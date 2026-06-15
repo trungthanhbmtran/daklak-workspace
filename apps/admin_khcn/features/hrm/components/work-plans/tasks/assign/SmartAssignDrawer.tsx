@@ -177,7 +177,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Task Card details */}
-              <Card className="border-l-4 border-l-indigo-600 rounded-lg">
+              <Card className="border-l-4 border-l-indigo-600 rounded-lg h-full flex flex-col">
                 <CardHeader className="py-4">
                   <CardDescription className="text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
                     <Target className="w-3.5 h-3.5" /> Nhiệm vụ cần giao
@@ -194,7 +194,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
               </Card>
 
               {/* Strategic select section */}
-              <Card className="rounded-lg bg-slate-50 dark:bg-slate-900 border-dashed">
+              <Card className="rounded-lg bg-slate-50 dark:bg-slate-900 border-dashed h-full flex flex-col">
                 <CardContent className="p-4 flex flex-col justify-center h-full gap-3">
                   <Label className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
                     Chiến lược ưu tiên gợi ý
@@ -341,19 +341,19 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                               
                               {/* Details */}
                               <div className="flex flex-col min-w-0 flex-1">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                  <p className={cn("font-semibold text-sm truncate", isLead && "text-indigo-700 dark:text-indigo-400")}>
+                                <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                                  <p className={cn("font-semibold text-sm", isLead && "text-indigo-700 dark:text-indigo-400")}>
                                     {rec.employeeName}
                                   </p>
-                                  <span className="text-[10px] text-muted-foreground uppercase">{rec.employeeCode}</span>
+                                  <span className="text-[10px] text-muted-foreground uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{rec.employeeCode}</span>
                                 </div>
                                 
-                                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                                  <span className="truncate max-w-[200px]" title={`${rec.jobTitleName} - ${deptName}`}>
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground mt-0.5">
+                                  <span className="font-medium text-slate-600 dark:text-slate-400">
                                     {rec.jobTitleName} ({deptName})
                                   </span>
                                   
-                                  <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-3">
+                                  <div className="flex items-center gap-1 sm:border-l border-slate-200 dark:border-slate-700 sm:pl-3">
                                     <Activity className="w-3 h-3 text-indigo-400" />
                                     <span>Tải: <b className={cn(loadPercentage >= 100 ? "text-rose-500" : "text-slate-700 dark:text-slate-300")}>{rec.currentLoad}/{rec.rankLimit || 5}</b></span>
                                   </div>
