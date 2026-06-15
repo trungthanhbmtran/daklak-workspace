@@ -452,6 +452,11 @@ export class TasksController implements OnModuleInit {
 
   @Get(':id/comments')
   async getComments(@Req() req: any, @Param('id') id: string) {
+    const taskId = parseInt(id, 10);
+    if (isNaN(taskId)) {
+      return { success: false, message: 'ID không hợp lệ', data: [] };
+    }
+
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
@@ -474,7 +479,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.GetComments({
-        taskId: parseInt(id, 10),
+        taskId,
         currentUserCode: user?.employeeCode,
         isAdmin,
         isLeader,
@@ -583,6 +588,11 @@ export class TasksController implements OnModuleInit {
 
   @Get(':id/subtasks')
   async getSubTasks(@Req() req: any, @Param('id') id: string) {
+    const taskId = parseInt(id, 10);
+    if (isNaN(taskId)) {
+      return { success: false, message: 'ID không hợp lệ', data: [] };
+    }
+
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
@@ -605,7 +615,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.GetSubTasks({
-        taskId: parseInt(id, 10),
+        taskId,
         currentUserCode: user?.employeeCode,
         isAdmin,
         isLeader,
