@@ -10,20 +10,17 @@ import { RpcException } from '@nestjs/microservices';
 export class TasksService implements OnModuleInit {
   private integrationService: any;
   private userService: any;
-  private workflowService: any;
 
   constructor(
     private prisma: PrismaService,
     @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
     @Inject('INTEGRATION_PACKAGE') private integrationClient: any,
     @Inject('USER_PACKAGE') private userClient: any,
-    @Inject('WORKFLOW_PACKAGE') private workflowClient: any,
   ) { }
 
   onModuleInit() {
     this.integrationService = this.integrationClient.getService('IntegrationService');
     this.userService = this.userClient.getService('UserService');
-    this.workflowService = this.workflowClient.getService('WorkflowService');
   }
 
   private async getDynamicConfig() {
@@ -577,25 +574,7 @@ export class TasksService implements OnModuleInit {
       return newTask;
     });
 
-    let workflowInstId = null;
-    // Bỏ kích hoạt quy trình động theo yêu cầu của user
-    /*
-    try {
-      const wfRes: any = await firstValueFrom(this.workflowService.TriggerWorkflow({
-        trigger: 'TASK_PROCESSING',
-        initiatorId: data.currentUserCode || '',
-        businessId: t.id.toString(),
-        businessType: 'TASK',
-        initialContext: { taskId: t.id, creatorCode: data.currentUserCode || '' }
-      }));
-      if (wfRes && wfRes.id) {
-        workflowInstId = wfRes.id;
-        await this.prisma.task.update({ where: { id: t.id }, data: { workflowInstId } });
-      }
-    } catch (e) {
-      console.error('Failed to trigger workflow for task:', t.id, e);
-    }
-    */
+
 
     const createdTask = await this.prisma.task.findUnique({
       where: { id: t.id },
