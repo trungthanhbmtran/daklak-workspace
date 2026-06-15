@@ -63,7 +63,7 @@ export const TaskStatsBar = memo(function TaskStatsBar({
           key={card.id}
           onClick={() => onFilterChange(activeFilter === card.id ? null : card.id)}
           className={cn(
-            "p-5 rounded-[1.5rem] cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-lg text-white relative overflow-hidden bg-gradient-to-br border-2",
+            "p-5 rounded-xl cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-lg text-white relative overflow-hidden bg-gradient-to-br border-2",
             card.cls,
             activeFilter === card.id
               ? 'border-white dark:border-slate-800 scale-[1.02] ring-4 ring-indigo-500/30'
@@ -74,7 +74,7 @@ export const TaskStatsBar = memo(function TaskStatsBar({
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
 
           <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20 shadow-inner backdrop-blur-sm border border-white/20">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white/20 shadow-inner backdrop-blur-sm border border-white/20">
               {card.icon}
             </div>
             <h3 className="text-4xl font-black drop-shadow-md tracking-tighter">{card.value}</h3>

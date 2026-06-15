@@ -72,7 +72,7 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
       {/* Row Card */}
       <div
         className={cn(
-          'relative flex items-stretch gap-3 transition-all duration-300 rounded-2xl cursor-pointer',
+          'relative flex items-stretch gap-3 transition-all duration-300 rounded-lg cursor-pointer',
           isRoot 
             ? 'bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 my-4 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] hover:border-indigo-300 dark:hover:border-indigo-500/50'
             : 'bg-slate-50/50 dark:bg-slate-800/40 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800 p-3 my-2 shadow-sm'
@@ -84,7 +84,7 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
           <div className="absolute left-[-22px] top-[24px] flex items-center">
             <div className={cn(
               "w-[22px] border-b-[2px] border-indigo-200 dark:border-slate-700",
-              isLastChild ? "h-[24px] border-l-[2px] rounded-bl-xl absolute bottom-0 left-0" : "h-[2px] absolute"
+              isLastChild ? "h-[24px] border-l-[2px] absolute bottom-0 left-0" : "h-[2px] absolute"
             )} />
           </div>
         )}
@@ -196,7 +196,7 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
       {/* Sub-task rows */}
       {expanded && hasChildren && (
         <div className={cn("ml-10 pl-2", isRoot && "ml-5 pl-2", "relative animate-in slide-in-from-top-2 fade-in duration-300")}>
-          <div className="absolute left-[-14px] top-0 bottom-4 w-[2px] bg-indigo-100 dark:bg-slate-800 rounded-full" />
+          <div className="absolute left-[-14px] top-0 bottom-4 w-[2px] bg-indigo-100 dark:bg-slate-800" />
           {task.children.map((child: any, index: number) => (
             <TaskRow
               key={child.id}

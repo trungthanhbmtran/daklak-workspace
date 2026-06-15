@@ -46,12 +46,12 @@ export const TaskToolbar = memo(function TaskToolbar({
   return (
     <div className="flex flex-col gap-4 mb-4">
       {/* Row: Search + Filters */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-2 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
         <div className="flex w-full xl:w-auto items-center gap-3">
           {onCreateTask && (
             <Button
               onClick={onCreateTask}
-              className="h-12 rounded-[1rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-lg shadow-indigo-200 dark:shadow-none shrink-0 transition-transform hover:scale-105 active:scale-95 px-5"
+              className="h-10 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm px-5"
             >
               <ClipboardList className="w-4 h-4 mr-2" />
               Khởi tạo công việc
@@ -64,7 +64,7 @@ export const TaskToolbar = memo(function TaskToolbar({
               placeholder="Tìm kiếm công việc..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full h-12 pl-11 pr-4 rounded-[1rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:font-normal placeholder:text-slate-400"
+              className="w-full h-10 pl-11 pr-4 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:font-normal placeholder:text-slate-400"
             />
           </div>
         </div>
@@ -73,15 +73,15 @@ export const TaskToolbar = memo(function TaskToolbar({
           {/* Role select */}
           <div className="flex-1 sm:flex-none">
             <Select value={roleFilter} onValueChange={(v) => onRoleChange(v as TaskRoleFilter)}>
-              <SelectTrigger className="w-full sm:w-[190px] h-12 rounded-[1rem] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <SelectTrigger className="w-full sm:w-[190px] h-10 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-indigo-500" />
                   <SelectValue placeholder="Vai trò" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1.5">
+              <SelectContent className="rounded-md border-slate-200 shadow-xl p-1.5">
                 {Object.entries(ROLE_META).map(([key, meta]) => (
-                  <SelectItem key={key} value={key} className="rounded-xl font-bold py-2.5 cursor-pointer">
+                  <SelectItem key={key} value={key} className="rounded-md font-semibold py-2 cursor-pointer">
                     <div className="flex items-center gap-2.5">
                       {meta.label}
                     </div>
@@ -94,16 +94,16 @@ export const TaskToolbar = memo(function TaskToolbar({
           {/* Status select */}
           <div className="flex-1 sm:flex-none">
             <Select value={statusFilter} onValueChange={onStatusChange}>
-              <SelectTrigger className="w-full sm:w-[180px] h-12 rounded-[1rem] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-indigo-500" />
                   <SelectValue placeholder="Trạng thái" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1.5">
-                <SelectItem value="ALL" className="rounded-xl font-bold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
+              <SelectContent className="rounded-md border-slate-200 shadow-xl p-1.5">
+                <SelectItem value="ALL" className="rounded-md font-semibold py-2 cursor-pointer">Tất cả trạng thái</SelectItem>
                 {taskStatusCategories?.map((st: any) => (
-                  <SelectItem key={st.id} value={st.code} className="rounded-xl font-bold py-2.5 cursor-pointer">
+                  <SelectItem key={st.id} value={st.code} className="rounded-md font-semibold py-2 cursor-pointer">
                     {st.name}
                   </SelectItem>
                 ))}
@@ -114,17 +114,17 @@ export const TaskToolbar = memo(function TaskToolbar({
           {/* Priority select */}
           <div className="flex-1 sm:flex-none">
             <Select value={priorityFilter} onValueChange={onPriorityChange}>
-              <SelectTrigger className="w-full sm:w-[160px] h-12 rounded-[1rem] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <SelectTrigger className="w-full sm:w-[160px] h-10 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-center gap-2">
                   <Filter className="w-4 h-4 text-indigo-500" />
                   <SelectValue placeholder="Ưu tiên" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1.5">
-                <SelectItem value="ALL" className="rounded-xl font-bold py-2.5 cursor-pointer">Tất cả mức độ</SelectItem>
-                <SelectItem value="HIGH" className="rounded-xl font-bold py-2.5 cursor-pointer text-rose-600">🔴 Cao</SelectItem>
-                <SelectItem value="MEDIUM" className="rounded-xl font-bold py-2.5 cursor-pointer text-amber-600">🟡 Trung bình</SelectItem>
-                <SelectItem value="LOW" className="rounded-xl font-bold py-2.5 cursor-pointer text-blue-600">🔵 Thấp</SelectItem>
+              <SelectContent className="rounded-md border-slate-200 shadow-xl p-1.5">
+                <SelectItem value="ALL" className="rounded-md font-semibold py-2 cursor-pointer">Tất cả mức độ</SelectItem>
+                <SelectItem value="HIGH" className="rounded-md font-semibold py-2 cursor-pointer text-rose-600">🔴 Cao</SelectItem>
+                <SelectItem value="MEDIUM" className="rounded-md font-semibold py-2 cursor-pointer text-amber-600">🟡 Trung bình</SelectItem>
+                <SelectItem value="LOW" className="rounded-md font-semibold py-2 cursor-pointer text-blue-600">🔵 Thấp</SelectItem>
               </SelectContent>
             </Select>
           </div>
