@@ -578,6 +578,8 @@ export class TasksService implements OnModuleInit {
     });
 
     let workflowInstId = null;
+    // Bỏ kích hoạt quy trình động theo yêu cầu của user
+    /*
     try {
       const wfRes: any = await firstValueFrom(this.workflowService.TriggerWorkflow({
         trigger: 'TASK_PROCESSING',
@@ -593,6 +595,7 @@ export class TasksService implements OnModuleInit {
     } catch (e) {
       console.error('Failed to trigger workflow for task:', t.id, e);
     }
+    */
 
     const createdTask = await this.prisma.task.findUnique({
       where: { id: t.id },
