@@ -330,10 +330,10 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                             )}
                           >
                             {/* Left: Info & Stats */}
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex items-start gap-3 min-w-0 flex-1">
                               {/* Avatar */}
                               <div className={cn(
-                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold transition-all",
+                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold transition-all mt-1",
                                 isLead ? "bg-indigo-600 text-white ring-2 ring-indigo-200" : isCoordinator ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-500"
                               )}>
                                 {rec.employeeName?.charAt(0) || '?'}
@@ -348,19 +348,23 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                                   <span className="text-[10px] text-muted-foreground uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{rec.employeeCode}</span>
                                 </div>
                                 
-                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground mt-0.5">
-                                  <span className="font-medium text-slate-600 dark:text-slate-400">
-                                    {rec.jobTitleName} ({deptName})
-                                  </span>
-                                  
-                                  <div className="flex items-center gap-1 sm:border-l border-slate-200 dark:border-slate-700 sm:pl-3">
-                                    <Activity className="w-3 h-3 text-indigo-400" />
-                                    <span>Tải: <b className={cn(loadPercentage >= 100 ? "text-rose-500" : "text-slate-700 dark:text-slate-300")}>{rec.currentLoad}/{rec.rankLimit || 5}</b></span>
-                                  </div>
-                                  
-                                  <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-3">
-                                    <span>KPI: <b className="text-emerald-600 dark:text-emerald-400">{Math.round(rec.performanceScore)}</b></span>
-                                  </div>
+                                <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 mt-0.5">
+                                  {rec.jobTitleName || 'Cán bộ'}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground mt-0.5">
+                                  {deptName}
+                                </div>
+                              </div>
+
+                              {/* Stats Column */}
+                              <div className="flex flex-col gap-1.5 shrink-0 px-4 border-l border-slate-200 dark:border-slate-800 w-[100px] justify-center mt-1">
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-muted-foreground flex items-center gap-1"><Activity className="w-3 h-3 text-indigo-400" /> Tải:</span>
+                                  <b className={cn(loadPercentage >= 100 ? "text-rose-500" : "text-slate-700 dark:text-slate-300")}>{rec.currentLoad}/{rec.rankLimit || 5}</b>
+                                </div>
+                                <div className="flex items-center justify-between text-[10px]">
+                                  <span className="text-muted-foreground">KPI:</span>
+                                  <b className="text-emerald-600 dark:text-emerald-400">{Math.round(rec.performanceScore)}</b>
                                 </div>
                               </div>
                             </div>

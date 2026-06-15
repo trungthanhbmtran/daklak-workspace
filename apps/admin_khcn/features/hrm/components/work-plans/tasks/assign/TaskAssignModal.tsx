@@ -267,12 +267,19 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                         </div>
                         <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">{emp.name}</span>
-                              <span className="text-[10px] text-slate-500 truncate">- {emp.jobTitle?.name || 'Cán bộ'} ({emp.department?.name || 'Chưa xác định'})</span>
+                            <div className="flex flex-col min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{emp.name}</span>
+                              </div>
+                              <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 mt-0.5">
+                                {emp.jobTitle?.name || 'Cán bộ'}
+                              </div>
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                                {emp.department?.name || 'Chưa xác định'}
+                              </div>
                             </div>
                             {(isMain || isCo || emp.isOverloaded) && (
-                              <div className="flex gap-1.5 mt-1">
+                              <div className="flex gap-1.5 mt-1.5">
                                 {isMain && <span className="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Chủ trì</span>}
                                 {isCo && <span className="text-[9px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Phối hợp</span>}
                                 {emp.isOverloaded && <span className="text-[9px] bg-red-100 dark:bg-red-950/20 text-red-655 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Quá tải</span>}
