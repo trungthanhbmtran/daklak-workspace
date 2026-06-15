@@ -161,7 +161,7 @@ export const TaskListClient = () => {
   const handleSmartAssign = useCallback((task: any) => setTaskToAssign(task), []);
   const handleCloseDetail = useCallback(() => setSelectedTask(null), []);
   const handleFilterChange = useCallback((id: string | null) => setActiveFilter(id), []);
-  
+
   const handleCreateTask = useCallback(() => {
     setIsCreateModalOpen(true);
   }, []);
@@ -208,15 +208,15 @@ export const TaskListClient = () => {
       <GlobalTaskTree
         tasks={displayedTasks}
         isLoading={isLoading}
-        currentUserCode={currentUserCode}
+        currentUserCode={"currentUserCode"}
         onSelectTask={handleSelectTask}
         onSmartAssign={handleSmartAssign}
       />
 
       {/* Create Modal */}
-      <CreateTaskModal 
-        isOpen={isCreateModalOpen} 
-        onClose={handleCloseCreateModal} 
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
       />
 
       {/* Detail Dialog */}

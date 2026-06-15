@@ -5,14 +5,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, UserCheck, CheckCircle2, BarChart3, Target } from 'lucide-react';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
-import type { TaskTab } from './TaskToolbar';
 
 interface TaskTableProps {
   tasks: any[];
   priorities: any[];
   taskStatusCategories?: any[];
   /** Context xác định action hiển thị */
-  context: TaskTab;
+  context: any;
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
   onHoverTask?: (task: any) => void;
@@ -39,14 +38,13 @@ export const TaskTable = memo(function TaskTable({
   return (
     <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden mt-6 shadow-sm">
       {/* Context label */}
-      <div className={`px-6 py-2.5 text-[11px] font-bold border-b flex items-center gap-2 ${
-        context === 'PENDING_ASSIGN' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+      <div className={`px-6 py-2.5 text-[11px] font-bold border-b flex items-center gap-2 ${context === 'PENDING_ASSIGN' ? 'bg-amber-50 text-amber-700 border-amber-100' :
         context === 'MY_EXECUTION' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-        'bg-emerald-50 text-emerald-700 border-emerald-100'
-      }`}>
+          'bg-emerald-50 text-emerald-700 border-emerald-100'
+        }`}>
         {context === 'PENDING_ASSIGN' ? '🗂️ Danh sách chờ phân công' :
-         context === 'MY_EXECUTION' ? '✅ Việc của tôi cần thực hiện' :
-         '📊 Việc tôi đã giao'}
+          context === 'MY_EXECUTION' ? '✅ Việc của tôi cần thực hiện' :
+            '📊 Việc tôi đã giao'}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
@@ -57,8 +55,8 @@ export const TaskTable = memo(function TaskTable({
               <th className="px-6 py-5 font-bold tracking-wider">Mức ưu tiên</th>
               <th className="px-6 py-5 font-bold tracking-wider">
                 {context === 'PENDING_ASSIGN' ? 'Người tạo / Kế hoạch' :
-                 context === 'I_ASSIGNED' ? 'Người thực hiện / Tiến độ' :
-                 'Thực hiện / Chỉ đạo'}
+                  context === 'I_ASSIGNED' ? 'Người thực hiện / Tiến độ' :
+                    'Thực hiện / Chỉ đạo'}
               </th>
               <th className="px-6 py-5 font-bold tracking-wider">Hạn chót</th>
               <th className="px-6 py-5 text-right font-bold tracking-wider">Thao tác</th>
@@ -137,9 +135,8 @@ export const TaskTable = memo(function TaskTable({
                           <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
                             {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
                           </div>
-                          <span className={`font-medium text-sm truncate ${
-                            task.assigneeCode === 'UNASSIGNED' ? 'text-amber-600 italic' : ''
-                          }`}>
+                          <span className={`font-medium text-sm truncate ${task.assigneeCode === 'UNASSIGNED' ? 'text-amber-600 italic' : ''
+                            }`}>
                             {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode)}
                           </span>
                         </div>

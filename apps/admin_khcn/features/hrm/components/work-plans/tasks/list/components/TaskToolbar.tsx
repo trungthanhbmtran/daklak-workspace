@@ -49,7 +49,7 @@ export const TaskToolbar = memo(function TaskToolbar({
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-2 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 shadow-sm">
         <div className="flex w-full xl:w-auto items-center gap-3">
           {onCreateTask && (
-            <Button 
+            <Button
               onClick={onCreateTask}
               className="h-12 rounded-[1rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-lg shadow-indigo-200 dark:shadow-none shrink-0 transition-transform hover:scale-105 active:scale-95 px-5"
             >
@@ -130,7 +130,7 @@ export const TaskToolbar = memo(function TaskToolbar({
           </div>
         </div>
       </div>
-      
+
       {/* Role Legend Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
         {Object.values(ROLE_META).map((meta, idx) => (
