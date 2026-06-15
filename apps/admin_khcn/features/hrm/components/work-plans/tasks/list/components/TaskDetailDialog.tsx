@@ -13,7 +13,6 @@ import { SubTaskModal } from '../../subtask/SubTaskModal';
 import { CoordinationModal } from '../../coordination/CoordinationModal';
 import { AssignCoordinationModal } from '../../assign/AssignCoordinationModal';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
-import type { TaskTab } from './TaskToolbar';
 
 interface TaskDetailDialogProps {
   task: any | null;
@@ -25,7 +24,7 @@ interface TaskDetailDialogProps {
   taskStatusCategories?: any[];
   taskRoleCategories?: any[];
   /** Context xác định actions nào hiển thị — tránh trùng chức năng giữa các tab */
-  context?: TaskTab;
+  context?: any;
 }
 
 /**
