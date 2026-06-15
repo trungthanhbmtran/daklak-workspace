@@ -285,8 +285,9 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                         </div>
                       </CommandItem>
                     );
+                  })}
                 </CommandGroup>
-            </CommandList>
+              </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
