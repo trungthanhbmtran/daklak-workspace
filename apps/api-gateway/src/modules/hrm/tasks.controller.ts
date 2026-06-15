@@ -301,6 +301,13 @@ export class TasksController implements OnModuleInit {
         await this.populateUsers([response.data]);
       }
     }
+    
+    // Inject currentUserCode into meta for frontend role badge mapping
+    if (response && user?.employeeCode) {
+      response.meta = response.meta || {};
+      response.meta.currentUserCode = user.employeeCode;
+    }
+    
     return response;
   }
 

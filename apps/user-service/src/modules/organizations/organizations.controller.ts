@@ -5,7 +5,7 @@ import { OrganizationsService } from './organizations.service';
 
 @Controller()
 export class OrganizationsController {
-  constructor(private readonly orgService: OrganizationsService) {}
+  constructor(private readonly orgService: OrganizationsService) { }
 
   private getCatName(cat: any): string {
     if (!cat) return '';

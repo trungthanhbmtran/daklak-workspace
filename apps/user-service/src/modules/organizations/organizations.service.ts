@@ -10,7 +10,7 @@ export class OrganizationsService {
   private treeCache = new Map<string, { data: any, expiresAt: number }>();
   private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // --- 1. QUẢN LÝ ĐƠN VỊ (CRUD) ---
 
@@ -59,7 +59,7 @@ export class OrganizationsService {
         skipDuplicates: true,
       });
     }
-    
+
     // Invalidate cache
     this.treeCache.clear();
 
@@ -238,7 +238,7 @@ export class OrganizationsService {
         });
       }
     }
-    
+
     // Invalidate cache
     this.treeCache.clear();
 
@@ -286,7 +286,7 @@ export class OrganizationsService {
       });
     }
     await this.prisma.organizationUnit.delete({ where: { id } });
-    
+
     // Invalidate cache
     this.treeCache.clear();
 
@@ -329,7 +329,7 @@ export class OrganizationsService {
         },
       },
     });
-    
+
     const result = { data: buildTree(units, null) };
     this.treeCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
     return result;
@@ -430,7 +430,7 @@ export class OrganizationsService {
         },
       },
     });
-    
+
     // Fetch all current employees holding these job positions in this unit
     const jobPositions = await this.prisma.jobPosition.findMany({
       where: { unitId },
@@ -442,7 +442,7 @@ export class OrganizationsService {
         .filter(jp => jp.jobTitleId === item.jobTitleId)
         .map(jp => jp.user?.fullName)
         .filter(Boolean) as string[];
-      
+
       return {
         ...item,
         current_employee_names: assignedUsers
