@@ -106,7 +106,8 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
 
   const assignMutation = useMutation({
     mutationFn: (data: { leadCode: string; coordinatorCodes: string[] }) => {
-      return hrmTasksApi.assignTask(task!.id.toString(), {
+      if (!task?.id) return Promise.reject(new Error("Missing task ID"));
+      return hrmTasksApi.assignTask(task.id, {
         assigneeCode: data.leadCode,
         coAssigneeCodes: data.coordinatorCodes || [],
       });

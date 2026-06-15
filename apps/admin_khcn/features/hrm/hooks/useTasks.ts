@@ -41,7 +41,7 @@ export function useTaskComments(taskId: number | undefined) {
     queryKey: hrmKeys.taskComments(taskId!),
     queryFn:  () => {
       if (!taskId) return Promise.resolve({ data: [] });
-      return hrmTasksApi.getComments(String(taskId));
+      return hrmTasksApi.getComments(taskId);
     },
     enabled:  !!taskId,
     staleTime: DETAIL_STALE_TIME,
@@ -59,7 +59,7 @@ export function useTaskSubtasks(taskId: number | undefined) {
     queryKey: hrmKeys.taskSubtasks(taskId!),
     queryFn:  () => {
       if (!taskId) return Promise.resolve({ data: [] });
-      return hrmTasksApi.getSubTasks(String(taskId));
+      return hrmTasksApi.getSubTasks(taskId);
     },
     enabled:  !!taskId,
     staleTime: DETAIL_STALE_TIME,
@@ -83,7 +83,7 @@ export function useCreateTask() {
 export function useUpdateTaskStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: any }) =>
+    mutationFn: ({ id, payload }: { id: number; payload: any }) =>
       hrmTasksApi.updateStatus(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
@@ -101,8 +101,10 @@ export function useAddComment(taskId: number | undefined) {
   const key = hrmKeys.taskComments(taskId!);
 
   return useMutation({
-    mutationFn: (content: string) =>
-      hrmTasksApi.addComment(String(taskId), { content }),
+    mutationFn: (content: string) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.addComment(taskId, { content });
+    },
 
     // Optimistic: thêm ngay vào cache
     onMutate: async (content) => {
@@ -144,8 +146,10 @@ export function useAddComment(taskId: number | undefined) {
 export function useUpdateStatus(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { status: string; rejectReason?: string }) =>
-      hrmTasksApi.updateStatus(String(taskId), payload),
+    mutationFn: (payload: { status: string; rejectReason?: string }) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.updateStatus(taskId, payload);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       if (taskId) {

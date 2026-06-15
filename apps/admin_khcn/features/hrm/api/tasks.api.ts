@@ -32,11 +32,11 @@ export const hrmTasksApi = {
     }) as any;
   },
 
-  update(id: string, payload: any): Promise<ApiResponse<any>> {
+  update(id: number, payload: any): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}`, payload) as any;
   },
 
-  updateStatus(id: string, payload: any): Promise<ApiResponse<any>> {
+  updateStatus(id: number, payload: any): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/status`, payload) as any;
   },
 
@@ -44,34 +44,34 @@ export const hrmTasksApi = {
     return apiClient.get('/hrm/tasks/recommend-assignees', { params }) as any;
   },
 
-  assignTask(id: string, payload: { assigneeCode?: string; coAssigneeCodes?: string[]; departmentId?: number }): Promise<ApiResponse<any>> {
+  assignTask(id: number, payload: { assigneeCode?: string; coAssigneeCodes?: string[]; departmentId?: number }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/assign`, payload) as any;
   },
 
-  getComments(id: string): Promise<ApiResponse<any[]>> {
+  getComments(id: number): Promise<ApiResponse<any[]>> {
     return apiClient.get(`/hrm/tasks/${id}/comments`) as any;
   },
 
-  addComment(id: string, payload: { authorCode?: string; content: string; isSystemMessage?: boolean }): Promise<ApiResponse<any>> {
+  addComment(id: number, payload: { authorCode?: string; content: string; isSystemMessage?: boolean }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${id}/comments`, payload) as any;
   },
 
-  getSubTasks(id: string): Promise<ApiResponse<any[]>> {
+  getSubTasks(id: number): Promise<ApiResponse<any[]>> {
     return apiClient.get(`/hrm/tasks/${id}/subtasks`) as any;
   },
 
   /** Gửi yêu cầu phối hợp lên LÃNH ĐẠO TRỰC TIẾP (người đang xử lý gọi). */
-  requestCoordination(id: string | number, payload?: { message?: string }): Promise<ApiResponse<any>> {
+  requestCoordination(id: number, payload?: { message?: string }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload || {}) as any;
   },
 
   /** Supervisor assigns Lead + Coordinators for task (no sub-task creation). */
-  assignCoordination(id: string | number, payload: { leadCode: string; coordinatorCodes: string[] }): Promise<ApiResponse<any>> {
+  assignCoordination(id: number, payload: { leadCode: string; coordinatorCodes: string[] }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload) as any;
   },
 
   /** Cập nhật % tiến độ hoàn thành của task (0–100). */
-  updateProgress(id: string | number, progress: number): Promise<ApiResponse<any>> {
+  updateProgress(id: number, progress: number): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/progress`, { progress }) as any;
   },
 };

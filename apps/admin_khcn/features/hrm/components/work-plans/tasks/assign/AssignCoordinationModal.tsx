@@ -70,7 +70,7 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
   };
 
   const assignMutation = useMutation({
-    mutationFn: () => hrmTasksApi.assignCoordination(task?.id?.toString() || '', {
+    mutationFn: () => hrmTasksApi.assignCoordination(task?.id, {
       leadCode,
       coordinatorCodes,
     }),

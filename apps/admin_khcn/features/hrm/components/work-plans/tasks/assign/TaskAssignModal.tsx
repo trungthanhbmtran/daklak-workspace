@@ -633,6 +633,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   const assignMutation = useMutation({
     mutationFn: async () => {
       const taskId = task.id;
+      if (!taskId) return Promise.reject(new Error("Missing task ID"));
       await hrmTasksApi.update(taskId, {
         weight: taskState.weight,
         startDate: taskState.startDate,
