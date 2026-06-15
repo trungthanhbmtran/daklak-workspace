@@ -601,6 +601,8 @@ export class TasksController implements OnModuleInit {
         message: message || '',
         leadId: leadCode || '',
         coordinatorIds: coordinatorCodes || [],
+        leadCode: leadCode || '',
+        coordinatorCodes: coordinatorCodes || [],
       }),
     );
   }

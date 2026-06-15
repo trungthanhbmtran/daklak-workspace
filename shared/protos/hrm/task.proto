@@ -159,6 +159,7 @@ message ListTasksRequest {
   repeated int32 callerAncestorUnitIds = 13; // optional - danh sách id đơn vị cha
   string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
   repeated int32 callerDescendantUnitIds = 15; // optional - danh sách id đơn vị con
+  bool isLeader = 16;
 }
 
 message TaskStats {
@@ -181,6 +182,9 @@ message UpdateTaskStatusRequest {
   string status = 2;
   string rejectReason = 3; // optional
   string actorCode = 4;    // người thực hiện (từ JWT)
+  repeated string currentUserPermissions = 5;
+  int32 currentUserId = 6;
+  string currentUserCode = 7;
 }
 
 message UpdateTaskRequest {
@@ -268,6 +272,12 @@ message AddCommentRequest {
   string authorCode = 2;
   string content = 3;
   bool isSystemMessage = 4;
+  string currentUserCode = 5;
+  bool isAdmin = 6;
+  bool isLeader = 7;
+  int32 currentUserDept = 8;
+  repeated int32 callerAncestorUnitIds = 9;
+  repeated int32 callerDescendantUnitIds = 10;
 }
 
 message GetCommentsRequest {
@@ -277,6 +287,7 @@ message GetCommentsRequest {
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
   repeated int32 callerDescendantUnitIds = 6;
+  bool isLeader = 7;
 }
 
 message GetCommentsResponse {
@@ -313,6 +324,7 @@ message GetSubTasksRequest {
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
   repeated int32 callerDescendantUnitIds = 6;
+  bool isLeader = 7;
 }
 
 message GetSubTasksResponse {
@@ -329,6 +341,7 @@ message GetTaskRequest {
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
   repeated int32 callerDescendantUnitIds = 6;
+  bool isLeader = 7;
 }
 
 // ─── BreakdownTask ─────────────────────────────────────────────────────────
@@ -359,6 +372,8 @@ message RequestCoordinationRequest {
   string message = 3;
   string leadId = 4;             // if set → supervisor assigns lead role
   repeated string coordinatorIds = 5;
+  string leadCode = 6;
+  repeated string coordinatorCodes = 7;
 }
 
 message CoordinationResponse {
