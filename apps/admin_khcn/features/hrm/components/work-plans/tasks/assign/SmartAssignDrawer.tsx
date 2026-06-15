@@ -162,8 +162,9 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl lg:max-w-4xl overflow-y-auto font-sans p-6 sm:p-8">
-        <SheetHeader className="mb-6">
+      <SheetContent className="w-full sm:max-w-2xl lg:max-w-4xl font-sans p-0 flex flex-col overflow-hidden h-full">
+        <div className="flex-1 overflow-y-auto min-h-0 p-6 sm:p-8">
+          <SheetHeader className="mb-6">
           <SheetTitle className="text-xl font-bold flex items-center gap-2">
             <PlayCircle className="w-5 h-5 text-indigo-600" /> Phân công thông minh
           </SheetTitle>
@@ -173,7 +174,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
         </SheetHeader>
 
         {task && (
-          <div className="space-y-6 pb-24">
+          <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Task Card details */}
               <Card className="border-l-4 border-l-indigo-600 rounded-lg">
@@ -410,10 +411,11 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
             </div>
           </div>
         )}
+        </div>
 
         {/* Sticky Footer */}
         {task && (
-          <div className="absolute bottom-0 left-0 w-full bg-background border-t p-4 z-20 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="shrink-0 w-full bg-background border-t p-4 z-20 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm">
               {!leadCode ? (
                 <span className="text-destructive font-medium flex items-center gap-2">

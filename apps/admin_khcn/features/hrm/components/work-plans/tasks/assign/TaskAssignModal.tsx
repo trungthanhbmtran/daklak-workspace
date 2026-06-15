@@ -672,9 +672,10 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-4xl w-[96vw] max-h-[95vh] overflow-y-auto bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-xl p-0 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl overflow-hidden">
+      <DialogContent className="max-w-4xl w-[96vw] max-h-[95vh] h-[95vh] bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-xl p-0 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl overflow-hidden flex flex-col">
         
-        <HeaderCard 
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <HeaderCard 
           title={task.title}
           assigneeName={task.assigneeName}
           assigneeUnitName={task.assigneeUnitName}
@@ -759,11 +760,10 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
               onChange={handleParamChange}
             />
           </div>
-
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 px-6 py-5 md:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="shrink-0 flex items-center justify-end gap-3 px-6 py-5 md:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
           <Button 
             variant="ghost" 
             onClick={() => onClose()} 
