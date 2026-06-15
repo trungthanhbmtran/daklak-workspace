@@ -316,6 +316,14 @@ message DelegationNode {
   bool isChild = 15;       // Task con (bất kỳ cấp nào)
   bool isGrandChild = 16;  // Giữ lại để tương thích
   int32 level = 17;        // Cấp độ: -1=cha, 0=hiện tại, 1,2,3...=các cấp con (không giới hạn)
+  repeated string allowedActions = 18;
+  string description = 19;
+  string supervisorCode = 20;
+  string supervisorName = 21;
+  repeated string coassigneeCodes = 22;
+  int32 planId = 23;
+  TaskPlan plan = 24;
+  int32 rootTaskId = 25;
 }
 
 message GetSubTasksRequest {
