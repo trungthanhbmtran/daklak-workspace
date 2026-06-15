@@ -24,7 +24,6 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 export class TasksController implements OnModuleInit {
   private taskService: any;
   private orgService: any;
-  private employeeService: any;
   private userService: any;
 
   // Cache org tree (5 phút)
@@ -36,17 +35,13 @@ export class TasksController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
-    @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly empClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
     this.orgService = this.orgClient.getService(
       MICROSERVICES.ORGANIZATION.SERVICE,
-    );
-    this.employeeService = this.empClient.getService(
-      MICROSERVICES.EMPLOYEE.SERVICE,
     );
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
@@ -105,8 +100,6 @@ export class TasksController implements OnModuleInit {
     return tasks;
   }
 
-  private jtMapCache: { data: Record<number, any>; expiresAt: number } | null =
-    null;
 
   private async getUnitMap(): Promise<Record<number, any>> {
     if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
@@ -145,28 +138,7 @@ export class TasksController implements OnModuleInit {
     }
   }
 
-  private async getJobTitlesMap(): Promise<Record<number, any>> {
-    if (this.jtMapCache && this.jtMapCache.expiresAt > Date.now())
-      return this.jtMapCache.data;
-    try {
-      const jtRes: any = await firstValueFrom(
-        this.orgService.ListJobTitles({}),
-      );
-      const jtMap: Record<number, any> = {};
-      (jtRes?.items || []).forEach((jt: any) => {
-        if (jt.id) {
-          jtMap[parseInt(jt.id, 10)] = {
-            id: parseInt(jt.id, 10),
-            category: jt.category || '',
-          };
-        }
-      });
-      this.jtMapCache = { data: jtMap, expiresAt: Date.now() + 5 * 60 * 1000 };
-      return jtMap;
-    } catch {
-      return {};
-    }
-  }
+
 
   private getAncestorUnitIds(
     unitMap: Record<number, any>,
@@ -203,6 +175,7 @@ export class TasksController implements OnModuleInit {
     return ids;
   }
 
+
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
@@ -214,7 +187,6 @@ export class TasksController implements OnModuleInit {
   @Get()
   async list(
     @Req() req: any,
-    @Query('tab') tab: string,
     @Query('role') role: string, // NEW: ASSIGNEE | OWNER (3-layer model)
     @Query('assigneeCode') assigneeCode: string,
     @Query('filter') filter: string,
@@ -242,16 +214,6 @@ export class TasksController implements OnModuleInit {
     }
     // Tab ①  "Chờ giao" (PENDING_ASSIGN): assigneeCode=UNASSIGNED được pass thẳng từ query
 
-    // ── Backward compatible (old tabs) ───────────────────────────────────────
-    if (!role) {
-      if (tab === 'MY_TASKS' && user) {
-        finalAssigneeCode = user.employeeCode;
-      } else if (tab === 'ASSIGNED_BY_ME' && user) {
-        finalAssignerCode = user.employeeCode;
-      } else if (tab === 'DEPT_TASKS' && user) {
-        finalDepartmentId = user.unitId;
-      }
-    }
 
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
@@ -301,13 +263,13 @@ export class TasksController implements OnModuleInit {
         await this.populateUsers([response.data]);
       }
     }
-    
+
     // Inject currentUserCode into meta for frontend role badge mapping
     if (response && user?.employeeCode) {
       response.meta = response.meta || {};
       response.meta.currentUserCode = user.employeeCode;
     }
-    
+
     return response;
   }
 
@@ -519,6 +481,8 @@ export class TasksController implements OnModuleInit {
     );
   }
 
+
+
   @Post(':id/comments')
   async addComment(
     @Req() req: any,
@@ -584,22 +548,6 @@ export class TasksController implements OnModuleInit {
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isOwner = taskData.assigneeCode === requesterCode;
     const isAssigner = taskData.assignerCode === requesterCode;
-
-    // Supervisor assigns roles: must be assigner or admin (Bypassed for testing)
-    /*
-    if (leadCode && !isAdmin && !isAssigner) {
-      throw new Error(
-        'Only the task assigner can assign Lead and Coordinators.',
-      );
-    }
-
-    // Request coordination: must be current assignee
-    if (!leadCode && !isAdmin && !isOwner) {
-      throw new Error(
-        'You do not have permission to send a coordination request (not the current assignee).',
-      );
-    }
-    */
 
     return firstValueFrom(
       this.taskService.RequestCoordination({

@@ -913,6 +913,11 @@ export class TasksService implements OnModuleInit {
         whereClause.employeeCode = { not: query.excludeEmployeeCode };
       }
 
+      // Giới hạn gợi ý theo Sơ đồ nếu không phải Admin và strategy = HIERARCHY
+      if (!isAdmin && query.strategy === 'HIERARCHY' && query.currentUserDept) {
+         // Trong tương lai có thể query callerDescendantUnitIds để giới hạn whereClause.departmentId
+      }
+
       const employees = await this.prisma.employee.findMany({
         where: whereClause,
       });
@@ -921,13 +926,9 @@ export class TasksService implements OnModuleInit {
         by: ['userId'],
         where: {
           participantRole: 'ASSIGNEE',
-          task: {
-            status: { not: 'DONE' },
-          },
+          task: { status: { not: 'DONE' } },
         },
-        _count: {
-          taskId: true,
-        },
+        _count: { taskId: true },
       });
 
       const uidToCodeMap = new Map<number, string>();
@@ -938,9 +939,7 @@ export class TasksService implements OnModuleInit {
       const taskCountMap = new Map<string, number>();
       activeTasksCount.forEach(item => {
         const empCode = uidToCodeMap.get(item.userId);
-        if (empCode) {
-          taskCountMap.set(empCode, item._count.taskId);
-        }
+        if (empCode) taskCountMap.set(empCode, item._count.taskId);
       });
 
       const evaluations = await this.prisma.kpiEvaluation.findMany({
@@ -949,9 +948,24 @@ export class TasksService implements OnModuleInit {
       });
       const kpiMap = new Map(evaluations.map(item => [item.employeeCode, item.totalScore || 75]));
 
+      // 2. Chấm điểm Gợi ý dựa trên Vị trí chức danh (JobTitle) và Lĩnh vực (Domain)
+      const targetDomainId = query.domainId ? parseInt(query.domainId, 10) : null;
+      const targetJobTitleId = query.jobTitleId ? parseInt(query.jobTitleId, 10) : null;
+
       const employeeList = employees.map(emp => {
         const taskCount = taskCountMap.get(emp.employeeCode) || 0;
         const kpiScore = kpiMap.get(emp.employeeCode) || 75;
+        
+        // Tính điểm Domain/Position Match Score
+        let matchScore = 0;
+        if (targetJobTitleId && emp.jobTitleId === targetJobTitleId) {
+           matchScore += 50; // Ưu tiên tuyệt đối nếu đúng Vị trí chức danh yêu cầu
+        }
+        // Giả lập ưu tiên Lĩnh vực (Nếu targetDomain khớp với phòng ban/đơn vị phụ trách lĩnh vực đó)
+        if (targetDomainId && query.domainDepartmentIds?.includes(emp.departmentId)) {
+           matchScore += 30;
+        }
+
         return {
           id: emp.id,
           employeeCode: emp.employeeCode,
@@ -961,20 +975,27 @@ export class TasksService implements OnModuleInit {
           jobTitleId: emp.jobTitleId,
           currentLoad: taskCount,
           performanceScore: kpiScore,
+          matchScore: matchScore
         };
       });
 
       const strategy = query?.strategy || 'LOW_PERFORMANCE';
-      if (strategy === 'HIGH_PERFORMANCE') {
-        employeeList.sort((a, b) => b.performanceScore - a.performanceScore || a.currentLoad - b.currentLoad);
-      } else if (strategy === 'UNDER_QUOTA') {
-        employeeList.sort((a, b) => a.currentLoad - b.currentLoad || b.performanceScore - a.performanceScore);
-      } else { // 'LOW_PERFORMANCE'
-        employeeList.sort((a, b) => a.performanceScore - b.performanceScore || a.currentLoad - b.currentLoad);
-      }
+      
+      // Sắp xếp: Ưu tiên MatchScore trước, sau đó đến Performance/Load
+      employeeList.sort((a, b) => {
+        if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+
+        if (strategy === 'HIGH_PERFORMANCE') {
+          return b.performanceScore - a.performanceScore || a.currentLoad - b.currentLoad;
+        } else if (strategy === 'UNDER_QUOTA') {
+          return a.currentLoad - b.currentLoad || b.performanceScore - a.performanceScore;
+        } else { // 'LOW_PERFORMANCE'
+          return a.performanceScore - b.performanceScore || a.currentLoad - b.currentLoad;
+        }
+      });
 
       // Group by department for topDepartments
-      const deptMap = new Map<number, { departmentId: number; employeeCount: number; currentLoad: number; performanceScore: number }>();
+      const deptMap = new Map<number, { departmentId: number; employeeCount: number; currentLoad: number; performanceScore: number, matchScore: number }>();
       employeeList.forEach(emp => {
         if (!emp.departmentId) return;
         const deptId = emp.departmentId;
@@ -984,27 +1005,29 @@ export class TasksService implements OnModuleInit {
             employeeCount: 0,
             currentLoad: 0,
             performanceScore: 0,
+            matchScore: 0
           });
         }
         const dept = deptMap.get(deptId)!;
         dept.employeeCount += 1;
         dept.currentLoad += emp.currentLoad;
         dept.performanceScore += emp.performanceScore;
+        dept.matchScore += emp.matchScore;
       });
 
       const topDepartments = Array.from(deptMap.values()).map(dept => ({
         ...dept,
         currentLoad: dept.currentLoad / dept.employeeCount,
         performanceScore: dept.performanceScore / dept.employeeCount,
+        matchScore: dept.matchScore / dept.employeeCount
       }));
 
-      if (strategy === 'HIGH_PERFORMANCE') {
-        topDepartments.sort((a, b) => b.performanceScore - a.performanceScore);
-      } else if (strategy === 'UNDER_QUOTA') {
-        topDepartments.sort((a, b) => a.currentLoad - b.currentLoad);
-      } else {
-        topDepartments.sort((a, b) => a.performanceScore - b.performanceScore);
-      }
+      topDepartments.sort((a, b) => {
+        if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+        if (strategy === 'HIGH_PERFORMANCE') return b.performanceScore - a.performanceScore;
+        if (strategy === 'UNDER_QUOTA') return a.currentLoad - b.currentLoad;
+        return a.performanceScore - b.performanceScore;
+      });
 
       return {
         success: true,
