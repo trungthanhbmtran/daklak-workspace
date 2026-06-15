@@ -236,9 +236,8 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
             <CommandInput placeholder="Tìm kiếm theo tên hoặc chức vụ..." className="h-11 border-none focus:ring-0" />
             <CommandList className="max-h-[320px] overflow-y-auto">
               <CommandEmpty className="p-4 text-center text-xs text-slate-500">Không tìm thấy nhân sự phù hợp</CommandEmpty>
-              {Object.entries(groupedEmployees).map(([deptName, emps]) => (
-                <CommandGroup key={deptName} heading={deptName} className="p-1.5 text-slate-500 dark:text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
-                  {emps.map((emp: any, idx: number) => {
+              <CommandGroup className="p-1.5">
+                {assignableEmployees.map((emp: any, idx: number) => {
                     const isMain = assigneeCode === emp.code;
                     const isCo = coAssigneeCodes.includes(emp.code);
                     const isSelected = isMain || isCo;
@@ -246,7 +245,7 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                     return (
                       <CommandItem
                         key={emp.code}
-                        value={`${emp.name} ${emp.jobTitle?.name || ''} ${deptName}`}
+                        value={`${emp.name} ${emp.jobTitle?.name || ''} ${emp.department?.name || ''}`}
                         onSelect={() => {
                           if (isMain) {
                             onChangeAssignee('');
@@ -270,7 +269,7 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">{emp.name}</span>
-                              <span className="text-[10px] text-slate-500 truncate">- {emp.jobTitle?.name || 'Cán bộ'} ({emp.department?.name || deptName})</span>
+                              <span className="text-[10px] text-slate-500 truncate">- {emp.jobTitle?.name || 'Cán bộ'} ({emp.department?.name || 'Chưa xác định'})</span>
                             </div>
                             {(isMain || isCo || emp.isOverloaded) && (
                               <div className="flex gap-1.5 mt-1">
@@ -286,9 +285,7 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                         </div>
                       </CommandItem>
                     );
-                  })}
                 </CommandGroup>
-              ))}
             </CommandList>
           </Command>
         </PopoverContent>

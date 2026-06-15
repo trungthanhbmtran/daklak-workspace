@@ -290,122 +290,111 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                 </Card>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {Object.entries(
-                    filteredEmployees.reduce((acc: any, emp: any) => {
-                      const dept = emp.departmentName || 'Chưa phân phòng';
-                      if (!acc[dept]) acc[dept] = [];
-                      acc[dept].push(emp);
-                      return acc;
-                    }, {})
-                  ).map(([deptName, emps]: [string, any]) => {
-                    const validCoords = emps.filter((e: any) => e.employeeCode !== leadCode);
-                    const isAllSelected = validCoords.length > 0 && validCoords.every((e: any) => coordinatorCodes.includes(e.employeeCode));
+                  <Card className="overflow-hidden shadow-sm">
+                    {/* Global Header */}
+                    <div className="bg-slate-50/80 dark:bg-slate-900/50 px-4 py-2 border-b flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        Danh sách nhân sự <Badge variant="secondary" className="text-[10px] ml-1">{filteredEmployees.length}</Badge>
+                      </div>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => toggleSelectAllDept(filteredEmployees)}
+                        className={cn("h-7 text-xs px-2", (filteredEmployees.length > 0 && filteredEmployees.filter((e: any) => e.employeeCode !== leadCode).every((e: any) => coordinatorCodes.includes(e.employeeCode))) ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-slate-500")}
+                        disabled={filteredEmployees.filter((e: any) => e.employeeCode !== leadCode).length === 0}
+                      >
+                        {(filteredEmployees.length > 0 && filteredEmployees.filter((e: any) => e.employeeCode !== leadCode).every((e: any) => coordinatorCodes.includes(e.employeeCode))) ? <CheckSquare className="w-3.5 h-3.5 mr-1.5" /> : <Users className="w-3.5 h-3.5 mr-1.5" />}
+                        {(filteredEmployees.length > 0 && filteredEmployees.filter((e: any) => e.employeeCode !== leadCode).every((e: any) => coordinatorCodes.includes(e.employeeCode))) ? 'Đã chọn tất cả phối hợp' : 'Chọn tất cả phối hợp'}
+                      </Button>
+                    </div>
                     
-                    return (
-                      <Card key={deptName} className="overflow-hidden shadow-sm">
-                        {/* Department Header */}
-                        <div className="bg-slate-50/80 dark:bg-slate-900/50 px-4 py-2 border-b flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {deptName} <Badge variant="secondary" className="text-[10px] ml-1">{emps.length}</Badge>
-                          </div>
-                          
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => toggleSelectAllDept(emps)}
-                            className={cn("h-7 text-xs px-2", isAllSelected ? "text-indigo-600 dark:text-indigo-400 font-bold" : "text-slate-500")}
-                            disabled={validCoords.length === 0}
+                    {/* Compact Employee List */}
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {filteredEmployees.map((rec: any) => {
+                        const isLead = rec.employeeCode === leadCode;
+                        const isCoordinator = coordinatorCodes.includes(rec.employeeCode);
+
+                        // Workload capacity bar calculation
+                        const loadRatio = Math.min(1, rec.currentLoad / (rec.rankLimit || 5));
+                        const loadPercentage = Math.round(loadRatio * 100);
+                        const deptName = rec.departmentName || 'Chưa phân phòng';
+
+                        return (
+                          <div 
+                            key={rec.employeeCode} 
+                            className={cn(
+                              "flex items-center justify-between p-3 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50",
+                              isLead ? "bg-indigo-50/30 dark:bg-indigo-900/10" : isCoordinator ? "bg-slate-50/80 dark:bg-slate-800/30" : ""
+                            )}
                           >
-                            {isAllSelected ? <CheckSquare className="w-3.5 h-3.5 mr-1.5" /> : <Users className="w-3.5 h-3.5 mr-1.5" />}
-                            {isAllSelected ? 'Đã chọn tất cả phối hợp' : 'Chọn tất cả phối hợp'}
-                          </Button>
-                        </div>
-                        
-                        {/* Compact Employee List */}
-                        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                          {emps.map((rec: any) => {
-                            const isLead = rec.employeeCode === leadCode;
-                            const isCoordinator = coordinatorCodes.includes(rec.employeeCode);
-
-                            // Workload capacity bar calculation
-                            const loadRatio = Math.min(1, rec.currentLoad / (rec.rankLimit || 5));
-                            const loadPercentage = Math.round(loadRatio * 100);
-
-                            return (
-                              <div 
-                                key={rec.employeeCode} 
-                                className={cn(
-                                  "flex items-center justify-between p-3 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50",
-                                  isLead ? "bg-indigo-50/30 dark:bg-indigo-900/10" : isCoordinator ? "bg-slate-50/80 dark:bg-slate-800/30" : ""
-                                )}
-                              >
-                                {/* Left: Info & Stats */}
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  {/* Avatar */}
-                                  <div className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold transition-all",
-                                    isLead ? "bg-indigo-600 text-white ring-2 ring-indigo-200" : isCoordinator ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-500"
-                                  )}>
-                                    {rec.employeeName?.charAt(0) || '?'}
+                            {/* Left: Info & Stats */}
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              {/* Avatar */}
+                              <div className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold transition-all",
+                                isLead ? "bg-indigo-600 text-white ring-2 ring-indigo-200" : isCoordinator ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-500"
+                              )}>
+                                {rec.employeeName?.charAt(0) || '?'}
+                              </div>
+                              
+                              {/* Details */}
+                              <div className="flex flex-col min-w-0 flex-1">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <p className={cn("font-semibold text-sm truncate", isLead && "text-indigo-700 dark:text-indigo-400")}>
+                                    {rec.employeeName}
+                                  </p>
+                                  <span className="text-[10px] text-muted-foreground uppercase">{rec.employeeCode}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                                  <span className="truncate max-w-[200px]" title={`${rec.jobTitleName} - ${deptName}`}>
+                                    {rec.jobTitleName} ({deptName})
+                                  </span>
+                                  
+                                  <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-3">
+                                    <Activity className="w-3 h-3 text-indigo-400" />
+                                    <span>Tải: <b className={cn(loadPercentage >= 100 ? "text-rose-500" : "text-slate-700 dark:text-slate-300")}>{rec.currentLoad}/{rec.rankLimit || 5}</b></span>
                                   </div>
                                   
-                                  {/* Details */}
-                                  <div className="flex flex-col min-w-0 flex-1">
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                      <p className={cn("font-semibold text-sm truncate", isLead && "text-indigo-700 dark:text-indigo-400")}>
-                                        {rec.employeeName}
-                                      </p>
-                                      <span className="text-[10px] text-muted-foreground uppercase">{rec.employeeCode}</span>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                                      <span className="truncate max-w-[120px]" title={rec.jobTitleName}>{rec.jobTitleName}</span>
-                                      
-                                      <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-3">
-                                        <Activity className="w-3 h-3 text-indigo-400" />
-                                        <span>Tải: <b className={cn(loadPercentage >= 100 ? "text-rose-500" : "text-slate-700 dark:text-slate-300")}>{rec.currentLoad}/{rec.rankLimit || 5}</b></span>
-                                      </div>
-                                      
-                                      <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-3">
-                                        <span>KPI: <b className="text-emerald-600 dark:text-emerald-400">{Math.round(rec.performanceScore)}</b></span>
-                                      </div>
-                                    </div>
+                                  <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-700 pl-3">
+                                    <span>KPI: <b className="text-emerald-600 dark:text-emerald-400">{Math.round(rec.performanceScore)}</b></span>
                                   </div>
                                 </div>
-
-                                {/* Right: Actions (Radio for Lead, Checkbox for Coordinator) */}
-                                <div className="flex items-center gap-4 shrink-0 pl-4">
-                                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium hover:text-indigo-600 transition-colors">
-                                    <div className={cn(
-                                      "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
-                                      isLead ? "border-indigo-600 bg-indigo-600" : "border-slate-300 bg-white"
-                                    )}>
-                                      {isLead && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-                                    </div>
-                                    <span className={cn(isLead ? "text-indigo-700 dark:text-indigo-400 font-bold" : "text-muted-foreground")} onClick={() => handleSetLead(rec.employeeCode)}>
-                                      Giao chính
-                                    </span>
-                                  </label>
-
-                                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium hover:text-slate-800 transition-colors">
-                                    <Checkbox 
-                                      checked={isCoordinator}
-                                      onCheckedChange={() => toggleCoordinator(rec.employeeCode)}
-                                      disabled={isLead}
-                                      className="w-4 h-4"
-                                    />
-                                    <span className={cn(isCoordinator ? "text-foreground font-bold" : "text-muted-foreground")}>
-                                      Phối hợp
-                                    </span>
-                                  </label>
-                                </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </Card>
-                    );
-                  })}
+                            </div>
+
+                            {/* Right: Actions */}
+                            <div className="flex items-center gap-4 shrink-0 pl-4">
+                              <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium hover:text-indigo-600 transition-colors">
+                                <div className={cn(
+                                  "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
+                                  isLead ? "border-indigo-600 bg-indigo-600" : "border-slate-300 bg-white"
+                                )}>
+                                  {isLead && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                                </div>
+                                <span className={cn(isLead ? "text-indigo-700 dark:text-indigo-400 font-bold" : "text-muted-foreground")} onClick={() => handleSetLead(rec.employeeCode)}>
+                                  Giao chính
+                                </span>
+                              </label>
+
+                              <label className="flex items-center gap-1.5 cursor-pointer text-xs font-medium hover:text-slate-800 transition-colors">
+                                <Checkbox 
+                                  checked={isCoordinator}
+                                  onCheckedChange={() => toggleCoordinator(rec.employeeCode)}
+                                  disabled={isLead}
+                                  className="w-4 h-4"
+                                />
+                                <span className={cn(isCoordinator ? "text-foreground font-bold" : "text-muted-foreground")}>
+                                  Phối hợp
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Card>
                   
                   {filteredEmployees.length === 0 && (
                     <Card className="py-12 border-dashed">
