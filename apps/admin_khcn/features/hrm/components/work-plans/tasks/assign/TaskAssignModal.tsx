@@ -270,13 +270,15 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">{emp.name}</span>
-                              {isMain && <span className="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Chủ trì</span>}
-                              {isCo && <span className="text-[9px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Phối hợp</span>}
-                              {emp.isOverloaded && <span className="text-[9px] bg-red-100 dark:bg-red-950/20 text-red-655 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Quá tải</span>}
+                              <span className="text-[10px] text-slate-500 truncate">- {emp.jobTitle?.name || 'Cán bộ'} ({emp.department?.name || deptName})</span>
                             </div>
-                            <p className="text-[10px] text-slate-500 truncate mt-1">
-                              {emp.jobTitle?.name || 'Cán bộ'} • {emp.department?.name || deptName}
-                            </p>
+                            {(isMain || isCo || emp.isOverloaded) && (
+                              <div className="flex gap-1.5 mt-1">
+                                {isMain && <span className="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Chủ trì</span>}
+                                {isCo && <span className="text-[9px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Phối hợp</span>}
+                                {emp.isOverloaded && <span className="text-[9px] bg-red-100 dark:bg-red-950/20 text-red-655 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Quá tải</span>}
+                              </div>
+                            )}
                           </div>
                           <span className={cn("text-[10px] font-bold shrink-0 whitespace-nowrap px-2 py-1 rounded bg-slate-100 dark:bg-slate-800", emp.isOverloaded ? "text-red-500 bg-red-50 dark:bg-red-950/20" : "text-indigo-600 dark:text-indigo-400")}>
                             Còn {emp.availableCapacity}đ
@@ -565,6 +567,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   const { data: employeesData } = useHrmEmployeesList({
     pageSize: 200,
     departmentId: selectedDeptId !== 'ALL' ? Number(selectedDeptId) : undefined,
+    crossDepartment: crossDepartment,
+    assignableOnly: true,
   } as any);
 
   // Fetch all employees for complete mapping lookup (names instead of codes)

@@ -39,7 +39,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   // Fetch all employees to enrich recommended list with actual department & job title names
   const { data: allEmployeesRes } = useQuery({
     queryKey: ['hrm-employees-dict'],
-    queryFn: () => hrmApi.list({ pageSize: 150 }),
+    queryFn: () => hrmApi.list({ pageSize: 150, assignableOnly: true }),
     staleTime: 5 * 60 * 1000,
     enabled: !!open,
   });
