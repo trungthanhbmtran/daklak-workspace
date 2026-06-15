@@ -48,28 +48,39 @@ export const TaskStatsBar = memo(function TaskStatsBar({
   }, [tasks]);
 
   const CARDS = [
-    { id: 'overdue',    label: 'Đang xử lý - Quá hạn',      value: stats.overdue,    icon: <AlertCircle className="h-6 w-6" />,   cls: 'bg-rose-500    hover:bg-rose-600    ring-rose-200'    },
-    { id: 'warning',    label: 'Đang xử lý - Sắp đến hạn',  value: stats.warning,    icon: <Clock        className="h-6 w-6" />,   cls: 'bg-amber-500   hover:bg-amber-600   ring-amber-200'   },
-    { id: 'inTime',     label: 'Đang xử lý - Trong hạn',     value: stats.inTime,     icon: <Calendar     className="h-6 w-6" />,   cls: 'bg-blue-500    hover:bg-blue-600    ring-blue-200'    },
-    { id: 'doneInTime', label: 'Đã xong - Đúng hạn',         value: stats.doneInTime, icon: <CheckCircle2 className="h-6 w-6" />,   cls: 'bg-emerald-500 hover:bg-emerald-600 ring-emerald-200' },
-    { id: 'doneOverdue',label: 'Đã xong - Trễ hạn',          value: stats.doneOverdue,icon: <AlertCircle  className="h-6 w-6" />,   cls: 'bg-orange-500  hover:bg-orange-600  ring-orange-200'  },
+    { id: 'overdue',    label: 'Đang xử lý - Quá hạn',      value: stats.overdue,    icon: <AlertCircle className="h-6 w-6" />,   cls: 'from-rose-500 to-red-600 shadow-rose-200/50'    },
+    { id: 'warning',    label: 'Đang xử lý - Sắp đến hạn',  value: stats.warning,    icon: <Clock        className="h-6 w-6" />,   cls: 'from-amber-400 to-orange-500 shadow-amber-200/50'   },
+    { id: 'inTime',     label: 'Đang xử lý - Trong hạn',     value: stats.inTime,     icon: <Calendar     className="h-6 w-6" />,   cls: 'from-blue-500 to-indigo-600 shadow-blue-200/50'    },
+    { id: 'doneInTime', label: 'Đã xong - Đúng hạn',         value: stats.doneInTime, icon: <CheckCircle2 className="h-6 w-6" />,   cls: 'from-emerald-400 to-teal-500 shadow-emerald-200/50' },
+    { id: 'doneOverdue',label: 'Đã xong - Trễ hạn',          value: stats.doneOverdue,icon: <AlertCircle  className="h-6 w-6" />,   cls: 'from-orange-500 to-rose-500 shadow-orange-200/50'  },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 relative z-10">
+    <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 relative z-10 mb-4">
       {CARDS.map((card) => (
         <div
           key={card.id}
           onClick={() => onFilterChange(activeFilter === card.id ? null : card.id)}
-          className={`p-4 rounded-[1.5rem] border cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-md text-white border-transparent ${card.cls} ${activeFilter === card.id ? 'ring-4 shadow-lg scale-105' : 'opacity-95 hover:opacity-100'}`}
+          className={cn(
+            "p-5 rounded-[1.5rem] cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-lg text-white relative overflow-hidden bg-gradient-to-br border-2",
+            card.cls,
+            activeFilter === card.id 
+              ? 'border-white dark:border-slate-800 scale-[1.02] ring-4 ring-indigo-500/30' 
+              : 'border-transparent opacity-90 hover:opacity-100 hover:-translate-y-1'
+          )}
         >
-          <div className="flex justify-between items-start mb-3">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/20">
+          {/* Background decoration */}
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+          
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/20 shadow-inner backdrop-blur-sm border border-white/20">
               {card.icon}
             </div>
-            <h3 className="text-4xl font-black">{card.value}</h3>
+            <h3 className="text-4xl font-black drop-shadow-md tracking-tighter">{card.value}</h3>
           </div>
-          <p className="text-[12px] font-bold uppercase tracking-wider opacity-90 leading-tight">{card.label}</p>
+          <p className="text-[13px] font-black uppercase tracking-wider opacity-90 leading-tight relative z-10 drop-shadow-sm">
+            {card.label}
+          </p>
         </div>
       ))}
     </div>

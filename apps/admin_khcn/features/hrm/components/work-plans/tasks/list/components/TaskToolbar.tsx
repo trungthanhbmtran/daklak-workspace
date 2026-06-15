@@ -27,6 +27,7 @@ interface TaskToolbarProps {
   onStatusChange: (v: string) => void;
   onPriorityChange: (v: string) => void;
   onSearchChange: (v: string) => void;
+  onCreateTask?: () => void;
   taskStatusCategories?: any[];
 }
 
@@ -39,37 +40,49 @@ export const TaskToolbar = memo(function TaskToolbar({
   onStatusChange,
   onPriorityChange,
   onSearchChange,
+  onCreateTask,
   taskStatusCategories = [],
 }: TaskToolbarProps) {
   return (
-    <div className="flex flex-col gap-3 mb-2">
+    <div className="flex flex-col gap-4 mb-4">
       {/* Row: Search + Filters */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
-        <div className="w-full sm:max-w-[320px] relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm công việc..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full h-11 pl-9 pr-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
-          />
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-2 rounded-[1.5rem] border border-slate-200/60 dark:border-slate-800 shadow-sm">
+        <div className="flex w-full xl:w-auto items-center gap-3">
+          {onCreateTask && (
+            <Button 
+              onClick={onCreateTask}
+              className="h-12 rounded-[1rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-lg shadow-indigo-200 dark:shadow-none shrink-0 transition-transform hover:scale-105 active:scale-95 px-5"
+            >
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Khởi tạo công việc
+            </Button>
+          )}
+          <div className="w-full sm:w-[350px] relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm công việc..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full h-12 pl-11 pr-4 rounded-[1rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:font-normal placeholder:text-slate-400"
+            />
+          </div>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto shrink-0">
           {/* Role select */}
           <div className="flex-1 sm:flex-none">
             <Select value={roleFilter} onValueChange={(v) => onRoleChange(v as TaskRoleFilter)}>
-              <SelectTrigger className="w-full sm:w-[180px] h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200">
+              <SelectTrigger className="w-full sm:w-[190px] h-12 rounded-[1rem] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-indigo-500" />
                   <SelectValue placeholder="Vai trò" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200 shadow-lg p-1">
+              <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1.5">
                 {Object.entries(ROLE_META).map(([key, meta]) => (
-                  <SelectItem key={key} value={key} className="rounded-lg font-semibold py-2.5 cursor-pointer">
-                    <div className="flex items-center gap-2">
+                  <SelectItem key={key} value={key} className="rounded-xl font-bold py-2.5 cursor-pointer">
+                    <div className="flex items-center gap-2.5">
                       {meta.label}
                     </div>
                   </SelectItem>
@@ -81,26 +94,19 @@ export const TaskToolbar = memo(function TaskToolbar({
           {/* Status select */}
           <div className="flex-1 sm:flex-none">
             <Select value={statusFilter} onValueChange={onStatusChange}>
-              <SelectTrigger className="w-full sm:w-[170px] h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200">
+              <SelectTrigger className="w-full sm:w-[180px] h-12 rounded-[1rem] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-indigo-500" />
                   <SelectValue placeholder="Trạng thái" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200 shadow-lg p-1">
-                <SelectItem value="ALL" className="rounded-lg font-semibold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
-                {taskStatusCategories.map((c: any) => {
-                  let colorClass = "text-slate-600 focus:bg-slate-50 dark:text-slate-300";
-                  if (c.code === 'DONE') colorClass = "text-emerald-600 focus:bg-emerald-50";
-                  else if (c.code === 'PROCESSING' || c.code === 'IN_PROGRESS') colorClass = "text-amber-600 focus:bg-amber-50";
-                  else if (c.code === 'PENDING' || c.code === 'TODO' || c.code === 'UNASSIGNED') colorClass = "text-blue-600 focus:bg-blue-50";
-                  else if (c.code === 'OVERDUE') colorClass = "text-rose-600 focus:bg-rose-50";
-                  return (
-                    <SelectItem key={c.code} value={c.code} className={cn("rounded-lg font-semibold py-2.5 cursor-pointer", colorClass)}>
-                      {c.nameVi || c.name || c.code}
-                    </SelectItem>
-                  );
-                })}
+              <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1.5">
+                <SelectItem value="ALL" className="rounded-xl font-bold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
+                {taskStatusCategories?.map((st: any) => (
+                  <SelectItem key={st.id} value={st.code} className="rounded-xl font-bold py-2.5 cursor-pointer">
+                    {st.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -108,29 +114,29 @@ export const TaskToolbar = memo(function TaskToolbar({
           {/* Priority select */}
           <div className="flex-1 sm:flex-none">
             <Select value={priorityFilter} onValueChange={onPriorityChange}>
-              <SelectTrigger className="w-full sm:w-[160px] h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200">
+              <SelectTrigger className="w-full sm:w-[160px] h-12 rounded-[1rem] border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-rose-500" />
+                  <Filter className="w-4 h-4 text-indigo-500" />
                   <SelectValue placeholder="Ưu tiên" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200 shadow-lg p-1">
-                <SelectItem value="ALL" className="rounded-lg font-semibold py-2.5 cursor-pointer">Mọi ưu tiên</SelectItem>
-                <SelectItem value="HIGH" className="rounded-lg font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50">🔴 Cao</SelectItem>
-                <SelectItem value="MEDIUM" className="rounded-lg font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50">🟡 Trung bình</SelectItem>
-                <SelectItem value="LOW" className="rounded-lg font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50">🟢 Thấp</SelectItem>
+              <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1.5">
+                <SelectItem value="ALL" className="rounded-xl font-bold py-2.5 cursor-pointer">Tất cả mức độ</SelectItem>
+                <SelectItem value="HIGH" className="rounded-xl font-bold py-2.5 cursor-pointer text-rose-600">🔴 Cao</SelectItem>
+                <SelectItem value="MEDIUM" className="rounded-xl font-bold py-2.5 cursor-pointer text-amber-600">🟡 Trung bình</SelectItem>
+                <SelectItem value="LOW" className="rounded-xl font-bold py-2.5 cursor-pointer text-blue-600">🔵 Thấp</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
       </div>
       
-      {/* Visual Role Badges Legend */}
-      <div className="flex items-center gap-3 mt-1 overflow-x-auto pb-2 scrollbar-none">
-        <span className="text-xs font-semibold text-slate-500 shrink-0">Chú thích vai trò:</span>
-        {Object.entries(ROLE_META).filter(([k]) => k !== 'ALL').map(([key, meta]) => (
-          <div key={key} className={cn("flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-bold shrink-0", meta.color)}>
-            {meta.icon} {meta.label}
+      {/* Role Legend Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+        {Object.values(ROLE_META).map((meta, idx) => (
+          <div key={idx} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border border-transparent shadow-sm", meta.color)}>
+            {meta.icon}
+            {meta.label}
           </div>
         ))}
       </div>

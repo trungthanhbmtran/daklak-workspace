@@ -10,7 +10,9 @@ import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/
 
 import { TaskToolbar, TaskRoleFilter } from './components/TaskToolbar';
 import { GlobalTaskTree } from './components/GlobalTaskTree';
+import { TaskStatsBar } from './components/TaskStatsBar';
 import { SmartAssignDrawer } from '../assign/SmartAssignDrawer';
+import { CreateTaskModal } from './components/CreateTaskModal';
 
 import { useDebounce } from './hooks/useDebounce';
 
@@ -27,9 +29,11 @@ export const TaskListClient = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState(defaultSearch);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const debouncedStatus = useDebounce(statusFilter, 300);
   const debouncedPriority = useDebounce(priorityFilter, 300);
@@ -125,10 +129,49 @@ export const TaskListClient = () => {
   const { data: roleRes }: any = useGetCategoryByGroup('TASK_ROLE');
   const taskRoleCategories = roleRes?.data || [];
 
+  // ── StatsBar filter ────────────────────────────────────────────────────────
+  const displayedTasks = useMemo(() => {
+    if (!activeFilter) return allTasks;
+    return allTasks.filter((task: any) => {
+      const due = task.dueDate ? new Date(task.dueDate) : null;
+      const now = new Date();
+      if (due) due.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+
+      if (activeFilter === 'doneInTime' || activeFilter === 'doneOverdue') {
+        if (task.status !== 'DONE') return false;
+        const completed = new Date(task.completedAt || task.updatedAt || Date.now());
+        completed.setHours(0, 0, 0, 0);
+        const late = due ? completed > due : false;
+        return activeFilter === 'doneOverdue' ? late : !late;
+      }
+
+      if (task.status === 'DONE') return false;
+      if (!due) return activeFilter === 'inTime';
+      const diff = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
+      if (activeFilter === 'overdue') return diff < 0;
+      if (activeFilter === 'warning') return diff >= 0 && diff <= 3;
+      if (activeFilter === 'inTime') return diff > 3;
+      return true;
+    });
+  }, [allTasks, activeFilter]);
+
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleSelectTask = useCallback((task: any) => setSelectedTask(task), []);
   const handleSmartAssign = useCallback((task: any) => setTaskToAssign(task), []);
   const handleCloseDetail = useCallback(() => setSelectedTask(null), []);
+  const handleFilterChange = useCallback((id: string | null) => setActiveFilter(id), []);
+  
+  const handleCreateTask = useCallback(() => {
+    setIsCreateModalOpen(true);
+  }, []);
+
+  const handleCloseCreateModal = useCallback((created?: boolean) => {
+    setIsCreateModalOpen(false);
+    if (created) {
+      refetch();
+    }
+  }, [refetch]);
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500 font-sans">
@@ -140,26 +183,40 @@ export const TaskListClient = () => {
         </div>
       )}
 
+      {/* Stats bar */}
+      <TaskStatsBar
+        tasks={allTasks}
+        activeFilter={activeFilter}
+        onFilterChange={handleFilterChange}
+      />
+
       {/* Toolbar */}
       <TaskToolbar
         roleFilter={roleFilter}
         statusFilter={statusFilter}
         priorityFilter={priorityFilter}
         searchQuery={searchQuery}
-        onRoleChange={setRoleFilter}
+        onRoleChange={(v) => { setRoleFilter(v); setActiveFilter(null); setStatusFilter('ALL'); }}
         onStatusChange={setStatusFilter}
         onPriorityChange={setPriorityFilter}
         onSearchChange={setSearchQuery}
+        onCreateTask={handleCreateTask}
         taskStatusCategories={taskStatusCategories}
       />
 
       {/* Tree Content */}
       <GlobalTaskTree
-        tasks={allTasks}
+        tasks={displayedTasks}
         isLoading={isLoading}
-        currentUserCode={"currentUserCode"}
+        currentUserCode={currentUserCode}
         onSelectTask={handleSelectTask}
         onSmartAssign={handleSmartAssign}
+      />
+
+      {/* Create Modal */}
+      <CreateTaskModal 
+        isOpen={isCreateModalOpen} 
+        onClose={handleCloseCreateModal} 
       />
 
       {/* Detail Dialog */}
