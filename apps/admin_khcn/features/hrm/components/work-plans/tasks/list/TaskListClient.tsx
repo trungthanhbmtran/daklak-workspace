@@ -157,7 +157,7 @@ export const TaskListClient = () => {
       <GlobalTaskTree
         tasks={allTasks}
         isLoading={isLoading}
-        currentUserCode={currentUserCode}
+        currentUserCode={"currentUserCode"}
         onSelectTask={handleSelectTask}
         onSmartAssign={handleSmartAssign}
       />
