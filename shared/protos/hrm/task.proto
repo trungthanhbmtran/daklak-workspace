@@ -36,8 +36,9 @@ message RecommendAssigneesRequest {
   string strategy = 2; // "HIGH_PERFORMANCE" or "LOW_PERFORMANCE"
   int32 currentUserId = 3;
   string currentUserCode = 4;
-
+  string domainId = 5;
   repeated string currentUserPermissions = 6;
+  string jobTitleId = 7;
 }
 
 message AssigneeRecommendation {

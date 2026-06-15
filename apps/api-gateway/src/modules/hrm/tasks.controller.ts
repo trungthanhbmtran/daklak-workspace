@@ -316,6 +316,8 @@ export class TasksController implements OnModuleInit {
     @Req() req: any,
     @Query('rankCode') rankCode: string,
     @Query('strategy') strategy: string,
+    @Query('domainId') domainId: string,
+    @Query('jobTitleId') jobTitleId: string,
   ) {
     const user = req.user;
     const unitMap = await this.getUnitMap();
@@ -330,6 +332,8 @@ export class TasksController implements OnModuleInit {
         this.taskService.RecommendAssignees({
           rankCode: rankCode || 'ALL',
           strategy: strategy || 'LOW_PERFORMANCE',
+          domainId,
+          jobTitleId,
           currentUserId: user?.id,
           currentUserCode: user?.employeeCode,
           currentUserPermissions: user?.permissionsFlatten || [],
