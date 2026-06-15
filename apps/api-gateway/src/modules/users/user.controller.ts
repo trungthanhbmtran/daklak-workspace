@@ -27,6 +27,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { NotificationsService } from '../notifications/notifications.service';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
+import { RedisService } from '../../core/redis/redis.service';
 
 @ApiTags('Users')
 @Controller('admin/users')
@@ -40,6 +41,7 @@ export class UserController implements OnModuleInit {
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
     private readonly notificationsService: NotificationsService,
+    private readonly redisService: RedisService,
   ) {}
 
   onModuleInit() {
@@ -66,9 +68,7 @@ export class UserController implements OnModuleInit {
         )
       : null;
 
-    const isAdmin: boolean = !!userInfo?.roles?.some(
-      (r: any) => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN',
-    );
+    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
@@ -99,13 +99,7 @@ export class UserController implements OnModuleInit {
     const data: any = await firstValueFrom(this.userService.FindOne({ id }));
     if (!data) return { success: true, data: null };
 
-    // Chỉ trả roles (nhẹ) – policies load riêng qua /users/:id/policies
-    const rawRoles: any[] = Array.isArray(data.roles) ? data.roles : [];
-    const roles = rawRoles.map((r: any) => ({
-      id: r.id,
-      code: r.code,
-      name: r.name,
-    }));
+
 
     return {
       success: true,
@@ -120,7 +114,6 @@ export class UserController implements OnModuleInit {
         cccd: data.cccd,
         employeeCode: data.employeeCode ?? data.employee_code,
         lastLogin: data.lastLogin ?? data.last_login,
-        roles,
       },
     };
   }
@@ -230,7 +223,7 @@ export class UserController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { unitId: number; jobTitleId: number; isPrimary?: boolean },
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.userService.AssignPosition({
         userId: id,
         unitId: body.unitId,
@@ -238,6 +231,12 @@ export class UserController implements OnModuleInit {
         isPrimary: body.isPrimary ?? false,
       }),
     );
+    try {
+      await this.redisService.getClient().del(`user:profile:${id}`);
+    } catch (err) {
+      console.error('Failed to clear user cache on assignPosition:', err);
+    }
+    return result;
   }
 
   @Patch(':id/active')
@@ -247,12 +246,18 @@ export class UserController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { isActive: boolean },
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.userService.SetUserActive({
         userId: id,
         isActive: body.isActive ?? false,
       }),
     );
+    try {
+      await this.redisService.getClient().del(`user:profile:${id}`);
+    } catch (err) {
+      console.error('Failed to clear user cache on setActive:', err);
+    }
+    return result;
   }
 
   @Post(':id/assign-roles')
@@ -263,9 +268,15 @@ export class UserController implements OnModuleInit {
     @Body() body: { roleIds?: number[] },
   ) {
     const roleIds = Array.isArray(body?.roleIds) ? body.roleIds : [];
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.userService.AssignRoles({ userId: id, roleIds }),
     );
+    try {
+      await this.redisService.getClient().del(`user:profile:${id}`);
+    } catch (err) {
+      console.error('Failed to clear user cache on assignRoles:', err);
+    }
+    return result;
   }
 
   @Put(':id')

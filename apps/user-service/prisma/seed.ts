@@ -3972,13 +3972,7 @@ async function main() {
   };
 
   const roleDefinitions = [
-    // ==========================================================
-    // Mô hình PBAC Chính phủ Việt Nam
-    // Căn cứ: Nghị định 47/2020/NĐ-CP, Nghị định 09/2019/NĐ-CP
-    // Phân cấp: GLOBAL > ORGANIZATION > DEPARTMENT > SELF
-    // ==========================================================
-
-    // 1. Quản trị tối cao - IT Admin - toàn quyền hệ thống
+    // 1. Quản trị tối cao - toàn quyền hệ thống
     {
       code: 'SUPER_ADMIN',
       name: 'Quản trị viên cấp cao',
@@ -3986,7 +3980,7 @@ async function main() {
       perms: ['ALL']
     },
 
-    // 2. Quản trị nghiệp vụ - chỉ quản lý user, cấu hình, danh mục (không có quyền nội dung)
+    // 2. Quản trị nghiệp vụ hệ thống - quản lý user, cấu hình, danh mục
     {
       code: 'ADMIN',
       name: 'Quản trị hệ thống',
@@ -3997,11 +3991,11 @@ async function main() {
       ]
     },
 
-    // 3. Lãnh đạo đơn vị (Giám đốc, Phó GD, Chủ tịch, Phó CT UBND)
-    // Phạm vi: TOÀN TỔ CHỨC - đọc + xử lý + phê duyệt mọi nghịệp vụ
+    // 3. Lãnh đạo (Giám đốc, Phó GD, Chủ tịch, Phó CT UBND)
+    // Phạm vi: TOÀN TỔ CHỨC - đọc + xử lý + phê duyệt mọi nghiệp vụ
     {
       code: 'LEADER',
-      name: 'Lãnh đạo đơn vị',
+      name: 'Lãnh đạo',
       scope: 'ORGANIZATION',
       perms: [
         'HRM_EMPLOYEE.*',
@@ -4012,11 +4006,11 @@ async function main() {
       ]
     },
 
-    // 4. Trưởng đơn vị (Trưởng phòng, Chánh VP, Giám đốc Trung tâm)
+    // 4. Quản lý (Trưởng phòng, Phó trưởng phòng, Giám đốc Trung tâm)
     // Phạm vi: PHÒNG BAN - quản lý công việc, phân công nhiệm vụ
     {
       code: 'MANAGER',
-      name: 'Trưởng đơn vị',
+      name: 'Quản lý',
       scope: 'DEPARTMENT',
       perms: [
         'HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.READ', 'HRM_EMPLOYEE.MANAGE',
@@ -4040,11 +4034,11 @@ async function main() {
       ]
     },
 
-    // 5. Chuyên viên xử lý (Chuyên viên, Nghiên cứu viên, Kỹ sư, Viên chức Hạng II/III)
-    // Phạm vi: PHÒNG BAN - xử lý công việc được giao, soạn thảo văn bản
+    // 5. Nhân viên (Chuyên viên, Viên chức, Cán sự, Nhân viên xử lý)
+    // Phạm vi: SELF & DEPARTMENT - xử lý công việc được giao, soạn thảo văn bản
     {
       code: 'STAFF',
-      name: 'Chuyên viên xử lý',
+      name: 'Nhân viên',
       scope: 'DEPARTMENT',
       perms: [
         'HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.READ',
@@ -4060,23 +4054,6 @@ async function main() {
         'DOC_CATEGORIES.VIEW', 'DOC_CATEGORIES.READ',
         'TASK.VIEW', 'TASK.READ', 'TASK.UPDATE', 'TASK.COMPLETE', 'TASK.COMMENT',
         'KPI.VIEW', 'KPI.READ',
-        'WORKFLOW.VIEW', 'WORKFLOW.READ'
-      ]
-    },
-
-    // 6. Nhân viên cơ bản (Viên chức Hạng IV, Bảo vệ, Lái xe, Tạp vụ)
-    // Phạm vi: SELF - chỉ xem và xử lý phần việc được giao
-    {
-      code: 'OFFICER',
-      name: 'Nhân viên',
-      scope: 'SELF',
-      perms: [
-        'HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.READ',
-        'DOCUMENT.VIEW', 'DOCUMENT.READ',
-        'DOC_INCOMING.VIEW', 'DOC_INCOMING.READ',
-        'DOC_OUTGOING.VIEW', 'DOC_OUTGOING.READ',
-        'DOC_PROCESSING.VIEW', 'DOC_PROCESSING.READ', 'DOC_PROCESSING.PROCESS',
-        'TASK.VIEW', 'TASK.READ', 'TASK.COMPLETE',
         'WORKFLOW.VIEW', 'WORKFLOW.READ'
       ]
     }
@@ -4129,7 +4106,7 @@ async function main() {
     ].includes(jobTitleCode)) {
       pbacRoleCode = 'MANAGER'; // Trưởng đơn vị cấp phòng/trung tâm
     } else if (['NHAN_VIEN', 'BAO_VE', 'TAP_VU', 'LAI_XE'].includes(jobTitleCode)) {
-      pbacRoleCode = 'OFFICER'; // Nhân viên phục vụ (quyền cơ bản nhất)
+      pbacRoleCode = 'STAFF'; // Nhân viên phục vụ (quyền cơ bản nhất)
     }
     // Còn lại (KE_TOAN, VAN_THU, VIEN_CHUC, CAN_SU...) giữ STAFF = Chuyên viên xử lý
 

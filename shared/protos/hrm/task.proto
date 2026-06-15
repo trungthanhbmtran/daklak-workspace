@@ -25,7 +25,7 @@ message AssignTaskRequest {
   int32 departmentId = 3;
   string assignerCode = 4;
   repeated string coassigneeCodes = 5;
-  repeated string currentUserRoles = 6;
+
   repeated string currentUserPermissions = 7;
   int32 currentUserId = 8;
   string currentUserCode = 9;
@@ -36,7 +36,7 @@ message RecommendAssigneesRequest {
   string strategy = 2; // "HIGH_PERFORMANCE" or "LOW_PERFORMANCE"
   int32 currentUserId = 3;
   string currentUserCode = 4;
-  repeated string currentUserRoles = 5;
+
   repeated string currentUserPermissions = 6;
 }
 
@@ -158,6 +158,7 @@ message ListTasksRequest {
   int32 planId = 12; // optional - id kế hoạch
   repeated int32 callerAncestorUnitIds = 13; // optional - danh sách id đơn vị cha
   string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
+  repeated int32 callerDescendantUnitIds = 15; // optional - danh sách id đơn vị con
 }
 
 message TaskStats {
@@ -275,6 +276,7 @@ message GetCommentsRequest {
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
+  repeated int32 callerDescendantUnitIds = 6;
 }
 
 message GetCommentsResponse {
@@ -310,6 +312,7 @@ message GetSubTasksRequest {
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
+  repeated int32 callerDescendantUnitIds = 6;
 }
 
 message GetSubTasksResponse {
@@ -325,6 +328,7 @@ message GetTaskRequest {
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
+  repeated int32 callerDescendantUnitIds = 6;
 }
 
 // ─── BreakdownTask ─────────────────────────────────────────────────────────

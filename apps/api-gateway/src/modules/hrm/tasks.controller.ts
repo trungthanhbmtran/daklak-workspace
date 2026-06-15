@@ -182,6 +182,27 @@ export class TasksController implements OnModuleInit {
     return ids;
   }
 
+  private getDescendantUnitIds(
+    unitMap: Record<number, any>,
+    unitId: number,
+  ): number[] {
+    const ids: number[] = [unitId];
+    const queue = [unitId];
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const current = unitMap[currentId];
+      if (current && current.directChildIds) {
+        for (const childId of current.directChildIds) {
+          if (!ids.includes(childId)) {
+            ids.push(childId);
+            queue.push(childId);
+          }
+        }
+      }
+    }
+    return ids;
+  }
+
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
@@ -232,19 +253,21 @@ export class TasksController implements OnModuleInit {
       }
     }
 
-    const isAdmin =
-      user?.roles?.some(
-        (r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN',
-      ) || user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
 
     let callerAncestorUnitIds: number[] = [];
+    let callerDescendantUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
       callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
+      callerDescendantUnitIds = this.getDescendantUnitIds(
         unitMap,
         parseInt(user.unitId, 10),
       );
@@ -266,6 +289,7 @@ export class TasksController implements OnModuleInit {
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
+        callerDescendantUnitIds,
         role,
       }),
     );
@@ -311,7 +335,6 @@ export class TasksController implements OnModuleInit {
         rejectReason,
         // Inject người thực hiện từ JWT token
         actorCode: user?.employeeCode || '',
-        currentUserRoles: user?.roles?.map((r: any) => typeof r === 'string' ? r : r.code) || [],
         currentUserPermissions: user?.permissionsFlatten || [],
         currentUserId: user?.id,
         currentUserCode: user?.employeeCode || user?.username,
@@ -340,10 +363,6 @@ export class TasksController implements OnModuleInit {
           strategy: strategy || 'LOW_PERFORMANCE',
           currentUserId: user?.id,
           currentUserCode: user?.employeeCode,
-          currentUserRoles:
-            user?.roles?.map((r: any) =>
-              typeof r === 'string' ? r : r.code,
-            ) || [],
           currentUserPermissions: user?.permissionsFlatten || [],
         }),
       );
@@ -416,7 +435,6 @@ export class TasksController implements OnModuleInit {
         coassigneeCodes: coassigneeCodes || [],
         departmentId,
         assignerCode,
-        currentUserRoles: user?.roles?.map((r: any) => r.code) || [],
         currentUserPermissions: user?.permissionsFlatten || [],
         currentUserId: user?.id,
         currentUserCode: user?.employeeCode || user?.username,
@@ -432,9 +450,7 @@ export class TasksController implements OnModuleInit {
   ) {
     const user = req.user;
     const assignerCode = user?.employeeCode;
-    const isAdmin =
-      user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') ||
-      user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
     const taskId = parseInt(id, 10);
     const taskResponse: any = await firstValueFrom(
@@ -464,17 +480,20 @@ export class TasksController implements OnModuleInit {
   @Get(':id/comments')
   async getComments(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
-    const isAdmin =
-      user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') ||
-      user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
     let callerAncestorUnitIds: number[] = [];
+    let callerDescendantUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
       callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
+      callerDescendantUnitIds = this.getDescendantUnitIds(
         unitMap,
         parseInt(user.unitId, 10),
       );
@@ -488,6 +507,7 @@ export class TasksController implements OnModuleInit {
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
+        callerDescendantUnitIds,
       }),
     );
   }
@@ -499,17 +519,20 @@ export class TasksController implements OnModuleInit {
     @Body() body: { content: string; isSystemMessage?: boolean },
   ) {
     const user = req.user;
-    const isAdmin =
-      user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') ||
-      user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
     let callerAncestorUnitIds: number[] = [];
+    let callerDescendantUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
       callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
+      callerDescendantUnitIds = this.getDescendantUnitIds(
         unitMap,
         parseInt(user.unitId, 10),
       );
@@ -526,6 +549,7 @@ export class TasksController implements OnModuleInit {
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
+        callerDescendantUnitIds,
       }),
     );
   }
@@ -550,9 +574,7 @@ export class TasksController implements OnModuleInit {
     const taskData = taskResponse?.data;
     if (!taskData) throw new Error('Task not found.');
 
-    const isAdmin =
-      user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') ||
-      user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isOwner = taskData.assigneeCode === requesterCode;
     const isAssigner = taskData.assignerCode === requesterCode;
 
@@ -601,17 +623,20 @@ export class TasksController implements OnModuleInit {
   @Get(':id/subtasks')
   async getSubTasks(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
-    const isAdmin =
-      user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') ||
-      user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
     let callerAncestorUnitIds: number[] = [];
+    let callerDescendantUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
       callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
+      callerDescendantUnitIds = this.getDescendantUnitIds(
         unitMap,
         parseInt(user.unitId, 10),
       );
@@ -625,6 +650,7 @@ export class TasksController implements OnModuleInit {
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
+        callerDescendantUnitIds,
       }),
     );
   }

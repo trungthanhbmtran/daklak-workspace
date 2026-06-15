@@ -130,8 +130,124 @@ export class TasksService implements OnModuleInit {
     return tasks;
   }
 
-  private async computeAllowedActions(t: any, query: any, isUserInTree: boolean = false): Promise<string[]> {
-    return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
+  private async checkTaskAccess(t: any, query: any): Promise<{
+    hasAccess: boolean;
+    isAdmin: boolean;
+    isOwner: boolean;
+    isAssignee: boolean;
+    isSupervisor: boolean;
+    isCoordinator: boolean;
+    isDeptLeader: boolean;
+  }> {
+    if (!query) {
+      return {
+        hasAccess: true,
+        isAdmin: true,
+        isOwner: true,
+        isAssignee: true,
+        isSupervisor: true,
+        isCoordinator: true,
+        isDeptLeader: true,
+      };
+    }
+
+    const perms = query.currentUserPermissions || [];
+    
+    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
+    if (isAdmin) {
+      return {
+        hasAccess: true,
+        isAdmin: true,
+        isOwner: true,
+        isAssignee: true,
+        isSupervisor: true,
+        isCoordinator: true,
+        isDeptLeader: true,
+      };
+    }
+
+    const currentUserCode = query.currentUserCode;
+    if (!currentUserCode) {
+      return {
+        hasAccess: false,
+        isAdmin: false,
+        isOwner: false,
+        isAssignee: false,
+        isSupervisor: false,
+        isCoordinator: false,
+        isDeptLeader: false,
+      };
+    }
+
+    const isOwner = t.assignerCode === currentUserCode || t.creatorEmployeeCode === currentUserCode;
+    const isAssignee = t.assigneeCode === currentUserCode;
+    const isSupervisor = t.supervisorCode === currentUserCode;
+    const isCoordinator = Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(currentUserCode);
+
+    let isDeptLeader = false;
+    const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
+    
+    if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
+      const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
+      
+      // Check if task's plan belongs to these departments
+      if (t.plan?.departmentId && descendantDeptIds.includes(Number(t.plan.departmentId))) {
+        isDeptLeader = true;
+      } else {
+        // Check if assignee belongs to these departments
+        const assigneeCode = t.assigneeCode;
+        if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
+          const assigneeEmp = await this.prisma.employee.findUnique({
+            where: { employeeCode: assigneeCode },
+            select: { departmentId: true }
+          });
+          if (assigneeEmp?.departmentId && descendantDeptIds.includes(Number(assigneeEmp.departmentId))) {
+            isDeptLeader = true;
+          }
+        }
+      }
+    }
+
+    const hasAccess = isOwner || isAssignee || isSupervisor || isCoordinator || isDeptLeader;
+
+    return {
+      hasAccess,
+      isAdmin: false,
+      isOwner,
+      isAssignee,
+      isSupervisor,
+      isCoordinator,
+      isDeptLeader,
+    };
+  }
+
+  private async computeAllowedActions(t: any, query: any): Promise<string[]> {
+    const access = await this.checkTaskAccess(t, query);
+    if (!access.hasAccess) {
+      return [];
+    }
+
+    if (access.isAdmin || access.isDeptLeader) {
+      return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
+    }
+
+    const actions: string[] = [];
+    
+    if (access.isOwner) {
+      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT');
+    } else {
+      if (access.isAssignee) {
+        actions.push('COMPLETE', 'COORDINATE', 'ADD_SUBTASK', 'CHAT');
+      }
+      if (access.isSupervisor) {
+        actions.push('COMPLETE', 'RETURN', 'CHAT');
+      }
+      if (access.isCoordinator) {
+        actions.push('CHAT');
+      }
+    }
+
+    return Array.from(new Set(actions));
   }
 
   async listTasks(query: any) {
@@ -228,6 +344,77 @@ export class TasksService implements OnModuleInit {
           }
         });
       } else {
+        conditions.push({ id: -1 });
+      }
+    }
+
+    // Security Data Scoping constraints
+    const perms = query.currentUserPermissions || [];
+    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
+
+    if (!isAdmin) {
+      const scopingConditions: any[] = [];
+
+      // 1. Participant check
+      if (currentUserId) {
+        scopingConditions.push({
+          participants: {
+            some: {
+              userId: currentUserId
+            }
+          }
+        });
+      }
+
+      // 2. Department Leader check
+      const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
+      if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
+        const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
+
+        // Fetch employee userIds in these departments
+        const empsInDepts = await this.prisma.employee.findMany({
+          where: {
+            departmentId: { in: descendantDeptIds },
+            userId: { not: null }
+          },
+          select: {
+            userId: true
+          }
+        });
+        const deptUserIds = empsInDepts.map(e => parseInt(e.userId!, 10)).filter(Boolean);
+
+        const leaderOrConditions: any[] = [];
+        if (deptUserIds.length > 0) {
+          // Assignee belongs to these departments
+          leaderOrConditions.push({
+            participants: {
+              some: {
+                userId: { in: deptUserIds },
+                participantRole: 'ASSIGNEE'
+              }
+            }
+          });
+          // Creator belongs to these departments
+          leaderOrConditions.push({
+            creatorUserId: { in: deptUserIds }
+          });
+        }
+        // Plan belongs to these departments
+        leaderOrConditions.push({
+          plan: {
+            departmentId: { in: descendantDeptIds }
+          }
+        });
+
+        scopingConditions.push(...leaderOrConditions);
+      }
+
+      if (scopingConditions.length > 0) {
+        conditions.push({
+          OR: scopingConditions
+        });
+      } else {
+        // If no scoping conditions can be resolved, prevent any query return
         conditions.push({ id: -1 });
       }
     }
@@ -466,7 +653,7 @@ export class TasksService implements OnModuleInit {
     coassigneeCodes?: string[],
     departmentId?: number,
     assignerCode?: string,
-    context?: { currentUserRoles?: string[]; currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }
+    context?: { currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }
   ) {
     const t = await this.prisma.$transaction(async (tx) => {
       const currentTask = await tx.task.findUnique({
@@ -566,10 +753,15 @@ export class TasksService implements OnModuleInit {
       where: { id },
       include: {
         participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true } }
+        plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } }
       }
     });
     if (!t) throw new RpcException('Không tìm thấy nhiệm vụ');
+
+    const access = await this.checkTaskAccess(t, query);
+    if (!access.hasAccess) {
+      throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
+    }
 
     const allowedActions = await this.computeAllowedActions(t, query);
     const enriched = await this.enrichTasks([t]);
@@ -584,6 +776,19 @@ export class TasksService implements OnModuleInit {
   }
 
   async getSubTasks(id: number, query: any) {
+    const parentTask = await this.prisma.task.findUnique({
+      where: { id },
+      include: {
+        participants: true,
+        plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } }
+      }
+    });
+    if (!parentTask) throw new RpcException('Nhiệm vụ không tồn tại');
+    const parentAccess = await this.checkTaskAccess(parentTask, query);
+    if (!parentAccess.hasAccess) {
+      throw new RpcException('Bạn không có quyền xem nhiệm vụ con của công việc này.');
+    }
+
     // Get all descendants from closure table with depth = 1 (direct children)
     const closureData = await this.prisma.taskClosure.findMany({
       where: { ancestorId: id, depth: 1 },
@@ -594,7 +799,7 @@ export class TasksService implements OnModuleInit {
 
     const tasks = await this.prisma.task.findMany({
       where: { id: { in: childIds }, status: { not: 'TEMPLATE' } },
-      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } } }
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
 
     const enriched = await this.enrichTasks(tasks);
@@ -719,9 +924,8 @@ export class TasksService implements OnModuleInit {
       const whereClause: any = { employmentStatus: 'active' };
 
       // 1. Phân quyền: Kiểm tra Admin
-      const roles = query.currentUserRoles || [];
       const perms = query.currentUserPermissions || [];
-      const isAdmin = roles.includes('SUPER_ADMIN') || perms.includes('TASK:MANAGE');
+      const isAdmin = perms.includes('TASK:MANAGE');
 
       if (query.excludeEmployeeCode) {
         whereClause.employeeCode = { not: query.excludeEmployeeCode };
@@ -857,9 +1061,15 @@ export class TasksService implements OnModuleInit {
   async addComment(id: number, data: any) {
     const t = await this.prisma.task.findUnique({
       where: { id },
-      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } } }
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
+
+    const access = await this.checkTaskAccess(t, data);
+    if (!access.hasAccess) {
+      throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
+    }
+
     const allowedActions = await this.computeAllowedActions(t, data);
     if (!allowedActions.includes('CHAT')) {
       throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
@@ -901,9 +1111,15 @@ export class TasksService implements OnModuleInit {
   async getComments(id: number, query: any) {
     const t = await this.prisma.task.findUnique({
       where: { id },
-      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } } }
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
+
+    const access = await this.checkTaskAccess(t, query);
+    if (!access.hasAccess) {
+      throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
+    }
+
     const allowedActions = await this.computeAllowedActions(t, query);
     if (!allowedActions.includes('CHAT')) {
       throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
