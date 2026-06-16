@@ -9,6 +9,7 @@ model Task {
   
   // Auditing
   creatorUserId  Int       @default(0) @map("creator_user_id")
+  creatorEmployeeCode String? @map("creator_employee_code")
   
   // Scoring
   baseScore      Float?    @map("base_score")
@@ -53,6 +54,7 @@ enum TaskRole {
 model TaskParticipant {
   taskId          Int      @map("task_id")
   userId          Int      @map("user_id")
+  employeeCode    String?  @map("employee_code")
   participantRole TaskRole @map("participant_role")
   assignedAt      DateTime @default(now()) @map("assigned_at")
 

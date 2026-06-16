@@ -613,19 +613,19 @@ export class TasksService implements OnModuleInit {
       const assigneeCode = data.assigneeCode || 'UNASSIGNED';
       const assigneeUid = codeToUidMap.get(assigneeCode);
       if (assigneeUid !== undefined && assigneeUid !== null) {
-        participantsData.push({ taskId: newTask.id, userId: assigneeUid, participantRole: TaskRole.ASSIGNEE });
+        participantsData.push({ taskId: newTask.id, userId: assigneeUid, employeeCode: assigneeCode, participantRole: TaskRole.ASSIGNEE });
       }
 
       const assignerCode = data.assignerCode || 'UNASSIGNED';
       const assignerUid = codeToUidMap.get(assignerCode);
       if (assignerUid !== undefined && assignerUid !== null) {
-        participantsData.push({ taskId: newTask.id, userId: assignerUid, participantRole: TaskRole.OWNER });
+        participantsData.push({ taskId: newTask.id, userId: assignerUid, employeeCode: assignerCode, participantRole: TaskRole.OWNER });
       }
 
       if (data.supervisorCode) {
         const supervisorUid = codeToUidMap.get(data.supervisorCode);
         if (supervisorUid !== undefined && supervisorUid !== null) {
-          participantsData.push({ taskId: newTask.id, userId: supervisorUid, participantRole: TaskRole.APPROVER });
+          participantsData.push({ taskId: newTask.id, userId: supervisorUid, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
         }
       }
 

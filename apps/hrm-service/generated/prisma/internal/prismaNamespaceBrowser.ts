@@ -118,6 +118,7 @@ export const TaskScalarFieldEnum = {
   status: 'status',
   priority: 'priority',
   creatorUserId: 'creatorUserId',
+  creatorEmployeeCode: 'creatorEmployeeCode',
   baseScore: 'baseScore',
   weight: 'weight',
   scoringMethod: 'scoringMethod',
@@ -142,6 +143,7 @@ export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof Task
 export const TaskParticipantScalarFieldEnum = {
   taskId: 'taskId',
   userId: 'userId',
+  employeeCode: 'employeeCode',
   participantRole: 'participantRole',
   assignedAt: 'assignedAt'
 } as const
@@ -344,12 +346,20 @@ export const TaskOrderByRelevanceFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
+  creatorEmployeeCode: 'creatorEmployeeCode',
   scoringMethod: 'scoringMethod',
   workflowInstId: 'workflowInstId',
   rejectReason: 'rejectReason'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskParticipantOrderByRelevanceFieldEnum = {
+  employeeCode: 'employeeCode'
+} as const
+
+export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
 
 
 export const TaskCommentOrderByRelevanceFieldEnum = {
