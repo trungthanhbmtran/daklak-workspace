@@ -48,75 +48,12 @@ export const TaskListClient = () => {
     assigneeCode: roleFilter === 'UNASSIGNED' ? 'UNASSIGNED' : undefined,
   });
 
-  // --- MOCK DATA FOR TESTING UI ---
-  const MOCK_TASKS = useMemo(() => [
-    {
-      id: -1,
-      title: 'Dự án Cải tiến Hệ thống Quản lý',
-      status: 'IN_PROGRESS',
-      priority: 'HIGH',
-      assigneeCode: 'vonguyenhoangnam',
-      assigneeName: 'Võ Nguyễn Hoàng Nam',
-      assignerCode: 'admin',
-      creatorEmployeeCode: 'admin',
-      dueDate: '2026-06-30T00:00:00Z',
-      parentId: null,
-      allowedActions: ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'COMPLETE']
-    },
-    {
-      id: -2,
-      title: 'Thiết kế giao diện',
-      status: 'DONE',
-      priority: 'MEDIUM',
-      assigneeCode: 'vonguyenhoangnam',
-      assigneeName: 'Võ Nguyễn Hoàng Nam',
-      assignerCode: 'admin',
-      creatorEmployeeCode: 'admin',
-      dueDate: '2026-06-20T00:00:00Z',
-      parentId: -1,
-      allowedActions: ['COMPLETE']
-    },
-    {
-      id: -3,
-      title: 'Tích hợp API backend',
-      status: 'TODO',
-      priority: 'HIGH',
-      assigneeCode: 'UNASSIGNED',
-      assigneeName: '',
-      assignerCode: 'vonguyenhoangnam',
-      creatorEmployeeCode: 'vonguyenhoangnam',
-      dueDate: '2026-06-25T00:00:00Z',
-      parentId: -1,
-      allowedActions: ['ASSIGN', 'EDIT']
-    },
-    {
-      id: -4,
-      title: 'Kiểm thử ứng dụng (QA)',
-      status: 'REVIEWING',
-      priority: 'LOW',
-      assigneeCode: 'tester01',
-      assigneeName: 'Nhân viên Test',
-      supervisorCode: 'vonguyenhoangnam', // Test Approver role
-      dueDate: '2026-06-28T00:00:00Z',
-      parentId: -1,
-      allowedActions: ['RETURN', 'COMPLETE']
-    },
-    {
-      id: -5,
-      title: 'Chuẩn bị tài liệu hướng dẫn',
-      status: 'TODO',
-      priority: 'MEDIUM',
-      assigneeCode: 'doc_writer',
-      assigneeName: 'Người viết tài liệu',
-      coassigneeCodes: ['vonguyenhoangnam'], // Test Coordinator role
-      dueDate: '2026-07-05T00:00:00Z',
-      parentId: null,
-      allowedActions: ['CHAT']
-    }
-  ], []);
+  // --- NO MOCK DATA ---
+  // Using real data from backend API
 
-  // Merge mock tasks with real tasks, and fallback to testing user code
-  const allTasks = [...MOCK_TASKS, ...(tasksResponse?.data || [])] as any[];
+
+  // Use only real tasks
+  const allTasks = [...(tasksResponse?.data || [])] as any[];
   const currentUserCode = tasksResponse?.meta?.currentUserCode || 'vonguyenhoangnam';
 
   // ── Categories ──────────────────────────────────────────────────────────────
