@@ -48,6 +48,8 @@ export const TaskListClient = () => {
     assigneeCode: roleFilter === 'UNASSIGNED' ? 'UNASSIGNED' : undefined,
   });
 
+  console.log("tasksResponse", tasksResponse)
+
   // --- NO MOCK DATA ---
   // Using real data from backend API
 
