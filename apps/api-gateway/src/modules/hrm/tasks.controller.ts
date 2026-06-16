@@ -10,6 +10,7 @@ import {
   UseGuards,
   OnModuleInit,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -270,7 +271,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id')
-  async update(@Param('id', ) id: number, @Body() body: any) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     return firstValueFrom(
       this.taskService.UpdateTask({
         id,
@@ -288,7 +289,7 @@ export class TasksController implements OnModuleInit {
   @Put(':id/status')
   async updateStatus(
     @Req() req: any,
-    @Param('id', ) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body('status') status: string,
     @Body('rejectReason') rejectReason?: string,
   ) {
@@ -386,7 +387,7 @@ export class TasksController implements OnModuleInit {
   @Put(':id/assign')
   async assignTask(
     @Req() req: any,
-    @Param('id', ) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
     const assigneeCode = body.assigneeCode;
@@ -414,7 +415,7 @@ export class TasksController implements OnModuleInit {
   @Post(':id/breakdown')
   async breakdownTask(
     @Req() req: any,
-    @Param('id', ) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
     const user = req.user;
@@ -447,7 +448,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/comments')
-  async getComments(@Req() req: any, @Param('id', ) id: number) {
+  async getComments(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
@@ -469,7 +470,7 @@ export class TasksController implements OnModuleInit {
   @Post(':id/comments')
   async addComment(
     @Req() req: any,
-    @Param('id', ) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: { content: string; isSystemMessage?: boolean },
   ) {
     const user = req.user;
@@ -511,7 +512,7 @@ export class TasksController implements OnModuleInit {
   @Post(':id/coordinate')
   async requestCoordination(
     @Req() req: any,
-    @Param('id', ) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
     const message = body.message;
@@ -548,7 +549,7 @@ export class TasksController implements OnModuleInit {
   @Put(':id/progress')
   async updateProgress(
     @Req() req: any,
-    @Param('id', ) id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body('progress') progress: number,
   ) {
     return firstValueFrom(
@@ -561,7 +562,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/subtasks')
-  async getSubTasks(@Req() req: any, @Param('id', ) id: number) {
+  async getSubTasks(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =

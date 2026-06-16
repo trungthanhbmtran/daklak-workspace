@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserCheck, CheckCircle2, Target, BarChart3 } from 'lucide-react';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
-import type { TaskTab } from './TaskToolbar';
+
+type TaskTab = 'ALL' | 'PENDING_ASSIGN' | 'MY_EXECUTION' | 'I_ASSIGNED' | 'DEPARTMENT' | 'REJECTED' | 'OVERDUE' | 'COMPLETED';
 
 interface TaskGridProps {
   tasks: any[];

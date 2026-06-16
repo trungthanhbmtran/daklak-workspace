@@ -51,7 +51,7 @@ export const TaskListClient = () => {
   // --- MOCK DATA FOR TESTING UI ---
   const MOCK_TASKS = useMemo(() => [
     {
-      id: 'mock-1',
+      id: -1,
       title: 'Dự án Cải tiến Hệ thống Quản lý',
       status: 'IN_PROGRESS',
       priority: 'HIGH',
@@ -64,7 +64,7 @@ export const TaskListClient = () => {
       allowedActions: ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'COMPLETE']
     },
     {
-      id: 'mock-2',
+      id: -2,
       title: 'Thiết kế giao diện',
       status: 'DONE',
       priority: 'MEDIUM',
@@ -73,11 +73,11 @@ export const TaskListClient = () => {
       assignerCode: 'admin',
       creatorEmployeeCode: 'admin',
       dueDate: '2026-06-20T00:00:00Z',
-      parentId: 'mock-1',
+      parentId: -1,
       allowedActions: ['COMPLETE']
     },
     {
-      id: 'mock-3',
+      id: -3,
       title: 'Tích hợp API backend',
       status: 'TODO',
       priority: 'HIGH',
@@ -86,11 +86,11 @@ export const TaskListClient = () => {
       assignerCode: 'vonguyenhoangnam',
       creatorEmployeeCode: 'vonguyenhoangnam',
       dueDate: '2026-06-25T00:00:00Z',
-      parentId: 'mock-1',
+      parentId: -1,
       allowedActions: ['ASSIGN', 'EDIT']
     },
     {
-      id: 'mock-4',
+      id: -4,
       title: 'Kiểm thử ứng dụng (QA)',
       status: 'REVIEWING',
       priority: 'LOW',
@@ -98,11 +98,11 @@ export const TaskListClient = () => {
       assigneeName: 'Nhân viên Test',
       supervisorCode: 'vonguyenhoangnam', // Test Approver role
       dueDate: '2026-06-28T00:00:00Z',
-      parentId: 'mock-1',
+      parentId: -1,
       allowedActions: ['RETURN', 'COMPLETE']
     },
     {
-      id: 'mock-5',
+      id: -5,
       title: 'Chuẩn bị tài liệu hướng dẫn',
       status: 'TODO',
       priority: 'MEDIUM',

@@ -40,7 +40,7 @@ export function useTaskComments(taskId: number | undefined) {
   return useQuery({
     queryKey: hrmKeys.taskComments(taskId!),
     queryFn: () => {
-      if (!taskId) return Promise.resolve({ data: [] });
+      if (!taskId) return Promise.resolve({ success: true, data: [] });
       return hrmTasksApi.getComments(taskId);
     },
     enabled: !!taskId,
@@ -58,7 +58,7 @@ export function useTaskSubtasks(taskId: number | undefined) {
   return useQuery({
     queryKey: hrmKeys.taskSubtasks(taskId!),
     queryFn: () => {
-      if (!taskId) return Promise.resolve({ data: [] });
+      if (!taskId) return Promise.resolve({ success: true, data: [] });
       return hrmTasksApi.getSubTasks(taskId);
     },
     enabled: !!taskId,
