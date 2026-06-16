@@ -21,21 +21,9 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls:
   RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'bg-orange-50/80 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
 };
 
-function getRoleBadge(task: any, currentUserCode: string) {
+function getRoleBadge(task: any) {
   if (task.assigneeCode === 'UNASSIGNED') {
     return { key: 'UNASSIGNED', ...ROLE_META.UNASSIGNED };
-  }
-  if (task.assigneeCode === currentUserCode) {
-    return { key: 'ASSIGNEE', ...ROLE_META.ASSIGNEE };
-  }
-  if (task.assignerCode === currentUserCode || task.creatorEmployeeCode === currentUserCode) {
-    return { key: 'OWNER', ...ROLE_META.OWNER };
-  }
-  if (task.supervisorCode === currentUserCode) {
-    return { key: 'APPROVER', ...ROLE_META.APPROVER };
-  }
-  if (Array.isArray(task.coassigneeCodes) && task.coassigneeCodes.includes(currentUserCode)) {
-    return { key: 'COORDINATOR', ...ROLE_META.COORDINATOR };
   }
   return null;
 }
@@ -43,13 +31,12 @@ function getRoleBadge(task: any, currentUserCode: string) {
 interface TaskRowProps {
   task: any;
   depth: number;
-  currentUserCode: string;
   isLastChild?: boolean;
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
 }
 
-function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
+function TaskRow({ task, depth, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2);
 
   const hasChildren = task.children?.length > 0;
@@ -59,7 +46,7 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
   const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
 
-  const roleBadge = getRoleBadge(task, currentUserCode);
+  const roleBadge = getRoleBadge(task);
   const isRoot = depth === 0;
 
   return (
@@ -202,7 +189,6 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
               key={child.id}
               task={child}
               depth={depth + 1}
-              currentUserCode={currentUserCode}
               onSelectTask={onSelectTask}
               onSmartAssign={onSmartAssign}
               isLastChild={index === task.children.length - 1}
@@ -216,7 +202,6 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
 
 interface GlobalTaskTreeProps {
   tasks: any[];
-  currentUserCode: string;
   isLoading?: boolean;
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
@@ -224,20 +209,32 @@ interface GlobalTaskTreeProps {
 
 export function GlobalTaskTree({
   tasks,
-  currentUserCode,
   isLoading,
   onSelectTask,
   onSmartAssign,
 }: GlobalTaskTreeProps) {
 
-  // Build tree from flat tasks
+  // Build tree from tasks (handles both flat list and pre-nested tree)
   const tree = useMemo(() => {
     if (!tasks || tasks.length === 0) return [];
 
-    const flatTasks = JSON.parse(JSON.stringify(tasks));
+    // 1. Flatten everything first to ensure we don't lose pre-nested children
+    const flatList: any[] = [];
+    const flatten = (arr: any[]) => {
+      for (const item of arr) {
+        // Push a clone without children to the flat list
+        flatList.push({ ...item, children: [] });
+        if (item.children && item.children.length > 0) {
+          flatten(item.children);
+        }
+      }
+    };
+    flatten(tasks);
+
+    // 2. Build map and roots
     const taskMap = new Map();
-    flatTasks.forEach((t: any) => {
-      taskMap.set(t.id, { ...t, children: [] });
+    flatList.forEach((t) => {
+      taskMap.set(t.id, t);
     });
 
     const roots: any[] = [];
@@ -248,6 +245,7 @@ export function GlobalTaskTree({
         roots.push(task);
       }
     });
+
     return roots;
   }, [tasks]);
 
@@ -299,7 +297,6 @@ export function GlobalTaskTree({
             key={task.id}
             task={task}
             depth={0}
-            currentUserCode={currentUserCode}
             onSelectTask={onSelectTask}
             onSmartAssign={onSmartAssign}
             isLastChild={index === tree.length - 1}

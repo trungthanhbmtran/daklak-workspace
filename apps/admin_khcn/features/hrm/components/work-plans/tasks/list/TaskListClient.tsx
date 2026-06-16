@@ -53,8 +53,7 @@ export const TaskListClient = () => {
 
 
   // Use only real tasks
-  const allTasks = [...(tasksResponse?.data || [])] as any[];
-  const currentUserCode = tasksResponse?.meta?.currentUserCode || 'vonguyenhoangnam';
+  const allTasks = tasksResponse?.data || [];
 
   // ── Categories ──────────────────────────────────────────────────────────────
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
@@ -145,7 +144,6 @@ export const TaskListClient = () => {
       <GlobalTaskTree
         tasks={displayedTasks}
         isLoading={isLoading}
-        currentUserCode={"currentUserCode"}
         onSelectTask={handleSelectTask}
         onSmartAssign={handleSmartAssign}
       />
