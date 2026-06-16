@@ -215,39 +215,8 @@ export function GlobalTaskTree({
 }: GlobalTaskTreeProps) {
 
   // Build tree from tasks (handles both flat list and pre-nested tree)
-  const tree = useMemo(() => {
-    if (!tasks || tasks.length === 0) return [];
-
-    // 1. Flatten everything first to ensure we don't lose pre-nested children
-    const flatList: any[] = [];
-    const flatten = (arr: any[]) => {
-      for (const item of arr) {
-        // Push a clone without children to the flat list
-        flatList.push({ ...item, children: [] });
-        if (item.children && item.children.length > 0) {
-          flatten(item.children);
-        }
-      }
-    };
-    flatten(tasks);
-
-    // 2. Build map and roots
-    const taskMap = new Map();
-    flatList.forEach((t) => {
-      taskMap.set(t.id, t);
-    });
-
-    const roots: any[] = [];
-    taskMap.forEach(task => {
-      if (task.parentId && taskMap.has(task.parentId)) {
-        taskMap.get(task.parentId).children.push(task);
-      } else {
-        roots.push(task);
-      }
-    });
-
-    return roots;
-  }, [tasks]);
+  // Use data exactly as provided by the backend without restructuring
+  const tree = tasks || [];
 
   if (isLoading) {
     return (

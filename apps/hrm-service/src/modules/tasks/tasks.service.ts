@@ -524,21 +524,38 @@ export class TasksService implements OnModuleInit {
 
     const enrichedTasks = await this.enrichTasks(tasks);
 
+    const mappedTasks = await Promise.all(enrichedTasks.map(async (t: any) => {
+      const allowedActions = await this.computeAllowedActions(t, query);
+
+      return {
+        ...t,
+        dueDate: t.dueDate?.toISOString() || '',
+        startDate: t.startDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+        allowedActions,
+        children: []
+      };
+    }));
+
+    const taskMap = new Map();
+    mappedTasks.forEach((t) => {
+      taskMap.set(t.id, t);
+    });
+
+    const roots: any[] = [];
+    taskMap.forEach((task) => {
+      if (task.parentId && taskMap.has(task.parentId)) {
+        taskMap.get(task.parentId).children.push(task);
+      } else {
+        roots.push(task);
+      }
+    });
+
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: await Promise.all(enrichedTasks.map(async (t: any) => {
-        const allowedActions = await this.computeAllowedActions(t, query);
-
-        return {
-          ...t,
-          dueDate: t.dueDate?.toISOString() || '',
-          startDate: t.startDate?.toISOString() || '',
-          createdAt: t.createdAt?.toISOString() || '',
-          updatedAt: t.updatedAt?.toISOString() || '',
-          allowedActions
-        };
-      })),
+      data: roots,
       meta: {
         pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 }
       }
