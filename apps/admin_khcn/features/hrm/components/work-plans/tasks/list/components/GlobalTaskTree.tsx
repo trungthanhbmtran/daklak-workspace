@@ -12,13 +12,13 @@ import { cn } from '@/lib/utils';
 import { ROLE_META } from './TaskToolbar';
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string; dot: string }> = {
-  TEMPLATE:    { label: 'Chờ giao',      icon: <Circle className="w-3.5 h-3.5" />,       cls: 'bg-slate-100/80 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
-  TODO:        { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />,        cls: 'bg-blue-50/80 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
-  IN_PROGRESS: { label: 'Đang thực hiện',icon: <RotateCcw className="w-3.5 h-3.5" />,   cls: 'bg-amber-50/80 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
-  REVIEWING:   { label: 'Chờ duyệt',     icon: <Clock className="w-3.5 h-3.5" />,        cls: 'bg-violet-50/80 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
-  DONE:        { label: 'Hoàn thành',    icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'bg-emerald-50/80 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
-  OVERDUE:     { label: 'Quá hạn',       icon: <AlertTriangle className="w-3.5 h-3.5" />,cls: 'bg-rose-50/80 text-rose-700 border-rose-200', dot: 'bg-rose-500' },
-  RETURNED:    { label: 'Trả lại',       icon: <RotateCcw className="w-3.5 h-3.5" />,   cls: 'bg-orange-50/80 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
+  TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'bg-slate-100/80 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
+  TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-blue-50/80 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
+  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'bg-amber-50/80 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
+  REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-violet-50/80 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
+  DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'bg-emerald-50/80 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
+  OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'bg-rose-50/80 text-rose-700 border-rose-200', dot: 'bg-rose-500' },
+  RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'bg-orange-50/80 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
 };
 
 function getRoleBadge(task: any, currentUserCode: string) {
@@ -58,7 +58,7 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
   const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
-  
+
   const roleBadge = getRoleBadge(task, currentUserCode);
   const isRoot = depth === 0;
 
@@ -73,7 +73,7 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
       <div
         className={cn(
           'relative flex items-stretch gap-3 transition-all duration-300 rounded-lg cursor-pointer',
-          isRoot 
+          isRoot
             ? 'bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 my-4 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] hover:border-indigo-300 dark:hover:border-indigo-500/50'
             : 'bg-slate-50/50 dark:bg-slate-800/40 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800 p-3 my-2 shadow-sm'
         )}
@@ -94,9 +94,9 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
           <button
             className={cn(
               "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 relative z-10",
-              hasChildren 
-                ? expanded 
-                  ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-400" 
+              hasChildren
+                ? expanded
+                  ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:text-indigo-400"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
                 : "bg-transparent text-slate-300 cursor-default"
             )}
@@ -134,14 +134,14 @@ function TaskRow({ task, depth, currentUserCode, onSelectTask, onSmartAssign, is
                   </Badge>
                 )}
               </div>
-              
+
               <h4 className={cn(
                 'text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 transition-colors group-hover/row:text-indigo-700 dark:group-hover/row:text-indigo-400',
                 isRoot ? 'text-lg font-black' : 'text-sm font-bold'
               )}>
                 {task.title}
               </h4>
-              
+
               <div className="flex flex-wrap items-center gap-3 mt-2.5">
                 <Badge variant="outline" className={cn('text-[11px] font-bold border px-2 py-0.5 gap-1.5 shadow-sm', statusCfg.cls)}>
                   {statusCfg.icon} {statusCfg.label}
@@ -229,11 +229,11 @@ export function GlobalTaskTree({
   onSelectTask,
   onSmartAssign,
 }: GlobalTaskTreeProps) {
-  
+
   // Build tree from flat tasks
   const tree = useMemo(() => {
     if (!tasks || tasks.length === 0) return [];
-    
+
     const flatTasks = JSON.parse(JSON.stringify(tasks));
     const taskMap = new Map();
     flatTasks.forEach((t: any) => {
@@ -292,7 +292,7 @@ export function GlobalTaskTree({
           {tasks.length} hạng mục
         </Badge>
       </div>
-      
+
       <div className="space-y-1">
         {tree.map((task, index) => (
           <TaskRow

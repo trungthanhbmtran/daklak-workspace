@@ -6,10 +6,10 @@ import { hrmKeys } from "../keys";
 import { toast } from "sonner";
 
 // ── Cấu hình cache toàn cục cho task queries ──────────────────────────────────
-const TASKS_STALE_TIME    = 30_000;        // 30s: data vẫn fresh, không refetch ngầm
-const TASKS_GC_TIME       = 5 * 60_000;   // 5 phút giữ cache sau khi unmount
-const DETAIL_STALE_TIME   = 20_000;       // comments/subtasks: 20s
-const DETAIL_GC_TIME      = 2 * 60_000;   // 2 phút
+const TASKS_STALE_TIME = 30_000;        // 30s: data vẫn fresh, không refetch ngầm
+const TASKS_GC_TIME = 5 * 60_000;   // 5 phút giữ cache sau khi unmount
+const DETAIL_STALE_TIME = 20_000;       // comments/subtasks: 20s
+const DETAIL_GC_TIME = 2 * 60_000;   // 2 phút
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -22,12 +22,12 @@ const DETAIL_GC_TIME      = 2 * 60_000;   // 2 phút
 export function useTasksList(params: any = {}) {
   return useQuery({
     queryKey: hrmKeys.tasksList(params),
-    queryFn:  () => hrmTasksApi.list(params),
-    staleTime:             TASKS_STALE_TIME,
-    gcTime:                TASKS_GC_TIME,
-    placeholderData:       keepPreviousData,
-    refetchOnWindowFocus:  true,
-    refetchOnReconnect:    true,
+    queryFn: () => hrmTasksApi.list(params),
+    staleTime: TASKS_STALE_TIME,
+    gcTime: TASKS_GC_TIME,
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 }
 
@@ -39,13 +39,13 @@ export function useTasksList(params: any = {}) {
 export function useTaskComments(taskId: number | undefined) {
   return useQuery({
     queryKey: hrmKeys.taskComments(taskId!),
-    queryFn:  () => {
+    queryFn: () => {
       if (!taskId) return Promise.resolve({ data: [] });
       return hrmTasksApi.getComments(taskId);
     },
-    enabled:  !!taskId,
+    enabled: !!taskId,
     staleTime: DETAIL_STALE_TIME,
-    gcTime:    DETAIL_GC_TIME,
+    gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false, // chat không cần refetch khi focus lại tab
   });
 }
@@ -57,13 +57,13 @@ export function useTaskComments(taskId: number | undefined) {
 export function useTaskSubtasks(taskId: number | undefined) {
   return useQuery({
     queryKey: hrmKeys.taskSubtasks(taskId!),
-    queryFn:  () => {
+    queryFn: () => {
       if (!taskId) return Promise.resolve({ data: [] });
       return hrmTasksApi.getSubTasks(taskId);
     },
-    enabled:  !!taskId,
+    enabled: !!taskId,
     staleTime: DETAIL_STALE_TIME,
-    gcTime:    DETAIL_GC_TIME,
+    gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false,
   });
 }

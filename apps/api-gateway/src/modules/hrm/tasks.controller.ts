@@ -10,6 +10,7 @@ import {
   UseGuards,
   OnModuleInit,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -206,14 +207,10 @@ export class TasksController implements OnModuleInit {
 
     // ── 3-layer model (new tabs) ──────────────────────────────────────────────
     if (role === 'ASSIGNEE' && user) {
-      // Tab ② "Việc của tôi": tasks được giao cho tôi thực hiện
       finalAssigneeCode = user.employeeCode;
     } else if (role === 'OWNER' && user) {
-      // Tab ③ "Tôi đã giao": tasks tôi tạo/giao cho người khác
       finalAssignerCode = user.employeeCode;
     }
-    // Tab ①  "Chờ giao" (PENDING_ASSIGN): assigneeCode=UNASSIGNED được pass thẳng từ query
-
 
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
@@ -274,10 +271,10 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     return firstValueFrom(
       this.taskService.UpdateTask({
-        id: parseInt(id, 10),
+        id,
         weight: body.weight,
         startDate: body.startDate,
         dueDate: body.dueDate,
@@ -292,14 +289,14 @@ export class TasksController implements OnModuleInit {
   @Put(':id/status')
   async updateStatus(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body('status') status: string,
     @Body('rejectReason') rejectReason?: string,
   ) {
     const user = req.user;
     return firstValueFrom(
       this.taskService.UpdateTaskStatus({
-        id: parseInt(id, 10),
+        id,
         status,
         rejectReason,
         // Inject người thực hiện từ JWT token
@@ -390,7 +387,7 @@ export class TasksController implements OnModuleInit {
   @Put(':id/assign')
   async assignTask(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
     const assigneeCode = body.assigneeCode;
@@ -399,11 +396,11 @@ export class TasksController implements OnModuleInit {
 
     const user = req.user;
     const assignerCode = user?.employeeCode;
-    const taskId = parseInt(id, 10);
+    
 
     return firstValueFrom(
       this.taskService.AssignTask({
-        id: taskId,
+        id,
         assigneeCode,
         coassigneeCodes: coassigneeCodes || [],
         departmentId,
@@ -418,16 +415,16 @@ export class TasksController implements OnModuleInit {
   @Post(':id/breakdown')
   async breakdownTask(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
     const user = req.user;
     const assignerCode = user?.employeeCode;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
-    const taskId = parseInt(id, 10);
+    
     const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask({ id: taskId }),
+      this.taskService.GetTask({ id: id }),
     );
     const taskData = taskResponse?.data;
     if (!taskData) {
@@ -444,58 +441,36 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.BreakdownTask({
         ...body,
-        parentId: taskId,
+        parentId: id,
         assignerCode,
       }),
     );
   }
 
   @Get(':id/comments')
-  async getComments(@Req() req: any, @Param('id') id: string) {
-    const taskId = parseInt(id, 10);
-    if (isNaN(taskId)) {
-      return { success: false, message: 'ID không hợp lệ', data: [] };
-    }
-
+  async getComments(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
-    let callerAncestorUnitIds: number[] = [];
-    let callerDescendantUnitIds: number[] = [];
-    if (!isAdmin && user?.unitId) {
-      const unitMap = await this.getUnitMap();
-      callerAncestorUnitIds = this.getAncestorUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-      callerDescendantUnitIds = this.getDescendantUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-    }
 
     return firstValueFrom(
       this.taskService.GetComments({
-        taskId,
+        taskId: id,
         currentUserCode: user?.employeeCode,
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        callerAncestorUnitIds,
-        callerDescendantUnitIds,
       }),
     );
   }
 
-
-
   @Post(':id/comments')
   async addComment(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: { content: string; isSystemMessage?: boolean },
   ) {
     const user = req.user;
@@ -520,7 +495,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.AddComment({
-        taskId: parseInt(id, 10),
+        id: id,
         authorCode: req.user?.employeeCode || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
@@ -537,7 +512,7 @@ export class TasksController implements OnModuleInit {
   @Post(':id/coordinate')
   async requestCoordination(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
     const message = body.message;
@@ -546,10 +521,10 @@ export class TasksController implements OnModuleInit {
 
     const user = req.user;
     const requesterCode = user?.employeeCode;
-    const taskId = parseInt(id, 10);
+    
 
     const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask({ id: taskId }),
+      this.taskService.GetTask({ id: id }),
     );
     const taskData = taskResponse?.data;
     if (!taskData) throw new Error('Task not found.');
@@ -560,7 +535,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.RequestCoordination({
-        taskId,
+        id: id,
         requesterCode,
         message: message || '',
         leadId: leadCode || '',
@@ -574,12 +549,12 @@ export class TasksController implements OnModuleInit {
   @Put(':id/progress')
   async updateProgress(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body('progress') progress: number,
   ) {
     return firstValueFrom(
       this.taskService.UpdateTaskProgress({
-        id: parseInt(id, 10),
+        id,
         progress,
         actorCode: req.user?.employeeCode || '',
       }),
@@ -587,42 +562,23 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/subtasks')
-  async getSubTasks(@Req() req: any, @Param('id') id: string) {
-    const taskId = parseInt(id, 10);
-    if (isNaN(taskId)) {
-      return { success: false, message: 'ID không hợp lệ', data: [] };
-    }
-
+  async getSubTasks(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
-    let callerAncestorUnitIds: number[] = [];
-    let callerDescendantUnitIds: number[] = [];
-    if (!isAdmin && user?.unitId) {
-      const unitMap = await this.getUnitMap();
-      callerAncestorUnitIds = this.getAncestorUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-      callerDescendantUnitIds = this.getDescendantUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-    }
 
     return firstValueFrom(
       this.taskService.GetSubTasks({
-        taskId,
+        taskId: id,
         currentUserCode: user?.employeeCode,
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        callerAncestorUnitIds,
-        callerDescendantUnitIds,
       }),
     );
   }
+
 }

@@ -58,7 +58,22 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
           },
         },
       },
-
+      {
+        name: 'ORGANIZATION_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'organization',
+          protoPath: require('path').join(PROTO_ROOT, 'users/organization.proto'),
+          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [PROTO_ROOT],
+          },
+        },
+      },
     ]),
   ],
   controllers: [TasksController],

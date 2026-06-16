@@ -157,9 +157,7 @@ message ListTasksRequest {
   string status = 10; // optional - lọc theo trạng thái
   string priority = 11; // optional - lọc theo mức độ ưu tiên
   int32 planId = 12; // optional - id kế hoạch
-  repeated int32 callerAncestorUnitIds = 13; // optional - danh sách id đơn vị cha
   string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
-  repeated int32 callerDescendantUnitIds = 15; // optional - danh sách id đơn vị con
   bool isLeader = 16;
 }
 
@@ -277,8 +275,6 @@ message AddCommentRequest {
   bool isAdmin = 6;
   bool isLeader = 7;
   int32 currentUserDept = 8;
-  repeated int32 callerAncestorUnitIds = 9;
-  repeated int32 callerDescendantUnitIds = 10;
 }
 
 message GetCommentsRequest {
@@ -286,8 +282,6 @@ message GetCommentsRequest {
   string currentUserCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
-  repeated int32 callerAncestorUnitIds = 5;
-  repeated int32 callerDescendantUnitIds = 6;
   bool isLeader = 7;
 }
 
@@ -331,8 +325,6 @@ message GetSubTasksRequest {
   string currentUserCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
-  repeated int32 callerAncestorUnitIds = 5;
-  repeated int32 callerDescendantUnitIds = 6;
   bool isLeader = 7;
 }
 
@@ -348,8 +340,6 @@ message GetTaskRequest {
   string currentUserCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
-  repeated int32 callerAncestorUnitIds = 5;
-  repeated int32 callerDescendantUnitIds = 6;
   bool isLeader = 7;
 }
 
