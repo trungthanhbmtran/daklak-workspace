@@ -553,6 +553,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async createTask(data: any) {
+    console.log('[DEBUG HRM] CREATE TASK PAYLOAD:', JSON.stringify(data));
     let planId = data.planId || null;
     let parentId = data.parentId ? parseInt(data.parentId, 10) : null;
 

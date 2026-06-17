@@ -129,6 +129,7 @@ export class TasksController implements OnModuleInit {
     @Req() req: any,
     @Query('role') role: string, // NEW: ASSIGNEE | OWNER (3-layer model)
     @Query('assigneeCode') assigneeCode: string,
+    @Query('assignerCode') assignerCode: string,
     @Query('filter') filter: string,
     @Query('search') search: string,
     @Query('departmentId') departmentId: string,
@@ -139,7 +140,7 @@ export class TasksController implements OnModuleInit {
   ) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
-    let finalAssignerCode: string | undefined = undefined;
+    let finalAssignerCode: string | undefined = assignerCode;
     let finalDepartmentId = departmentId
       ? parseInt(departmentId, 10)
       : undefined;
@@ -486,7 +487,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.GetSubTasks({
-        taskId: id,
+        id: id,
         currentUserCode: user?.employeeCode,
         isAdmin,
         isLeader,
