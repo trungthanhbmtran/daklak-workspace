@@ -329,6 +329,73 @@ export class TasksService implements OnModuleInit {
     return Array.from(new Set(actions));
   }
 
+  private toTaskResponse(t: any): any {
+    if (!t) return null;
+    return {
+      id: t.id ?? 0,
+      title: t.title ?? '',
+      description: t.description ?? '',
+      assigneeCode: t.assigneeCode ?? '',
+      assignerCode: t.assignerCode ?? '',
+      status: t.status ?? '',
+      dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || ''),
+      startDate: t.startDate instanceof Date ? t.startDate.toISOString() : (t.startDate || ''),
+      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
+      updatedAt: t.updatedAt instanceof Date ? t.updatedAt.toISOString() : (t.updatedAt || ''),
+      baseScore: t.baseScore ?? 0,
+      weight: t.weight ?? 0,
+      scoringMethod: t.scoringMethod ?? '',
+      bonusPerDay: t.bonusPerDay ?? 0,
+      penaltyPerDay: t.penaltyPerDay ?? 0,
+      supervisorCode: t.supervisorCode ?? '',
+      planId: t.planId ?? 0,
+      assigneeName: t.assigneeName ?? '',
+      departmentId: t.departmentId ?? 0,
+      parentId: t.parentId ?? 0,
+      rejectReason: t.rejectReason ?? '',
+      assignerName: t.assignerName ?? '',
+      priority: t.priority ?? '',
+      supervisorName: t.supervisorName ?? '',
+      coassigneeCodes: t.coassigneeCodes || [],
+      allowedActions: t.allowedActions || [],
+      plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
+      rootTaskId: t.rootTaskId ?? 0,
+      progress: t.progress ?? 0,
+      children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
+    };
+  }
+
+  private toDelegationNode(t: any): any {
+    if (!t) return null;
+    return {
+      id: t.id ?? 0,
+      title: t.title ?? '',
+      status: t.status ?? '',
+      priority: t.priority ?? '',
+      assigneeCode: t.assigneeCode ?? '',
+      assigneeName: t.assigneeName ?? '',
+      assignerCode: t.assignerCode ?? '',
+      assignerName: t.assignerName ?? '',
+      departmentId: t.departmentId ?? 0,
+      parentId: t.parentId ?? 0,
+      dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || ''),
+      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
+      isParent: t.isParent ?? false,
+      isCurrent: t.isCurrent ?? false,
+      isChild: t.isChild ?? false,
+      isGrandChild: t.isGrandChild ?? false,
+      level: t.level ?? 0,
+      allowedActions: t.allowedActions || [],
+      description: t.description ?? '',
+      supervisorCode: t.supervisorCode ?? '',
+      supervisorName: t.supervisorName ?? '',
+      coassigneeCodes: t.coassigneeCodes || [],
+      planId: t.planId ?? 0,
+      plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
+      rootTaskId: t.rootTaskId ?? 0,
+    };
+  }
+
   async listTasks(query: any) {
     await this.populateQueryHierarchy(query);
     const where: any = {};
@@ -555,7 +622,7 @@ export class TasksService implements OnModuleInit {
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: roots,
+      data: roots.map(t => this.toTaskResponse(t)),
       meta: {
         pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 }
       }
@@ -685,7 +752,7 @@ export class TasksService implements OnModuleInit {
     });
 
     const enriched = await this.enrichTasks([createdTask]);
-    return enriched[0];
+    return this.toTaskResponse(enriched[0]);
   }
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any) {
@@ -726,7 +793,15 @@ export class TasksService implements OnModuleInit {
 
     if (status === 'DONE') await this.updateTaskProgress(id, 100, actorCode);
 
-    return t;
+    const updatedTask = await this.prisma.task.findUnique({
+      where: { id },
+      include: {
+        participants: true,
+        plan: { select: { id: true, title: true, createdByCode: true } }
+      }
+    });
+    const enriched = await this.enrichTasks([updatedTask]);
+    return this.toTaskResponse(enriched[0]);
   }
 
   async assignTask(
@@ -827,7 +902,7 @@ export class TasksService implements OnModuleInit {
     });
 
     const enriched = await this.enrichTasks([t]);
-    return enriched[0];
+    return this.toTaskResponse(enriched[0]);
   }
 
   async getTask(id: number, query: any) {
@@ -849,13 +924,10 @@ export class TasksService implements OnModuleInit {
     const allowedActions = await this.computeAllowedActions(t, query);
     const enriched = await this.enrichTasks([t]);
 
-    return {
-      success: true,
-      data: {
-        ...enriched[0],
-        allowedActions
-      }
-    };
+    return this.toTaskResponse({
+      ...enriched[0],
+      allowedActions
+    });
   }
 
   async getSubTasks(id: number, query: any) {
@@ -890,10 +962,10 @@ export class TasksService implements OnModuleInit {
 
     const data = await Promise.all(enriched.map(async (t: any) => {
       const allowedActions = await this.computeAllowedActions(t, query);
-      return {
+      return this.toDelegationNode({
         ...t,
         allowedActions
-      };
+      });
     }));
 
     return { success: true, data };
@@ -983,7 +1055,14 @@ export class TasksService implements OnModuleInit {
 
   async updateTaskProgress(id: number, progress: number, actorCode?: string) {
     const p = Math.max(0, Math.min(100, progress));
-    await this.prisma.task.update({ where: { id }, data: { progress: p } });
+    const updatedTask = await this.prisma.task.update({ 
+      where: { id }, 
+      data: { progress: p },
+      include: {
+        participants: true,
+        plan: { select: { id: true, title: true, createdByCode: true } }
+      }
+    });
 
     // Tìm parent để update
     const closure = await this.prisma.taskClosure.findFirst({
@@ -1000,7 +1079,8 @@ export class TasksService implements OnModuleInit {
       const avg = tasks.reduce((sum, t) => sum + t.progress, 0) / tasks.length;
       await this.updateTaskProgress(closure.ancestorId, avg, actorCode);
     }
-    return { success: true };
+    const enriched = await this.enrichTasks([updatedTask]);
+    return this.toTaskResponse(enriched[0]);
   }
 
   async recommendAssignees(query: any) {
@@ -1159,8 +1239,16 @@ export class TasksService implements OnModuleInit {
     if (updateData.dueDate) {
       updateData.dueDate = new Date(updateData.dueDate);
     }
-    const t = await this.prisma.task.update({ where: { id }, data: updateData });
-    return { success: true, data: t };
+    const t = await this.prisma.task.update({ 
+      where: { id }, 
+      data: updateData,
+      include: {
+        participants: true,
+        plan: { select: { id: true, title: true, createdByCode: true } }
+      }
+    });
+    const enriched = await this.enrichTasks([t]);
+    return this.toTaskResponse(enriched[0]);
   }
   async breakdownTask(id: number, data: any) {
     return this.createSubTask(id, data);

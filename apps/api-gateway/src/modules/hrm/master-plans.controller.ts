@@ -52,47 +52,67 @@ export class MasterPlansController implements OnModuleInit {
   private async populateUsers(plans: any[]) {
     if (!plans || plans.length === 0) return plans;
 
+    const empCodes = new Set<string>();
     const userIds = new Set<number>();
-    const collectIds = (plan: any) => {
-      if (plan.createdByCode && plan.createdByCode !== 'system')
-        userIds.add(parseInt(plan.createdByCode, 10));
-      if (plan.updatedByCode && plan.updatedByCode !== 'system')
-        userIds.add(parseInt(plan.updatedByCode, 10));
+
+    const collectCodes = (plan: any) => {
+      if (plan.createdByCode && plan.createdByCode !== 'system') {
+        empCodes.add(plan.createdByCode);
+        const parsed = parseInt(plan.createdByCode, 10);
+        if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+      }
+      if (plan.updatedByCode && plan.updatedByCode !== 'system') {
+        empCodes.add(plan.updatedByCode);
+        const parsed = parseInt(plan.updatedByCode, 10);
+        if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+      }
 
       if (plan.tasks) {
         plan.tasks.forEach((t: any) => {
-          if (t.assigneeCode && t.assigneeCode !== 'UNASSIGNED')
-            userIds.add(parseInt(t.assigneeCode, 10));
-          if (t.assignerCode) userIds.add(parseInt(t.assignerCode, 10));
+          if (t.assigneeCode && t.assigneeCode !== 'UNASSIGNED') {
+            empCodes.add(t.assigneeCode);
+            const parsed = parseInt(t.assigneeCode, 10);
+            if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+          }
+          if (t.assignerCode) {
+            empCodes.add(t.assignerCode);
+            const parsed = parseInt(t.assignerCode, 10);
+            if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+          }
         });
       }
     };
-    plans.forEach(collectIds);
+    plans.forEach(collectCodes);
 
-    const idsToFetch = Array.from(userIds).filter((id) => !isNaN(id) && id > 0);
-    if (idsToFetch.length === 0) return plans;
+    if (empCodes.size === 0 && userIds.size === 0) return plans;
 
     try {
-      const userRes: any = await firstValueFrom(
-        this.userService.GetUsersByIds({ ids: idsToFetch }),
+      const usersRes: any = await firstValueFrom(
+        this.userService.ListUsers({ take: 500 }),
       );
-      const usersMap = new Map();
-      (userRes?.data || []).forEach((u: any) => usersMap.set(String(u.id), u));
+      const users = usersRes?.data || [];
+      const usersMap = new Map<string, any>();
+      users.forEach((u: any) => {
+        if (u.employeeCode) {
+          usersMap.set(u.employeeCode, u);
+        }
+        usersMap.set(String(u.id), u);
+      });
 
       const mapUsers = (plan: any) => {
         if (plan.createdByCode) {
-          const u = usersMap.get(String(plan.createdByCode));
+          const u = usersMap.get(plan.createdByCode);
           if (u) plan.createdByName = u.fullName || u.username;
         }
         if (plan.updatedByCode) {
-          const u = usersMap.get(String(plan.updatedByCode));
+          const u = usersMap.get(plan.updatedByCode);
           if (u) plan.updatedByName = u.fullName || u.username;
         }
 
         if (plan.tasks) {
           plan.tasks.forEach((t: any) => {
             if (t.assigneeCode && t.assigneeCode !== 'UNASSIGNED') {
-              const u = usersMap.get(String(t.assigneeCode));
+              const u = usersMap.get(t.assigneeCode);
               if (u) {
                 t.assigneeName = u.fullName || u.username;
                 t.assigneeAvatar = u.avatarUrl;
@@ -101,7 +121,7 @@ export class MasterPlansController implements OnModuleInit {
               }
             }
             if (t.assignerCode) {
-              const u = usersMap.get(String(t.assignerCode));
+              const u = usersMap.get(t.assignerCode);
               if (u) t.assignerName = u.fullName || u.username;
             }
           });

@@ -50,33 +50,58 @@ export class TasksController implements OnModuleInit {
   private async populateUsers(tasks: any[]) {
     if (!tasks || tasks.length === 0) return tasks;
 
+    // Collect all employee codes and potential user IDs
+    const empCodes = new Set<string>();
     const userIds = new Set<number>();
-    const collectIds = (task: any) => {
-      if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED')
-        userIds.add(parseInt(task.assigneeCode, 10));
-      if (task.assignerCode) userIds.add(parseInt(task.assignerCode, 10));
-      if (task.supervisorCode) userIds.add(parseInt(task.supervisorCode, 10));
-      if (task.coassigneeCodes)
-        task.coassigneeCodes.forEach((id: string) =>
-          userIds.add(parseInt(id, 10)),
-        );
-      if (task.children) task.children.forEach(collectIds);
+    
+    const collectCodes = (task: any) => {
+      if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') {
+        empCodes.add(task.assigneeCode);
+        const parsed = parseInt(task.assigneeCode, 10);
+        if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+      }
+      if (task.assignerCode) {
+        empCodes.add(task.assignerCode);
+        const parsed = parseInt(task.assignerCode, 10);
+        if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+      }
+      if (task.supervisorCode) {
+        empCodes.add(task.supervisorCode);
+        const parsed = parseInt(task.supervisorCode, 10);
+        if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+      }
+      if (task.coassigneeCodes) {
+        task.coassigneeCodes.forEach((code: string) => {
+          if (code) {
+            empCodes.add(code);
+            const parsed = parseInt(code, 10);
+            if (!isNaN(parsed) && parsed > 0) userIds.add(parsed);
+          }
+        });
+      }
+      if (task.children) task.children.forEach(collectCodes);
     };
-    tasks.forEach(collectIds);
+    tasks.forEach(collectCodes);
 
-    const idsToFetch = Array.from(userIds).filter((id) => !isNaN(id) && id > 0);
-    if (idsToFetch.length === 0) return tasks;
+    if (empCodes.size === 0 && userIds.size === 0) return tasks;
 
     try {
-      const userRes: any = await firstValueFrom(
-        this.userService.GetUsersByIds({ ids: idsToFetch }),
+      // Fetch all users to construct an employeeCode/userId to user details map
+      const usersRes: any = await firstValueFrom(
+        this.userService.ListUsers({ take: 500 }),
       );
-      const usersMap = new Map();
-      (userRes?.data || []).forEach((u: any) => usersMap.set(String(u.id), u));
+      const users = usersRes?.data || [];
+      const usersMap = new Map<string, any>();
+      users.forEach((u: any) => {
+        if (u.employeeCode) {
+          usersMap.set(u.employeeCode, u);
+        }
+        usersMap.set(String(u.id), u);
+      });
 
       const mapUsers = (task: any) => {
         if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') {
-          const u = usersMap.get(String(task.assigneeCode));
+          const u = usersMap.get(task.assigneeCode);
           if (u) {
             task.assigneeName = u.fullName || u.username;
             task.assigneeAvatar = u.avatarUrl;
@@ -85,11 +110,11 @@ export class TasksController implements OnModuleInit {
           }
         }
         if (task.assignerCode) {
-          const u = usersMap.get(String(task.assignerCode));
+          const u = usersMap.get(task.assignerCode);
           if (u) task.assignerName = u.fullName || u.username;
         }
         if (task.supervisorCode) {
-          const u = usersMap.get(String(task.supervisorCode));
+          const u = usersMap.get(task.supervisorCode);
           if (u) task.supervisorName = u.fullName || u.username;
         }
         if (task.children) task.children.forEach(mapUsers);
@@ -426,7 +451,7 @@ export class TasksController implements OnModuleInit {
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: id }),
     );
-    const taskData = taskResponse?.data;
+    const taskData = taskResponse?.data || taskResponse;
     if (!taskData) {
       throw new Error('Nhiệm vụ không tồn tại');
     }
@@ -526,7 +551,7 @@ export class TasksController implements OnModuleInit {
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: id }),
     );
-    const taskData = taskResponse?.data;
+    const taskData = taskResponse?.data || taskResponse;
     if (!taskData) throw new Error('Task not found.');
 
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
