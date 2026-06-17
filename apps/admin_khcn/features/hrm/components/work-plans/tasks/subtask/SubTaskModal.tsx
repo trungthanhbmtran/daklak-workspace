@@ -45,7 +45,7 @@ export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskMod
           dueDate: form.dueDate || undefined,
           assigneeCode: 'UNASSIGNED',
           planId: planId || parentTask?.planId,
-          status: 'TEMPLATE',
+          status: 'TODO',
         });
       } else {
         // Tạo nhiệm vụ con dưới task cha

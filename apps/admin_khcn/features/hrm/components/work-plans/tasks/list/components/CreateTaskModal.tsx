@@ -37,7 +37,7 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
         priority: form.priority,
         dueDate: form.dueDate || undefined,
         assigneeCode: 'UNASSIGNED',
-        status: 'TEMPLATE',
+        status: 'TODO',
       });
 
       toast.success(`Đã khởi tạo: ${form.title}`);

@@ -121,12 +121,6 @@ export class TasksController implements OnModuleInit {
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
     }
-    
-    // Ngăn chặn Frontend gửi nhầm status TEMPLATE cho task thông thường
-    if (body.status === 'TEMPLATE') {
-      body.status = 'TODO';
-    }
-
     return firstValueFrom(this.taskService.CreateTask(body));
   }
 
