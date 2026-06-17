@@ -1,10 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class EmployeesService {
-  constructor(private readonly prisma: PrismaService) { }
+export class EmployeesService implements OnModuleInit {
+  private userService: any;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject('USER_PACKAGE') private readonly userClient: any,
+  ) { }
+
+  onModuleInit() {
+    this.userService = this.userClient.getService('UserService');
+  }
 
   // ─── Private mapping helper ──────────────────────────────────────────────────
 
@@ -213,11 +223,42 @@ export class EmployeesService {
     partyTitleId?: number;
     employmentStatus?: string;
     includeChildren?: boolean;
+    assignableOnly?: boolean;
+    callerUserId?: number;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
     const skip = (page - 1) * pageSize;
     const where: Record<string, unknown> = {};
+
+    if (params.assignableOnly && params.callerUserId) {
+      try {
+        const subordinatesRes: any = await firstValueFrom(
+          this.userService.GetSubordinates({ userId: params.callerUserId })
+        );
+        const allowedCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
+        where.employeeCode = { in: allowedCodes };
+        
+        // Nếu allowedCodes rỗng thì không có ai, trả về luôn [] để tối ưu
+        if (allowedCodes.length === 0) {
+          return {
+            success: true,
+            message: 'OK',
+            data: [],
+            meta: {
+              pagination: { total: 0, page, pageSize, totalPages: 1, hasNext: false, hasPrev: false },
+              sort: { sortBy: 'id', sortOrder: 'asc' },
+              filters: {},
+              extra: {},
+            },
+          };
+        }
+      } catch (e) {
+        console.error('Failed to get subordinates:', e);
+        where.employeeCode = { in: [] }; // Fallback an toàn
+      }
+    }
+
     if (params.keyword) {
       const kw = params.keyword.trim();
       where.OR = [

@@ -111,6 +111,7 @@ message ListEmployeesRequest {
   string callerEmail = 11;
   int32 callerUnitId = 12;
   string callerJobCode = 13;
+  int32 callerUserId = 14;
 }
 
 // ---------------- RESPONSES ----------------

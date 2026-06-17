@@ -26,7 +26,6 @@ export class EmployeeController implements OnModuleInit {
   private employeeService: any;
   private orgService: any;
   private catService: any;
-  private userService: any;
 
   // Cache for dictionaries to optimize API speed
   private dictCache: { data: any; expiresAt: number } | null = null;
@@ -36,7 +35,6 @@ export class EmployeeController implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
-    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
   ) { }
 
   onModuleInit() {
@@ -48,9 +46,6 @@ export class EmployeeController implements OnModuleInit {
     );
     this.catService = this.catClient.getService(
       MICROSERVICES.SYS_CATEGORY.SERVICE,
-    );
-    this.userService = this.userClient.getService(
-      MICROSERVICES.USER.SERVICE,
     );
   }
 
@@ -196,6 +191,7 @@ export class EmployeeController implements OnModuleInit {
       req.callerUnitId = user.unitId;
       req.callerJobCode = user.jobTitleCode;
       req.callerEmployeeCode = user.employeeCode || user.username;
+      req.callerUserId = user.id;
     }
 
     // Convert boolean flag
@@ -238,22 +234,6 @@ export class EmployeeController implements OnModuleInit {
           );
           return descendantUnitIds.has(empUnitId);
         });
-      }
-
-      // ── CHẾ ĐỘ CHỈ LẤY NGƯỜI ĐƯỢC GIAO VIỆC (SUBORDINATES) ──
-      if (req.assignableOnly && user?.id && !isAdmin) {
-        try {
-          const subordinatesRes: any = await firstValueFrom(
-            this.userService.GetSubordinates({ userId: user.id })
-          );
-          const allowedEmployeeCodes = new Set<string>(
-            subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || []
-          );
-          res.data = res.data.filter((emp: any) => allowedEmployeeCodes.has(emp.employeeCode));
-        } catch (error) {
-          console.error('Failed to get subordinates:', error);
-          res.data = []; // Nếu lỗi, trả về rỗng để an toàn
-        }
       }
 
       // ── TÍNH TOÁN ĐIỀU PHỐI (WORKLOAD & SCORING) ──
