@@ -201,7 +201,7 @@ export class TasksService implements OnModuleInit {
     const isCoordinator = Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(currentUserCode);
 
     let isDeptLeader = false;
-    fs.appendFileSync('c:/Users/Admin/Desktop/daklak-workspace/grpc-debug.log', JSON.stringify({ currentUserId: query.currentUserId, dept: query.allowedDepartmentIds, codes: query.allowedEmployeeCodes, query: query }) + '\n'); const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
+    const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
 
     if (query.allowedDepartmentIds?.length > 0 || query.allowedEmployeeCodes?.length > 0) {
       const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
