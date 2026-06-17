@@ -564,7 +564,7 @@ export class TasksService implements OnModuleInit {
       planId = parent?.planId || null;
     }
 
-    const initialStatus = parentId ? 'TEMPLATE' : (data.status || 'TODO');
+    const initialStatus = data.status || 'TODO';
 
     // Resolve creatorUserId
     let creatorUserId = 0;
