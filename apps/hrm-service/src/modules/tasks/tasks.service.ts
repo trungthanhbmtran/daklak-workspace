@@ -552,7 +552,7 @@ export class TasksService implements OnModuleInit {
       delete where.status;
     }
 
-
+    console.log('[TasksService] Final Where Clause for findMany:', JSON.stringify(where, null, 2));
 
     const tasks = await this.prisma.task.findMany({
       where,
@@ -562,6 +562,8 @@ export class TasksService implements OnModuleInit {
         plan: { select: { id: true, title: true, createdByCode: true } }
       }
     });
+
+    console.log('[TasksService] Tasks found from DB:', tasks.length);
 
     const enrichedTasks = await this.enrichTasks(tasks);
 

@@ -257,26 +257,35 @@ export class TasksController implements OnModuleInit {
       );
     }
 
+    const requestPayload = {
+      assigneeCode: finalAssigneeCode,
+      assignerCode: finalAssignerCode,
+      filter,
+      search,
+      status,
+      priority,
+      departmentId: finalDepartmentId,
+      planId: planId ? parseInt(planId, 10) : undefined,
+      isSupervisor: isSupervisor === 'true',
+      currentUserCode: user?.employeeCode,
+      isAdmin,
+      isLeader,
+      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+      callerAncestorUnitIds,
+      callerDescendantUnitIds,
+      role,
+    };
+    
+    console.log('[TasksController] ListTasks Request Payload:', JSON.stringify(requestPayload, null, 2));
+
     const response: any = await firstValueFrom(
-      this.taskService.ListTasks({
-        assigneeCode: finalAssigneeCode,
-        assignerCode: finalAssignerCode,
-        filter,
-        search,
-        status,
-        priority,
-        departmentId: finalDepartmentId,
-        planId: planId ? parseInt(planId, 10) : undefined,
-        isSupervisor: isSupervisor === 'true',
-        currentUserCode: user?.employeeCode,
-        isAdmin,
-        isLeader,
-        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        callerAncestorUnitIds,
-        callerDescendantUnitIds,
-        role,
-      }),
+      this.taskService.ListTasks(requestPayload),
     );
+
+    console.log('[TasksController] ListTasks Raw Response Data Length:', response?.data?.length);
+    if (response?.data?.length === 0) {
+      console.log('[TasksController] ListTasks Raw Response is EMPTY. Response object:', JSON.stringify(response, null, 2));
+    }
 
     if (response?.data) {
       if (Array.isArray(response.data)) {
