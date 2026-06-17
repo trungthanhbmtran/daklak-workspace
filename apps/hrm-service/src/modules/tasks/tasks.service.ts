@@ -507,6 +507,8 @@ export class TasksService implements OnModuleInit {
       }
     });
 
+    console.log('[DEBUG HRM] PRISMA TASKS RETURNED:', tasks.length);
+
     const enrichedTasks = await this.enrichTasks(tasks);
 
     const mappedTasks = await Promise.all(enrichedTasks.map(async (t: any) => {
@@ -537,10 +539,13 @@ export class TasksService implements OnModuleInit {
       }
     });
 
+    const finalData = roots.map(t => this.toTaskResponse(t));
+    console.log('[DEBUG HRM] FINAL DATA LENGTH TO RETURN:', finalData.length);
+    
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: roots.map(t => this.toTaskResponse(t)),
+      data: finalData,
       meta: {
         pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 }
       }
