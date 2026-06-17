@@ -129,7 +129,98 @@ export class TasksService implements OnModuleInit {
     return tasks;
   }
 
-  
+
+
+  private async getUnitMap(): Promise<Record<number, any>> {
+    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
+      return this.unitMapCache.data;
+    try {
+      const treeRes: any = await firstValueFrom(
+        this.orgService.GetFullTree({}),
+      );
+      const unitMap: Record<number, any> = {};
+      const flattenNodes = (nodes: any[]) => {
+        for (const n of nodes) {
+          const nId = parseInt(n.id, 10);
+          if (nId) {
+            unitMap[nId] = {
+              id: nId,
+              name: n.name || n.title || '',
+              code: n.code,
+              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
+              isLeaf: n.isLeaf ?? !n.children?.length,
+              directChildIds: (n.children || [])
+                .map((c: any) => parseInt(c.id, 10))
+                .filter(Boolean),
+            };
+          }
+          if (n.children && n.children.length > 0) flattenNodes(n.children);
+        }
+      };
+      flattenNodes(treeRes?.nodes || []);
+      this.unitMapCache = {
+        data: unitMap,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      };
+      return unitMap;
+    } catch (e) {
+      console.error('Failed to get org tree', e);
+      return {};
+    }
+  }
+
+  private getAncestorUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
+    const ids: number[] = [];
+    let current = unitMap[unitId];
+    if (current) ids.push(unitId);
+    while (current?.parentId) {
+      ids.push(current.parentId);
+      current = unitMap[current.parentId];
+    }
+    return ids;
+  }
+
+  private getDescendantUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
+    const ids: number[] = [unitId];
+    const queue = [unitId];
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const current = unitMap[currentId];
+      if (current && current.directChildIds) {
+        for (const childId of current.directChildIds) {
+          if (!ids.includes(childId)) {
+            ids.push(childId);
+            queue.push(childId);
+          }
+        }
+      }
+    }
+    return ids;
+  }
+
+  private async populateQueryHierarchy(query: any) {
+    if (!query.isAdmin && query.currentUserDept) {
+      const unitMap = await this.getUnitMap();
+      query.callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, query.currentUserDept);
+      query.callerDescendantUnitIds = this.getDescendantUnitIds(unitMap, query.currentUserDept);
+    } else {
+      query.callerAncestorUnitIds = [];
+      query.callerDescendantUnitIds = [];
+    }
+
+    // Lấy sơ đồ thẩm quyền trực tiếp từ user-service
+    if (!query.isAdmin && query.currentUserId) {
+      try {
+        const subordinatesRes: any = await firstValueFrom(
+          this.userService.GetSubordinates({ userId: query.currentUserId })
+        );
+        query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
+        query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
+      } catch (e) {
+        console.error('Failed to get subordinates in hrm-service:', e);
+      }
+    }
+  }
 
   private async checkTaskAccess(t: any, query: any): Promise<{
     hasAccess: boolean;
@@ -153,7 +244,7 @@ export class TasksService implements OnModuleInit {
     }
 
     const perms = query.currentUserPermissions || [];
-    
+
     const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
     if (isAdmin) {
       return {
@@ -187,10 +278,30 @@ export class TasksService implements OnModuleInit {
 
     let isDeptLeader = false;
     const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
-    
-    if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
+
+    if (query.allowedDepartmentIds?.length > 0 || query.allowedEmployeeCodes?.length > 0) {
+      const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
+      const allowedCodes = query.allowedEmployeeCodes || [];
+
+      if (t.plan?.departmentId && allowedDepts.includes(Number(t.plan.departmentId))) {
+        isDeptLeader = true;
+      } else {
+        const assigneeCode = t.assigneeCode;
+        if (assigneeCode && allowedCodes.includes(assigneeCode)) {
+          isDeptLeader = true;
+        } else if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
+          const assigneeEmp = await this.prisma.employee.findUnique({
+            where: { employeeCode: assigneeCode },
+            select: { departmentId: true }
+          });
+          if (assigneeEmp?.departmentId && allowedDepts.includes(Number(assigneeEmp.departmentId))) {
+            isDeptLeader = true;
+          }
+        }
+      }
+    } else if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
       const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
-      
+
       // Check if task's plan belongs to these departments
       if (t.plan?.departmentId && descendantDeptIds.includes(Number(t.plan.departmentId))) {
         isDeptLeader = true;
@@ -233,7 +344,7 @@ export class TasksService implements OnModuleInit {
     }
 
     const actions: string[] = [];
-    
+
     if (access.isOwner) {
       actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT');
     } else {
@@ -319,6 +430,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async listTasks(query: any) {
+    await this.populateQueryHierarchy(query);
     const where: any = {};
 
     const conditions: any[] = [];
@@ -409,45 +521,66 @@ export class TasksService implements OnModuleInit {
         });
       }
 
-      // 2. Department Leader check
+      // 2. Phân quyền theo Sơ đồ thẩm quyền (từ user-service)
       const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
-      if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
+      const hasAllowedDepts = query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0;
+      const hasAllowedCodes = query.allowedEmployeeCodes && query.allowedEmployeeCodes.length > 0;
+
+      if (hasAllowedDepts || hasAllowedCodes) {
+        const leaderOrConditions: any[] = [];
+        const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
+        const allowedCodes = query.allowedEmployeeCodes || [];
+
+        let allAllowedCodes = [...allowedCodes];
+
+        if (allowedDepts.length > 0) {
+          const empsInDepts = await this.prisma.employee.findMany({
+            where: { departmentId: { in: allowedDepts } },
+            select: { employeeCode: true }
+          });
+          const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
+          allAllowedCodes = Array.from(new Set([...allAllowedCodes, ...deptEmployeeCodes]));
+
+          leaderOrConditions.push({
+            plan: { departmentId: { in: allowedDepts } }
+          });
+        }
+
+        if (allAllowedCodes.length > 0) {
+          leaderOrConditions.push({
+            participants: {
+              some: {
+                employeeCode: { in: allAllowedCodes },
+                participantRole: 'ASSIGNEE'
+              }
+            }
+          });
+          leaderOrConditions.push({
+            creatorEmployeeCode: { in: allAllowedCodes }
+          });
+        }
+        
+        scopingConditions.push(...leaderOrConditions);
+      } else if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
+        // Fallback cũ nếu có
         const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
 
-        // Fetch employeeCodes in these departments
         const empsInDepts = await this.prisma.employee.findMany({
-          where: {
-            departmentId: { in: descendantDeptIds }
-          },
-          select: {
-            employeeCode: true
-          }
+          where: { departmentId: { in: descendantDeptIds } },
+          select: { employeeCode: true }
         });
         const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
 
         const leaderOrConditions: any[] = [];
         if (deptEmployeeCodes.length > 0) {
-          // Assignee belongs to these departments
           leaderOrConditions.push({
             participants: {
-              some: {
-                employeeCode: { in: deptEmployeeCodes },
-                participantRole: 'ASSIGNEE'
-              }
+              some: { employeeCode: { in: deptEmployeeCodes }, participantRole: 'ASSIGNEE' }
             }
           });
-          // Creator belongs to these departments
-          leaderOrConditions.push({
-            creatorEmployeeCode: { in: deptEmployeeCodes }
-          });
+          leaderOrConditions.push({ creatorEmployeeCode: { in: deptEmployeeCodes } });
         }
-        // Plan belongs to these departments
-        leaderOrConditions.push({
-          plan: {
-            departmentId: { in: descendantDeptIds }
-          }
-        });
-
+        leaderOrConditions.push({ plan: { departmentId: { in: descendantDeptIds } } });
         scopingConditions.push(...leaderOrConditions);
       }
 
@@ -473,7 +606,7 @@ export class TasksService implements OnModuleInit {
       delete where.status;
     }
 
-    console.log('[TasksService] Final Where Clause for findMany:', JSON.stringify(where, null, 2));
+
 
     const tasks = await this.prisma.task.findMany({
       where,
@@ -483,8 +616,6 @@ export class TasksService implements OnModuleInit {
         plan: { select: { id: true, title: true, createdByCode: true } }
       }
     });
-
-    console.log('[TasksService] Tasks found from DB:', tasks.length);
 
     const enrichedTasks = await this.enrichTasks(tasks);
 
@@ -803,6 +934,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async getTask(id: number, query: any) {
+    await this.populateQueryHierarchy(query);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: {
@@ -827,6 +959,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async getSubTasks(id: number, query: any) {
+    await this.populateQueryHierarchy(query);
     const parentTask = await this.prisma.task.findUnique({
       where: { id },
       include: {
@@ -950,8 +1083,8 @@ export class TasksService implements OnModuleInit {
 
   async updateTaskProgress(id: number, progress: number, actorCode?: string) {
     const p = Math.max(0, Math.min(100, progress));
-    const updatedTask = await this.prisma.task.update({ 
-      where: { id }, 
+    const updatedTask = await this.prisma.task.update({
+      where: { id },
       data: { progress: p },
       include: {
         participants: true,
@@ -990,9 +1123,37 @@ export class TasksService implements OnModuleInit {
         whereClause.employeeCode = { not: query.excludeEmployeeCode };
       }
 
-      // Giới hạn gợi ý theo Sơ đồ nếu không phải Admin và strategy = HIERARCHY
-      if (!isAdmin && query.strategy === 'HIERARCHY' && query.currentUserDept) {
-         // Trong tương lai có thể query callerDescendantUnitIds để giới hạn whereClause.departmentId
+      // Lấy cấu trúc thẩm quyền trực tiếp từ user-service
+      if (!isAdmin && query.currentUserId) {
+        try {
+          const subordinatesRes: any = await firstValueFrom(
+            this.userService.GetSubordinates({ userId: query.currentUserId })
+          );
+          query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
+          query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
+        } catch (e) {
+          console.error('Failed to get subordinates for recommendAssignees:', e);
+        }
+      }
+
+      // Giới hạn gợi ý theo Sơ đồ thẩm quyền từ user-service
+      if (!isAdmin) {
+        const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
+        const allowedCodes = query.allowedEmployeeCodes || [];
+
+        if (allowedDepts.length > 0 || allowedCodes.length > 0) {
+          const orConditions: any[] = [];
+          if (allowedDepts.length > 0) {
+            orConditions.push({ departmentId: { in: allowedDepts } });
+          }
+          if (allowedCodes.length > 0) {
+            orConditions.push({ employeeCode: { in: allowedCodes } });
+          }
+          whereClause.OR = orConditions;
+        } else if (query.currentUserCode) {
+          // Chỉ thấy bản thân nếu không có quyền gì
+          whereClause.employeeCode = query.currentUserCode;
+        }
       }
 
       const employees = await this.prisma.employee.findMany({
@@ -1032,15 +1193,15 @@ export class TasksService implements OnModuleInit {
       const employeeList = employees.map(emp => {
         const taskCount = taskCountMap.get(emp.employeeCode) || 0;
         const kpiScore = kpiMap.get(emp.employeeCode) || 75;
-        
+
         // Tính điểm Domain/Position Match Score
         let matchScore = 0;
         if (targetJobTitleId && emp.jobTitleId === targetJobTitleId) {
-           matchScore += 50; // Ưu tiên tuyệt đối nếu đúng Vị trí chức danh yêu cầu
+          matchScore += 50; // Ưu tiên tuyệt đối nếu đúng Vị trí chức danh yêu cầu
         }
         // Giả lập ưu tiên Lĩnh vực (Nếu targetDomain khớp với phòng ban/đơn vị phụ trách lĩnh vực đó)
         if (targetDomainId && query.domainDepartmentIds?.includes(emp.departmentId)) {
-           matchScore += 30;
+          matchScore += 30;
         }
 
         return {
@@ -1057,7 +1218,7 @@ export class TasksService implements OnModuleInit {
       });
 
       const strategy = query?.strategy || 'LOW_PERFORMANCE';
-      
+
       // Sắp xếp: Ưu tiên MatchScore trước, sau đó đến Performance/Load
       employeeList.sort((a, b) => {
         if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
@@ -1134,8 +1295,8 @@ export class TasksService implements OnModuleInit {
     if (updateData.dueDate) {
       updateData.dueDate = new Date(updateData.dueDate);
     }
-    const t = await this.prisma.task.update({ 
-      where: { id }, 
+    const t = await this.prisma.task.update({
+      where: { id },
       data: updateData,
       include: {
         participants: true,
@@ -1199,6 +1360,7 @@ export class TasksService implements OnModuleInit {
     };
   }
   async getComments(id: number, query: any) {
+    await this.populateQueryHierarchy(query);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }

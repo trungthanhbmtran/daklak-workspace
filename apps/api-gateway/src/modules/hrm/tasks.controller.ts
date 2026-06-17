@@ -257,6 +257,8 @@ export class TasksController implements OnModuleInit {
       );
     }
 
+
+
     const requestPayload = {
       assigneeCode: finalAssigneeCode,
       assignerCode: finalAssignerCode,
@@ -273,6 +275,7 @@ export class TasksController implements OnModuleInit {
       currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
       callerAncestorUnitIds,
       callerDescendantUnitIds,
+      currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
       role,
     };
     
@@ -357,6 +360,8 @@ export class TasksController implements OnModuleInit {
     // Việc quyết định user có quyền gì (Admin, Quản lý) và được phép xem danh sách nhân sự nào
     // hoàn toàn thuộc trách nhiệm của hrm-service.
 
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
+
     let res: any;
     try {
       res = await firstValueFrom(
@@ -365,7 +370,7 @@ export class TasksController implements OnModuleInit {
           strategy: strategy || 'LOW_PERFORMANCE',
           domainId,
           jobTitleId,
-          currentUserId: user?.id,
+          currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
           currentUserCode: user?.employeeCode,
           currentUserPermissions: user?.permissionsFlatten || [],
         }),

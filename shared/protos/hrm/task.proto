@@ -39,6 +39,8 @@ message RecommendAssigneesRequest {
   string domainId = 5;
   repeated string currentUserPermissions = 6;
   string jobTitleId = 7;
+  repeated int32 allowedDepartmentIds = 8;
+  repeated string allowedEmployeeCodes = 9;
 }
 
 message AssigneeRecommendation {
@@ -159,6 +161,9 @@ message ListTasksRequest {
   int32 planId = 12; // optional - id kế hoạch
   string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
   bool isLeader = 16;
+  repeated int32 allowedDepartmentIds = 17;
+  repeated string allowedEmployeeCodes = 18;
+  int32 currentUserId = 19;
 }
 
 message TaskStats {
