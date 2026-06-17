@@ -24,26 +24,15 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 @ApiBearerAuth('JWT-auth')
 export class TasksController implements OnModuleInit {
   private taskService: any;
-  private orgService: any;
   private userService: any;
-
-  // Cache org tree (5 phút)
-  private unitMapCache: {
-    data: Record<number, any>;
-    expiresAt: number;
-  } | null = null;
 
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
-    @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
   ) { }
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
-    this.orgService = this.orgClient.getService(
-      MICROSERVICES.ORGANIZATION.SERVICE,
-    );
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
@@ -127,81 +116,6 @@ export class TasksController implements OnModuleInit {
   }
 
 
-  private async getUnitMap(): Promise<Record<number, any>> {
-    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
-      return this.unitMapCache.data;
-    try {
-      const treeRes: any = await firstValueFrom(
-        this.orgService.GetFullTree({}),
-      );
-      const unitMap: Record<number, any> = {};
-      const flattenNodes = (nodes: any[]) => {
-        for (const n of nodes) {
-          const nId = parseInt(n.id, 10);
-          if (nId) {
-            unitMap[nId] = {
-              id: nId,
-              name: n.name || n.title || '',
-              code: n.code,
-              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
-              isLeaf: n.isLeaf ?? !n.children?.length,
-              directChildIds: (n.children || [])
-                .map((c: any) => parseInt(c.id, 10))
-                .filter(Boolean),
-            };
-          }
-          if (n.children && n.children.length > 0) flattenNodes(n.children);
-        }
-      };
-      flattenNodes(treeRes?.nodes || []);
-      this.unitMapCache = {
-        data: unitMap,
-        expiresAt: Date.now() + 5 * 60 * 1000,
-      };
-      return unitMap;
-    } catch {
-      return {};
-    }
-  }
-
-
-
-  private getAncestorUnitIds(
-    unitMap: Record<number, any>,
-    unitId: number,
-  ): number[] {
-    const ids: number[] = [];
-    let current = unitMap[unitId];
-    if (current) ids.push(unitId);
-    while (current?.parentId) {
-      ids.push(current.parentId);
-      current = unitMap[current.parentId];
-    }
-    return ids;
-  }
-
-  private getDescendantUnitIds(
-    unitMap: Record<number, any>,
-    unitId: number,
-  ): number[] {
-    const ids: number[] = [unitId];
-    const queue = [unitId];
-    while (queue.length > 0) {
-      const currentId = queue.shift()!;
-      const current = unitMap[currentId];
-      if (current && current.directChildIds) {
-        for (const childId of current.directChildIds) {
-          if (!ids.includes(childId)) {
-            ids.push(childId);
-            queue.push(childId);
-          }
-        }
-      }
-    }
-    return ids;
-  }
-
-
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
@@ -243,19 +157,6 @@ export class TasksController implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
 
-    let callerAncestorUnitIds: number[] = [];
-    let callerDescendantUnitIds: number[] = [];
-    if (!isAdmin && user?.unitId) {
-      const unitMap = await this.getUnitMap();
-      callerAncestorUnitIds = this.getAncestorUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-      callerDescendantUnitIds = this.getDescendantUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-    }
 
 
 
@@ -273,8 +174,6 @@ export class TasksController implements OnModuleInit {
       isAdmin,
       isLeader,
       currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      callerAncestorUnitIds,
-      callerDescendantUnitIds,
       currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
       role,
     };
@@ -354,8 +253,6 @@ export class TasksController implements OnModuleInit {
     @Query('jobTitleId') jobTitleId: string,
   ) {
     const user = req.user;
-    const unitMap = await this.getUnitMap();
-
     // API Gateway chỉ đóng vai trò forward context (token info) xuống backend.
     // Việc quyết định user có quyền gì (Admin, Quản lý) và được phép xem danh sách nhân sự nào
     // hoàn toàn thuộc trách nhiệm của hrm-service.
@@ -389,13 +286,11 @@ export class TasksController implements OnModuleInit {
 
     // Normalize field names and resolve department names
     topEmployees = topEmployees.map((emp: any, idx: number) => {
-      const deptId = emp.departmentId ? parseInt(emp.departmentId, 10) : 0;
-      const dept = unitMap[deptId];
       return {
         ...emp,
         employeeName:
           emp.fullName || emp.employeeName || emp.username || emp.employeeCode,
-        departmentName: dept?.name || '',
+        departmentName: emp.departmentName || '',
         currentLoad:
           emp.currentLoad !== undefined ? emp.currentLoad : emp.taskCount || 0,
         performanceScore:
@@ -406,11 +301,9 @@ export class TasksController implements OnModuleInit {
     });
 
     topDepartments = topDepartments.map((d: any) => {
-      const deptId = d.departmentId ? parseInt(d.departmentId, 10) : 0;
-      const dept = unitMap[deptId];
       return {
         ...d,
-        departmentName: dept?.name || '',
+        departmentName: d.departmentName || d.name || '',
       };
     });
 
@@ -517,20 +410,6 @@ export class TasksController implements OnModuleInit {
       isAdmin ||
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
-    let callerAncestorUnitIds: number[] = [];
-    let callerDescendantUnitIds: number[] = [];
-    if (!isAdmin && user?.unitId) {
-      const unitMap = await this.getUnitMap();
-      callerAncestorUnitIds = this.getAncestorUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-      callerDescendantUnitIds = this.getDescendantUnitIds(
-        unitMap,
-        parseInt(user.unitId, 10),
-      );
-    }
-
     return firstValueFrom(
       this.taskService.AddComment({
         id: id,
@@ -541,8 +420,6 @@ export class TasksController implements OnModuleInit {
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        callerAncestorUnitIds,
-        callerDescendantUnitIds,
       }),
     );
   }

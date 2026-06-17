@@ -10,8 +10,6 @@ import { RpcException } from '@nestjs/microservices';
 export class TasksService implements OnModuleInit {
   private integrationService: any;
   private userService: any;
-  private orgService: any;
-  private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
 
   constructor(
     private prisma: PrismaService,
@@ -131,82 +129,8 @@ export class TasksService implements OnModuleInit {
 
 
 
-  private async getUnitMap(): Promise<Record<number, any>> {
-    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
-      return this.unitMapCache.data;
-    try {
-      const treeRes: any = await firstValueFrom(
-        this.orgService.GetFullTree({}),
-      );
-      const unitMap: Record<number, any> = {};
-      const flattenNodes = (nodes: any[]) => {
-        for (const n of nodes) {
-          const nId = parseInt(n.id, 10);
-          if (nId) {
-            unitMap[nId] = {
-              id: nId,
-              name: n.name || n.title || '',
-              code: n.code,
-              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
-              isLeaf: n.isLeaf ?? !n.children?.length,
-              directChildIds: (n.children || [])
-                .map((c: any) => parseInt(c.id, 10))
-                .filter(Boolean),
-            };
-          }
-          if (n.children && n.children.length > 0) flattenNodes(n.children);
-        }
-      };
-      flattenNodes(treeRes?.nodes || []);
-      this.unitMapCache = {
-        data: unitMap,
-        expiresAt: Date.now() + 5 * 60 * 1000,
-      };
-      return unitMap;
-    } catch (e) {
-      console.error('Failed to get org tree', e);
-      return {};
-    }
-  }
-
-  private getAncestorUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
-    const ids: number[] = [];
-    let current = unitMap[unitId];
-    if (current) ids.push(unitId);
-    while (current?.parentId) {
-      ids.push(current.parentId);
-      current = unitMap[current.parentId];
-    }
-    return ids;
-  }
-
-  private getDescendantUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
-    const ids: number[] = [unitId];
-    const queue = [unitId];
-    while (queue.length > 0) {
-      const currentId = queue.shift()!;
-      const current = unitMap[currentId];
-      if (current && current.directChildIds) {
-        for (const childId of current.directChildIds) {
-          if (!ids.includes(childId)) {
-            ids.push(childId);
-            queue.push(childId);
-          }
-        }
-      }
-    }
-    return ids;
-  }
 
   private async populateQueryHierarchy(query: any) {
-    if (!query.isAdmin && query.currentUserDept) {
-      const unitMap = await this.getUnitMap();
-      query.callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, query.currentUserDept);
-      query.callerDescendantUnitIds = this.getDescendantUnitIds(unitMap, query.currentUserDept);
-    } else {
-      query.callerAncestorUnitIds = [];
-      query.callerDescendantUnitIds = [];
-    }
 
     // Lấy sơ đồ thẩm quyền trực tiếp từ user-service
     if (!query.isAdmin && query.currentUserId) {
@@ -277,7 +201,7 @@ export class TasksService implements OnModuleInit {
     const isCoordinator = Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(currentUserCode);
 
     let isDeptLeader = false;
-    const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
+    fs.appendFileSync('c:/Users/Admin/Desktop/daklak-workspace/grpc-debug.log', JSON.stringify({ currentUserId: query.currentUserId, dept: query.allowedDepartmentIds, codes: query.allowedEmployeeCodes, query: query }) + '\n'); const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
 
     if (query.allowedDepartmentIds?.length > 0 || query.allowedEmployeeCodes?.length > 0) {
       const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
@@ -299,27 +223,7 @@ export class TasksService implements OnModuleInit {
           }
         }
       }
-    } else if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
-      const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
-
-      // Check if task's plan belongs to these departments
-      if (t.plan?.departmentId && descendantDeptIds.includes(Number(t.plan.departmentId))) {
-        isDeptLeader = true;
-      } else {
-        // Check if assignee belongs to these departments
-        const assigneeCode = t.assigneeCode;
-        if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
-          const assigneeEmp = await this.prisma.employee.findUnique({
-            where: { employeeCode: assigneeCode },
-            select: { departmentId: true }
-          });
-          if (assigneeEmp?.departmentId && descendantDeptIds.includes(Number(assigneeEmp.departmentId))) {
-            isDeptLeader = true;
-          }
-        }
-      }
     }
-
     const hasAccess = isOwner || isAssignee || isSupervisor || isCoordinator || isDeptLeader;
 
     return {
@@ -559,28 +463,7 @@ export class TasksService implements OnModuleInit {
             creatorEmployeeCode: { in: allAllowedCodes }
           });
         }
-        
-        scopingConditions.push(...leaderOrConditions);
-      } else if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
-        // Fallback cũ nếu có
-        const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
 
-        const empsInDepts = await this.prisma.employee.findMany({
-          where: { departmentId: { in: descendantDeptIds } },
-          select: { employeeCode: true }
-        });
-        const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
-
-        const leaderOrConditions: any[] = [];
-        if (deptEmployeeCodes.length > 0) {
-          leaderOrConditions.push({
-            participants: {
-              some: { employeeCode: { in: deptEmployeeCodes }, participantRole: 'ASSIGNEE' }
-            }
-          });
-          leaderOrConditions.push({ creatorEmployeeCode: { in: deptEmployeeCodes } });
-        }
-        leaderOrConditions.push({ plan: { departmentId: { in: descendantDeptIds } } });
         scopingConditions.push(...leaderOrConditions);
       }
 
