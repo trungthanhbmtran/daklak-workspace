@@ -451,13 +451,12 @@ export class TasksController implements OnModuleInit {
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: id }),
     );
-    const taskData = taskResponse?.data || taskResponse;
-    if (!taskData) {
+    if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
     }
 
     // Chỉ owner (người được giao hiện tại) hoặc admin mới được tạo task con
-    if (!isAdmin && taskData.assigneeCode !== assignerCode) {
+    if (!isAdmin && taskResponse.assigneeCode !== assignerCode) {
       throw new Error(
         'Bạn không có quyền phân rã nhiệm vụ này (Không phải người đang xử lý).',
       );
@@ -551,12 +550,11 @@ export class TasksController implements OnModuleInit {
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: id }),
     );
-    const taskData = taskResponse?.data || taskResponse;
-    if (!taskData) throw new Error('Task not found.');
+    if (!taskResponse) throw new Error('Task not found.');
 
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
-    const isOwner = taskData.assigneeCode === requesterCode;
-    const isAssigner = taskData.assignerCode === requesterCode;
+    const isOwner = taskResponse.assigneeCode === requesterCode;
+    const isAssigner = taskResponse.assignerCode === requesterCode;
 
     return firstValueFrom(
       this.taskService.RequestCoordination({
