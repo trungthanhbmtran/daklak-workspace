@@ -782,7 +782,7 @@ export class TasksService implements OnModuleInit {
         const uid = getUserId(assigneeCode || 'UNASSIGNED');
         if (uid !== undefined && uid !== null) {
           await tx.taskParticipant.create({
-            data: { taskId: id, userId: uid, participantRole: TaskRole.ASSIGNEE }
+            data: { taskId: id, userId: uid, employeeCode: assigneeCode || 'UNASSIGNED', participantRole: TaskRole.ASSIGNEE }
           });
         }
       }
@@ -795,7 +795,7 @@ export class TasksService implements OnModuleInit {
         const uid = getUserId(assignerCode);
         if (uid !== undefined && uid !== null) {
           await tx.taskParticipant.create({
-            data: { taskId: id, userId: uid, participantRole: TaskRole.OWNER }
+            data: { taskId: id, userId: uid, employeeCode: assignerCode, participantRole: TaskRole.OWNER }
           });
         }
       }
@@ -809,7 +809,7 @@ export class TasksService implements OnModuleInit {
         coassigneeCodes.forEach(code => {
           const uid = getUserId(code);
           if (uid) {
-            coData.push({ taskId: id, userId: uid, participantRole: TaskRole.COORDINATOR });
+            coData.push({ taskId: id, userId: uid, employeeCode: code, participantRole: TaskRole.COORDINATOR });
           }
         });
         if (coData.length > 0) {
@@ -945,6 +945,7 @@ export class TasksService implements OnModuleInit {
         coData.push({
           taskId: id,
           userId: parseInt(emp.userId, 10),
+          employeeCode: emp.employeeCode,
           participantRole: TaskRole.COORDINATOR
         });
       }
