@@ -400,18 +400,6 @@ export class TasksService implements OnModuleInit {
     await this.populateQueryHierarchy(query);
     const where: any = {};
 
-    // Resolve currentUserId by currentUserCode
-    let currentUserId: number | undefined = undefined;
-    if (query.currentUserCode) {
-      const currentEmp = await this.prisma.employee.findUnique({
-        where: { employeeCode: query.currentUserCode },
-        select: { userId: true }
-      });
-      if (currentEmp?.userId) {
-        currentUserId = parseInt(currentEmp.userId, 10);
-      }
-    }
-
     const conditions: any[] = [];
 
     // Default status filter
@@ -422,11 +410,11 @@ export class TasksService implements OnModuleInit {
     }
 
     // Role filter
-    if (query.role && currentUserId) {
+    if (query.role && query.currentUserCode) {
       conditions.push({
         participants: {
           some: {
-            userId: currentUserId,
+            employeeCode: query.currentUserCode,
             participantRole: query.role
           }
         }
@@ -448,7 +436,7 @@ export class TasksService implements OnModuleInit {
             {
               participants: {
                 some: {
-                  userId: 0,
+                  employeeCode: 'UNASSIGNED',
                   participantRole: TaskRole.ASSIGNEE
                 }
               }
@@ -456,43 +444,27 @@ export class TasksService implements OnModuleInit {
           ]
         });
       } else {
-        const emp = await this.prisma.employee.findUnique({
-          where: { employeeCode: query.assigneeCode },
-          select: { userId: true }
-        });
-        if (emp?.userId) {
-          conditions.push({
-            participants: {
-              some: {
-                userId: parseInt(emp.userId, 10),
-                participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
-              }
+        conditions.push({
+          participants: {
+            some: {
+              employeeCode: query.assigneeCode,
+              participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
             }
-          });
-        } else {
-          conditions.push({ id: -1 });
-        }
+          }
+        });
       }
     }
 
     // Assigner/Owner filter
     if (query.assignerCode) {
-      const emp = await this.prisma.employee.findUnique({
-        where: { employeeCode: query.assignerCode },
-        select: { userId: true }
-      });
-      if (emp?.userId) {
-        conditions.push({
-          participants: {
-            some: {
-              userId: parseInt(emp.userId, 10),
-              participantRole: TaskRole.OWNER
-            }
+      conditions.push({
+        participants: {
+          some: {
+            employeeCode: query.assignerCode,
+            participantRole: TaskRole.OWNER
           }
-        });
-      } else {
-        conditions.push({ id: -1 });
-      }
+        }
+      });
     }
 
     // Security Data Scoping constraints
@@ -503,13 +475,16 @@ export class TasksService implements OnModuleInit {
       const scopingConditions: any[] = [];
 
       // 1. Participant check
-      if (currentUserId) {
+      if (query.currentUserCode) {
         scopingConditions.push({
           participants: {
             some: {
-              userId: currentUserId
+              employeeCode: query.currentUserCode
             }
           }
+        });
+        scopingConditions.push({
+          creatorEmployeeCode: query.currentUserCode
         });
       }
 
@@ -518,32 +493,31 @@ export class TasksService implements OnModuleInit {
       if (isLeader && query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
         const descendantDeptIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
 
-        // Fetch employee userIds in these departments
+        // Fetch employeeCodes in these departments
         const empsInDepts = await this.prisma.employee.findMany({
           where: {
-            departmentId: { in: descendantDeptIds },
-            userId: { not: null }
+            departmentId: { in: descendantDeptIds }
           },
           select: {
-            userId: true
+            employeeCode: true
           }
         });
-        const deptUserIds = empsInDepts.map(e => parseInt(e.userId!, 10)).filter(Boolean);
+        const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
 
         const leaderOrConditions: any[] = [];
-        if (deptUserIds.length > 0) {
+        if (deptEmployeeCodes.length > 0) {
           // Assignee belongs to these departments
           leaderOrConditions.push({
             participants: {
               some: {
-                userId: { in: deptUserIds },
+                employeeCode: { in: deptEmployeeCodes },
                 participantRole: 'ASSIGNEE'
               }
             }
           });
           // Creator belongs to these departments
           leaderOrConditions.push({
-            creatorUserId: { in: deptUserIds }
+            creatorEmployeeCode: { in: deptEmployeeCodes }
           });
         }
         // Plan belongs to these departments
