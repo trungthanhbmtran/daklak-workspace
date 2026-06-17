@@ -140,8 +140,11 @@ export class TasksService implements OnModuleInit {
         );
         query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
         query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
+        console.log('[DEBUG HRM] GetSubordinates response:', JSON.stringify(subordinatesRes));
+        console.log('[DEBUG HRM] Allowed Depts:', query.allowedDepartmentIds);
+        console.log('[DEBUG HRM] Allowed Codes:', query.allowedEmployeeCodes);
       } catch (e) {
-        console.error('Failed to get subordinates in hrm-service:', e);
+        console.error('[DEBUG HRM] Failed to get subordinates in hrm-service:', e);
       }
     }
   }
@@ -468,14 +471,18 @@ export class TasksService implements OnModuleInit {
       }
 
       if (scopingConditions.length > 0) {
+        console.log('[DEBUG HRM] Applied Scoping Conditions:', JSON.stringify(scopingConditions));
         conditions.push({
           OR: scopingConditions
         });
       } else {
+        console.log('[DEBUG HRM] NO SCOPING CONDITIONS. Returning empty data.');
         // If no scoping conditions can be resolved, prevent any query return
         conditions.push({ id: -1 });
       }
     }
+
+    console.log('[DEBUG HRM] Final Prisma Where Conditions:', JSON.stringify(conditions));
 
     if (conditions.length > 0) {
       where.AND = conditions;
