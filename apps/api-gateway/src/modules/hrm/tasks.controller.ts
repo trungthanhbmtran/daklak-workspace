@@ -39,8 +39,8 @@ export class TasksController implements OnModuleInit {
   private getGrpcMetadata(req: any) {
     const Metadata = require('@grpc/grpc-js').Metadata;
     const meta = new Metadata();
-    if (req?.user) {
-      meta.add('user', JSON.stringify(req.user));
+    if (req?.headers?.authorization) {
+      meta.add('authorization', req.headers.authorization);
     }
     return meta;
   }
