@@ -36,6 +36,16 @@ export class TasksController implements OnModuleInit {
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
+  private getGrpcMetadata(req: any) {
+    const Metadata = require('@grpc/grpc-js').Metadata;
+    const meta = new Metadata();
+    if (req?.user) {
+      meta.add('user', JSON.stringify(req.user));
+    }
+    return meta;
+  }
+
+
   private async populateUsers(tasks: any[]) {
     if (!tasks || tasks.length === 0) return tasks;
 
@@ -121,7 +131,7 @@ export class TasksController implements OnModuleInit {
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
     }
-    return firstValueFrom(this.taskService.CreateTask(body));
+    return firstValueFrom(this.taskService.CreateTask(body, this.getGrpcMetadata(req)));
   }
 
   @Get()
@@ -182,7 +192,7 @@ export class TasksController implements OnModuleInit {
     console.log('[TasksController] ListTasks Request Payload:', JSON.stringify(requestPayload, null, 2));
 
     const response: any = await firstValueFrom(
-      this.taskService.ListTasks(requestPayload),
+      this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
     );
 
     console.log('[TasksController] ListTasks Raw Response Data Length:', response?.data?.length);
@@ -208,7 +218,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
+  async update(@Req() req: any, @Param('id', ParseIntPipe) id: number, @Body() body: any) {
     return firstValueFrom(
       this.taskService.UpdateTask({
         id,
@@ -219,7 +229,7 @@ export class TasksController implements OnModuleInit {
         baseScore: body.baseScore,
         title: body.title,
         description: body.description,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -241,7 +251,7 @@ export class TasksController implements OnModuleInit {
         currentUserPermissions: user?.permissionsFlatten || [],
         currentUserId: user?.id,
         currentUserCode: user?.employeeCode || user?.username,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -271,7 +281,7 @@ export class TasksController implements OnModuleInit {
           currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
           currentUserCode: user?.employeeCode,
           currentUserPermissions: user?.permissionsFlatten || [],
-        }),
+        }, this.getGrpcMetadata(req)),
       );
     } catch (e) {
       console.error('Failed to call recommendAssignees from taskService:', e);
@@ -341,7 +351,7 @@ export class TasksController implements OnModuleInit {
         currentUserPermissions: user?.permissionsFlatten || [],
         currentUserId: user?.id,
         currentUserCode: user?.employeeCode || user?.username,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -363,7 +373,7 @@ export class TasksController implements OnModuleInit {
         isAdmin: isAdmin,
         isLeader: isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*'),
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
     if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
@@ -382,7 +392,7 @@ export class TasksController implements OnModuleInit {
         id: id,
         parentId: id,
         assignerCode,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -402,7 +412,7 @@ export class TasksController implements OnModuleInit {
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -428,7 +438,7 @@ export class TasksController implements OnModuleInit {
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -455,7 +465,7 @@ export class TasksController implements OnModuleInit {
         isAdmin: isAdmin,
         isLeader: isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*'),
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
     if (!taskResponse) throw new Error('Task not found.');
     const isOwner = taskResponse.assigneeCode === requesterCode;
@@ -470,7 +480,7 @@ export class TasksController implements OnModuleInit {
         coordinatorIds: coordinatorCodes || [],
         leadCode: leadCode || '',
         coordinatorCodes: coordinatorCodes || [],
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -485,7 +495,7 @@ export class TasksController implements OnModuleInit {
         id,
         progress,
         actorCode: req.user?.employeeCode || '',
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 
@@ -505,7 +515,7 @@ export class TasksController implements OnModuleInit {
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      }),
+      }, this.getGrpcMetadata(req)),
     );
   }
 

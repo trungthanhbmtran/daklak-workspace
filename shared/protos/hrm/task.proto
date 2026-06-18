@@ -26,18 +26,12 @@ message AssignTaskRequest {
   string assignerCode = 4;
   repeated string coassigneeCodes = 5;
 
-  repeated string currentUserPermissions = 7;
-  int32 currentUserId = 8;
-  string currentUserCode = 9;
 }
 
 message RecommendAssigneesRequest {
   string rankCode = 1;
   string strategy = 2; // "HIGH_PERFORMANCE" or "LOW_PERFORMANCE"
-  int32 currentUserId = 3;
-  string currentUserCode = 4;
   string domainId = 5;
-  repeated string currentUserPermissions = 6;
   string jobTitleId = 7;
   repeated int32 allowedDepartmentIds = 8;
   repeated string allowedEmployeeCodes = 9;
@@ -152,18 +146,13 @@ message ListTasksRequest {
   string search = 3; // optional
   int32 departmentId = 4; // optional
   bool isSupervisor = 5; // optional
-  string currentUserCode = 6; // optional
-  bool isAdmin = 7; // optional
-  int32 currentUserDept = 8; // optional
   string assignerCode = 9; // optional - lọc theo người giao việc (tab Đã giao)
   string status = 10; // optional - lọc theo trạng thái
   string priority = 11; // optional - lọc theo mức độ ưu tiên
   int32 planId = 12; // optional - id kế hoạch
   string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
-  bool isLeader = 16;
   repeated int32 allowedDepartmentIds = 17;
   repeated string allowedEmployeeCodes = 18;
-  int32 currentUserId = 19;
 }
 
 message TaskStats {
@@ -186,9 +175,6 @@ message UpdateTaskStatusRequest {
   string status = 2;
   string rejectReason = 3; // optional
   string actorCode = 4;    // người thực hiện (từ JWT)
-  repeated string currentUserPermissions = 5;
-  int32 currentUserId = 6;
-  string currentUserCode = 7;
 }
 
 message UpdateTaskRequest {
@@ -276,18 +262,10 @@ message AddCommentRequest {
   string authorCode = 2;
   string content = 3;
   bool isSystemMessage = 4;
-  string currentUserCode = 5;
-  bool isAdmin = 6;
-  bool isLeader = 7;
-  int32 currentUserDept = 8;
 }
 
 message GetCommentsRequest {
   int32 taskId = 1;
-  string currentUserCode = 2;
-  bool isAdmin = 3;
-  int32 currentUserDept = 4;
-  bool isLeader = 7;
 }
 
 message GetCommentsResponse {
@@ -327,10 +305,6 @@ message DelegationNode {
 
 message GetSubTasksRequest {
   int32 taskId = 1;
-  string currentUserCode = 2;
-  bool isAdmin = 3;
-  int32 currentUserDept = 4;
-  bool isLeader = 7;
 }
 
 message GetSubTasksResponse {
@@ -342,10 +316,6 @@ message GetSubTasksResponse {
 // ─── GetTask ───────────────────────────────────────────────────────────────
 message GetTaskRequest {
   int32 id = 1;
-  string currentUserCode = 2;
-  bool isAdmin = 3;
-  int32 currentUserDept = 4;
-  bool isLeader = 7;
 }
 
 // ─── BreakdownTask ─────────────────────────────────────────────────────────
@@ -360,6 +330,7 @@ message BreakdownTaskRequest {
   float baseScore = 8;
   float weight = 9;
   int32 departmentId = 10;
+  
 }
 
 // ─── UpdateTaskProgress ────────────────────────────────────────────────────
@@ -378,6 +349,7 @@ message RequestCoordinationRequest {
   repeated string coordinatorIds = 5;
   string leadCode = 6;
   repeated string coordinatorCodes = 7;
+  
 }
 
 message CoordinationResponse {

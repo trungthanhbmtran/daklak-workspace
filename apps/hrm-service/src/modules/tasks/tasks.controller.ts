@@ -1,8 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseInterceptors } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { TasksService } from './tasks.service';
+import { GrpcContextInterceptor } from '../../core/interceptors/grpc-context.interceptor';
 
 @Controller()
+@UseInterceptors(GrpcContextInterceptor)
 export class TasksController {
   constructor(private readonly tasksService: TasksService) { }
 

@@ -1206,6 +1206,23 @@ export class TasksService implements OnModuleInit {
     return this.toTaskResponse(enriched[0]);
   }
   async breakdownTask(id: number, data: any) {
+    const parentTask = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
+    });
+    if (!parentTask) throw new RpcException('Nhiệm vụ không tồn tại.');
+
+    await this.enrichTasks([parentTask]);
+    const access = await this.checkTaskAccess(parentTask, data);
+    if (!access.hasAccess) {
+      throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
+    }
+
+    const allowedActions = await this.computeAllowedActions(parentTask, data);
+    if (!allowedActions.includes('ADD_SUBTASK')) {
+      throw new RpcException('Bạn không có quyền phân rã nhiệm vụ này.');
+    }
+
     return this.createSubTask(id, data);
   }
   async addComment(id: number, data: any) {
@@ -1321,6 +1338,23 @@ export class TasksService implements OnModuleInit {
     return { success: true, data };
   }
   async requestCoordination(id: number, data: any) {
+    const t = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
+    });
+    if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
+
+    await this.enrichTasks([t]);
+    const access = await this.checkTaskAccess(t, data);
+    if (!access.hasAccess) {
+      throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
+    }
+
+    const allowedActions = await this.computeAllowedActions(t, data);
+    if (!allowedActions.includes('COORDINATE')) {
+      throw new RpcException('Bạn không có quyền yêu cầu phối hợp trong công việc này.');
+    }
+
     const leadCode = data.leadId || data.leadCode;
     const coordinatorCodes = data.coordinatorIds || data.coordinatorCodes || [];
     const message = data.message;
