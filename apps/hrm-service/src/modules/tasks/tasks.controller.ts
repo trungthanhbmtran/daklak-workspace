@@ -33,7 +33,8 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'BreakdownTask')
   breakdownTask(data: any) {
-    return this.tasksService.breakdownTask(data.id, data);
+    const parentId = data.id || data.parentId;
+    return this.tasksService.breakdownTask(parentId, data);
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskProgress')
