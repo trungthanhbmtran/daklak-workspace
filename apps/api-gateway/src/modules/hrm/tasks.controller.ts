@@ -42,7 +42,7 @@ export class TasksController implements OnModuleInit {
     // Collect all employee codes and potential user IDs
     const empCodes = new Set<string>();
     const userIds = new Set<number>();
-    
+
     const collectCodes = (task: any) => {
       if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') {
         empCodes.add(task.assigneeCode);
@@ -178,7 +178,7 @@ export class TasksController implements OnModuleInit {
       currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
       role,
     };
-    
+
     console.log('[TasksController] ListTasks Request Payload:', JSON.stringify(requestPayload, null, 2));
 
     const response: any = await firstValueFrom(
@@ -329,7 +329,7 @@ export class TasksController implements OnModuleInit {
 
     const user = req.user;
     const assignerCode = user?.employeeCode;
-    
+
 
     return firstValueFrom(
       this.taskService.AssignTask({
@@ -355,7 +355,7 @@ export class TasksController implements OnModuleInit {
     const assignerCode = user?.employeeCode;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
-    
+
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: id }),
     );
@@ -438,7 +438,7 @@ export class TasksController implements OnModuleInit {
 
     const user = req.user;
     const requesterCode = user?.employeeCode;
-    
+
 
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: id }),
@@ -488,7 +488,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.GetSubTasks({
-        id: id,
+        taskId: id,
         currentUserCode: user?.employeeCode,
         isAdmin,
         isLeader,
