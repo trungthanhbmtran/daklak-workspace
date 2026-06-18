@@ -840,13 +840,14 @@ export class TasksService implements OnModuleInit {
     });
     if (!t) throw new RpcException('Không tìm thấy nhiệm vụ');
 
+    const enriched = await this.enrichTasks([t]);
+
     const access = await this.checkTaskAccess(t, query);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
     }
 
     const allowedActions = await this.computeAllowedActions(t, query);
-    const enriched = await this.enrichTasks([t]);
 
     return this.toTaskResponse({
       ...enriched[0],
@@ -864,6 +865,7 @@ export class TasksService implements OnModuleInit {
       }
     });
     if (!parentTask) throw new RpcException('Nhiệm vụ không tồn tại');
+    await this.enrichTasks([parentTask]);
     const parentAccess = await this.checkTaskAccess(parentTask, query);
     if (!parentAccess.hasAccess) {
       throw new RpcException('Bạn không có quyền xem nhiệm vụ con của công việc này.');
@@ -1213,6 +1215,7 @@ export class TasksService implements OnModuleInit {
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
 
+    await this.enrichTasks([t]);
     const access = await this.checkTaskAccess(t, data);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
@@ -1264,6 +1267,7 @@ export class TasksService implements OnModuleInit {
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
 
+    await this.enrichTasks([t]);
     const access = await this.checkTaskAccess(t, query);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
