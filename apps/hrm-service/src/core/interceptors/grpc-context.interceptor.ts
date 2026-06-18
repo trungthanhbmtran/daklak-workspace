@@ -26,8 +26,6 @@ export class GrpcContextInterceptor implements NestInterceptor {
             Object.assign(data, {
               currentUserCode: user.employeeCode || user.username,
               currentUserId: user.id ? parseInt(user.id, 10) : undefined,
-              isAdmin: user.permissionsFlatten?.includes('TASK:MANAGE'),
-              isLeader: user.permissionsFlatten?.includes('TASK:MANAGE') || user.permissionsFlatten?.includes('TASK.ASSIGN') || user.permissionsFlatten?.includes('TASK.*'),
               currentUserDept: user.unitId ? parseInt(user.unitId, 10) : undefined,
               currentUserPermissions: user.permissionsFlatten || [],
             });
