@@ -660,12 +660,12 @@ export class UsersService implements OnModuleInit {
       if (!pos.unitId || !pos.jobTitle) continue;
       const myRank = pos.jobTitle.rank;
 
-      // 1. Giao việc trong cùng đơn vị: rank >= myRank (Bao gồm cả cấp phó hoặc người cùng cấp bậc)
+      // 1. Giao việc trong cùng đơn vị: rank > myRank (Không bao gồm người cùng cấp bậc)
       const sameUnitColleagues = await this.prisma.jobPosition.findMany({
         where: {
           unitId: pos.unitId,
           endDate: null,
-          jobTitle: { rank: { gte: myRank } },
+          jobTitle: { rank: { gt: myRank } },
           user: { isActive: true },
         },
         include: { user: true },
@@ -727,6 +727,11 @@ export class UsersService implements OnModuleInit {
           }
         }
       }
+    }
+
+    // Xóa chính mình khỏi danh sách được giao việc
+    if (user.employeeCode) {
+      empCodes.delete(user.employeeCode);
     }
 
     return {
