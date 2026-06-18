@@ -246,8 +246,20 @@ export class TasksService implements OnModuleInit {
       return [];
     }
 
+    let hasChildren = false;
+    if (t.children && t.children.length > 0) {
+      hasChildren = true;
+    } else if (t._count && typeof t._count.children === 'number') {
+      hasChildren = t._count.children > 0;
+    } else {
+      const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: t.id, depth: 1 } });
+      hasChildren = childrenCount > 0;
+    }
+
     if (access.isAdmin) {
-      return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
+      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
+      return actions;
     }
 
     let isTreeParticipant = access.isOwner || access.isAssignee || access.isSupervisor || access.isCoordinator;
@@ -290,19 +302,24 @@ export class TasksService implements OnModuleInit {
     }
 
     if (access.isDeptLeader && isTreeParticipant) {
-      return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
+      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
+      return actions;
     }
 
     const actions: string[] = [];
 
     if (access.isOwner) {
-      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT');
+      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
     } else {
       if (access.isAssignee) {
-        actions.push('COMPLETE', 'COORDINATE', 'ADD_SUBTASK', 'CHAT');
+        actions.push('ADD_SUBTASK', 'CHAT');
+        if (!hasChildren) actions.push('COMPLETE', 'COORDINATE');
       }
       if (access.isSupervisor) {
-        actions.push('COMPLETE', 'RETURN', 'CHAT');
+        actions.push('CHAT');
+        if (!hasChildren) actions.push('COMPLETE', 'RETURN');
       }
       if (access.isCoordinator) {
         actions.push('CHAT');
