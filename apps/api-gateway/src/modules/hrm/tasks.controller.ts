@@ -39,9 +39,16 @@ export class TasksController implements OnModuleInit {
   private getGrpcMetadata(req: any) {
     const Metadata = require('@grpc/grpc-js').Metadata;
     const meta = new Metadata();
-    if (req?.headers?.authorization) {
+    
+    if (req?.user) {
+      const jwt = require('jsonwebtoken');
+      // Encode full req.user (including permissionsFlatten, employeeCode) into an internal token
+      const internalToken = jwt.sign(req.user, process.env.JWT_SECRET || 'super-secret');
+      meta.add('authorization', `Bearer ${internalToken}`);
+    } else if (req?.headers?.authorization) {
       meta.add('authorization', req.headers.authorization);
     }
+    
     return meta;
   }
 

@@ -13,9 +13,11 @@ export class GrpcContextInterceptor implements NestInterceptor {
     const rpcCtx = context.switchToRpc();
     const data = rpcCtx.getData();
     const metadata = rpcCtx.getContext();
+    console.log('[DEBUG Interceptor] Executing... Metadata keys:', metadata ? Object.keys(metadata) : 'NONE');
 
     if (metadata && metadata.get) {
       const authHeader = metadata.get('authorization')?.[0];
+      console.log('[DEBUG Interceptor] authHeader:', authHeader);
       if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
         try {
