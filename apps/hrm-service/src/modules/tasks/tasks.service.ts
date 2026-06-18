@@ -246,7 +246,50 @@ export class TasksService implements OnModuleInit {
       return [];
     }
 
-    if (access.isAdmin || access.isDeptLeader) {
+    if (access.isAdmin) {
+      return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
+    }
+
+    let isTreeParticipant = access.isOwner || access.isAssignee || access.isSupervisor || access.isCoordinator;
+
+    if (!isTreeParticipant && access.isDeptLeader) {
+      const closures = await this.prisma.taskClosure.findMany({
+        where: {
+          OR: [
+            { descendantId: t.id },
+            { ancestorId: t.id }
+          ]
+        },
+        select: { ancestorId: true, descendantId: true }
+      });
+      const relatedTaskIds = new Set<number>();
+      closures.forEach(c => {
+        if (c.ancestorId !== t.id) relatedTaskIds.add(c.ancestorId);
+        if (c.descendantId !== t.id) relatedTaskIds.add(c.descendantId);
+      });
+
+      if (relatedTaskIds.size > 0) {
+        const relatedTasks = await this.prisma.task.findMany({
+          where: { id: { in: Array.from(relatedTaskIds) } },
+          include: { participants: true }
+        });
+        await this.enrichTasks(relatedTasks);
+        for (const relT of relatedTasks as any[]) {
+          if (
+            relT.assignerCode === query.currentUserCode ||
+            relT.creatorEmployeeCode === query.currentUserCode ||
+            relT.assigneeCode === query.currentUserCode ||
+            relT.supervisorCode === query.currentUserCode ||
+            (Array.isArray(relT.coassigneeCodes) && relT.coassigneeCodes.includes(query.currentUserCode))
+          ) {
+            isTreeParticipant = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (access.isDeptLeader && isTreeParticipant) {
       return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
     }
 
@@ -680,6 +723,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any) {
+    if (context) await this.populateQueryHierarchy(context);
     const tCheck = await this.prisma.task.findUnique({ where: { id } });
     if (!tCheck) throw new RpcException('Nhiệm vụ không tồn tại');
 
@@ -1206,6 +1250,7 @@ export class TasksService implements OnModuleInit {
     return this.toTaskResponse(enriched[0]);
   }
   async breakdownTask(id: number, data: any) {
+    await this.populateQueryHierarchy(data);
     const parentTask = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
@@ -1226,6 +1271,7 @@ export class TasksService implements OnModuleInit {
     return this.createSubTask(id, data);
   }
   async addComment(id: number, data: any) {
+    await this.populateQueryHierarchy(data);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
@@ -1338,6 +1384,7 @@ export class TasksService implements OnModuleInit {
     return { success: true, data };
   }
   async requestCoordination(id: number, data: any) {
+    await this.populateQueryHierarchy(data);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
