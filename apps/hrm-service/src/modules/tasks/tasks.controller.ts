@@ -33,8 +33,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'BreakdownTask')
   breakdownTask(data: any) {
-    const parentId = data.id || data.parentId;
-    return this.tasksService.breakdownTask(parentId, data);
+    return this.tasksService.breakdownTask(data.parentId, data);
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskProgress')
@@ -58,17 +57,17 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'AddComment')
   addComment(data: any) {
-    return this.tasksService.addComment(data.taskId || data.id, data);
+    return this.tasksService.addComment(data.taskId, data);
   }
 
   @GrpcMethod('TaskService', 'GetComments')
   getComments(data: any) {
-    return this.tasksService.getComments(data.taskId || data.id, data);
+    return this.tasksService.getComments(data.taskId, data);
   }
 
   @GrpcMethod('TaskService', 'GetSubTasks')
   getSubTasks(data: any) {
-    return this.tasksService.getSubTasks(data.id, data);
+    return this.tasksService.getSubTasks(data.taskId, data);
   }
 
   @GrpcMethod('TaskService', 'RequestCoordination')

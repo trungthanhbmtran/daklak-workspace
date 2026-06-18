@@ -414,7 +414,7 @@ export class TasksController implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.*');
     return firstValueFrom(
       this.taskService.AddComment({
-        id: id,
+        taskId: id,
         authorCode: req.user?.employeeCode || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
@@ -451,7 +451,7 @@ export class TasksController implements OnModuleInit {
 
     return firstValueFrom(
       this.taskService.RequestCoordination({
-        id: id,
+        taskId: id,
         requesterCode,
         message: message || '',
         leadId: leadCode || '',
