@@ -357,7 +357,13 @@ export class TasksController implements OnModuleInit {
 
 
     const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask({ id: id }),
+      this.taskService.GetTask({ 
+        id: id,
+        currentUserCode: assignerCode,
+        isAdmin: isAdmin,
+        isLeader: isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*'),
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+      }),
     );
     if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
@@ -440,12 +446,18 @@ export class TasksController implements OnModuleInit {
     const requesterCode = user?.employeeCode;
 
 
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
+
     const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask({ id: id }),
+      this.taskService.GetTask({ 
+        id: id,
+        currentUserCode: requesterCode,
+        isAdmin: isAdmin,
+        isLeader: isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*'),
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+      }),
     );
     if (!taskResponse) throw new Error('Task not found.');
-
-    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isOwner = taskResponse.assigneeCode === requesterCode;
     const isAssigner = taskResponse.assignerCode === requesterCode;
 
