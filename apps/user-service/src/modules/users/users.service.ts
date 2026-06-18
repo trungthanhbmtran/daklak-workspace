@@ -660,18 +660,22 @@ export class UsersService implements OnModuleInit {
       if (!pos.unitId || !pos.jobTitle) continue;
       const myRank = pos.jobTitle.rank;
 
-      // 1. Giao việc trong cùng đơn vị: rank > myRank (Không bao gồm người cùng cấp bậc)
-      const sameUnitColleagues = await this.prisma.jobPosition.findMany({
+      // 1. Giao việc trong cùng đơn vị: Chỉ giao cho cấp dưới trực tiếp (rank tiếp theo ngay sau myRank)
+      const lowerRanks = await this.prisma.jobPosition.findMany({
         where: {
           unitId: pos.unitId,
           endDate: null,
           jobTitle: { rank: { gt: myRank } },
           user: { isActive: true },
         },
-        include: { user: true },
+        include: { jobTitle: true, user: true },
       });
-      for (const col of sameUnitColleagues) {
-        if (col.user.employeeCode) empCodes.add(col.user.employeeCode);
+      if (lowerRanks.length > 0) {
+        const nextRank = Math.min(...lowerRanks.map(p => p.jobTitle.rank));
+        const directSubordinates = lowerRanks.filter(p => p.jobTitle.rank === nextRank);
+        for (const col of directSubordinates) {
+          if (col.user.employeeCode) empCodes.add(col.user.employeeCode);
+        }
       }
 
       // 2. Xác định các đơn vị con / được phân công theo dõi
@@ -710,7 +714,7 @@ export class UsersService implements OnModuleInit {
         }
       }
 
-      // 3. Với các đơn vị cấp dưới, tìm những người có rank cao nhất (Trưởng / Phó)
+      // 3. Với các đơn vị cấp dưới, chỉ lấy người có rank cao nhất (cấp dưới trực tiếp của đơn vị cha)
       for (const childUnitId of Array.from(deptIds)) {
         const allChildPositions = await this.prisma.jobPosition.findMany({
           where: { unitId: childUnitId, endDate: null, user: { isActive: true } },
@@ -718,10 +722,10 @@ export class UsersService implements OnModuleInit {
         });
         if (allChildPositions.length > 0) {
           const distinctRanks = [...new Set(allChildPositions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
-          // Lấy top 2 ranks (Trưởng và Phó)
-          const topRanks = distinctRanks.slice(0, 2);
+          // Lấy duy nhất rank cao nhất
+          const topRank = distinctRanks[0];
           for (const p of allChildPositions) {
-            if (topRanks.includes(p.jobTitle.rank) && p.user.employeeCode) {
+            if (p.jobTitle.rank === topRank && p.user.employeeCode) {
               empCodes.add(p.user.employeeCode);
             }
           }
