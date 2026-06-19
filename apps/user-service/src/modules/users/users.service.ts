@@ -696,16 +696,17 @@ export class UsersService implements OnModuleInit {
         }
       }
 
-      // Nếu là rank cao nhất trong unit, tự động có quyền với tất cả đơn vị con
+      // Nếu là Trưởng hoặc Cấp phó (rank 1 hoặc 2 trong unit), tự động có quyền với tất cả đơn vị con
       const allRanksInUnit = await this.prisma.jobPosition.findMany({
         where: { unitId: pos.unitId, endDate: null },
         include: { jobTitle: true },
       });
-      const minRank = allRanksInUnit.length > 0 
-        ? Math.min(...allRanksInUnit.map((p) => p.jobTitle.rank)) 
-        : myRank;
+      
+      const distinctRanksInUnit = [...new Set(allRanksInUnit.map(p => p.jobTitle.rank))].sort((a, b) => a - b);
+      const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
+      const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
 
-      if (myRank <= minRank) {
+      if (myRank <= secondMinRank) {
         const childUnits = await this.prisma.organizationUnit.findMany({
           where: { parentId: pos.unitId },
         });
