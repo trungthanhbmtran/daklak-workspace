@@ -287,19 +287,20 @@ export class TasksService implements OnModuleInit {
 
     if (access.isOwner) {
       actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
-    } else {
-      if (access.isAssignee) {
-        actions.push('ADD_SUBTASK', 'CHAT');
-        if (!hasChildren) actions.push('COMPLETE', 'COORDINATE');
-      }
-      if (access.isSupervisor) {
-        actions.push('CHAT');
-        if (!hasChildren) actions.push('COMPLETE', 'RETURN');
-      }
-      if (access.isCoordinator) {
-        actions.push('CHAT');
-      }
+    }
+
+    if (access.isAssignee) {
+      actions.push('ADD_SUBTASK', 'CHAT');
+      if (!hasChildren) actions.push('COMPLETE', 'COORDINATE');
+    }
+
+    if (access.isSupervisor) {
+      actions.push('CHAT');
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN');
+    }
+
+    if (access.isCoordinator) {
+      actions.push('CHAT');
     }
 
     if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
