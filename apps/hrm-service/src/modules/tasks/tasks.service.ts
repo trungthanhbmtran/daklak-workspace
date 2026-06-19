@@ -171,25 +171,13 @@ export class TasksService implements OnModuleInit {
     }
 
     const perms = query.currentUserPermissions || [];
-
     const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
-    if (isAdmin) {
-      return {
-        hasAccess: true,
-        isAdmin: true,
-        isOwner: true,
-        isAssignee: true,
-        isSupervisor: true,
-        isCoordinator: true,
-        isDeptLeader: true,
-      };
-    }
-
     const currentUserCode = query.currentUserCode;
+
     if (!currentUserCode) {
       return {
-        hasAccess: false,
-        isAdmin: false,
+        hasAccess: isAdmin, // If they are admin, they have access, but no direct roles
+        isAdmin,
         isOwner: false,
         isAssignee: false,
         isSupervisor: false,
@@ -227,11 +215,11 @@ export class TasksService implements OnModuleInit {
         }
       }
     }
-    const hasAccess = isOwner || isAssignee || isSupervisor || isCoordinator || isDeptLeader;
+    const hasAccess = isAdmin || isOwner || isAssignee || isSupervisor || isCoordinator || isDeptLeader;
 
     return {
       hasAccess,
-      isAdmin: false,
+      isAdmin,
       isOwner,
       isAssignee,
       isSupervisor,
@@ -254,12 +242,6 @@ export class TasksService implements OnModuleInit {
     } else {
       const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: t.id, depth: 1 } });
       hasChildren = childrenCount > 0;
-    }
-
-    if (access.isAdmin) {
-      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
-      return actions;
     }
 
     let isTreeParticipant = access.isOwner || access.isAssignee || access.isSupervisor || access.isCoordinator;
@@ -302,6 +284,10 @@ export class TasksService implements OnModuleInit {
     }
 
     const actions: string[] = [];
+
+    if (access.isAdmin) {
+      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
+    }
 
     if (access.isOwner) {
       actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
