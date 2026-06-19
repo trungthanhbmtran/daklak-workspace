@@ -285,10 +285,6 @@ export class TasksService implements OnModuleInit {
 
     const actions: string[] = [];
 
-    if (access.isAdmin) {
-      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
-    }
-
     if (access.isOwner) {
       actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
       if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
@@ -306,7 +302,7 @@ export class TasksService implements OnModuleInit {
       }
     }
 
-    if (actions.length === 0 && access.isDeptLeader && isTreeParticipant) {
+    if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
       actions.push('CHAT');
     }
 
