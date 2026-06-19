@@ -256,10 +256,10 @@ export class TasksService implements OnModuleInit {
       hasChildren = childrenCount > 0;
     }
 
+    const actionSet = new Set<string>();
+
     if (access.isAdmin) {
-      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
-      return actions;
+      ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'].forEach(a => actionSet.add(a));
     }
 
     let isTreeParticipant = access.isOwner || access.isAssignee || access.isSupervisor || access.isCoordinator;
@@ -302,31 +302,33 @@ export class TasksService implements OnModuleInit {
     }
 
     if (access.isDeptLeader && isTreeParticipant) {
-      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
-      return actions;
+      ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'].forEach(a => actionSet.add(a));
     }
-
-    const actions: string[] = [];
 
     if (access.isOwner) {
-      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
+      ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'].forEach(a => actionSet.add(a));
+      if (!hasChildren) {
+        actionSet.add('COMPLETE').add('RETURN').add('COORDINATE');
+      }
     } else {
       if (access.isAssignee) {
-        actions.push('ADD_SUBTASK', 'CHAT');
-        if (!hasChildren) actions.push('COMPLETE', 'COORDINATE');
+        actionSet.add('ADD_SUBTASK').add('CHAT');
+        if (!hasChildren) {
+          actionSet.add('COMPLETE').add('COORDINATE');
+        }
       }
       if (access.isSupervisor) {
-        actions.push('CHAT');
-        if (!hasChildren) actions.push('COMPLETE', 'RETURN');
+        actionSet.add('CHAT');
+        if (!hasChildren) {
+          actionSet.add('COMPLETE').add('RETURN');
+        }
       }
       if (access.isCoordinator) {
-        actions.push('CHAT');
+        actionSet.add('CHAT');
       }
     }
 
-    return Array.from(new Set(actions));
+    return Array.from(actionSet);
   }
 
   private toTaskResponse(t: any): any {
