@@ -301,12 +301,6 @@ export class TasksService implements OnModuleInit {
       }
     }
 
-    if (access.isDeptLeader && isTreeParticipant) {
-      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
-      return actions;
-    }
-
     const actions: string[] = [];
 
     if (access.isOwner) {
@@ -324,6 +318,10 @@ export class TasksService implements OnModuleInit {
       if (access.isCoordinator) {
         actions.push('CHAT');
       }
+    }
+
+    if (actions.length === 0 && access.isDeptLeader && isTreeParticipant) {
+      actions.push('CHAT');
     }
 
     return Array.from(new Set(actions));
