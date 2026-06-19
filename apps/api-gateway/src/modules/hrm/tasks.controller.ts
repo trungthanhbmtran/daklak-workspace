@@ -386,13 +386,6 @@ export class TasksController implements OnModuleInit {
       throw new Error('Nhiệm vụ không tồn tại');
     }
 
-    // Chỉ owner (người được giao hiện tại), assigner hoặc admin mới được tạo task con
-    if (!isAdmin && taskResponse.assigneeCode !== assignerCode && taskResponse.assignerCode !== assignerCode) {
-      throw new Error(
-        'Bạn không có quyền phân rã nhiệm vụ này (Không phải người đang xử lý hoặc người giao việc).',
-      );
-    }
-
     return firstValueFrom(
       this.taskService.BreakdownTask({
         ...body,
