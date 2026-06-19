@@ -522,9 +522,9 @@ export class UsersService implements OnModuleInit {
     const ids = idsResult.map((u) => u.id);
     const users = ids.length > 0
       ? await this.prisma.user.findMany({
-          where: { id: { in: ids } },
-          orderBy: { id: 'asc' },
-        })
+        where: { id: { in: ids } },
+        orderBy: { id: 'asc' },
+      })
       : [];
 
     return {
