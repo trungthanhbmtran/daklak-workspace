@@ -673,15 +673,38 @@ export class UsersService implements OnModuleInit {
       });
       const hasChildUnits = childUnits.length > 0;
 
-      // 1. Giao việc trong cùng đơn vị: Chỉ giao cho cấp dưới trực tiếp (rank tiếp theo ngay sau myRank)
-      // NẾU là Cấp phó (myRank == secondMinRank) và Đơn vị có đơn vị con (như Sở) => KHÔNG cho phép giao xuống Chuyên viên cùng đơn vị
+      // 1. Giao việc trong cùng đơn vị và đơn vị cấp dưới liền kề
+      const isHead = myRank === minRank;
       const isDeputy = myRank === secondMinRank && myRank > minRank;
-      let canAssignInSameUnit = true;
-      if (isDeputy && hasChildUnits) {
-        canAssignInSameUnit = false;
-      }
 
-      if (canAssignInSameUnit) {
+      if (isHead) {
+        // Cấp trưởng giao cho phó (cùng đơn vị, hoặc rank liền kề nếu không có phó)
+        if (distinctRanksInUnit.length > 1) {
+          const lowerRanks = await this.prisma.jobPosition.findMany({
+            where: {
+              unitId: pos.unitId,
+              endDate: null,
+              jobTitle: { rank: secondMinRank },
+              user: { isActive: true },
+            },
+            include: { jobTitle: true, user: true },
+          });
+          for (const col of lowerRanks) {
+            if (col.user.employeeCode) empCodes.add(col.user.employeeCode);
+          }
+        }
+
+        // Cấp trưởng giao cho trưởng đơn vị cấp dưới liền kề
+        for (const childUnit of childUnits) {
+          deptIds.add(childUnit.id);
+        }
+      } else if (isDeputy) {
+        // Cấp phó chỉ có thể giao việc cho trưởng đơn vị liền kề
+        for (const childUnit of childUnits) {
+          deptIds.add(childUnit.id);
+        }
+      } else {
+        // Các chuyên viên khác giao cho cấp dưới trực tiếp (nếu có)
         const lowerRanks = await this.prisma.jobPosition.findMany({
           where: {
             unitId: pos.unitId,

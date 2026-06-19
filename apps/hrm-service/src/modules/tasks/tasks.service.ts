@@ -1079,18 +1079,10 @@ export class TasksService implements OnModuleInit {
 
       // Giới hạn gợi ý theo Sơ đồ thẩm quyền từ user-service
       if (!isAdmin) {
-        const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
         const allowedCodes = query.allowedEmployeeCodes || [];
 
-        if (allowedDepts.length > 0 || allowedCodes.length > 0) {
-          const orConditions: any[] = [];
-          if (allowedDepts.length > 0) {
-            orConditions.push({ departmentId: { in: allowedDepts } });
-          }
-          if (allowedCodes.length > 0) {
-            orConditions.push({ employeeCode: { in: allowedCodes } });
-          }
-          whereClause.OR = orConditions;
+        if (allowedCodes.length > 0) {
+          whereClause.employeeCode = { in: allowedCodes };
         } else if (query.currentUserCode) {
           // Chỉ thấy bản thân nếu không có quyền gì
           whereClause.employeeCode = query.currentUserCode;
