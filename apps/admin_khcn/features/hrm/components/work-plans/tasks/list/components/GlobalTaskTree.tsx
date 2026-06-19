@@ -31,12 +31,13 @@ function getRoleBadge(task: any) {
 interface TaskRowProps {
   task: any;
   depth: number;
+  indexSequence: string;
   isLastChild?: boolean;
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
 }
 
-function TaskRow({ task, depth, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
+function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2);
 
   const hasChildren = task.children?.length > 0;
@@ -51,9 +52,12 @@ function TaskRow({ task, depth, onSelectTask, onSmartAssign, isLastChild }: Task
 
   return (
     <div className="relative font-sans group/row">
-      {/* Nét dọc nối sub-tasks cùng cấp */}
-      {depth > 0 && !isLastChild && (
-        <div className="absolute left-[-22px] top-[40px] bottom-[-16px] w-[2px] bg-indigo-100 dark:bg-slate-800" />
+      {/* Nét dọc nối sub-tasks liên tục */}
+      {depth > 0 && (
+        <div className={cn(
+          "absolute left-[-22px] top-[-8px] w-[2px] bg-indigo-200 dark:bg-slate-700",
+          isLastChild ? "h-[32px]" : "bottom-[-8px]"
+        )} />
       )}
 
       {/* Row Card */}
@@ -68,12 +72,7 @@ function TaskRow({ task, depth, onSelectTask, onSmartAssign, isLastChild }: Task
       >
         {/* Nét ngang nối từ nét dọc của cha */}
         {depth > 0 && (
-          <div className="absolute left-[-22px] top-[24px] flex items-center">
-            <div className={cn(
-              "w-[22px] border-b-[2px] border-indigo-200 dark:border-slate-700",
-              isLastChild ? "h-[24px] border-l-[2px] absolute bottom-0 left-0" : "h-[2px] absolute"
-            )} />
-          </div>
+          <div className="absolute left-[-22px] top-[24px] w-[22px] h-[2px] bg-indigo-200 dark:bg-slate-700" />
         )}
 
         {/* Expand toggle */}
@@ -126,6 +125,7 @@ function TaskRow({ task, depth, onSelectTask, onSmartAssign, isLastChild }: Task
                 'text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 transition-colors group-hover/row:text-indigo-700 dark:group-hover/row:text-indigo-400',
                 isRoot ? 'text-lg font-black' : 'text-sm font-bold'
               )}>
+                <span className="text-indigo-600 dark:text-indigo-400 mr-2">{indexSequence}</span>
                 {task.title}
               </h4>
 
@@ -183,12 +183,12 @@ function TaskRow({ task, depth, onSelectTask, onSmartAssign, isLastChild }: Task
       {/* Sub-task rows */}
       {expanded && hasChildren && (
         <div className={cn("ml-10 pl-2", isRoot && "ml-5 pl-2", "relative animate-in slide-in-from-top-2 fade-in duration-300")}>
-          <div className="absolute left-[-14px] top-0 bottom-4 w-[2px] bg-indigo-100 dark:bg-slate-800" />
           {task.children.map((child: any, index: number) => (
             <TaskRow
               key={child.id}
               task={child}
               depth={depth + 1}
+              indexSequence={`${indexSequence}.${index + 1}`}
               onSelectTask={onSelectTask}
               onSmartAssign={onSmartAssign}
               isLastChild={index === task.children.length - 1}
@@ -266,6 +266,7 @@ export function GlobalTaskTree({
             key={task.id}
             task={task}
             depth={0}
+            indexSequence={`${index + 1}`}
             onSelectTask={onSelectTask}
             onSmartAssign={onSmartAssign}
             isLastChild={index === tree.length - 1}

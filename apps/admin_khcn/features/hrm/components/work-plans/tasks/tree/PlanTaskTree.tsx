@@ -28,15 +28,12 @@ interface TaskRowProps {
   task: any;
   depth: number;
   planId: number;
+  indexSequence: string;
   isLastChild?: boolean;
-  /**
-   * Khi user click "Giao việc" → MasterPlanDetail mở SmartAssignDrawer dùng chung.
-   * KHÔNG mở modal riêng tại đây — tránh trùng lặp với TaskListClient.
-   */
   onRequestAssign: (task: any) => void;
 }
 
-function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowProps) {
+function TaskRow({ task, depth, planId, indexSequence, onRequestAssign, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2);
 
   const hasChildren = task.children?.length > 0;
@@ -48,9 +45,12 @@ function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowP
 
   return (
     <div className="relative">
-      {/* Nét dọc nối sub-tasks cùng cấp */}
-      {depth > 0 && !isLastChild && (
-        <div className="absolute left-[-16px] top-8 bottom-[-8px] w-px bg-slate-200/80" />
+      {/* Nét dọc nối sub-tasks liên tục */}
+      {depth > 0 && (
+        <div className={cn(
+          "absolute left-[-16px] top-[-4px] w-[1.5px] bg-slate-300",
+          isLastChild ? "h-[24px]" : "bottom-[-4px]"
+        )} />
       )}
 
       {/* Row */}
@@ -62,12 +62,7 @@ function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowP
       >
         {/* Nét ngang nối từ nét dọc của cha */}
         {depth > 0 && (
-          <div className="absolute left-[-16px] top-[20px] flex items-center">
-            <div className={cn(
-              "w-[16px] border-b-[1.5px] border-slate-300",
-              isLastChild ? "h-[20px] border-l-[1.5px] rounded-bl-xl absolute bottom-0 left-0" : "h-px absolute"
-            )} />
-          </div>
+          <div className="absolute left-[-16px] top-[20px] w-[16px] h-[1.5px] bg-slate-300" />
         )}
 
         {/* Expand toggle */}
@@ -88,10 +83,10 @@ function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowP
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <p className={cn(
-                'font-semibold text-slate-800 text-sm truncate',
+                'font-semibold text-slate-800 text-sm truncate flex items-center gap-1',
                 depth === 0 && 'text-sm font-bold',
               )}>
-                {task.title}
+                <span className="text-indigo-600 font-bold">{indexSequence}</span> {task.title}
               </p>
 
               <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -146,13 +141,13 @@ function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowP
       {/* Sub-task rows (đệ quy) — hiển thị để xem, không có action */}
       {expanded && hasChildren && (
         <div className={cn("ml-8 pl-4", depth === 0 && "ml-4 pl-4", "relative")}>
-          <div className="absolute left-[-8px] top-0 bottom-4 w-[1.5px] bg-slate-300" />
           {task.children.map((child: any, index: number) => (
             <TaskRow
               key={child.id}
               task={child}
               depth={depth + 1}
               planId={planId}
+              indexSequence={`${indexSequence}.${index + 1}`}
               onRequestAssign={onRequestAssign}
               isLastChild={index === task.children.length - 1}
             />
@@ -236,6 +231,7 @@ export function PlanTaskTree({
               task={task}
               depth={0}
               planId={planId}
+              indexSequence={`${index + 1}`}
               onRequestAssign={onRequestAssign || (() => {})}
               isLastChild={index === tree.length - 1}
             />
