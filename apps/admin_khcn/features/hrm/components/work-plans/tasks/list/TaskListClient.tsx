@@ -34,6 +34,7 @@ export const TaskListClient = () => {
 
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
+  const [taskToBreakdown, setTaskToBreakdown] = useState<any>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const debouncedStatus = useDebounce(statusFilter, 300);
