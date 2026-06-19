@@ -256,10 +256,10 @@ export class TasksService implements OnModuleInit {
       hasChildren = childrenCount > 0;
     }
 
-    const actionSet = new Set<string>();
-
     if (access.isAdmin) {
-      ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'].forEach(a => actionSet.add(a));
+      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
+      return actions;
     }
 
     let isTreeParticipant = access.isOwner || access.isAssignee || access.isSupervisor || access.isCoordinator;
@@ -302,33 +302,31 @@ export class TasksService implements OnModuleInit {
     }
 
     if (access.isDeptLeader && isTreeParticipant) {
-      ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'].forEach(a => actionSet.add(a));
+      const actions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'];
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
+      return actions;
     }
+
+    const actions: string[] = [];
 
     if (access.isOwner) {
-      ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT'].forEach(a => actionSet.add(a));
-      if (!hasChildren) {
-        actionSet.add('COMPLETE').add('RETURN').add('COORDINATE');
-      }
+      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
+      if (!hasChildren) actions.push('COMPLETE', 'RETURN', 'COORDINATE');
     } else {
       if (access.isAssignee) {
-        actionSet.add('ADD_SUBTASK').add('CHAT');
-        if (!hasChildren) {
-          actionSet.add('COMPLETE').add('COORDINATE');
-        }
+        actions.push('ADD_SUBTASK', 'CHAT');
+        if (!hasChildren) actions.push('COMPLETE', 'COORDINATE');
       }
       if (access.isSupervisor) {
-        actionSet.add('CHAT');
-        if (!hasChildren) {
-          actionSet.add('COMPLETE').add('RETURN');
-        }
+        actions.push('CHAT');
+        if (!hasChildren) actions.push('COMPLETE', 'RETURN');
       }
       if (access.isCoordinator) {
-        actionSet.add('CHAT');
+        actions.push('CHAT');
       }
     }
 
-    return Array.from(actionSet);
+    return Array.from(new Set(actions));
   }
 
   private toTaskResponse(t: any): any {
@@ -603,7 +601,7 @@ export class TasksService implements OnModuleInit {
 
     const finalData = roots.map(t => this.toTaskResponse(t));
     console.log('[DEBUG HRM] FINAL DATA LENGTH TO RETURN:', finalData.length);
-    
+
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
