@@ -32,12 +32,13 @@ interface TaskRowProps {
   task: any;
   depth: number;
   indexSequence: string;
-  isLastChild?: boolean;
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
+  onBreakdownTask?: (task: any) => void;
+  isLastChild?: boolean;
 }
 
-function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
+function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, onBreakdownTask, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2);
 
   const hasChildren = task.children?.length > 0;
@@ -161,6 +162,20 @@ function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLa
 
             {/* Actions */}
             <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200">
+              {allowedActions.includes('ADD_SUBTASK') && onBreakdownTask && (
+                <Button
+                  size="sm"
+                  className="h-9 px-4 text-xs font-bold bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl shadow-sm transition-colors border border-emerald-100 hover:border-transparent"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onBreakdownTask(task);
+                  }}
+                >
+                  <GitMerge className="w-3.5 h-3.5 mr-1.5" />
+                  Phân rã
+                </Button>
+              )}
               {canAssign && (
                 <Button
                   size="sm"
@@ -191,6 +206,7 @@ function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLa
               indexSequence={`${indexSequence}.${index + 1}`}
               onSelectTask={onSelectTask}
               onSmartAssign={onSmartAssign}
+              onBreakdownTask={onBreakdownTask}
               isLastChild={index === task.children.length - 1}
             />
           ))}
@@ -205,6 +221,7 @@ interface GlobalTaskTreeProps {
   isLoading?: boolean;
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
+  onBreakdownTask?: (task: any) => void;
 }
 
 export function GlobalTaskTree({
@@ -212,6 +229,7 @@ export function GlobalTaskTree({
   isLoading,
   onSelectTask,
   onSmartAssign,
+  onBreakdownTask,
 }: GlobalTaskTreeProps) {
 
   // Build tree from tasks (handles both flat list and pre-nested tree)
@@ -260,8 +278,8 @@ export function GlobalTaskTree({
         </Badge>
       </div>
 
-      <div className="space-y-1">
-        {tree.map((task, index) => (
+      <div className="divide-y divide-slate-100/50 dark:divide-slate-800/50 relative">
+        {tree.map((task: any, index: number) => (
           <TaskRow
             key={task.id}
             task={task}
@@ -269,6 +287,7 @@ export function GlobalTaskTree({
             indexSequence={`${index + 1}`}
             onSelectTask={onSelectTask}
             onSmartAssign={onSmartAssign}
+            onBreakdownTask={onBreakdownTask}
             isLastChild={index === tree.length - 1}
           />
         ))}

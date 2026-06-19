@@ -13,6 +13,7 @@ import { GlobalTaskTree } from './components/GlobalTaskTree';
 import { TaskStatsBar } from './components/TaskStatsBar';
 import { SmartAssignDrawer } from '../assign/SmartAssignDrawer';
 import { CreateTaskModal } from './components/CreateTaskModal';
+import { SubTaskModal } from '../subtask/SubTaskModal';
 
 import { useDebounce } from './hooks/useDebounce';
 
@@ -148,6 +149,7 @@ export const TaskListClient = () => {
         isLoading={isLoading}
         onSelectTask={handleSelectTask}
         onSmartAssign={handleSmartAssign}
+        onBreakdownTask={(task) => setTaskToBreakdown(task)}
       />
 
       {/* Create Modal */}
@@ -155,6 +157,18 @@ export const TaskListClient = () => {
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
       />
+
+      {/* SubTask Modal */}
+      {taskToBreakdown && (
+        <SubTaskModal
+          isOpen={!!taskToBreakdown}
+          onClose={(created) => {
+            setTaskToBreakdown(null);
+            if (created) refetch();
+          }}
+          parentTask={taskToBreakdown}
+        />
+      )}
 
       {/* Detail Dialog */}
       {selectedTask && (

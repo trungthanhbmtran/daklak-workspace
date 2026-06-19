@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('./generated/prisma');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -9,9 +9,10 @@ async function main() {
       }
     }
   });
-  
+
   const output = units.map(u => ({
     id: u.id,
+    parentId: u.parentId,
     name: u.name,
     positions: u.jobPositions.map(p => ({
       user: p.user?.fullName,
@@ -23,6 +24,4 @@ async function main() {
   console.log(JSON.stringify(output, null, 2));
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+main().catch(console.error).finally(() => prisma.$disconnect());
