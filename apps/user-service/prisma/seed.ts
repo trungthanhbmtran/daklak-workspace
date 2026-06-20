@@ -2552,6 +2552,34 @@ async function main() {
       type: 'RANK',
     },
     {
+      code: 'GRADE_1',
+      name: 'Viên chức hạng I',
+      category: 'STAFF',
+      rank: 1,
+      type: 'RANK',
+    },
+    {
+      code: 'GRADE_2',
+      name: 'Viên chức hạng II',
+      category: 'STAFF',
+      rank: 2,
+      type: 'RANK',
+    },
+    {
+      code: 'GRADE_3',
+      name: 'Viên chức hạng III',
+      category: 'STAFF',
+      rank: 3,
+      type: 'RANK',
+    },
+    {
+      code: 'GRADE_4',
+      name: 'Viên chức hạng IV',
+      category: 'STAFF',
+      rank: 4,
+      type: 'RANK',
+    },
+    {
       code: 'KE_TOAN',
       name: 'Kế toán',
       category: 'STAFF',
@@ -2863,6 +2891,53 @@ async function main() {
     { jt: 'PHO_BI_THU', types: ['CQ_DANG'] },
     { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
     { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
+    {
+      jt: 'KE_TOAN',
+      types: [
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'VAN_THU',
+      types: [
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'VIEN_CHUC',
+      types: [
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'NHAN_VIEN',
+      types: [
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'BAO_VE',
+      types: [
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
   ];
 
   // Dynamically add PHONG_BAN_TRUNG_TAM to any link that supports PHONG_BAN_SO
