@@ -102,79 +102,74 @@ function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLa
         <div className="flex-1 min-w-0">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                {roleBadge && (
-                  <Badge variant="outline" className={cn('text-[11px] font-bold border-0 px-2 py-0.5 gap-1.5 shadow-sm', roleBadge.color)}>
-                    {roleBadge.icon} {roleBadge.label}
-                  </Badge>
-                )}
-                {task.priority === 'HIGH' && (
-                  <Badge variant="outline" className="text-[10px] bg-rose-50 text-rose-600 border-rose-200 uppercase tracking-widest font-black">
-                    🔴 Ưu tiên cao
-                  </Badge>
-                )}
-                {hasChildren && (
-                  <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200 gap-1 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-                    <ClipboardList className="w-3 h-3" />
-                    {task.children.length} việc con
-                  </Badge>
-                )}
-              </div>
-
               <h4 className={cn(
-                'text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 transition-colors group-hover/row:text-indigo-700 dark:group-hover/row:text-indigo-400',
-                isRoot ? 'text-lg font-black' : 'text-sm font-bold'
+                'text-slate-800 dark:text-slate-100 leading-snug truncate transition-colors group-hover/row:text-indigo-700 dark:group-hover/row:text-indigo-400',
+                isRoot ? 'text-base font-bold' : 'text-sm font-semibold'
               )}>
-                <span className="text-indigo-600 dark:text-indigo-400 mr-2">{indexSequence}</span>
+                <span className="text-slate-400 font-medium mr-2 text-xs">{indexSequence}</span>
                 {task.title}
+                {task.priority === 'HIGH' && (
+                  <span className="ml-2 text-[10px] text-rose-500 font-bold uppercase">🔴 Quan trọng</span>
+                )}
               </h4>
 
-              <div className="flex flex-wrap items-center gap-3 mt-2.5">
-                <Badge variant="outline" className={cn('text-[11px] font-bold border px-2 py-0.5 gap-1.5 shadow-sm', statusCfg.cls)}>
-                  {statusCfg.icon} {statusCfg.label}
-                </Badge>
-
-                {!isUnassigned ? (
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 pl-1 pr-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] text-white font-bold shadow-inner">
-                      {(task.assigneeName || task.assigneeCode).charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[150px]">
-                      {task.assigneeName || task.assigneeCode}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 bg-orange-50 dark:bg-orange-900/30 pl-2 pr-3 py-1 rounded-full border border-orange-200 dark:border-orange-800/50 text-orange-600 dark:text-orange-400">
-                    <Target className="w-3.5 h-3.5" />
-                    <span className="text-xs font-bold">Chưa phân công</span>
+              <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {task.dueDate && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {new Date(task.dueDate).toLocaleDateString('vi-VN')}
                   </div>
                 )}
-
-                {task.dueDate && (
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-white dark:bg-slate-900 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    {new Date(task.dueDate).toLocaleDateString('vi-VN')}
+                {hasChildren && (
+                  <div className="flex items-center gap-1">
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    {task.children.length} việc con
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200">
-              {canAssign && (
-                <Button
-                  size="sm"
-                  className="h-9 px-4 text-xs font-bold bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-xl shadow-sm transition-colors border border-indigo-100 hover:border-transparent"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onSmartAssign(task);
-                  }}
-                >
-                  <Users className="w-3.5 h-3.5 mr-1.5" />
-                  Phân công
-                </Button>
+            {/* Right Side: Status, Assignee, Actions */}
+            <div className="flex items-center gap-4 shrink-0">
+              {/* Status */}
+              <div className={cn('flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-md', statusCfg.cls)}>
+                {statusCfg.icon} <span className="hidden sm:inline">{statusCfg.label}</span>
+              </div>
+
+              {/* Assignee */}
+              {!isUnassigned ? (
+                <div className="flex items-center gap-2" title={task.assigneeName || task.assigneeCode}>
+                  <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300 shadow-sm border border-white dark:border-slate-800">
+                    {(task.assigneeName || task.assigneeCode).charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium hidden md:inline max-w-[120px] truncate">
+                    {task.assigneeName || task.assigneeCode}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-1 rounded-md text-xs font-semibold border border-orange-100 dark:border-orange-800/50" title="Chưa phân công">
+                  <Target className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Chưa phân công</span>
+                </div>
               )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 w-24 justify-end">
+                {canAssign && (
+                  <Button
+                    size="sm"
+                    className="h-8 px-3 text-xs font-bold bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg shadow-sm transition-colors border border-indigo-100 hover:border-transparent"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onSmartAssign(task);
+                    }}
+                  >
+                    <Users className="w-3.5 h-3.5 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Giao</span>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>

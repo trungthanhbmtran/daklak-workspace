@@ -4629,12 +4629,14 @@ async function main() {
 
     // 3. Quản lý Nhân sự & Công việc
     { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: 'HRM_EMPLOYEE', type: 'SERVICE_ITEM' },
-    { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/services/hrm/employees', icon: 'UserCircle', order: 1, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
-    { code: 'HRM_TASK_MENU', name: 'Danh sách nhiệm vụ', route: '/services/hrm/work-plans/tasks', icon: 'CheckSquare', order: 2, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
-    { code: 'HRM_PLAN_MENU', name: 'Kế hoạch năm/tháng', route: '/services/hrm/work-plans/master-plans', icon: 'Calendar', order: 3, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
-    { code: 'HRM_TEMPLATE_MENU', name: 'Khung mẫu nhiệm vụ', route: '/services/hrm/work-plans/rank-templates', icon: 'ClipboardList', order: 4, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
-    { code: 'HRM_SELECTOR_MENU', name: 'Đăng ký nhiệm vụ', route: '/services/hrm/work-plans/manual-selector', icon: 'Layers', order: 5, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
-    { code: 'HRM_CRITERIA_MENU', name: 'Tiêu chí đánh giá', route: '/services/hrm/work-plans/criteria', icon: 'BarChart2', order: 6, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
+    { code: 'HRM_DASHBOARD_MENU', name: 'Tổng quan (Dashboard)', route: '/services/hrm/dashboard', icon: 'LayoutDashboard', order: 1, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
+    { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/services/hrm/employees', icon: 'UserCircle', order: 2, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
+    { code: 'HRM_TASK_MENU', name: 'Danh sách nhiệm vụ', route: '/services/hrm/work-plans/tasks', icon: 'CheckSquare', order: 3, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
+    { code: 'HRM_CALENDAR_MENU', name: 'Lịch công tác', route: '/services/hrm/calendar', icon: 'CalendarDays', order: 4, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
+    { code: 'HRM_REPORT_MENU', name: 'Báo cáo công việc', route: '/services/hrm/reports', icon: 'Presentation', order: 5, parentCode: 'HRM_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
+    { code: 'HRM_TEMPLATE_MENU', name: 'Khung mẫu nhiệm vụ', route: '/services/hrm/work-plans/rank-templates', icon: 'ClipboardList', order: 6, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
+    { code: 'HRM_SELECTOR_MENU', name: 'Đăng ký nhiệm vụ', route: '/services/hrm/work-plans/manual-selector', icon: 'Layers', order: 7, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
+    { code: 'HRM_CRITERIA_MENU', name: 'Tiêu chí đánh giá', route: '/services/hrm/work-plans/criteria', icon: 'BarChart2', order: 8, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
 
     // 4. Quản lý Văn bản
     { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: '/services/documents', icon: 'FileText', order: 3, linkedResourceCode: 'DOC_INCOMING', type: 'SERVICE_ITEM' },
