@@ -609,8 +609,8 @@ export class TasksService implements OnModuleInit {
     const initialStatus = data.status || 'TODO';
 
     // Resolve creatorUserId
-    let creatorUserId = 0;
-    if (data.currentEmployeeCode) {
+    let creatorUserId = data.currentUserId ? parseInt(data.currentUserId, 10) : 0;
+    if (!creatorUserId && data.currentEmployeeCode) {
       const emp = await this.prisma.employee.findUnique({
         where: { employeeCode: data.currentEmployeeCode },
         select: { userId: true }
@@ -637,6 +637,7 @@ export class TasksService implements OnModuleInit {
           bonusPerDay: data.bonusPerDay,
           penaltyPerDay: data.penaltyPerDay,
           creatorUserId,
+          creatorEmployeeCode: data.currentEmployeeCode || null,
           planId
         }
       });

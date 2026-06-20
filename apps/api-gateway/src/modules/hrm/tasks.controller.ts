@@ -138,6 +138,7 @@ export class TasksController implements OnModuleInit {
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
       body.currentEmployeeCode = req.user.employeeCode;
+      body.currentUserId = req.user.id ? parseInt(req.user.id, 10) : undefined;
     }
     return firstValueFrom(this.taskService.CreateTask(body, this.getGrpcMetadata(req)));
   }
