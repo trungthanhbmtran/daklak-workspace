@@ -3548,6 +3548,7 @@ async function main() {
   console.log('📦 Seeding Job Positions & Leaders (April 2026)...');
 
   const assignLeader = async (
+    employeeCode: string | null,
     email: string,
     username: string,
     fullName: string,
@@ -3555,6 +3556,7 @@ async function main() {
     jobTitleCode: string,
     isUnitLeader: boolean,
   ) => {
+
     // Xác định PBAC Role theo chức vụ (hệ thống chính phủ)
     let pbacRoleCode = 'STAFF'; // Mặc định: Chuyên viên
     if (['GIAM_DOC', 'PHO_GIAM_DOC', 'CHU_TICH', 'PHO_CHU_TICH'].includes(jobTitleCode)) {
@@ -3581,12 +3583,14 @@ async function main() {
       where: { email },
       update: {
         fullName,
+        employeeCode,
         roles: { set: [], connect: rolesConnect }
       },
       create: {
         email,
         username,
         fullName,
+        employeeCode,
         roles: { connect: rolesConnect },
       },
     });
@@ -3643,6 +3647,7 @@ async function main() {
 
   // 1. UBND Tỉnh Đắk Lắk
   await assignLeader(
+    null,
     'dohuuhuy@daklak.gov.vn',
     'dohuuhuy',
     'Đỗ Hữu Huy',
@@ -3652,6 +3657,7 @@ async function main() {
   );
   // 2. Sở Nội vụ
   await assignLeader(
+    'NV_010',
     'truongngoctuan@daklak.gov.vn',
     'truongngoctuan',
     'Trương Ngọc Tuấn',
@@ -3661,6 +3667,7 @@ async function main() {
   );
   // 3. Sở Khoa học & Công nghệ
   await assignLeader(
+    'NV_001',
     'buithanhtoan@daklak.gov.vn',
     'buithanhtoan',
     'Bùi Thanh Toàn',
@@ -3669,6 +3676,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_002',
     'phamgiaviet@daklak.gov.vn',
     'phamgiaviet',
     'Phạm Gia Việt',
@@ -3677,6 +3685,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_003',
     'ralantruongthanhha@daklak.gov.vn',
     'ralantruongthanhha',
     'Ra Lan Trương Thanh Hà',
@@ -3685,6 +3694,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_004',
     'tranvanson@daklak.gov.vn',
     'tranvanson',
     'Trần Văn Sơn',
@@ -3693,6 +3703,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_005',
     'lamvumyhanh@daklak.gov.vn',
     'lamvumyhanh',
     'Lâm Vũ Mỹ Hạnh',
@@ -3702,6 +3713,7 @@ async function main() {
   );
   // Bí thư Đảng bộ thường là Giám đốc
   await assignLeader(
+    'NV_001',
     'buithanhtoan@daklak.gov.vn',
     'buithanhtoan',
     'Bùi Thanh Toàn',
@@ -3710,6 +3722,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_002',
     'phamgiaviet@daklak.gov.vn',
     'phamgiaviet',
     'Phạm Gia Việt',
@@ -3720,6 +3733,7 @@ async function main() {
 
   // Lãnh đạo các phòng ban Sở KHCN
   await assignLeader(
+    'NV_020',
     'nguyenvana@daklak.gov.vn',
     'nguyenvana',
     'Nguyễn Văn A',
@@ -3728,6 +3742,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_021',
     'lethib@daklak.gov.vn',
     'lethib',
     'Lê Thị B',
@@ -3736,6 +3751,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_022',
     'tranvanc@daklak.gov.vn',
     'tranvanc',
     'Trần Văn C',
@@ -3744,6 +3760,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_023',
     'phamthid@daklak.gov.vn',
     'phamthid',
     'Phạm Thị D',
@@ -3752,6 +3769,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_024',
     'hoangvane@daklak.gov.vn',
     'hoangvane',
     'Hoàng Văn E',
@@ -3760,6 +3778,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_025',
     'vuthif@daklak.gov.vn',
     'vuthif',
     'Vũ Thị F',
@@ -3770,6 +3789,7 @@ async function main() {
 
   // Lãnh đạo các Trung tâm thuộc Sở KHCN
   await assignLeader(
+    'NV_026',
     'dovang@daklak.gov.vn',
     'dovang',
     'Đỗ Văn G',
@@ -3778,6 +3798,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_028',
     'lyvani@daklak.gov.vn',
     'lyvani',
     'Lý Văn I',
@@ -3786,6 +3807,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_100',
     'vonguyenhoangnam@daklak.gov.vn',
     'vonguyenhoangnam',
     'Võ Nguyễn Hoàng Nam',
@@ -3794,6 +3816,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_101',
     'lexuanquang@daklak.gov.vn',
     'lexuanquang',
     'Lê Xuân Quang',
@@ -3802,6 +3825,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_102',
     'tranduytan@daklak.gov.vn',
     'tranduytan',
     'Trần Duy Tân',
@@ -3812,6 +3836,7 @@ async function main() {
 
   // Lãnh đạo các phòng thuộc Trung tâm
   await assignLeader(
+    'NV_029',
     'truongphonghc_dmsm@daklak.gov.vn',
     'truongphonghc_dmsm',
     'Hoàng Văn HC',
@@ -3820,6 +3845,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_030',
     'truongphongut_dmsm@daklak.gov.vn',
     'truongphongut_dmsm',
     'Lê Thị UT',
@@ -3830,6 +3856,7 @@ async function main() {
 
 
   await assignLeader(
+    'NV_104',
     'lequangthanh@daklak.gov.vn',
     'lequangthanh',
     'Lê Quang Thanh',
@@ -3838,6 +3865,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_105',
     'letrongvu@daklak.gov.vn',
     'letrongvu',
     'Lê Trọng Vũ',
@@ -3846,6 +3874,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_103',
     'leanhtuan@daklak.gov.vn',
     'leanhtuan',
     'Lê Anh Tuấn',
@@ -3854,6 +3883,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_106',
     'chautrongphat@daklak.gov.vn',
     'chautrongphat',
     'Châu Trọng Phát',
@@ -3862,6 +3892,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_109',
     'phamtheanh@daklak.gov.vn',
     'phamtheanh',
     'Phạm Thế Anh',
@@ -3870,6 +3901,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_118',
     'nguyenvuhuy@daklak.gov.vn',
     'nguyenvuhuy',
     'Nguyễn Vũ Huy',
@@ -3878,6 +3910,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_113',
     'lethithanhkieu@daklak.gov.vn',
     'lethithanhkieu',
     'Lê Thị Thanh Kiều',
@@ -3886,6 +3919,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_033',
     'truongphonghc_kttdc@daklak.gov.vn',
     'truongphonghc_kttdc',
     'Nguyễn Văn HC',
@@ -3894,6 +3928,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_034',
     'truongphongdl_kttdc@daklak.gov.vn',
     'truongphongdl_kttdc',
     'Đinh Thị DL',
@@ -3902,6 +3937,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    'NV_035',
     'truongphongtn_kttdc@daklak.gov.vn',
     'truongphongtn_kttdc',
     'Vũ Văn TN',
@@ -3912,6 +3948,7 @@ async function main() {
 
   // Thêm một số Phó Trưởng phòng (Ví dụ)
   await assignLeader(
+    'NV_036',
     'phochvp_khcn@daklak.gov.vn',
     'phochvp_khcn',
     'Trương Văn Phó 1',
@@ -3920,6 +3957,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_037',
     'photp_khtc_khcn@daklak.gov.vn',
     'photp_khtc_khcn',
     'Ngô Thị Phó 2',
@@ -3930,6 +3968,7 @@ async function main() {
 
   // 4. Sở Tài chính
   await assignLeader(
+    'NV_011',
     'tranvantan@daklak.gov.vn',
     'tranvantan',
     'Trần Văn Tân',
@@ -3939,6 +3978,7 @@ async function main() {
   );
   // 5. Nhân viên Phòng Khai thác & Quản lý dữ liệu (H15.07.04.02)
   await assignLeader(
+    'NV_123',
     'trantrungthanh@daklak.gov.vn',
     'trantrungthanh',
     'Trần Trung Thành',
@@ -3947,6 +3987,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_121',
     'nguyenthiquynhmai@daklak.gov.vn',
     'nguyenthiquynhmai',
     'Nguyễn Thị Quỳnh Mai',
@@ -3955,6 +3996,7 @@ async function main() {
     false,
   );
   await assignLeader(
+    'NV_122',
     'nguyenquangtu@daklak.gov.vn',
     'nguyenquangtu',
     'Nguyễn Quang Tú',
@@ -3964,6 +4006,7 @@ async function main() {
   );
   // 6. Phường Tân Lập
   await assignLeader(
+    null,
     'vuvanhung@daklak.gov.vn',
     'vuvanhung',
     'Vũ Văn Hưng',
@@ -3972,6 +4015,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'tranducnhat@daklak.gov.vn',
     'tranducnhat',
     'Trần Đức Nhật',
@@ -3981,6 +4025,7 @@ async function main() {
   );
   // 7. Phường Tân An
   await assignLeader(
+    null,
     'nguyenducvinh@daklak.gov.vn',
     'nguyenducvinh',
     'Nguyễn Đức Vinh',
@@ -3989,6 +4034,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'phamtrungnghia@daklak.gov.vn',
     'phamtrungnghia',
     'Phạm Trung Nghĩa',
@@ -3998,6 +4044,7 @@ async function main() {
   );
   // 9. Các giám đốc Sở mới (cập nhật từ 2026)
   await assignLeader(
+    'NV_012',
     'caodinhhuy@daklak.gov.vn',
     'caodinhhuy',
     'Cao Đình Huy',
@@ -4007,6 +4054,7 @@ async function main() {
   );
   // 10. Các phường/xã còn lại
   await assignLeader(
+    null,
     'nguyenthanhliem@daklak.gov.vn',
     'nguyenthanhliem',
     'Nguyễn Thanh Liêm',
@@ -4015,6 +4063,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'nguyendinhtam@daklak.gov.vn',
     'nguyendinhtam',
     'Nguyễn Đình Tâm',
@@ -4023,6 +4072,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'phamtienhung@daklak.gov.vn',
     'phamtienhung',
     'Phạm Tiến Hưng',
@@ -4031,6 +4081,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'nguyenthehau@daklak.gov.vn',
     'nguyenthehau',
     'Nguyễn Thế Hậu',
@@ -4039,6 +4090,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'danggiaduan@daklak.gov.vn',
     'danggiaduan',
     'Đặng Gia Duẩn',
@@ -4047,6 +4099,7 @@ async function main() {
     true,
   );
   await assignLeader(
+    null,
     'ledaithang@daklak.gov.vn',
     'ledaithang',
     'Lê Đại Thắng',
