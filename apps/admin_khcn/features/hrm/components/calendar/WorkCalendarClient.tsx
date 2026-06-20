@@ -146,12 +146,12 @@ export function WorkCalendarClient() {
       days.push(
         <div 
           key={day.toString()} 
-          className={`min-h-[120px] p-2 border-r border-b border-slate-200 dark:border-slate-800 transition-colors
+          className={`flex flex-col p-2 border-r border-b border-slate-200 dark:border-slate-800 transition-colors
             ${!isSameMonth(day, monthStart) ? "bg-slate-50/50 dark:bg-slate-900/20 text-slate-400" : "bg-white dark:bg-slate-900"}
             ${isToday(day) ? "bg-indigo-50/30 dark:bg-indigo-900/10" : ""}
           `}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 shrink-0">
             <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full
               ${isToday(day) ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"}
             `}>
@@ -164,7 +164,7 @@ export function WorkCalendarClient() {
             )}
           </div>
           
-          <div className="space-y-1.5 overflow-y-auto max-h-[85px] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-1">
+          <div className="flex-1 overflow-y-auto min-h-0 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-1">
             {dayEvents.map((evt) => (
               <div 
                 key={evt.id} 
@@ -182,7 +182,7 @@ export function WorkCalendarClient() {
       day = addDays(day, 1);
     }
     rows.push(
-      <div className="grid grid-cols-7" key={day.toString()}>
+      <div className="grid grid-cols-7 flex-1 min-h-0" key={day.toString()}>
         {days}
       </div>
     );
@@ -192,8 +192,8 @@ export function WorkCalendarClient() {
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
   return (
-    <div className="p-6 md:p-8 min-h-screen bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="p-6 md:p-8 h-[calc(100vh-64px)] flex flex-col bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-500 overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 shrink-0">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <CalendarIcon className="h-8 w-8 text-indigo-600" />
@@ -205,8 +205,8 @@ export function WorkCalendarClient() {
         </div>
       </div>
 
-      <Tabs defaultValue="all" className="space-y-6" onValueChange={setActiveTab}>
-        <TabsList className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 shadow-sm rounded-lg flex-wrap h-auto">
+      <Tabs defaultValue="all" className="flex flex-col flex-1 min-h-0 space-y-4" onValueChange={setActiveTab}>
+        <TabsList className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 shadow-sm rounded-lg flex-wrap h-auto shrink-0">
           <TabsTrigger value="all" className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 dark:data-[state=active]:bg-indigo-900/50">
             <Briefcase className="w-4 h-4 mr-2" />
             Lịch xử lý công việc
@@ -225,8 +225,8 @@ export function WorkCalendarClient() {
           </TabsTrigger>
         </TabsList>
 
-        <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          <CardHeader className="flex flex-col md:flex-row items-center justify-between py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <Card className="flex flex-col flex-1 min-h-0 border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <CardHeader className="shrink-0 flex flex-col md:flex-row items-center justify-between py-3 px-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-4">
               <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100 capitalize">
                 {format(currentDate, "MMMM 'năm' yyyy", { locale: viLocale })}
@@ -247,11 +247,11 @@ export function WorkCalendarClient() {
             </div>
           </CardHeader>
           
-          <CardContent className="p-0">
+          <CardContent className="flex flex-col flex-1 min-h-0 p-0">
             {/* Lưới Lịch */}
-            <div className="flex flex-col w-full bg-white dark:bg-slate-900">
+            <div className="flex flex-col w-full h-full bg-white dark:bg-slate-900">
               {/* Header các thứ trong tuần */}
-              <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
                 {weekDays.map((wd) => (
                   <div key={wd} className="py-3 text-center text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider border-r border-slate-200 dark:border-slate-800 last:border-0">
                     {wd}
@@ -260,7 +260,7 @@ export function WorkCalendarClient() {
               </div>
               
               {/* Nội dung ngày */}
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1 min-h-0">
                 {rows}
               </div>
             </div>
@@ -268,7 +268,7 @@ export function WorkCalendarClient() {
         </Card>
         
         {/* Chú thích màu sắc */}
-        <div className="flex items-center gap-6 mt-4 px-2">
+        <div className="flex items-center gap-6 pt-2 pb-1 px-2 shrink-0">
           <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
             <span className="w-3 h-3 rounded-full bg-blue-400"></span> Đang xử lý
           </div>
