@@ -15,7 +15,7 @@ import {
   parseISO,
   isToday
 } from "date-fns";
-import viLocale from "date-fns/locale/vi";
+import { vi as viLocale } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";

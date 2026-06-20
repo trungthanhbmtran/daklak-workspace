@@ -9,7 +9,6 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
       label={data.label || (isParallel ? 'Rẽ nhánh song song' : 'Rẽ nhánh điều kiện')}
       type={type}
       icon={<Diamond className="w-4 h-4 text-orange-500" />}
-      isConnectable={isConnectable}
       className="border-orange-200/50 hover:border-orange-500/50 shadow-orange-500/5 bg-orange-50/30"
     >
       <Handle
