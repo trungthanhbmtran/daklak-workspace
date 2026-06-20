@@ -13,7 +13,9 @@ import {
   isSameDay, 
   addDays,
   parseISO,
-  isToday
+  isToday,
+  startOfDay,
+  differenceInDays
 } from "date-fns";
 import { vi as viLocale } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,7 +81,8 @@ export function WorkCalendarClient() {
       return {
         id: `task-${t.id}`,
         title: t.title,
-        date: t.dueDate ? parseISO(t.dueDate) : (t.createdAt ? parseISO(t.createdAt) : new Date()),
+        startDate: t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date()),
+        endDate: t.dueDate ? parseISO(t.dueDate) : (t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date())),
         type: "task",
         colorClass,
         isCompleted
@@ -96,7 +99,8 @@ export function WorkCalendarClient() {
         meetingEvents.push({
           id: `meet-${i}`,
           title: `Họp giao ban tuần ${i}`,
-          date: mDate,
+          startDate: mDate,
+          endDate: mDate,
           type: "meeting",
           colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
           isCompleted: false
@@ -111,7 +115,8 @@ export function WorkCalendarClient() {
         events.push({
             id: `meet-all`,
             title: `Họp phòng chuyên môn`,
-            date: mDate,
+            startDate: mDate,
+          endDate: mDate,
             type: "meeting",
             colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
             isCompleted: false
@@ -121,6 +126,7 @@ export function WorkCalendarClient() {
     return events;
   }, [allTasks, activeTab]);
 
+  
   // --- CALENDAR LOGIC ---
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -133,77 +139,137 @@ export function WorkCalendarClient() {
 
   const dateFormat = "d";
   const rows = [];
-  let days = [];
-  let day = startDate;
-  let formattedDate = "";
+  let weekStartDay = startDate;
 
-  while (day <= endDate) {
+  while (weekStartDay <= endDate) {
+    const weekEndDay = endOfWeek(weekStartDay, { weekStartsOn: 1 });
+    
+    // 1. Get events overlapping with this week
+    const weekEvents = filteredEvents.filter(e => {
+        const eS = startOfDay(e.startDate);
+        const eE = startOfDay(e.endDate);
+        const wS = startOfDay(weekStartDay);
+        const wE = startOfDay(weekEndDay);
+        return eS <= wE && eE >= wS;
+    }).sort((a, b) => {
+        // sort by start date
+        const startDiff = a.startDate.getTime() - b.startDate.getTime();
+        if (startDiff !== 0) return startDiff;
+        // then by length desc
+        return b.endDate.getTime() - b.startDate.getTime() - (a.endDate.getTime() - a.startDate.getTime());
+    });
+
+    // 2. Compute tracks
+    const tracks: any[][] = [];
+    const positionedEvents = weekEvents.map(evt => {
+        const eS = startOfDay(evt.startDate);
+        const eE = startOfDay(evt.endDate);
+        const wS = startOfDay(weekStartDay);
+        
+        const colStart = Math.max(0, differenceInDays(eS, wS));
+        const colEnd = Math.min(6, differenceInDays(eE, wS));
+        const span = colEnd - colStart + 1;
+        
+        let trackIndex = 0;
+        while (true) {
+            if (!tracks[trackIndex]) tracks[trackIndex] = [];
+            const overlap = tracks[trackIndex].some(placed => {
+                return !(colEnd < placed.colStart || colStart > placed.colEnd);
+            });
+            if (!overlap) {
+                tracks[trackIndex].push({ id: evt.id, colStart, colEnd });
+                break;
+            }
+            trackIndex++;
+        }
+        
+        return { ...evt, colStart, colEnd, span, trackIndex };
+    });
+
+    // 3. Render days background
+    const days = [];
     for (let i = 0; i < 7; i++) {
-      formattedDate = format(day, dateFormat);
-      const cloneDay = day;
-      
-      // Get events for this day
-      const dayEvents = filteredEvents.filter(e => isSameDay(e.date, cloneDay));
+        const cloneDay = addDays(weekStartDay, i);
+        const formattedDate = format(cloneDay, dateFormat);
+        
+        // For the modal and indicator, we count how many events overlap this specific day
+        const dayEvents = filteredEvents.filter(e => {
+             const eS = startOfDay(e.startDate);
+             const eE = startOfDay(e.endDate);
+             const cur = startOfDay(cloneDay);
+             return eS <= cur && cur <= eE;
+        });
 
-      days.push(
-        <div 
-          key={day.toString()} 
-          className={`flex flex-col p-2 border-r border-b border-slate-200 dark:border-slate-800 transition-colors
-            ${!isSameMonth(day, monthStart) ? "bg-slate-50/50 dark:bg-slate-900/20 text-slate-400" : "bg-white dark:bg-slate-900"}
-            ${isToday(day) ? "bg-indigo-50/30 dark:bg-indigo-900/10" : ""}
-          `}
-        >
-          <div className="flex items-center justify-between mb-2 shrink-0">
-            <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full
-              ${isToday(day) ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"}
-            `}>
-              {formattedDate}
-            </span>
-            {dayEvents.length > 0 && (
-              <button 
-                onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
-                className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 transition-colors cursor-pointer"
-              >
-                Chi tiết ({dayEvents.length})
-              </button>
-            )}
-          </div>
-          
-          <div className="flex-1 overflow-hidden min-h-0 space-y-1.5 pr-1">
-            {dayEvents.slice(0, 3).map((evt) => (
-              <div 
-                key={evt.id} 
-                className={`text-xs p-1.5 rounded border ${evt.colorClass} truncate cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1.5`}
-                title={evt.title}
-                onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
-              >
-                {evt.type === 'meeting' ? <Video className="w-3 h-3 shrink-0" /> : 
-                 evt.isCompleted ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <Clock className="w-3 h-3 shrink-0" />}
-                <span className="truncate">{evt.title}</span>
-              </div>
-            ))}
-            {dayEvents.length > 3 && (
-              <div 
-                className="text-[10px] text-slate-500 hover:text-slate-700 cursor-pointer pt-0.5 font-medium"
-                onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
-              >
-                + {dayEvents.length - 3} sự kiện nữa...
+        days.push(
+          <div 
+            key={cloneDay.toString()} 
+            className={`flex flex-col p-2 border-r border-b border-slate-200 dark:border-slate-800 transition-colors
+              ${!isSameMonth(cloneDay, monthStart) ? "bg-slate-50/50 dark:bg-slate-900/20" : "bg-white dark:bg-slate-900"}
+              ${isToday(cloneDay) && isSameMonth(cloneDay, monthStart) ? "bg-indigo-50/30 dark:bg-indigo-900/10" : ""}
+            `}
+          >
+            {isSameMonth(cloneDay, monthStart) && (
+              <div className="flex items-center justify-between shrink-0 z-10 relative">
+                <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full
+                  ${isToday(cloneDay) ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"}
+                `}>
+                  {formattedDate}
+                </span>
+                {dayEvents.length > 0 && (
+                  <button 
+                    onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
+                    className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 transition-colors cursor-pointer"
+                  >
+                    Xem chi tiết ({dayEvents.length})
+                  </button>
+                )}
               </div>
             )}
           </div>
-        </div>
-      );
-      day = addDays(day, 1);
+        );
     }
+
+    const maxTrackIndex = Math.max(0, tracks.length);
+    const ROW_HEIGHT = 26; // pixels per event line
+    const TOP_PADDING = 36; // padding for the date header
+
     rows.push(
-      <div className="grid grid-cols-7 flex-1 min-h-0" key={day.toString()}>
+      <div 
+        className="relative grid grid-cols-7 flex-1 border-b-0 border-r-0" 
+        key={weekStartDay.toString()}
+        style={{ minHeight: Math.max(100, maxTrackIndex * ROW_HEIGHT + TOP_PADDING + 10) + 'px' }}
+      >
+        {/* Lớp nền */}
         {days}
+        
+        {/* Lớp sự kiện (Lines) */}
+        <div className="absolute inset-0 pointer-events-none" style={{ paddingTop: TOP_PADDING }}>
+            <div className="relative w-full h-full">
+                {positionedEvents.map(evt => (
+                    <div 
+                        key={evt.id}
+                        className={`absolute ${evt.colorClass} border rounded px-1.5 py-0.5 text-xs truncate pointer-events-auto cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm`}
+                        style={{
+                            left: `calc(${(evt.colStart * 100) / 7}% + 4px)`,
+                            width: `calc(${(evt.span * 100) / 7}% - 8px)`,
+                            top: `${evt.trackIndex * ROW_HEIGHT}px`,
+                            height: '22px'
+                        }}
+                        title={evt.title}
+                        onClick={() => setSelectedDayEvents({ day: evt.startDate, events: [evt] })}
+                    >
+                        {evt.type === 'meeting' ? <Video className="w-3 h-3 shrink-0" /> : 
+                        evt.isCompleted ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <Clock className="w-3 h-3 shrink-0" />}
+                        <span className="truncate font-medium">{evt.title}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
       </div>
     );
-    days = [];
+    weekStartDay = addDays(weekStartDay, 7);
   }
-
-  const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
   return (
     <div className="p-6 md:p-8 h-[calc(100vh-64px)] flex flex-col bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-500 overflow-hidden">
