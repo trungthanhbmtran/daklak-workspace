@@ -637,7 +637,6 @@ export class TasksService implements OnModuleInit {
           bonusPerDay: data.bonusPerDay,
           penaltyPerDay: data.penaltyPerDay,
           creatorUserId,
-          creatorEmployeeCode: data.currentUserCode || null,
           planId
         }
       });
