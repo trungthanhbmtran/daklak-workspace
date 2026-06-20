@@ -137,6 +137,19 @@ async function main() {
   }
   console.log(`✅ Đã seed ${count} nhân viên HRM trên tổng số ${EMPLOYEES.length}.`);
 
+  // Đồng bộ user_id từ admin_systems.users sang admin_hrm.employees
+  try {
+    console.log('🔹 Đồng bộ user_id từ admin_systems.users sang admin_hrm.employees...');
+    await prisma.$executeRawUnsafe(`
+      UPDATE admin_hrm.employees e
+      JOIN admin_systems.users u ON e.email = u.email
+      SET e.user_id = u.id;
+    `);
+    console.log('✅ Đã đồng bộ user_id thành công.');
+  } catch (error) {
+    console.error('❌ Lỗi khi đồng bộ user_id:', error);
+  }
+
   console.log('🔹 Seed TaskRankTemplates theo Nghị định 335/2025/NĐ-CP...');
 
   await prisma.taskRankTemplate.deleteMany();

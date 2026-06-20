@@ -43,21 +43,16 @@ export class TasksService implements OnModuleInit {
     }
   }
 
-  private parseParticipants(participants: any[], userToCodeMap: Map<number, string>) {
+  private parseParticipants(participants: any[]) {
     if (!participants) return { owner: null, assignee: null, approver: null, coordinators: [] };
-    const getCode = (uid?: number | null) => uid ? (userToCodeMap.get(uid) || '') : '';
 
-    const ownerId = participants.find(p => p.participantRole === TaskRole.OWNER)?.userId;
-    const assigneeId = participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.userId;
-    const approverId = participants.find(p => p.participantRole === TaskRole.APPROVER)?.userId;
-
-    const owner = ownerId ? getCode(ownerId) : null;
-    const assignee = assigneeId ? getCode(assigneeId) : null;
-    const approver = approverId ? getCode(approverId) : null;
+    const owner = participants.find(p => p.participantRole === TaskRole.OWNER)?.employeeCode || null;
+    const assignee = participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || null;
+    const approver = participants.find(p => p.participantRole === TaskRole.APPROVER)?.employeeCode || null;
 
     const coordinators = participants
       .filter(p => p.participantRole === TaskRole.COORDINATOR)
-      .map(p => getCode(p.userId))
+      .map(p => p.employeeCode)
       .filter(Boolean);
 
     return { owner, assignee, approver, coordinators };
@@ -99,9 +94,13 @@ export class TasksService implements OnModuleInit {
     }
 
     const mapNames = (t: any) => {
-      const creatorCode = t.creatorUserId ? (userToCodeMap.get(t.creatorUserId) || '') : '';
+      let creatorCode = t.creatorEmployeeCode;
+      if (!creatorCode && t.creatorUserId) {
+        creatorCode = userToCodeMap.get(t.creatorUserId) || '';
+      }
+      
       if (creatorCode) {
-        t.creatorEmployeeCode = creatorCode;
+        t.creatorEmployeeCode = creatorCode; // ensure it is set
         t.creatorName = employeeMap.get(creatorCode) || creatorCode;
       } else {
         t.creatorEmployeeCode = 'SYSTEM';
@@ -109,7 +108,7 @@ export class TasksService implements OnModuleInit {
       }
 
       if (t.participants) {
-        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants, userToCodeMap);
+        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
         t.assigneeCode = assignee || 'UNASSIGNED';
         t.assigneeName = assignee && assignee !== 'UNASSIGNED' ? (employeeMap.get(assignee) || assignee) : 'Chưa phân công';
         t.assignerCode = owner || '';
@@ -662,21 +661,19 @@ export class TasksService implements OnModuleInit {
       const participantsData: any[] = [];
       const assigneeCode = data.assigneeCode || 'UNASSIGNED';
       const assigneeUid = codeToUidMap.get(assigneeCode);
-      if (assigneeUid !== undefined && assigneeUid !== null) {
-        participantsData.push({ taskId: newTask.id, userId: assigneeUid, employeeCode: assigneeCode, participantRole: TaskRole.ASSIGNEE });
+      if (assigneeCode) {
+        participantsData.push({ taskId: newTask.id, userId: assigneeUid || 0, employeeCode: assigneeCode, participantRole: TaskRole.ASSIGNEE });
       }
 
       const assignerCode = data.assignerCode || 'UNASSIGNED';
       const assignerUid = codeToUidMap.get(assignerCode);
-      if (assignerUid !== undefined && assignerUid !== null) {
-        participantsData.push({ taskId: newTask.id, userId: assignerUid, employeeCode: assignerCode, participantRole: TaskRole.OWNER });
+      if (assignerCode) {
+        participantsData.push({ taskId: newTask.id, userId: assignerUid || 0, employeeCode: assignerCode, participantRole: TaskRole.OWNER });
       }
 
       if (data.supervisorCode) {
         const supervisorUid = codeToUidMap.get(data.supervisorCode);
-        if (supervisorUid !== undefined && supervisorUid !== null) {
-          participantsData.push({ taskId: newTask.id, userId: supervisorUid, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
-        }
+        participantsData.push({ taskId: newTask.id, userId: supervisorUid || 0, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
       }
 
       if (participantsData.length > 0) {
@@ -822,12 +819,11 @@ export class TasksService implements OnModuleInit {
         await tx.taskParticipant.deleteMany({
           where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
         });
-        const uid = getUserId(assigneeCode || 'UNASSIGNED');
-        if (uid !== undefined && uid !== null) {
-          await tx.taskParticipant.create({
-            data: { taskId: id, userId: uid, employeeCode: assigneeCode || 'UNASSIGNED', participantRole: TaskRole.ASSIGNEE }
-          });
-        }
+        const finalAssigneeCode = assigneeCode || 'UNASSIGNED';
+        const uid = getUserId(finalAssigneeCode);
+        await tx.taskParticipant.create({
+          data: { taskId: id, userId: uid || 0, employeeCode: finalAssigneeCode, participantRole: TaskRole.ASSIGNEE }
+        });
       }
 
       // Update owner
@@ -836,11 +832,9 @@ export class TasksService implements OnModuleInit {
           where: { taskId: id, participantRole: TaskRole.OWNER }
         });
         const uid = getUserId(assignerCode);
-        if (uid !== undefined && uid !== null) {
-          await tx.taskParticipant.create({
-            data: { taskId: id, userId: uid, employeeCode: assignerCode, participantRole: TaskRole.OWNER }
-          });
-        }
+        await tx.taskParticipant.create({
+          data: { taskId: id, userId: uid || 0, employeeCode: assignerCode, participantRole: TaskRole.OWNER }
+        });
       }
 
       // Update coordinators
@@ -850,9 +844,9 @@ export class TasksService implements OnModuleInit {
         });
         const coData: any[] = [];
         coassigneeCodes.forEach(code => {
-          const uid = getUserId(code);
-          if (uid) {
-            coData.push({ taskId: id, userId: uid, employeeCode: code, participantRole: TaskRole.COORDINATOR });
+          if (code) {
+            const uid = getUserId(code);
+            coData.push({ taskId: id, userId: uid || 0, employeeCode: code, participantRole: TaskRole.COORDINATOR });
           }
         });
         if (coData.length > 0) {
