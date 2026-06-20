@@ -298,7 +298,7 @@ export class MasterPlansService {
             weight: task.weight,
             baseScore: task.targetValue,
             planId: mp.id,
-            creatorUserId,
+            creatorEmployeeCode: 'SYSTEM',
             participants: {
               create: participants
             }
