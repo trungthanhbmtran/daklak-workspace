@@ -36,7 +36,8 @@ CREATE TABLE `tasks` (
     `description` TEXT NULL,
     `status` VARCHAR(191) NOT NULL DEFAULT 'TODO',
     `priority` VARCHAR(191) NOT NULL DEFAULT 'MEDIUM',
-    `creator_employee_code` VARCHAR(191) NOT NULL DEFAULT 'SYSTEM',
+    `creator_user_id` INTEGER NOT NULL DEFAULT 0,
+    `creator_employee_code` VARCHAR(191) NULL,
     `base_score` DOUBLE NULL,
     `weight` DOUBLE NULL,
     `scoring_method` VARCHAR(191) NOT NULL DEFAULT 'MANUAL',
@@ -60,11 +61,12 @@ CREATE TABLE `tasks` (
 -- CreateTable
 CREATE TABLE `task_participants` (
     `task_id` INTEGER NOT NULL,
-    `employee_code` VARCHAR(191) NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    `employee_code` VARCHAR(191) NULL,
     `participant_role` ENUM('OWNER', 'ASSIGNEE', 'APPROVER', 'COORDINATOR', 'FOLLOWER') NOT NULL,
     `assigned_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    PRIMARY KEY (`task_id`, `employee_code`, `participant_role`)
+    PRIMARY KEY (`task_id`, `user_id`, `participant_role`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -80,7 +82,7 @@ CREATE TABLE `task_closure` (
 CREATE TABLE `task_comments` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `task_id` INTEGER NOT NULL,
-    `employee_code` VARCHAR(191) NULL,
+    `user_id` INTEGER NULL,
     `content` TEXT NOT NULL,
     `is_system_message` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
