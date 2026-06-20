@@ -44,7 +44,7 @@ message FindAllMasterPlansRequest {
   string type = 1;
   string status = 2;
   int32 departmentId = 3;
-  string currentUserCode = 4;
+  string currentEmployeeCode = 4;
   bool isAdmin = 5;
   int32 currentUserDept = 6;
   repeated int32 callerAncestorUnitIds = 7;
@@ -53,7 +53,7 @@ message FindAllMasterPlansRequest {
 
 message FindMasterPlanByIdRequest {
   int32 id = 1;
-  string currentUserCode = 2;
+  string currentEmployeeCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;

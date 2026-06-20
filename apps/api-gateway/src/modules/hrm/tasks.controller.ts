@@ -137,6 +137,7 @@ export class TasksController implements OnModuleInit {
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
+      body.currentEmployeeCode = req.user.employeeCode;
     }
     return firstValueFrom(this.taskService.CreateTask(body, this.getGrpcMetadata(req)));
   }
@@ -188,7 +189,7 @@ export class TasksController implements OnModuleInit {
       departmentId: finalDepartmentId,
       planId: planId ? parseInt(planId, 10) : undefined,
       isSupervisor: isSupervisor === 'true',
-      currentUserCode: user?.employeeCode,
+      currentEmployeeCode: user?.employeeCode,
       isAdmin,
       isLeader,
       currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
@@ -215,10 +216,10 @@ export class TasksController implements OnModuleInit {
       }
     }
 
-    // Inject currentUserCode into meta for frontend role badge mapping
+    // Inject currentEmployeeCode into meta for frontend role badge mapping
     if (response && user?.employeeCode) {
       response.meta = response.meta || {};
-      response.meta.currentUserCode = user.employeeCode;
+      response.meta.currentEmployeeCode = user.employeeCode;
     }
 
     return response;
@@ -257,7 +258,7 @@ export class TasksController implements OnModuleInit {
         actorCode: user?.employeeCode || '',
         currentUserPermissions: user?.permissionsFlatten || [],
         currentUserId: user?.id,
-        currentUserCode: user?.employeeCode || user?.username,
+        currentEmployeeCode: user?.employeeCode || user?.username,
       }, this.getGrpcMetadata(req)),
     );
   }
@@ -286,7 +287,7 @@ export class TasksController implements OnModuleInit {
           domainId,
           jobTitleId,
           currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
-          currentUserCode: user?.employeeCode,
+          currentEmployeeCode: user?.employeeCode,
           currentUserPermissions: user?.permissionsFlatten || [],
         }, this.getGrpcMetadata(req)),
       );
@@ -357,7 +358,7 @@ export class TasksController implements OnModuleInit {
         assignerCode,
         currentUserPermissions: user?.permissionsFlatten || [],
         currentUserId: user?.id,
-        currentUserCode: user?.employeeCode || user?.username,
+        currentEmployeeCode: user?.employeeCode || user?.username,
       }, this.getGrpcMetadata(req)),
     );
   }
@@ -376,7 +377,7 @@ export class TasksController implements OnModuleInit {
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ 
         id: id,
-        currentUserCode: assignerCode,
+        currentEmployeeCode: assignerCode,
         isAdmin: isAdmin,
         isLeader: isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*'),
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
@@ -408,7 +409,7 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.GetComments({
         taskId: id,
-        currentUserCode: user?.employeeCode,
+        currentEmployeeCode: user?.employeeCode,
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
@@ -434,7 +435,7 @@ export class TasksController implements OnModuleInit {
         authorCode: req.user?.employeeCode || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
-        currentUserCode: user?.employeeCode,
+        currentEmployeeCode: user?.employeeCode,
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
@@ -461,7 +462,7 @@ export class TasksController implements OnModuleInit {
     const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ 
         id: id,
-        currentUserCode: requesterCode,
+        currentEmployeeCode: requesterCode,
         isAdmin: isAdmin,
         isLeader: isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*'),
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
@@ -511,7 +512,7 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.GetSubTasks({
         taskId: id,
-        currentUserCode: user?.employeeCode,
+        currentEmployeeCode: user?.employeeCode,
         isAdmin,
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,

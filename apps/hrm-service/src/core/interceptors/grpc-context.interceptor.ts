@@ -26,7 +26,7 @@ export class GrpcContextInterceptor implements NestInterceptor {
           if (user) {
             // Inject context into payload for backward compatibility with service
             Object.assign(data, {
-              currentUserCode: user.employeeCode || user.username,
+              currentEmployeeCode: user.employeeCode || user.username,
               currentUserId: user.id ? parseInt(user.id, 10) : undefined,
               currentUserDept: user.unitId ? parseInt(user.unitId, 10) : undefined,
               currentUserPermissions: user.permissionsFlatten || [],

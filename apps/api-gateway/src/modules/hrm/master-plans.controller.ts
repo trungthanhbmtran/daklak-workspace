@@ -216,7 +216,7 @@ export class MasterPlansController implements OnModuleInit {
         departmentId: reqDepartmentId
           ? parseInt(reqDepartmentId, 10)
           : undefined,
-        currentUserCode: user?.employeeCode,
+        currentEmployeeCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds, // Danh sách đơn vị cha để lọc kế hoạch cấp trên
@@ -273,7 +273,7 @@ export class MasterPlansController implements OnModuleInit {
     const res: any = await firstValueFrom(
       this.masterPlanService.FindById({
         id: parseInt(id, 10),
-        currentUserCode: user?.employeeCode,
+        currentEmployeeCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,

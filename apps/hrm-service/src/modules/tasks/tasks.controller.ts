@@ -19,7 +19,7 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string; currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }) {
+  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string; currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }) {
     return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode, data);
   }
 
@@ -44,16 +44,16 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'RecommendAssignees')
-  recommendAssignees(data: { rankCode: string; strategy: string; currentUserId?: number; currentUserCode?: string; currentUserPermissions?: string[] }) {
+  recommendAssignees(data: { rankCode: string; strategy: string; currentUserId?: number; currentEmployeeCode?: string; currentUserPermissions?: string[] }) {
     return this.tasksService.recommendAssignees(data);
   }
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: { id: number; assigneeCode: string; coassigneeCodes?: string[]; departmentId?: number; assignerCode?: string; currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }) {
+  assignTask(data: { id: number; assigneeCode: string; coassigneeCodes?: string[]; departmentId?: number; assignerCode?: string; currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }) {
     return this.tasksService.assignTask(data.id, data.assigneeCode, data.coassigneeCodes, data.departmentId, data.assignerCode, {
       currentUserPermissions: data.currentUserPermissions,
       currentUserId: data.currentUserId,
-      currentUserCode: data.currentUserCode
+      currentEmployeeCode: data.currentEmployeeCode
     });
   }
 

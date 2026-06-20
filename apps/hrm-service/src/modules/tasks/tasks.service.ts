@@ -172,9 +172,9 @@ export class TasksService implements OnModuleInit {
 
     const perms = query.currentUserPermissions || [];
     const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
-    const currentUserCode = query.currentUserCode;
+    const currentEmployeeCode = query.currentEmployeeCode;
 
-    if (!currentUserCode) {
+    if (!currentEmployeeCode) {
       return {
         hasAccess: isAdmin, // If they are admin, they have access, but no direct roles
         isAdmin,
@@ -186,10 +186,10 @@ export class TasksService implements OnModuleInit {
       };
     }
 
-    const isOwner = t.assignerCode === currentUserCode || t.creatorEmployeeCode === currentUserCode;
-    const isAssignee = t.assigneeCode === currentUserCode;
-    const isSupervisor = t.supervisorCode === currentUserCode;
-    const isCoordinator = Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(currentUserCode);
+    const isOwner = t.assignerCode === currentEmployeeCode || t.creatorEmployeeCode === currentEmployeeCode;
+    const isAssignee = t.assigneeCode === currentEmployeeCode;
+    const isSupervisor = t.supervisorCode === currentEmployeeCode;
+    const isCoordinator = Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(currentEmployeeCode);
 
     let isDeptLeader = false;
     const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
@@ -270,11 +270,11 @@ export class TasksService implements OnModuleInit {
         await this.enrichTasks(relatedTasks);
         for (const relT of relatedTasks as any[]) {
           if (
-            relT.assignerCode === query.currentUserCode ||
-            relT.creatorEmployeeCode === query.currentUserCode ||
-            relT.assigneeCode === query.currentUserCode ||
-            relT.supervisorCode === query.currentUserCode ||
-            (Array.isArray(relT.coassigneeCodes) && relT.coassigneeCodes.includes(query.currentUserCode))
+            relT.assignerCode === query.currentEmployeeCode ||
+            relT.creatorEmployeeCode === query.currentEmployeeCode ||
+            relT.assigneeCode === query.currentEmployeeCode ||
+            relT.supervisorCode === query.currentEmployeeCode ||
+            (Array.isArray(relT.coassigneeCodes) && relT.coassigneeCodes.includes(query.currentEmployeeCode))
           ) {
             isTreeParticipant = true;
             break;
@@ -391,11 +391,11 @@ export class TasksService implements OnModuleInit {
     }
 
     // Role filter
-    if (query.role && query.currentUserCode) {
+    if (query.role && query.currentEmployeeCode) {
       conditions.push({
         participants: {
           some: {
-            employeeCode: query.currentUserCode,
+            employeeCode: query.currentEmployeeCode,
             participantRole: query.role
           }
         }
@@ -456,16 +456,16 @@ export class TasksService implements OnModuleInit {
       const scopingConditions: any[] = [];
 
       // 1. Participant check
-      if (query.currentUserCode) {
+      if (query.currentEmployeeCode) {
         scopingConditions.push({
           participants: {
             some: {
-              employeeCode: query.currentUserCode
+              employeeCode: query.currentEmployeeCode
             }
           }
         });
         scopingConditions.push({
-          creatorEmployeeCode: query.currentUserCode
+          creatorEmployeeCode: query.currentEmployeeCode
         });
       }
 
@@ -610,9 +610,9 @@ export class TasksService implements OnModuleInit {
 
     // Resolve creatorUserId
     let creatorUserId = 0;
-    if (data.currentUserCode) {
+    if (data.currentEmployeeCode) {
       const emp = await this.prisma.employee.findUnique({
-        where: { employeeCode: data.currentUserCode },
+        where: { employeeCode: data.currentEmployeeCode },
         select: { userId: true }
       });
       if (emp?.userId) {
@@ -776,7 +776,7 @@ export class TasksService implements OnModuleInit {
     coassigneeCodes?: string[],
     departmentId?: number,
     assignerCode?: string,
-    context?: { currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }
+    context?: { currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }
   ) {
     const t = await this.prisma.$transaction(async (tx) => {
       const currentTask = await tx.task.findUnique({
@@ -1083,9 +1083,9 @@ export class TasksService implements OnModuleInit {
 
         if (allowedCodes.length > 0) {
           whereClause.employeeCode = { in: allowedCodes };
-        } else if (query.currentUserCode) {
+        } else if (query.currentEmployeeCode) {
           // Chỉ thấy bản thân nếu không có quyền gì
-          whereClause.employeeCode = query.currentUserCode;
+          whereClause.employeeCode = query.currentEmployeeCode;
         }
       }
 
@@ -1216,8 +1216,8 @@ export class TasksService implements OnModuleInit {
   async importTasks(data: any[]) { return { success: true }; }
   async exportTasks(query: any) { return { success: true }; }
   async resolveTask(id: number, action: string, body: any) {
-    if (action === 'COMPLETE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentUserCode);
-    if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentUserCode);
+    if (action === 'COMPLETE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode);
+    if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentEmployeeCode);
   }
   async updateTask(id: number, data: any) {
     const updateData = { ...data };
@@ -1279,7 +1279,7 @@ export class TasksService implements OnModuleInit {
       throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
     }
 
-    const actorCode = data.authorCode || data.currentUserCode || 'SYSTEM';
+    const actorCode = data.authorCode || data.currentEmployeeCode || 'SYSTEM';
     let actorUserId: number | null = null;
     if (actorCode && actorCode !== 'SYSTEM') {
       const emp = await this.prisma.employee.findUnique({

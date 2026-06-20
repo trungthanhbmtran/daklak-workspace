@@ -189,7 +189,7 @@ export class KpiEvaluationsService {
           where.employee = { departmentId: { in: descendantIds } };
         } else {
           // No descendants -> can't view others
-          where.employeeCode = query.currentUserCode;
+          where.employeeCode = query.currentEmployeeCode;
         }
       }
     }

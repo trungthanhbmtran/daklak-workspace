@@ -12,7 +12,7 @@ export class MasterPlansService {
     if (query.status) where.status = query.status;
     if (query.departmentId) where.departmentId = query.departmentId;
 
-    if (!query.isAdmin && query.currentUserCode) {
+    if (!query.isAdmin && query.currentEmployeeCode) {
       const authConditions: any[] = [];
 
       // QUY TẮC 1: Kế hoạch thuộc đơn vị của user hoặc đơn vị CẤP TRÊN
@@ -26,7 +26,7 @@ export class MasterPlansService {
 
       // QUY TẮC 2: User là người được giao hoặc người giao của bất kỳ task nào trong kế hoạch
       const currentEmp = await this.prisma.employee.findUnique({
-        where: { employeeCode: query.currentUserCode },
+        where: { employeeCode: query.currentEmployeeCode },
         select: { userId: true }
       });
       const currentUserId = currentEmp?.userId ? parseInt(currentEmp.userId, 10) : null;
@@ -101,7 +101,7 @@ export class MasterPlansService {
           };
         });
 
-        const canEdit = query.isAdmin || mp.createdByCode === query.currentUserCode || query.isLeader;
+        const canEdit = query.isAdmin || mp.createdByCode === query.currentEmployeeCode || query.isLeader;
         const allowedActions: string[] = [];
         if (canEdit) allowedActions.push('ADD_ROOT_TASK', 'EDIT', 'DELETE');
 
@@ -144,7 +144,7 @@ export class MasterPlansService {
     });
     if (!mp) return null;
 
-    if (typeof query === 'object' && !query.isAdmin && query.currentUserCode) {
+    if (typeof query === 'object' && !query.isAdmin && query.currentEmployeeCode) {
       let hasAccess = false;
       const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
         ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
@@ -153,7 +153,7 @@ export class MasterPlansService {
       if (mp.departmentId !== null && ancestorIds.includes(mp.departmentId)) {
         hasAccess = true;
       } else {
-        const code = query.currentUserCode;
+        const code = query.currentEmployeeCode;
         const currentEmp = await this.prisma.employee.findUnique({
           where: { employeeCode: code },
           select: { userId: true }
@@ -203,7 +203,7 @@ export class MasterPlansService {
       };
     });
 
-    const canEdit = query.isAdmin || mp.createdByCode === query.currentUserCode || query.isLeader;
+    const canEdit = query.isAdmin || mp.createdByCode === query.currentEmployeeCode || query.isLeader;
 
     return {
       ...mp,

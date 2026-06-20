@@ -192,7 +192,7 @@ export class KpisController implements OnModuleInit {
     return firstValueFrom(
       this.kpiService.FindEvaluations({
         employeeCode: targetCode,
-        currentUserCode: callerCode,
+        currentEmployeeCode: callerCode,
         isAdmin,
         isFetchingOwn,
         callerDescendantUnitIds,
