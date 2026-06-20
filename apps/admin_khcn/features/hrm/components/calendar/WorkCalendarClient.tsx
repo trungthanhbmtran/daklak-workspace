@@ -19,6 +19,7 @@ import { vi as viLocale } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { 
   Calendar as CalendarIcon, 
@@ -37,6 +38,7 @@ import { Loader2 } from "lucide-react";
 export function WorkCalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState("all"); // 'all' (Xử lý CV), 'personal', 'unit', 'meeting'
+  const [selectedDayEvents, setSelectedDayEvents] = useState<{ day: Date, events: any[] } | null>(null);
 
   // --- GET REAL DATA ---
   const { data: tasksRes, isLoading } = useTasksList({ pageSize: 2000 });
@@ -158,24 +160,36 @@ export function WorkCalendarClient() {
               {formattedDate}
             </span>
             {dayEvents.length > 0 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
-                {dayEvents.length} sự kiện
-              </span>
+              <button 
+                onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
+                className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 transition-colors cursor-pointer"
+              >
+                Chi tiết ({dayEvents.length})
+              </button>
             )}
           </div>
           
-          <div className="flex-1 overflow-y-auto min-h-0 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 pr-1">
-            {dayEvents.map((evt) => (
+          <div className="flex-1 overflow-hidden min-h-0 space-y-1.5 pr-1">
+            {dayEvents.slice(0, 3).map((evt) => (
               <div 
                 key={evt.id} 
                 className={`text-xs p-1.5 rounded border ${evt.colorClass} truncate cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1.5`}
                 title={evt.title}
+                onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
               >
                 {evt.type === 'meeting' ? <Video className="w-3 h-3 shrink-0" /> : 
                  evt.isCompleted ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <Clock className="w-3 h-3 shrink-0" />}
                 <span className="truncate">{evt.title}</span>
               </div>
             ))}
+            {dayEvents.length > 3 && (
+              <div 
+                className="text-[10px] text-slate-500 hover:text-slate-700 cursor-pointer pt-0.5 font-medium"
+                onClick={() => setSelectedDayEvents({ day: cloneDay, events: dayEvents })}
+              >
+                + {dayEvents.length - 3} sự kiện nữa...
+              </div>
+            )}
           </div>
         </div>
       );
@@ -283,6 +297,39 @@ export function WorkCalendarClient() {
           </div>
         </div>
       </Tabs>
+
+      {/* Modal chi tiết sự kiện của ngày */}
+      <Dialog open={!!selectedDayEvents} onOpenChange={(open) => !open && setSelectedDayEvents(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <CalendarIcon className="w-5 h-5 text-indigo-500" />
+              Sự kiện ngày {selectedDayEvents?.day && format(selectedDayEvents.day, "dd/MM/yyyy")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-2 mt-4">
+            {selectedDayEvents?.events.length === 0 ? (
+              <p className="text-slate-500 text-sm italic">Không có sự kiện nào.</p>
+            ) : (
+              selectedDayEvents?.events.map((evt) => (
+                <div 
+                  key={evt.id} 
+                  className={`p-3 rounded-lg border ${evt.colorClass} flex flex-col gap-1.5`}
+                >
+                  <div className="flex items-start gap-2">
+                    {evt.type === 'meeting' ? <Video className="w-4 h-4 shrink-0 mt-0.5" /> : 
+                    evt.isCompleted ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <Clock className="w-4 h-4 shrink-0 mt-0.5" />}
+                    <span className="font-semibold text-sm leading-tight">{evt.title}</span>
+                  </div>
+                  <span className="text-xs opacity-80 ml-6">
+                    {evt.type === 'meeting' ? 'Lịch họp' : (evt.isCompleted ? 'Hoàn thành' : 'Đang xử lý / Trễ hạn')}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
