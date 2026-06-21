@@ -250,12 +250,12 @@ export function TaskDetailDialog({
                       </div>
 
                       {/* Co-assignees */}
-                      {(activeTask.coAssigneeCodes || []).length > 0 && (
+                      {(activeTask.coassigneeNames || []).length > 0 && (
                         <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
-                          <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">🤝 Phối hợp ({(activeTask.coAssigneeCodes || []).length})</p>
+                          <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">🤝 Phối hợp ({(activeTask.coassigneeNames || []).length})</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {(activeTask.coAssigneeCodes || []).map((code: string) => (
-                              <span key={code} className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 px-2 py-1 rounded-full border border-amber-200">{code}</span>
+                            {(activeTask.coassigneeNames || []).map((name: string, idx: number) => (
+                              <span key={idx} className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 px-2 py-1 rounded-full border border-amber-200">{name}</span>
                             ))}
                           </div>
                         </div>

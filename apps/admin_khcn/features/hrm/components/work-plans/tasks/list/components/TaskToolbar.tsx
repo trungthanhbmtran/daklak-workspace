@@ -3,8 +3,7 @@
 import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from '@/components/ui/search';
-import { Filter, Target, User, Users, ClipboardList, Eye, CheckCircle2 } from 'lucide-react';
+import { Filter, Target, User, Users, ClipboardList, Eye, CheckCircle2, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type TaskRoleFilter = 'ALL' | 'UNASSIGNED' | 'ASSIGNEE' | 'OWNER' | 'APPROVER' | 'COORDINATOR';
