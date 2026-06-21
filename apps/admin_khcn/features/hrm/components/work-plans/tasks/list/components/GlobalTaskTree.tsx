@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROLE_META } from './TaskToolbar';
+import { useTaskSubtasks } from '@/features/hrm/hooks/useTasks';
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string; dot: string }> = {
   TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'bg-slate-100/80 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
@@ -37,10 +38,20 @@ interface TaskRowProps {
   onSmartAssign: (task: any) => void;
 }
 
-function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
-  const [expanded, setExpanded] = useState(depth < 2);
+const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
+  const [expanded, setExpanded] = useState(depth === 0);
 
-  const hasChildren = task.children?.length > 0;
+  const hasLoadedChildren = task.children?.length > 0;
+  const countChildren = task._count?.children || 0;
+  const hasChildren = hasLoadedChildren || countChildren > 0;
+
+  // Tải lười (lazy-load) công việc con nếu chưa có sẵn nhưng _count > 0
+  const shouldFetchSubtasks = expanded && hasChildren && !hasLoadedChildren;
+  const { data: subtasksResponse, isLoading: isLoadingSubtasks } = useTaskSubtasks(
+    shouldFetchSubtasks ? task.id : undefined
+  );
+
+  const displayChildren = hasLoadedChildren ? task.children : (subtasksResponse?.data || []);
   const allowedActions = task.allowedActions || [];
   const canAssign = allowedActions.includes('ASSIGN');
 
@@ -116,7 +127,7 @@ function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLa
                 {hasChildren && (
                   <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200 gap-1 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
                     <ClipboardList className="w-3 h-3" />
-                    {task.children.length} việc con
+                    {hasLoadedChildren ? task.children.length : countChildren} việc con
                   </Badge>
                 )}
               </div>
@@ -183,7 +194,13 @@ function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLa
       {/* Sub-task rows */}
       {expanded && hasChildren && (
         <div className={cn("ml-10 pl-2", isRoot && "ml-5 pl-2", "relative animate-in slide-in-from-top-2 fade-in duration-300")}>
-          {task.children.map((child: any, index: number) => (
+          {isLoadingSubtasks && (
+            <div className="py-2 flex items-center gap-2 text-xs text-slate-500">
+              <div className="w-3 h-3 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+              Đang tải công việc con...
+            </div>
+          )}
+          {!isLoadingSubtasks && displayChildren.map((child: any, index: number) => (
             <TaskRow
               key={child.id}
               task={child}
@@ -191,14 +208,14 @@ function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLa
               indexSequence={`${indexSequence}.${index + 1}`}
               onSelectTask={onSelectTask}
               onSmartAssign={onSmartAssign}
-              isLastChild={index === task.children.length - 1}
+              isLastChild={index === displayChildren.length - 1}
             />
           ))}
         </div>
       )}
     </div>
   );
-}
+});
 
 interface GlobalTaskTreeProps {
   tasks: any[];
@@ -207,7 +224,7 @@ interface GlobalTaskTreeProps {
   onSmartAssign: (task: any) => void;
 }
 
-export function GlobalTaskTree({
+export const GlobalTaskTree = React.memo(function GlobalTaskTree({
   tasks,
   isLoading,
   onSelectTask,
@@ -275,4 +292,4 @@ export function GlobalTaskTree({
       </div>
     </div>
   );
-}
+});

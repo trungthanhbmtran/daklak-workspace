@@ -6,6 +6,7 @@ import "common/common.proto";
 service TaskService {
   rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {}
   rpc ListTasks (ListTasksRequest) returns (ListTasksResponse) {}
+  rpc GetTaskStats (ListTasksRequest) returns (GetTaskStatsResponse) {}
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
   rpc UpdateTask (UpdateTaskRequest) returns (TaskResponse) {}
   rpc RecommendAssignees (RecommendAssigneesRequest) returns (RecommendAssigneesResponse) {}
@@ -156,10 +157,11 @@ message ListTasksRequest {
 }
 
 message TaskStats {
-  int32 overdueCount = 1;
-  int32 dueIn3DaysCount = 2;
-  int32 dueIn7DaysCount = 3;
-  int32 dueOver7DaysCount = 4;
+  int32 overdue = 1;
+  int32 warning = 2;
+  int32 inTime = 3;
+  int32 doneInTime = 4;
+  int32 doneOverdue = 5;
 }
 
 message ListTasksResponse {
@@ -167,7 +169,12 @@ message ListTasksResponse {
   string message = 2;
   repeated TaskResponse data = 3;
   common.Meta meta = 4;
-  TaskStats stats = 5;
+}
+
+message GetTaskStatsResponse {
+  bool success = 1;
+  string message = 2;
+  TaskStats data = 3;
 }
 
 message UpdateTaskStatusRequest {

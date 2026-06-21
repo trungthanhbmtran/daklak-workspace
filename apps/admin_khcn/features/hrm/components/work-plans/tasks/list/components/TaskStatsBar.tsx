@@ -5,48 +5,20 @@ import { AlertCircle, Clock, Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TaskStatsBarProps {
-  tasks: any[];
+  stats: { overdue: number; warning: number; inTime: number; doneInTime: number; doneOverdue: number };
   activeFilter: string | null;
   onFilterChange: (id: string | null) => void;
 }
 
 /**
  * Stats cards hiển thị tổng quan theo-trạng thái thời hạn.
- * Memo-ized: chỉ re-render khi tasks hoặc activeFilter thay đổi.
+ * Memo-ized: chỉ re-render khi stats hoặc activeFilter thay đổi.
  */
 export const TaskStatsBar = memo(function TaskStatsBar({
-  tasks,
+  stats,
   activeFilter,
   onFilterChange,
 }: TaskStatsBarProps) {
-  const stats = useMemo(() => {
-    let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
-    tasks.forEach((task: any) => {
-      const due = task.dueDate ? new Date(task.dueDate) : null;
-      const now = new Date();
-      if (due) due.setHours(0, 0, 0, 0);
-      now.setHours(0, 0, 0, 0);
-
-      if (task.status === 'DONE') {
-        const completedDate = new Date(task.completedAt || task.updatedAt || Date.now());
-        completedDate.setHours(0, 0, 0, 0);
-        if (due && completedDate > due) {
-          doneOverdue++;
-        } else {
-          doneInTime++;
-        }
-      } else {
-        if (!due) { inTime++; }
-        else {
-          const diff = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
-          if (diff < 0) overdue++;
-          else if (diff <= 3) warning++;
-          else inTime++;
-        }
-      }
-    });
-    return { overdue, warning, inTime, doneInTime, doneOverdue };
-  }, [tasks]);
 
   const CARDS = [
     { id: 'overdue', label: 'Đang xử lý - Quá hạn', value: stats.overdue, icon: <AlertCircle className="h-6 w-6" />, cls: 'from-rose-500 to-red-600 shadow-rose-200/50' },

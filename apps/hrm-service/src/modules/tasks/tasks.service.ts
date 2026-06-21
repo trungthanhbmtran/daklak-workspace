@@ -529,19 +529,70 @@ export class TasksService implements OnModuleInit {
     }
 
 
+    const page = query.page ? parseInt(query.page, 10) : 1;
+    const limit = query.limit ? parseInt(query.limit, 10) : 20;
+    const skip = (page - 1) * limit;
 
-    const tasks = await this.prisma.task.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true } }
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const threeDaysLater = new Date(now);
+    threeDaysLater.setDate(now.getDate() + 3);
+
+    // Apply statsFilter range conditions
+    if (query.statsFilter) {
+      if (query.statsFilter === 'overdue') {
+        where.status = { not: 'DONE' };
+        where.dueDate = { lt: now };
+      } else if (query.statsFilter === 'warning') {
+        where.status = { not: 'DONE' };
+        where.dueDate = { gte: now, lte: threeDaysLater };
+      } else if (query.statsFilter === 'inTime') {
+        where.status = { not: 'DONE' };
+        // dueDate can be greater than threeDaysLater, or null
+        where.OR = [
+          { dueDate: { gt: threeDaysLater } },
+          { dueDate: null }
+        ];
+      } else if (query.statsFilter === 'doneInTime') {
+        where.status = 'DONE';
+      } else if (query.statsFilter === 'doneOverdue') {
+        where.status = 'DONE';
       }
-    });
+    }
 
-    console.log('[DEBUG HRM] PRISMA TASKS RETURNED:', tasks.length);
+    let finalWhere = { ...where };
+    
+    const [total, tasks] = await Promise.all([
+      this.prisma.task.count({ where: finalWhere }),
+      this.prisma.task.findMany({
+        where: finalWhere,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          participants: true,
+          plan: { select: { id: true, title: true, createdByCode: true } },
+          _count: { select: { descendants: true } }
+        }
+      })
+    ]);
 
-    const enrichedTasks = await this.enrichTasks(tasks);
+    // Apply strict column-vs-column filter in JS if required
+    let finalTasks = tasks;
+    if (query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue') {
+       finalTasks = tasks.filter((task: any) => {
+         const due = task.dueDate ? new Date(task.dueDate) : null;
+         if (due) due.setHours(0,0,0,0);
+         const completed = new Date(task.completedAt || task.updatedAt || Date.now());
+         completed.setHours(0,0,0,0);
+         const late = due ? completed > due : false;
+         return query.statsFilter === 'doneOverdue' ? late : !late;
+       });
+    }
+
+    console.log('[DEBUG HRM] PRISMA TASKS RETURNED:', finalTasks.length, 'TOTAL:', total);
+
+    const enrichedTasks = await this.enrichTasks(finalTasks);
 
     const mappedTasks = await Promise.all(enrichedTasks.map(async (t: any) => {
       const allowedActions = await this.computeAllowedActions(t, query);
@@ -579,8 +630,120 @@ export class TasksService implements OnModuleInit {
       message: 'Lấy danh sách nhiệm vụ thành công',
       data: finalData,
       meta: {
-        pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 }
+        pagination: { 
+          total, 
+          page, 
+          pageSize: limit, 
+          totalPages: Math.ceil(total / limit) 
+        }
       }
+    };
+  }
+
+  async getTaskStats(query: any) {
+    console.log('[DEBUG HRM] getTaskStats with Query:', JSON.stringify(query));
+
+    const where: any = {
+      ...(query.assigneeCode ? { assigneeCode: query.assigneeCode } : {}),
+    };
+
+    if (query.role === 'UNASSIGNED') {
+      where.assigneeCode = 'UNASSIGNED';
+    } else if (query.role === 'ASSIGNEE') {
+      where.assigneeCode = query.assigneeCode || undefined;
+    } else if (query.role === 'OWNER') {
+      where.assignerCode = query.assignerCode || undefined;
+    }
+
+    if (query.departmentId) {
+      where.departmentId = parseInt(query.departmentId, 10);
+    }
+
+    if (!query.role || query.role === 'ALL') {
+      const conditions: any[] = [];
+      const scopingConditions: any[] = [];
+      
+      const adminOrLeaderConditions: any[] = [];
+      if (query.isAdmin || query.isLeader) {
+         if (query.departmentId) {
+             adminOrLeaderConditions.push({ departmentId: parseInt(query.departmentId, 10) });
+         } else {
+             adminOrLeaderConditions.push({}); // Full access or global view based on original logic
+         }
+      }
+
+      if (adminOrLeaderConditions.length > 0) {
+         scopingConditions.push(...adminOrLeaderConditions);
+      } else if (query.currentEmployeeCode) {
+         const leaderOrConditions: any[] = [
+           { assignerCode: query.currentEmployeeCode },
+           { assigneeCode: query.currentEmployeeCode },
+           { participants: { some: { employeeCode: query.currentEmployeeCode } } }
+         ];
+
+         if (query.currentUserDept && query.isSupervisor) {
+           leaderOrConditions.push({ departmentId: query.currentUserDept });
+         }
+         scopingConditions.push(...leaderOrConditions);
+      }
+
+      if (scopingConditions.length > 0) {
+        conditions.push({ OR: scopingConditions });
+      } else {
+        conditions.push({ id: -1 });
+      }
+
+      if (conditions.length > 0) {
+        where.AND = conditions;
+      }
+    }
+
+    if (query.search) where.title = { contains: query.search };
+    if (query.priority && query.priority !== 'ALL') where.priority = query.priority;
+
+    if (query.planId) {
+      where.planId = parseInt(query.planId, 10);
+      delete where.status;
+    }
+
+    console.log('[DEBUG HRM] Final Prisma Where Conditions (Stats):', JSON.stringify(where));
+
+    const allStatsTasks = await this.prisma.task.findMany({
+      where,
+      select: { status: true, dueDate: true, completedAt: true, updatedAt: true }
+    });
+
+    let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    allStatsTasks.forEach((t: any) => {
+      const due = t.dueDate ? new Date(t.dueDate) : null;
+      if (due) due.setHours(0, 0, 0, 0);
+
+      if (t.status === 'DONE') {
+        const completedDate = new Date(t.completedAt || t.updatedAt || Date.now());
+        completedDate.setHours(0, 0, 0, 0);
+        if (due && completedDate > due) {
+          doneOverdue++;
+        } else {
+          doneInTime++;
+        }
+      } else {
+        if (!due) { inTime++; }
+        else {
+          const diff = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
+          if (diff < 0) overdue++;
+          else if (diff <= 3) warning++;
+          else inTime++;
+        }
+      }
+    });
+
+    return {
+      success: true,
+      message: 'Lấy thống kê nhiệm vụ thành công',
+      data: { overdue, warning, inTime, doneInTime, doneOverdue }
     };
   }
 

@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTasksList } from '@/features/hrm/hooks';
+import { useTasksList, useTaskStats } from '@/features/hrm/hooks';
 import { hrmTasksApi } from '@/features/hrm/api';
 import { hrmKeys } from '@/features/hrm/keys';
 import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
@@ -13,6 +13,7 @@ import { GlobalTaskTree } from './components/GlobalTaskTree';
 import { TaskStatsBar } from './components/TaskStatsBar';
 import { SmartAssignDrawer } from '../assign/SmartAssignDrawer';
 import { CreateTaskModal } from './components/CreateTaskModal';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
 
 import { useDebounce } from './hooks/useDebounce';
 
@@ -31,6 +32,9 @@ export const TaskListClient = () => {
   const [searchQuery, setSearchQuery] = useState(defaultSearch);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -39,16 +43,23 @@ export const TaskListClient = () => {
   const debouncedPriority = useDebounce(priorityFilter, 300);
   const debouncedSearch = useDebounce(searchQuery, 400);
 
-  // ── Unified Data Fetching ──────────────────────────────────────────────────
   const { data: tasksResponse, isLoading, isFetching, refetch } = useTasksList({
     search: debouncedSearch,
     priority: debouncedPriority === 'ALL' ? undefined : debouncedPriority,
     status: debouncedStatus === 'ALL' ? undefined : debouncedStatus,
     role: (roleFilter !== 'ALL' && roleFilter !== 'UNASSIGNED') ? roleFilter : undefined,
     assigneeCode: roleFilter === 'UNASSIGNED' ? 'UNASSIGNED' : undefined,
+    statsFilter: activeFilter || undefined,
+    page,
+    limit: pageSize,
   });
 
-  console.log("tasksResponse", tasksResponse)
+  const { data: statsResponse } = useTaskStats({
+    search: debouncedSearch,
+    priority: debouncedPriority === 'ALL' ? undefined : debouncedPriority,
+    role: (roleFilter !== 'ALL' && roleFilter !== 'UNASSIGNED') ? roleFilter : undefined,
+    assigneeCode: roleFilter === 'UNASSIGNED' ? 'UNASSIGNED' : undefined,
+  });
 
   // --- NO MOCK DATA ---
   // Using real data from backend API
@@ -56,6 +67,8 @@ export const TaskListClient = () => {
 
   // Use only real tasks
   const allTasks = tasksResponse?.data || [];
+  const meta = tasksResponse?.meta || {};
+  const totalPages = meta.pagination?.totalPages || 1;
 
   // ── Categories ──────────────────────────────────────────────────────────────
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
@@ -68,31 +81,8 @@ export const TaskListClient = () => {
   const taskRoleCategories = roleRes?.data || [];
 
   // ── StatsBar filter ────────────────────────────────────────────────────────
-  const displayedTasks = useMemo(() => {
-    if (!activeFilter) return allTasks;
-    return allTasks.filter((task: any) => {
-      const due = task.dueDate ? new Date(task.dueDate) : null;
-      const now = new Date();
-      if (due) due.setHours(0, 0, 0, 0);
-      now.setHours(0, 0, 0, 0);
-
-      if (activeFilter === 'doneInTime' || activeFilter === 'doneOverdue') {
-        if (task.status !== 'DONE') return false;
-        const completed = new Date(task.completedAt || task.updatedAt || Date.now());
-        completed.setHours(0, 0, 0, 0);
-        const late = due ? completed > due : false;
-        return activeFilter === 'doneOverdue' ? late : !late;
-      }
-
-      if (task.status === 'DONE') return false;
-      if (!due) return activeFilter === 'inTime';
-      const diff = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
-      if (activeFilter === 'overdue') return diff < 0;
-      if (activeFilter === 'warning') return diff >= 0 && diff <= 3;
-      if (activeFilter === 'inTime') return diff > 3;
-      return true;
-    });
-  }, [allTasks, activeFilter]);
+  // We use server-side statsFilter so no need to filter displayedTasks in JS anymore
+  const displayedTasks = allTasks;
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleSelectTask = useCallback((task: any) => setSelectedTask(task), []);
@@ -123,7 +113,7 @@ export const TaskListClient = () => {
 
       {/* Stats bar */}
       <TaskStatsBar
-        tasks={allTasks}
+        stats={statsResponse?.data || { overdue: 0, warning: 0, inTime: 0, doneInTime: 0, doneOverdue: 0 }}
         activeFilter={activeFilter}
         onFilterChange={handleFilterChange}
       />
@@ -134,10 +124,10 @@ export const TaskListClient = () => {
         statusFilter={statusFilter}
         priorityFilter={priorityFilter}
         searchQuery={searchQuery}
-        onRoleChange={(v) => { setRoleFilter(v); setActiveFilter(null); setStatusFilter('ALL'); }}
-        onStatusChange={setStatusFilter}
-        onPriorityChange={setPriorityFilter}
-        onSearchChange={setSearchQuery}
+        onRoleChange={(v) => { setRoleFilter(v); setActiveFilter(null); setStatusFilter('ALL'); setPage(1); }}
+        onStatusChange={(v) => { setStatusFilter(v); setPage(1); }}
+        onPriorityChange={(v) => { setPriorityFilter(v); setPage(1); }}
+        onSearchChange={(v) => { setSearchQuery(v); setPage(1); }}
         onCreateTask={handleCreateTask}
         taskStatusCategories={taskStatusCategories}
       />
@@ -149,6 +139,56 @@ export const TaskListClient = () => {
         onSelectTask={handleSelectTask}
         onSmartAssign={handleSmartAssign}
       />
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="py-4 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setPage(p => Math.max(1, p - 1))} 
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                if (
+                  p === 1 || 
+                  p === totalPages || 
+                  (p >= page - 1 && p <= page + 1)
+                ) {
+                  return (
+                    <PaginationItem key={p}>
+                      <PaginationLink 
+                        isActive={page === p} 
+                        onClick={() => setPage(p)}
+                        className="cursor-pointer"
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                } else if (p === page - 2 || p === page + 2) {
+                  return (
+                    <PaginationItem key={p}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return null;
+              })}
+
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {/* Create Modal */}
       <CreateTaskModal

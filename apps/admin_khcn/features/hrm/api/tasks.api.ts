@@ -6,6 +6,10 @@ export const hrmTasksApi = {
     return apiClient.get("/hrm/tasks", { params }) as any;
   },
 
+  getStats(params: any = {}): Promise<ApiResponse<any>> {
+    return apiClient.get("/hrm/tasks/stats", { params }) as any;
+  },
+
   /** Lấy TOÀN BỘ task của 1 kế hoạch (flat list, bao gồm sub-tasks mọi cấp).
    *  Client tự build tree theo parentId. Auth filter bị bỏ qua — plan visibility đã kiểm tra.
    */

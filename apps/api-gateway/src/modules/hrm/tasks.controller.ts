@@ -156,6 +156,9 @@ export class TasksController implements OnModuleInit {
     @Query('isSupervisor') isSupervisor: string,
     @Query('status') status: string,
     @Query('priority') priority: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('statsFilter') statsFilter: string,
   ) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
@@ -187,6 +190,7 @@ export class TasksController implements OnModuleInit {
       search,
       status,
       priority,
+      statsFilter,
       departmentId: finalDepartmentId,
       planId: planId ? parseInt(planId, 10) : undefined,
       isSupervisor: isSupervisor === 'true',
@@ -196,6 +200,8 @@ export class TasksController implements OnModuleInit {
       currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
       currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
       role,
+      page: page ? parseInt(page, 10) : 1,
+      limit: limit ? parseInt(limit, 10) : 20,
     };
 
     console.log('[TasksController] ListTasks Request Payload:', JSON.stringify(requestPayload, null, 2));
@@ -222,6 +228,60 @@ export class TasksController implements OnModuleInit {
       response.meta = response.meta || {};
       response.meta.currentEmployeeCode = user.employeeCode;
     }
+
+    return response;
+  }
+
+  @Get('stats')
+  @Permissions('TASK.VIEW', 'TASK.*')
+  async getStats(
+    @Req() req: any,
+    @Query('role') role: string,
+    @Query('assigneeCode') assigneeCode: string,
+    @Query('assignerCode') assignerCode: string,
+    @Query('departmentId') departmentId: string,
+    @Query('planId') planId: string,
+    @Query('isSupervisor') isSupervisor: string,
+    @Query('status') status: string,
+    @Query('priority') priority: string,
+    @Query('search') search: string,
+  ) {
+    const user = req.user;
+    let finalAssigneeCode = assigneeCode;
+    let finalAssignerCode: string | undefined = assignerCode;
+    let finalDepartmentId = departmentId ? parseInt(departmentId, 10) : undefined;
+
+    if (role === 'ASSIGNEE' && user) {
+      finalAssigneeCode = user.employeeCode;
+    } else if (role === 'OWNER' && user) {
+      finalAssignerCode = user.employeeCode;
+    }
+
+    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
+    const isLeader = isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*');
+
+    const requestPayload = {
+      assigneeCode: finalAssigneeCode,
+      assignerCode: finalAssignerCode,
+      departmentId: finalDepartmentId,
+      planId: planId ? parseInt(planId, 10) : undefined,
+      isSupervisor: isSupervisor === 'true',
+      status,
+      priority,
+      search,
+      currentEmployeeCode: user?.employeeCode,
+      isAdmin,
+      isLeader,
+      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+      currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
+      role,
+    };
+
+    console.log('[TasksController] GetTaskStats Request Payload:', JSON.stringify(requestPayload, null, 2));
+
+    const response: any = await firstValueFrom(
+      this.taskService.GetTaskStats(requestPayload, this.getGrpcMetadata(req)),
+    );
 
     return response;
   }
