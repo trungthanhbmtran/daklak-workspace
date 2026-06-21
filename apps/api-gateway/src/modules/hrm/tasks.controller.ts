@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
 @ApiTags('HRM - Tasks')
 @Controller('admin/hrm/tasks')
@@ -233,7 +234,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get('stats')
-  @Permissions('TASK.VIEW', 'TASK.*')
+  @RequirePermissions('TASK.VIEW', 'TASK.*')
   async getStats(
     @Req() req: any,
     @Query('role') role: string,
