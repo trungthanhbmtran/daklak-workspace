@@ -36,6 +36,7 @@ export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskMod
       const isRootTask = !parentTask?.id;
 
       if (isRootTask) {
+        const finalPlanId = (planId || parentTask?.planId);
         // Tạo đầu việc gốc — không có parentId, chỉ có planId
         const { hrmTasksApi } = await import('@/features/hrm/api');
         await hrmTasksApi.create({
@@ -44,17 +45,18 @@ export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskMod
           priority: form.priority,
           dueDate: form.dueDate || undefined,
           assigneeCode: 'UNASSIGNED',
-          planId: planId || parentTask?.planId,
+          planId: finalPlanId,
           status: 'TODO',
         });
       } else {
+        const finalPlanId = (planId || parentTask?.planId);
         // Tạo nhiệm vụ con dưới task cha
         await hrmTasksApi.createSubTask(parentTask.id, {
           title: form.title.trim(),
           description: form.description.trim() || undefined,
           priority: form.priority,
           dueDate: form.dueDate || undefined,
-          planId: planId || parentTask?.planId,
+          planId: finalPlanId,
         });
       }
 

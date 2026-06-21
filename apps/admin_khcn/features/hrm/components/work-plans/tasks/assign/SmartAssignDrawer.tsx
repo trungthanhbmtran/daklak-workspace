@@ -109,7 +109,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
       if (!task?.id) return Promise.reject(new Error("Missing task ID"));
       return hrmTasksApi.assignTask(task.id, {
         assigneeCode: data.leadCode,
-        coAssigneeCodes: data.coordinatorCodes || [],
+        coAssigneeCodes: data.coordinatorCodes,
       });
     },
     onSuccess: () => {

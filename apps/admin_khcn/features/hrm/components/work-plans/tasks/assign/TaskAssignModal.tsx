@@ -96,8 +96,8 @@ const DepartmentSelector = React.memo(function DepartmentSelector({
   setSelectedDeptId,
   units,
 }: {
-  selectedDeptId: string;
-  setSelectedDeptId: (id: string) => void;
+  selectedDeptId: number | 'ALL';
+  setSelectedDeptId: (id: number | 'ALL') => void;
   units: any[];
 }) {
   const [openDeptPopover, setOpenDeptPopover] = useState(false);
@@ -111,7 +111,7 @@ const DepartmentSelector = React.memo(function DepartmentSelector({
             <span className="truncate">
               {selectedDeptId === 'ALL' 
                 ? "🏢 Tất cả đơn vị" 
-                : (units.find(u => String(u.id) === selectedDeptId)?.name || "Chọn đơn vị...")}
+                : (units.find(u => u.id === selectedDeptId)?.name || "Chọn đơn vị...")}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-400" />
           </Button>
@@ -140,13 +140,13 @@ const DepartmentSelector = React.memo(function DepartmentSelector({
                   <span className="truncate font-bold">Tất cả đơn vị</span>
                 </CommandItem>
                 {units.map((unit) => {
-                  const isSelected = selectedDeptId === String(unit.id);
+                  const isSelected = selectedDeptId === unit.id;
                   return (
                     <CommandItem
                       key={unit.id}
                       value={`${unit.name} ${unit.code || ''} ${unit.fullPath || ''}`}
                       onSelect={() => {
-                        setSelectedDeptId(String(unit.id));
+                        setSelectedDeptId(unit.id);
                         setOpenDeptPopover(false);
                       }}
                       className={cn(
@@ -555,7 +555,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   }, [task, isOpen]);
 
   const [crossDepartment, setCrossDepartment] = useState(false);
-  const [selectedDeptId, setSelectedDeptId] = useState<string>('ALL');
+  const [selectedDeptId, setSelectedDeptId] = useState<number | 'ALL'>('ALL');
 
   // Fetch departments from api-gateway organization tree
   const { data: treeNodes } = useQuery({
@@ -571,7 +571,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   // Fetch employees list filtered by selected department
   const { data: employeesData } = useHrmEmployeesList({
     pageSize: 200,
-    departmentId: selectedDeptId !== 'ALL' ? Number(selectedDeptId) : undefined,
+    departmentId: selectedDeptId !== 'ALL' ? selectedDeptId : undefined,
     crossDepartment: crossDepartment,
     assignableOnly: true,
   } as any);
@@ -644,7 +644,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
       await hrmTasksApi.assignTask(taskId, {
         assigneeCode: taskState.assigneeCode,
-        coAssigneeCodes: taskState.coAssigneeCodes
+        coAssigneeCodes: taskState.coAssigneeCodes,
+        departmentId: selectedDeptId !== 'ALL' ? selectedDeptId : undefined
       });
       return taskId;
     },
