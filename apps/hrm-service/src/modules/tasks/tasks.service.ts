@@ -90,7 +90,7 @@ export class TasksService implements OnModuleInit {
 
     const mapNames = (t: any) => {
       let creatorCode = t.creatorEmployeeCode;
-      
+
       if (creatorCode) {
         t.creatorEmployeeCode = creatorCode; // ensure it is set
         t.creatorName = employeeMap.get(creatorCode) || creatorCode;
@@ -334,7 +334,6 @@ export class TasksService implements OnModuleInit {
       plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
       rootTaskId: t.rootTaskId ?? 0,
       progress: t.progress ?? 0,
-      coassigneeCodes: t.coassigneeCodes || [],
       coassigneeNames: t.coassigneeNames || [],
       children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
     };
@@ -564,7 +563,7 @@ export class TasksService implements OnModuleInit {
     }
 
     let finalWhere = { ...where };
-    
+
     const [total, tasks] = await Promise.all([
       this.prisma.task.count({ where: finalWhere }),
       this.prisma.task.findMany({
@@ -583,14 +582,14 @@ export class TasksService implements OnModuleInit {
     // Apply strict column-vs-column filter in JS if required
     let finalTasks = tasks;
     if (query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue') {
-       finalTasks = tasks.filter((task: any) => {
-         const due = task.dueDate ? new Date(task.dueDate) : null;
-         if (due) due.setHours(0,0,0,0);
-         const completed = new Date(task.completedAt || task.updatedAt || Date.now());
-         completed.setHours(0,0,0,0);
-         const late = due ? completed > due : false;
-         return query.statsFilter === 'doneOverdue' ? late : !late;
-       });
+      finalTasks = tasks.filter((task: any) => {
+        const due = task.dueDate ? new Date(task.dueDate) : null;
+        if (due) due.setHours(0, 0, 0, 0);
+        const completed = new Date(task.completedAt || task.updatedAt || Date.now());
+        completed.setHours(0, 0, 0, 0);
+        const late = due ? completed > due : false;
+        return query.statsFilter === 'doneOverdue' ? late : !late;
+      });
     }
 
     console.log('[DEBUG HRM] PRISMA TASKS RETURNED:', finalTasks.length, 'TOTAL:', total);
@@ -633,11 +632,11 @@ export class TasksService implements OnModuleInit {
       message: 'Lấy danh sách nhiệm vụ thành công',
       data: finalData,
       meta: {
-        pagination: { 
-          total, 
-          page, 
-          pageSize: limit, 
-          totalPages: Math.ceil(total / limit) 
+        pagination: {
+          total,
+          page,
+          pageSize: limit,
+          totalPages: Math.ceil(total / limit)
         }
       }
     };
@@ -665,29 +664,29 @@ export class TasksService implements OnModuleInit {
     if (!query.role || query.role === 'ALL') {
       const conditions: any[] = [];
       const scopingConditions: any[] = [];
-      
+
       const adminOrLeaderConditions: any[] = [];
       if (query.isAdmin || query.isLeader) {
-         if (query.departmentId) {
-             adminOrLeaderConditions.push({ departmentId: parseInt(query.departmentId, 10) });
-         } else {
-             adminOrLeaderConditions.push({}); // Full access or global view based on original logic
-         }
+        if (query.departmentId) {
+          adminOrLeaderConditions.push({ departmentId: parseInt(query.departmentId, 10) });
+        } else {
+          adminOrLeaderConditions.push({}); // Full access or global view based on original logic
+        }
       }
 
       if (adminOrLeaderConditions.length > 0) {
-         scopingConditions.push(...adminOrLeaderConditions);
+        scopingConditions.push(...adminOrLeaderConditions);
       } else if (query.currentEmployeeCode) {
-         const leaderOrConditions: any[] = [
-           { assignerCode: query.currentEmployeeCode },
-           { assigneeCode: query.currentEmployeeCode },
-           { participants: { some: { employeeCode: query.currentEmployeeCode } } }
-         ];
+        const leaderOrConditions: any[] = [
+          { assignerCode: query.currentEmployeeCode },
+          { assigneeCode: query.currentEmployeeCode },
+          { participants: { some: { employeeCode: query.currentEmployeeCode } } }
+        ];
 
-         if (query.currentUserDept && query.isSupervisor) {
-           leaderOrConditions.push({ departmentId: query.currentUserDept });
-         }
-         scopingConditions.push(...leaderOrConditions);
+        if (query.currentUserDept && query.isSupervisor) {
+          leaderOrConditions.push({ departmentId: query.currentUserDept });
+        }
+        scopingConditions.push(...leaderOrConditions);
       }
 
       if (scopingConditions.length > 0) {
