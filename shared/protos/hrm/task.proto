@@ -143,17 +143,25 @@ message CreateTaskRequest {
 
 message ListTasksRequest {
   string assigneeCode = 1; // optional
-  string filter = 2; // optional (overdue, dueIn3Days, dueIn7Days, dueOver7Days)
+  string filter = 2; // optional
   string search = 3; // optional
   int32 departmentId = 4; // optional
   bool isSupervisor = 5; // optional
+  int32 page = 6;
+  int32 limit = 7;
+  string currentEmployeeCode = 8;
   string assignerCode = 9; // optional - lọc theo người giao việc (tab Đã giao)
   string status = 10; // optional - lọc theo trạng thái
   string priority = 11; // optional - lọc theo mức độ ưu tiên
   int32 planId = 12; // optional - id kế hoạch
+  string statsFilter = 13;
   string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
+  bool isAdmin = 15;
+  bool isLeader = 16;
   repeated int32 allowedDepartmentIds = 17;
   repeated string allowedEmployeeCodes = 18;
+  int32 currentUserDept = 19;
+  int32 currentUserId = 20;
 }
 
 message TaskStats {
