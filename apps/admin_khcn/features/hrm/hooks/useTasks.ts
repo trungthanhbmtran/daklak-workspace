@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData, skipToken } from "@tanstack/react-query";
 import { hrmTasksApi } from "../api";
 import { hrmKeys } from "../keys";
 import { toast } from "sonner";
@@ -48,12 +48,8 @@ export function useTaskStats(params: any = {}) {
  */
 export function useTaskComments(taskId: number | undefined) {
   return useQuery({
-    queryKey: hrmKeys.taskComments(taskId!),
-    queryFn: () => {
-      if (!taskId) return Promise.resolve({ success: true, data: [] });
-      return hrmTasksApi.getComments(taskId);
-    },
-    enabled: !!taskId,
+    queryKey: taskId ? hrmKeys.taskComments(taskId) : [...hrmKeys.tasks(), 'comments', 'none'],
+    queryFn: taskId ? () => hrmTasksApi.getComments(taskId) : skipToken,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false, // chat không cần refetch khi focus lại tab
@@ -66,12 +62,8 @@ export function useTaskComments(taskId: number | undefined) {
  */
 export function useTaskSubtasks(taskId: number | undefined) {
   return useQuery({
-    queryKey: hrmKeys.taskSubtasks(taskId!),
-    queryFn: () => {
-      if (!taskId) return Promise.resolve({ success: true, data: [] });
-      return hrmTasksApi.getSubTasks(taskId);
-    },
-    enabled: !!taskId,
+    queryKey: taskId ? hrmKeys.taskSubtasks(taskId) : [...hrmKeys.tasks(), 'subtasks', 'none'],
+    queryFn: taskId ? () => hrmTasksApi.getSubTasks(taskId) : skipToken,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false,

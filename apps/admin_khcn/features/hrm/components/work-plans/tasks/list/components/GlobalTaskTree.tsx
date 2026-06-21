@@ -161,6 +161,24 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
                   </div>
                 )}
 
+                {task.coassigneeNames && task.coassigneeNames.length > 0 && (
+                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 pl-2 pr-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
+                    <Users className="w-3 h-3 text-slate-500" />
+                    <div className="flex -space-x-1.5">
+                      {task.coassigneeNames.slice(0, 3).map((name: string, idx: number) => (
+                        <div key={idx} className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[9px] font-bold text-slate-600 dark:text-slate-300" title={`Phối hợp: ${name}`}>
+                          {name.charAt(0).toUpperCase()}
+                        </div>
+                      ))}
+                      {task.coassigneeNames.length > 3 && (
+                        <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[9px] font-bold text-slate-500">
+                          +{task.coassigneeNames.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {task.dueDate && (
                   <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-white dark:bg-slate-900 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-800">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />

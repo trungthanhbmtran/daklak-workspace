@@ -108,6 +108,7 @@ export class TasksService implements OnModuleInit {
         t.supervisorCode = approver || '';
         t.supervisorName = approver ? (employeeMap.get(approver) || approver) : '';
         t.coassigneeCodes = coordinators;
+        t.coassigneeNames = (coordinators || []).map((code: string) => employeeMap.get(code) || code);
       } else {
         t.assignerName = t.creatorName || '';
       }
@@ -333,6 +334,8 @@ export class TasksService implements OnModuleInit {
       plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
       rootTaskId: t.rootTaskId ?? 0,
       progress: t.progress ?? 0,
+      coassigneeCodes: t.coassigneeCodes || [],
+      coassigneeNames: t.coassigneeNames || [],
       children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
     };
   }

@@ -113,6 +113,7 @@ message TaskResponse {
   int32 rootTaskId = 28;
   float progress = 29;
   repeated TaskResponse children = 30;
+  repeated string coassigneeNames = 31;
 }
 
 message TaskPlan {
