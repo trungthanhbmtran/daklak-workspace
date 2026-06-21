@@ -658,12 +658,13 @@ export class UsersService implements OnModuleInit {
 
     for (const pos of user.jobPositions) {
       if (!pos.unitId || !pos.jobTitle) continue;
-      const myRank = pos.jobTitle.rank;
 
+      const myRank = pos.jobTitle.rank;
       const allRanksInUnit = await this.prisma.jobPosition.findMany({
         where: { unitId: pos.unitId, endDate: null },
         include: { jobTitle: true },
       });
+
       const distinctRanksInUnit = [...new Set(allRanksInUnit.map(p => p.jobTitle.rank))].sort((a, b) => a - b);
       const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
       const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
@@ -673,64 +674,24 @@ export class UsersService implements OnModuleInit {
       });
       const hasChildUnits = childUnits.length > 0;
 
-      // 1. Giao việc trong cùng đơn vị và đơn vị cấp dưới liền kề
+      // 1. Giao việc trong cùng đơn vị
+      const sameUnitSubordinates = await this.getSubordinatesInSameUnit(
+        pos, myRank, distinctRanksInUnit, hasChildUnits
+      );
+      sameUnitSubordinates.forEach(code => empCodes.add(code));
+
+      // 2. Đối với đơn vị cấp dưới (Chỉ cấp trưởng hoặc phó mới được giao việc xuống đơn vị con)
       const isHead = myRank === minRank;
       const isDeputy = myRank === secondMinRank && myRank > minRank;
 
-      if (isHead) {
-        // Cấp trưởng giao cho phó (cùng đơn vị, hoặc rank liền kề nếu không có phó)
-        if (distinctRanksInUnit.length > 1) {
-          const lowerRanks = await this.prisma.jobPosition.findMany({
-            where: {
-              unitId: pos.unitId,
-              endDate: null,
-              jobTitle: { rank: secondMinRank },
-              user: { isActive: true },
-            },
-            include: { jobTitle: true, user: true },
-          });
-          for (const col of lowerRanks) {
-            if (col.user.employeeCode) empCodes.add(col.user.employeeCode);
-          }
-        }
-
-        // Cấp trưởng giao cho trưởng đơn vị cấp dưới liền kề
-        for (const childUnit of childUnits) {
-          deptIds.add(childUnit.id);
-        }
-      } else if (isDeputy) {
-        // Cấp phó chỉ có thể giao việc cho trưởng đơn vị liền kề
-        for (const childUnit of childUnits) {
-          deptIds.add(childUnit.id);
-        }
-      } else {
-        // Các chuyên viên khác giao cho cấp dưới trực tiếp (nếu có)
-        const lowerRanks = await this.prisma.jobPosition.findMany({
-          where: {
-            unitId: pos.unitId,
-            endDate: null,
-            jobTitle: { rank: { gt: myRank } },
-            user: { isActive: true },
-          },
-          include: { jobTitle: true, user: true },
-        });
-        if (lowerRanks.length > 0) {
-          const nextRank = Math.min(...lowerRanks.map(p => p.jobTitle.rank));
-          const directSubordinates = lowerRanks.filter(p => p.jobTitle.rank === nextRank);
-          for (const col of directSubordinates) {
-            if (col.user.employeeCode) empCodes.add(col.user.employeeCode);
-          }
-        }
+      if (isHead || isDeputy) {
+        childUnits.forEach(child => deptIds.add(child.id));
       }
 
-      // 2. Xác định các đơn vị con / được phân công theo dõi
+      // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots)
       const staffings = await this.prisma.organizationStaffing.findMany({
         where: { unitId: pos.unitId, jobTitleId: pos.jobTitleId },
-        include: {
-          slots: {
-            include: { monitoredUnits: true },
-          },
-        },
+        include: { slots: { include: { monitoredUnits: true } } },
       });
 
       for (const st of staffings) {
@@ -740,24 +701,23 @@ export class UsersService implements OnModuleInit {
           }
         }
       }
+    }
 
+    // 4. Với các đơn vị cấp dưới (từ tất cả các chức vụ), lấy người có rank cao nhất
+    for (const childUnitId of Array.from(deptIds)) {
+      const allChildPositions = await this.prisma.jobPosition.findMany({
+        where: { unitId: childUnitId, endDate: null, user: { isActive: true } },
+        include: { jobTitle: true, user: true },
+      });
 
+      if (allChildPositions.length === 0) continue;
 
-      // 3. Với các đơn vị cấp dưới, chỉ lấy người có rank cao nhất (cấp dưới trực tiếp của đơn vị cha)
-      for (const childUnitId of Array.from(deptIds)) {
-        const allChildPositions = await this.prisma.jobPosition.findMany({
-          where: { unitId: childUnitId, endDate: null, user: { isActive: true } },
-          include: { jobTitle: true, user: true },
-        });
-        if (allChildPositions.length > 0) {
-          const distinctRanks = [...new Set(allChildPositions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
-          // Lấy duy nhất rank cao nhất
-          const topRank = distinctRanks[0];
-          for (const p of allChildPositions) {
-            if (p.jobTitle.rank === topRank && p.user.employeeCode) {
-              empCodes.add(p.user.employeeCode);
-            }
-          }
+      const distinctRanks = [...new Set(allChildPositions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
+      const topRank = distinctRanks[0]; // Lấy duy nhất rank cao nhất
+
+      for (const p of allChildPositions) {
+        if (p.jobTitle.rank === topRank && p.user.employeeCode) {
+          empCodes.add(p.user.employeeCode);
         }
       }
     }
@@ -773,6 +733,57 @@ export class UsersService implements OnModuleInit {
       allowed_department_ids: Array.from(deptIds),
       allowed_employee_codes: Array.from(empCodes),
     };
+  }
+
+  private async getSubordinatesInSameUnit(
+    pos: any,
+    myRank: number,
+    distinctRanksInUnit: number[],
+    hasChildUnits: boolean
+  ): Promise<string[]> {
+    const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
+    const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
+    const isHead = myRank === minRank;
+    const isDeputy = myRank === secondMinRank && myRank > minRank;
+
+    // Trường hợp 1: Phòng ban cụ thể / cuối cùng (không có đơn vị con)
+    // -> Thấy TẤT CẢ chức vụ thấp hơn trong cùng đơn vị
+    if (!hasChildUnits) {
+      const lowerRanksInUnit = await this.prisma.jobPosition.findMany({
+        where: { unitId: pos.unitId, endDate: null, jobTitle: { rank: { gt: myRank } }, user: { isActive: true } },
+        include: { jobTitle: true, user: true },
+      });
+      return lowerRanksInUnit.map(p => p.user?.employeeCode).filter(Boolean) as string[];
+    }
+
+    // Trường hợp 2: Đơn vị cấp trên (có đơn vị con) - Logic phân cấp chặt chẽ cũ
+
+    // Cấp trưởng giao cho phó (cùng đơn vị, hoặc rank liền kề nếu không có phó)
+    if (isHead) {
+      if (distinctRanksInUnit.length <= 1) return [];
+      const lowerRanks = await this.prisma.jobPosition.findMany({
+        where: { unitId: pos.unitId, endDate: null, jobTitle: { rank: secondMinRank }, user: { isActive: true } },
+        include: { jobTitle: true, user: true },
+      });
+      return lowerRanks.map(p => p.user?.employeeCode).filter(Boolean) as string[];
+    }
+
+    // Cấp phó không giao việc cho chuyên viên trong cùng đơn vị (theo logic cũ)
+    if (isDeputy) {
+      return [];
+    }
+
+    // Các chuyên viên khác giao cho cấp dưới trực tiếp liền kề (nếu có)
+    const lowerRanks = await this.prisma.jobPosition.findMany({
+      where: { unitId: pos.unitId, endDate: null, jobTitle: { rank: { gt: myRank } }, user: { isActive: true } },
+      include: { jobTitle: true, user: true },
+    });
+
+    if (lowerRanks.length === 0) return [];
+
+    const nextRank = Math.min(...lowerRanks.map(p => p.jobTitle.rank));
+    const directSubordinates = lowerRanks.filter(p => p.jobTitle.rank === nextRank);
+    return directSubordinates.map(p => p.user?.employeeCode).filter(Boolean) as string[];
   }
 
   private toUserResponse(user: {
