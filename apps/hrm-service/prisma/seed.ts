@@ -24,7 +24,7 @@ async function main() {
   // Fetch real units and job titles from the user-service database (admin_systems)
   const units: any[] = await prisma.$queryRaw`SELECT id, code FROM admin_systems.organization_units`;
   const jobTitles: any[] = await prisma.$queryRaw`SELECT id, code FROM admin_systems.job_titles`;
-  const categories: any[] = await prisma.$queryRaw`SELECT id, code FROM admin_systems.categories`;
+  const categories: any[] = await prisma.$queryRaw`SELECT id, code FROM admin_systems.sys_categories`;
 
   const unitMap = Object.fromEntries(units.map(u => [u.code, u.id]));
   const jobMap = Object.fromEntries(jobTitles.map(j => [j.code, j.id]));
