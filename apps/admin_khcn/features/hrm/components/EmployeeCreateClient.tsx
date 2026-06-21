@@ -42,8 +42,11 @@ export function EmployeeCreateClient() {
 
   const [form, setForm] = useState({
     firstname: "", lastname: "", employeeCode: "", email: "",
-    phone: "", identityCard: "", departmentId: "", jobTitleId: "",
-    civilServantRankId: "", partyTitleId: "",
+    phone: "", identityCard: "", 
+    departmentId: undefined as number | undefined, 
+    jobTitleId: undefined as number | undefined,
+    civilServantRankId: undefined as number | undefined, 
+    partyTitleId: undefined as number | undefined,
     startDate: new Date().toISOString().slice(0, 10), birthday: "",
     avatar: "", // Đây sẽ lưu File ID/Path sau khi upload thành công
   });
@@ -66,13 +69,13 @@ export function EmployeeCreateClient() {
 
   const { data: jobTitlesRes, isLoading: isLoadingJobs } = useQuery({
     queryKey: ["organizations", "job-titles", form.departmentId],
-    queryFn: () => organizationApi.getJobTitles(form.departmentId ? parseInt(form.departmentId, 10) : undefined),
+    queryFn: () => organizationApi.getJobTitles(form.departmentId),
     enabled: !!form.departmentId,
   });
 
   const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
 
-  const selectedUnit = units.find(u => u.id.toString() === form.departmentId);
+  const selectedUnit = units.find(u => u.id === form.departmentId);
   const jobTitles = jobTitlesRes?.items ?? [];
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
@@ -86,13 +89,13 @@ export function EmployeeCreateClient() {
     }
     setSubmitting(true);
     try {
-      const finalJobTitleId = form.jobTitleId ? parseInt(form.jobTitleId, 10) : parseInt(form.civilServantRankId, 10);
+      const finalJobTitleId = form.jobTitleId || form.civilServantRankId;
       await hrmApi.create({
         ...form,
-        departmentId: parseInt(form.departmentId, 10),
+        departmentId: form.departmentId,
         jobTitleId: finalJobTitleId,
-        civilServantRankId: parseInt(form.civilServantRankId, 10),
-        partyTitleId: form.partyTitleId ? parseInt(form.partyTitleId, 10) : 0,
+        civilServantRankId: form.civilServantRankId,
+        partyTitleId: form.partyTitleId || 0,
       });
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
       toast.success("Thêm nhân sự thành công");
@@ -147,16 +150,16 @@ export function EmployeeCreateClient() {
                         <button
                           key={u.id}
                           type="button"
-                          onClick={() => setForm({ ...form, departmentId: u.id.toString(), jobTitleId: "" })}
+                          onClick={() => setForm({ ...form, departmentId: u.id, jobTitleId: undefined })}
                           className={cn(
                             "w-full text-left p-3 rounded-lg mb-1 transition-all border border-transparent",
-                            form.departmentId === u.id.toString()
+                            form.departmentId === u.id
                               ? "bg-blue-700 text-white border-blue-800 shadow-md"
                               : "hover:bg-white hover:border-slate-200 text-slate-700"
                           )}
                         >
                           <div className="font-bold text-[13px]">{u.name}</div>
-                          <div className={cn("text-[10px] truncate font-medium", form.departmentId === u.id.toString() ? "text-blue-100" : "text-slate-400")}>
+                          <div className={cn("text-[10px] truncate font-medium", form.departmentId === u.id ? "text-blue-100" : "text-slate-400")}>
                             {u.fullPath}
                           </div>
                         </button>
@@ -186,8 +189,8 @@ export function EmployeeCreateClient() {
                     <div className="relative">
                       <select
                         className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                        value={form.jobTitleId}
-                        onChange={(e) => setForm({ ...form, jobTitleId: e.target.value })}
+                        value={form.jobTitleId || ""}
+                        onChange={(e) => setForm({ ...form, jobTitleId: e.target.value ? Number(e.target.value) : undefined })}
                         disabled={!form.departmentId}
                       >
                         <option value="">-- Chọn chức vụ chính quyền --</option>
@@ -202,8 +205,8 @@ export function EmployeeCreateClient() {
                     <div className="relative">
                       <select
                         className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                        value={form.civilServantRankId}
-                        onChange={(e) => setForm({ ...form, civilServantRankId: e.target.value })}
+                        value={form.civilServantRankId || ""}
+                        onChange={(e) => setForm({ ...form, civilServantRankId: e.target.value ? Number(e.target.value) : undefined })}
                         disabled={!form.departmentId}
                       >
                         <option value="">-- Chọn ngạch công chức --</option>
@@ -218,8 +221,8 @@ export function EmployeeCreateClient() {
                     <div className="relative">
                       <select
                         className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                        value={form.partyTitleId}
-                        onChange={(e) => setForm({ ...form, partyTitleId: e.target.value })}
+                        value={form.partyTitleId || ""}
+                        onChange={(e) => setForm({ ...form, partyTitleId: e.target.value ? Number(e.target.value) : undefined })}
                         disabled={!form.departmentId}
                       >
                         <option value="">-- Chọn chức vụ Đảng --</option>
