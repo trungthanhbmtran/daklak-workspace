@@ -32,7 +32,7 @@ Nếu muốn deploy thủ công trên server:
  
 docker compose -f docker-compose.prod.yml pull
 
-# Chạy migrations (quan trọng)
+# Chạy migrations (cập nhật schema DB)
 docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate
@@ -40,25 +40,29 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-servi
 docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
 
-# echo "Xóa data cũ và tạo lại schema..."
-# docker exec -it daklak-workspace-user-service-1 npx prisma migrate reset --force --skip-seed
-# docker exec -it daklak-workspace-hrm-service-1 npx prisma migrate reset --force --skip-seed
-# docker exec -it daklak-workspace-workflow-service-1 npx prisma migrate reset --force --skip-seed
-# docker exec -it daklak-workspace-media-service-1 npx prisma migrate reset --force --skip-seed
-# docker exec -it daklak-workspace-posts-service-1 npx prisma migrate reset --force --skip-seed
-# docker exec -it daklak-workspace-document-service-1 npx prisma migrate reset --force --skip-seed
+# (Tùy chọn) Xóa toàn bộ dữ liệu cũ và ép đồng bộ cấu trúc mới nhất
+# Lưu ý: Lệnh này sẽ xóa sạch dữ liệu. Dùng "db push" thay cho "migrate reset" để tránh lỗi lệch file migration
+# docker exec -it daklak-workspace-user-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-hrm-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-workflow-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-media-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-posts-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-document-service-1 npx prisma db push --accept-data-loss
 
-# Khởi động lại các services
-docker compose -f docker-compose.prod.yml up -d portal-goverment nginx
+# Khởi động toàn bộ các services (đảm bảo DB đang chạy để seed)
+docker compose -f docker-compose.prod.yml up -d
 
-# Chạy seeders (nếu cần dữ liệu mẫu)
-# Lưu ý: Nên chạy theo thứ tự dưới đây
+# Chạy seeders để khởi tạo dữ liệu mặc định (hoặc dữ liệu mẫu)
+# YÊU CẦU QUAN TRỌNG: Phải chạy seed của user-service ĐẦU TIÊN để tạo sơ đồ tổ chức, sau đó mới tới các dịch vụ khác.
 docker exec -it daklak-workspace-user-service-1 npx prisma db seed
 docker exec -it daklak-workspace-hrm-service-1 npx prisma db seed
 docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
 docker exec -it daklak-workspace-media-service-1 npx prisma db seed
 docker exec -it daklak-workspace-posts-service-1 npx prisma db seed
 
+# BẮT BUỘC KHỞI ĐỘNG LẠI API-GATEWAY SAU KHI SEED:
+# Mục đích: Xoá bộ nhớ cache lưu trữ cấu trúc phòng ban trống (empty) lúc mới up DB lên.
+docker restart daklak-workspace-api-gateway-1
 ```
 
 ## 4. Thông tin Tài khoản & Kết nối
