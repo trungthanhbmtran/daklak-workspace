@@ -150,6 +150,23 @@ export const TaskTable = memo(function TaskTable({
                             </span>
                           </div>
                         )}
+                        {task.approverCode && (
+                          <div className="flex items-start mt-1.5">
+                            <div className="w-7 h-7 rounded-full bg-teal-100 text-teal-600 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
+                              {(task.approverName || task.approverCode)?.charAt(0) || '?'}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-medium text-sm text-teal-700 dark:text-teal-500 truncate">
+                                {task.approverName || task.approverCode} (TD)
+                              </span>
+                              {(task.domainName || task.domain?.name) && (
+                                <span className="text-[9px] font-bold text-teal-600/70 dark:text-teal-400/70 uppercase tracking-wider truncate">
+                                  {task.domainName || task.domain?.name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </td>

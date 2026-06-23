@@ -274,6 +274,26 @@ export function TaskDetailDialog({
                         </div>
                       )}
 
+                      {/* Approver / Monitor */}
+                      {activeTask.approverCode && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-teal-50 dark:bg-teal-900/10 border border-teal-100 dark:border-teal-800/30">
+                          <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center text-teal-600 font-black text-sm shrink-0">
+                            {(activeTask.approverName || activeTask.approverCode)?.charAt(0) || '?'}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                              <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest">👀 Lãnh đạo theo dõi</p>
+                              {(activeTask.domainName || activeTask.domain?.name) && (
+                                <span className="bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 px-1.5 py-0.5 rounded border border-teal-200/50 text-[9px] font-bold tracking-wider">
+                                  {activeTask.domainName || activeTask.domain?.name}
+                                </span>
+                              )}
+                            </div>
+                            <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">{activeTask.approverName || activeTask.approverCode}</p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Assigner */}
                       {activeTask.assignerCode && (
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/60 dark:border-indigo-800/30">

@@ -44,19 +44,22 @@ export const TaskToolbar = memo(function TaskToolbar({
 }: TaskToolbarProps) {
   return (
     <div className="flex flex-col gap-4 mb-4">
-      {/* Role Filter Tabs (Interactive) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+      {/* Role Filter Tabs (Segmented Control) */}
+      <div className="inline-flex items-center p-1 bg-slate-100/80 dark:bg-slate-800/80 rounded-xl overflow-x-auto hide-scrollbar max-w-full">
         {Object.entries(ROLE_META).map(([key, meta]) => {
           const isActive = roleFilter === key;
+          // Extract just the text color from meta.color (e.g., 'text-indigo-600')
+          const textColor = meta.color.split(' ').find(c => c.startsWith('text-'));
+          
           return (
             <button
               key={key}
               onClick={() => onRoleChange(key as TaskRoleFilter)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border shadow-sm",
+                "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium whitespace-nowrap transition-all duration-200",
                 isActive 
-                  ? cn(meta.color, "border-transparent ring-2 ring-indigo-500/30 scale-[1.02]") 
-                  : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+                  ? cn("bg-white dark:bg-slate-900 shadow-sm font-bold", textColor) 
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
               )}
             >
               {meta.icon}
