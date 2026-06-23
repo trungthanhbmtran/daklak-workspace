@@ -44,6 +44,28 @@ export const TaskToolbar = memo(function TaskToolbar({
 }: TaskToolbarProps) {
   return (
     <div className="flex flex-col gap-4 mb-4">
+      {/* Role Filter Tabs (Interactive) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
+        {Object.entries(ROLE_META).map(([key, meta]) => {
+          const isActive = roleFilter === key;
+          return (
+            <button
+              key={key}
+              onClick={() => onRoleChange(key as TaskRoleFilter)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border shadow-sm",
+                isActive 
+                  ? cn(meta.color, "border-transparent ring-2 ring-indigo-500/30 scale-[1.02]") 
+                  : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+              )}
+            >
+              {meta.icon}
+              {meta.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Row: Search + Filters */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm">
         <div className="flex w-full xl:w-auto items-center gap-3">
@@ -69,26 +91,7 @@ export const TaskToolbar = memo(function TaskToolbar({
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto shrink-0">
-          {/* Role select */}
-          <div className="flex-1 sm:flex-none">
-            <Select value={roleFilter} onValueChange={(v) => onRoleChange(v as TaskRoleFilter)}>
-              <SelectTrigger className="w-full sm:w-[190px] h-10 rounded-md border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-indigo-500" />
-                  <SelectValue placeholder="Vai trò" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-md border-slate-200 shadow-xl p-1.5">
-                {Object.entries(ROLE_META).map(([key, meta]) => (
-                  <SelectItem key={key} value={key} className="rounded-md font-semibold py-2 cursor-pointer">
-                    <div className="flex items-center gap-2.5">
-                      {meta.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {/* Status select */}
           <div className="flex-1 sm:flex-none">
@@ -130,15 +133,6 @@ export const TaskToolbar = memo(function TaskToolbar({
         </div>
       </div>
 
-      {/* Role Legend Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar">
-        {Object.values(ROLE_META).map((meta, idx) => (
-          <div key={idx} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border border-transparent shadow-sm", meta.color)}>
-            {meta.icon}
-            {meta.label}
-          </div>
-        ))}
-      </div>
     </div>
   );
 });
