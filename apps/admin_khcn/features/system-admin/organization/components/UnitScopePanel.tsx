@@ -96,7 +96,7 @@ export function UnitScopePanel() {
       <Separator />
 
       {/* ─── 1-Column Layout ─── */}
-      <div className="flex-1 flex flex-col gap-6 min-h-0 mt-2 max-w-2xl">
+      <div className="flex-1 flex flex-col min-h-0 mt-2">
         {/* Lĩnh vực phụ trách */}
         <div className="flex-1 flex flex-col min-h-0 bg-muted/20 border rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b">
@@ -228,23 +228,14 @@ function ScopePicker({
             <p className="text-sm">{q ? `Không tìm thấy "${q}"` : `Nhập từ khóa để tìm lĩnh vực`}</p>
           </div>
         ) : (
-          <div className="px-1 space-y-0.5">
-            {/* Server đã đặt selected items trước */}
-            {items.map((item, idx) => (
-              <>
-                {/* Divider giữa selected và rest */}
-                {idx > 0 && items[idx - 1].selected && !item.selected && (
-                  <div key={`sep-${item.id}`} className="py-1">
-                    <Separator />
-                  </div>
-                )}
-                <ResultRow
-                  key={item.id}
-                  item={item}
-                  checked={item.selected}
-                  onToggle={onToggle}
-                />
-              </>
+          <div className="px-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 pb-4">
+            {items.map((item) => (
+              <ResultRow
+                key={item.id}
+                item={item}
+                checked={item.selected}
+                onToggle={onToggle}
+              />
             ))}
           </div>
         )}
@@ -266,8 +257,8 @@ function ResultRow({
       type="button"
       onClick={() => onToggle(item.id)}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors group",
-        checked ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/60",
+        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors group border",
+        checked ? "bg-primary/5 hover:bg-primary/10 border-primary/20" : "bg-background hover:bg-muted/60 border-transparent",
       )}
     >
       {checked
