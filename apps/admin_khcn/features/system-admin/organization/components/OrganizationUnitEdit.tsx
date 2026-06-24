@@ -35,7 +35,7 @@ export function OrganizationUnitEdit() {
 
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
-    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], geographicAreaIds: [], scope: "" },
+    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" },
   });
 
   useEffect(() => {
@@ -46,7 +46,6 @@ export function OrganizationUnitEdit() {
         shortName: unit.shortName ?? "",
         categoryCode: unit.categoryCode ?? "",
         domainIds: unit.domainIds ?? [],
-        geographicAreaIds: unit.geographicAreaIds ?? [],
         scope: unit.scope ?? "",
       });
     }

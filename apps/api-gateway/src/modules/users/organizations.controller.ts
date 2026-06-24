@@ -59,7 +59,6 @@ export class OrganizationsController implements OnModuleInit {
       typeId: number;
       parentId?: number | null;
       domainIds?: number[];
-      geographicAreaIds?: number[];
       scope?: string;
     },
   ) {
@@ -67,12 +66,7 @@ export class OrganizationsController implements OnModuleInit {
       if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
         throw new BadRequestException('domainIds phải là một mảng');
       }
-      if (
-        body.geographicAreaIds !== undefined &&
-        !Array.isArray(body.geographicAreaIds)
-      ) {
-        throw new BadRequestException('geographicAreaIds phải là một mảng');
-      }
+
       const result = await firstValueFrom(
         this.orgService.CreateUnit({
           code: body.code,
@@ -81,7 +75,6 @@ export class OrganizationsController implements OnModuleInit {
           typeId: body.typeId,
           parentId: body.parentId,
           domainIds: body.domainIds ?? [],
-          geographicAreaIds: body.geographicAreaIds ?? [],
           scope: body.scope,
         }),
       );
@@ -181,7 +174,7 @@ export class OrganizationsController implements OnModuleInit {
   @Put('job-titles/:id')
   @ApiOperation({
     summary:
-      'Cập nhật chức danh (lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý)',
+      'Cập nhật chức danh (lĩnh vực phụ trách)',
   })
   @ApiResponse({
     status: 200,
@@ -192,22 +185,12 @@ export class OrganizationsController implements OnModuleInit {
     @Body()
     body: {
       domainId?: number;
-      geographicAreaId?: number;
-      monitoredUnitIds?: number[];
     },
   ) {
-    if (
-      body.monitoredUnitIds !== undefined &&
-      !Array.isArray(body.monitoredUnitIds)
-    ) {
-      throw new BadRequestException('monitoredUnitIds phải là một mảng');
-    }
     const result = await firstValueFrom(
       this.orgService.UpdateJobTitle({
         id,
         domainId: body.domainId,
-        geographicAreaId: body.geographicAreaId,
-        monitoredUnitIds: body.monitoredUnitIds,
       }),
     );
     return { success: true, data: result };
@@ -261,7 +244,7 @@ export class OrganizationsController implements OnModuleInit {
         shortName: body.shortName,
         typeId: body.typeId,
         domainIds: body.domainIds,
-        geographicAreaIds: body.geographicAreaIds,
+
         scope: body.scope,
       };
       if (body.parentId !== undefined) payload.parentId = body.parentId;
@@ -309,23 +292,17 @@ export class OrganizationsController implements OnModuleInit {
   })
   async updateScope(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { domainIds?: number[]; geographicAreaIds?: number[] },
+    @Body() body: { domainIds?: number[] },
   ) {
     if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
       throw new BadRequestException('domainIds phải là một mảng');
     }
-    if (
-      body.geographicAreaIds !== undefined &&
-      !Array.isArray(body.geographicAreaIds)
-    ) {
-      throw new BadRequestException('geographicAreaIds phải là một mảng');
-    }
+
     try {
       const result = await firstValueFrom(
         this.orgService.UpdateUnit({
           id,
           domainIds: body.domainIds ?? [],
-          geographicAreaIds: body.geographicAreaIds ?? [],
         }),
       );
       return { success: true, data: result };
@@ -394,26 +371,31 @@ export class OrganizationsController implements OnModuleInit {
       staffingId: number;
       slotOrder: number;
       description?: string;
-      geographicAreaId?: number;
-      geographicAreaIds?: number[];
       domainIds?: number[];
+      geographicAreaIds?: number[];
       monitoredUnitIds?: number[];
     },
   ) {
+    if (
+      body.geographicAreaIds !== undefined &&
+      !Array.isArray(body.geographicAreaIds)
+    ) {
+      throw new BadRequestException('geographicAreaIds phải là một mảng');
+    }
     if (
       body.monitoredUnitIds !== undefined &&
       !Array.isArray(body.monitoredUnitIds)
     ) {
       throw new BadRequestException('monitoredUnitIds phải là một mảng');
     }
+
     const result = await firstValueFrom(
       this.orgService.SetStaffingSlot({
         staffingId: body.staffingId,
         slotOrder: body.slotOrder,
         description: body.description,
-        geographicAreaId: body.geographicAreaId,
-        geographicAreaIds: body.geographicAreaIds,
         domainIds: body.domainIds,
+        geographicAreaIds: body.geographicAreaIds,
         monitoredUnitIds: body.monitoredUnitIds,
       }),
     );

@@ -12,9 +12,9 @@
 
 import { useState } from "react";
 import { useOrganizationContext } from "../context/OrganizationContext";
-import { useDomainSearch, useGeoAreaSearch, type CatalogServerItem } from "../hooks/useScopeCatalog";
+import { useDomainSearch, type CatalogServerItem } from "../hooks/useScopeCatalog";
 import {
-  Briefcase, MapPin, RotateCcw, Save, Search, X,
+  Briefcase, RotateCcw, Save, Search, X,
   Loader2, CheckCircle2, Circle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,13 +33,10 @@ export function UnitScopePanel() {
 
   // Local IDs — server sẽ dùng để sort & đánh dấu selected
   const [domainIds, setDomainIds] = useState<number[]>(() => unit?.domainIds ?? []);
-  const [geoIds,    setGeoIds]    = useState<number[]>(() => unit?.geographicAreaIds ?? []);
-  const [dirty,     setDirty]     = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   // Truyền selectedIds lên server để server sort + đánh dấu
-  const domains  = useDomainSearch(domainIds);
-  // Vì không dùng tab nữa nên geo luôn ready
-  const geoAreas = useGeoAreaSearch(geoIds, true);
+  const domains = useDomainSearch(domainIds);
 
   if (!unit || selectedId == null) return null;
 
@@ -47,16 +44,15 @@ export function UnitScopePanel() {
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
 
   const handleDomainToggle = (id: number) => { setDomainIds(p => toggle(p, id)); setDirty(true); };
-  const handleGeoToggle    = (id: number) => { setGeoIds(p => toggle(p, id));    setDirty(true); };
 
   const handleReset = () => {
     setDomainIds(unit.domainIds ?? []);
-    setGeoIds(unit.geographicAreaIds ?? []);
     setDirty(false);
   };
 
   const handleSave = async () => {
-    await actions.updateScope(selectedId, { domainIds, geographicAreaIds: geoIds });
+    // Chỉ lưu domainIds theo yêu cầu mới
+    await actions.updateScope(selectedId, { domainIds });
     setDirty(false);
   };
 
@@ -68,7 +64,7 @@ export function UnitScopePanel() {
         <div>
           <h3 className="text-sm font-semibold">Phạm vi phụ trách</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Lĩnh vực chuyên môn và đơn vị, địa bàn được giao quản lý
+            Lĩnh vực chuyên môn được giao quản lý
           </p>
         </div>
 
@@ -99,8 +95,8 @@ export function UnitScopePanel() {
 
       <Separator />
 
-      {/* ─── 2-Column Layout ─── */}
-      <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0 mt-2">
+      {/* ─── 1-Column Layout ─── */}
+      <div className="flex-1 flex flex-col gap-6 min-h-0 mt-2 max-w-2xl">
         {/* Lĩnh vực phụ trách */}
         <div className="flex-1 flex flex-col min-h-0 bg-muted/20 border rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b">
@@ -116,7 +112,6 @@ export function UnitScopePanel() {
           </div>
           <div className="flex-1 min-h-0">
             <ScopePicker
-              type="domain"
               items={domains.items}
               selectedIds={domainIds}
               isFetching={domains.isFetching}
@@ -127,33 +122,6 @@ export function UnitScopePanel() {
             />
           </div>
         </div>
-
-        {/* Địa bàn / Đơn vị theo dõi */}
-        <div className="flex-1 flex flex-col min-h-0 bg-muted/20 border rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
-              <MapPin className="h-4 w-4" />
-            </div>
-            <h4 className="text-sm font-semibold">Đơn vị / Địa bàn theo dõi</h4>
-            {geoIds.length > 0 && (
-              <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                {geoIds.length}
-              </span>
-            )}
-          </div>
-          <div className="flex-1 min-h-0">
-            <ScopePicker
-              type="geo"
-              items={geoAreas.items}
-              selectedIds={geoIds}
-              isFetching={geoAreas.isFetching}
-              q={geoAreas.q}
-              onSearch={geoAreas.setQ}
-              onToggle={handleGeoToggle}
-              onRemoveAll={() => { setGeoIds([]); setDirty(true); }}
-            />
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -161,9 +129,8 @@ export function UnitScopePanel() {
 
 /* ─── ScopePicker ─────────────────────────────────────── */
 function ScopePicker({
-  type, items, selectedIds, isFetching, q, onSearch, onToggle, onRemoveAll,
+  items, selectedIds, isFetching, q, onSearch, onToggle, onRemoveAll,
 }: {
-  type: "domain" | "geo";
   items: CatalogServerItem[];   // đã được server sort: selected first
   selectedIds: number[];
   isFetching: boolean;
@@ -172,15 +139,13 @@ function ScopePicker({
   onToggle: (id: number) => void;
   onRemoveAll: () => void;
 }) {
-  const isDomain = type === "domain";
-  const Icon     = isDomain ? Briefcase : MapPin;
-  const label    = isDomain ? "lĩnh vực" : "địa bàn";
-  const placeholder = isDomain ? "Tìm lĩnh vực chuyên môn..." : "Tìm tỉnh thành, quận huyện...";
+  const Icon = Briefcase;
+  const placeholder = "Tìm lĩnh vực chuyên môn...";
 
   // Server đã sort: selected items ở đầu, rest ở sau
   const selectedItems = items.filter(i => i.selected);
-  const restItems     = items.filter(i => !i.selected);
-  const isEmpty       = items.length === 0 && !isFetching;
+  const restItems = items.filter(i => !i.selected);
+  const isEmpty = items.length === 0 && !isFetching;
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -250,8 +215,8 @@ function ScopePicker({
         {isFetching
           ? "Đang tìm kiếm..."
           : isEmpty
-          ? q ? `Không có kết quả cho "${q}"` : `Nhập từ khóa để tìm ${label}`
-          : `${items.length} kết quả${items.length >= 50 ? " — nhập thêm từ khóa để thu hẹp" : ""}`
+            ? q ? `Không có kết quả cho "${q}"` : `Nhập từ khóa để tìm lĩnh vực`
+            : `${items.length} kết quả${items.length >= 50 ? " — nhập thêm từ khóa để thu hẹp" : ""}`
         }
       </p>
 
@@ -260,7 +225,7 @@ function ScopePicker({
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
             <Icon className="h-8 w-8 opacity-25" />
-            <p className="text-sm">{q ? `Không tìm thấy "${q}"` : `Nhập từ khóa để tìm ${label}`}</p>
+            <p className="text-sm">{q ? `Không tìm thấy "${q}"` : `Nhập từ khóa để tìm lĩnh vực`}</p>
           </div>
         ) : (
           <div className="px-1 space-y-0.5">

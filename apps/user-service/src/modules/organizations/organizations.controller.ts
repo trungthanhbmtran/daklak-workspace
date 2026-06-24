@@ -25,22 +25,8 @@ export class OrganizationsController {
     };
   }
 
-  private geoAreaIdsAndNames(unit: any): {
-    geographicAreaIds: number[];
-    geographicAreaNames: string[];
-  } {
-    const uga = unit.unitGeographicAreas ?? [];
-    return {
-      geographicAreaIds: uga.map((d: any) => d.geographicAreaId ?? d.geographicArea?.id).filter(Boolean),
-      geographicAreaNames: uga
-        .map((d: any) => this.getCatName(d.geographicArea))
-        .filter(Boolean),
-    };
-  }
-
   private mapUnitNode(node: any, depth = 0): any {
     const { domainIds, domainNames } = this.domainIdsAndNames(node);
-    const { geographicAreaIds, geographicAreaNames } = this.geoAreaIdsAndNames(node);
     const hasChildren = node.children && node.children.length > 0;
     return {
       id: node.id,
@@ -53,8 +39,6 @@ export class OrganizationsController {
       typeName: node.type?.name ?? '',
       domainIds,
       domainNames,
-      geographicAreaIds,
-      geographicAreaNames,
       scope: node.scope ?? '',
       isLeaf: !hasChildren,
       depth,
@@ -66,7 +50,6 @@ export class OrganizationsController {
 
   private toUnitResponse(unit: any): any {
     const { domainIds, domainNames } = this.domainIdsAndNames(unit);
-    const { geographicAreaIds, geographicAreaNames } = this.geoAreaIdsAndNames(unit);
     return {
       id: unit.id,
       code: unit.code,
@@ -78,8 +61,6 @@ export class OrganizationsController {
       typeName: unit.type?.name ?? '',
       domainIds,
       domainNames,
-      geographicAreaIds,
-      geographicAreaNames,
       scope: unit.scope ?? '',
     };
   }
@@ -92,19 +73,12 @@ export class OrganizationsController {
     typeId: number;
     parentId?: number;
     domainIds?: number[];
-    geographicAreaIds?: number[];
     scope?: string;
   }) {
     if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: 'domainIds phải là một mảng',
-      });
-    }
-    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
-      throw new RpcException({
-        code: GrpcStatus.INVALID_ARGUMENT,
-        message: 'geographicAreaIds phải là một mảng',
       });
     }
 
@@ -115,7 +89,6 @@ export class OrganizationsController {
       typeId: data.typeId,
       parentId: data.parentId,
       domainIds: data.domainIds ?? [],
-      geographicAreaIds: data.geographicAreaIds ?? [],
       scope: data.scope,
     });
     return this.toUnitResponse(unit);
@@ -142,19 +115,12 @@ export class OrganizationsController {
     typeId?: number;
     parentId?: number;
     domainIds?: number[];
-    geographicAreaIds?: number[];
     scope?: string;
   }) {
     if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: 'domainIds phải là một mảng',
-      });
-    }
-    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
-      throw new RpcException({
-        code: GrpcStatus.INVALID_ARGUMENT,
-        message: 'geographicAreaIds phải là một mảng',
       });
     }
 
@@ -166,7 +132,6 @@ export class OrganizationsController {
         typeId: data.typeId,
         parentId: data.parentId,
         domainIds: data.domainIds,
-        geographicAreaIds: data.geographicAreaIds,
       });
       if (!unit) {
         throw new RpcException({
@@ -255,35 +220,22 @@ export class OrganizationsController {
           jobTitleDomainName:
             this.getCatName(j?.domain) ||
             [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.domains ?? []).map((d: any) => this.getCatName(d.domain))))].filter(Boolean).join(', '),
-          jobTitleMonitoredUnitNames: ((s.slots ?? []).flatMap((slot: any) => slot.monitoredUnits ?? []))
-            .map((mu: any) => mu.unit?.name ?? '')
-            .filter((v: string, i: number, a: string[]) => v && a.indexOf(v) === i),
-          jobTitleGeographicAreaName:
-            this.getCatName(j?.geographicArea) ||
-            [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.geographicAreas ?? []).map((g: any) => this.getCatName(g.geographicArea))))].filter(Boolean).join(', '),
+
           slots: (s.slots ?? []).map((slot: any) => ({
             id: slot.id,
             staffingId: slot.staffingId,
             slotOrder: slot.slotOrder,
             description: slot.description ?? '',
-            geographicAreaId: slot.geographicAreaId ?? 0,
-            geographicAreaName: this.getCatName(slot.geographicArea),
             domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
             domainNames: (slot.domains ?? []).map((d: any) =>
               this.getCatName(d.domain),
             ),
-            monitoredUnitIds: (slot.monitoredUnits ?? []).map(
-              (mu: any) => mu.unitId,
-            ),
-            monitoredUnitNames: (slot.monitoredUnits ?? []).map(
-              (mu: any) => mu.unit?.name ?? '',
-            ),
-            geographicAreaIds: (slot.geographicAreas ?? []).map(
-              (ga: any) => ga.geographicAreaId,
-            ),
+            geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
             geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) =>
               this.getCatName(ga.geographicArea),
             ),
+            monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
+            monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
           })),
         };
       }),
@@ -295,20 +247,20 @@ export class OrganizationsController {
     staffingId: number;
     slotOrder: number;
     description?: string;
-    geographicAreaIds?: number[];
     domainIds?: number[];
+    geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
-      throw new RpcException({
-        code: GrpcStatus.INVALID_ARGUMENT,
-        message: 'geographicAreaIds phải là một mảng',
-      });
-    }
     if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: 'domainIds phải là một mảng',
+      });
+    }
+    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'geographicAreaIds phải là một mảng',
       });
     }
     if (data.monitoredUnitIds !== undefined && !Array.isArray(data.monitoredUnitIds)) {
@@ -322,17 +274,18 @@ export class OrganizationsController {
       staffingId: data.staffingId,
       slotOrder: data.slotOrder,
       description: data.description,
-      monitoredUnitIds: data.monitoredUnitIds ?? [],
+      domainIds: data.domainIds,
+      geographicAreaIds: data.geographicAreaIds,
+      monitoredUnitIds: data.monitoredUnitIds,
     });
     return {
       id: slot.id,
       staffingId: slot.staffingId,
       slotOrder: slot.slotOrder,
       description: slot.description ?? '',
+      domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
+      geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
       monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-      monitoredUnitNames: (slot.monitoredUnits ?? []).map(
-        (mu: any) => mu.unit?.name ?? '',
-      ),
     };
   }
 

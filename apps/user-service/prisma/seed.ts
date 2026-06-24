@@ -4422,7 +4422,6 @@ async function main() {
   });
 
   if (soKhcnUnits.length > 0) {
-    const geoData: { unitId: number, geographicAreaId: number }[] = [];
     const domainData: { unitId: number, domainId: number }[] = [];
 
     const domainMapping: Record<string, string[]> = {
@@ -4475,10 +4474,6 @@ async function main() {
 
 
     for (const unit of soKhcnUnits) {
-      // Địa bàn: chỉ gán Tỉnh Đắk Lắk (1 bản ghi/đơn vị)
-      for (const geo of defaultGeoAreas) {
-        geoData.push({ unitId: unit.id, geographicAreaId: geo.id });
-      }
 
       const assignedCodes = domainMapping[unit.code] || ['H15.07'];
       const unitDomains = techDomains.filter(d => assignedCodes.includes(d.code));
@@ -4488,17 +4483,13 @@ async function main() {
       }
     }
 
-    await prisma.unitGeographicArea.createMany({
-      data: geoData,
-      skipDuplicates: true,
-    });
+
 
     await prisma.unitDomain.createMany({
       data: domainData,
       skipDuplicates: true,
     });
 
-    console.log(`✅ Đã gán địa bàn Tỉnh Đắk Lắk cho ${soKhcnUnits.length} đơn vị KH&CN (Tổng: ${geoData.length} bản ghi)`);
     console.log(`✅ Đã phân bổ Lĩnh vực chuyên môn theo chức năng cho các đơn vị KH&CN (Tổng: ${domainData.length} bản ghi)`);
 
     // ----------------------------------------------------
@@ -4509,7 +4500,7 @@ async function main() {
       include: { jobTitle: true, unit: true }
     });
 
-    const slotGeos: { slotId: number, geographicAreaId: number }[] = [];
+
     const slotDomains: { slotId: number, domainId: number }[] = [];
     const slotMonitored: { slotId: number, unitId: number }[] = [];
 
@@ -4520,7 +4511,7 @@ async function main() {
     const domainNS = techDomains.find(d => d.code === 'NGAN_SACH');
     const domainCDS = techDomains.find(d => d.code === 'CHUYEN_DOI_SO');
 
-    const daklakGeo = defaultGeoAreas.find(g => g.code === '47');
+
 
     for (const staffing of allStaffing) {
       for (let i = 1; i <= staffing.quantity; i++) {
@@ -4530,11 +4521,6 @@ async function main() {
           update: {},
           create: { staffingId: staffing.id, slotOrder: i },
         });
-
-        // 1. Địa bàn: Gán mặc định Tỉnh Đắk Lắk (mã 47) hoặc tất cả xã phường tuỳ chọn, ở đây gán Đắk Lắk
-        if (daklakGeo) {
-          slotGeos.push({ slotId: slot.id, geographicAreaId: daklakGeo.id });
-        }
 
         // 2. Lĩnh vực và Phòng ban theo dõi
         if (staffing.unit.code === 'H15.07') { // Lãnh đạo cấp Sở
@@ -4583,7 +4569,7 @@ async function main() {
         signingNote: 'Ký ban hành văn bản quản lý nhà nước (QĐ, CV, TB) theo thẩm quyền được phân cấp.',
         purposeNote: 'Thực hiện chức năng quản lý hành chính nhà nước trong lĩnh vực được giao.',
         signingAuthority: 'FULL', politicalSystem: 'HANH_CHINH',
-        requiredFields: ['domainIds', 'geographicAreaIds'],
+        requiredFields: ['domainIds'],
         leaderTitleKeywords: ['Giám đốc', 'Phó Giám đốc', 'Chủ tịch UBND', 'Phó Chủ tịch UBND'],
         staffTitleKeywords: ['Chuyên viên cao cấp', 'Chuyên viên chính', 'Chuyên viên', 'Nhân viên'],
       }),
@@ -4593,7 +4579,7 @@ async function main() {
         signingNote: 'Issue state management documents (Decisions, Dispatches, Notices) within delegated authority.',
         purposeNote: 'Performs state administrative management functions in assigned fields.',
         signingAuthority: 'FULL', politicalSystem: 'HANH_CHINH',
-        requiredFields: ['domainIds', 'geographicAreaIds'],
+        requiredFields: ['domainIds'],
         leaderTitleKeywords: ['Director', 'Deputy Director', 'Chairman', 'Vice Chairman'],
         staffTitleKeywords: ['Senior Expert', 'Principal Expert', 'Expert', 'Staff'],
       }),
@@ -4649,7 +4635,7 @@ async function main() {
         signingNote: 'Tham mưu và thực thi chuyên ngành. Chi cục có thể ký một số văn bản theo phân cấp.',
         purposeNote: 'Quản lý chuyên môn theo ngành dọc; thanh tra, kiểm tra, hướng dẫn nghiệp vụ.',
         signingAuthority: 'DELEGATED', politicalSystem: 'HANH_CHINH',
-        requiredFields: ['domainIds', 'geographicAreaIds'],
+        requiredFields: ['domainIds'],
         leaderTitleKeywords: ['Trưởng phòng', 'Phó Trưởng phòng', 'Chi cục trưởng', 'Phó Chi cục trưởng'],
         staffTitleKeywords: ['Chuyên viên', 'Chuyên viên chính', 'Chuyên viên cao cấp', 'Kiểm soát viên'],
       }),
@@ -4659,7 +4645,7 @@ async function main() {
         signingNote: 'Advisory and implementation in specialized fields. Sub-departments may sign certain documents.',
         purposeNote: 'Vertical sector management; inspection, guidance on professional matters.',
         signingAuthority: 'DELEGATED', politicalSystem: 'HANH_CHINH',
-        requiredFields: ['domainIds', 'geographicAreaIds'],
+        requiredFields: ['domainIds'],
         leaderTitleKeywords: ['Head of Division', 'Deputy Head', 'Sub-department Director'],
         staffTitleKeywords: ['Expert', 'Principal Expert', 'Senior Expert', 'Inspector'],
       }),

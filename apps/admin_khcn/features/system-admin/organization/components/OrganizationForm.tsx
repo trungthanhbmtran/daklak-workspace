@@ -74,11 +74,11 @@ function OrganizationFormInner({
 }) {
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
-    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], geographicAreaIds: [], scope: "" },
+    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" },
   });
 
   useEffect(() => {
-    form.reset({ code: "", name: "", shortName: "", categoryCode: "", domainIds: [], geographicAreaIds: [], scope: "" });
+    form.reset({ code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" });
   }, [parentId, form]);
 
   const categoryCode = form.watch("categoryCode");
@@ -210,7 +210,7 @@ function OrganizationFormInner({
                   )}
                 </div>
               )}
-              {categoryMeta?.requiredFields?.some(f => f === "domainIds" || f === "geographicAreaIds") && (
+              {categoryMeta?.requiredFields?.some(f => f === "domainIds") && (
                 <p className="text-xs text-muted-foreground border border-dashed rounded-md px-3 py-2">
                   Sau khi tạo đơn vị, vào tab <strong>Phạm vi phụ trách</strong> để thiết lập lĩnh vực và địa bàn.
                 </p>

@@ -21,23 +21,21 @@ import { cn } from "@/lib/utils";
 type StaffingTableProps = {
   report: StaffingReportItem[];
   domainsForUnit: { id: number; name: string }[];
-  geoAreas: { id: number; name: string }[];
-  subordinateUnits: { id: number; name: string; code?: string }[];
   onSaveSlot: (payload: {
     staffingId: number;
     slotOrder: number;
     description?: string;
-    geographicAreaIds?: number[];
     domainIds?: number[];
+    geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
   }) => void;
+  subordinateUnits: { id: number; name: string }[];
   isSavingSlot: boolean;
 };
 
 export function StaffingTable({
   report,
   domainsForUnit,
-  geoAreas,
   subordinateUnits,
   onSaveSlot,
   isSavingSlot,
@@ -69,8 +67,6 @@ export function StaffingTable({
           <TableRow className="bg-muted/50 hover:bg-muted/50">
             <TableHead className="font-semibold text-foreground w-[260px]">Chức danh</TableHead>
             <TableHead className="font-semibold text-foreground">Lĩnh vực phụ trách</TableHead>
-            <TableHead className="font-semibold text-foreground">Theo dõi phòng ban</TableHead>
-            <TableHead className="font-semibold text-foreground">Khu vực địa lý</TableHead>
             <TableHead className="text-right font-semibold text-foreground w-24">Định biên</TableHead>
             <TableHead className="text-right font-semibold text-foreground w-20">Hiện có</TableHead>
           </TableRow>
@@ -117,17 +113,6 @@ export function StaffingTable({
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
                     {row.jobTitleDomainName || "—"}
-                  </TableCell>
-                  <TableCell
-                    className="text-muted-foreground text-sm max-w-[160px] truncate"
-                    title={(row.jobTitleMonitoredUnitNames ?? []).join(", ")}
-                  >
-                    {(row.jobTitleMonitoredUnitNames ?? []).length
-                      ? row.jobTitleMonitoredUnitNames!.join(", ")
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {row.jobTitleGeographicAreaName || "—"}
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{row.quantity}</TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">{row.currentCount}</TableCell>
@@ -194,12 +179,10 @@ export function StaffingTable({
                                 return (
                                   <div className="animate-in fade-in-50 duration-200">
                                     <SlotCard
-                                      key={`${row.id}-${currentActiveSlot}`}
                                       staffingId={row.id}
                                       slotOrder={currentActiveSlot}
                                       existingSlot={existingSlot}
                                       domainsForUnit={domainsForUnit}
-                                      geoAreas={geoAreas}
                                       subordinateUnits={subordinateUnits}
                                       onSave={onSaveSlot}
                                       isSaving={isSavingSlot}

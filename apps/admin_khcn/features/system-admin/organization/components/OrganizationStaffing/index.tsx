@@ -19,7 +19,7 @@ import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { JobTitleItem, StaffingReportItem } from "../../types";
-import { useDomainSearch, useGeoAreaSearch } from "../../hooks/useScopeCatalog";
+import { useDomainSearch } from "../../hooks/useScopeCatalog";
 
 export function OrganizationStaffing() {
   const { state } = useOrganizationContext();
@@ -31,8 +31,6 @@ export function OrganizationStaffing() {
   const [configOpen, setConfigOpen] = useState(false);
   const [configJobTitle, setConfigJobTitle] = useState<JobTitleItem | null>(null);
   const [configDomainId, setConfigDomainId] = useState("__none__");
-  const [configGeoId, setConfigGeoId] = useState("__none__");
-  const [configUnitIds, setConfigUnitIds] = useState<number[]>([]);
   const [govPage, setGovPage] = useState(1);
   const [partyPage, setPartyPage] = useState(1);
   const STAFFING_PAGE_SIZE = 8;
@@ -49,8 +47,6 @@ export function OrganizationStaffing() {
   } = useStaffingReport(selectedId ?? null);
 
   const { items: domains } = useDomainSearch([]);
-  const { items: geoAreas } = useGeoAreaSearch([], true);
-
   const { setStaffing, setStaffingSlot, updateJobTitle } =
     useStaffingMutations(selectedId ?? null);
 
@@ -63,8 +59,6 @@ export function OrganizationStaffing() {
   const openConfig = (j: JobTitleItem) => {
     setConfigJobTitle(j);
     setConfigDomainId(j.domainId ? String(j.domainId) : "__none__");
-    setConfigGeoId(j.geographicAreaId ? String(j.geographicAreaId) : "__none__");
-    setConfigUnitIds(j.monitoredUnitIds ?? []);
     setConfigOpen(true);
   };
 
@@ -74,8 +68,6 @@ export function OrganizationStaffing() {
       {
         id: configJobTitle.id,
         domainId: configDomainId === "__none__" ? 0 : parseInt(configDomainId, 10),
-        geographicAreaId: configGeoId === "__none__" ? 0 : parseInt(configGeoId, 10),
-        monitoredUnitIds: configUnitIds,
       },
       {
         onSuccess: () => {
@@ -86,11 +78,7 @@ export function OrganizationStaffing() {
     );
   };
 
-  const toggleConfigUnit = (unitId: number) => {
-    setConfigUnitIds((prev) =>
-      prev.includes(unitId) ? prev.filter((id) => id !== unitId) : [...prev, unitId]
-    );
-  };
+
 
   const handleSubmitStaffing = (e: React.FormEvent) => {
     e.preventDefault();
@@ -236,7 +224,6 @@ export function OrganizationStaffing() {
                 <StaffingTable
                   report={pagedReport}
                   domainsForUnit={domainsForUnit}
-                  geoAreas={geoAreas}
                   subordinateUnits={subordinateUnits}
                   onSaveSlot={(payload) => setStaffingSlot.mutate(payload)}
                   isSavingSlot={setStaffingSlot.isPending}
@@ -328,16 +315,10 @@ export function OrganizationStaffing() {
         onOpenChange={setConfigOpen}
         jobTitle={configJobTitle}
         domainId={configDomainId}
-        geoId={configGeoId}
-        unitIds={configUnitIds}
         onDomainIdChange={setConfigDomainId}
-        onGeoIdChange={setConfigGeoId}
-        onUnitToggle={toggleConfigUnit}
         onSave={handleSaveConfig}
         isSaving={updateJobTitle.isPending}
         domainsForUnit={domainsForUnit}
-        geoAreas={geoAreas}
-        subordinateUnits={subordinateUnits}
         unitName={unit?.name}
       />
     </div>

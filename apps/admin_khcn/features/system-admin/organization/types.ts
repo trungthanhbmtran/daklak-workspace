@@ -11,8 +11,6 @@ export interface OrganizationUnitNode {
   domainIds?: number[];
   domainNames?: string[];
   scope?: string;
-  geographicAreaIds?: number[];
-  geographicAreaNames?: string[];
   children?: OrganizationUnitNode[];
 }
 
@@ -25,7 +23,6 @@ export interface CreateUnitPayload {
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
-  geographicAreaIds?: number[];
 }
 
 /** Payload cập nhật đơn vị (mọi field optional) */
@@ -37,7 +34,6 @@ export interface UpdateUnitPayload {
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
-  geographicAreaIds?: number[];
 }
 
 /** Chức danh kèm lĩnh vực phụ trách, phòng ban theo dõi, khu vực địa lý */

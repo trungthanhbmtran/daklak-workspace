@@ -213,7 +213,6 @@ export function UnitTypeSelector({ value, onChange, disabled }: UnitTypeSelector
                   {selectedMeta.requiredFields.map((f) => (
                     <Badge key={f} variant="secondary" className="text-[10px] h-5 px-1.5 font-semibold">
                       {f === "domainIds" && "Lĩnh vực chuyên môn"}
-                      {f === "geographicAreaIds" && "Phạm vi địa lý"}
                       {f === "scope" && "Phạm vi nhiệm vụ"}
                     </Badge>
                   ))}

@@ -4,9 +4,10 @@ model Category {
   code                String
   order               Int                   @default(0)
   isActive            Boolean               @default(true) @map("is_active")
-  unitDomains         UnitDomain[]
-  unitGeographicAreas UnitGeographicArea[]
-  group               CategoryGroup         @relation(fields: [groupCode], references: [code])
+  unitDomains                 UnitDomain[]
+  staffingSlotDomains         StaffingSlotDomain[]
+  staffingSlotGeographicAreas StaffingSlotGeographicArea[]
+  group                       CategoryGroup         @relation(fields: [groupCode], references: [code])
   translations        CategoryTranslation[]
 
   @@unique([groupCode, code])

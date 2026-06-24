@@ -26,16 +26,10 @@ type JobTitleConfigDialogProps = {
   onOpenChange: (open: boolean) => void;
   jobTitle: JobTitleItem | null;
   domainId: string;
-  geoId: string;
-  unitIds: number[];
   onDomainIdChange: (v: string) => void;
-  onGeoIdChange: (v: string) => void;
-  onUnitToggle: (unitId: number) => void;
   onSave: () => void;
   isSaving: boolean;
   domainsForUnit: { id: number; name: string }[];
-  geoAreas: { id: number; name: string }[];
-  subordinateUnits: { id: number; name: string; code?: string }[];
   unitName?: string;
 };
 
@@ -44,16 +38,10 @@ export function JobTitleConfigDialog({
   onOpenChange,
   jobTitle,
   domainId,
-  geoId,
-  unitIds,
   onDomainIdChange,
-  onGeoIdChange,
-  onUnitToggle,
   onSave,
   isSaving,
   domainsForUnit,
-  geoAreas,
-  subordinateUnits,
   unitName,
 }: JobTitleConfigDialogProps) {
   return (
@@ -106,59 +94,7 @@ export function JobTitleConfigDialog({
               )}
             </div>
 
-            <div className="space-y-3">
-              <label className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                Khu vực địa lý mặc định
-              </label>
-              <Select value={geoId} onValueChange={onGeoIdChange}>
-                <SelectTrigger className="h-10 bg-background">
-                  <SelectValue placeholder="-- Chọn khu vực (nếu có) --" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Không quy định khu vực</SelectItem>
-                  {geoAreas.map((g) => (
-                    <SelectItem key={g.id} value={String(g.id)}>{g.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="space-y-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  Theo dõi đơn vị trực thuộc
-                </label>
-                <p className="text-xs text-muted-foreground">
-                  Chọn các phòng ban/đơn vị mà nhóm chức danh này quản lý.
-                </p>
-              </div>
-              
-              <ScrollArea className="h-40 rounded-lg border bg-muted/10 p-2 shadow-inner">
-                <div className="flex flex-col gap-1">
-                  {subordinateUnits.length === 0 ? (
-                    <p className="text-sm text-muted-foreground italic p-2 text-center">Chưa có đơn vị trực thuộc.</p>
-                  ) : (
-                    subordinateUnits.map((u) => (
-                      <label
-                        key={u.id}
-                        className="flex items-center gap-3 cursor-pointer text-sm hover:bg-muted/50 p-2 rounded-md transition-colors"
-                      >
-                        <Checkbox
-                          checked={unitIds.includes(u.id)}
-                          onCheckedChange={() => onUnitToggle(u.id)}
-                        />
-                        <span className="truncate font-medium">{u.name}</span>
-                        {u.code && (
-                          <span className="text-muted-foreground text-[11px] uppercase shrink-0">({u.code})</span>
-                        )}
-                      </label>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
-            </div>
           </div>
         )}
 

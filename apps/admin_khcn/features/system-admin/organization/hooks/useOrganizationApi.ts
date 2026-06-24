@@ -50,7 +50,6 @@ export function useOrganizationApi() {
         ...payload,
         parentId: payload.parentId ?? undefined,
         domainIds: payload.domainIds?.length ? payload.domainIds : undefined,
-        geographicAreaIds: payload.geographicAreaIds?.length ? payload.geographicAreaIds : undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
@@ -70,7 +69,7 @@ export function useOrganizationApi() {
   });
 
   const updateScope = useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: { domainIds?: number[]; geographicAreaIds?: number[] } }) =>
+    mutationFn: ({ id, payload }: { id: number; payload: { domainIds?: number[] } }) =>
       organizationApi.updateScope(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
@@ -94,7 +93,7 @@ export function useOrganizationApi() {
     isLoadingTree,
     createUnit: createUnit.mutateAsync,
     updateUnit: (id: number, payload: UpdateUnitPayload) => updateUnit.mutateAsync({ id, payload }),
-    updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) =>
+    updateScope: (id: number, payload: { domainIds?: number[] }) =>
       updateScope.mutateAsync({ id, payload }),
     deleteUnit: deleteUnit.mutateAsync,
     isCreating: createUnit.isPending,

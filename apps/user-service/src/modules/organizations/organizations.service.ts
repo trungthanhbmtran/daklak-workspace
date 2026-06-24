@@ -20,11 +20,7 @@ export class OrganizationsService {
       : data.domainId != null
         ? [data.domainId]
         : [];
-    const geographicAreaIds = Array.isArray(data.geographicAreaIds)
-      ? data.geographicAreaIds
-      : data.geographicAreaId != null
-        ? [data.geographicAreaId]
-        : [];
+
     // Bước 1: Tạo đơn vị (Path tạm để trống)
     const unit = await this.prisma.organizationUnit.create({
       data: {
@@ -51,14 +47,7 @@ export class OrganizationsService {
         skipDuplicates: true,
       });
     }
-    if (geographicAreaIds.length > 0) {
-      await this.prisma.unitGeographicArea.createMany({
-        data: geographicAreaIds
-          .filter((id: number) => id > 0)
-          .map((geographicAreaId: number) => ({ unitId: unit.id, geographicAreaId })),
-        skipDuplicates: true,
-      });
-    }
+
 
     // Invalidate cache
     this.treeCache.clear();
@@ -78,17 +67,7 @@ export class OrganizationsService {
             },
           },
         },
-        unitGeographicAreas: {
-          include: {
-            geographicArea: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
+
       },
     });
   }
@@ -109,17 +88,7 @@ export class OrganizationsService {
             },
           },
         },
-        unitGeographicAreas: {
-          include: {
-            geographicArea: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
+
       },
     });
     if (!unit) return null;
@@ -135,7 +104,7 @@ export class OrganizationsService {
       typeId?: number;
       parentId?: number | null;
       domainIds?: number[] | null;
-      geographicAreaIds?: number[] | null;
+
     },
   ) {
     const unit = await this.prisma.organizationUnit.findUnique({
@@ -226,18 +195,7 @@ export class OrganizationsService {
         });
       }
     }
-    if (data.geographicAreaIds !== undefined) {
-      await this.prisma.unitGeographicArea.deleteMany({ where: { unitId: id } });
-      const geoIds = Array.isArray(data.geographicAreaIds)
-        ? data.geographicAreaIds.filter((d) => d > 0)
-        : [];
-      if (geoIds.length > 0) {
-        await this.prisma.unitGeographicArea.createMany({
-          data: geoIds.map((geographicAreaId) => ({ unitId: id, geographicAreaId })),
-          skipDuplicates: true,
-        });
-      }
-    }
+
 
     // Invalidate cache
     this.treeCache.clear();
@@ -257,17 +215,7 @@ export class OrganizationsService {
             },
           },
         },
-        unitGeographicAreas: {
-          include: {
-            geographicArea: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
+
       },
     });
   }
@@ -316,17 +264,7 @@ export class OrganizationsService {
             },
           },
         },
-        unitGeographicAreas: {
-          include: {
-            geographicArea: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
+
       },
     });
 
@@ -376,17 +314,7 @@ export class OrganizationsService {
             },
           },
         },
-        unitGeographicAreas: {
-          include: {
-            geographicArea: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
+
       },
     });
 
@@ -424,9 +352,7 @@ export class OrganizationsService {
         jobTitle: true,
         slots: {
           orderBy: { slotOrder: 'asc' },
-          include: {
-            monitoredUnits: { include: { unit: true } },
-          },
+
         },
       },
     });
@@ -496,14 +422,37 @@ export class OrganizationsService {
     staffingId: number;
     slotOrder: number;
     description?: string | null;
+    domainIds?: number[];
+    geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const { staffingId, slotOrder, description, monitoredUnitIds } = dto;
+    const { staffingId, slotOrder, description, domainIds, geographicAreaIds, monitoredUnitIds } = dto;
     const slot = await this.prisma.staffingSlot.upsert({
       where: { staffingId_slotOrder: { staffingId, slotOrder } },
       update: { description: description ?? undefined },
       create: { staffingId, slotOrder, description: description ?? undefined },
     });
+
+    if (domainIds !== undefined) {
+      await this.prisma.staffingSlotDomain.deleteMany({
+        where: { slotId: slot.id },
+      });
+      if (domainIds.length > 0) {
+        await this.prisma.staffingSlotDomain.createMany({
+          data: domainIds.map((domainId) => ({ slotId: slot.id, domainId })),
+        });
+      }
+    }
+    if (geographicAreaIds !== undefined) {
+      await this.prisma.staffingSlotGeographicArea.deleteMany({
+        where: { slotId: slot.id },
+      });
+      if (geographicAreaIds.length > 0) {
+        await this.prisma.staffingSlotGeographicArea.createMany({
+          data: geographicAreaIds.map((geographicAreaId) => ({ slotId: slot.id, geographicAreaId })),
+        });
+      }
+    }
     if (monitoredUnitIds !== undefined) {
       await this.prisma.staffingSlotMonitoredUnit.deleteMany({
         where: { slotId: slot.id },
@@ -514,9 +463,14 @@ export class OrganizationsService {
         });
       }
     }
+
     const updated = await this.prisma.staffingSlot.findUnique({
       where: { id: slot.id },
-      include: { monitoredUnits: { include: { unit: true } } },
+      include: {
+        monitoredUnits: { include: { unit: true } },
+        geographicAreas: { include: { geographicArea: true } },
+        domains: { include: { domain: true } },
+      },
     });
     return updated!;
   }

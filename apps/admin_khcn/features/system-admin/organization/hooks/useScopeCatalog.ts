@@ -50,14 +50,13 @@ export function useDomainSearch(selectedIds: number[]) {
   return { items, isFetching, q, setQ };
 }
 
-/** Hook địa bàn — lazy + server-side search + selected-first sort */
-export function useGeoAreaSearch(selectedIds: number[], enabled: boolean) {
+export function useGeoAreaSearch(selectedIds: number[], enabled = true) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
 
   const { data: items = [], isFetching } = useQuery<CatalogServerItem[]>({
     queryKey: ["categories", "GEO_AREA", debouncedQ, selectedIds.join(",")],
-    queryFn: () => organizationApi.getGeoAreas(debouncedQ, selectedIds),
+    queryFn: () => organizationApi.getGeographicAreas(debouncedQ, selectedIds),
     enabled,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,

@@ -28,8 +28,6 @@ function normalizeUnitNode(n: any): OrganizationUnitNode {
     domainIds: n.domainIds ?? n.domain_ids ?? [],
     domainNames: n.domainNames ?? n.domain_names ?? [],
     scope: n.scope,
-    geographicAreaIds: n.geographicAreaIds ?? n.geographic_area_ids ?? [],
-    geographicAreaNames: n.geographicAreaNames ?? n.geographic_area_names ?? [],
     children: Array.isArray(n.children) ? n.children.map(normalizeUnitNode) : undefined,
   };
 }
@@ -112,7 +110,7 @@ export const organizationApi = {
       })
       .then(r => unwrapData<any[]>(r)),
 
-  getGeoAreas: (q?: string, selectedIds?: number[]) =>
+  getGeographicAreas: (q?: string, selectedIds?: number[]) =>
     apiClient
       .get("/categories", {
         params: {
@@ -124,8 +122,7 @@ export const organizationApi = {
       })
       .then(r => unwrapData<any[]>(r)),
 
-  /** Endpoint chuyên biệt: chỉ cập nhật lĩnh vực + địa bàn, không đụng tên/mã/phân loại */
-  updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) =>
+  updateScope: (id: number, payload: { domainIds?: number[] }) =>
     apiClient.put(`/organizations/${id}/scope`, payload).then(r => unwrapData<any>(r)),
 
   getJobTitles: (unitId?: number): Promise<{ items: JobTitleItem[] }> =>

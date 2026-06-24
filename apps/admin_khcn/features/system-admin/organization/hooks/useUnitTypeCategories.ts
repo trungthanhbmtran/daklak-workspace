@@ -30,7 +30,7 @@ export interface UnitCategoryMeta {
   /** Hệ thống chính trị */
   politicalSystem: PoliticalSystem;
   /** Trường bổ sung cần thu thập khi tạo/sửa đơn vị */
-  requiredFields: ("domainIds" | "geographicAreaIds" | "scope")[];
+  requiredFields: ("domainIds" | "scope")[];
   /** Từ khoá chức danh lãnh đạo (dùng filter job-title list) */
   leaderTitleKeywords: string[];
   /** Từ khoá chức danh nhân viên/viên chức */

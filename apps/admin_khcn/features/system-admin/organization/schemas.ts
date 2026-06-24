@@ -18,7 +18,6 @@ export const organizationUnitSchema = z.object({
    */
   categoryCode: z.string().min(1, "Vui lòng chọn phân loại đơn vị"),
   domainIds: z.array(z.number()).optional(),
-  geographicAreaIds: z.array(z.number()).optional(),
   scope: z.string().max(500, "Phạm vi quản lý tối đa 500 ký tự").optional(),
 });
 

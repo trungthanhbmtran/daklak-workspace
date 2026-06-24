@@ -20,7 +20,7 @@ export interface OrganizationActions {
   cancel: () => void;
   createUnit: (payload: CreateUnitPayload) => Promise<unknown>;
   updateUnit: (id: number, payload: UpdateUnitPayload) => Promise<unknown>;
-  updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) => Promise<unknown>;
+  updateScope: (id: number, payload: { domainIds?: number[] }) => Promise<unknown>;
   deleteUnit: (id: number) => Promise<unknown>;
 }
 
