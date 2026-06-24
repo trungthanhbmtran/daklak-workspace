@@ -121,7 +121,7 @@ export function OrganizationClient() {
             {/* Tab: Phạm vi phụ trách */}
             <TabsContent
               value="scope"
-              className="flex-1 min-h-0 overflow-y-auto mt-0 pt-6 px-6 pb-6 data-[state=active]:flex flex-col focus-visible:outline-none"
+              className="flex-1 min-h-0 mt-0 pt-6 px-6 pb-6 data-[state=active]:flex flex-col focus-visible:outline-none"
             >
               <UnitScopePanel />
             </TabsContent>
@@ -129,7 +129,7 @@ export function OrganizationClient() {
             {/* Tab: Định biên & Chức danh */}
             <TabsContent
               value="staffing"
-              className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 data-[state=active]:flex flex-col focus-visible:outline-none"
+              className="flex-1 min-h-0 mt-0 pt-4 px-4 pb-4 data-[state=active]:flex flex-col focus-visible:outline-none"
             >
               <OrganizationStaffing />
             </TabsContent>

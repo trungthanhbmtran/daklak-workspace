@@ -164,8 +164,8 @@ export function OrganizationStaffing() {
     const safeP = page > totalPages ? 1 : page;
     const pagedReport = reportList.slice((safeP - 1) * PAGE_SIZE, safeP * PAGE_SIZE);
     return (
-      <div className="space-y-6 mt-4">
-        <section className="rounded-lg border bg-muted/30 p-4">
+      <div className="flex flex-col h-full min-h-0 gap-4 mt-2">
+        <section className="shrink-0 rounded-lg border bg-muted/30 p-4">
           <h3 className="text-sm font-medium mb-3">Thêm định biên {label.toLowerCase()}</h3>
           <form onSubmit={handleSubmitStaffing} className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5 min-w-[220px]">
@@ -205,7 +205,7 @@ export function OrganizationStaffing() {
           </form>
         </section>
 
-        <section>
+        <section className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium">Danh sách {label.toLowerCase()}</h3>
             {reportList.length > 0 && (
@@ -220,7 +220,7 @@ export function OrganizationStaffing() {
             </div>
           ) : (
             <>
-              <div className="rounded-lg border overflow-hidden">
+              <div className="rounded-lg border overflow-y-auto flex-1 min-h-0 relative">
                 <StaffingTable
                   report={pagedReport}
                   domainsForUnit={domainsForUnit}
@@ -231,7 +231,7 @@ export function OrganizationStaffing() {
                 />
               </div>
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-2 px-1">
+                <div className="shrink-0 flex items-center justify-between mt-2 px-1">
                   <span className="text-xs text-muted-foreground">
                     {(safeP - 1) * PAGE_SIZE + 1}–{Math.min(safeP * PAGE_SIZE, reportList.length)} / {reportList.length}
                   </span>
@@ -249,7 +249,7 @@ export function OrganizationStaffing() {
         </section>
 
         {titleList.length > 0 && (
-          <section className="rounded-lg border bg-muted/20 p-4">
+          <section className="shrink-0 rounded-lg border bg-muted/20 p-4">
             <h3 className="text-sm font-medium mb-1">Cấu hình chức danh</h3>
             <p className="text-xs text-muted-foreground mb-3">
               Lĩnh vực phụ trách (theo cấp trên giao). Theo dõi phòng ban: đơn vị trực thuộc.
@@ -271,8 +271,8 @@ export function OrganizationStaffing() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
+    <div className="flex flex-col h-full min-h-0 gap-4">
+      <div className="shrink-0">
         <h2 className="text-base font-semibold text-foreground">
           Định biên & Chức danh
           {unit?.name && (
@@ -291,9 +291,9 @@ export function OrganizationStaffing() {
           setSelectedJobTitleId("");
           setQuantity("1");
         }}
-        className="w-full"
+        className="flex-1 min-h-0 flex flex-col w-full"
       >
-        <TabsList className="w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
+        <TabsList className="shrink-0 w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
           <TabsTrigger value="CHINH_QUYEN" className="rounded-lg text-xs font-semibold">
             Chính quyền
           </TabsTrigger>
@@ -302,12 +302,12 @@ export function OrganizationStaffing() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="CHINH_QUYEN">
-          {renderTabContent(govTitles, govReport, "chức danh chính quyền", govPage, setGovPage)}
+        <TabsContent value="CHINH_QUYEN" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
+          {renderTabContent(govTitles, govReport, "Chính quyền", govPage, setGovPage)}
         </TabsContent>
 
-        <TabsContent value="DANG">
-          {renderTabContent(partyTitles, partyReport, "chức danh Đảng", partyPage, setPartyPage)}
+        <TabsContent value="DANG" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
+          {renderTabContent(partyTitles, partyReport, "Đảng", partyPage, setPartyPage)}
         </TabsContent>
       </Tabs>
 
