@@ -57,7 +57,7 @@ export function UnitScopePanel() {
   };
 
   return (
-    <div className="flex flex-col gap-5 h-full">
+    <div className="flex flex-col gap-5 flex-1 min-h-0">
 
       {/* ─── Header ─── */}
       <div className="flex items-start justify-between gap-3">

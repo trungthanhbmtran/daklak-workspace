@@ -57,8 +57,8 @@ export function OrganizationClient() {
 
   if (api.isLoadingTree) {
     return (
-      <div className="flex flex-col lg:flex-row gap-6 h-full min-h-0 overflow-hidden">
-        <Skeleton className="w-full lg:w-[350px] h-full rounded-xl shrink-0" />
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 w-full min-h-0 overflow-hidden">
+        <Skeleton className="w-full lg:w-[350px] flex-1 lg:flex-none h-full rounded-xl shrink-0" />
         <Skeleton className="flex-1 h-full rounded-xl" />
       </div>
     );
@@ -77,7 +77,7 @@ export function OrganizationClient() {
 
     if (hasSelection) {
       return (
-        <div className="h-full min-h-0 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm">
           <Tabs
             value={activeTab}
             onValueChange={handleTabChange}
@@ -139,7 +139,7 @@ export function OrganizationClient() {
     }
 
     return (
-      <div className="h-full flex flex-1 items-center justify-center rounded-xl border border-dashed bg-muted/20">
+      <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border border-dashed bg-muted/20">
         <div className="flex flex-col items-center gap-4 px-6 text-center">
           <div className="rounded-full bg-muted/50 p-5">
             <Building2 className="h-12 w-12 text-muted-foreground/50" />
@@ -154,7 +154,7 @@ export function OrganizationClient() {
 
   return (
     <OrganizationProvider value={contextValue}>
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-full min-h-0 overflow-hidden font-sans antialiased min-w-0">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 w-full min-h-0 overflow-hidden font-sans antialiased min-w-0">
         <OrganizationSidebar />
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           {renderRightContent()}

@@ -164,7 +164,7 @@ export function OrganizationStaffing() {
     const safeP = page > totalPages ? 1 : page;
     const pagedReport = reportList.slice((safeP - 1) * PAGE_SIZE, safeP * PAGE_SIZE);
     return (
-      <div className="flex flex-col h-full min-h-0 gap-4 mt-2">
+      <div className="flex flex-col flex-1 min-h-0 gap-4 mt-2">
         <section className="shrink-0 rounded-lg border bg-muted/30 p-4">
           <h3 className="text-sm font-medium mb-3">Thêm định biên {label.toLowerCase()}</h3>
           <form onSubmit={handleSubmitStaffing} className="flex flex-wrap items-end gap-4">
