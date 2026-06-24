@@ -186,22 +186,22 @@ export const TaskTable = memo(function TaskTable({
                   <td className="px-6 py-5 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       {context === 'PENDING_ASSIGN' && (!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
-                        <Button size="sm" className="h-8 rounded-full text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold" onClick={(e) => handleAssign(e, task)}>
-                          <UserCheck className="h-3.5 w-3.5 mr-1" /> Phân công
+                        <Button size="sm" className="h-8 rounded-lg text-xs bg-amber-500 hover:bg-amber-600 text-white font-medium" onClick={(e) => handleAssign(e, task)}>
+                          <UserCheck className="h-3.5 w-3.5 mr-1.5" /> Phân công
                         </Button>
                       )}
                       {context === 'MY_EXECUTION' && task.status !== 'DONE' && (
-                        <Button size="sm" className="h-8 rounded-full text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold" onClick={() => onSelectTask(task)}>
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Thực hiện
+                        <Button size="sm" className="h-8 rounded-lg text-xs bg-indigo-500 hover:bg-indigo-600 text-white font-medium" onClick={() => onSelectTask(task)}>
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Thực hiện
                         </Button>
                       )}
                       {context === 'I_ASSIGNED' && (
-                        <Button size="sm" variant="ghost" className="h-8 rounded-full text-xs text-emerald-700 font-bold" onClick={() => onSelectTask(task)}>
-                          <BarChart3 className="h-3.5 w-3.5 mr-1" /> Tiến độ
+                        <Button size="sm" variant="outline" className="h-8 rounded-lg text-xs font-medium" onClick={() => onSelectTask(task)}>
+                          <BarChart3 className="h-3.5 w-3.5 mr-1.5" /> Tiến độ
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" onClick={() => onSelectTask(task)} className="h-9 w-9 rounded-full bg-slate-50 text-indigo-600 hover:bg-indigo-50 transition-colors shadow-sm">
-                        <Eye className="h-4 w-4" />
+                      <Button variant="outline" size="icon" onClick={() => onSelectTask(task)} className="h-8 w-8 rounded-lg">
+                        <Eye className="h-4 w-4 text-slate-600" />
                       </Button>
                     </div>
                   </td>

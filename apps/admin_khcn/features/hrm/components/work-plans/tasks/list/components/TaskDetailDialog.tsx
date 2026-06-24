@@ -243,7 +243,7 @@ export function TaskDetailDialog({
                           </p>
                         </div>
                         {(!activeTask.assigneeCode || activeTask.assigneeCode === 'UNASSIGNED') && allowedActions.includes('ASSIGN') && (
-                          <Button size="sm" variant="ghost" className="rounded-full text-xs font-bold text-violet-600 bg-violet-100 hover:bg-violet-200" onClick={() => onSmartAssign(activeTask)}>
+                          <Button size="sm" variant="outline" className="rounded-lg text-xs font-medium h-8" onClick={() => onSmartAssign(activeTask)}>
                             Giao
                           </Button>
                         )}
@@ -326,7 +326,7 @@ export function TaskDetailDialog({
                             <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-500 leading-relaxed">
                               Sau khi giao, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong &quot;Việc của tôi&quot; — bạn không cần phân rã tại đây.
                             </div>
-                            <Button className="w-full h-11 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[13px] shadow-lg shadow-amber-500/20" onClick={() => { onSmartAssign(activeTask); }}>
+                            <Button className="w-full h-10 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm" onClick={() => { onSmartAssign(activeTask); }}>
                               <User className="w-4 h-4 mr-2" /> Phân công người thực hiện
                             </Button>
                           </>
@@ -342,10 +342,10 @@ export function TaskDetailDialog({
                             {allowedActions.includes('ADD_SUBTASK') && (
                               <Button
                                 variant="outline"
-                                className="w-full h-10 rounded-xl border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 font-bold text-[12px]"
+                                className="w-full h-10 rounded-lg font-medium text-sm"
                                 onClick={() => setIsSubTaskModalOpen(true)}
                               >
-                                <Split className="w-3.5 h-3.5 mr-1.5" />
+                                <Split className="w-4 h-4 mr-2" />
                                 Xây dựng kế hoạch thực hiện
                               </Button>
                             )}
@@ -355,18 +355,18 @@ export function TaskDetailDialog({
                               </div>
                             )}
                             {allowedActions.includes('COMPLETE') && !hasSubtasks && (
-                              <Button className="w-full h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[13px] shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all" onClick={handleComplete}>
+                              <Button className="w-full h-10 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm" onClick={handleComplete}>
                                 <CheckCircle2 className="w-4 h-4 mr-2" /> Hoàn thành công việc
                               </Button>
                             )}
                             {allowedActions.includes('COORDINATE') && (
-                              <Button variant="outline" className="w-full h-10 rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 font-bold text-[12px]" onClick={() => setIsCoordinationModalOpen(true)}>
-                                <Users className="w-3.5 h-3.5 mr-1.5" /> Xin phối hợp
+                              <Button variant="outline" className="w-full h-10 rounded-lg font-medium text-sm" onClick={() => setIsCoordinationModalOpen(true)}>
+                                <Users className="w-4 h-4 mr-2" /> Xin phối hợp
                               </Button>
                             )}
                             {allowedActions.includes('RETURN') && (
-                              <Button variant="outline" className="w-full h-10 rounded-xl border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold text-[12px]" onClick={() => setIsRejectOpen(true)}>
-                                <Reply className="w-3.5 h-3.5 mr-1.5" /> Trả lại công việc
+                              <Button variant="outline" className="w-full h-10 rounded-lg border-rose-200 text-rose-600 hover:bg-rose-50 font-medium text-sm" onClick={() => setIsRejectOpen(true)}>
+                                <Reply className="w-4 h-4 mr-2" /> Trả lại công việc
                               </Button>
                             )}
                           </>

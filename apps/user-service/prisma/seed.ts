@@ -2090,10 +2090,20 @@ async function main() {
       group: 'UNIT_TYPE_CATEGORY',
       code: 'PHONG_THUOC_SN',
       order: 6,
-      nameVi: 'Ph\u00f2ng ban thu\u1ed9c \u0111\u01a1n v\u1ecb s\u1ef1 nghi\u1ec7p',
+      nameVi: 'Phòng ban thuộc đơn vị sự nghiệp',
       nameEn: 'Department under Public Service Unit',
-      description: '{"icon":"Building","color":"slate","description":"Ph\u00f2ng H\u00e0nh ch\u00ednh, Ph\u00f2ng chuy\u00ean m\u00f4n thu\u1ed9c Trung t\u00e2m","typeCodes":["PHONG_HC_TH","PHONG_CM_SN","PHONG_KT_DVTU","TO_DOI"]}'
+      description: '{"icon":"Building","color":"slate","description":"Phòng Hành chính, Phòng chuyên môn thuộc Trung tâm","typeCodes":["PHONG_HC_TH","PHONG_CM_SN","PHONG_KT_DVTU","TO_DOI"]}'
     },
+    // NEW DOMAINS
+    { group: 'DOMAIN', code: 'QUAN_LY_KHOA_HOC', order: 101, nameVi: 'Quản lý Khoa học', nameEn: 'Science Management' },
+    { group: 'DOMAIN', code: 'DOI_MOI_SANG_TAO', order: 102, nameVi: 'Đổi mới sáng tạo', nameEn: 'Innovation' },
+    { group: 'DOMAIN', code: 'KHOI_NGHIEP_SANG_TAO', order: 103, nameVi: 'Khởi nghiệp sáng tạo', nameEn: 'Startup & Innovation' },
+    { group: 'DOMAIN', code: 'TIEM_LUC_KHCN', order: 104, nameVi: 'Tiềm lực Khoa học Công nghệ', nameEn: 'Science & Tech Potential' },
+    { group: 'DOMAIN', code: 'SO_HUU_TRI_TUE', order: 105, nameVi: 'Sở hữu trí tuệ', nameEn: 'Intellectual Property' },
+    { group: 'DOMAIN', code: 'TIEU_CHUAN_DO_LUONG_CHAT_LUONG', order: 106, nameVi: 'Tiêu chuẩn - Đo lường - Chất lượng', nameEn: 'Standards, Metrology and Quality' },
+    { group: 'DOMAIN', code: 'AN_TOAN_BUC_XA_HAT_NHAN', order: 107, nameVi: 'An toàn bức xạ & hạt nhân', nameEn: 'Radiation & Nuclear Safety' },
+    { group: 'DOMAIN', code: 'TAN_SO_VO_TUYEN_DIEN', order: 108, nameVi: 'Tần số vô tuyến điện', nameEn: 'Radio Frequency' },
+    { group: 'DOMAIN', code: 'CONG_NGHE_THONG_TIN', order: 109, nameVi: 'Công nghệ thông tin', nameEn: 'Information Technology' },
   ];
 
 
@@ -3090,7 +3100,7 @@ async function main() {
   // helper tạo phòng ban
   const createDept = async (
     parentCode: string,
-    dept: { code: string; name: string; typeCode?: string },
+    dept: { code: string; name: string; typeCode?: string; domainCodes?: string[] },
   ) => {
     const parent = await prisma.organizationUnit.findUnique({
       where: { code: parentCode },
@@ -3099,7 +3109,7 @@ async function main() {
 
     const tId = dept.typeCode ? unitTypeMap[dept.typeCode]?.id : phongTypeId;
 
-    await prisma.organizationUnit.upsert({
+    const unit = await prisma.organizationUnit.upsert({
       where: { code: dept.code },
       update: { parentId: parent.id, typeId: tId },
       create: {
@@ -3109,6 +3119,19 @@ async function main() {
         typeId: tId,
       },
     });
+
+    if (dept.domainCodes && dept.domainCodes.length > 0) {
+      const domains = await prisma.category.findMany({
+        where: { groupCode: 'DOMAIN', code: { in: dept.domainCodes } }
+      });
+      if (domains.length > 0) {
+        await prisma.unitDomain.deleteMany({ where: { unitId: unit.id } });
+        await prisma.unitDomain.createMany({
+          data: domains.map(d => ({ unitId: unit.id, domainId: d.id })),
+          skipDuplicates: true
+        });
+      }
+    }
   };
 
   // ==========================
@@ -3133,21 +3156,25 @@ async function main() {
     code: 'H15.07.08',
     name: 'Phòng Quản lý Khoa học',
     typeCode: 'PHONG_BAN_SO',
+    domainCodes: ['QUAN_LY_KHOA_HOC', 'UNG_DUNG_KHCN'],
   });
   await createDept('H15.07', {
     code: 'H15.07.09',
     name: 'Phòng Chuyển đổi số',
     typeCode: 'PHONG_BAN_SO',
+    domainCodes: ['CHUYEN_DOI_SO', 'DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'CONG_NGHE_THONG_TIN'],
   });
   await createDept('H15.07', {
     code: 'H15.07.10',
     name: 'Phòng Quản lý Công nghệ và Đổi mới sáng tạo',
     typeCode: 'PHONG_BAN_SO',
+    domainCodes: ['QUAN_LY_CONG_NGHE', 'DOI_MOI_SANG_TAO', 'SO_HUU_TRI_TUE'],
   });
   await createDept('H15.07', {
     code: 'H15.07.11',
     name: 'Phòng Quản lý Tiêu chuẩn - Đo lường - Chất lượng',
     typeCode: 'PHONG_BAN_SO',
+    domainCodes: ['TIEU_CHUAN_DO_LUONG_CHAT_LUONG', 'AN_TOAN_BUC_XA_HAT_NHAN'],
   });
 
   // Các phòng thuộc Trung tâm Đổi mới Sáng tạo
@@ -3555,6 +3582,7 @@ async function main() {
     unitCode: string,
     jobTitleCode: string,
     isUnitLeader: boolean,
+    monitoredUnitCodes?: string[],
   ) => {
 
     // Xác định PBAC Role theo chức vụ (hệ thống chính phủ)
@@ -3642,6 +3670,41 @@ async function main() {
           `✅ Created job position for ${fullName} at ${unit.name} (${jobTitle.name})`,
         );
       }
+
+      // Seed StaffingSlot and Monitored Units
+      if (monitoredUnitCodes && monitoredUnitCodes.length > 0) {
+        const staffing = await prisma.organizationStaffing.upsert({
+          where: { unitId_jobTitleId: { unitId: unit.id, jobTitleId: jobTitle.id } },
+          update: {},
+          create: { unitId: unit.id, jobTitleId: jobTitle.id, quantity: 5 }
+        });
+
+        const slot = await prisma.staffingSlot.upsert({
+          where: { staffingId_slotOrder: { staffingId: staffing.id, slotOrder: user.id } },
+          update: { description: `Phụ trách bởi ${fullName}` },
+          create: {
+            staffingId: staffing.id,
+            slotOrder: user.id,
+            description: `Phụ trách bởi ${fullName}`
+          }
+        });
+
+        const monitoredUnits = await prisma.organizationUnit.findMany({
+          where: { code: { in: monitoredUnitCodes } }
+        });
+
+        if (monitoredUnits.length > 0) {
+          await prisma.staffingSlotMonitoredUnit.deleteMany({ where: { slotId: slot.id } });
+          await prisma.staffingSlotMonitoredUnit.createMany({
+            data: monitoredUnits.map(mu => ({
+              slotId: slot.id,
+              unitId: mu.id
+            })),
+            skipDuplicates: true
+          });
+          console.log(`✅ Assigned monitored units to ${fullName} (Slot ${slot.slotOrder})`);
+        }
+      }
     }
   };
 
@@ -3674,6 +3737,7 @@ async function main() {
     'H15.07',
     'GIAM_DOC',
     true,
+    ['H15.07.05', 'H15.07.06', 'H15.07.07']
   );
   await assignLeader(
     'NV_002',
@@ -3683,6 +3747,7 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
+    ['H15.07.08']
   );
   await assignLeader(
     'NV_003',
@@ -3692,6 +3757,7 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
+    ['H15.07.10']
   );
   await assignLeader(
     'NV_004',
@@ -3701,6 +3767,7 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
+    ['H15.07.09']
   );
   await assignLeader(
     'NV_005',
@@ -3710,6 +3777,7 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
+    ['H15.07.11']
   );
   // Bí thư Đảng bộ thường là Giám đốc
   await assignLeader(
@@ -4330,7 +4398,9 @@ async function main() {
   const allDomainCodes = [
     'H15.07', 'CHUYEN_DOI_SO', 'DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'VIEN_THONG', 'KINH_TE_SO',
     'THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'HA_TANG_SO',
-    'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI', 'NGAN_SACH'
+    'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI', 'NGAN_SACH',
+    'QUAN_LY_KHOA_HOC', 'DOI_MOI_SANG_TAO', 'KHOI_NGHIEP_SANG_TAO', 'TIEM_LUC_KHCN', 'SO_HUU_TRI_TUE',
+    'TIEU_CHUAN_DO_LUONG_CHAT_LUONG', 'AN_TOAN_BUC_XA_HAT_NHAN', 'TAN_SO_VO_TUYEN_DIEN', 'CONG_NGHE_THONG_TIN'
   ];
 
   const techDomains = await prisma.category.findMany({
@@ -4366,41 +4436,41 @@ async function main() {
       'H15.07.07': ['NGAN_SACH', 'H15.07'],
 
       // Phòng Quản lý Khoa học
-      'H15.07.08': ['H15.07'],
+      'H15.07.08': ['QUAN_LY_KHOA_HOC', 'TIEM_LUC_KHCN'],
 
       // Phòng Chuyển đổi số
-      'H15.07.09': ['CHUYEN_DOI_SO', 'DU_LIEU_SO', 'KINH_TE_SO', 'AN_TOAN_THONG_TIN', 'HA_TANG_SO'],
+      'H15.07.09': ['CHUYEN_DOI_SO', 'DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'CONG_NGHE_THONG_TIN', 'VIEN_THONG', 'BUU_CHINH', 'TAN_SO_VO_TUYEN_DIEN', 'KINH_TE_SO', 'HA_TANG_SO'],
 
       // Phòng Quản lý Công nghệ & Đổi mới sáng tạo
-      'H15.07.10': ['H15.07'],
+      'H15.07.10': ['DOI_MOI_SANG_TAO', 'SO_HUU_TRI_TUE', 'KHOI_NGHIEP_SANG_TAO'],
 
       // Phòng Quản lý TCĐLCL
-      'H15.07.11': ['H15.07'],
+      'H15.07.11': ['TIEU_CHUAN_DO_LUONG_CHAT_LUONG', 'AN_TOAN_BUC_XA_HAT_NHAN'],
 
-      // TT Thông tin Ứng dụng KH&CN (H15.07.03)
-      'H15.07.03': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
+      // Trung tâm Đổi mới Sáng tạo (H15.07.01)
+      'H15.07.01': ['DOI_MOI_SANG_TAO', 'KHOI_NGHIEP_SANG_TAO'],
+      'H15.07.01.01': ['DOI_MOI_SANG_TAO'],
+      'H15.07.01.02': ['KHOI_NGHIEP_SANG_TAO'],
+
+      // TT Thông tin Ứng dụng KH&CN (H15.07.03) -> Giữ nguyên (nếu đây là một tổ chức cũ/mới tương ứng)
+      'H15.07.03': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
       'H15.07.03.01': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN'],
       'H15.07.03.02': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU'],
-      'H15.07.03.03': ['THONG_TIN_DIEN_TU', 'BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO'],
-      'H15.07.03.04': ['BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
+      'H15.07.03.03': ['THONG_TIN_DIEN_TU', 'TRUYEN_THONG_CO_SO'],
+      'H15.07.03.04': ['TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
       'H15.07.03.05': ['H15.07'],
 
-      // TT Kỹ thuật TCĐLCL (H15.07.02)
-      'H15.07.02': ['H15.07'],
-      'H15.07.02.01': ['H15.07'],
-      'H15.07.02.02': ['H15.07'],
-      'H15.07.02.03': ['H15.07'],
+      // Trung tâm Kỹ thuật TCĐLCL (H15.07.02)
+      'H15.07.02': ['TIEU_CHUAN_DO_LUONG_CHAT_LUONG'],
+      'H15.07.02.01': ['TIEU_CHUAN_DO_LUONG_CHAT_LUONG'],
+      'H15.07.02.02': ['TIEU_CHUAN_DO_LUONG_CHAT_LUONG'],
+      'H15.07.02.03': ['TIEU_CHUAN_DO_LUONG_CHAT_LUONG'],
 
       // TT IOC — Giám sát Đô thị Thông minh (H15.07.04)
       'H15.07.04': ['DU_LIEU_SO', 'HA_TANG_SO', 'THONG_TIN_TRUYEN_THONG', 'CHUYEN_DOI_SO', 'AN_TOAN_THONG_TIN'],
       'H15.07.04.01': ['DU_LIEU_SO', 'CHUYEN_DOI_SO'],                                        // HC-TH IOC
       'H15.07.04.02': ['DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'CHUYEN_DOI_SO'],                   // Khai thác dữ liệu
       'H15.07.04.03': ['HA_TANG_SO', 'AN_TOAN_THONG_TIN', 'THONG_TIN_TRUYEN_THONG'],          // Hạ tầng ĐT thông minh
-
-      // TT ĐMST (H15.07.01)
-      'H15.07.01': ['H15.07'],
-      'H15.07.01.01': ['H15.07'],
-      'H15.07.01.02': ['H15.07'],
     };
 
 
