@@ -15,7 +15,7 @@ interface TableProps {
 
 export function CategoryTable({ isLoading, isError, data, onEdit, onDelete }: TableProps) {
   return (
-    <div className="rounded-md border bg-background shadow-sm overflow-hidden">
+    <div className="flex-1 overflow-y-auto rounded-md border bg-background shadow-sm">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">

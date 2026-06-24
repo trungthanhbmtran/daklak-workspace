@@ -17,7 +17,7 @@ interface SidebarProps {
 export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm, filteredGroups, activeGroup, onSelectGroup, uniqueGroups }: SidebarProps) {
   return (
     <>
-      <Card className="hidden md:flex w-72 shrink-0 flex-col p-3 border-border/50 shadow-sm sticky top-20 h-[calc(100vh-8rem)]">
+      <Card className="hidden md:flex w-72 shrink-0 flex-col p-3 border-border/50 shadow-sm h-full min-h-0">
         <div className="flex flex-col gap-3 mb-3 shrink-0">
           <div className="px-1 text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhóm danh mục</div>
           <div className="relative">

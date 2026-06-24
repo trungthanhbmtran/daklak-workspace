@@ -38,7 +38,7 @@ export function CategoryClient() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 items-start">
+    <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-0 min-w-0">
       <CategorySidebar
         isLoading={isLoading}
         searchGroupTerm={ui.state.searchGroupTerm}
@@ -49,8 +49,8 @@ export function CategoryClient() {
         onSelectGroup={(group) => { ui.setters.setActiveGroup(group); }}
       />
 
-      <div className="flex-1 w-full space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="flex-1 min-w-0 flex flex-col min-h-0 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           <div className="hidden sm:block">
             <h3 className="text-lg font-semibold text-foreground">{groups?.find(g => g.code === ui.state.activeGroup)?.name || ui.state.activeGroup}</h3>
             <p className="text-sm text-muted-foreground">Quản lý các giá trị thuộc nhóm này</p>

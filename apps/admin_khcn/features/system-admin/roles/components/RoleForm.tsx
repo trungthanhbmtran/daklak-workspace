@@ -62,7 +62,7 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
 
   if (!selectedRole && !createMode) {
     return (
-      <Card className="flex-1 w-full h-full shadow-none border-border border-dashed bg-muted/10 flex flex-col items-center justify-center p-12 text-center rounded-xl">
+      <Card className="flex-1 w-full min-h-0 shadow-none border-border border-dashed bg-muted/10 flex flex-col items-center justify-center p-12 text-center rounded-xl">
         <div className="p-4 bg-background rounded-full shadow-sm mb-4">
           <ShieldAlert className="h-10 w-10 text-muted-foreground/40" />
         </div>
@@ -75,7 +75,7 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
   }
 
   return (
-    <Card className="flex-1 w-full h-full shadow-sm border-border overflow-hidden flex flex-col rounded-xl bg-background">
+    <Card className="flex-1 w-full min-h-0 shadow-sm border-border overflow-hidden flex flex-col rounded-xl bg-background">
       {/* HEADER */}
       <div className="bg-muted/40 border-b py-4 px-6 shrink-0 flex items-center justify-between">
         <div className="flex items-center gap-3">

@@ -18,11 +18,11 @@ export function MenuClient() {
   const { menus, isLoadingMenus } = useMenuApi();
 
   if (isLoadingMenus) {
-    return <div className="h-[calc(100vh-120px)] flex items-center justify-center font-medium animate-pulse">Đang tải cấu trúc Menu...</div>;
+    return <div className="flex-1 min-h-0 flex items-center justify-center font-medium animate-pulse">Đang tải cấu trúc Menu...</div>;
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start h-[calc(100vh-120px)] overflow-hidden font-sans antialiased">
+    <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 min-w-0 overflow-hidden font-sans antialiased">
       <MenuSidebar
         menus={menus}
         activeId={viewState.selectedId}

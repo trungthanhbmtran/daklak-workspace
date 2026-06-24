@@ -41,7 +41,7 @@ export function UserTable({
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="rounded-md border bg-background shadow-sm overflow-hidden flex flex-col">
+    <div className="flex-1 min-h-0 rounded-md border bg-background shadow-sm overflow-hidden flex flex-col">
       <ScrollArea className="w-full flex-1">
         <Table>
           <TableHeader>

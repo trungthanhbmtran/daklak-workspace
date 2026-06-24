@@ -25,7 +25,7 @@ export function RoleSidebar({
   const end = Math.min(page * pageSize, total);
 
   return (
-    <Card className="w-full lg:w-[300px] flex flex-col h-full shadow-none border-border overflow-hidden shrink-0">
+    <Card className="w-full lg:w-[300px] flex flex-col h-full min-h-0 shadow-none border-border overflow-hidden shrink-0">
       {/* Header */}
       <div className="p-4 space-y-3 border-b bg-muted/10 shrink-0">
         <div className="flex items-center justify-between">

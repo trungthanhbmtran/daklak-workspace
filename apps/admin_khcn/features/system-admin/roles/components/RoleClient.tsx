@@ -10,14 +10,14 @@ export function RoleClient() {
 
   if (state.isLoading) {
     return (
-      <div className="h-[calc(100vh-120px)] flex items-center justify-center text-muted-foreground gap-2">
+      <div className="flex-1 min-h-0 flex items-center justify-center text-muted-foreground gap-2">
         <Loader2 className="h-5 w-5 animate-spin" /> Đang tải danh sách vai trò...
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start h-[calc(100vh-120px)] overflow-hidden">
+    <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 min-w-0 overflow-hidden">
       <RoleSidebar
         roles={state.roles}
         total={state.allRolesCount}

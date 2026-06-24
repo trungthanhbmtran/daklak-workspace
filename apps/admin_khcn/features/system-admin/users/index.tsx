@@ -28,9 +28,9 @@ export function UserClient() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col flex-1 min-h-0 gap-4">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-4 rounded-lg border shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 bg-card p-4 rounded-lg border shadow-sm">
         <Search
           placeholder="Tìm email, tên đăng nhập, họ tên..."
           className="w-full sm:w-80"
