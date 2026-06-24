@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -36,11 +35,11 @@ export function UnitScopePanel() {
   const [domainIds, setDomainIds] = useState<number[]>(() => unit?.domainIds ?? []);
   const [geoIds,    setGeoIds]    = useState<number[]>(() => unit?.geographicAreaIds ?? []);
   const [dirty,     setDirty]     = useState(false);
-  const [geoReady,  setGeoReady]  = useState(false);
 
   // Truyền selectedIds lên server để server sort + đánh dấu
   const domains  = useDomainSearch(domainIds);
-  const geoAreas = useGeoAreaSearch(geoIds, geoReady);
+  // Vì không dùng tab nữa nên geo luôn ready
+  const geoAreas = useGeoAreaSearch(geoIds, true);
 
   if (!unit || selectedId == null) return null;
 
@@ -69,7 +68,7 @@ export function UnitScopePanel() {
         <div>
           <h3 className="text-sm font-semibold">Phạm vi phụ trách</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Lĩnh vực chuyên môn và địa bàn được giao quản lý
+            Lĩnh vực chuyên môn và đơn vị, địa bàn được giao quản lý
           </p>
         </div>
 
@@ -100,54 +99,49 @@ export function UnitScopePanel() {
 
       <Separator />
 
-      {/* ─── Tabs ─── */}
-      <Tabs
-        defaultValue="domains"
-        className="flex-1 flex flex-col min-h-0"
-        onValueChange={v => { if (v === "geo") setGeoReady(true); }}
-      >
-        <TabsList className="h-9 self-start bg-muted/60 rounded-lg p-0.5 gap-0.5">
-          <TabsTrigger
-            value="domains"
-            className="h-8 px-4 text-xs rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-          >
-            <Briefcase className="h-3.5 w-3.5" />
-            Lĩnh vực
+      {/* ─── 2-Column Layout ─── */}
+      <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0 mt-2">
+        {/* Lĩnh vực phụ trách */}
+        <div className="flex-1 flex flex-col min-h-0 bg-muted/20 border rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Briefcase className="h-4 w-4" />
+            </div>
+            <h4 className="text-sm font-semibold">Lĩnh vực chuyên môn</h4>
             {domainIds.length > 0 && (
-              <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold leading-none">
+              <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
                 {domainIds.length}
               </span>
             )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="geo"
-            className="h-8 px-4 text-xs rounded-md gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            Địa bàn
+          </div>
+          <div className="flex-1 min-h-0">
+            <ScopePicker
+              type="domain"
+              items={domains.items}
+              selectedIds={domainIds}
+              isFetching={domains.isFetching}
+              q={domains.q}
+              onSearch={domains.setQ}
+              onToggle={handleDomainToggle}
+              onRemoveAll={() => { setDomainIds([]); setDirty(true); }}
+            />
+          </div>
+        </div>
+
+        {/* Địa bàn / Đơn vị theo dõi */}
+        <div className="flex-1 flex flex-col min-h-0 bg-muted/20 border rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <MapPin className="h-4 w-4" />
+            </div>
+            <h4 className="text-sm font-semibold">Đơn vị / Địa bàn theo dõi</h4>
             {geoIds.length > 0 && (
-              <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold leading-none">
+              <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
                 {geoIds.length}
               </span>
             )}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="domains" className="flex-1 min-h-0 mt-4 focus-visible:outline-none">
-          <ScopePicker
-            type="domain"
-            items={domains.items}
-            selectedIds={domainIds}
-            isFetching={domains.isFetching}
-            q={domains.q}
-            onSearch={domains.setQ}
-            onToggle={handleDomainToggle}
-            onRemoveAll={() => { setDomainIds([]); setDirty(true); }}
-          />
-        </TabsContent>
-
-        <TabsContent value="geo" className="flex-1 min-h-0 mt-4 focus-visible:outline-none">
-          {geoReady && (
+          </div>
+          <div className="flex-1 min-h-0">
             <ScopePicker
               type="geo"
               items={geoAreas.items}
@@ -158,9 +152,9 @@ export function UnitScopePanel() {
               onToggle={handleGeoToggle}
               onRemoveAll={() => { setGeoIds([]); setDirty(true); }}
             />
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
