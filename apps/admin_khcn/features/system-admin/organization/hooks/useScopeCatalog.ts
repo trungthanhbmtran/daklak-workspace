@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { organizationApi } from "../api";
 
 const CAT_STALE  = 10 * 60 * 1000;
@@ -49,6 +49,7 @@ export function useDomainSearch(selectedIds: number[]) {
     initialPageParam: 0,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
+    placeholderData: keepPreviousData,
   });
 
   const items = query.data?.pages.flat() || [];
@@ -78,6 +79,7 @@ export function useGeoAreaSearch(selectedIds: number[], enabled = true) {
     enabled,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
+    placeholderData: keepPreviousData,
   });
 
   const items = query.data?.pages.flat() || [];

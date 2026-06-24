@@ -149,10 +149,15 @@ function ScopePicker({
   const Icon = Briefcase;
   const placeholder = "Tìm lĩnh vực chuyên môn...";
 
-  // Server đã sort: selected items ở đầu, rest ở sau
-  const selectedItems = items.filter(i => i.selected);
-  const restItems = items.filter(i => !i.selected);
-  const isEmpty = items.length === 0 && !isFetching;
+  // Override selected state with local state for instant feedback
+  const displayItems = items.map(item => ({
+    ...item,
+    selected: selectedIds.includes(item.id)
+  }));
+
+  const selectedItems = displayItems.filter(i => i.selected);
+  const restItems = displayItems.filter(i => !i.selected);
+  const isEmpty = displayItems.length === 0 && !isFetching;
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -223,7 +228,7 @@ function ScopePicker({
           ? "Đang tìm kiếm..."
           : isEmpty
             ? q ? `Không có kết quả cho "${q}"` : `Nhập từ khóa để tìm lĩnh vực`
-            : `${items.length} kết quả${items.length >= 50 ? " — nhập thêm từ khóa để thu hẹp" : ""}`
+            : `${displayItems.length} kết quả${displayItems.length >= 50 ? " — nhập thêm từ khóa để thu hẹp" : ""}`
         }
       </p>
 
@@ -236,7 +241,7 @@ function ScopePicker({
           </div>
         ) : (
           <div className="px-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 pb-4">
-            {items.map((item) => (
+            {displayItems.map((item) => (
               <ResultRow
                 key={item.id}
                 item={item}
