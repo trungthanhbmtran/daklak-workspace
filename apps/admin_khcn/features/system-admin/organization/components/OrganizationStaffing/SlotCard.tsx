@@ -6,13 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { StaffingSlotItem } from "../../types";
 import { PopoverMultiSelect } from "../PopoverMultiSelect";
-import { useGeoAreaSearch } from "../../hooks/useScopeCatalog";
+import { useGeoAreaSearch, useDomainSearch } from "../../hooks/useScopeCatalog";
 
 type SlotCardProps = {
   staffingId: number;
   slotOrder: number;
   existingSlot: StaffingSlotItem | null | undefined;
   domainsForUnit: { id: number; name: string }[];
+  unitDomainIds: number[];
   onSave: (payload: {
     staffingId: number;
     slotOrder: number;
@@ -30,6 +31,7 @@ export function SlotCard({
   slotOrder,
   existingSlot,
   domainsForUnit,
+  unitDomainIds,
   subordinateUnits,
   onSave,
   isSaving,
@@ -40,7 +42,13 @@ export function SlotCard({
   const [monitoredUnitIds, setMonitoredUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
 
   // Use Geo Area Search locally to avoid fetching all areas upfront
-  const { items: geoAreas, isFetching: isLoadingGeoAreas, q: searchGeoArea, setQ: setSearchGeoArea } = useGeoAreaSearch(geographicAreaIds);
+  const { items: geoAreas, isFetching: isLoadingGeoAreas, q: searchGeoArea, setQ: setSearchGeoArea, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geographicAreaIds);
+
+  // Use Domain Search locally if unit doesn't have restricted domains
+  const isDomainRestricted = unitDomainIds.length > 0;
+  const { items: serverDomains, isFetching: isLoadingDomains, q: searchDomain, setQ: setSearchDomain, hasNextPage: hasNextDomainPage, fetchNextPage: fetchNextDomainPage, isFetchingNextPage: isFetchingNextDomainPage } = useDomainSearch(domainIds);
+
+  const displayDomains = isDomainRestricted ? domainsForUnit : serverDomains;
 
   useEffect(() => {
     setDescription(existingSlot?.description ?? "");
@@ -80,11 +88,17 @@ export function SlotCard({
             <PopoverMultiSelect
               title="Chọn lĩnh vực chuyên môn"
               icon={<Network className="h-5 w-5" />}
-              items={domainsForUnit}
+              items={displayDomains}
               selectedIds={domainIds}
               onChange={setDomainIds}
               placeholderSearch="Tìm lĩnh vực..."
               triggerLabel="Chọn lĩnh vực"
+              search={isDomainRestricted ? undefined : searchDomain}
+              onSearchChange={isDomainRestricted ? undefined : setSearchDomain}
+              isLoading={isDomainRestricted ? false : isLoadingDomains}
+              hasNextPage={isDomainRestricted ? false : hasNextDomainPage}
+              fetchNextPage={isDomainRestricted ? undefined : fetchNextDomainPage}
+              isFetchingNextPage={isDomainRestricted ? false : isFetchingNextDomainPage}
             />
           </div>
 
@@ -104,6 +118,9 @@ export function SlotCard({
               search={searchGeoArea}
               onSearchChange={setSearchGeoArea}
               isLoading={isLoadingGeoAreas}
+              hasNextPage={hasNextPage}
+              fetchNextPage={fetchNextPage}
+              isFetchingNextPage={isFetchingNextPage}
             />
           </div>
 

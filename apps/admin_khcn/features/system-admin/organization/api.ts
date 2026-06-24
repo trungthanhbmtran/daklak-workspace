@@ -98,25 +98,27 @@ export const organizationApi = {
   deleteUnit: (id: number) =>
     apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
-  getDomains: (q?: string, selectedIds?: number[]) =>
+  getDomains: (q?: string, selectedIds?: number[], skip: number = 0) =>
     apiClient
       .get("/categories", {
         params: {
           group: "DOMAIN",
           q: q || "",
-          limit: 50,
+          limit: 15,
+          skip,
           ...(selectedIds?.length ? { selectedIds: selectedIds.join(',') } : {}),
         },
       })
       .then(r => unwrapData<any[]>(r)),
 
-  getGeographicAreas: (q?: string, selectedIds?: number[]) =>
+  getGeographicAreas: (q?: string, selectedIds?: number[], skip: number = 0) =>
     apiClient
       .get("/categories", {
         params: {
           group: "GEO_AREA",
           q: q || "",
-          limit: 50,
+          limit: 15,
+          skip,
           ...(selectedIds?.length ? { selectedIds: selectedIds.join(',') } : {}),
         },
       })

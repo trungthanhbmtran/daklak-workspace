@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { organizationApi } from "../api";
 
 const CAT_STALE  = 10 * 60 * 1000;
@@ -39,29 +39,56 @@ export function useDomainSearch(selectedIds: number[]) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
 
-  const { data: items = [], isFetching } = useQuery<CatalogServerItem[]>({
+  const query = useInfiniteQuery<CatalogServerItem[]>({
     queryKey: ["categories", "DOMAIN", debouncedQ, selectedIds.join(",")],
-    queryFn: () => organizationApi.getDomains(debouncedQ, selectedIds),
+    queryFn: ({ pageParam = 0 }) => organizationApi.getDomains(debouncedQ, selectedIds, pageParam as number),
+    getNextPageParam: (lastPage, allPages) => {
+      // 15 items per page
+      return lastPage.length === 15 ? allPages.length * 15 : undefined;
+    },
+    initialPageParam: 0,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
-    placeholderData: prev => prev,
   });
 
-  return { items, isFetching, q, setQ };
+  const items = query.data?.pages.flat() || [];
+
+  return { 
+    items, 
+    isFetching: query.isFetching, 
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    q, 
+    setQ 
+  };
 }
 
 export function useGeoAreaSearch(selectedIds: number[], enabled = true) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
 
-  const { data: items = [], isFetching } = useQuery<CatalogServerItem[]>({
+  const query = useInfiniteQuery<CatalogServerItem[]>({
     queryKey: ["categories", "GEO_AREA", debouncedQ, selectedIds.join(",")],
-    queryFn: () => organizationApi.getGeographicAreas(debouncedQ, selectedIds),
+    queryFn: ({ pageParam = 0 }) => organizationApi.getGeographicAreas(debouncedQ, selectedIds, pageParam as number),
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === 15 ? allPages.length * 15 : undefined;
+    },
+    initialPageParam: 0,
     enabled,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
-    placeholderData: prev => prev,
   });
 
-  return { items, isFetching, q, setQ };
+  const items = query.data?.pages.flat() || [];
+
+  return { 
+    items, 
+    isFetching: query.isFetching, 
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    q, 
+    setQ 
+  };
 }

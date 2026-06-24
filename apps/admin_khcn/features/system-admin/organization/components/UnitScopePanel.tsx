@@ -119,6 +119,9 @@ export function UnitScopePanel() {
               onSearch={domains.setQ}
               onToggle={handleDomainToggle}
               onRemoveAll={() => { setDomainIds([]); setDirty(true); }}
+              hasNextPage={domains.hasNextPage}
+              fetchNextPage={domains.fetchNextPage}
+              isFetchingNextPage={domains.isFetchingNextPage}
             />
           </div>
         </div>
@@ -130,6 +133,7 @@ export function UnitScopePanel() {
 /* ─── ScopePicker ─────────────────────────────────────── */
 function ScopePicker({
   items, selectedIds, isFetching, q, onSearch, onToggle, onRemoveAll,
+  hasNextPage, fetchNextPage, isFetchingNextPage
 }: {
   items: CatalogServerItem[];   // đã được server sort: selected first
   selectedIds: number[];
@@ -138,6 +142,9 @@ function ScopePicker({
   onSearch: (v: string) => void;
   onToggle: (id: number) => void;
   onRemoveAll: () => void;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
+  isFetchingNextPage?: boolean;
 }) {
   const Icon = Briefcase;
   const placeholder = "Tìm lĩnh vực chuyên môn...";
@@ -237,6 +244,24 @@ function ScopePicker({
                 onToggle={onToggle}
               />
             ))}
+          </div>
+        )}
+        {hasNextPage && fetchNextPage && (
+          <div className="pt-2 flex justify-center pb-6">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-primary hover:text-primary hover:bg-primary/5 border-primary/20"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {isFetchingNextPage ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Đang tải...</>
+              ) : (
+                "Tải thêm lĩnh vực"
+              )}
+            </Button>
           </div>
         )}
       </ScrollArea>

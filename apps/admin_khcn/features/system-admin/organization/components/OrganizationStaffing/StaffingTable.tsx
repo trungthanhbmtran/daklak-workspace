@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 type StaffingTableProps = {
   report: StaffingReportItem[];
   domainsForUnit: { id: number; name: string }[];
+  unitDomainIds: number[];
   onSaveSlot: (payload: {
     staffingId: number;
     slotOrder: number;
@@ -36,6 +37,7 @@ type StaffingTableProps = {
 export function StaffingTable({
   report,
   domainsForUnit,
+  unitDomainIds,
   subordinateUnits,
   onSaveSlot,
   isSavingSlot,
@@ -183,6 +185,7 @@ export function StaffingTable({
                                       slotOrder={currentActiveSlot}
                                       existingSlot={existingSlot}
                                       domainsForUnit={domainsForUnit}
+                                      unitDomainIds={unitDomainIds}
                                       subordinateUnits={subordinateUnits}
                                       onSave={onSaveSlot}
                                       isSaving={isSavingSlot}

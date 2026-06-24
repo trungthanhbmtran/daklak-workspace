@@ -19,6 +19,9 @@ type PopoverMultiSelectProps = {
   isLoading?: boolean;
   search?: string;
   onSearchChange?: (val: string) => void;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
+  isFetchingNextPage?: boolean;
 };
 
 export function PopoverMultiSelect({
@@ -32,6 +35,9 @@ export function PopoverMultiSelect({
   isLoading = false,
   search,
   onSearchChange,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
 }: PopoverMultiSelectProps) {
   const [open, setOpen] = useState(false);
   const isAsync = onSearchChange !== undefined;
@@ -106,6 +112,24 @@ export function PopoverMultiSelect({
                   </CommandItem>
                 );
               })}
+              {hasNextPage && fetchNextPage && (
+                <div className="pt-2 pb-1 flex justify-center border-t mt-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs w-full text-primary hover:text-primary hover:bg-primary/5"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Đang tải...</>
+                    ) : (
+                      "Tải thêm kết quả"
+                    )}
+                  </Button>
+                </div>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>

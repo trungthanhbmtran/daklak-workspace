@@ -46,7 +46,7 @@ export function OrganizationStaffing() {
     isError,
   } = useStaffingReport(selectedId ?? null);
 
-  const { items: domains } = useDomainSearch([]);
+  const { items: domains } = useDomainSearch(unit?.domainIds ?? []);
   const { setStaffing, setStaffingSlot, updateJobTitle } =
     useStaffingMutations(selectedId ?? null);
 
@@ -224,6 +224,7 @@ export function OrganizationStaffing() {
                 <StaffingTable
                   report={pagedReport}
                   domainsForUnit={domainsForUnit}
+                  unitDomainIds={unit?.domainIds ?? []}
                   subordinateUnits={subordinateUnits}
                   onSaveSlot={(payload) => setStaffingSlot.mutate(payload)}
                   isSavingSlot={setStaffingSlot.isPending}
