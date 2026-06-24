@@ -57,7 +57,7 @@ export function OrganizationClient() {
 
   if (api.isLoadingTree) {
     return (
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-6 h-full min-h-0 overflow-hidden">
         <Skeleton className="w-full lg:w-[350px] h-full rounded-xl shrink-0" />
         <Skeleton className="flex-1 h-full rounded-xl" />
       </div>
@@ -154,7 +154,7 @@ export function OrganizationClient() {
 
   return (
     <OrganizationProvider value={contextValue}>
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-[calc(100vh-120px)] overflow-hidden font-sans antialiased min-w-0">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-full min-h-0 overflow-hidden font-sans antialiased min-w-0">
         <OrganizationSidebar />
         <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           {renderRightContent()}
