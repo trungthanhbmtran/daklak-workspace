@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function SystemSettingsPage() {
   return (
-    <div className="flex-1 p-4 md:p-8 pt-6 min-h-screen">
+    <div className="flex-1 overflow-y-auto min-h-0 pb-10">
       <SystemSettingsClient />
     </div>
   );
