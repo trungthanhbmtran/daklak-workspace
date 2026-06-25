@@ -68,7 +68,8 @@ export class UserController implements OnModuleInit {
         )
       : null;
 
-    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
+    const isSuperAdmin = userInfo?.roles?.some((r: any) => r.code === 'SUPER_ADMIN');
+    const isAdmin: boolean = isSuperAdmin || !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {

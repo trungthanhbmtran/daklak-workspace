@@ -52,8 +52,15 @@ message ListUsersRequest {
   optional string unit_code_starts_with = 3;
 }
 
+message ListUsersMeta {
+  int32 total = 1;
+  int32 skip = 2;
+  int32 take = 3;
+}
+
 message ListUsersResponse {
   repeated UserResponse data = 1;
+  ListUsersMeta meta = 2;
 }
 
 // Chính sách hiệu lực (quyền kế thừa từ vai trò) – dùng cho màn chi tiết user

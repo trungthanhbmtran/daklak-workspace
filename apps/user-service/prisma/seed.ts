@@ -4503,6 +4503,7 @@ async function main() {
 
     const slotDomains: { slotId: number, domainId: number }[] = [];
     const slotMonitored: { slotId: number, unitId: number }[] = [];
+    const slotGeoAreas: { slotId: number, geographicAreaId: number }[] = [];
 
     const vanPhong = soKhcnUnits.find(u => u.code === 'H15.07.05');
     const thanhTra = soKhcnUnits.find(u => u.code === 'H15.07.06');
@@ -4555,6 +4556,11 @@ async function main() {
           update: {},
           create: { staffingId: staffing.id, slotOrder: i },
         });
+
+        // 1. Địa bàn phụ trách (mặc định: Tỉnh Đắk Lắk)
+        for (const geo of defaultGeoAreas) {
+          slotGeoAreas.push({ slotId: slot.id, geographicAreaId: geo.id });
+        }
 
         // 2. Lĩnh vực và Phòng ban theo dõi
         
@@ -4640,9 +4646,11 @@ async function main() {
       }
     }
 
+    await prisma.staffingSlotDomain.createMany({ data: slotDomains, skipDuplicates: true });
     await prisma.staffingSlotMonitoredUnit.createMany({ data: slotMonitored, skipDuplicates: true });
+    await prisma.staffingSlotGeographicArea.createMany({ data: slotGeoAreas, skipDuplicates: true });
 
-    console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Monitored Units: ${slotMonitored.length})`);
+    console.log(`✅ Đã phân bổ Lĩnh vực theo dõi (${slotDomains.length}), Địa bàn (${slotGeoAreas.length}), và Phòng ban theo dõi (${slotMonitored.length}) cho các Vị trí chức danh.`);
   }
 
 
