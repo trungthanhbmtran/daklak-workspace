@@ -235,7 +235,7 @@ export class OrganizationsController {
               this.getCatName(ga.geographicArea),
             ),
             monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-            monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
+            monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.code ?? ''),
           })),
         };
       }),
