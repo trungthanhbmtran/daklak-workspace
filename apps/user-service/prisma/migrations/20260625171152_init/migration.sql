@@ -165,15 +165,6 @@ CREATE TABLE `organization_unit_domains` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `organization_unit_geographic_areas` (
-    `unit_id` INTEGER NOT NULL,
-    `geographic_area_id` INTEGER NOT NULL,
-
-    INDEX `organization_unit_geographic_areas_geographic_area_id_fkey`(`geographic_area_id`),
-    PRIMARY KEY (`unit_id`, `geographic_area_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `job_titles` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
@@ -225,6 +216,24 @@ CREATE TABLE `staffing_slot_monitored_units` (
 
     INDEX `staffing_slot_monitored_units_unit_id_fkey`(`unit_id`),
     PRIMARY KEY (`slot_id`, `unit_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `staffing_slot_geographic_areas` (
+    `slot_id` INTEGER NOT NULL,
+    `geographic_area_id` INTEGER NOT NULL,
+
+    INDEX `staffing_slot_geographic_areas_geographic_area_id_fkey`(`geographic_area_id`),
+    PRIMARY KEY (`slot_id`, `geographic_area_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `staffing_slot_domains` (
+    `slot_id` INTEGER NOT NULL,
+    `domain_id` INTEGER NOT NULL,
+
+    INDEX `staffing_slot_domains_domain_id_fkey`(`domain_id`),
+    PRIMARY KEY (`slot_id`, `domain_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -405,12 +414,6 @@ ALTER TABLE `organization_unit_domains` ADD CONSTRAINT `organization_unit_domain
 ALTER TABLE `organization_unit_domains` ADD CONSTRAINT `organization_unit_domains_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `organization_unit_geographic_areas` ADD CONSTRAINT `organization_unit_geographic_areas_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `organization_unit_geographic_areas` ADD CONSTRAINT `organization_unit_geographic_areas_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_reports_to_position_id_fkey` FOREIGN KEY (`reports_to_position_id`) REFERENCES `job_titles`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -427,6 +430,18 @@ ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monito
 
 -- AddForeignKey
 ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monitored_units_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_geographic_areas` ADD CONSTRAINT `staffing_slot_geographic_areas_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_geographic_areas` ADD CONSTRAINT `staffing_slot_geographic_areas_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_domains` ADD CONSTRAINT `staffing_slot_domains_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_domains` ADD CONSTRAINT `staffing_slot_domains_domain_id_fkey` FOREIGN KEY (`domain_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `policies` ADD CONSTRAINT `policies_resource_id_fkey` FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
