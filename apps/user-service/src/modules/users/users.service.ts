@@ -110,6 +110,9 @@ export class UsersService implements OnModuleInit {
 
     console.log(`📡 Đã bắn event bổ nhiệm cho User ${dto.userId}`);
 
+    // Xoá Cache Profile để user cập nhật phân quyền ngay lập tức
+    await this.cache.del(`user:profile:${dto.userId}`);
+
     return newPosition;
   }
 
@@ -427,6 +430,14 @@ export class UsersService implements OnModuleInit {
   }
 
   async findOne(data: { id: number }) {
+    const cacheKey = `user:profile:${data.id}`;
+
+    // 1. Kiểm tra Cache
+    const cachedData = await this.cache.get<any>(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: data.id },
       include: {
@@ -434,17 +445,20 @@ export class UsersService implements OnModuleInit {
           include: { policies: { include: { resource: true } } }
         },
         jobPositions: {
+          where: { endDate: null },
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
         }
       },
     });
+
     if (!user) {
       throw new RpcException({
         message: `User with id ${data.id} not found`,
         code: GRPC.NOT_FOUND,
       });
     }
+
     const base = this.toUserResponse(user);
     const roles = (user as any).roles ?? [];
     const roleNames = roles.map(
@@ -473,7 +487,7 @@ export class UsersService implements OnModuleInit {
     const unitCode = firstPosition?.unit?.code ?? null;
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
-    return {
+    const response = {
       ...base,
       roleNames,
       role_names: roleNames,
@@ -487,6 +501,11 @@ export class UsersService implements OnModuleInit {
       unitCode,
       unit_code: unitCode,
     };
+
+    // Lưu Cache TTL 10 phút (600,000 ms)
+    await this.cache.set(cacheKey, response, 600000);
+
+    return response;
   }
 
   /** Danh sách user (trả về id, email, username, fullName, phoneNumber, avatarUrl, isActive) */
@@ -524,6 +543,16 @@ export class UsersService implements OnModuleInit {
       ? await this.prisma.user.findMany({
         where: { id: { in: ids } },
         orderBy: { id: 'asc' },
+        include: {
+          roles: { select: { id: true, code: true, name: true } },
+          jobPositions: {
+            where: { endDate: null },
+            include: {
+              unit: { select: { id: true, code: true, name: true } },
+              jobTitle: { select: { id: true, code: true, name: true, rank: true } },
+            },
+          },
+        },
       })
       : [];
 
@@ -632,6 +661,9 @@ export class UsersService implements OnModuleInit {
             : { set: [] },
       },
     });
+
+    // Xoá Cache Profile để user cập nhật phân quyền ngay lập tức
+    await this.cache.del(`user:profile:${data.userId}`);
     return { success: true, message: 'Đã cập nhật vai trò.' };
   }
 
@@ -704,20 +736,30 @@ export class UsersService implements OnModuleInit {
     }
 
     // 4. Với các đơn vị cấp dưới (từ tất cả các chức vụ), lấy người có rank cao nhất
-    for (const childUnitId of Array.from(deptIds)) {
+    const deptIdsArray = Array.from(deptIds);
+    if (deptIdsArray.length > 0) {
       const allChildPositions = await this.prisma.jobPosition.findMany({
-        where: { unitId: childUnitId, endDate: null, user: { isActive: true } },
+        where: { unitId: { in: deptIdsArray }, endDate: null, user: { isActive: true } },
         include: { jobTitle: true, user: true },
       });
 
-      if (allChildPositions.length === 0) continue;
-
-      const distinctRanks = [...new Set(allChildPositions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
-      const topRank = distinctRanks[0]; // Lấy duy nhất rank cao nhất
-
+      const positionsByUnit = new Map<number, any[]>();
       for (const p of allChildPositions) {
-        if (p.jobTitle.rank === topRank && p.user.employeeCode) {
-          empCodes.add(p.user.employeeCode);
+        if (!positionsByUnit.has(p.unitId)) positionsByUnit.set(p.unitId, []);
+        positionsByUnit.get(p.unitId)!.push(p);
+      }
+
+      for (const childUnitId of deptIdsArray) {
+        const positions = positionsByUnit.get(childUnitId) || [];
+        if (positions.length === 0) continue;
+
+        const distinctRanks = [...new Set(positions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
+        const topRank = distinctRanks[0]; // Lấy duy nhất rank cao nhất
+
+        for (const p of positions) {
+          if (p.jobTitle.rank === topRank && p.user.employeeCode) {
+            empCodes.add(p.user.employeeCode);
+          }
         }
       }
     }
