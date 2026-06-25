@@ -4399,8 +4399,8 @@ async function main() {
     'H15.07', 'CHUYEN_DOI_SO', 'DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'VIEN_THONG', 'KINH_TE_SO',
     'THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'HA_TANG_SO',
     'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI', 'NGAN_SACH',
-    'QUAN_LY_KHOA_HOC', 'DOI_MOI_SANG_TAO', 'KHOI_NGHIEP_SANG_TAO', 'TIEM_LUC_KHCN', 'SO_HUU_TRI_TUE',
-    'TIEU_CHUAN_DO_LUONG_CHAT_LUONG', 'AN_TOAN_BUC_XA_HAT_NHAN', 'TAN_SO_VO_TUYEN_DIEN', 'CONG_NGHE_THONG_TIN'
+    'QUAN_LY_KHOA_HOC', 'QUAN_LY_CONG_NGHE', 'DOI_MOI_SANG_TAO', 'KHOI_NGHIEP_SANG_TAO', 'TIEM_LUC_KHCN', 'SO_HUU_TRI_TUE',
+    'TIEU_CHUAN_DO_LUONG_CHAT_LUONG', 'AN_TOAN_BUC_XA_HAT_NHAN', 'TAN_SO_VO_TUYEN_DIEN', 'CONG_NGHE_THONG_TIN', 'UNG_DUNG_KHCN'
   ];
 
   const techDomains = await prisma.category.findMany({
@@ -4540,6 +4540,12 @@ async function main() {
 
     const domainNS = techDomains.find(d => d.code === 'NGAN_SACH');
     const domainCDS = techDomains.find(d => d.code === 'CHUYEN_DOI_SO');
+    const domainTCDLCL = techDomains.find(d => d.code === 'TIEU_CHUAN_DO_LUONG_CHAT_LUONG');
+    const domainQLCN = techDomains.find(d => d.code === 'QUAN_LY_CONG_NGHE');
+    const domainSHTT = techDomains.find(d => d.code === 'SO_HUU_TRI_TUE');
+    const domainUDKHCN = techDomains.find(d => d.code === 'UNG_DUNG_KHCN');
+    const domainQLKH = techDomains.find(d => d.code === 'QUAN_LY_KHOA_HOC');
+    const domainDMST = techDomains.find(d => d.code === 'DOI_MOI_SANG_TAO');
 
     for (const staffing of allStaffing) {
       for (let i = 1; i <= staffing.quantity; i++) {
@@ -4551,25 +4557,44 @@ async function main() {
         });
 
         // 2. Lĩnh vực và Phòng ban theo dõi
+        
+        // Mặc định: Kế thừa lĩnh vực của đơn vị cha (ngoại trừ Lãnh đạo cấp Sở phân công riêng)
+        if (staffing.unit.code !== 'H15.07') {
+          const assignedCodes = domainMapping[staffing.unit.code] || ['H15.07'];
+          const unitDomains = techDomains.filter(d => assignedCodes.includes(d.code));
+          for (const d of unitDomains) {
+            slotDomains.push({ slotId: slot.id, domainId: d.id });
+          }
+        }
+
         if (staffing.unit.code === 'H15.07') { // Lãnh đạo cấp Sở
           if (staffing.jobTitle.code === 'GIAM_DOC' && i === 1) {
-            if (domainNS) slotDomains.push({ slotId: slot.id, domainId: domainNS.id });
+            // Giám đốc phụ trách chung tất cả các lĩnh vực của Sở
+            const allAssigned = techDomains.filter(d => (domainMapping['H15.07'] || []).includes(d.code));
+            for (const d of allAssigned) slotDomains.push({ slotId: slot.id, domainId: d.id });
+            
             if (vanPhong) slotMonitored.push({ slotId: slot.id, unitId: vanPhong.id });
             if (thanhTra) slotMonitored.push({ slotId: slot.id, unitId: thanhTra.id });
             if (phongKHTC) slotMonitored.push({ slotId: slot.id, unitId: phongKHTC.id });
           } else if (staffing.jobTitle.code === 'PHO_GIAM_DOC') {
             if (i === 1) { // PGD 1 phụ trách CĐS, IOC
               if (domainCDS) slotDomains.push({ slotId: slot.id, domainId: domainCDS.id });
+              if (domainTCDLCL) slotDomains.push({ slotId: slot.id, domainId: domainTCDLCL.id });
               if (phongCDS) slotMonitored.push({ slotId: slot.id, unitId: phongCDS.id });
               if (trungtamIOC) slotMonitored.push({ slotId: slot.id, unitId: trungtamIOC.id });
               if (phongQLTCDLCL) slotMonitored.push({ slotId: slot.id, unitId: phongQLTCDLCL.id });
               if (ttTCDLCL) slotMonitored.push({ slotId: slot.id, unitId: ttTCDLCL.id });
             }
             if (i === 2) { // PGD 2 phụ trách QLCN
+              if (domainQLCN) slotDomains.push({ slotId: slot.id, domainId: domainQLCN.id });
+              if (domainSHTT) slotDomains.push({ slotId: slot.id, domainId: domainSHTT.id });
+              if (domainUDKHCN) slotDomains.push({ slotId: slot.id, domainId: domainUDKHCN.id });
               if (phongQLCN) slotMonitored.push({ slotId: slot.id, unitId: phongQLCN.id });
               if (ttThongTinUngDung) slotMonitored.push({ slotId: slot.id, unitId: ttThongTinUngDung.id });
             }
-            if (i === 3) {
+            if (i === 3) { // PGD 3 phụ trách QLKH
+              if (domainQLKH) slotDomains.push({ slotId: slot.id, domainId: domainQLKH.id });
+              if (domainDMST) slotDomains.push({ slotId: slot.id, domainId: domainDMST.id });
               if (phongQLKH) slotMonitored.push({ slotId: slot.id, unitId: phongQLKH.id });
               if (ttDoiMoiSangTao) slotMonitored.push({ slotId: slot.id, unitId: ttDoiMoiSangTao.id });
             }
@@ -4602,17 +4627,14 @@ async function main() {
           }
         } else if (staffing.unit.code === 'H15.07.04') { // Trung tâm IOC
           if (staffing.jobTitle.code === 'GIAM_DOC') {
-            if (phongHCTH_Ioc) slotMonitored.push({ slotId: slot.id, unitId: phongHCTH_Ioc.id });
             if (phongKTQLDL_Ioc) slotMonitored.push({ slotId: slot.id, unitId: phongKTQLDL_Ioc.id });
           } else if (staffing.jobTitle.code === 'PHO_GIAM_DOC') {
-            if (i === 1 && phongHTDT_Ioc) slotMonitored.push({ slotId: slot.id, unitId: phongHTDT_Ioc.id });
-          }
-        } else {
-          // Trưởng phòng / Phó trưởng phòng: Kế thừa lĩnh vực của đơn vị cha
-          const assignedCodes = domainMapping[staffing.unit.code] || ['H15.07'];
-          const unitDomains = techDomains.filter(d => assignedCodes.includes(d.code));
-          for (const d of unitDomains) {
-            slotDomains.push({ slotId: slot.id, domainId: d.id });
+            if (i === 1) {
+              if (phongHCTH_Ioc) slotMonitored.push({ slotId: slot.id, unitId: phongHCTH_Ioc.id });
+            }
+            if (i === 2) {
+              if (phongHTDT_Ioc) slotMonitored.push({ slotId: slot.id, unitId: phongHTDT_Ioc.id });
+            }
           }
         }
       }
