@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Shield, Key, AlertTriangle, User, CalendarDays, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +56,20 @@ export function UserDetailSheet({
   const isActive = user ? (user.status === "ACTIVE" || user.isActive !== false) : false;
   const roles = user?.roles ?? [];
   const lastLogin = user?.lastLogin;
+
+  const groupedPolicies = useMemo(() => {
+    if (!policiesData || policiesData.length === 0) return [];
+    const groups: Record<string, typeof policiesData> = {};
+    policiesData.forEach(p => {
+      const res = p.resource ?? "Khác";
+      if (!groups[res]) groups[res] = [];
+      groups[res].push(p);
+    });
+    return Object.entries(groups).map(([resource, items]) => ({
+      resource,
+      policies: items
+    }));
+  }, [policiesData]);
 
   const handleLockUnlock = () => {
     if (!user?.id || !onSetActive) return;
@@ -173,35 +187,39 @@ export function UserDetailSheet({
                             Chưa có chính sách nào được áp dụng.
                           </p>
                         ) : (
-                          <ScrollArea className="max-h-[220px] pr-2">
-                            <ul className="text-xs space-y-2.5">
-                              {policiesData.map((policy, idx) => (
-                                <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                                    <span className="font-medium flex-1 truncate">{policy.description ?? "—"}</span>
-                                    {policy.effect && (
-                                      <Badge
-                                        variant={policy.effect === "ALLOW" ? "default" : "destructive"}
-                                        className="text-[10px] px-1.5 py-0 h-4 shrink-0"
-                                      >
-                                        {policy.effect}
-                                      </Badge>
-                                    )}
+                          <ScrollArea className="max-h-[300px] pr-2">
+                            <div className="space-y-4">
+                              {groupedPolicies.map((group, idx) => (
+                                <div key={idx} className="flex flex-col gap-2 pb-3 border-b last:border-0 last:pb-0">
+                                  <div className="flex items-center gap-2 font-semibold text-sm">
+                                    <span className="w-2 h-2 rounded-sm bg-primary shrink-0" />
+                                    <span>Tài nguyên: <code className="bg-background px-1.5 py-0.5 rounded border text-xs text-primary">{group.resource}</code></span>
                                   </div>
-                                  <div className="flex items-center gap-3 pl-3.5 text-muted-foreground">
-                                    <span>
-                                      Tài nguyên: <code className="bg-background px-1 py-0.5 rounded border text-[10px]">{policy.resource ?? "—"}</code>
-                                    </span>
-                                    {policy.action && (
-                                      <span>
-                                        Hành động: <code className="bg-background px-1 py-0.5 rounded border text-[10px]">{policy.action}</code>
-                                      </span>
-                                    )}
+                                  <div className="pl-4 flex flex-wrap gap-2">
+                                    {group.policies.map((p, pIdx) => (
+                                      <div key={pIdx} className="flex flex-col gap-1 bg-background border rounded-md p-2 shadow-sm min-w-[120px] max-w-[200px]">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <span className="text-xs font-mono font-semibold text-foreground truncate">{p.action ?? "N/A"}</span>
+                                          {p.effect && (
+                                            <Badge
+                                              variant={p.effect === "ALLOW" ? "default" : "destructive"}
+                                              className="text-[9px] px-1 py-0 h-3.5 shrink-0"
+                                            >
+                                              {p.effect}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        {p.description && (
+                                          <span className="text-[10px] text-muted-foreground line-clamp-2" title={p.description}>
+                                            {p.description}
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
-                                </li>
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </ScrollArea>
                         )}
                       </div>
