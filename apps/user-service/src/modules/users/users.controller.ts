@@ -101,10 +101,11 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'ListUsers')
-  async listUsers(data: { skip?: number; take?: number } = {}) {
+  async listUsers(data: { skip?: number; take?: number; search?: string } = {}) {
     return this.usersService.listUsers({
       skip: data.skip ?? 0,
       take: data.take ?? 500,
+      search: data.search,
     });
   }
 

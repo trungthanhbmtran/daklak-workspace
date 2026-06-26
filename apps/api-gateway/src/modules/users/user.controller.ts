@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Body,
+  Query,
   Param,
   Req,
   Inject,
@@ -58,8 +59,17 @@ export class UserController implements OnModuleInit {
     description:
       'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
   })
-  async list(@Req() req: any) {
+  async list(
+    @Req() req: any,
+    @Query('page') pageStr?: string,
+    @Query('limit') limitStr?: string,
+    @Query('search') search?: string,
+  ) {
     const userId = req?.user?.id;
+    const page = parseInt(pageStr || '1', 10);
+    const limit = parseInt(limitStr || '10', 10);
+    const skip = (page - 1) * limit;
+    const take = limit;
 
     // Gọi FindOne để lấy roles và unitCode của người đang đăng nhập
     const userInfo: any = userId
@@ -80,7 +90,7 @@ export class UserController implements OnModuleInit {
     }
 
     const response = (await firstValueFrom(
-      this.userService.ListUsers({ unitCodeStartsWith }),
+      this.userService.ListUsers({ skip, take, search, unitCodeStartsWith }),
     )) as any;
     return {
       success: true,

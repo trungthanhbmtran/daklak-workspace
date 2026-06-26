@@ -65,15 +65,19 @@ function unwrapData<T>(res: any): T {
 }
 
 export const userApi = {
-  list: async (): Promise<UserItem[]> => {
+  list: async (params?: { page?: number; limit?: number; search?: string }): Promise<{ data: UserItem[], meta: { total: number } }> => {
     try {
-      const res = await apiClient.get("/users");
-      const data = unwrapData<any>(res);
-      const arr = Array.isArray(data) ? data : (data?.data ?? []);
-      return arr.map((r: any) => normalizeUser(r as Record<string, unknown>));
+      const res = await apiClient.get("/users", { params });
+      const rawData = (res as any)?.data ?? res;
+      const meta = rawData?.meta ?? { total: 0 };
+      const arr = Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData) ? rawData : []);
+      return {
+        data: arr.map((r: any) => normalizeUser(r as Record<string, unknown>)),
+        meta
+      };
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 406) return [];
+      if (status === 406) return { data: [], meta: { total: 0 } };
       throw err;
     }
   },

@@ -518,7 +518,7 @@ export class UsersService implements OnModuleInit {
   }
 
   /** Danh sách user (trả về id, email, username, fullName, phoneNumber, avatarUrl, isActive) */
-  async listUsers(data: { skip?: number; take?: number; unitCodeStartsWith?: string } = {}) {
+  async listUsers(data: { skip?: number; take?: number; unitCodeStartsWith?: string; search?: string } = {}) {
     const skip = data.skip ?? 0;
     const take = data.take && data.take > 0 ? Math.min(data.take, 500) : 500;
 
@@ -533,6 +533,15 @@ export class UsersService implements OnModuleInit {
           }
         }
       };
+    }
+    
+    if (data.search) {
+      whereCondition.OR = [
+        { email: { contains: data.search } },
+        { username: { contains: data.search } },
+        { fullName: { contains: data.search } },
+        { phoneNumber: { contains: data.search } },
+      ];
     }
 
     // Optimized via ID-Indexed Deferred Join

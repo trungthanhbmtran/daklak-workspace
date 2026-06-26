@@ -50,6 +50,7 @@ message ListUsersRequest {
   int32 skip = 1;
   int32 take = 2;
   optional string unit_code_starts_with = 3;
+  optional string search = 4;
 }
 
 message ListUsersMeta {

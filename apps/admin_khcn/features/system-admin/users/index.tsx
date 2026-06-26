@@ -1,5 +1,5 @@
 "use client";
-
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
@@ -8,24 +8,50 @@ import {
   useUserDetail,
   useSetUserActive,
   useAssignRoles,
-  usePaginatedUsers,
 } from "./hooks/useUserApi";
 import { useUserUI } from "./hooks/useUserUI";
 import { UserTable } from "./components/UserTable";
 import { CreateUserModal } from "./components/CreateUserModal";
 import { UserDetailSheet } from "./components/UserDetailCard";
 
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 export function UserClient() {
-  const { data: serverData = [], isLoading, isError } = useUserList();
-  const ui = useUserUI(serverData);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const limit = 10;
+
+  // Gọi API danh sách (đã phân trang ở server)
+  const { data: listResponse, isLoading, isError } = useUserList({
+    page,
+    limit,
+    search: debouncedSearch
+  });
+  
+  const serverData = listResponse?.data ?? [];
+  const total = listResponse?.meta?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  // Reset page khi search thay đổi
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const ui = useUserUI();
   const { data: detailUser, isLoading: isLoadingDetail } = useUserDetail(ui.state.detailId);
   const setActiveMutation = useSetUserActive();
   const assignRolesMutation = useAssignRoles();
-
-  // Phân trang trên dữ liệu đã lọc
-  const { page, setPage, totalPages, pageData, pageSize } = usePaginatedUsers(
-    ui.derived.filteredData
-  );
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
@@ -34,6 +60,8 @@ export function UserClient() {
         <Search
           placeholder="Tìm email, tên đăng nhập, họ tên..."
           className="w-full sm:w-80"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <Button
           className="shrink-0 w-full sm:w-auto"
@@ -47,11 +75,11 @@ export function UserClient() {
       <UserTable
         isLoading={isLoading}
         isError={isError}
-        data={pageData}
-        total={ui.derived.filteredData.length}
+        data={serverData}
+        total={total}
         page={page}
         totalPages={totalPages}
-        pageSize={pageSize}
+        pageSize={limit}
         onPageChange={setPage}
         onViewDetail={(item) => ui.setters.setDetailId(item.id)}
       />

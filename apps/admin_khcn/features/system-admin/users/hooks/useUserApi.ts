@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { userApi } from "../api";
@@ -7,27 +7,14 @@ import { USER_KEYS } from "../keys";
 
 const PAGE_SIZE = 10;
 
-export function useUserList() {
+export function useUserList(params: { page: number; limit: number; search: string }) {
   return useQuery({
-    queryKey: USER_KEYS.list(),
-    queryFn: userApi.list,
-    staleTime: 2 * 60 * 1000,
+    queryKey: [...USER_KEYS.list(), params],
+    queryFn: () => userApi.list(params),
+    staleTime: 60 * 1000,
   });
 }
 
-/** Phân trang client-side từ danh sách đã lọc */
-export function usePaginatedUsers(filteredData: UserItem[]) {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
-  // Reset về trang 1 khi dữ liệu filter thay đổi
-  const safeData = useMemo(() => {
-    if (page > totalPages) setPage(1);
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredData.slice(start, start + PAGE_SIZE);
-  }, [filteredData, page, totalPages]);
-
-  return { page, setPage, totalPages, pageData: safeData, pageSize: PAGE_SIZE };
-}
 
 export function useUserDetail(id: number | null) {
   return useQuery({

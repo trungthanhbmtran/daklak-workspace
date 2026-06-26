@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Shield, Key, AlertTriangle, User, CalendarDays, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,11 +47,42 @@ export function UserDetailSheet({
   const [editRolesOpen, setEditRolesOpen] = useState(false);
   const [policiesOpen, setPoliciesOpen] = useState(false);
 
+  const [visibleCount, setVisibleCount] = useState(20);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
   // Lazy load policies — chỉ fetch khi user mở collapsible
   const {
     data: policiesData,
     isLoading: isPoliciesLoading,
   } = useUserPolicies(user?.id ?? null, policiesOpen && isOpen);
+
+  // Reset visible count khi đổi user
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [user?.id]);
+
+  // Observer để load thêm khi cuộn
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && policiesData && visibleCount < policiesData.length) {
+          setVisibleCount((prev) => prev + 20);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [policiesData, visibleCount]);
 
   const isActive = user ? (user.status === "ACTIVE" || user.isActive !== false) : false;
   const roles = user?.roles ?? [];
@@ -176,7 +207,7 @@ export function UserDetailSheet({
                           ) : (
                             <div className="pt-1">
                               <ul className="text-xs space-y-2.5">
-                                {policiesData.map((policy, idx) => (
+                                {policiesData.slice(0, visibleCount).map((policy, idx) => (
                                   <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0">
                                     <div className="flex items-center gap-2">
                                       <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
@@ -202,6 +233,11 @@ export function UserDetailSheet({
                                     </div>
                                   </li>
                                 ))}
+                                {visibleCount < policiesData.length && (
+                                  <li ref={observerTarget} className="py-2 text-center text-muted-foreground text-xs flex justify-center items-center gap-2">
+                                    <Loader2 className="w-3 h-3 animate-spin" /> Đang tải thêm...
+                                  </li>
+                                )}
                               </ul>
                             </div>
                           )}
