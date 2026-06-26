@@ -67,6 +67,8 @@ message ListUsersResponse {
 message UserPolicy {
   string description = 1;  // Mô tả: "READ - Quản lý người dùng"
   string resource = 2;     // Mã tài nguyên: USER_MGMT
+  string action = 3;
+  string effect = 4;
 }
 
 message RoleMessage {

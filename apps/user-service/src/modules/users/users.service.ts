@@ -469,12 +469,20 @@ export class UsersService implements OnModuleInit {
     const permissionsFlattenSet = new Set<string>();
     const isSuperAdmin = roles.some((r) => r.code === 'SUPER_ADMIN');
 
+    const policiesList: any[] = [];
+
     for (const role of user.roles ?? []) {
       for (const policy of role.policies ?? []) {
         const resourceCode = policy.resource?.code ?? '';
         if (resourceCode && policy.action) {
           permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);
         }
+        policiesList.push({
+          description: `${policy.action} trên ${policy.resource?.name ?? policy.resource?.code ?? policy.resourceId ?? '—'}`,
+          resource: policy.resource?.code ?? String(policy.resourceId ?? '—'),
+          action: policy.action,
+          effect: policy.effect ?? 'ALLOW',
+        });
       }
     }
 
@@ -492,6 +500,7 @@ export class UsersService implements OnModuleInit {
       roleNames,
       role_names: roleNames,
       roles,
+      policies: policiesList,
       permissionsFlatten,
       permissions_flatten: permissionsFlatten,
       unitId,

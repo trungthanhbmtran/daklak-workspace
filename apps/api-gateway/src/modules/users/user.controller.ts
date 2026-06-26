@@ -115,6 +115,7 @@ export class UserController implements OnModuleInit {
         cccd: data.cccd,
         employeeCode: data.employeeCode ?? data.employee_code,
         lastLogin: data.lastLogin ?? data.last_login,
+        roles: data.roles,
       },
     };
   }
@@ -129,24 +130,18 @@ export class UserController implements OnModuleInit {
     const data: any = await firstValueFrom(this.userService.FindOne({ id }));
     if (!data) return { success: true, data: [] };
 
-    const rawRoles: any[] = Array.isArray(data.roles) ? data.roles : [];
+    const policies: any[] = Array.isArray(data.policies) ? data.policies : [];
+
     const policiesMap = new Map<string, any>();
-    for (const r of rawRoles) {
-      const rolePolicies: any[] = Array.isArray(r.policies) ? r.policies : [];
-      for (const p of rolePolicies) {
-        const key = `${p.resourceId ?? p.resource_id}-${p.action}`;
-        if (!policiesMap.has(key)) {
-          policiesMap.set(key, {
-            description: `${p.action} trên ${p.resource?.name ?? p.resource?.code ?? p.resourceId ?? '—'}`,
-            resource:
-              p.resource?.code ??
-              p.resourceCode ??
-              p.resource_code ??
-              String(p.resourceId ?? '—'),
-            action: p.action,
-            effect: p.effect ?? 'ALLOW',
-          });
-        }
+    for (const p of policies) {
+      const key = `${p.resource}-${p.action}`;
+      if (!policiesMap.has(key)) {
+        policiesMap.set(key, {
+          description: p.description,
+          resource: p.resource,
+          action: p.action,
+          effect: p.effect ?? 'ALLOW',
+        });
       }
     }
 
