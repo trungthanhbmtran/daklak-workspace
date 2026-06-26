@@ -4,7 +4,7 @@ import { PbacService } from './pbac.service';
 
 @Controller()
 export class PbacController {
-  constructor(private readonly pbacService: PbacService) { }
+  constructor(private readonly pbacService: PbacService) {}
 
   private toRoleResponse(role: {
     id: number;
@@ -95,17 +95,33 @@ export class PbacController {
   @GrpcMethod('PbacService', 'GetResources')
   async getResources() {
     const resources = await this.pbacService.getResources();
-    return { resources: resources.map(r => ({ id: r.id, code: r.code, name: r.name, service_code: r.serviceCode })) };
+    return {
+      resources: resources.map((r) => ({
+        id: r.id,
+        code: r.code,
+        name: r.name,
+        service_code: r.serviceCode,
+      })),
+    };
   }
 
   @GrpcMethod('PbacService', 'CreateResource')
-  async createResource(data: { code: string; name: string; serviceCode?: string }) {
+  async createResource(data: {
+    code: string;
+    name: string;
+    serviceCode?: string;
+  }) {
     const resource = await this.pbacService.createResource(data);
     return { id: resource.id, code: resource.code, name: resource.name };
   }
 
   @GrpcMethod('PbacService', 'UpdateResource')
-  async updateResource(data: { id: number; code?: string; name?: string; serviceCode?: string }) {
+  async updateResource(data: {
+    id: number;
+    code?: string;
+    name?: string;
+    serviceCode?: string;
+  }) {
     const resource = await this.pbacService.updateResource(data.id, {
       code: data.code,
       name: data.name,

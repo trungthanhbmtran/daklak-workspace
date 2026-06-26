@@ -31,7 +31,7 @@ export class UsersService implements OnModuleInit {
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
     @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.workflowEngine =
@@ -309,7 +309,7 @@ export class UsersService implements OnModuleInit {
         iss: 'daklak-user-service',
         sub: String(user.id),
         aud: 'daklak-api-gateway',
-        jti: randomUUID()
+        jti: randomUUID(),
       },
       { expiresIn: jwtExpiresIn },
     );
@@ -383,7 +383,7 @@ export class UsersService implements OnModuleInit {
         iss: 'daklak-user-service',
         sub: String(user.id),
         aud: 'daklak-api-gateway',
-        jti: randomUUID()
+        jti: randomUUID(),
       },
       { expiresIn: jwtExpiresIn },
     );
@@ -442,13 +442,13 @@ export class UsersService implements OnModuleInit {
       where: { id: data.id },
       include: {
         roles: {
-          include: { policies: { include: { resource: true } } }
+          include: { policies: { include: { resource: true } } },
         },
         jobPositions: {
           where: { endDate: null },
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
-        }
+        },
       },
     });
 
@@ -465,7 +465,6 @@ export class UsersService implements OnModuleInit {
       (r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
     );
 
-    const roleIds = roles.map((r) => r.id);
     const permissionsFlattenSet = new Set<string>();
     const isSuperAdmin = roles.some((r) => r.code === 'SUPER_ADMIN');
 
@@ -518,7 +517,14 @@ export class UsersService implements OnModuleInit {
   }
 
   /** Danh sách user (trả về id, email, username, fullName, phoneNumber, avatarUrl, isActive) */
-  async listUsers(data: { skip?: number; take?: number; unitCodeStartsWith?: string; search?: string } = {}) {
+  async listUsers(
+    data: {
+      skip?: number;
+      take?: number;
+      unitCodeStartsWith?: string;
+      search?: string;
+    } = {},
+  ) {
     const skip = data.skip ?? 0;
     const take = data.take && data.take > 0 ? Math.min(data.take, 500) : 500;
 
@@ -528,13 +534,13 @@ export class UsersService implements OnModuleInit {
         some: {
           unit: {
             code: {
-              startsWith: data.unitCodeStartsWith
-            }
-          }
-        }
+              startsWith: data.unitCodeStartsWith,
+            },
+          },
+        },
       };
     }
-    
+
     if (data.search) {
       whereCondition.OR = [
         { email: { contains: data.search } },
@@ -557,22 +563,25 @@ export class UsersService implements OnModuleInit {
     ]);
 
     const ids = idsResult.map((u) => u.id);
-    const users = ids.length > 0
-      ? await this.prisma.user.findMany({
-        where: { id: { in: ids } },
-        orderBy: { id: 'asc' },
-        include: {
-          roles: { select: { id: true, code: true, name: true } },
-          jobPositions: {
-            where: { endDate: null },
+    const users =
+      ids.length > 0
+        ? await this.prisma.user.findMany({
+            where: { id: { in: ids } },
+            orderBy: { id: 'asc' },
             include: {
-              unit: { select: { id: true, code: true, name: true } },
-              jobTitle: { select: { id: true, code: true, name: true, rank: true } },
+              roles: { select: { id: true, code: true, name: true } },
+              jobPositions: {
+                where: { endDate: null },
+                include: {
+                  unit: { select: { id: true, code: true, name: true } },
+                  jobTitle: {
+                    select: { id: true, code: true, name: true, rank: true },
+                  },
+                },
+              },
             },
-          },
-        },
-      })
-      : [];
+          })
+        : [];
 
     return {
       data: users.map((u) => this.toUserResponse(u)),
@@ -715,9 +724,13 @@ export class UsersService implements OnModuleInit {
         include: { jobTitle: true },
       });
 
-      const distinctRanksInUnit = [...new Set(allRanksInUnit.map(p => p.jobTitle.rank))].sort((a, b) => a - b);
-      const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
-      const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
+      const distinctRanksInUnit = [
+        ...new Set(allRanksInUnit.map((p) => p.jobTitle.rank)),
+      ].sort((a, b) => a - b);
+      const minRank =
+        distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
+      const secondMinRank =
+        distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
 
       const childUnits = await this.prisma.organizationUnit.findMany({
         where: { parentId: pos.unitId },
@@ -726,16 +739,19 @@ export class UsersService implements OnModuleInit {
 
       // 1. Giao việc trong cùng đơn vị
       const sameUnitSubordinates = await this.getSubordinatesInSameUnit(
-        pos, myRank, distinctRanksInUnit, hasChildUnits
+        pos,
+        myRank,
+        distinctRanksInUnit,
+        hasChildUnits,
       );
-      sameUnitSubordinates.forEach(code => empCodes.add(code));
+      sameUnitSubordinates.forEach((code) => empCodes.add(code));
 
       // 2. Đối với đơn vị cấp dưới (Chỉ cấp trưởng hoặc phó mới được giao việc xuống đơn vị con)
       const isHead = myRank === minRank;
       const isDeputy = myRank === secondMinRank && myRank > minRank;
 
       if (isHead || isDeputy) {
-        childUnits.forEach(child => deptIds.add(child.id));
+        childUnits.forEach((child) => deptIds.add(child.id));
       }
 
       // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots)
@@ -757,7 +773,11 @@ export class UsersService implements OnModuleInit {
     const deptIdsArray = Array.from(deptIds);
     if (deptIdsArray.length > 0) {
       const allChildPositions = await this.prisma.jobPosition.findMany({
-        where: { unitId: { in: deptIdsArray }, endDate: null, user: { isActive: true } },
+        where: {
+          unitId: { in: deptIdsArray },
+          endDate: null,
+          user: { isActive: true },
+        },
         include: { jobTitle: true, user: true },
       });
 
@@ -771,7 +791,9 @@ export class UsersService implements OnModuleInit {
         const positions = positionsByUnit.get(childUnitId) || [];
         if (positions.length === 0) continue;
 
-        const distinctRanks = [...new Set(positions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
+        const distinctRanks = [
+          ...new Set(positions.map((p) => p.jobTitle.rank)),
+        ].sort((a, b) => a - b);
         const topRank = distinctRanks[0]; // Lấy duy nhất rank cao nhất
 
         for (const p of positions) {
@@ -799,10 +821,12 @@ export class UsersService implements OnModuleInit {
     pos: any,
     myRank: number,
     distinctRanksInUnit: number[],
-    hasChildUnits: boolean
+    hasChildUnits: boolean,
   ): Promise<string[]> {
-    const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
-    const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
+    const minRank =
+      distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
+    const secondMinRank =
+      distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
     const isHead = myRank === minRank;
     const isDeputy = myRank === secondMinRank && myRank > minRank;
 
@@ -810,10 +834,17 @@ export class UsersService implements OnModuleInit {
     // -> Thấy TẤT CẢ chức vụ thấp hơn trong cùng đơn vị
     if (!hasChildUnits) {
       const lowerRanksInUnit = await this.prisma.jobPosition.findMany({
-        where: { unitId: pos.unitId, endDate: null, jobTitle: { rank: { gt: myRank } }, user: { isActive: true } },
+        where: {
+          unitId: pos.unitId,
+          endDate: null,
+          jobTitle: { rank: { gt: myRank } },
+          user: { isActive: true },
+        },
         include: { jobTitle: true, user: true },
       });
-      return lowerRanksInUnit.map(p => p.user?.employeeCode).filter(Boolean) as string[];
+      return lowerRanksInUnit
+        .map((p) => p.user?.employeeCode)
+        .filter(Boolean) as string[];
     }
 
     // Trường hợp 2: Đơn vị cấp trên (có đơn vị con) - Logic phân cấp chặt chẽ cũ
@@ -822,10 +853,17 @@ export class UsersService implements OnModuleInit {
     if (isHead) {
       if (distinctRanksInUnit.length <= 1) return [];
       const lowerRanks = await this.prisma.jobPosition.findMany({
-        where: { unitId: pos.unitId, endDate: null, jobTitle: { rank: secondMinRank }, user: { isActive: true } },
+        where: {
+          unitId: pos.unitId,
+          endDate: null,
+          jobTitle: { rank: secondMinRank },
+          user: { isActive: true },
+        },
         include: { jobTitle: true, user: true },
       });
-      return lowerRanks.map(p => p.user?.employeeCode).filter(Boolean) as string[];
+      return lowerRanks
+        .map((p) => p.user?.employeeCode)
+        .filter(Boolean) as string[];
     }
 
     // Cấp phó không giao việc cho chuyên viên trong cùng đơn vị (theo logic cũ)
@@ -835,15 +873,24 @@ export class UsersService implements OnModuleInit {
 
     // Các chuyên viên khác giao cho cấp dưới trực tiếp liền kề (nếu có)
     const lowerRanks = await this.prisma.jobPosition.findMany({
-      where: { unitId: pos.unitId, endDate: null, jobTitle: { rank: { gt: myRank } }, user: { isActive: true } },
+      where: {
+        unitId: pos.unitId,
+        endDate: null,
+        jobTitle: { rank: { gt: myRank } },
+        user: { isActive: true },
+      },
       include: { jobTitle: true, user: true },
     });
 
     if (lowerRanks.length === 0) return [];
 
-    const nextRank = Math.min(...lowerRanks.map(p => p.jobTitle.rank));
-    const directSubordinates = lowerRanks.filter(p => p.jobTitle.rank === nextRank);
-    return directSubordinates.map(p => p.user?.employeeCode).filter(Boolean) as string[];
+    const nextRank = Math.min(...lowerRanks.map((p) => p.jobTitle.rank));
+    const directSubordinates = lowerRanks.filter(
+      (p) => p.jobTitle.rank === nextRank,
+    );
+    return directSubordinates
+      .map((p) => p.user?.employeeCode)
+      .filter(Boolean) as string[];
   }
 
   private toUserResponse(user: {

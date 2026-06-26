@@ -121,9 +121,7 @@ export class MenusController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách menu (flat) cho trang quản lý menu' })
   @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
   async getAll(@Query('app') app?: string) {
-    const res = (await firstValueFrom(
-      this.menuService.GetAll({}),
-    )) as any;
+    const res = (await firstValueFrom(this.menuService.GetAll({}))) as any;
     const items = res?.items ?? [];
     return items.map(toFrontendItem);
   }

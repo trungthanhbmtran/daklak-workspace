@@ -20,4 +20,4 @@ import { ConfigsModule } from './configs/configs.module';
     ConfigsModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

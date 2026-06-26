@@ -5,7 +5,7 @@ import { OrganizationsService } from './organizations.service';
 
 @Controller()
 export class OrganizationsController {
-  constructor(private readonly orgService: OrganizationsService) { }
+  constructor(private readonly orgService: OrganizationsService) {}
 
   private getCatName(cat: any): string {
     if (!cat) return '';
@@ -219,7 +219,17 @@ export class OrganizationsController {
           currentEmployeeNames: s.current_employee_names ?? [],
           jobTitleDomainName:
             this.getCatName(j?.domain) ||
-            [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.domains ?? []).map((d: any) => this.getCatName(d.domain))))].filter(Boolean).join(', '),
+            [
+              ...new Set(
+                (s.slots ?? []).flatMap((slot: any) =>
+                  (slot.domains ?? []).map((d: any) =>
+                    this.getCatName(d.domain),
+                  ),
+                ),
+              ),
+            ]
+              .filter(Boolean)
+              .join(', '),
 
           slots: (s.slots ?? []).map((slot: any) => ({
             id: slot.id,
@@ -230,12 +240,18 @@ export class OrganizationsController {
             domainNames: (slot.domains ?? []).map((d: any) =>
               this.getCatName(d.domain),
             ),
-            geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
+            geographicAreaIds: (slot.geographicAreas ?? []).map(
+              (ga: any) => ga.geographicAreaId,
+            ),
             geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) =>
               this.getCatName(ga.geographicArea),
             ),
-            monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-            monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.code ?? ''),
+            monitoredUnitIds: (slot.monitoredUnits ?? []).map(
+              (mu: any) => mu.unitId,
+            ),
+            monitoredUnitNames: (slot.monitoredUnits ?? []).map(
+              (mu: any) => mu.unit?.code ?? '',
+            ),
           })),
         };
       }),
@@ -257,13 +273,19 @@ export class OrganizationsController {
         message: 'domainIds phải là một mảng',
       });
     }
-    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
+    if (
+      data.geographicAreaIds !== undefined &&
+      !Array.isArray(data.geographicAreaIds)
+    ) {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: 'geographicAreaIds phải là một mảng',
       });
     }
-    if (data.monitoredUnitIds !== undefined && !Array.isArray(data.monitoredUnitIds)) {
+    if (
+      data.monitoredUnitIds !== undefined &&
+      !Array.isArray(data.monitoredUnitIds)
+    ) {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: 'monitoredUnitIds phải là một mảng',
@@ -284,7 +306,9 @@ export class OrganizationsController {
       slotOrder: slot.slotOrder,
       description: slot.description ?? '',
       domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-      geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
+      geographicAreaIds: (slot.geographicAreas ?? []).map(
+        (ga: any) => ga.geographicAreaId,
+      ),
       monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
     };
   }
@@ -299,9 +323,7 @@ export class OrganizationsController {
   }
 
   @GrpcMethod('OrganizationService', 'UpdateJobTitle')
-  async updateJobTitle(data: {
-    id: number;
-  }) {
+  async updateJobTitle(data: { id: number }) {
     const j = await this.orgService.updateJobTitle({
       id: data.id,
     });

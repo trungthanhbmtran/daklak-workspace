@@ -35,7 +35,7 @@ export class EmployeeController implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.employeeService = this.client.getService(

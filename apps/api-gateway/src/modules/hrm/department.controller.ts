@@ -39,7 +39,7 @@ export class DepartmentController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.orgClient.getService(

@@ -80,22 +80,35 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
 
       if (!userInfo) {
         try {
-          userInfo = await firstValueFrom(this.userService.FindOne({ id: userId }));
+          userInfo = await firstValueFrom(
+            this.userService.FindOne({ id: userId }),
+          );
           if (userInfo) {
             try {
-              await this.redisService.set(cacheKey, JSON.stringify(userInfo), 900); // 15 mins
+              await this.redisService.set(
+                cacheKey,
+                JSON.stringify(userInfo),
+                900,
+              ); // 15 mins
             } catch (err) {
               console.error('Redis cache write error:', err);
             }
           }
         } catch (err: any) {
-          console.error(`Failed to fetch user info for ID ${userId} from user-service:`, err?.message);
-          throw new UnauthorizedException('Không tìm thấy thông tin xác thực người dùng');
+          console.error(
+            `Failed to fetch user info for ID ${userId} from user-service:`,
+            err?.message,
+          );
+          throw new UnauthorizedException(
+            'Không tìm thấy thông tin xác thực người dùng',
+          );
         }
       }
 
       if (!userInfo || !userInfo.isActive) {
-        throw new UnauthorizedException('Tài khoản đã bị vô hiệu hóa hoặc không khả dụng');
+        throw new UnauthorizedException(
+          'Tài khoản đã bị vô hiệu hóa hoặc không khả dụng',
+        );
       }
 
       // Lưu đầy đủ thông tin vào request.user
@@ -110,7 +123,8 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
         unitName: userInfo.unitName || userInfo.unit_name,
         jobTitleCode: userInfo.jobTitleCode || userInfo.job_title_code,
         jobTitleName: userInfo.jobTitleName || userInfo.job_title_name,
-        permissionsFlatten: userInfo.permissionsFlatten || userInfo.permissions_flatten || [],
+        permissionsFlatten:
+          userInfo.permissionsFlatten || userInfo.permissions_flatten || [],
       };
 
       return true;
@@ -123,4 +137,3 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
     }
   }
 }
-

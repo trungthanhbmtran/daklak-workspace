@@ -38,7 +38,7 @@ export class OrganizationsController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.client.getService(
@@ -111,8 +111,8 @@ export class OrganizationsController implements OnModuleInit {
     const userId = request?.user?.id;
     const userInfo: any = userId
       ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(
-        () => null,
-      )
+          () => null,
+        )
       : null;
 
     const isAdmin: boolean = !!userInfo?.roles?.some(
@@ -173,8 +173,7 @@ export class OrganizationsController implements OnModuleInit {
 
   @Put('job-titles/:id')
   @ApiOperation({
-    summary:
-      'Cập nhật chức danh (lĩnh vực phụ trách)',
+    summary: 'Cập nhật chức danh (lĩnh vực phụ trách)',
   })
   @ApiResponse({
     status: 200,
@@ -410,7 +409,7 @@ export class PublicOrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.client.getService(

@@ -11,13 +11,18 @@ export class PbacService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) { }
+  ) {}
 
   async createRole(data: {
     code: string;
     name: string;
     description?: string;
-    policies?: { resourceId: number; action: string; effect: string; conditions?: any }[];
+    policies?: {
+      resourceId: number;
+      action: string;
+      effect: string;
+      conditions?: any;
+    }[];
   }) {
     const existing = await this.prisma.role.findUnique({
       where: { code: data.code },
@@ -35,12 +40,13 @@ export class PbacService {
         name: data.name,
         description: data.description,
         policies: {
-          create: data.policies?.map(p => ({
-            resourceId: p.resourceId,
-            action: p.action,
-            effect: p.effect || 'ALLOW',
-            conditions: p.conditions || {},
-          })) || [],
+          create:
+            data.policies?.map((p) => ({
+              resourceId: p.resourceId,
+              action: p.action,
+              effect: p.effect || 'ALLOW',
+              conditions: p.conditions || {},
+            })) || [],
         },
       },
     });
@@ -64,22 +70,33 @@ export class PbacService {
 
   async updateRole(
     id: number,
-    data: { name?: string; description?: string; policies?: { resourceId: number; action: string; effect: string; conditions?: any }[] },
+    data: {
+      name?: string;
+      description?: string;
+      policies?: {
+        resourceId: number;
+        action: string;
+        effect: string;
+        conditions?: any;
+      }[];
+    },
   ) {
     return this.prisma.role.update({
       where: { id },
       data: {
         name: data.name,
         description: data.description,
-        policies: data.policies ? {
-          deleteMany: {},
-          create: data.policies.map(p => ({
-            resourceId: p.resourceId,
-            action: p.action,
-            effect: p.effect || 'ALLOW',
-            conditions: p.conditions || {},
-          }))
-        } : undefined,
+        policies: data.policies
+          ? {
+              deleteMany: {},
+              create: data.policies.map((p) => ({
+                resourceId: p.resourceId,
+                action: p.action,
+                effect: p.effect || 'ALLOW',
+                conditions: p.conditions || {},
+              })),
+            }
+          : undefined,
       },
     });
   }
@@ -102,7 +119,11 @@ export class PbacService {
     return this.prisma.resource.findMany({ orderBy: { code: 'asc' } });
   }
 
-  async createResource(data: { code: string; name: string; serviceCode?: string }) {
+  async createResource(data: {
+    code: string;
+    name: string;
+    serviceCode?: string;
+  }) {
     const existing = await this.prisma.resource.findUnique({
       where: { code: data.code },
     });
@@ -117,7 +138,10 @@ export class PbacService {
     });
   }
 
-  async updateResource(id: number, data: { code?: string; name?: string; serviceCode?: string }) {
+  async updateResource(
+    id: number,
+    data: { code?: string; name?: string; serviceCode?: string },
+  ) {
     const resource = await this.prisma.resource.findUnique({ where: { id } });
     if (!resource) return null;
     if (data.code !== undefined) {
@@ -136,7 +160,9 @@ export class PbacService {
       data: {
         ...(data.code !== undefined && { code: data.code }),
         ...(data.name !== undefined && { name: data.name }),
-        ...(data.serviceCode !== undefined && { serviceCode: data.serviceCode }),
+        ...(data.serviceCode !== undefined && {
+          serviceCode: data.serviceCode,
+        }),
       },
     });
   }

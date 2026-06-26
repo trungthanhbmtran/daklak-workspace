@@ -5,7 +5,7 @@ import { UsersService } from './users.service';
 
 @Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @GrpcMethod('UserService', 'CreateUser')
   async createUser(data: {
@@ -101,7 +101,9 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'ListUsers')
-  async listUsers(data: { skip?: number; take?: number; search?: string } = {}) {
+  async listUsers(
+    data: { skip?: number; take?: number; search?: string } = {},
+  ) {
     return this.usersService.listUsers({
       skip: data.skip ?? 0,
       take: data.take ?? 500,

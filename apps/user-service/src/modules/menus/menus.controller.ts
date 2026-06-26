@@ -5,7 +5,7 @@ import { MenusService } from './menus.service';
 
 @Controller()
 export class MenusController {
-  constructor(private readonly menusService: MenusService) { }
+  constructor(private readonly menusService: MenusService) {}
 
   private mapMenuNode(node: any): any {
     return {
@@ -41,7 +41,7 @@ export class MenusController {
   }
 
   @GrpcMethod('MenuService', 'GetAll')
-  async getAll(data: any = {}) {
+  async getAll() {
     const items = await this.menusService.getAll();
     return { items };
   }
@@ -86,7 +86,7 @@ export class MenusController {
   }
 
   @GrpcMethod('MenuService', 'Update')
-  async update(data: { id: number;[k: string]: any }) {
+  async update(data: { id: number; [k: string]: any }) {
     try {
       const { id, ...rest } = data;
       const menu = await this.menusService.update(id, {

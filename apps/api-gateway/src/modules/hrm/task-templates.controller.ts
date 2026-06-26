@@ -26,7 +26,7 @@ export class TaskTemplatesController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.taskTemplateService = this.client.getService('TaskTemplateService');

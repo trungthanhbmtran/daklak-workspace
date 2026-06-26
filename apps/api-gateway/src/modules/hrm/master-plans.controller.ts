@@ -37,7 +37,7 @@ export class MasterPlansController implements OnModuleInit {
     @Inject('MASTER_PLAN_PACKAGE') private client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.masterPlanService = this.client.getService('MasterPlanService');

@@ -8,11 +8,11 @@ export function sanitizeUserForClient(user: any) {
     role_ids,
     roleNames,
     role_names,
-    
+
     // (Giữ lại permissionsFlatten và policies cho PBAC)
     // (Giữ lại đơn vị, chức danh để render)
     ...safeUser
   } = user;
-  
+
   return safeUser;
 }

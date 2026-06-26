@@ -7,10 +7,10 @@ const GRPC = { NOT_FOUND: 5 } as const;
 
 @Injectable()
 export class OrganizationsService {
-  private treeCache = new Map<string, { data: any, expiresAt: number }>();
+  private treeCache = new Map<string, { data: any; expiresAt: number }>();
   private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
 
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   // --- 1. QUẢN LÝ ĐƠN VỊ (CRUD) ---
 
@@ -48,7 +48,6 @@ export class OrganizationsService {
       });
     }
 
-
     // Invalidate cache
     this.treeCache.clear();
 
@@ -67,7 +66,6 @@ export class OrganizationsService {
             },
           },
         },
-
       },
     });
   }
@@ -88,7 +86,6 @@ export class OrganizationsService {
             },
           },
         },
-
       },
     });
     if (!unit) return null;
@@ -104,7 +101,6 @@ export class OrganizationsService {
       typeId?: number;
       parentId?: number | null;
       domainIds?: number[] | null;
-
     },
   ) {
     const unit = await this.prisma.organizationUnit.findUnique({
@@ -196,7 +192,6 @@ export class OrganizationsService {
       }
     }
 
-
     // Invalidate cache
     this.treeCache.clear();
 
@@ -215,7 +210,6 @@ export class OrganizationsService {
             },
           },
         },
-
       },
     });
   }
@@ -264,12 +258,14 @@ export class OrganizationsService {
             },
           },
         },
-
       },
     });
 
     const result = { data: buildTree(units, null) };
-    this.treeCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    this.treeCache.set(cacheKey, {
+      data: result,
+      expiresAt: Date.now() + this.CACHE_TTL_MS,
+    });
     return result;
   }
 
@@ -297,7 +293,11 @@ export class OrganizationsService {
       where: {
         OR: [
           { id: rootId },
-          { hierarchyPath: { startsWith: (root.code || root.hierarchyPath || '') + '.' } },
+          {
+            hierarchyPath: {
+              startsWith: (root.code || root.hierarchyPath || '') + '.',
+            },
+          },
         ],
       },
       orderBy: { hierarchyPath: 'asc' },
@@ -314,12 +314,14 @@ export class OrganizationsService {
             },
           },
         },
-
       },
     });
 
     const result = { data: buildTree(units, root.parentId) };
-    this.treeCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    this.treeCache.set(cacheKey, {
+      data: result,
+      expiresAt: Date.now() + this.CACHE_TTL_MS,
+    });
     return result;
   }
 
@@ -352,7 +354,6 @@ export class OrganizationsService {
         jobTitle: true,
         slots: {
           orderBy: { slotOrder: 'asc' },
-
         },
       },
     });
@@ -360,18 +361,18 @@ export class OrganizationsService {
     // Fetch all current employees holding these job positions in this unit
     const jobPositions = await this.prisma.jobPosition.findMany({
       where: { unitId },
-      include: { user: true }
+      include: { user: true },
     });
 
-    const data = items.map(item => {
+    const data = items.map((item) => {
       const assignedUsers = jobPositions
-        .filter(jp => jp.jobTitleId === item.jobTitleId)
-        .map(jp => jp.user?.fullName)
+        .filter((jp) => jp.jobTitleId === item.jobTitleId)
+        .map((jp) => jp.user?.fullName)
         .filter(Boolean) as string[];
 
       return {
         ...item,
-        current_employee_names: assignedUsers
+        current_employee_names: assignedUsers,
       };
     });
 
@@ -426,7 +427,14 @@ export class OrganizationsService {
     geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const { staffingId, slotOrder, description, domainIds, geographicAreaIds, monitoredUnitIds } = dto;
+    const {
+      staffingId,
+      slotOrder,
+      description,
+      domainIds,
+      geographicAreaIds,
+      monitoredUnitIds,
+    } = dto;
     const slot = await this.prisma.staffingSlot.upsert({
       where: { staffingId_slotOrder: { staffingId, slotOrder } },
       update: { description: description ?? undefined },
@@ -449,7 +457,10 @@ export class OrganizationsService {
       });
       if (geographicAreaIds.length > 0) {
         await this.prisma.staffingSlotGeographicArea.createMany({
-          data: geographicAreaIds.map((geographicAreaId) => ({ slotId: slot.id, geographicAreaId })),
+          data: geographicAreaIds.map((geographicAreaId) => ({
+            slotId: slot.id,
+            geographicAreaId,
+          })),
         });
       }
     }

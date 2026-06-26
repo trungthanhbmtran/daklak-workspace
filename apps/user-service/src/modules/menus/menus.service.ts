@@ -22,10 +22,10 @@ export type UpdateMenuDto = Partial<CreateMenuDto>;
 
 @Injectable()
 export class MenusService {
-  private menuCache = new Map<string, { data: any, expiresAt: number }>();
+  private menuCache = new Map<string, { data: any; expiresAt: number }>();
   private readonly CACHE_TTL_MS = 300 * 1000; // 5 minutes
 
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async getAll() {
     const list = await this.prisma.menu.findMany({
@@ -166,7 +166,8 @@ export class MenusService {
       },
     });
 
-    const isSuperAdmin = user?.roles?.some(r => r.code === 'SUPER_ADMIN') ?? false;
+    const isSuperAdmin =
+      user?.roles?.some((r) => r.code === 'SUPER_ADMIN') ?? false;
 
     // PBAC chuẩn: Set resource codes mà user có quyền (bất kỳ action nào)
     const allowedResources = new Set<string>();

@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
   async getAll(lang?: string) {
@@ -35,7 +35,12 @@ export class CategoriesService {
   async getByGroup(
     group: string,
     lang?: string,
-    opts?: { search?: string; limit?: number; skip?: number; selectedIds?: number[] },
+    opts?: {
+      search?: string;
+      limit?: number;
+      skip?: number;
+      selectedIds?: number[];
+    },
   ) {
     const targetLang = lang || 'vi';
     const { search, limit, skip, selectedIds = [] } = opts ?? {};
@@ -44,14 +49,14 @@ export class CategoriesService {
     // 1. Luôn fetch selected items (dù không khớp search) để đảm bảo chúng xuất hiện
     const selectedItems = hasSelected
       ? await this.prisma.category.findMany({
-        where: { groupCode: group, id: { in: selectedIds } },
-        include: { translations: { where: { langCode: targetLang } } },
-        orderBy: { order: 'asc' },
-      })
+          where: { groupCode: group, id: { in: selectedIds } },
+          include: { translations: { where: { langCode: targetLang } } },
+          orderBy: { order: 'asc' },
+        })
       : [];
 
     // 2. Fetch search results (loại trừ các ID đã có trong selected)
-    const excludeIds = selectedItems.map(i => i.id);
+    const excludeIds = selectedItems.map((i) => i.id);
     const searchItems = await this.prisma.category.findMany({
       where: {
         groupCode: group,
@@ -59,14 +64,20 @@ export class CategoriesService {
         ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
         ...(search?.trim()
           ? {
-            translations: {
-              some: { langCode: targetLang, name: { contains: search.trim() } },
-            },
-          }
+              translations: {
+                some: {
+                  langCode: targetLang,
+                  name: { contains: search.trim() },
+                },
+              },
+            }
           : {}),
       },
       orderBy: { order: 'asc' },
-      take: limit && limit > 0 ? Math.max(limit - selectedItems.length, 0) : undefined,
+      take:
+        limit && limit > 0
+          ? Math.max(limit - selectedItems.length, 0)
+          : undefined,
       skip: skip && skip > 0 ? skip : undefined,
       include: { translations: { where: { langCode: targetLang } } },
     });
@@ -89,8 +100,8 @@ export class CategoriesService {
     };
 
     return [
-      ...selectedItems.map(i => mapItem(i, true)),
-      ...searchItems.map(i => mapItem(i, false)),
+      ...selectedItems.map((i) => mapItem(i, true)),
+      ...searchItems.map((i) => mapItem(i, false)),
     ];
   }
 

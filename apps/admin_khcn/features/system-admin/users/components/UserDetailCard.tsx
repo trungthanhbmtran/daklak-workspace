@@ -48,7 +48,7 @@ export function UserDetailSheet({
   const [policiesOpen, setPoliciesOpen] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(20);
-  const observerTarget = useRef<HTMLDivElement>(null);
+  const observerTarget = useRef<HTMLLIElement>(null);
 
   // Lazy load policies — chỉ fetch khi user mở collapsible
   const {

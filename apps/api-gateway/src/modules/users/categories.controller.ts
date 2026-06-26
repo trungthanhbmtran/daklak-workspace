@@ -47,7 +47,7 @@ export class CategoriesController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.categoryService = this.client.getService(
@@ -103,9 +103,9 @@ export class CategoriesController implements OnModuleInit {
     const skipNum = skip ? parseInt(skip, 10) : 0;
     const selectedIdsArr = selectedIds
       ? selectedIds
-        .split(',')
-        .map(Number)
-        .filter((n) => !isNaN(n) && n > 0)
+          .split(',')
+          .map(Number)
+          .filter((n) => !isNaN(n) && n > 0)
       : [];
 
     if (!group) {
@@ -203,7 +203,7 @@ export class PublicCategoriesController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.categoryService = this.client.getService(

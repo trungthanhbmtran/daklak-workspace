@@ -48,7 +48,7 @@ export class MediaGatewayController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.MEDIA.SYMBOL)
     private readonly client: microservices.ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.mediaService = this.client.getService<MediaGrpcService>(

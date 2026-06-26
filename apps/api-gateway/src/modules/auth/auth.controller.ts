@@ -35,7 +35,7 @@ export class AuthController implements OnModuleInit {
     @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);

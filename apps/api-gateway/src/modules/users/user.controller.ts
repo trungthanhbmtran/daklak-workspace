@@ -27,7 +27,6 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { NotificationsService } from '../notifications/notifications.service';
-import { sanitizeUserForClient } from '../../common/utils/user.util';
 import { RedisService } from '../../core/redis/redis.service';
 
 @ApiTags('Users')
@@ -78,8 +77,11 @@ export class UserController implements OnModuleInit {
         )
       : null;
 
-    const isSuperAdmin = userInfo?.roles?.some((r: any) => r.code === 'SUPER_ADMIN');
-    const isAdmin: boolean = isSuperAdmin || !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
+    const isSuperAdmin = userInfo?.roles?.some(
+      (r: any) => r.code === 'SUPER_ADMIN',
+    );
+    const isAdmin: boolean =
+      isSuperAdmin || !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
@@ -109,8 +111,6 @@ export class UserController implements OnModuleInit {
   async getDetail(@Param('id', ParseIntPipe) id: number) {
     const data: any = await firstValueFrom(this.userService.FindOne({ id }));
     if (!data) return { success: true, data: null };
-
-
 
     return {
       success: true,
