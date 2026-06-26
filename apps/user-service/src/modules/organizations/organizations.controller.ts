@@ -250,7 +250,7 @@ export class OrganizationsController {
               (mu: any) => mu.unitId,
             ),
             monitoredUnitNames: (slot.monitoredUnits ?? []).map(
-              (mu: any) => mu.unit?.code ?? '',
+              (mu: any) => mu.unit?.name ?? mu.unit?.code ?? '',
             ),
           })),
         };

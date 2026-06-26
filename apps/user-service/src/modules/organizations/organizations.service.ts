@@ -354,6 +354,23 @@ export class OrganizationsService {
         jobTitle: true,
         slots: {
           orderBy: { slotOrder: 'asc' },
+          include: {
+            domains: {
+              include: {
+                domain: {
+                  include: { translations: { where: { langCode: 'vi' } } },
+                },
+              },
+            },
+            geographicAreas: {
+              include: {
+                geographicArea: {
+                  include: { translations: { where: { langCode: 'vi' } } },
+                },
+              },
+            },
+            monitoredUnits: { include: { unit: true } },
+          },
         },
       },
     });
