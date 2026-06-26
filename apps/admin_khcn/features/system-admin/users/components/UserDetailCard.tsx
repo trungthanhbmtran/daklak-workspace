@@ -174,7 +174,7 @@ export function UserDetailSheet({
                               Chưa có chính sách nào được áp dụng.
                             </p>
                           ) : (
-                            <ScrollArea className="max-h-[220px] pr-2">
+                            <div className="pt-1">
                               <ul className="text-xs space-y-2.5">
                                 {policiesData.map((policy, idx) => (
                                   <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0">
@@ -203,7 +203,7 @@ export function UserDetailSheet({
                                   </li>
                                 ))}
                               </ul>
-                            </ScrollArea>
+                            </div>
                           )}
                         </div>
                       </CollapsibleContent>
