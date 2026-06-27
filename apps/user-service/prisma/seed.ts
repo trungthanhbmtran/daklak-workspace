@@ -3748,7 +3748,7 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
-    ['H15.07.08']
+    ['H15.07.10']
   );
   await assignLeader(
     'NV_003',
@@ -3758,7 +3758,7 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
-    ['H15.07.10']
+    ['H15.07.08']
   );
   await assignLeader(
     'NV_004',
@@ -4044,7 +4044,7 @@ async function main() {
   await assignLeader('NV_114', 'nguyenkieutrang@daklak.gov.vn', 'nguyenkieutrang', 'Nguyễn Kiều Trang', 'H15.07.04.01', 'NHAN_VIEN', false);
   await assignLeader('NV_115', 'hlisabya@daklak.gov.vn', 'hlisabya', 'H Lisa Byă', 'H15.07.04.01', 'NHAN_VIEN', false);
   await assignLeader('NV_116', 'nguyenthidiemquyen@daklak.gov.vn', 'nguyenthidiemquyen', 'Nguyễn Thị Diễm Quyên', 'H15.07.04.01', 'NHAN_VIEN', false);
-  await assignLeader('NV_117', 'ysomenuol@daklak.gov.vn', 'ysomenuol', 'Y Sơm Êñuôl', 'H15.07.04.01', 'NHAN_VIEN', false);
+  await assignLeader('NV_117', 'ysomenuol@daklak.gov.vn', 'ysomenuol', 'Y Sơm Êñuôl', 'H15.07.04.03', 'NHAN_VIEN', false);
   await assignLeader('NV_119', 'phungdinhhung@daklak.gov.vn', 'phungdinhhung', 'Phùng Đình Hưng', 'H15.07.04.03', 'NHAN_VIEN', false);
   await assignLeader('NV_120', 'kieuvuadrong@daklak.gov.vn', 'kieuvuadrong', 'Kiều Vũ Adrơng', 'H15.07.04.03', 'NHAN_VIEN', false);
   await assignLeader('NV_124', 'nguyensyhop@daklak.gov.vn', 'nguyensyhop', 'Nguyễn Sỹ Hợp', 'H15.07.04.01', 'BAO_VE', false);
