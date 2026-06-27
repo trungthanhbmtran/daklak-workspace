@@ -192,7 +192,6 @@ export function StaffingTable({
                                       staffingId={row.id}
                                       slotOrder={currentActiveSlot}
                                       existingSlot={existingSlot}
-                                      assignedEmployeeCode={assignedUser?.employeeCode || ""}
                                       domainsForUnit={domainsForUnit}
                                       unitDomainIds={unitDomainIds}
                                       subordinateUnits={subordinateUnits}

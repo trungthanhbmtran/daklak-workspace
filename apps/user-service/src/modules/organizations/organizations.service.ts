@@ -375,26 +375,42 @@ export class OrganizationsService {
       },
     });
 
-    // Fetch all current employees holding these job positions in this unit
-    const jobPositions = await this.prisma.jobPosition.findMany({
-      where: { unitId },
-      include: { user: true },
+    // Lấy danh sách mã nhân viên đã được gán vào các vị trí
+    const employeeCodes = new Set<string>();
+    items.forEach((item) => {
+      item.slots.forEach((slot) => {
+        if ((slot as any).assignedEmployeeCode) {
+          employeeCodes.add((slot as any).assignedEmployeeCode);
+        }
+      });
+    });
+
+    const users = await this.prisma.user.findMany({
+      where: { employeeCode: { in: Array.from(employeeCodes) } },
+      select: { employeeCode: true, fullName: true },
+    });
+
+    const userMap = new Map<string, string>();
+    users.forEach((u) => {
+      if (u.employeeCode && u.fullName) {
+        userMap.set(u.employeeCode, u.fullName);
+      }
     });
 
     const data = items.map((item) => {
-      // Lấy tất cả nhân sự đang giữ chức danh này trong đơn vị
-      const jobPositionsForTitle = jobPositions.filter(
-        (jp) => jp.jobTitleId === item.jobTitleId
-      );
-
-      // Tạo object map slotOrder -> tên nhân sự (1-1)
+      // Map tên nhân sự và mã nhân sự vào từng slot
       const assignedUserBySlot: Record<number, { fullName: string; employeeCode: string | null }> = {};
-      jobPositionsForTitle.forEach((jp) => {
-        if (jp.slotOrder && jp.user?.fullName) {
-          assignedUserBySlot[jp.slotOrder] = {
-            fullName: jp.user.fullName,
-            employeeCode: jp.user.employeeCode,
-          };
+      
+      item.slots.forEach((slot) => {
+        const code = (slot as any).assignedEmployeeCode;
+        if (code) {
+          const fullName = userMap.get(code);
+          if (fullName) {
+            assignedUserBySlot[slot.slotOrder] = {
+              fullName,
+              employeeCode: code,
+            };
+          }
         }
       });
 

@@ -84,9 +84,10 @@ model OrganizationStaffing {
 model StaffingSlot {
   id              Int                          @id @default(autoincrement())
   staffingId      Int                          @map("staffing_id")
-  slotOrder       Int                          @map("slot_order")
-  description     String?                      @map("description")
-  monitoredUnits  StaffingSlotMonitoredUnit[]
+  slotOrder            Int                          @map("slot_order")
+  description          String?                      @map("description")
+  assignedEmployeeCode String?                      @map("assigned_employee_code")
+  monitoredUnits       StaffingSlotMonitoredUnit[]
   geographicAreas StaffingSlotGeographicArea[]
   domains         StaffingSlotDomain[]
   staffing        OrganizationStaffing         @relation(fields: [staffingId], references: [id], onDelete: Cascade)
