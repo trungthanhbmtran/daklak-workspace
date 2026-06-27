@@ -113,8 +113,10 @@ export function StaffingTable({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {row.jobTitleDomainName || "—"}
+                  <TableCell className="text-muted-foreground text-sm whitespace-normal min-w-[200px]">
+                    <div className="max-h-[120px] overflow-y-auto pr-1">
+                      {row.jobTitleDomainName || "—"}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{row.quantity}</TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">{row.currentCount}</TableCell>
