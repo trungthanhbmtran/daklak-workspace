@@ -25,6 +25,7 @@ model JobPosition {
   userId         Int              @map("user_id")
   unitId         Int              @map("unit_id")
   jobTitleId     Int              @map("job_title_id")
+  slotOrder      Int?             @map("slot_order")
   isPrimary      Boolean          @default(false) @map("is_primary")
   isUnitLeader   Boolean          @default(false) @map("is_unit_leader")
   isDeputyLeader Boolean          @default(false) @map("is_deputy_leader")
