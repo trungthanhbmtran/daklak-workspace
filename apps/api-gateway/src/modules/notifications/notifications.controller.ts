@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -14,7 +14,9 @@ import { NotificationsService } from './notifications.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Danh sách thông báo in-app cho user đăng nhập' })

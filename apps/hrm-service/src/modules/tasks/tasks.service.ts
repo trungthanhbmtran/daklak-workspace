@@ -2,14 +2,16 @@ import { Injectable, Inject } from '@nestjs/common';
 import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { OnModuleInit } from '@nestjs/common';
+import { OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
-export class TasksService implements OnModuleInit {
+export class TasksService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(TasksService.name);
   private integrationService: any;
   private userService: any;
+  private scanInterval: NodeJS.Timeout;
 
   constructor(
     private prisma: PrismaService,
@@ -21,6 +23,13 @@ export class TasksService implements OnModuleInit {
   onModuleInit() {
     this.integrationService = this.integrationClient.getService('IntegrationService');
     this.userService = this.userClient.getService('UserService');
+    this.startDueTaskScanner();
+  }
+
+  onModuleDestroy() {
+    if (this.scanInterval) {
+      clearInterval(this.scanInterval);
+    }
   }
 
   private async getDynamicConfig() {
@@ -863,7 +872,23 @@ export class TasksService implements OnModuleInit {
     });
 
     const enriched = await this.enrichTasks([createdTask]);
-    return this.toTaskResponse(enriched[0]);
+    const enrichedTask = enriched[0];
+    const enrichedTaskResponse = this.toTaskResponse(enrichedTask);
+
+    if (data.assigneeCode) {
+      try {
+        this.notificationClient.emit('send_notification', {
+          channel: 'console',
+          recipient: data.assigneeCode,
+          subject: 'Có công việc mới được giao',
+          body: `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`
+        });
+      } catch (e) {
+        console.error('Failed to send in-app notification', e);
+      }
+    }
+
+    return enrichedTaskResponse;
   }
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any) {
@@ -976,8 +1001,87 @@ export class TasksService implements OnModuleInit {
     });
 
     const enriched = await this.enrichTasks([t]);
-    return this.toTaskResponse(enriched[0]);
+    const enrichedTaskResponse = this.toTaskResponse(enriched[0]);
+
+    if (assigneeCode) {
+      try {
+        this.notificationClient.emit('send_notification', {
+          channel: 'console',
+          recipient: assigneeCode,
+          subject: 'Có công việc mới được giao',
+          body: `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`
+        });
+      } catch (e) {
+        console.error('Failed to send in-app notification', e);
+      }
+    }
+
+    return enrichedTaskResponse;
   }
+
+
+  async startDueTaskScanner() {
+    const scanPeriodHours = 1;
+    this.logger.log(`Starting due task scanner every ${scanPeriodHours} hour(s)`);
+    
+    this.scanInterval = setInterval(async () => {
+      try {
+        const days = 3;
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + days);
+
+        const tasks = await this.prisma.task.findMany({
+          where: {
+            status: { notIn: ['COMPLETED', 'CANCELLED', 'REJECTED', 'DONE', 'TEMPLATE'] },
+            dueDate: { lte: futureDate, gte: new Date() },
+          },
+          include: {
+            participants: true,
+            comments: {
+              where: { content: { startsWith: 'Hệ thống đã tự động gửi cảnh báo' } }
+            }
+          }
+        });
+
+        for (const task of tasks) {
+          if (task.comments && task.comments.length > 0) continue; // Already warned
+
+          const assignees = task.participants
+            .filter(p => p.participantRole === 'ASSIGNEE')
+            .map(p => p.employeeCode)
+            .filter(Boolean);
+
+          for (const code of assignees) {
+            try {
+              // Gửi sang Notification Service (Email, Telegram...)
+              // Lưu ý: Cần tra cứu email từ employeeCode nếu Notification Service yêu cầu email
+              this.notificationClient.emit('send_notification', {
+                channel: 'console', // Cấu hình gửi mail hoặc telegram tại đây
+                recipient: code,
+                subject: 'Cảnh báo hạn chót công việc',
+                body: `Công việc "${task.title}" sắp đến hạn vào ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'vài ngày tới'}.`
+              });
+            } catch (e) {
+              this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);
+            }
+          }
+
+          // Mark as warned
+          await this.prisma.taskComment.create({
+            data: {
+              taskId: task.id,
+              authorCode: null,
+              content: `Hệ thống đã tự động gửi cảnh báo sắp hết hạn`,
+              isSystemMessage: true,
+            }
+          });
+        }
+      } catch (err) {
+        this.logger.error('Error in due task scanner', err);
+      }
+    }, scanPeriodHours * 60 * 60 * 1000); // Mặc định chạy 1 tiếng 1 lần
+  }
+
 
   async getTask(id: number, query: any) {
     await this.populateQueryHierarchy(query);

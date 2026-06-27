@@ -23,7 +23,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
             },
           },
         }),
-      },
+      }
     ]),
     ClientsModule.register([
       {
