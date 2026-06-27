@@ -266,6 +266,7 @@ export class OrganizationsController {
     domainIds?: number[];
     geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
+    assignedEmployeeCode?: string | null;
   }) {
     if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
       throw new RpcException({
@@ -299,6 +300,7 @@ export class OrganizationsController {
       domainIds: data.domainIds,
       geographicAreaIds: data.geographicAreaIds,
       monitoredUnitIds: data.monitoredUnitIds,
+      assignedEmployeeCode: data.assignedEmployeeCode,
     });
     return {
       id: slot.id,

@@ -171,7 +171,7 @@ export function StaffingTable({
                                         isSelected ? "text-primary-foreground/90" : "text-muted-foreground",
                                         assignedUser ? "" : "italic opacity-70"
                                       )}>
-                                        {assignedUser ? assignedUser : "Chưa có nhân sự"}
+                                        {assignedUser ? assignedUser.fullName : "Chưa có nhân sự"}
                                       </div>
                                     </button>
                                   );
@@ -185,12 +185,14 @@ export function StaffingTable({
                                 const existingSlot = row.slots?.find(
                                   (s) => s.slotOrder === currentActiveSlot
                                 );
+                                const assignedUser = row.assignedUserBySlot?.[currentActiveSlot];
                                 return (
                                   <div className="animate-in fade-in-50 duration-200">
                                     <SlotCard
                                       staffingId={row.id}
                                       slotOrder={currentActiveSlot}
                                       existingSlot={existingSlot}
+                                      assignedEmployeeCode={assignedUser?.employeeCode || ""}
                                       domainsForUnit={domainsForUnit}
                                       unitDomainIds={unitDomainIds}
                                       subordinateUnits={subordinateUnits}

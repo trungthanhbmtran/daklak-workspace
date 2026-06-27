@@ -388,10 +388,13 @@ export class OrganizationsService {
       );
 
       // Tạo object map slotOrder -> tên nhân sự (1-1)
-      const assignedUserBySlot: Record<number, string> = {};
+      const assignedUserBySlot: Record<number, { fullName: string; employeeCode: string | null }> = {};
       jobPositionsForTitle.forEach((jp) => {
         if (jp.slotOrder && jp.user?.fullName) {
-          assignedUserBySlot[jp.slotOrder] = jp.user.fullName;
+          assignedUserBySlot[jp.slotOrder] = {
+            fullName: jp.user.fullName,
+            employeeCode: jp.user.employeeCode,
+          };
         }
       });
 
@@ -451,6 +454,7 @@ export class OrganizationsService {
     domainIds?: number[];
     geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
+    assignedEmployeeCode?: string | null;
   }) {
     const {
       staffingId,
@@ -459,7 +463,51 @@ export class OrganizationsService {
       domainIds,
       geographicAreaIds,
       monitoredUnitIds,
+      assignedEmployeeCode,
     } = dto;
+
+    const staffing = await this.prisma.organizationStaffing.findUnique({
+      where: { id: staffingId },
+    });
+
+    if (!staffing) throw new Error("Staffing not found");
+
+    if (assignedEmployeeCode !== undefined) {
+      if (!assignedEmployeeCode) {
+        // Gỡ bỏ nhân sự khỏi vị trí này
+        await this.prisma.jobPosition.deleteMany({
+          where: { unitId: staffing.unitId, jobTitleId: staffing.jobTitleId, slotOrder },
+        });
+      } else {
+        // Gán nhân sự vào vị trí
+        const user = await this.prisma.user.findFirst({
+          where: { employeeCode: assignedEmployeeCode },
+        });
+        if (!user) {
+          throw new Error(`Không tìm thấy nhân viên với mã: ${assignedEmployeeCode}`);
+        }
+
+        const existingJp = await this.prisma.jobPosition.findFirst({
+          where: { unitId: staffing.unitId, jobTitleId: staffing.jobTitleId, slotOrder },
+        });
+
+        if (existingJp) {
+          await this.prisma.jobPosition.update({
+            where: { id: existingJp.id },
+            data: { userId: user.id },
+          });
+        } else {
+          await this.prisma.jobPosition.create({
+            data: {
+              unitId: staffing.unitId,
+              jobTitleId: staffing.jobTitleId,
+              slotOrder,
+              userId: user.id,
+            },
+          });
+        }
+      }
+    }
     const slot = await this.prisma.staffingSlot.upsert({
       where: { staffingId_slotOrder: { staffingId, slotOrder } },
       update: { description: description ?? undefined },

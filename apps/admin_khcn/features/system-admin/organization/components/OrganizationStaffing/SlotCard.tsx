@@ -12,6 +12,7 @@ type SlotCardProps = {
   staffingId: number;
   slotOrder: number;
   existingSlot: StaffingSlotItem | null | undefined;
+  assignedEmployeeCode: string;
   domainsForUnit: { id: number; name: string }[];
   unitDomainIds: number[];
   onSave: (payload: {
@@ -21,6 +22,7 @@ type SlotCardProps = {
     domainIds?: number[];
     geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
+    assignedEmployeeCode?: string;
   }) => void;
   subordinateUnits: { id: number; name: string }[];
   isSaving: boolean;
@@ -30,6 +32,7 @@ export function SlotCard({
   staffingId,
   slotOrder,
   existingSlot,
+  assignedEmployeeCode,
   domainsForUnit,
   unitDomainIds,
   subordinateUnits,
@@ -37,6 +40,7 @@ export function SlotCard({
   isSaving,
 }: SlotCardProps) {
   const [description, setDescription] = useState(existingSlot?.description ?? "");
+  const [employeeCode, setEmployeeCode] = useState(assignedEmployeeCode);
   const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
   const [geographicAreaIds, setGeographicAreaIds] = useState<number[]>(existingSlot?.geographicAreaIds ?? []);
   const [monitoredUnitIds, setMonitoredUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
@@ -52,10 +56,11 @@ export function SlotCard({
 
   useEffect(() => {
     setDescription(existingSlot?.description ?? "");
+    setEmployeeCode(assignedEmployeeCode);
     setDomainIds(existingSlot?.domainIds ?? []);
     setGeographicAreaIds(existingSlot?.geographicAreaIds ?? []);
     setMonitoredUnitIds(existingSlot?.monitoredUnitIds ?? []);
-  }, [existingSlot]);
+  }, [existingSlot, assignedEmployeeCode]);
 
   return (
     <Card className="rounded-xl border border-border bg-card shadow-sm flex flex-col h-full">
@@ -64,13 +69,25 @@ export function SlotCard({
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">{slotOrder}</div>
           <span>Vị trí nhân sự</span>
         </CardTitle>
-        <Button type="button" size="sm" className="h-8 text-xs font-medium" onClick={() => onSave({ staffingId, slotOrder, description: description.trim() || undefined, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geographicAreaIds.length ? geographicAreaIds : undefined, monitoredUnitIds: monitoredUnitIds.length ? monitoredUnitIds : undefined })} disabled={isSaving}>
+        <Button type="button" size="sm" className="h-8 text-xs font-medium" onClick={() => onSave({ staffingId, slotOrder, description: description.trim() || undefined, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geographicAreaIds.length ? geographicAreaIds : undefined, monitoredUnitIds: monitoredUnitIds.length ? monitoredUnitIds : undefined, assignedEmployeeCode: employeeCode.trim() })} disabled={isSaving}>
           {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
           Lưu vị trí
         </Button>
       </CardHeader>
 
       <CardContent className="p-4 flex-1 flex flex-col gap-4 text-sm">
+        {/* Nhân sự đảm nhiệm */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Nhân sự đảm nhiệm (Mã nhân sự)</label>
+          <input 
+            type="text" 
+            className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" 
+            value={employeeCode} 
+            onChange={(e) => setEmployeeCode(e.target.value)} 
+            placeholder="Nhập mã nhân sự..." 
+          />
+        </div>
+
         {/* Nhiệm vụ */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Nhiệm vụ được giao</label>

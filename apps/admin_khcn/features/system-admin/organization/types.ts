@@ -79,7 +79,7 @@ export interface StaffingReportItem {
   jobTitleMonitoredUnitNames?: string[];
   jobTitleGeographicAreaName?: string;
   slots?: StaffingSlotItem[];
-  assignedUserBySlot?: Record<number, string>;
+  assignedUserBySlot?: Record<number, { fullName: string; employeeCode: string | null }>;
 }
 
 export interface UpdateJobTitlePayload {
@@ -101,4 +101,5 @@ export interface SetStaffingSlotPayload {
   geographicAreaIds?: number[];
   domainIds?: number[];
   monitoredUnitIds?: number[];
+  assignedEmployeeCode?: string | null;
 }
