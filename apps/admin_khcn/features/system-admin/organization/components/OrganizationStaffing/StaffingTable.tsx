@@ -143,7 +143,7 @@ export function StaffingTable({
                                 ).map((slotOrder) => {
                                   const isSelected = currentActiveSlot === slotOrder;
                                   const hasData = row.slots?.some((s) => s.slotOrder === slotOrder);
-                                  const assignedUsers = row.assignedUsersBySlot?.[slotOrder];
+                                  const assignedUser = row.assignedUserBySlot?.[slotOrder];
 
                                   return (
                                     <button
@@ -169,9 +169,9 @@ export function StaffingTable({
                                       <div className={cn(
                                         "mt-0.5 truncate max-w-full text-[11px]",
                                         isSelected ? "text-primary-foreground/90" : "text-muted-foreground",
-                                        assignedUsers && assignedUsers.length > 0 ? "" : "italic opacity-70"
+                                        assignedUser ? "" : "italic opacity-70"
                                       )}>
-                                        {assignedUsers && assignedUsers.length > 0 ? assignedUsers.join(", ") : "Chưa có nhân sự"}
+                                        {assignedUser ? assignedUser : "Chưa có nhân sự"}
                                       </div>
                                     </button>
                                   );

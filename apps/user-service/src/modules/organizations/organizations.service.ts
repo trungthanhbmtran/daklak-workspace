@@ -387,36 +387,17 @@ export class OrganizationsService {
         (jp) => jp.jobTitleId === item.jobTitleId
       );
 
-      const assignedUsers = jobPositionsForTitle
-        .map((jp) => jp.user?.fullName)
-        .filter(Boolean) as string[];
-
-      // Tạo object map slotOrder -> danh sách tên nhân sự
-      const assignedUsersBySlot: Record<number, string[]> = {};
+      // Tạo object map slotOrder -> tên nhân sự (1-1)
+      const assignedUserBySlot: Record<number, string> = {};
       jobPositionsForTitle.forEach((jp) => {
-        if (jp.slotOrder) {
-          if (!assignedUsersBySlot[jp.slotOrder]) {
-            assignedUsersBySlot[jp.slotOrder] = [];
-          }
-          if (jp.user?.fullName) {
-            assignedUsersBySlot[jp.slotOrder].push(jp.user.fullName);
-          }
+        if (jp.slotOrder && jp.user?.fullName) {
+          assignedUserBySlot[jp.slotOrder] = jp.user.fullName;
         }
-      });
-
-      // Vẫn map vào slots hiện có nếu cần (tương thích ngược)
-      const mappedSlots = item.slots.map((slot) => {
-        return {
-          ...slot,
-          currentEmployeeNames: assignedUsersBySlot[slot.slotOrder] || [],
-        };
       });
 
       return {
         ...item,
-        slots: mappedSlots,
-        current_employee_names: assignedUsers,
-        assignedUsersBySlot,
+        assignedUserBySlot,
       };
     });
 
