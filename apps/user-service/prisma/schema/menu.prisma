@@ -26,4 +26,3 @@ model Menu {
   @@index([parentId], map: "sys_menus_parent_id_fkey")
   @@map("sys_menus")
 }
-

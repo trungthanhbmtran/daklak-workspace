@@ -3681,11 +3681,12 @@ async function main() {
 
         const slot = await prisma.staffingSlot.upsert({
           where: { staffingId_slotOrder: { staffingId: staffing.id, slotOrder: user.id } },
-          update: { description: `Phụ trách bởi ${fullName}` },
+          update: { description: `Phụ trách bởi ${fullName}`, assignedEmployeeCode: employeeCode },
           create: {
             staffingId: staffing.id,
             slotOrder: user.id,
-            description: `Phụ trách bởi ${fullName}`
+            description: `Phụ trách bởi ${fullName}`,
+            assignedEmployeeCode: employeeCode
           }
         });
 

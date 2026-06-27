@@ -152,6 +152,83 @@ async function main() {
     console.error('❌ Lỗi khi đồng bộ user_id:', error);
   }
 
+  // Đồng bộ vị trí định biên từ HRM sang StaffingSlot của hệ thống (admin_systems)
+  try {
+    console.log('🔹 Gán mã nhân viên vào Vị trí định biên (admin_systems.staffing_slots)...');
+    
+    // Xóa tất cả gán cũ trước khi gán mới từ HRM
+    // Chỉ xóa những slot mà mã nhân viên thuộc danh sách được seed trong HRM
+    await prisma.$executeRawUnsafe(`
+      UPDATE admin_systems.staffing_slots
+      SET assigned_employee_code = NULL
+      WHERE assigned_employee_code IS NOT NULL;
+    `);
+
+    for (const e of EMPLOYEES) {
+      if (e.departmentId && e.jobTitleId && e.employeeCode) {
+        // Tìm staffing tương ứng
+        const staffing: any[] = await prisma.$queryRaw`
+          SELECT id FROM admin_systems.org_staffing 
+          WHERE unit_id = ${e.departmentId} AND job_title_id = ${e.jobTitleId} LIMIT 1
+        `;
+
+        if (staffing.length > 0) {
+          const staffingId = staffing[0].id;
+          
+          // Tìm slot trống đầu tiên
+          const emptySlot: any[] = await prisma.$queryRaw`
+            SELECT id FROM admin_systems.staffing_slots 
+            WHERE staffing_id = ${staffingId} AND assigned_employee_code IS NULL 
+            ORDER BY slot_order ASC LIMIT 1
+          `;
+          
+          if (emptySlot.length > 0) {
+            await prisma.$executeRawUnsafe(`
+              UPDATE admin_systems.staffing_slots 
+              SET assigned_employee_code = '${e.employeeCode}',
+                  description = 'Phụ trách bởi ${e.fullName}'
+              WHERE id = ${emptySlot[0].id}
+            `);
+          } else {
+            // Tự động tạo slot mới nếu thiếu
+            const lastSlot: any[] = await prisma.$queryRaw`
+              SELECT slot_order FROM admin_systems.staffing_slots
+              WHERE staffing_id = ${staffingId}
+              ORDER BY slot_order DESC LIMIT 1
+            `;
+            const nextSlotOrder = lastSlot.length > 0 ? lastSlot[0].slot_order + 1 : 1;
+            
+            await prisma.$executeRawUnsafe(`
+              INSERT INTO admin_systems.staffing_slots (staffing_id, slot_order, description, assigned_employee_code)
+              VALUES (${staffingId}, ${nextSlotOrder}, 'Phụ trách bởi ${e.fullName}', '${e.employeeCode}')
+            `);
+          }
+        } else {
+          // Tự động tạo staffing và slot nếu chưa có
+          await prisma.$executeRawUnsafe(`
+            INSERT INTO admin_systems.org_staffing (unit_id, job_title_id, quantity)
+            VALUES (${e.departmentId}, ${e.jobTitleId}, 1)
+          `);
+          
+          const newStaffing: any[] = await prisma.$queryRaw`
+            SELECT id FROM admin_systems.org_staffing 
+            WHERE unit_id = ${e.departmentId} AND job_title_id = ${e.jobTitleId} LIMIT 1
+          `;
+          
+          if (newStaffing.length > 0) {
+            await prisma.$executeRawUnsafe(`
+              INSERT INTO admin_systems.staffing_slots (staffing_id, slot_order, description, assigned_employee_code)
+              VALUES (${newStaffing[0].id}, 1, 'Phụ trách bởi ${e.fullName}', '${e.employeeCode}')
+            `);
+          }
+        }
+      }
+    }
+    console.log('✅ Đã gán nhân sự vào vị trí định biên thành công.');
+  } catch (error) {
+    console.error('❌ Lỗi khi gán vị trí định biên:', error);
+  }
+
   console.log('🔹 Seed TaskRankTemplates theo Nghị định 335/2025/NĐ-CP...');
 
   await prisma.taskRankTemplate.deleteMany();

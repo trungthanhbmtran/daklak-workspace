@@ -1,14 +1,14 @@
 model Category {
-  id                  Int                   @id @default(autoincrement())
-  groupCode           String                @map("group_code")
-  code                String
-  order               Int                   @default(0)
-  isActive            Boolean               @default(true) @map("is_active")
+  id                          Int                          @id @default(autoincrement())
+  groupCode                   String                       @map("group_code")
+  code                        String
+  order                       Int                          @default(0)
+  isActive                    Boolean                      @default(true) @map("is_active")
   unitDomains                 UnitDomain[]
   staffingSlotDomains         StaffingSlotDomain[]
   staffingSlotGeographicAreas StaffingSlotGeographicArea[]
-  group                       CategoryGroup         @relation(fields: [groupCode], references: [code])
-  translations        CategoryTranslation[]
+  group                       CategoryGroup                @relation(fields: [groupCode], references: [code])
+  translations                CategoryTranslation[]
 
   @@unique([groupCode, code])
   @@index([groupCode])

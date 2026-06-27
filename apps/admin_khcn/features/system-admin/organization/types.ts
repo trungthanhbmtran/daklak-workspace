@@ -101,5 +101,4 @@ export interface SetStaffingSlotPayload {
   geographicAreaIds?: number[];
   domainIds?: number[];
   monitoredUnitIds?: number[];
-  assignedEmployeeCode?: string | null;
 }

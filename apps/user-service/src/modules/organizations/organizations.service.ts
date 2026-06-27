@@ -414,8 +414,14 @@ export class OrganizationsService {
         }
       });
 
+      const currentEmployeeNames = Object.values(assignedUserBySlot)
+        .map(u => u.fullName)
+        .filter(Boolean);
+
       return {
         ...item,
+        currentCount: currentEmployeeNames.length,
+        current_employee_names: currentEmployeeNames,
         assignedUserBySlot,
       };
     });
