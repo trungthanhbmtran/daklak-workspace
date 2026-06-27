@@ -842,7 +842,7 @@ export class UsersService implements OnModuleInit {
       whereObj.monitoredUnits = { some: { unitId: monitoredUnitId } };
     }
 
-    const slots = await this.prisma.organizationStaffingSlot.findMany({
+    const slots = await this.prisma.staffingSlot.findMany({
       where: whereObj,
       select: { assignedEmployeeCode: true }
     });

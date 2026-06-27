@@ -4035,6 +4035,21 @@ async function main() {
     false,
   );
 
+  // --- Bổ sung thêm các nhân viên và chuyên viên thuộc Trung tâm IOC ---
+  await assignLeader('NV_107', 'nguyenthikimoanh@daklak.gov.vn', 'nguyenthikimoanh', 'Nguyễn Thị Kim Oanh', 'H15.07.04.01', 'VIEN_CHUC', false);
+  await assignLeader('NV_108', 'vothihien@daklak.gov.vn', 'vothihien', 'Võ Thị Hiền', 'H15.07.04.01', 'VAN_THU', false);
+  await assignLeader('NV_110', 'phandangvietvinhchuan@daklak.gov.vn', 'phandangvietvinhchuan', 'Phan Đăng Việt Vinh Chuẩn', 'H15.07.04.03', 'VIEN_CHUC', false);
+  await assignLeader('NV_111', 'nguyenminhhoa@daklak.gov.vn', 'nguyenminhhoa', 'Nguyễn Minh Hóa', 'H15.07.04.02', 'VIEN_CHUC', false);
+  await assignLeader('NV_112', 'chauhoakhanhtam@daklak.gov.vn', 'chauhoakhanhtam', 'Châu Hòa Khánh Tâm', 'H15.07.04.02', 'VIEN_CHUC', false);
+  await assignLeader('NV_114', 'nguyenkieutrang@daklak.gov.vn', 'nguyenkieutrang', 'Nguyễn Kiều Trang', 'H15.07.04.01', 'NHAN_VIEN', false);
+  await assignLeader('NV_115', 'hlisabya@daklak.gov.vn', 'hlisabya', 'H Lisa Byă', 'H15.07.04.01', 'NHAN_VIEN', false);
+  await assignLeader('NV_116', 'nguyenthidiemquyen@daklak.gov.vn', 'nguyenthidiemquyen', 'Nguyễn Thị Diễm Quyên', 'H15.07.04.01', 'NHAN_VIEN', false);
+  await assignLeader('NV_117', 'ysomenuol@daklak.gov.vn', 'ysomenuol', 'Y Sơm Êñuôl', 'H15.07.04.01', 'NHAN_VIEN', false);
+  await assignLeader('NV_119', 'phungdinhhung@daklak.gov.vn', 'phungdinhhung', 'Phùng Đình Hưng', 'H15.07.04.03', 'NHAN_VIEN', false);
+  await assignLeader('NV_120', 'kieuvuadrong@daklak.gov.vn', 'kieuvuadrong', 'Kiều Vũ Adrơng', 'H15.07.04.03', 'NHAN_VIEN', false);
+  await assignLeader('NV_124', 'nguyensyhop@daklak.gov.vn', 'nguyensyhop', 'Nguyễn Sỹ Hợp', 'H15.07.04.01', 'BAO_VE', false);
+  await assignLeader('NV_125', 'nguyentienquang@daklak.gov.vn', 'nguyentienquang', 'Nguyễn Tiến Quang', 'H15.07.04.01', 'BAO_VE', false);
+
   // 4. Sở Tài chính
   await assignLeader(
     'NV_011',
