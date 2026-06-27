@@ -36,7 +36,6 @@ CREATE TABLE `tasks` (
     `description` TEXT NULL,
     `status` VARCHAR(191) NOT NULL DEFAULT 'TODO',
     `priority` VARCHAR(191) NOT NULL DEFAULT 'MEDIUM',
-    `creator_user_id` INTEGER NOT NULL DEFAULT 0,
     `creator_employee_code` VARCHAR(191) NULL,
     `base_score` DOUBLE NULL,
     `weight` DOUBLE NULL,
@@ -55,18 +54,22 @@ CREATE TABLE `tasks` (
     `progress` DOUBLE NOT NULL DEFAULT 0,
     `reject_reason` TEXT NULL,
 
+    INDEX `tasks_due_date_idx`(`due_date`),
+    INDEX `tasks_status_due_date_idx`(`status`, `due_date`),
+    INDEX `tasks_created_at_idx`(`created_at`),
+    INDEX `tasks_parent_id_idx`(`parent_id`),
+    INDEX `tasks_plan_id_idx`(`plan_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `task_participants` (
     `task_id` INTEGER NOT NULL,
-    `user_id` INTEGER NOT NULL,
-    `employee_code` VARCHAR(191) NULL,
+    `employee_code` VARCHAR(191) NOT NULL,
     `participant_role` ENUM('OWNER', 'ASSIGNEE', 'APPROVER', 'COORDINATOR', 'FOLLOWER') NOT NULL,
     `assigned_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    PRIMARY KEY (`task_id`, `user_id`, `participant_role`)
+    PRIMARY KEY (`task_id`, `employee_code`, `participant_role`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -82,7 +85,7 @@ CREATE TABLE `task_closure` (
 CREATE TABLE `task_comments` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `task_id` INTEGER NOT NULL,
-    `user_id` INTEGER NULL,
+    `author_code` VARCHAR(191) NULL,
     `content` TEXT NOT NULL,
     `is_system_message` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

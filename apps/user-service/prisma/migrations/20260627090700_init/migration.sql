@@ -203,6 +203,7 @@ CREATE TABLE `staffing_slots` (
     `staffing_id` INTEGER NOT NULL,
     `slot_order` INTEGER NOT NULL,
     `description` VARCHAR(191) NULL,
+    `assigned_employee_code` VARCHAR(191) NULL,
 
     INDEX `staffing_slots_staffing_id_idx`(`staffing_id`),
     UNIQUE INDEX `staffing_slots_staffing_id_slot_order_key`(`staffing_id`, `slot_order`),
