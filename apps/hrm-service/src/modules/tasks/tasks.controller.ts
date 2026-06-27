@@ -29,7 +29,7 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTask')
-  updateTask(data: { id: number; weight?: number; startDate?: string; dueDate?: string; priority?: string; baseScore?: number; title?: string; description?: string }) {
+  updateTask(data: { id: number; weight?: number; startDate?: string; dueDate?: string; priority?: string; baseScore?: number; title?: string; description?: string; domainId?: number; monitoredUnitId?: number }) {
     return this.tasksService.updateTask(data.id, data);
   }
 

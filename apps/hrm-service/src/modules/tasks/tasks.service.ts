@@ -186,11 +186,20 @@ export class TasksService implements OnModuleInit {
     let isDeptLeader = false;
     const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
 
+    if (query.allowedDomainIds?.length > 0) {
+      const allowedDomains = query.allowedDomainIds.map(Number).filter(Boolean);
+      if (t.domainId && allowedDomains.includes(Number(t.domainId))) {
+        isDeptLeader = true;
+      }
+    }
+
     if (query.allowedDepartmentIds?.length > 0 || query.allowedEmployeeCodes?.length > 0) {
       const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
       const allowedCodes = query.allowedEmployeeCodes || [];
 
       if (t.plan?.departmentId && allowedDepts.includes(Number(t.plan.departmentId))) {
+        isDeptLeader = true;
+      } else if (t.monitoredUnitId && allowedDepts.includes(Number(t.monitoredUnitId))) {
         isDeptLeader = true;
       } else {
         const assigneeCode = t.assigneeCode;
@@ -484,6 +493,16 @@ export class TasksService implements OnModuleInit {
 
           leaderOrConditions.push({
             plan: { departmentId: { in: allowedDepts } }
+          });
+          leaderOrConditions.push({
+            monitoredUnitId: { in: allowedDepts }
+          });
+        }
+
+        const allowedDomains = query.allowedDomainIds?.map(Number).filter(Boolean) || [];
+        if (allowedDomains.length > 0) {
+          leaderOrConditions.push({
+            domainId: { in: allowedDomains }
           });
         }
 
@@ -783,7 +802,9 @@ export class TasksService implements OnModuleInit {
           bonusPerDay: data.bonusPerDay,
           penaltyPerDay: data.penaltyPerDay,
           creatorEmployeeCode: creatorCode,
-          planId
+          planId,
+          domainId: data.domainId ? parseInt(data.domainId, 10) : null,
+          monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null
         }
       });
 
@@ -1200,9 +1221,22 @@ export class TasksService implements OnModuleInit {
       });
       const kpiMap = new Map(evaluations.map(item => [item.employeeCode, item.totalScore || 75]));
 
-      // 2. Chấm điểm Gợi ý dựa trên Vị trí chức danh (JobTitle) và Lĩnh vực (Domain)
+      // 2. Chấm điểm Gợi ý dựa trên Vị trí chức danh (JobTitle), Lĩnh vực (Domain) và Phòng ban theo dõi
       const targetDomainId = query.domainId ? parseInt(query.domainId, 10) : null;
+      const targetMonitoredUnitId = query.monitoredUnitId ? parseInt(query.monitoredUnitId, 10) : null;
       const targetJobTitleId = query.jobTitleId ? parseInt(query.jobTitleId, 10) : null;
+
+      let scopeEmployeeCodes: string[] = [];
+      if (targetDomainId || targetMonitoredUnitId) {
+        try {
+          const scopeRes: any = await firstValueFrom(
+            this.userService.GetEmployeesByScope({ domainId: targetDomainId || 0, monitoredUnitId: targetMonitoredUnitId || 0 })
+          );
+          scopeEmployeeCodes = scopeRes?.employeeCodes || scopeRes?.employee_codes || [];
+        } catch (e) {
+          console.error('Failed to get employees by scope:', e);
+        }
+      }
 
       const employeeList = employees.map(emp => {
         const taskCount = taskCountMap.get(emp.employeeCode) || 0;
@@ -1213,8 +1247,9 @@ export class TasksService implements OnModuleInit {
         if (targetJobTitleId && emp.jobTitleId === targetJobTitleId) {
           matchScore += 50; // Ưu tiên tuyệt đối nếu đúng Vị trí chức danh yêu cầu
         }
-        // Giả lập ưu tiên Lĩnh vực (Nếu targetDomain khớp với phòng ban/đơn vị phụ trách lĩnh vực đó)
-        if (targetDomainId && query.domainDepartmentIds?.includes(emp.departmentId)) {
+        
+        // Ưu tiên nếu nhân viên phụ trách Lĩnh vực hoặc Phòng ban tương ứng
+        if (scopeEmployeeCodes.includes(emp.employeeCode)) {
           matchScore += 30;
         }
 

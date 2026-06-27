@@ -33,6 +33,8 @@ export type TaskAvgAggregateOutputType = {
   weight: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  domainId: number | null
+  monitoredUnitId: number | null
   planId: number | null
   progress: number | null
 }
@@ -44,6 +46,8 @@ export type TaskSumAggregateOutputType = {
   weight: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  domainId: number | null
+  monitoredUnitId: number | null
   planId: number | null
   progress: number | null
 }
@@ -67,6 +71,8 @@ export type TaskMinAggregateOutputType = {
   completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  domainId: number | null
+  monitoredUnitId: number | null
   planId: number | null
   progress: number | null
   rejectReason: string | null
@@ -91,6 +97,8 @@ export type TaskMaxAggregateOutputType = {
   completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  domainId: number | null
+  monitoredUnitId: number | null
   planId: number | null
   progress: number | null
   rejectReason: string | null
@@ -117,6 +125,8 @@ export type TaskCountAggregateOutputType = {
   completedAt: number
   createdAt: number
   updatedAt: number
+  domainId: number
+  monitoredUnitId: number
   planId: number
   progress: number
   rejectReason: number
@@ -131,6 +141,8 @@ export type TaskAvgAggregateInputType = {
   weight?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  domainId?: true
+  monitoredUnitId?: true
   planId?: true
   progress?: true
 }
@@ -142,6 +154,8 @@ export type TaskSumAggregateInputType = {
   weight?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  domainId?: true
+  monitoredUnitId?: true
   planId?: true
   progress?: true
 }
@@ -165,6 +179,8 @@ export type TaskMinAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  domainId?: true
+  monitoredUnitId?: true
   planId?: true
   progress?: true
   rejectReason?: true
@@ -189,6 +205,8 @@ export type TaskMaxAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  domainId?: true
+  monitoredUnitId?: true
   planId?: true
   progress?: true
   rejectReason?: true
@@ -215,6 +233,8 @@ export type TaskCountAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  domainId?: true
+  monitoredUnitId?: true
   planId?: true
   progress?: true
   rejectReason?: true
@@ -328,6 +348,8 @@ export type TaskGroupByOutputType = {
   completedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  domainId: number | null
+  monitoredUnitId: number | null
   planId: number | null
   progress: number
   rejectReason: string | null
@@ -377,6 +399,8 @@ export type TaskWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
+  domainId?: Prisma.IntNullableFilter<"Task"> | number | null
+  monitoredUnitId?: Prisma.IntNullableFilter<"Task"> | number | null
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
@@ -408,6 +432,8 @@ export type TaskOrderByWithRelationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  domainId?: Prisma.SortOrderInput | Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrderInput | Prisma.SortOrder
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -443,6 +469,8 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
+  domainId?: Prisma.IntNullableFilter<"Task"> | number | null
+  monitoredUnitId?: Prisma.IntNullableFilter<"Task"> | number | null
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
@@ -474,6 +502,8 @@ export type TaskOrderByWithAggregationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  domainId?: Prisma.SortOrderInput | Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrderInput | Prisma.SortOrder
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -508,6 +538,8 @@ export type TaskScalarWhereWithAggregatesInput = {
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
+  domainId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
+  monitoredUnitId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   planId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   progress?: Prisma.FloatWithAggregatesFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
@@ -533,6 +565,8 @@ export type TaskCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
@@ -563,6 +597,8 @@ export type TaskUncheckedCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   planId?: number | null
   progress?: number
   rejectReason?: string | null
@@ -592,6 +628,8 @@ export type TaskUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
@@ -622,6 +660,8 @@ export type TaskUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -652,6 +692,8 @@ export type TaskCreateManyInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   planId?: number | null
   progress?: number
   rejectReason?: string | null
@@ -677,6 +719,8 @@ export type TaskUpdateManyMutationInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -702,6 +746,8 @@ export type TaskUncheckedUpdateManyInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -734,6 +780,8 @@ export type TaskCountOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  domainId?: Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
@@ -746,6 +794,8 @@ export type TaskAvgOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  domainId?: Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
 }
@@ -769,6 +819,8 @@ export type TaskMaxOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  domainId?: Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
@@ -793,6 +845,8 @@ export type TaskMinOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  domainId?: Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
@@ -805,6 +859,8 @@ export type TaskSumOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  domainId?: Prisma.SortOrder
+  monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
 }
@@ -958,6 +1014,8 @@ export type TaskCreateWithoutParticipantsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
@@ -987,6 +1045,8 @@ export type TaskUncheckedCreateWithoutParticipantsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   planId?: number | null
   progress?: number
   rejectReason?: string | null
@@ -1031,6 +1091,8 @@ export type TaskUpdateWithoutParticipantsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
@@ -1060,6 +1122,8 @@ export type TaskUncheckedUpdateWithoutParticipantsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1088,6 +1152,8 @@ export type TaskCreateWithoutDescendantsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
@@ -1117,6 +1183,8 @@ export type TaskUncheckedCreateWithoutDescendantsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   planId?: number | null
   progress?: number
   rejectReason?: string | null
@@ -1150,6 +1218,8 @@ export type TaskCreateWithoutAncestorsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
@@ -1179,6 +1249,8 @@ export type TaskUncheckedCreateWithoutAncestorsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   planId?: number | null
   progress?: number
   rejectReason?: string | null
@@ -1223,6 +1295,8 @@ export type TaskUpdateWithoutDescendantsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
@@ -1252,6 +1326,8 @@ export type TaskUncheckedUpdateWithoutDescendantsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1291,6 +1367,8 @@ export type TaskUpdateWithoutAncestorsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
@@ -1320,6 +1398,8 @@ export type TaskUncheckedUpdateWithoutAncestorsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1348,6 +1428,8 @@ export type TaskCreateWithoutCommentsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
@@ -1377,6 +1459,8 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   planId?: number | null
   progress?: number
   rejectReason?: string | null
@@ -1421,6 +1505,8 @@ export type TaskUpdateWithoutCommentsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
@@ -1450,6 +1536,8 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1478,6 +1566,8 @@ export type TaskCreateWithoutPlanInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
@@ -1507,6 +1597,8 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
@@ -1565,6 +1657,8 @@ export type TaskScalarWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
+  domainId?: Prisma.IntNullableFilter<"Task"> | number | null
+  monitoredUnitId?: Prisma.IntNullableFilter<"Task"> | number | null
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
@@ -1591,6 +1685,8 @@ export type TaskCreateManyPlanInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
 }
@@ -1615,6 +1711,8 @@ export type TaskUpdateWithoutPlanInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -1644,6 +1742,8 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
@@ -1673,6 +1773,8 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -1756,6 +1858,8 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  domainId?: boolean
+  monitoredUnitId?: boolean
   planId?: boolean
   progress?: boolean
   rejectReason?: boolean
@@ -1790,12 +1894,14 @@ export type TaskSelectScalar = {
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  domainId?: boolean
+  monitoredUnitId?: boolean
   planId?: boolean
   progress?: boolean
   rejectReason?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "creatorEmployeeCode" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "documentIds" | "workflowInstId" | "metadata" | "startDate" | "dueDate" | "completedAt" | "createdAt" | "updatedAt" | "planId" | "progress" | "rejectReason", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "creatorEmployeeCode" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "documentIds" | "workflowInstId" | "metadata" | "startDate" | "dueDate" | "completedAt" | "createdAt" | "updatedAt" | "domainId" | "monitoredUnitId" | "planId" | "progress" | "rejectReason", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   participants?: boolean | Prisma.Task$participantsArgs<ExtArgs>
@@ -1835,6 +1941,8 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     completedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    domainId: number | null
+    monitoredUnitId: number | null
     planId: number | null
     progress: number
     rejectReason: string | null
@@ -2232,6 +2340,8 @@ export interface TaskFieldRefs {
   readonly completedAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly domainId: Prisma.FieldRef<"Task", 'Int'>
+  readonly monitoredUnitId: Prisma.FieldRef<"Task", 'Int'>
   readonly planId: Prisma.FieldRef<"Task", 'Int'>
   readonly progress: Prisma.FieldRef<"Task", 'Float'>
   readonly rejectReason: Prisma.FieldRef<"Task", 'String'>

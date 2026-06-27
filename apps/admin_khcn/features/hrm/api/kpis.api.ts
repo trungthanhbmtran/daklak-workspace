@@ -26,7 +26,10 @@ export const hrmKpiPlansApi = {
 };
 
 export const hrmKpiEvaluationsApi = {
-  list(params: any = {}): Promise<ApiResponse<any>> {
-    return apiClient.get('/hrm/kpi-evaluations', { params }) as any;
+  list: (params?: any) => {
+    return apiClient.get('/hrm/kpis/evaluations', { params }) as any;
   },
+  calculatePersonal: (payload: { periodId: number; employeeCode?: string }) => {
+    return apiClient.post('/hrm/kpis/evaluations/calculate-personal', payload) as any;
+  }
 };

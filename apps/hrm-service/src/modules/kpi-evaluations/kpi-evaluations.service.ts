@@ -218,4 +218,102 @@ export class KpiEvaluationsService {
       }
     };
   }
+
+  async calculatePersonalKpi(data: { periodId: number, employeeCode: string }) {
+    const { periodId, employeeCode } = data;
+
+    const period = await this.prisma.kpiPeriod.findUnique({ where: { id: periodId } });
+    if (!period) {
+      return { success: false, message: 'Kỳ đánh giá không tồn tại', totalScore: 0, tasks: [] };
+    }
+
+    // Find all completed tasks for this employee within the period
+    const taskParticipants = await this.prisma.taskParticipant.findMany({
+      where: {
+        employeeCode: employeeCode,
+        participantRole: 'ASSIGNEE',
+        task: {
+          status: 'DONE',
+          completedAt: {
+            gte: period.startDate,
+            lte: period.endDate
+          }
+        }
+      },
+      include: {
+        task: true
+      }
+    });
+
+    let totalScore = 0;
+    const calculatedTasks: any[] = [];
+
+    for (const tp of taskParticipants) {
+      const task = tp.task;
+      const baseScore = task.baseScore || 0;
+      let finalScore = baseScore;
+
+      const bonusPerDay = task.bonusPerDay || 0;
+      const penaltyPerDay = task.penaltyPerDay || 0;
+
+      if (task.completedAt && task.dueDate) {
+        // Calculate days difference
+        const completedDate = new Date(task.completedAt);
+        completedDate.setHours(0, 0, 0, 0);
+        const dueDate = new Date(task.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
+
+        const diffTime = completedDate.getTime() - dueDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          // Completed early
+          finalScore += Math.abs(diffDays) * bonusPerDay;
+        } else if (diffDays > 0) {
+          // Completed late
+          finalScore -= diffDays * penaltyPerDay;
+        }
+      }
+
+      totalScore += finalScore;
+
+      calculatedTasks.push({
+        taskId: task.id,
+        title: task.title,
+        baseScore: baseScore,
+        finalScore: finalScore,
+        completedAt: task.completedAt ? task.completedAt.toISOString() : '',
+        dueDate: task.dueDate ? task.dueDate.toISOString() : '',
+        status: task.status
+      });
+    }
+
+    // Upsert the KpiEvaluation record
+    const existingEvaluation = await this.prisma.kpiEvaluation.findFirst({
+      where: { employeeCode, periodId }
+    });
+
+    if (existingEvaluation) {
+      await this.prisma.kpiEvaluation.update({
+        where: { id: existingEvaluation.id },
+        data: { totalScore, status: 'COMPUTING' }
+      });
+    } else {
+      await this.prisma.kpiEvaluation.create({
+        data: {
+          employeeCode,
+          periodId,
+          totalScore,
+          status: 'COMPUTING'
+        }
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Tính điểm KPI thành công',
+      totalScore,
+      tasks: calculatedTasks
+    };
+  }
 }

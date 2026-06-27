@@ -58,3 +58,14 @@ export function useKpiEvaluations(period: string) {
     enabled: !!period,
   });
 }
+
+export function useCalculatePersonalKpi() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { periodId: number; employeeCode?: string }) => hrmKpiEvaluationsApi.calculatePersonal(payload),
+    onSuccess: (_, variables) => {
+      // Invalidate the evaluations query
+      queryClient.invalidateQueries({ queryKey: hrmKeys.kpiEvaluations(variables.periodId.toString()) });
+    }
+  });
+}

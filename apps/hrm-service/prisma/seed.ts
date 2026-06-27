@@ -18,6 +18,12 @@ const adapter = new PrismaMariaDb(url);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  console.log('🔹 Cleaning old seed data...');
+  await prisma.kpiCriteria.deleteMany({});
+  await prisma.kpiPeriod.deleteMany({});
+  await prisma.rankQuota.deleteMany({});
+  await prisma.taskRankTemplate.deleteMany({});
+  
   console.log('🔹 Seed HRM employees...');
   const startDate = new Date('2020-01-01');
 
@@ -301,6 +307,59 @@ async function main() {
 
   await prisma.taskRankTemplate.createMany({ data: RANK_TEMPLATES });
   console.log(`✅ Đã seed ${RANK_TEMPLATES.length} TaskRankTemplates.`);
+
+  // --- Seed KPI Periods ---
+  console.log('🔹 Seed KPI Periods...');
+  const kpiPeriods = [
+    { name: 'Tháng 1/2026', startDate: new Date('2026-01-01'), endDate: new Date('2026-01-31') },
+    { name: 'Tháng 2/2026', startDate: new Date('2026-02-01'), endDate: new Date('2026-02-28') },
+    { name: 'Tháng 3/2026', startDate: new Date('2026-03-01'), endDate: new Date('2026-03-31') },
+    { name: 'Tháng 4/2026', startDate: new Date('2026-04-01'), endDate: new Date('2026-04-30') },
+    { name: 'Tháng 5/2026', startDate: new Date('2026-05-01'), endDate: new Date('2026-05-31') },
+    { name: 'Tháng 6/2026', startDate: new Date('2026-06-01'), endDate: new Date('2026-06-30') },
+  ];
+  await prisma.kpiPeriod.createMany({ data: kpiPeriods });
+  console.log(`✅ Đã seed ${kpiPeriods.length} KPI Periods.`);
+
+  // --- Seed Rank Quotas ---
+  console.log('🔹 Seed Rank Quotas...');
+  const rankQuotas = RANK_TEMPLATES.map(t => {
+    let targetValue = 10;
+    let weight = t.defaultWeight || 10;
+    
+    if (['Văn bản QPPL', 'Bộ tài liệu', 'Chương trình', 'Bài báo', 'Báo cáo thẩm định'].includes(t.defaultUnit)) targetValue = 2;
+    else if (['Đề án/Quy hoạch', 'Tài liệu thiết kế'].includes(t.defaultUnit)) targetValue = 3;
+    else if (t.defaultUnit === 'Hồ sơ') targetValue = t.rank === 'PRINCIPAL_SPECIALIST' ? 15 : (t.rank === 'OFFICER' ? 50 : 30);
+    else if (t.defaultUnit === 'Văn bản') targetValue = 20;
+    else if (['Vụ việc', 'Khóa/Lượt', 'Dự án/Hạng mục'].includes(t.defaultUnit)) targetValue = 4;
+    else if (['Báo cáo/Kế hoạch', 'Báo cáo', 'Lượt tham gia', 'Gói dịch vụ', 'Module/Tính năng'].includes(t.defaultUnit)) targetValue = 5;
+    else if (['Bản ghi/Bộ dữ liệu', 'Lượt', 'Phiếu hỗ trợ (Ticket)'].includes(t.defaultUnit)) targetValue = 100;
+    else if (t.defaultUnit === 'Đề tài') targetValue = 1;
+    else if (['Ca trực', 'Phiếu kiểm định'].includes(t.defaultUnit)) targetValue = 20;
+    else if (['Hệ thống/Yêu cầu', 'Lần triển khai'].includes(t.defaultUnit)) targetValue = 10;
+    else if (t.defaultUnit === 'Bản ghi') targetValue = 30;
+
+    return {
+      rankCode: t.rank,
+      taskName: t.taskName,
+      unit: t.defaultUnit,
+      targetValue,
+      weight
+    };
+  });
+  await prisma.rankQuota.createMany({ data: rankQuotas });
+  console.log(`✅ Đã seed ${rankQuotas.length} Rank Quotas.`);
+
+  // --- Seed KPI Criteria (Updated for Rank Quotas) ---
+  console.log('🔹 Seed KPI Criteria...');
+  const kpiCriteria = [
+    { name: 'Hoàn thành định mức chuyên môn', description: 'Đánh giá mức độ hoàn thành số lượng công việc so với định mức chức danh (Rank Quota)', weight: 50, baseScore: 50, scoringMethod: 'AUTO', bonusPerDay: 2, penaltyPerDay: 5 },
+    { name: 'Tiến độ và chất lượng', description: 'Đánh giá việc đảm bảo thời gian và chất lượng (không bị trả về) của các công việc', weight: 30, baseScore: 30, scoringMethod: 'AUTO', bonusPerDay: 3, penaltyPerDay: 4 },
+    { name: 'Nhiệm vụ đột xuất', description: 'Đánh giá việc thực hiện các nhiệm vụ phát sinh ngoài định mức do Lãnh đạo giao', weight: 10, baseScore: 10, scoringMethod: 'AUTO', bonusPerDay: 1, penaltyPerDay: 2 },
+    { name: 'Kỷ luật và Phối hợp', description: 'Đánh giá việc chấp hành nội quy, phối hợp làm việc nhóm', weight: 10, baseScore: 10, scoringMethod: 'MANUAL', bonusPerDay: 0, penaltyPerDay: 0 }
+  ];
+  await prisma.kpiCriteria.createMany({ data: kpiCriteria });
+  console.log(`✅ Đã seed ${kpiCriteria.length} KPI Criteria.`);
 }
 
 main()

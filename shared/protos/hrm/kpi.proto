@@ -13,6 +13,7 @@ service KpiService {
   rpc DeleteCriterion (DeleteCriterionRequest) returns (DeleteCriterionResponse) {}
   rpc CreateEvaluation (CreateEvaluationRequest) returns (EvaluationResponse) {}
   rpc FindEvaluations (FindEvaluationsRequest) returns (EvaluationsResponse) {}
+  rpc CalculatePersonalKpi (CalculatePersonalKpiRequest) returns (CalculatePersonalKpiResponse) {}
 }
 
 message FindPeriodsRequest {}
@@ -132,4 +133,26 @@ message EvaluationsResponse {
   string message = 2;
   repeated EvaluationResponse data = 3;
   common.Meta meta = 4;
+}
+
+message CalculatePersonalKpiRequest {
+  int32 periodId = 1;
+  string employeeCode = 2;
+}
+
+message CalculatedTaskScore {
+  int32 taskId = 1;
+  string title = 2;
+  float baseScore = 3;
+  float finalScore = 4;
+  string completedAt = 5;
+  string dueDate = 6;
+  string status = 7;
+}
+
+message CalculatePersonalKpiResponse {
+  bool success = 1;
+  string message = 2;
+  float totalScore = 3;
+  repeated CalculatedTaskScore tasks = 4;
 }

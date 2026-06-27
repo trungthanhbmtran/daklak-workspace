@@ -100,6 +100,16 @@ export class UsersController {
     return this.usersService.findOne(data);
   }
 
+  @GrpcMethod('UserService', 'GetSubordinates')
+  getSubordinates(data: { user_id: number }) {
+    return this.usersService.getSubordinates(data.user_id);
+  }
+
+  @GrpcMethod('UserService', 'GetEmployeesByScope')
+  getEmployeesByScope(data: { domain_id?: number, monitored_unit_id?: number }) {
+    return this.usersService.getEmployeesByScope(data.domain_id, data.monitored_unit_id);
+  }
+
   @GrpcMethod('UserService', 'ListUsers')
   async listUsers(
     data: { skip?: number; take?: number; search?: string } = {},

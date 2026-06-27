@@ -27,6 +27,9 @@ model Task {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  domainId       Int?      @map("domain_id")
+  monitoredUnitId Int?     @map("monitored_unit_id")
+
   planId         Int?      @map("plan_id")
   plan           MasterPlan? @relation(fields: [planId], references: [id])
 

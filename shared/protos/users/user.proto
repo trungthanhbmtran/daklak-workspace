@@ -22,6 +22,8 @@ service UserService {
   rpc SetPassword (SetPasswordRequest) returns (SetPasswordResponse);
   // Lấy danh sách phòng ban và nhân viên cấp dưới trực tiếp để giao việc
   rpc GetSubordinates (GetSubordinatesRequest) returns (GetSubordinatesResponse);
+  // Lấy danh sách nhân viên phụ trách theo domain và monitored_unit
+  rpc GetEmployeesByScope (GetEmployeesByScopeRequest) returns (GetEmployeesByScopeResponse);
 }
 
 message CreateUserRequest {
@@ -186,4 +188,14 @@ message GetSubordinatesRequest {
 message GetSubordinatesResponse {
   repeated int32 allowed_department_ids = 1;
   repeated string allowed_employee_codes = 2;
+  repeated int32 allowed_domain_ids = 3;
+}
+
+message GetEmployeesByScopeRequest {
+  int32 domain_id = 1;
+  int32 monitored_unit_id = 2;
+}
+
+message GetEmployeesByScopeResponse {
+  repeated string employee_codes = 1;
 }

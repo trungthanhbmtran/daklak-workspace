@@ -714,6 +714,7 @@ export class UsersService implements OnModuleInit {
 
     const deptIds = new Set<number>();
     const empCodes = new Set<string>();
+    const domainIds = new Set<number>();
 
     for (const pos of user.jobPositions) {
       if (!pos.unitId || !pos.jobTitle) continue;
@@ -757,13 +758,20 @@ export class UsersService implements OnModuleInit {
       // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots)
       const staffings = await this.prisma.organizationStaffing.findMany({
         where: { unitId: pos.unitId, jobTitleId: pos.jobTitleId },
-        include: { slots: { include: { monitoredUnits: true } } },
+        include: { slots: { include: { monitoredUnits: true, domains: true } } },
       });
 
       for (const st of staffings) {
         for (const slot of st.slots) {
-          for (const mu of slot.monitoredUnits) {
-            deptIds.add(mu.unitId);
+          if (slot.assignedEmployeeCode === user.employeeCode) {
+            for (const mu of slot.monitoredUnits) {
+              deptIds.add(mu.unitId);
+            }
+            if (slot.domains) {
+              for (const d of slot.domains) {
+                domainIds.add(d.domainId);
+              }
+            }
           }
         }
       }
@@ -812,9 +820,40 @@ export class UsersService implements OnModuleInit {
     return {
       allowedDepartmentIds: Array.from(deptIds),
       allowedEmployeeCodes: Array.from(empCodes),
+      allowedDomainIds: Array.from(domainIds),
       allowed_department_ids: Array.from(deptIds),
       allowed_employee_codes: Array.from(empCodes),
+      allowed_domain_ids: Array.from(domainIds),
     };
+  }
+
+  async getEmployeesByScope(domainId?: number, monitoredUnitId?: number) {
+    const employeeCodes = new Set<string>();
+
+    if (!domainId && !monitoredUnitId) {
+      return { employeeCodes: [] };
+    }
+
+    const whereObj: any = {};
+    if (domainId) {
+      whereObj.domains = { some: { domainId } };
+    }
+    if (monitoredUnitId) {
+      whereObj.monitoredUnits = { some: { unitId: monitoredUnitId } };
+    }
+
+    const slots = await this.prisma.organizationStaffingSlot.findMany({
+      where: whereObj,
+      select: { assignedEmployeeCode: true }
+    });
+
+    for (const slot of slots) {
+      if (slot.assignedEmployeeCode) {
+        employeeCodes.add(slot.assignedEmployeeCode);
+      }
+    }
+
+    return { employeeCodes: Array.from(employeeCodes) };
   }
 
   private async getSubordinatesInSameUnit(
