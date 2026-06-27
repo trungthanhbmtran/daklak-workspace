@@ -113,7 +113,7 @@ export function StaffingTable({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm max-w-[300px] break-words whitespace-normal align-top">
+                  <TableCell className="text-muted-foreground text-sm max-w-[300px] wrap-break-word whitespace-normal align-top">
                     <div className="max-h-[120px] overflow-y-auto pr-2 custom-scrollbar">
                       {row.jobTitleDomainName || "—"}
                     </div>
@@ -148,6 +148,7 @@ export function StaffingTable({
                                 ).map((slotOrder) => {
                                   const isSelected = currentActiveSlot === slotOrder;
                                   const hasData = row.slots?.some((s) => s.slotOrder === slotOrder);
+                                  const assignedUsers = row.assignedUsersBySlot?.[slotOrder];
 
                                   return (
                                     <button
@@ -155,19 +156,28 @@ export function StaffingTable({
                                       type="button"
                                       onClick={() => changeActiveSlot(row.id, slotOrder)}
                                       className={cn(
-                                        "flex items-center justify-between text-left px-3 py-2 text-xs font-medium rounded-lg transition-all min-w-[100px] md:w-full border select-none shrink-0",
+                                        "flex flex-col text-left px-3 py-2 text-xs rounded-lg transition-all min-w-[100px] md:w-full border select-none shrink-0 relative",
                                         isSelected
                                           ? "bg-primary text-primary-foreground border-primary shadow-sm"
                                           : "bg-background text-foreground hover:bg-muted/80 border-border"
                                       )}
                                     >
-                                      <span>Vị trí {slotOrder}</span>
-                                      {hasData && (
-                                        <span className={cn(
-                                          "h-1.5 w-1.5 rounded-full",
-                                          isSelected ? "bg-primary-foreground" : "bg-emerald-500"
-                                        )} />
-                                      )}
+                                      <div className="flex items-center justify-between w-full">
+                                        <span className="font-semibold">Vị trí {slotOrder}</span>
+                                        {hasData && (
+                                          <span className={cn(
+                                            "h-1.5 w-1.5 rounded-full shrink-0",
+                                            isSelected ? "bg-primary-foreground" : "bg-emerald-500"
+                                          )} />
+                                        )}
+                                      </div>
+                                      <div className={cn(
+                                        "mt-0.5 truncate max-w-full text-[11px]",
+                                        isSelected ? "text-primary-foreground/90" : "text-muted-foreground",
+                                        assignedUsers && assignedUsers.length > 0 ? "" : "italic opacity-70"
+                                      )}>
+                                        {assignedUsers && assignedUsers.length > 0 ? assignedUsers.join(", ") : "Chưa có nhân sự"}
+                                      </div>
                                     </button>
                                   );
                                 })}

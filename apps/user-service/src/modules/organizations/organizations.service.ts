@@ -10,7 +10,7 @@ export class OrganizationsService {
   private treeCache = new Map<string, { data: any; expiresAt: number }>();
   private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // --- 1. QUẢN LÝ ĐƠN VỊ (CRUD) ---
 
@@ -382,14 +382,41 @@ export class OrganizationsService {
     });
 
     const data = items.map((item) => {
-      const assignedUsers = jobPositions
-        .filter((jp) => jp.jobTitleId === item.jobTitleId)
+      // Lấy tất cả nhân sự đang giữ chức danh này trong đơn vị
+      const jobPositionsForTitle = jobPositions.filter(
+        (jp) => jp.jobTitleId === item.jobTitleId
+      );
+
+      const assignedUsers = jobPositionsForTitle
         .map((jp) => jp.user?.fullName)
         .filter(Boolean) as string[];
 
+      // Tạo object map slotOrder -> danh sách tên nhân sự
+      const assignedUsersBySlot: Record<number, string[]> = {};
+      jobPositionsForTitle.forEach((jp) => {
+        if (jp.slotOrder) {
+          if (!assignedUsersBySlot[jp.slotOrder]) {
+            assignedUsersBySlot[jp.slotOrder] = [];
+          }
+          if (jp.user?.fullName) {
+            assignedUsersBySlot[jp.slotOrder].push(jp.user.fullName);
+          }
+        }
+      });
+
+      // Vẫn map vào slots hiện có nếu cần (tương thích ngược)
+      const mappedSlots = item.slots.map((slot) => {
+        return {
+          ...slot,
+          currentEmployeeNames: assignedUsersBySlot[slot.slotOrder] || [],
+        };
+      });
+
       return {
         ...item,
+        slots: mappedSlots,
         current_employee_names: assignedUsers,
+        assignedUsersBySlot,
       };
     });
 

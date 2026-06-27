@@ -64,6 +64,7 @@ export interface StaffingSlotItem {
   domainNames?: string[];
   monitoredUnitIds?: number[];
   monitoredUnitNames?: string[];
+  currentEmployeeNames?: string[];
 }
 
 /** Một dòng báo cáo định biên của đơn vị */
@@ -79,6 +80,7 @@ export interface StaffingReportItem {
   jobTitleMonitoredUnitNames?: string[];
   jobTitleGeographicAreaName?: string;
   slots?: StaffingSlotItem[];
+  assignedUsersBySlot?: Record<number, string[]>;
 }
 
 export interface UpdateJobTitlePayload {
