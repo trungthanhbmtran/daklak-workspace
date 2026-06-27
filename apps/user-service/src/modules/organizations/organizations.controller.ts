@@ -252,6 +252,8 @@ export class OrganizationsController {
             monitoredUnitNames: (slot.monitoredUnits ?? []).map(
               (mu: any) => mu.unit?.name ?? mu.unit?.code ?? '',
             ),
+            assignedEmployeeName: slot.assignedEmployeeName ?? '',
+            assignedEmployeeCode: slot.assignedEmployeeCode ?? '',
           })),
         };
       }),

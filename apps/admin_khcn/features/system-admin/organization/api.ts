@@ -61,6 +61,8 @@ function normalizeStaffingSlotItem(s: any): StaffingSlotItem {
     domainNames: s.domainNames ?? s.domain_names ?? [],
     monitoredUnitIds: s.monitoredUnitIds ?? s.monitored_unit_ids ?? [],
     monitoredUnitNames: s.monitoredUnitNames ?? s.monitored_unit_names ?? [],
+    assignedEmployeeName: s.assignedEmployeeName ?? s.assigned_employee_name,
+    assignedEmployeeCode: s.assignedEmployeeCode ?? s.assigned_employee_code,
   };
 }
 
