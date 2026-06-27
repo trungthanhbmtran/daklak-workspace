@@ -24,7 +24,6 @@ type SlotCardProps = {
   }) => void;
   subordinateUnits: { id: number; name: string }[];
   isSaving: boolean;
-  assignedEmployeeName?: string;
 };
 
 export function SlotCard({
@@ -36,7 +35,6 @@ export function SlotCard({
   subordinateUnits,
   onSave,
   isSaving,
-  assignedEmployeeName,
 }: SlotCardProps) {
   const [description, setDescription] = useState(existingSlot?.description ?? "");
   const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
@@ -73,19 +71,6 @@ export function SlotCard({
       </CardHeader>
 
       <CardContent className="p-4 flex-1 flex flex-col gap-4 text-sm">
-        {/* Nhân sự đang gán */}
-        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-          <div className="flex-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-0.5">Nhân sự đảm nhiệm</span>
-            {assignedEmployeeName ? (
-              <span className="font-medium text-foreground">{assignedEmployeeName}</span>
-            ) : (
-              <span className="text-muted-foreground italic text-sm">Chưa phân công nhân sự</span>
-            )}
-          </div>
-        </div>
-
         {/* Nhiệm vụ */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Nhiệm vụ được giao</label>
