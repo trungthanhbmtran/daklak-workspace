@@ -64,6 +64,8 @@ export interface StaffingSlotItem {
   domainNames?: string[];
   monitoredUnitIds?: number[];
   monitoredUnitNames?: string[];
+  assignedEmployeeName?: string;
+  assignedEmployeeCode?: string;
 }
 
 /** Một dòng báo cáo định biên của đơn vị */

@@ -151,6 +151,8 @@ message StaffingSlotItem {
   repeated string monitored_unit_names = 10;
   repeated int32 geographic_area_ids = 11;   // Nhiều khu vực địa lý
   repeated string geographic_area_names = 12;
+  string assigned_employee_name = 13;
+  string assigned_employee_code = 14;
 }
 
 message SetStaffingSlotRequest {

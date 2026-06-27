@@ -142,8 +142,8 @@ export function StaffingTable({
                                   (_, i) => i + 1
                                 ).map((slotOrder) => {
                                   const isSelected = currentActiveSlot === slotOrder;
-                                  const hasData = row.slots?.some((s) => s.slotOrder === slotOrder);
-                                  const assignedUser = row.assignedUserBySlot?.[slotOrder];
+                                  const existingSlot = row.slots?.find((s) => s.slotOrder === slotOrder);
+                                  const employeeName = existingSlot?.assignedEmployeeName;
 
                                   return (
                                     <button
@@ -159,7 +159,7 @@ export function StaffingTable({
                                     >
                                       <div className="flex items-center justify-between w-full">
                                         <span className="font-semibold">Vị trí {slotOrder}</span>
-                                        {hasData && (
+                                        {existingSlot && (
                                           <span className={cn(
                                             "h-1.5 w-1.5 rounded-full shrink-0",
                                             isSelected ? "bg-primary-foreground" : "bg-emerald-500"
@@ -169,9 +169,9 @@ export function StaffingTable({
                                       <div className={cn(
                                         "mt-0.5 truncate max-w-full text-[11px]",
                                         isSelected ? "text-primary-foreground/90" : "text-muted-foreground",
-                                        assignedUser ? "" : "italic opacity-70"
+                                        employeeName ? "" : "italic opacity-70"
                                       )}>
-                                        {assignedUser ? assignedUser.fullName : "Chưa có nhân sự"}
+                                        {employeeName ? employeeName : "Chưa có nhân sự"}
                                       </div>
                                     </button>
                                   );
@@ -185,7 +185,6 @@ export function StaffingTable({
                                 const existingSlot = row.slots?.find(
                                   (s) => s.slotOrder === currentActiveSlot
                                 );
-                                const assignedUser = row.assignedUserBySlot?.[currentActiveSlot];
                                 return (
                                   <div className="animate-in fade-in-50 duration-200">
                                     <SlotCard

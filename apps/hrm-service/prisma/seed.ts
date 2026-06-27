@@ -145,7 +145,7 @@ async function main() {
     await prisma.$executeRawUnsafe(`
       UPDATE admin_hrm.employees e
       JOIN admin_systems.users u ON e.email = u.email
-      SET e.user_id = u.id;
+      SET e.user_id = u.id, e.updated_at = NOW();
     `);
     console.log('✅ Đã đồng bộ user_id thành công.');
   } catch (error) {
@@ -206,8 +206,8 @@ async function main() {
         } else {
           // Tự động tạo staffing và slot nếu chưa có
           await prisma.$executeRawUnsafe(`
-            INSERT INTO admin_systems.org_staffing (unit_id, job_title_id, quantity)
-            VALUES (${e.departmentId}, ${e.jobTitleId}, 1)
+            INSERT INTO admin_systems.org_staffing (unit_id, job_title_id, quantity, created_at, updated_at)
+            VALUES (${e.departmentId}, ${e.jobTitleId}, 1, NOW(), NOW())
           `);
           
           const newStaffing: any[] = await prisma.$queryRaw`

@@ -401,17 +401,26 @@ export class OrganizationsService {
       // Map tên nhân sự và mã nhân sự vào từng slot
       const assignedUserBySlot: Record<number, { fullName: string; employeeCode: string | null }> = {};
 
-      item.slots.forEach((slot) => {
+      const mappedSlots = item.slots.map((slot) => {
         const code = (slot as any).assignedEmployeeCode;
+        let employeeName = "";
+        
         if (code) {
           const fullName = userMap.get(code);
           if (fullName) {
+            employeeName = fullName;
             assignedUserBySlot[slot.slotOrder] = {
               fullName,
               employeeCode: code,
             };
           }
         }
+        
+        return {
+          ...slot,
+          assignedEmployeeCode: code || "",
+          assignedEmployeeName: employeeName,
+        };
       });
 
       const currentEmployeeNames = Object.values(assignedUserBySlot)
@@ -423,6 +432,7 @@ export class OrganizationsService {
         currentCount: currentEmployeeNames.length,
         current_employee_names: currentEmployeeNames,
         assignedUserBySlot,
+        slots: mappedSlots,
       };
     });
 
