@@ -12,6 +12,7 @@ export function AiPromptConfig() {
   
   const [promptMasterPlan, setPromptMasterPlan] = useState('');
   const [promptProjectTasks, setPromptProjectTasks] = useState('');
+  const [promptSubtaskAssignment, setPromptSubtaskAssignment] = useState('');
 
   useEffect(() => {
     if (configs['AI_PROMPT_MASTER_PLAN_TASKS'] !== undefined) {
@@ -60,7 +61,34 @@ Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`j
   }
 ]`);
     }
-  }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS']]);
+
+    if (configs['AI_PROMPT_SUBTASK_ASSIGNMENT'] !== undefined) {
+      setPromptSubtaskAssignment(configs['AI_PROMPT_SUBTASK_ASSIGNMENT']);
+    } else {
+      setPromptSubtaskAssignment(`Bạn là Trưởng nhóm đang cần phân rã một công việc lớn thành các công việc con (Subtasks) và giao cho các thành viên trong nhóm.
+
+Thông tin công việc lớn:
+Tên: "{parentTitle}"
+Mô tả/Yêu cầu: "{parentDescription}"
+
+Danh sách nhân sự hiện có (kèm Ngạch/Chức danh, mã nhân viên):
+{employeesContext}
+
+Hãy phân rã công việc này thành 3-5 subtask chi tiết để hoàn thành mục tiêu. Đối với mỗi subtask, hãy đề xuất 1 người thực hiện phù hợp nhất dựa trên danh sách nhân sự.
+
+Trả về duy nhất một mảng JSON thuần túy (không bọc markdown \`\`\`json) theo cấu trúc:
+[
+  {
+    "title": "Tên subtask",
+    "description": "Mô tả chi tiết",
+    "priority": "HIGH/MEDIUM/LOW",
+    "dueDate": "YYYY-MM-DD",
+    "assigneeCode": "Mã nhân viên (ví dụ: NV001, hoặc UNASSIGNED nếu không rõ)",
+    "reasoning": "Giải thích ngắn gọn lý do chọn người này"
+  }
+]`);
+    }
+  }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS'], configs['AI_PROMPT_SUBTASK_ASSIGNMENT']]);
 
   const handleSavePrompts = async () => {
     try {
@@ -74,6 +102,11 @@ Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`j
           key: 'AI_PROMPT_PROJECT_TASKS',
           value: promptProjectTasks,
           description: 'Mẫu Prompt sinh công việc cho Dự án/OKR'
+        },
+        {
+          key: 'AI_PROMPT_SUBTASK_ASSIGNMENT',
+          value: promptSubtaskAssignment,
+          description: 'Mẫu Prompt phân rã công việc & giao việc'
         }
       ]);
       toast.success('Đã lưu cấu hình AI Prompt thành công!');
@@ -112,6 +145,16 @@ Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`j
             className="min-h-[250px] font-mono text-sm bg-slate-50 rounded-xl border-slate-200"
             value={promptProjectTasks}
             onChange={(e) => setPromptProjectTasks(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-3 pt-6 border-t border-slate-100">
+          <label className="text-sm font-bold text-slate-700">3. Prompt Phân rã Công việc & Giao việc (Subtasks)</label>
+          <p className="text-xs text-slate-500">Các biến hỗ trợ: <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">{`{parentTitle}`}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">{`{parentDescription}`}</code>, <code className="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">{`{employeesContext}`}</code></p>
+          <Textarea 
+            className="min-h-[300px] font-mono text-sm bg-slate-50 rounded-xl border-slate-200"
+            value={promptSubtaskAssignment}
+            onChange={(e) => setPromptSubtaskAssignment(e.target.value)}
           />
         </div>
       </CardContent>

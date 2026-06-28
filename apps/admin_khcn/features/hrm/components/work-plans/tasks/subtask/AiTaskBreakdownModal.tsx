@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Sparkles, Calendar, Flag, UserPlus, Trash2, Split } from 'lucide-react';
 import { hrmTasksApi } from '@/features/hrm/api';
 import { aiApi } from '@/features/hrm/api/ai.api';
-import { hrmApi } from '@/features/hrm/api/employees.api';
 
 interface AiTaskBreakdownModalProps {
   isOpen: boolean;
@@ -43,33 +42,51 @@ export function AiTaskBreakdownModal({ isOpen, onClose, parentTask, planId }: Ai
     setIsGenerating(true);
     setGeneratedTasks([]);
     try {
-      // 1. Lấy danh sách nhân sự làm context
-      const empRes = await hrmApi.list({ pageSize: 50 });
-      const employeesContext = (empRes.data || [])
-        .map(emp => `${emp.fullName} (Mã: ${emp.employeeCode}, Chức danh: ${emp.jobTitle?.name || 'Không có'})`)
-        .join('\n');
-
-      // 2. Gọi AI API
-      const resultList = await aiApi.generateSubTasksAssignment({
-        parentTitle: parentTask.title,
-        parentDescription: parentTask.description || '',
-        employeesContext: employeesContext || 'Không có dữ liệu nhân sự'
-      });
-
-      if (!Array.isArray(resultList)) {
-        throw new Error('AI trả về sai định dạng dữ liệu (không phải mảng)');
+      const res = await aiApi.requestAiExecution('SUBTASK_ASSIGNMENT', { taskId: parentTask.id });
+      if (res.jobId) {
+        pollJobStatus(res.jobId);
+      } else {
+        throw new Error('Không nhận được jobId từ server');
       }
-
-      const tasksWithIds = resultList.map(t => ({
-        ...t,
-        id: Math.random().toString(36).substring(7)
-      }));
-
-      setGeneratedTasks(tasksWithIds);
-      toast.success(`AI đã phân rã thành ${tasksWithIds.length} công việc con!`);
     } catch (error: any) {
-      toast.error(error.message || 'Lỗi khi gọi AI phân tích');
-    } finally {
+      toast.error(error.message || 'Lỗi khi gọi yêu cầu phân rã AI');
+      setIsGenerating(false);
+    }
+  };
+
+  const pollJobStatus = async (jobId: string) => {
+    try {
+      const statusRes = await aiApi.getAiJobStatus(jobId);
+      if (statusRes.status === 'COMPLETED') {
+        let resultList = statusRes.result;
+        if (typeof resultList === 'string') {
+          try {
+            resultList = JSON.parse(resultList);
+          } catch (e) {
+            console.error("Lỗi parse JSON:", e);
+            throw new Error("Dữ liệu trả về không phải là JSON hợp lệ.");
+          }
+        }
+        if (!Array.isArray(resultList)) {
+          throw new Error('AI trả về sai định dạng dữ liệu (không phải mảng)');
+        }
+
+        const tasksWithIds = resultList.map((t: any) => ({
+          ...t,
+          id: Math.random().toString(36).substring(7)
+        }));
+
+        setGeneratedTasks(tasksWithIds);
+        toast.success(`AI đã phân rã thành ${tasksWithIds.length} công việc con!`);
+        setIsGenerating(false);
+      } else if (statusRes.status === 'FAILED') {
+        throw new Error(statusRes.error || 'Quá trình phân rã AI thất bại.');
+      } else {
+        // Tiếp tục polling sau 2 giây
+        setTimeout(() => pollJobStatus(jobId), 2000);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi lấy kết quả AI');
       setIsGenerating(false);
     }
   };

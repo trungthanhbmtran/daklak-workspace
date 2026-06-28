@@ -8,6 +8,9 @@ import { AiController } from './ai.controller';
 @Module({
   imports: [
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
+    registerGrpcService(MICROSERVICES.USER),
+    registerGrpcService(MICROSERVICES.TASK),
+    registerGrpcService(MICROSERVICES.MASTER_PLAN),
     ClientsModule.register([
       {
         name: 'AI_QUEUE_SERVICE',
