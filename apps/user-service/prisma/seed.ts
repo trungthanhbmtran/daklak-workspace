@@ -4850,9 +4850,11 @@ async function main() {
     { code: 'SYS_RESOURCE', name: 'Tài nguyên PBAC', route: '/services/admin/resources', icon: 'Database', order: 4, parentCode: 'SYS_GROUP', linkedResourceCode: 'RESOURCE', type: 'MENU' },
     { code: 'SYS_MENU', name: 'Quản lý Menu', route: '/services/admin/menus', icon: 'Menu', order: 5, parentCode: 'SYS_GROUP', linkedResourceCode: 'MENU', type: 'MENU' },
     { code: 'SYS_CAT', name: 'Danh mục', route: '/services/admin/categories', icon: 'ListTree', order: 6, parentCode: 'SYS_GROUP', linkedResourceCode: 'CATEGORY', type: 'MENU' },
-    { code: 'SYS_NOTIF', name: 'Thông báo', route: '/services/admin/notifications', icon: 'Mail', order: 7, parentCode: 'SYS_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
+    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/services/admin/notifications', icon: 'Mail', order: 7, parentCode: 'SYS_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
+    
+    // 2.5 Trung tâm Thông báo (Hub)
+    { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'SYS_SETTING', name: 'Cấu hình chung', route: '/services/admin/settings', icon: 'Settings', order: 8, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
-    { code: 'SYS_WORKFLOW', name: 'Quy trình hệ thống', route: '/services/admin/workflows', icon: 'GitBranch', order: 9, parentCode: 'SYS_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
 
     // 3. Quản lý Nhân sự & Công việc
     { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: 'HRM_EMPLOYEE', type: 'SERVICE_ITEM' },
@@ -4893,6 +4895,7 @@ async function main() {
     { code: 'WORKFLOW_GROUP', name: 'Quy trình & Liên thông', route: '/services/integration', icon: 'GitBranch', order: 5, linkedResourceCode: 'WORKFLOW', type: 'SERVICE_ITEM' },
     { code: 'WORKFLOW_DASHBOARD_MENU', name: 'Bảng quản trị', route: '/services/integration', icon: 'Layers', order: 1, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
     { code: 'WORKFLOW_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/integration/gateway', icon: 'Network', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
+    { code: 'WORKFLOW_SYSTEM_MENU', name: 'Quy trình hệ thống', route: '/services/integration/workflows', icon: 'GitBranch', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
   ];
 
   for (const m of menuData) {

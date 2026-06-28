@@ -2,46 +2,35 @@
 
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import {
-  LayoutDashboard, Users, KeyRound, ListTree, Settings2, Building2,
-  ShieldCheck, FileText, Newspaper, Calendar, CheckSquare, BarChart2,
-  Mail, Send, Inbox, Layers, Globe, Eye, ClipboardList, Tag, Image,
-  MessageSquare, Menu, Database, GitBranch, UserCircle, type LucideIcon,
-} from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { menuApi } from "@/features/system-admin/menus/api";
 
 // ----------------------------------------------------------------------
 // 1. ICON MAP — hỗ trợ cả Ionicons-style (cũ) và PascalCase Lucide (mới)
 // ----------------------------------------------------------------------
-const ICON_MAP: Record<string, LucideIcon> = {
+const LEGACY_MAP: Record<string, string> = {
   // Ionicons-style
-  "grid-outline": LayoutDashboard, "apps-outline": LayoutDashboard,
-  "people-outline": Users, "person-outline": Users,
-  "lock-closed-outline": KeyRound, "shield-checkmark-outline": ShieldCheck,
-  "list-outline": ListTree, "megaphone-outline": ListTree,
-  "calendar-outline": Calendar, "layers-outline": Layers,
-  "bar-chart-outline": BarChart2, "globe-outline": Globe,
-  "folder-outline": Settings2, "cog-outline": Settings2,
-  "settings-outline": Settings2, "settings-2-outline": Settings2,
-  "apartment": Building2, "document-text-outline": FileText,
-  "document-outline": FileText, "document-attach-outline": FileText,
-  "briefcase-outline": CheckSquare, "newspaper-outline": Newspaper,
-  "git-network-outline": GitBranch,
-  // PascalCase Lucide (Standard Menus)
-  "LayoutDashboard": LayoutDashboard, "Users": Users, "Settings": Settings2,
-  "Settings2": Settings2, "ShieldCheck": ShieldCheck, "KeyRound": KeyRound,
-  "FileText": FileText, "Newspaper": Newspaper, "Calendar": Calendar,
-  "CheckSquare": CheckSquare, "BarChart2": BarChart2, "Mail": Mail,
-  "Send": Send, "Inbox": Inbox, "Layers": Layers, "Globe": Globe,
-  "Eye": Eye, "ClipboardList": ClipboardList, "Tag": Tag, "Image": Image,
-  "MessageSquare": MessageSquare, "Menu": Menu, "Database": Database,
-  "ListTree": ListTree, "GitBranch": GitBranch, "Building2": Building2,
-  "UserCircle": UserCircle,
+  "grid-outline": "LayoutDashboard", "apps-outline": "LayoutDashboard",
+  "people-outline": "Users", "person-outline": "Users",
+  "lock-closed-outline": "KeyRound", "shield-checkmark-outline": "ShieldCheck",
+  "list-outline": "ListTree", "megaphone-outline": "ListTree",
+  "calendar-outline": "Calendar", "layers-outline": "Layers",
+  "bar-chart-outline": "BarChart2", "globe-outline": "Globe",
+  "folder-outline": "Settings2", "cog-outline": "Settings2",
+  "settings-outline": "Settings2", "settings-2-outline": "Settings2",
+  "apartment": "Building2", "document-text-outline": "FileText",
+  "document-outline": "FileText", "document-attach-outline": "FileText",
+  "briefcase-outline": "CheckSquare", "newspaper-outline": "Newspaper",
+  "git-network-outline": "GitBranch",
 };
 
 export const getIcon = (iconName?: string | null): LucideIcon => {
-  if (!iconName) return LayoutDashboard;
-  return ICON_MAP[iconName.trim()] ?? LayoutDashboard;
+  if (!iconName) return LucideIcons.LayoutDashboard as LucideIcon;
+  const name = iconName.trim();
+  const pascalName = LEGACY_MAP[name] || name;
+  const IconComponent = (LucideIcons as any)[pascalName];
+  return (IconComponent as LucideIcon) ?? (LucideIcons.LayoutDashboard as LucideIcon);
 };
 
 // ----------------------------------------------------------------------
