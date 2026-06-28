@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -157,15 +158,12 @@ export function ManualPlanSelectorByRankClient() {
                         <CardDescription>Chọn nhóm và ngạch để thiết lập</CardDescription>
                         
                         <div className="mt-4">
-                            <Select value={classification} onValueChange={(val: any) => setClassification(val)}>
-                                <SelectTrigger className="w-full bg-muted/30">
-                                    <SelectValue placeholder="Chọn nhóm đối tượng" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="CONG_CHUC">Công chức hành chính</SelectItem>
-                                    <SelectItem value="VIEN_CHUC">Viên chức sự nghiệp</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="CONG_CHUC">Công chức</TabsTrigger>
+                                    <TabsTrigger value="VIEN_CHUC">Viên chức</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0 flex-1 overflow-hidden">
@@ -238,16 +236,16 @@ export function ManualPlanSelectorByRankClient() {
                             </div>
                             <div className="md:col-span-3 space-y-2">
                                 <Label>Chỉ tiêu bắt buộc</Label>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3">
                                     <Input
                                         type="number"
                                         value={targetValue}
                                         onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
-                                        className="w-full font-mono text-center"
+                                        className="w-24 font-mono text-center"
                                     />
-                                    <div className="px-3 h-10 flex items-center justify-center border rounded-md bg-muted text-sm text-muted-foreground whitespace-nowrap min-w-[60px]">
-                                        {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : '---'}
-                                    </div>
+                                    <span className="text-sm text-muted-foreground font-medium">
+                                        {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : ''}
+                                    </span>
                                 </div>
                             </div>
                             <div className="md:col-span-3">
@@ -314,7 +312,7 @@ export function ManualPlanSelectorByRankClient() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <div className="inline-flex items-center justify-end w-full gap-2">
+                                                <div className="flex items-center justify-end gap-3 w-full">
                                                     <Input
                                                         type="number"
                                                         value={plan.targetValue}
@@ -322,9 +320,11 @@ export function ManualPlanSelectorByRankClient() {
                                                             const val = Number(e.target.value);
                                                             setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
                                                         }}
-                                                        className="w-20 h-9 text-center font-mono"
+                                                        className="w-16 h-8 text-center font-mono"
                                                     />
-                                                    <span className="text-xs text-muted-foreground w-12 text-left">{plan.unit}</span>
+                                                    <span className="text-sm text-muted-foreground min-w-[60px] text-left">
+                                                        {plan.unit}
+                                                    </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center">

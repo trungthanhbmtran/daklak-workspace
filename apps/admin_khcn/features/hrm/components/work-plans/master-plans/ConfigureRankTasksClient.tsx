@@ -31,12 +31,12 @@ export function ConfigureRankTasksClient() {
             </CardHeader>
             <CardContent>
                 <Tabs value={selectedClass} onValueChange={(val) => setSelectedClass(val as GovClassification)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6 h-auto p-1.5 bg-muted/50 border rounded-xl">
-                        <TabsTrigger value="CONG_CHUC" className="py-2.5 text-xs font-bold rounded-lg flex items-center justify-center gap-2">
-                            <Shield className="w-4 h-4" /> KHỐI CÔNG CHỨC (Hành chính công)
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                        <TabsTrigger value="CONG_CHUC">
+                            Khối Công chức
                         </TabsTrigger>
-                        <TabsTrigger value="VIEN_CHUC" className="py-2.5 text-xs font-bold rounded-lg flex items-center justify-center gap-2">
-                            <Users className="w-4 h-4" /> KHỐI VIÊN CHỨC (Đơn vị sự nghiệp/Kỹ thuật)
+                        <TabsTrigger value="VIEN_CHUC">
+                            Khối Viên chức
                         </TabsTrigger>
                     </TabsList>
 
