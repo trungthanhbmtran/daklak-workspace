@@ -19,7 +19,7 @@ export function PersonalKpiClient() {
   // Lấy danh sách các kỳ KPI
   const { data: periodsData } = useQuery({
     queryKey: ["hrm-kpi-periods"],
-    queryFn: () => apiClient.get("/hrm/kpis/periods").then((res: any) => res.data?.data || []),
+    queryFn: () => apiClient.get("/hrm/kpis/periods").then((res: any) => res.data || []),
   });
 
   const calculateMutation = useCalculatePersonalKpi();
@@ -34,11 +34,11 @@ export function PersonalKpiClient() {
       { periodId: parseInt(selectedPeriod) },
       {
         onSuccess: (res: any) => {
-          if (res?.data?.success) {
+          if (res?.success) {
             toast.success("Tính điểm KPI thành công!");
             setResult(res.data);
           } else {
-            toast.error(res?.data?.message || "Có lỗi xảy ra");
+            toast.error(res?.message || "Có lỗi xảy ra");
           }
         },
         onError: () => {

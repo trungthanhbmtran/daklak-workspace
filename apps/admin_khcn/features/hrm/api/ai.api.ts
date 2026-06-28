@@ -158,6 +158,26 @@ export const aiApi = {
   },
 
   /**
+   * Sinh danh sách Subtask kèm phân công nhân sự dựa trên task cha.
+   */
+  async generateSubTasksAssignment(payload: {
+    parentTitle: string;
+    parentDescription: string;
+    employeesContext: string;
+  }): Promise<any> {
+    const defaultPrompt = `Bạn là Trưởng nhóm đang cần phân rã một công việc lớn thành các công việc con (Subtasks) và giao cho các thành viên trong nhóm.\n\nThông tin công việc lớn:\nTên: "{parentTitle}"\nMô tả/Yêu cầu: "{parentDescription}"\n\nDanh sách nhân sự hiện có (kèm Ngạch/Chức danh, mã nhân viên):\n{employeesContext}\n\nHãy phân rã công việc này thành 3-5 subtask chi tiết để hoàn thành mục tiêu. Đối với mỗi subtask, hãy đề xuất 1 người thực hiện phù hợp nhất dựa trên danh sách nhân sự.\n\nTrả về duy nhất một mảng JSON thuần túy (không bọc markdown \`\`\`json) theo cấu trúc:\n[\n  {\n    "title": "Tên subtask",\n    "description": "Mô tả chi tiết",\n    "priority": "HIGH/MEDIUM/LOW",\n    "dueDate": "YYYY-MM-DD",\n    "assigneeCode": "Mã nhân viên (ví dụ: NV001, hoặc UNASSIGNED nếu không rõ)",\n    "reasoning": "Giải thích ngắn gọn lý do chọn người này"\n  }\n]\nLưu ý: Nếu không rõ ngày, lấy mốc tương đối từ hôm nay (${new Date().toISOString().split('T')[0]}). Mảng JSON phải đúng chuẩn.`;
+
+    const promptTemplate = await this.getPromptConfig('AI_PROMPT_SUBTASK_ASSIGNMENT', defaultPrompt);
+    const prompt = promptTemplate
+      .replace(/{parentTitle}/g, payload.parentTitle)
+      .replace(/{parentDescription}/g, payload.parentDescription || 'Không có')
+      .replace(/{employeesContext}/g, payload.employeesContext);
+
+    const res = await apiClient.post('/ai/generate', { prompt }, { timeout: AI_API_TIMEOUT_MS }) as any as ApiResponse<any>;
+    return this.parseJsonData(res);
+  },
+
+  /**
    * Parse JSON string từ AI response.
    * Đọc res.data (chuẩn ApiResponse) — không dùng res.status nữa.
    */

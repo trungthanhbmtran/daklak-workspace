@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTaskDetail } from '../hooks/useTaskDetail';
 import { SubTaskModal } from '../../subtask/SubTaskModal';
+import { AiTaskBreakdownModal } from '../../subtask/AiTaskBreakdownModal';
 import { CoordinationModal } from '../../coordination/CoordinationModal';
 import { AssignCoordinationModal } from '../../assign/AssignCoordinationModal';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
@@ -57,6 +58,7 @@ export function TaskDetailDialog({
   const [isCoordinationModalOpen, setIsCoordinationModalOpen] = useState(false);
   const [isAssignCoordinationOpen, setIsAssignCoordinationOpen] = useState(false);
   const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
+  const [isAiBreakdownModalOpen, setIsAiBreakdownModalOpen] = useState(false);
 
   const {
     taskComments, isLoadingComments, isSendingMessage,
@@ -340,14 +342,23 @@ export function TaskDetailDialog({
                             </div>
                             {/* Xây dựng kế hoạch thực hiện — phân rã mục tiêu cá nhân/đơn vị */}
                             {allowedActions.includes('ADD_SUBTASK') && (
-                              <Button
-                                variant="outline"
-                                className="w-full h-10 rounded-lg font-medium text-sm"
-                                onClick={() => setIsSubTaskModalOpen(true)}
-                              >
-                                <Split className="w-4 h-4 mr-2" />
-                                Xây dựng kế hoạch thực hiện
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 h-10 rounded-lg font-medium text-sm"
+                                  onClick={() => setIsSubTaskModalOpen(true)}
+                                >
+                                  <Split className="w-4 h-4 mr-2" />
+                                  Thủ công
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  className="flex-1 h-10 rounded-lg font-bold text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800"
+                                  onClick={() => setIsAiBreakdownModalOpen(true)}
+                                >
+                                  ✨ AI Phân rã
+                                </Button>
+                              </div>
                             )}
                             {activeTask.plan && (
                               <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-500 leading-relaxed">
@@ -564,6 +575,19 @@ export function TaskDetailDialog({
         isOpen={isSubTaskModalOpen}
         onClose={(created) => {
           setIsSubTaskModalOpen(false);
+          if (created) {
+            onRefetch();
+            fetchDelegationChain();
+          }
+        }}
+        parentTask={activeTask}
+        planId={activeTask?.planId}
+      />
+
+      <AiTaskBreakdownModal
+        isOpen={isAiBreakdownModalOpen}
+        onClose={(created) => {
+          setIsAiBreakdownModalOpen(false);
           if (created) {
             onRefetch();
             fetchDelegationChain();

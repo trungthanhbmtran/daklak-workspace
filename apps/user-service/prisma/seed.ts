@@ -3583,6 +3583,7 @@ async function main() {
     jobTitleCode: string,
     isUnitLeader: boolean,
     monitoredUnitCodes?: string[],
+    slotOrder: number = 1
   ) => {
 
     // Xác định PBAC Role theo chức vụ (hệ thống chính phủ)
@@ -3680,11 +3681,11 @@ async function main() {
         });
 
         const slot = await prisma.staffingSlot.upsert({
-          where: { staffingId_slotOrder: { staffingId: staffing.id, slotOrder: 1 } },
+          where: { staffingId_slotOrder: { staffingId: staffing.id, slotOrder } },
           update: { description: `Phụ trách bởi ${fullName}`, assignedEmployeeCode: employeeCode },
           create: {
             staffingId: staffing.id,
-            slotOrder: 1,
+            slotOrder,
             description: `Phụ trách bởi ${fullName}`,
             assignedEmployeeCode: employeeCode
           }
@@ -3748,7 +3749,8 @@ async function main() {
     'H15.07',
     'PHO_GIAM_DOC',
     true,
-    ['H15.07.10']
+    ['H15.07.10'],
+    2
   );
   await assignLeader(
     'NV_003',

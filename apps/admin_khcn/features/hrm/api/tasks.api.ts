@@ -28,11 +28,12 @@ export const hrmTasksApi = {
     priority?: string;
     dueDate?: string;
     assignerCode?: string;
+    assigneeCode?: string;
     planId?: number;
   }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${parentId}/breakdown`, {
       ...payload,
-      assigneeCode: 'UNASSIGNED',
+      assigneeCode: payload.assigneeCode || 'UNASSIGNED',
     }) as any;
   },
 
