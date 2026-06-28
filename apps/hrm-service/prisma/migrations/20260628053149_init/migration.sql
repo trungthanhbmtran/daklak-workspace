@@ -50,6 +50,8 @@ CREATE TABLE `tasks` (
     `completed_at` DATETIME(3) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `domain_id` INTEGER NULL,
+    `monitored_unit_id` INTEGER NULL,
     `plan_id` INTEGER NULL,
     `progress` DOUBLE NOT NULL DEFAULT 0,
     `reject_reason` TEXT NULL,
