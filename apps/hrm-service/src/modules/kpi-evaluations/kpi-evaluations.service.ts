@@ -294,12 +294,16 @@ export class KpiEvaluationsService {
     });
 
     if (existingEvaluation) {
-      await this.prisma.kpiEvaluation.update({
-        where: { id: existingEvaluation.id },
-        data: { totalScore, status: 'COMPUTING' }
-      });
-    } else {
-      await this.prisma.kpiEvaluation.create({
+      if (existingEvaluation.status === 'DRAFT' || existingEvaluation.status === 'COMPUTING') {
+        await this.prisma.kpiEvaluation.update({
+          where: { id: existingEvaluation.id },
+          data: { totalScore, status: 'COMPUTING' }
+        });
+      }
+    }
+    let evaluationId = existingEvaluation?.id;
+    if (!existingEvaluation) {
+      const newEval = await this.prisma.kpiEvaluation.create({
         data: {
           employeeCode,
           periodId,
@@ -307,13 +311,151 @@ export class KpiEvaluationsService {
           status: 'COMPUTING'
         }
       });
+      evaluationId = newEval.id;
     }
 
     return {
       success: true,
       message: 'Tính điểm KPI thành công',
       totalScore,
+      evaluationId,
       tasks: calculatedTasks
     };
+  }
+
+  async getEvaluationDetail(id: number) {
+    const evaluation = await this.prisma.kpiEvaluation.findUnique({
+      where: { id },
+      include: {
+        employee: true,
+        details: true
+      }
+    });
+
+    if (!evaluation) {
+      return { success: false, message: 'Không tìm thấy phiếu đánh giá', data: '' };
+    }
+
+    const allCriteria = await this.prisma.kpiCriteria.findMany({
+      orderBy: { id: 'asc' }
+    });
+    
+    // Auto-calculate tasks if status is DRAFT or COMPUTING
+    const calcResult = await this.calculatePersonalKpi({ periodId: evaluation.periodId, employeeCode: evaluation.employeeCode });
+
+    const finalDetails = allCriteria.map(crit => {
+      const existingDetail = evaluation.details.find(d => d.criteriaId === crit.id);
+      
+      let autoScore: number | null = null;
+      let notes = existingDetail?.notes || '';
+      
+      if (crit.scoringMethod === 'AUTOMATIC') {
+         autoScore = calcResult.totalScore;
+         notes = `Hệ thống tổng hợp từ ${calcResult.tasks.length} công việc đã hoàn thành.`;
+      }
+
+      return {
+        id: existingDetail?.id || null,
+        criteriaId: crit.id,
+        criteriaName: crit.name,
+        description: crit.description,
+        scoringMethod: crit.scoringMethod,
+        baseScore: crit.baseScore,
+        weight: crit.weight,
+        selfScore: existingDetail?.selfScore ?? (crit.scoringMethod === 'AUTOMATIC' ? autoScore : null),
+        reviewerScore: existingDetail?.reviewerScore ?? null,
+        notes: notes,
+      };
+    });
+
+    const dataObj = {
+      ...evaluation,
+      details: finalDetails,
+      tasks: calcResult.tasks
+    };
+
+    return {
+      success: true,
+      message: 'Lấy chi tiết thành công',
+      data: JSON.stringify(dataObj)
+    };
+  }
+
+  async submitSelfScore(id: number, payload: any) {
+    const evaluation = await this.prisma.kpiEvaluation.findUnique({ where: { id } });
+    if (!evaluation) return { success: false, message: 'Không tìm thấy phiếu đánh giá', data: '' };
+
+    if (evaluation.status !== 'DRAFT' && evaluation.status !== 'COMPUTING') {
+      return { success: false, message: 'Phiếu đã được nộp hoặc đã chốt', data: '' };
+    }
+
+    // Upsert details
+    for (const d of payload.details) {
+      if (d.id) {
+        await this.prisma.kpiEvaluationDetail.update({
+          where: { id: d.id },
+          data: { selfScore: d.selfScore, notes: d.notes }
+        });
+      } else {
+        await this.prisma.kpiEvaluationDetail.create({
+          data: {
+            evaluationId: id,
+            criteriaId: d.criteriaId,
+            selfScore: d.selfScore,
+            notes: d.notes
+          }
+        });
+      }
+    }
+
+    await this.prisma.kpiEvaluation.update({
+      where: { id },
+      data: { status: 'SUBMITTED' }
+    });
+
+    return { success: true, message: 'Nộp phiếu đánh giá thành công', data: JSON.stringify({ status: 'SUBMITTED' }) };
+  }
+
+  async approveReviewerScore(id: number, payload: any, reviewerCode: string) {
+    const evaluation = await this.prisma.kpiEvaluation.findUnique({ where: { id } });
+    if (!evaluation) return { success: false, message: 'Không tìm thấy phiếu đánh giá', data: '' };
+
+    if (evaluation.status !== 'SUBMITTED') {
+      return { success: false, message: 'Chỉ có thể duyệt phiếu ở trạng thái đã nộp', data: '' };
+    }
+
+    let finalTotalScore = 0;
+
+    for (const d of payload.details) {
+      if (d.id) {
+        await this.prisma.kpiEvaluationDetail.update({
+          where: { id: d.id },
+          data: { reviewerScore: d.reviewerScore }
+        });
+        finalTotalScore += (d.reviewerScore || 0);
+      } else {
+        await this.prisma.kpiEvaluationDetail.create({
+          data: {
+            evaluationId: id,
+            criteriaId: d.criteriaId,
+            selfScore: d.selfScore,
+            reviewerScore: d.reviewerScore,
+            notes: d.notes
+          }
+        });
+        finalTotalScore += (d.reviewerScore || 0);
+      }
+    }
+
+    await this.prisma.kpiEvaluation.update({
+      where: { id },
+      data: { 
+        status: 'APPROVED', 
+        reviewerCode: reviewerCode,
+        totalScore: finalTotalScore 
+      }
+    });
+
+    return { success: true, message: 'Đã chốt phiếu đánh giá', data: JSON.stringify({ status: 'APPROVED', totalScore: finalTotalScore }) };
   }
 }

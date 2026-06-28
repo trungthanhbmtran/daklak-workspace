@@ -84,6 +84,21 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
     );
   }, [activeTaskId, updateStatus, onRefetch]);
 
+  const handleApproveTask = useCallback(async (onClose: () => void) => {
+    if (!activeTaskId) return;
+    updateStatus.mutate(
+      { status: 'DONE' },
+      {
+        onSuccess: () => {
+          toast.success('Đã nghiệm thu công việc');
+          onRefetch();
+          onClose();
+        },
+        onError: () => toast.error('Lỗi khi nghiệm thu công việc'),
+      },
+    );
+  }, [activeTaskId, updateStatus, onRefetch]);
+
   /** Refresh comments thủ công (dùng sau khi CoordinationModal thành công) */
   const fetchComments = useCallback(() => {
     if (!activeTaskId) return;
@@ -108,5 +123,6 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
     handleSendMessage,
     handleCompleteTask,
     handleRejectTask,
+    handleApproveTask,
   };
 }

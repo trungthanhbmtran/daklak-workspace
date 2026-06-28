@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   CheckCircle2, Calendar, Split, ArrowLeftCircle,
-  MessageSquare, Send, Reply, User, Users, Target, BarChart3,
+  MessageSquare, Send, Reply, User, Users, Target, BarChart3, AlertCircle,
 } from 'lucide-react';
 import { useTaskDetail } from '../hooks/useTaskDetail';
 import { SubTaskModal } from '../../subtask/SubTaskModal';
@@ -14,6 +14,7 @@ import { AiTaskBreakdownModal } from '../../subtask/AiTaskBreakdownModal';
 import { CoordinationModal } from '../../coordination/CoordinationModal';
 import { AssignCoordinationModal } from '../../assign/AssignCoordinationModal';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
+import { MentionInput } from '../../../../MentionInput';
 
 interface TaskDetailDialogProps {
   task: any | null;
@@ -64,7 +65,7 @@ export function TaskDetailDialog({
     taskComments, isLoadingComments, isSendingMessage,
     delegationChain, isLoadingChain,
     fetchComments, fetchDelegationChain,
-    handleSendMessage, handleCompleteTask, handleRejectTask,
+    handleSendMessage, handleCompleteTask, handleRejectTask, handleApproveTask,
   } = useTaskDetail(activeTask?.id, task?.rootTaskId || task?.id, onRefetch);
 
   const handleSend = useCallback(() => {
@@ -78,6 +79,10 @@ export function TaskDetailDialog({
   const handleComplete = useCallback(() => {
     handleCompleteTask(onClose);
   }, [handleCompleteTask, onClose]);
+
+  const handleApprove = useCallback(() => {
+    handleApproveTask(onClose);
+  }, [handleApproveTask, onClose]);
 
   const handleReject = useCallback(() => {
     handleRejectTask(rejectReason, () => {
@@ -127,6 +132,11 @@ export function TaskDetailDialog({
 
                 {/* ── COL 1: Mô tả + Chat ── */}
                 <div className="flex flex-col gap-0 overflow-y-auto">
+                  {activeTask.status === 'PENDING_APPROVAL' && (
+                    <div className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 p-3 px-6 flex items-center gap-2 text-[13px] font-bold border-b border-fuchsia-100 dark:border-fuchsia-800">
+                      <AlertCircle className="w-4 h-4" /> ⏳ Đang chờ lãnh đạo nghiệm thu... (Tạm khóa)
+                    </div>
+                  )}
                   {/* Description */}
                   <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -178,7 +188,19 @@ export function TaskDetailDialog({
                                     {!msg.isSystemMessage && !isMine && (
                                       <p className="text-[10px] font-black mb-1 opacity-50">{msg.authorName || msg.authorCode}</p>
                                     )}
-                                    <p className="leading-relaxed whitespace-pre-wrap wrap-break-word">{msg.content}</p>
+                                    <p className="leading-relaxed whitespace-pre-wrap wrap-break-word">
+                                      {msg.content.split(/(@\[.*?\]\([^)]+\))/g).map((part: string, i: number) => {
+                                        const match = part.match(/@\[(.*?)\]\(([^)]+)\)/);
+                                        if (match) {
+                                          return (
+                                            <span key={i} className="font-bold text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/30 px-1 py-0.5 rounded">
+                                              @{match[1]}
+                                            </span>
+                                          );
+                                        }
+                                        return <span key={i}>{part}</span>;
+                                      })}
+                                    </p>
                                     <p className={`text-[10px] mt-1.5 text-right ${isMine ? 'text-indigo-200' : 'opacity-30'}`}>
                                       {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · {new Date(msg.createdAt).toLocaleDateString('vi-VN')}
                                     </p>
@@ -192,17 +214,15 @@ export function TaskDetailDialog({
                         {/* Input */}
                         <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800">
                           <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-2 border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-indigo-400/50 transition-all">
-                            <input
-                              type="text"
-                              disabled={activeTask.status === 'DONE' || isSendingMessage}
+                            <MentionInput
+                              disabled={['DONE', 'PENDING_APPROVAL'].includes(activeTask.status) || isSendingMessage}
                               value={chatMessage}
-                              onChange={(e) => setChatMessage(e.target.value)}
-                              onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSend(); }}
-                              placeholder={activeTask.status === 'DONE' ? 'Công việc đã đóng' : 'Nhập nội dung trao đổi...'}
-                              className="flex-1 bg-transparent border-none text-[13.5px] focus:ring-0 outline-none disabled:opacity-40 text-slate-800 dark:text-white"
+                              onChange={(e: any) => setChatMessage(e.target.value)}
+                              onSend={handleSend}
+                              placeholder={['DONE', 'PENDING_APPROVAL'].includes(activeTask.status) ? 'Công việc đã đóng/chờ duyệt' : 'Nhập nội dung trao đổi...'}
                             />
                             <Button
-                              disabled={activeTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
+                              disabled={['DONE', 'PENDING_APPROVAL'].includes(activeTask.status) || !chatMessage.trim() || isSendingMessage}
                               onClick={handleSend}
                               className="rounded-full w-9 h-9 p-0 bg-indigo-600 hover:bg-indigo-700 shadow-md disabled:opacity-40"
                             >
@@ -367,7 +387,12 @@ export function TaskDetailDialog({
                             )}
                             {allowedActions.includes('COMPLETE') && !hasSubtasks && (
                               <Button className="w-full h-10 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm" onClick={handleComplete}>
-                                <CheckCircle2 className="w-4 h-4 mr-2" /> Hoàn thành công việc
+                                <CheckCircle2 className="w-4 h-4 mr-2" /> Báo cáo hoàn thành
+                              </Button>
+                            )}
+                            {allowedActions.includes('APPROVE') && (
+                              <Button className="w-full h-10 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm" onClick={handleApprove}>
+                                <CheckCircle2 className="w-4 h-4 mr-2" /> Nghiệm thu (Duyệt)
                               </Button>
                             )}
                             {allowedActions.includes('COORDINATE') && (

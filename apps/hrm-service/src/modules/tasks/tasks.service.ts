@@ -297,16 +297,20 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     if (access.isOwner) {
       actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
+      if (t.status === 'PENDING_APPROVAL') {
+        actions.push('APPROVE', 'RETURN');
+      }
     }
 
     if (access.isAssignee) {
       actions.push('ADD_SUBTASK', 'CHAT');
-      if (!hasChildren) actions.push('COMPLETE', 'COORDINATE');
+      if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'COORDINATE');
     }
 
-    if (access.isSupervisor) {
+    if (access.isSupervisor || access.isDeptLeader) {
       actions.push('CHAT');
-      if (!hasChildren) actions.push('COMPLETE', 'RETURN');
+      if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'RETURN');
+      if (t.status === 'PENDING_APPROVAL') actions.push('APPROVE', 'RETURN');
     }
 
     if (access.isCoordinator) {
@@ -893,10 +897,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any) {
     if (context) await this.populateQueryHierarchy(context);
-    const tCheck = await this.prisma.task.findUnique({ where: { id } });
-    if (!tCheck) throw new RpcException('Nhiệm vụ không tồn tại');
-
-
+    const rawTask = await this.prisma.task.findUnique({ where: { id } });
+    if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
+    
+    const tCheckArr = [rawTask];
+    await this.enrichTasks(tCheckArr);
+    const tCheck: any = tCheckArr[0];
 
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
@@ -920,6 +926,45 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (status === 'DONE') await this.updateTaskProgress(id, 100, actorCode);
+
+    // Send notifications for Approval workflow
+    if (status === 'PENDING_APPROVAL') {
+      const recipientCode = tCheck.supervisorCode || tCheck.assignerCode || tCheck.creatorEmployeeCode;
+      if (recipientCode && recipientCode !== actorCode) {
+        const emp = await this.prisma.employee.findUnique({ where: { employeeCode: recipientCode }, select: { userId: true } });
+        if (emp?.userId) {
+          this.notificationClient.emit('send_notification', {
+            title: 'Yêu cầu nghiệm thu công việc',
+            message: `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`,
+            type: 'SYSTEM',
+            recipients: [emp.userId],
+            metadata: { taskId: id },
+          });
+        }
+      }
+    } else if (status === 'RETURNED' && actorCode !== tCheck.assigneeCode) {
+      const emp = await this.prisma.employee.findUnique({ where: { employeeCode: tCheck.assigneeCode }, select: { userId: true } });
+      if (emp?.userId) {
+        this.notificationClient.emit('send_notification', {
+          title: 'Công việc bị trả lại',
+          message: `Công việc "${tCheck.title}" của bạn đã bị trả lại. Lý do: ${rejectReason}`,
+          type: 'SYSTEM',
+          recipients: [emp.userId],
+          metadata: { taskId: id },
+        });
+      }
+    } else if (status === 'DONE' && tCheck.status === 'PENDING_APPROVAL' && actorCode !== tCheck.assigneeCode) {
+      const emp = await this.prisma.employee.findUnique({ where: { employeeCode: tCheck.assigneeCode }, select: { userId: true } });
+      if (emp?.userId) {
+        this.notificationClient.emit('send_notification', {
+          title: 'Công việc đã được nghiệm thu',
+          message: `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`,
+          type: 'SYSTEM',
+          recipients: [emp.userId],
+          metadata: { taskId: id },
+        });
+      }
+    }
 
     const updatedTask = await this.prisma.task.findUnique({
       where: { id },
@@ -1436,7 +1481,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   async importTasks(data: any[]) { return { success: true }; }
   async exportTasks(query: any) { return { success: true }; }
   async resolveTask(id: number, action: string, body: any) {
-    if (action === 'COMPLETE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode);
+    if (action === 'COMPLETE') {
+      const raw = await this.prisma.task.findUnique({ where: { id } });
+      const tArr = [raw];
+      await this.enrichTasks(tArr);
+      const t: any = tArr[0];
+      const requiresApproval = t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED';
+      const nextStatus = requiresApproval ? 'PENDING_APPROVAL' : 'DONE';
+      return this.updateTaskStatus(id, nextStatus, undefined, body?.currentEmployeeCode);
+    }
+    if (action === 'APPROVE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode);
     if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentEmployeeCode);
   }
   async updateTask(id: number, data: any) {
@@ -1509,6 +1563,38 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { employeeCode: actorCode },
       select: { fullName: true, avatar: true }
     });
+
+    // Handle @mentions
+    if (!data.isSystemMessage && data.content) {
+      const mentionRegex = /@\[.*?\]\(([^)]+)\)/g;
+      const mentionedCodes = new Set<string>();
+      let match;
+      while ((match = mentionRegex.exec(data.content)) !== null) {
+        if (match[1] !== actorCode) {
+          mentionedCodes.add(match[1]);
+        }
+      }
+
+      if (mentionedCodes.size > 0) {
+        const mentionedEmployees = await this.prisma.employee.findMany({
+          where: { employeeCode: { in: Array.from(mentionedCodes) } },
+          select: { userId: true }
+        });
+
+        const userIds = mentionedEmployees.map(e => e.userId).filter(Boolean);
+
+        if (userIds.length > 0) {
+          const actorName = emp?.fullName || actorCode;
+          this.notificationClient.emit('send_notification', {
+            title: 'Bạn được nhắc đến trong bình luận',
+            message: `${actorName} đã nhắc đến bạn trong bình luận của công việc "${t.title}"`,
+            type: 'SYSTEM',
+            recipients: userIds,
+            metadata: { taskId: t.id },
+          });
+        }
+      }
+    }
 
     return {
       success: true,

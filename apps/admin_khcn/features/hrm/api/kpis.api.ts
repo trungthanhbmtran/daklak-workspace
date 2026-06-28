@@ -31,5 +31,14 @@ export const hrmKpiEvaluationsApi = {
   },
   calculatePersonal: (payload: { periodId: number; employeeCode?: string }) => {
     return apiClient.post('/hrm/kpis/evaluations/calculate-personal', payload) as any;
+  },
+  getDetail: (id: number) => {
+    return apiClient.get(`/hrm/kpis/evaluations/${id}`) as any;
+  },
+  submitSelfScore: (id: number, payload: any) => {
+    return apiClient.post(`/hrm/kpis/evaluations/${id}/submit`, payload) as any;
+  },
+  approveReviewerScore: (id: number, payload: any) => {
+    return apiClient.post(`/hrm/kpis/evaluations/${id}/approve`, payload) as any;
   }
 };

@@ -212,4 +212,28 @@ export class KpisController implements OnModuleInit {
       })
     );
   }
+
+  @Get('evaluations/:id')
+  async getEvaluationDetail(@Param('id') id: string) {
+    return firstValueFrom(this.kpiService.GetEvaluationDetail({ id: Number(id) }));
+  }
+
+  @Post('evaluations/:id/submit')
+  async submitSelfScore(@Param('id') id: string, @Body() body: any) {
+    return firstValueFrom(this.kpiService.SubmitEvaluation({
+      id: Number(id),
+      data: JSON.stringify(body)
+    }));
+  }
+
+  @Post('evaluations/:id/approve')
+  async approveEvaluation(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    const user = req.user;
+    const reviewerCode = user?.employeeCode || user?.username;
+    return firstValueFrom(this.kpiService.ApproveEvaluation({
+      id: Number(id),
+      data: JSON.stringify(body),
+      reviewerCode
+    }));
+  }
 }

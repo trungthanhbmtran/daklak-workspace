@@ -14,6 +14,9 @@ service KpiService {
   rpc CreateEvaluation (CreateEvaluationRequest) returns (EvaluationResponse) {}
   rpc FindEvaluations (FindEvaluationsRequest) returns (EvaluationsResponse) {}
   rpc CalculatePersonalKpi (CalculatePersonalKpiRequest) returns (CalculatePersonalKpiResponse) {}
+  rpc GetEvaluationDetail (GetEvaluationDetailRequest) returns (KpiEvaluationDetailResponse) {}
+  rpc SubmitEvaluation (SubmitEvaluationRequest) returns (EvaluationResponse) {}
+  rpc ApproveEvaluation (ApproveEvaluationRequest) returns (EvaluationResponse) {}
 }
 
 message FindPeriodsRequest {}
@@ -155,4 +158,26 @@ message CalculatePersonalKpiResponse {
   string message = 2;
   float totalScore = 3;
   repeated CalculatedTaskScore tasks = 4;
+  optional int32 evaluationId = 5;
+}
+
+message GetEvaluationDetailRequest {
+  int32 id = 1;
+}
+
+message KpiEvaluationDetailResponse {
+  bool success = 1;
+  string message = 2;
+  string data = 3; // JSON string representation
+}
+
+message SubmitEvaluationRequest {
+  int32 id = 1;
+  string data = 2; // JSON string
+}
+
+message ApproveEvaluationRequest {
+  int32 id = 1;
+  string data = 2; // JSON string
+  string reviewerCode = 3;
 }

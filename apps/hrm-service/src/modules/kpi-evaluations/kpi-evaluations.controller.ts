@@ -50,4 +50,21 @@ export class KpiEvaluationsController {
   calculatePersonalKpi(data: { periodId: number, employeeCode: string }) {
     return this.kpiEvaluationsService.calculatePersonalKpi(data);
   }
+
+  @GrpcMethod('KpiService', 'GetEvaluationDetail')
+  getEvaluationDetail(data: { id: number }) {
+    return this.kpiEvaluationsService.getEvaluationDetail(data.id);
+  }
+
+  @GrpcMethod('KpiService', 'SubmitEvaluation')
+  submitEvaluation(data: any) {
+    const payload = JSON.parse(data.data);
+    return this.kpiEvaluationsService.submitSelfScore(data.id, payload);
+  }
+
+  @GrpcMethod('KpiService', 'ApproveEvaluation')
+  approveEvaluation(data: any) {
+    const payload = JSON.parse(data.data);
+    return this.kpiEvaluationsService.approveReviewerScore(data.id, payload, data.reviewerCode);
+  }
 }

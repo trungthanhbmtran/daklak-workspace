@@ -11,6 +11,7 @@ export const getStatusBadge = (status: string, categories?: any[]) => {
     case 'PROCESSING':  return <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200">{label}</Badge>;
     case 'TODO':        
     case 'PENDING':     return <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200">{label}</Badge>;
+    case 'PENDING_APPROVAL': return <Badge className="bg-fuchsia-500/10 text-fuchsia-600 hover:bg-fuchsia-500/20 border-fuchsia-200">{label}</Badge>;
     case 'OVERDUE':     return <Badge className="bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-200">{label}</Badge>;
     case 'RETURNED':    return <Badge className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-200">{label}</Badge>;
     case 'REJECTED':

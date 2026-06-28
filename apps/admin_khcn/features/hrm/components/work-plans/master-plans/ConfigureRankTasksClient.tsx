@@ -20,22 +20,22 @@ export function ConfigureRankTasksClient() {
     } = useConfigureRankTasks();
 
     return (
-        <Card className="max-w-5xl mx-auto mt-6 shadow-sm border-slate-200">
+        <Card className="max-w-5xl mx-auto mt-6 shadow-sm border">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl font-black text-slate-900">
-                    <Settings2 className="w-5 h-5 text-indigo-600" /> Cấu hình Thư viện Định biên theo Ngạch & Chức danh Công vụ
+                <CardTitle className="flex items-center gap-2 text-xl font-black text-foreground">
+                    <Settings2 className="w-5 h-5 text-primary" /> Cấu hình Thư viện Định biên theo Ngạch & Chức danh Công vụ
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-500 mt-1">
+                <CardDescription className="text-xs text-muted-foreground mt-1">
                     Hệ thống hóa danh mục công việc dựa trên phân hạng Ngạch giúp phân rã khối lượng công việc đúng năng lực, đúng thẩm quyền pháp lý.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <Tabs value={selectedClass} onValueChange={(val) => setSelectedClass(val as GovClassification)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6 h-auto p-1.5 bg-slate-50 border rounded-xl">
-                        <TabsTrigger value="CONG_CHUC" className="py-2.5 text-xs font-bold rounded-lg data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center justify-center gap-2">
+                    <TabsList className="grid w-full grid-cols-2 mb-6 h-auto p-1.5 bg-muted/50 border rounded-xl">
+                        <TabsTrigger value="CONG_CHUC" className="py-2.5 text-xs font-bold rounded-lg flex items-center justify-center gap-2">
                             <Shield className="w-4 h-4" /> KHỐI CÔNG CHỨC (Hành chính công)
                         </TabsTrigger>
-                        <TabsTrigger value="VIEN_CHUC" className="py-2.5 text-xs font-bold rounded-lg data-[state=active]:bg-slate-900 data-[state=active]:text-white flex items-center justify-center gap-2">
+                        <TabsTrigger value="VIEN_CHUC" className="py-2.5 text-xs font-bold rounded-lg flex items-center justify-center gap-2">
                             <Users className="w-4 h-4" /> KHỐI VIÊN CHỨC (Đơn vị sự nghiệp/Kỹ thuật)
                         </TabsTrigger>
                     </TabsList>
@@ -58,7 +58,7 @@ export function ConfigureRankTasksClient() {
                 </Tabs>
             </CardContent>
 
-            <CardFooter className="flex justify-end pt-4 pb-4 border-t bg-slate-50/50 rounded-b-2xl">
+            <CardFooter className="flex justify-end pt-4 pb-4 border-t bg-muted/30 rounded-b-2xl">
                 <Button
                     onClick={handleSave}
                     disabled={isSaving}
