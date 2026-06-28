@@ -2,8 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import * as LucideIcons from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import * as React from "react";
+import { lazy, Suspense } from "react";
+import type { LucideProps, LucideIcon } from "lucide-react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { menuApi } from "@/features/system-admin/menus/api";
 
 // ----------------------------------------------------------------------
@@ -11,26 +13,47 @@ import { menuApi } from "@/features/system-admin/menus/api";
 // ----------------------------------------------------------------------
 const LEGACY_MAP: Record<string, string> = {
   // Ionicons-style
-  "grid-outline": "LayoutDashboard", "apps-outline": "LayoutDashboard",
-  "people-outline": "Users", "person-outline": "Users",
-  "lock-closed-outline": "KeyRound", "shield-checkmark-outline": "ShieldCheck",
-  "list-outline": "ListTree", "megaphone-outline": "ListTree",
-  "calendar-outline": "Calendar", "layers-outline": "Layers",
-  "bar-chart-outline": "BarChart2", "globe-outline": "Globe",
-  "folder-outline": "Settings2", "cog-outline": "Settings2",
-  "settings-outline": "Settings2", "settings-2-outline": "Settings2",
-  "apartment": "Building2", "document-text-outline": "FileText",
-  "document-outline": "FileText", "document-attach-outline": "FileText",
-  "briefcase-outline": "CheckSquare", "newspaper-outline": "Newspaper",
-  "git-network-outline": "GitBranch",
+  "grid-outline": "layout-dashboard", "apps-outline": "layout-dashboard",
+  "people-outline": "users", "person-outline": "users",
+  "lock-closed-outline": "key-round", "shield-checkmark-outline": "shield-check",
+  "list-outline": "list-tree", "megaphone-outline": "list-tree",
+  "calendar-outline": "calendar", "layers-outline": "layers",
+  "bar-chart-outline": "bar-chart-2", "globe-outline": "globe",
+  "folder-outline": "settings-2", "cog-outline": "settings-2",
+  "settings-outline": "settings-2", "settings-2-outline": "settings-2",
+  "apartment": "building-2", "document-text-outline": "file-text",
+  "document-outline": "file-text", "document-attach-outline": "file-text",
+  "briefcase-outline": "check-square", "newspaper-outline": "newspaper",
+  "git-network-outline": "git-branch",
 };
 
+const toKebabCase = (str: string) => str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
+// Global cache để giữ reference của component, tránh bị re-render liên tục
+const iconCache = new Map<string, LucideIcon>();
+
 export const getIcon = (iconName?: string | null): LucideIcon => {
-  if (!iconName) return LucideIcons.LayoutDashboard as LucideIcon;
-  const name = iconName.trim();
-  const pascalName = LEGACY_MAP[name] || name;
-  const IconComponent = (LucideIcons as any)[pascalName];
-  return (IconComponent as LucideIcon) ?? (LucideIcons.LayoutDashboard as LucideIcon);
+  if (!iconName) iconName = "LayoutDashboard";
+
+  let kebabName = LEGACY_MAP[iconName.trim()] || toKebabCase(iconName.trim());
+
+  // Nếu không tồn tại trong thư viện thì fallback về layout-dashboard
+  if (!(kebabName in dynamicIconImports)) {
+    kebabName = "layout-dashboard";
+  }
+
+  if (!iconCache.has(kebabName)) {
+    const LazyIcon = lazy(dynamicIconImports[kebabName as keyof typeof dynamicIconImports]);
+    const WrappedIcon = (props: any) =>
+      React.createElement(
+        Suspense,
+        { fallback: React.createElement("div", { className: "w-5 h-5 bg-slate-100 rounded animate-pulse" }) },
+        React.createElement(LazyIcon, props)
+      );
+    iconCache.set(kebabName, WrappedIcon as unknown as LucideIcon);
+  }
+
+  return iconCache.get(kebabName)!;
 };
 
 // ----------------------------------------------------------------------
