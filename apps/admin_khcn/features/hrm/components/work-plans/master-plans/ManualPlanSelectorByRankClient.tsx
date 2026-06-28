@@ -95,6 +95,10 @@ export function ManualPlanSelectorByRankClient() {
     }, [existingQuotasData, activeRankFilter]);
 
     const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter);
+    console.log("DEBUG_TASKS: serverTemplates =", serverTemplates);
+    console.log("DEBUG_TASKS: activeRankFilter =", activeRankFilter);
+    console.log("DEBUG_TASKS: availableTasks =", availableTasks);
+    
     const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
 
     const handleAssignTask = () => {
@@ -207,7 +211,7 @@ export function ManualPlanSelectorByRankClient() {
                             <div className="md:col-span-6 space-y-2">
                                 <Label>Nhiệm vụ mẫu</Label>
                                 <Select
-                                    value={selectedTaskId}
+                                    value={selectedTaskId || undefined}
                                     onValueChange={val => {
                                         setSelectedTaskId(val);
                                         const task = availableTasks.find(t => t.id === val);
