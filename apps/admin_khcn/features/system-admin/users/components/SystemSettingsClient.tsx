@@ -45,7 +45,6 @@ export function SystemSettingsClient() {
           </TabsTrigger>
         </TabsList>
 
-        <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-1 md:p-2 border border-slate-100 shadow-sm">
           <TabsContent value="ai-router" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
               <AiRouterConfig />
@@ -61,7 +60,6 @@ export function SystemSettingsClient() {
               <AiPromptConfig />
             </div>
           </TabsContent>
-        </div>
       </Tabs>
     </div>
   );

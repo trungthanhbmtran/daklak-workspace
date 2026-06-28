@@ -105,7 +105,7 @@ export function NotificationBell() {
             )}
           </ScrollArea>
           <div className="p-2 border-t border-border">
-            <Link href="/services/hrm/notifications" className="block">
+            <Link href="/hub/notifications" className="block">
               <Button variant="ghost" className="w-full text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
                 Xem tất cả thông báo
               </Button>

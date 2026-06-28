@@ -20,6 +20,7 @@ export async function getNotifications(): Promise<NotificationItem[]> {
     body: n.body ?? "",
     createdAt: n.createdAt ?? "",
     read: Boolean(n.read),
+    type: n.type,
   }));
 }
 

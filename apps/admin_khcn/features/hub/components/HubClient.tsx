@@ -17,7 +17,7 @@ import { useUser } from "@/hooks/useUser";
 import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
 
 // 2. TÁCH HEADER COMPONENT: Cho code gọn gàng
-function PortalHeader() {
+export function PortalHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-sm">

@@ -50,8 +50,8 @@ export function NotificationListClient() {
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Trung tâm Cảnh báo & Thông báo</h2>
-          <p className="text-slate-500 mt-2">Quản lý toàn bộ thông báo hệ thống, công việc trễ hạn và cập nhật KPI.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Trung tâm Thông báo</h2>
+          <p className="text-slate-500 mt-2">Quản lý và theo dõi toàn bộ thông báo từ tất cả các phân hệ trong hệ thống.</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="bg-white" onClick={() => list.filter(n => !n.read).forEach(n => markRead.mutate(n.id))}>
