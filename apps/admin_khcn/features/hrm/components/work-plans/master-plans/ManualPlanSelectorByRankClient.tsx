@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Target, Trash2, Save } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { hrmTaskTemplatesApi, hrmRankQuotasApi } from '@/features/hrm/api';
+import { hrmRankQuotasApi } from '@/features/hrm/api';
 import { categoryApi } from "@/features/system-admin/categories/api";
-import { useTaskTemplatesList, useCreateMasterPlan, useTasksList } from '@/features/hrm/hooks';
-import { useRouter } from 'next/navigation';
+import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
     Table,
     TableBody,
@@ -22,9 +23,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 
 interface SelectedPlanItem {
     id: string;
@@ -59,25 +57,30 @@ export function ManualPlanSelectorByRankClient() {
         defaultWeight: t.defaultWeight || 1
     }));
 
-    const { data: globalTasksData } = useTasksList({ limit: 1000 });
-    const globalTasks = globalTasksData?.data || [];
-
-    const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
+    const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC'>('CONG_CHUC');
+    const [activeRankFilter, setActiveRankFilter] = useState<string>('');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
 
+    const { isPending } = useCreateMasterPlan();
 
-    const router = useRouter();
-    const { mutateAsync: createPlan, isPending } = useCreateMasterPlan();
+    useEffect(() => {
+        if (classification === 'CONG_CHUC' && congChucRanks.length > 0 && !congChucRanks.find(r => r.code === activeRankFilter)) {
+            setActiveRankFilter(congChucRanks[0].code);
+        } else if (classification === 'VIEN_CHUC' && vienChucRanks.length > 0 && !vienChucRanks.find(r => r.code === activeRankFilter)) {
+            setActiveRankFilter(vienChucRanks[0].code);
+        }
+    }, [classification, congChucRanks, vienChucRanks]);
 
-    const { data: existingQuotasData, isLoading: isFetchingQuotas } = useQuery({
+    const { data: existingQuotasData } = useQuery({
         queryKey: ['rank-quotas', activeRankFilter],
         queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter),
+        enabled: !!activeRankFilter,
         staleTime: 0,
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (existingQuotasData?.data) {
             setAddedPlans(existingQuotasData.data.map((q: any) => ({
                 id: q.id.toString(),
@@ -92,6 +95,7 @@ export function ManualPlanSelectorByRankClient() {
     }, [existingQuotasData, activeRankFilter]);
 
     const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter);
+    const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
 
     const handleAssignTask = () => {
         const task = availableTasks.find(t => t.id === selectedTaskId);
@@ -125,11 +129,11 @@ export function ManualPlanSelectorByRankClient() {
 
             await hrmRankQuotasApi.save(activeRankFilter, quotas);
             toast.success('Lưu định biên thành công!', {
-                description: `Đã đưa ${addedPlans.length} chỉ tiêu vào danh sách.`
+                description: `Đã cập nhật ${addedPlans.length} chỉ tiêu vào danh sách.`
             });
         } catch (error) {
             toast.error('Có lỗi xảy ra', {
-                description: 'Không thể lập cấu trúc kế hoạch vào lúc này.'
+                description: 'Không thể lưu định biên vào lúc này.'
             });
         }
     };
@@ -140,247 +144,180 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto p-4 md:p-8 bg-background min-h-screen text-foreground antialiased">
-            <div className="bg-card rounded-3xl p-8 shadow-sm border relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <Network className="w-32 h-32 text-primary" />
-                </div>
-                <div className="relative z-10">
-                    <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-3 mb-2">
-                        <div className="bg-primary/20 p-2 rounded-xl backdrop-blur-sm border border-primary/30">
-                            <Network className="w-6 h-6 text-primary" />
+        <div className="max-w-5xl mx-auto p-4 space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Phân bổ Chỉ tiêu Định biên theo Ngạch</CardTitle>
+                    <CardDescription>
+                        Cá nhân hóa và tinh chỉnh định mức công việc cho từng ngạch chức danh.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Nhóm đối tượng</Label>
+                            <Select value={classification} onValueChange={(val: any) => setClassification(val)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Chọn nhóm" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="CONG_CHUC">Công chức (Hành chính công)</SelectItem>
+                                    <SelectItem value="VIEN_CHUC">Viên chức (Sự nghiệp/Kỹ thuật)</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        Phân bổ Chỉ tiêu Định biên theo Ngạch
-                    </h1>
-                    <p className="text-muted-foreground text-sm max-w-2xl leading-relaxed">
-                        Hệ thống hóa thao tác phân bổ thủ công. Chọn ngạch công vụ hành chính để truy xuất bộ nhiệm vụ đặc thù được quy định bởi pháp luật điều hành.
-                    </p>
-                </div>
-            </div>
+                        <div className="space-y-2">
+                            <Label>Ngạch / Chức danh nghề nghiệp</Label>
+                            <Select value={activeRankFilter} onValueChange={setActiveRankFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Chọn ngạch" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {activeRanksList.map((rank: any) => (
+                                        <SelectItem key={rank.code} value={rank.code}>
+                                            {rank.nameVi || rank.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                    <Separator />
 
-                {/* THANH ĐIỀU HƯỚNG BỘ LỌC THEO NGẠCH ĐẶC THÙ (4/12 COLS) */}
-                <Card className="xl:col-span-4 border shadow-sm">
-                    <CardHeader className="pb-4 border-b">
-                        <CardTitle className="flex items-center gap-2 font-bold text-sm uppercase tracking-wider">
-                            <MousePointerClick className="w-4 h-4 text-primary" /> Chọn Ngạch công vụ tác nghiệp
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-5 space-y-4">
-                        {/* Cây danh mục ngạch bậc bằng Tabs */}
-                        <Tabs defaultValue="cong-chuc" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted rounded-xl p-1">
-                                <TabsTrigger value="cong-chuc" className="rounded-lg font-bold">Công chức</TabsTrigger>
-                                <TabsTrigger value="vien-chuc" className="rounded-lg font-bold">Viên chức</TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="cong-chuc" className="flex flex-col gap-1.5 mt-0">
-                                {congChucRanks.map((rank: any) => (
-                                    <button
-                                        key={rank.code}
-                                        type="button"
-                                        onClick={() => setActiveRankFilter(rank.code)}
-                                        className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group border
-                                            ${activeRankFilter === rank.code
-                                                ? 'bg-primary text-primary-foreground shadow-md scale-[1.02] border-transparent'
-                                                : 'bg-background hover:border-primary hover:shadow-sm hover:bg-muted/50 text-foreground'
-                                            }`}
-                                    >
-                                        <div className="space-y-1">
-                                            <div className="text-xs font-bold tracking-wide">{rank.nameVi || rank.name}</div>
-                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.code ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{rank.description || 'Chưa có mô tả'}</div>
-                                        </div>
-                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.code ? 'opacity-100 translate-x-1' : 'opacity-40 group-hover:opacity-100 group-hover:text-primary'}`} />
-                                    </button>
-                                ))}
-                            </TabsContent>
-
-                            <TabsContent value="vien-chuc" className="flex flex-col gap-1.5 mt-0">
-                                {vienChucRanks.map((rank: any) => (
-                                    <button
-                                        key={rank.code}
-                                        type="button"
-                                        onClick={() => setActiveRankFilter(rank.code)}
-                                        className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group border
-                                            ${activeRankFilter === rank.code
-                                                ? 'bg-primary text-primary-foreground shadow-md scale-[1.02] border-transparent'
-                                                : 'bg-background hover:border-primary hover:shadow-sm hover:bg-muted/50 text-foreground'
-                                            }`}
-                                    >
-                                        <div className="space-y-1">
-                                            <div className="text-xs font-bold tracking-wide">{rank.nameVi || rank.name}</div>
-                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.code ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{rank.description || 'Chưa có mô tả'}</div>
-                                        </div>
-                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.code ? 'opacity-100 translate-x-1' : 'opacity-40 group-hover:opacity-100 group-hover:text-primary'}`} />
-                                    </button>
-                                ))}
-                            </TabsContent>
-                        </Tabs>
-
-                        {/* FORM CHỌN VIỆC VÀ ĐỊNH MỨC */}
-                        <div className="mt-6 p-4 bg-muted/30 border rounded-2xl space-y-5">
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <label className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px]">1</span>
-                                        Chọn công việc cần gán định mức
-                                    </label>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-6 px-2 text-[10px] font-bold text-primary hover:bg-primary/10"
-                                        onClick={() => router.push('/services/hrm/work-plans/rank-templates')}
-                                    >
-                                        + Cấu hình thêm
-                                    </Button>
-                                </div>
-                                <Select
-                                    value={selectedTaskId}
-                                    onValueChange={val => {
-                                        setSelectedTaskId(val);
-                                        const task = availableTasks.find(t => t.id === val);
-                                        if (task) setTargetValue(task.defaultWeight);
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full h-11 px-3 text-sm rounded-xl border focus:ring-2 focus:ring-primary outline-none bg-background transition-shadow">
-                                        <SelectValue placeholder="-- Vui lòng chọn công việc --" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableTasks.map(task => (
-                                            <SelectItem key={task.id} value={task.id} disabled={addedPlans.some(p => p.title === task.taskName)}>
-                                                {task.taskName} {addedPlans.some(p => p.title === task.taskName) ? '(Đã thêm)' : ''}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div className="md:col-span-6 space-y-2">
+                            <Label>Nhiệm vụ định biên</Label>
+                            <Select
+                                value={selectedTaskId}
+                                onValueChange={val => {
+                                    setSelectedTaskId(val);
+                                    const task = availableTasks.find(t => t.id === val);
+                                    if (task) setTargetValue(task.defaultWeight);
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="-- Vui lòng chọn công việc --" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableTasks.map(task => {
+                                        const isAdded = addedPlans.some(p => p.title === task.taskName);
+                                        return (
+                                            <SelectItem key={task.id} value={task.id} disabled={isAdded}>
+                                                {task.taskName} {isAdded ? '(Đã thêm)' : ''}
                                             </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {availableTasks.length === 0 && (
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <p className="text-[11px] text-destructive font-medium ml-1">Chưa có công việc mẫu nào được cấu hình cho ngạch này.</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px]">2</span>
-                                        Nhập định mức
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        value={targetValue}
-                                        onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
-                                        className="h-11 text-sm font-mono font-bold bg-background rounded-xl"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider">
-                                        Đơn vị tính
-                                    </label>
-                                    <div className="h-11 px-3 flex items-center bg-muted/50 text-muted-foreground text-sm rounded-xl border font-medium">
-                                        {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : '---'}
-                                    </div>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                            {availableTasks.length === 0 && (
+                                <p className="text-xs text-muted-foreground mt-1">Chưa có công việc mẫu nào cho ngạch này.</p>
+                            )}
+                        </div>
+                        <div className="md:col-span-3 space-y-2">
+                            <Label>Chỉ tiêu bắt buộc</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    type="number"
+                                    value={targetValue}
+                                    onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
+                                    className="w-full"
+                                />
+                                <div className="px-3 flex items-center justify-center border rounded-md bg-muted text-sm text-muted-foreground whitespace-nowrap">
+                                    {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : 'ĐVT'}
                                 </div>
                             </div>
-
+                        </div>
+                        <div className="md:col-span-3">
                             <Button
                                 onClick={handleAssignTask}
                                 disabled={!selectedTaskId}
-                                className="w-full h-11 rounded-xl shadow-sm hover:shadow-md transition-all gap-2 mt-2"
+                                className="w-full"
                             >
-                                Gán vào cấu trúc
+                                Gán vào ma trận
                             </Button>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </CardContent>
+            </Card>
 
-                {/* BẢNG MA TRẬN KẾ HOẠCH CHI TIẾT SAU KHI PHÂN PHỐI (8/12 COLS) */}
-                <Card className="xl:col-span-8 border shadow-sm overflow-hidden">
-                    <CardHeader className="bg-muted/30 border-b pb-4">
-                        <CardTitle className="flex items-center gap-2 font-black text-sm uppercase tracking-wider">
-                            <Target className="w-4 h-4 text-primary" /> Cấu trúc kế hoạch tổng hợp sau phân rã ngạch
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-4 border-b">
+                    <div>
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Target className="w-4 h-4" /> Ma trận Thực thi
                         </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                <TableRow>
-                                    <TableHead className="w-[55%] text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nhiệm vụ hành chính công vụ</TableHead>
-                                    <TableHead className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Yêu cầu cấp ngạch</TableHead>
-                                    <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Chỉ tiêu áp đặt</TableHead>
-                                    <TableHead className="w-[60px] text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Hủy</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {addedPlans.map((plan) => (
-                                    <TableRow key={plan.id} className="hover:bg-muted/50 transition-colors group">
-                                        <TableCell className="font-bold leading-relaxed text-sm py-4">
-                                            {plan.title}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold uppercase tracking-wider shadow-sm px-2.5 py-1">
-                                                {getRankName(plan.rankType)}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="inline-flex items-center gap-2 justify-end w-full">
-                                                <Input
-                                                    type="number"
-                                                    value={plan.targetValue}
-                                                    onChange={e => {
-                                                        const val = Number(e.target.value);
-                                                        setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
-                                                    }}
-                                                    className="w-20 h-9 text-center font-mono font-black text-primary bg-background border rounded-lg shadow-sm focus-visible:ring-primary transition-shadow"
-                                                />
-                                                <span className="text-[11px] text-muted-foreground font-bold min-w-[45px] text-left uppercase tracking-wider bg-muted px-2 py-1.5 rounded-md">{plan.unit}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
-                                                className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {addedPlans.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={4} className="h-48 text-center text-muted-foreground text-sm bg-muted/30">
-                                            <div className="flex flex-col items-center justify-center gap-3">
-                                                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                                                    <Target className="w-6 h-6 text-muted-foreground" />
-                                                </div>
-                                                <p>Chưa có tác vụ nào được chọn vào ma trận thực thi.</p>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
+                        <CardDescription>Danh sách các nhiệm vụ được phân bổ cho ngạch đã chọn.</CardDescription>
+                    </div>
                     {addedPlans.length > 0 && (
-                        <div className="p-4 bg-muted/50 border-t flex justify-end items-center gap-3">
-                            <Button variant="outline" onClick={() => setAddedPlans([])} className="h-10 text-muted-foreground hover:text-foreground">
-                                Làm lại từ đầu
-                            </Button>
-                            <Button
-                                onClick={handleSubmitPlan}
-                                disabled={isPending}
-                                className="h-10 font-bold px-6 rounded-xl shadow-sm hover:shadow-md transition-all gap-2"
-                            >
-                                {isPending ? <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : <Target className="w-4 h-4" />}
-                                Lưu định biên theo ngạch
-                            </Button>
-                        </div>
+                        <Button
+                            onClick={handleSubmitPlan}
+                            disabled={isPending}
+                            className="gap-2"
+                        >
+                            {isPending ? <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                            Lưu cấu trúc
+                        </Button>
                     )}
-                </Card>
-
-            </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[50%]">Nhiệm vụ</TableHead>
+                                <TableHead>Yêu cầu ngạch</TableHead>
+                                <TableHead className="text-right">Chỉ tiêu áp đặt</TableHead>
+                                <TableHead className="w-[60px] text-center"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {addedPlans.map((plan) => (
+                                <TableRow key={plan.id}>
+                                    <TableCell className="font-medium">
+                                        {plan.title}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary" className="font-normal">
+                                            {getRankName(plan.rankType)}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="inline-flex items-center gap-2 justify-end w-full">
+                                            <Input
+                                                type="number"
+                                                value={plan.targetValue}
+                                                onChange={e => {
+                                                    const val = Number(e.target.value);
+                                                    setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
+                                                }}
+                                                className="w-20 h-8 text-center"
+                                            />
+                                            <span className="text-xs text-muted-foreground w-12 text-left">{plan.unit}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
+                                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {addedPlans.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                                        Chưa có nhiệm vụ nào được chọn.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         </div>
     );
 }
