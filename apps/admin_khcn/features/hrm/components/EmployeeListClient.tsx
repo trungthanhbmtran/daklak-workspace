@@ -62,7 +62,7 @@ export function EmployeeListClient() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 p-6 md:p-10 space-y-6">
+    <div className="flex flex-col w-full min-w-0 min-h-[calc(100vh-80px)] bg-slate-50/50 p-6 md:p-10 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">Danh sách nhân sự</h2>
@@ -79,7 +79,7 @@ export function EmployeeListClient() {
         )}
       </div>
 
-      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden flex flex-col min-w-0">
         <div className="p-4 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
