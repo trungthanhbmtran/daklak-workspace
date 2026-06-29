@@ -47,7 +47,7 @@ export function ManualPlanSelectorByRankClient() {
     });
 
     const { data: templatesData } = useTaskTemplatesList();
-    const serverTemplates = templatesData?.data || [];
+    const serverTemplates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
     const rankTasksRepository = serverTemplates.map((t: any) => ({
         id: t.id.toString(),
@@ -59,7 +59,7 @@ export function ManualPlanSelectorByRankClient() {
     }));
 
     const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC'>('CONG_CHUC');
-    const [activeRankFilter, setActiveRankFilter] = useState<string>('');
+    const [activeRankFilter, setActiveRankFilter] = useState<string>('SPECIALIST');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
@@ -203,7 +203,7 @@ export function ManualPlanSelectorByRankClient() {
                                     <div className="flex-1 w-full space-y-1.5">
                                         <Label className="text-[10px] font-bold text-muted-foreground uppercase">Nhiệm vụ mẫu</Label>
                                         <Select
-                                            value={selectedTaskId || undefined}
+                                            value={selectedTaskId}
                                             onValueChange={val => {
                                                 setSelectedTaskId(val);
                                                 const task = availableTasks.find(t => t.id === val);
@@ -225,7 +225,9 @@ export function ManualPlanSelectorByRankClient() {
                                             </SelectContent>
                                         </Select>
                                         {availableTasks.length === 0 && (
-                                            <p className="text-[10px] text-muted-foreground mt-1">Không có nhiệm vụ mẫu nào.</p>
+                                            <p className="text-[10px] text-muted-foreground mt-1">
+                                                Không có nhiệm vụ mẫu nào. (Tổng: {serverTemplates.length}, Đang lọc theo: {activeRankFilter})
+                                            </p>
                                         )}
                                     </div>
                                     <div className="w-[120px] space-y-1.5">
@@ -254,11 +256,7 @@ export function ManualPlanSelectorByRankClient() {
 
                             {/* Table Execution Matrix */}
                             <div className="flex-1 flex flex-col overflow-hidden relative bg-background">
-                                {isLoadingQuotas && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
-                                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                    </div>
-                                )}
+
                                 
                                 <div className="p-4 border-b flex-shrink-0 flex items-center justify-between bg-white">
                                     <h4 className="text-sm font-semibold flex items-center gap-2">
