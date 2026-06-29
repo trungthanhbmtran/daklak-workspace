@@ -23,7 +23,7 @@ export function WorkflowBuilderClient() {
 
   if (editingId || isCreating) {
     return (
-      <main className="h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+      <main className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
         <WorkflowEditor
           id={editingId || undefined}
           onBack={() => {
