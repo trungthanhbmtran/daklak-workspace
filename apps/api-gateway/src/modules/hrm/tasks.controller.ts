@@ -243,7 +243,6 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get('stats')
-  @RequirePermissions('TASK.VIEW', 'TASK.*')
   async getStats(
     @Req() req: any,
     @Query('role') role: string,
