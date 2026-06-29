@@ -22,13 +22,13 @@ export function WorkflowBuilderClient() {
   const [activeTab, setActiveTab] = useState("definitions");
 
   return (
-    <main className="min-h-screen relative bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
+    <main className="h-screen w-full flex flex-col relative bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       {/* Premium Background Blobs */}
       <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-400/20 dark:bg-violet-600/10 blur-[120px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-400/20 dark:bg-fuchsia-600/10 blur-[150px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
 
       {/* Header Area */}
-      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-background/40 backdrop-blur-xl supports-backdrop-filter:bg-background/20 shadow-sm">
+      <header className="shrink-0 z-40 w-full border-b border-white/10 bg-background/40 backdrop-blur-xl supports-backdrop-filter:bg-background/20 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl h-20 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Button
@@ -61,8 +61,8 @@ export function WorkflowBuilderClient() {
       </header>
 
       {editingId || isCreating ? (
-        <div className="w-full px-2 sm:px-4 lg:px-6 py-4" style={{ height: "calc(100vh - 100px)" }}>
-          <div className="w-full h-full min-h-[600px] flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl relative z-10 animate-in fade-in zoom-in-95 duration-300">
+        <div className="flex-1 w-full p-2 sm:p-4 lg:px-6 overflow-hidden min-h-0">
+          <div className="w-full h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl relative z-10 animate-in fade-in zoom-in-95 duration-300">
             <WorkflowEditor
               id={editingId || undefined}
               onBack={() => {
@@ -73,7 +73,8 @@ export function WorkflowBuilderClient() {
           </div>
         </div>
       ) : (
-        <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10 animate-in fade-in duration-300">
+        <div className="flex-1 overflow-y-auto w-full min-h-0 relative z-10">
+          <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 max-w-7xl animate-in fade-in duration-300">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <div className="flex justify-center mb-8">
               <TabsList className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 p-1.5 rounded-2xl shadow-sm inline-flex h-14">
@@ -109,6 +110,7 @@ export function WorkflowBuilderClient() {
               </CardContainer>
             </TabsContent>
           </Tabs>
+          </div>
         </div>
       )}
     </main>
