@@ -210,14 +210,14 @@ export function ManualPlanSelectorByRankClient() {
                                                 if (task) setTargetValue(task.defaultWeight);
                                             }}
                                         >
-                                            <SelectTrigger className="h-9 text-xs bg-background">
+                                            <SelectTrigger className="w-full h-auto min-h-9 whitespace-normal break-words text-left bg-background text-xs [&>span]:line-clamp-none [&>span]:whitespace-normal [&>span]:break-words">
                                                 <SelectValue placeholder="-- Chọn nhiệm vụ --" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {availableTasks.map(task => {
                                                     const isAdded = addedPlans.some(p => p.title === task.taskName);
                                                     return (
-                                                        <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs">
+                                                        <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs whitespace-normal break-words pr-8">
                                                             {task.taskName} {isAdded ? '(Đã thêm)' : ''}
                                                         </SelectItem>
                                                     );

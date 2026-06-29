@@ -147,7 +147,7 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
                                             </Select>
                                         </div>
                                     ) : (
-                                        <div className="font-medium text-sm text-foreground leading-relaxed">
+                                        <div className="font-medium text-sm text-foreground leading-relaxed whitespace-normal break-words">
                                             {item.taskName}
                                         </div>
                                     )}
