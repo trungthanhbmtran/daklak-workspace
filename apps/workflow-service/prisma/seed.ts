@@ -39,7 +39,7 @@ async function main() {
               }
               
               if ((typeof isSupervisor !== 'undefined' && isSupervisor) || (typeof isDeptLeader !== 'undefined' && isDeptLeader)) {
-                if (!hasChildren && status !== 'PENDING_APPROVAL' && ['COMPLETE', 'RETURN'].includes(actionName)) return true;
+                if (!hasChildren && status !== 'PENDING_APPROVAL' && ['RETURN'].includes(actionName)) return true;
                 if (status === 'PENDING_APPROVAL' && ['APPROVE', 'RETURN'].includes(actionName)) return true;
               }
               

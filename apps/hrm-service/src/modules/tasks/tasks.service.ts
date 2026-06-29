@@ -318,7 +318,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
       if (access.isSupervisor || access.isDeptLeader) {
         actions.push('CHAT');
-        if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'RETURN');
+        if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('RETURN');
         if (t.status === 'PENDING_APPROVAL') actions.push('APPROVE', 'RETURN');
       }
 
