@@ -167,7 +167,7 @@ export class TasksController implements OnModuleInit {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
     let finalAssignerCode: string | undefined = assignerCode;
-    const finalDepartmentId = departmentId
+    const finalDepartmentId = (departmentId && departmentId !== 'undefined')
       ? parseInt(departmentId, 10)
       : undefined;
 
@@ -193,7 +193,7 @@ export class TasksController implements OnModuleInit {
       priority,
       statsFilter,
       departmentId: finalDepartmentId,
-      planId: planId ? parseInt(planId, 10) : undefined,
+      planId: (planId && planId !== 'undefined') ? parseInt(planId, 10) : undefined,
       isSupervisor: isSupervisor === 'true',
       currentEmployeeCode: user?.employeeCode,
       isAdmin,
@@ -258,7 +258,7 @@ export class TasksController implements OnModuleInit {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
     let finalAssignerCode: string | undefined = assignerCode;
-    const finalDepartmentId = departmentId
+    const finalDepartmentId = (departmentId && departmentId !== 'undefined')
       ? parseInt(departmentId, 10)
       : undefined;
 
@@ -278,7 +278,7 @@ export class TasksController implements OnModuleInit {
       assigneeCode: finalAssigneeCode,
       assignerCode: finalAssignerCode,
       departmentId: finalDepartmentId,
-      planId: planId ? parseInt(planId, 10) : undefined,
+      planId: (planId && planId !== 'undefined') ? parseInt(planId, 10) : undefined,
       isSupervisor: isSupervisor === 'true',
       status,
       priority,

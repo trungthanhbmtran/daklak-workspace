@@ -687,59 +687,82 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   async getTaskStats(query: any) {
     console.log('[DEBUG HRM] getTaskStats with Query:', JSON.stringify(query));
 
-    const where: any = {
-      ...(query.assigneeCode ? { assigneeCode: query.assigneeCode } : {}),
-    };
+    const where: any = {};
+    const conditions: any[] = [];
 
-    if (query.role === 'UNASSIGNED') {
-      where.assigneeCode = 'UNASSIGNED';
-    } else if (query.role === 'ASSIGNEE') {
-      where.assigneeCode = query.assigneeCode || undefined;
-    } else if (query.role === 'OWNER') {
-      where.assignerCode = query.assignerCode || undefined;
+    if (query.role === 'UNASSIGNED' || query.assigneeCode === 'UNASSIGNED') {
+      conditions.push({
+        OR: [
+          { participants: { none: { participantRole: 'ASSIGNEE' } } },
+          { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' } } }
+        ]
+      });
+    } else if (query.role === 'ASSIGNEE' && query.assigneeCode) {
+      conditions.push({
+        participants: {
+          some: {
+            employeeCode: query.assigneeCode,
+            participantRole: 'ASSIGNEE'
+          }
+        }
+      });
+    } else if (query.role === 'OWNER' && query.assignerCode) {
+      conditions.push({
+        participants: {
+          some: {
+            employeeCode: query.assignerCode,
+            participantRole: 'OWNER'
+          }
+        }
+      });
     }
 
     if (query.departmentId) {
-      where.departmentId = parseInt(query.departmentId, 10);
+      // Assuming plan.departmentId or monitoredUnitId is what departmentId means now
+      conditions.push({
+        OR: [
+          { plan: { departmentId: parseInt(query.departmentId, 10) } },
+          { monitoredUnitId: parseInt(query.departmentId, 10) }
+        ]
+      });
     }
 
     if (!query.role || query.role === 'ALL') {
-      const conditions: any[] = [];
-      const scopingConditions: any[] = [];
+      const perms = query.currentUserPermissions || [];
+      const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
+      
+      if (!isAdmin) {
+        const scopingConditions: any[] = [];
 
-      const adminOrLeaderConditions: any[] = [];
-      if (query.isAdmin || query.isLeader) {
-        if (query.departmentId) {
-          adminOrLeaderConditions.push({ departmentId: parseInt(query.departmentId, 10) });
+        if (query.currentEmployeeCode) {
+          scopingConditions.push({
+            participants: {
+              some: { employeeCode: query.currentEmployeeCode }
+            }
+          });
+          scopingConditions.push({
+            creatorEmployeeCode: query.currentEmployeeCode
+          });
+        }
+
+        const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
+        if (isLeader) {
+          if (query.currentUserDept && query.isSupervisor) {
+            scopingConditions.push({ plan: { departmentId: query.currentUserDept } });
+            scopingConditions.push({ monitoredUnitId: query.currentUserDept });
+          }
+        }
+
+        if (scopingConditions.length > 0) {
+          conditions.push({ OR: scopingConditions });
         } else {
-          adminOrLeaderConditions.push({}); // Full access or global view based on original logic
+          conditions.push({ id: -1 });
         }
       }
+    }
 
-      if (adminOrLeaderConditions.length > 0) {
-        scopingConditions.push(...adminOrLeaderConditions);
-      } else if (query.currentEmployeeCode) {
-        const leaderOrConditions: any[] = [
-          { assignerCode: query.currentEmployeeCode },
-          { assigneeCode: query.currentEmployeeCode },
-          { participants: { some: { employeeCode: query.currentEmployeeCode } } }
-        ];
-
-        if (query.currentUserDept && query.isSupervisor) {
-          leaderOrConditions.push({ departmentId: query.currentUserDept });
-        }
-        scopingConditions.push(...leaderOrConditions);
-      }
-
-      if (scopingConditions.length > 0) {
-        conditions.push({ OR: scopingConditions });
-      } else {
-        conditions.push({ id: -1 });
-      }
-
-      if (conditions.length > 0) {
-        where.AND = conditions;
-      }
+    if (conditions.length > 0) {
+      where.AND = conditions;
     }
 
     if (query.search) where.title = { contains: query.search };
