@@ -9,7 +9,6 @@ import { RpcException } from '@nestjs/microservices';
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TasksService.name);
-  private integrationService: any;
   private userService: any;
   private workflowService: any;
   private scanInterval: NodeJS.Timeout;
@@ -17,13 +16,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private prisma: PrismaService,
     @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
-    @Inject('INTEGRATION_PACKAGE') private integrationClient: any,
     @Inject('USER_PACKAGE') private userClient: any,
     @Inject('WORKFLOW_PACKAGE') private workflowClient: any,
   ) { }
 
   onModuleInit() {
-    this.integrationService = this.integrationClient.getService('IntegrationService');
     this.userService = this.userClient.getService('UserService');
     this.workflowService = this.workflowClient.getService('WorkflowService');
     this.startDueTaskScanner();
@@ -32,26 +29,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   onModuleDestroy() {
     if (this.scanInterval) {
       clearInterval(this.scanInterval);
-    }
-  }
-
-  private async getDynamicConfig() {
-    try {
-      const res = await firstValueFrom<any>(this.integrationService.FindAll({ search: '' }));
-      const data = res?.data || res || [];
-      if (!Array.isArray(data)) return {};
-      const config: Record<string, any> = {};
-      for (const item of data) {
-        if (item.isActive && item.configData) {
-          try {
-            const parsed = typeof item.configData === 'string' ? JSON.parse(item.configData) : item.configData;
-            if (item.integrationCode === 'NOTIFY_TELEGRAM') config.telegram = parsed;
-          } catch (e) { }
-        }
-      }
-      return config;
-    } catch (error) {
-      return {};
     }
   }
 
