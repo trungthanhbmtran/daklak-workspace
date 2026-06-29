@@ -278,7 +278,7 @@ export class WorkflowEngineService implements OnModuleInit {
     userRoles: string[] = [],
     userId?: string,
   ): Promise<string[]> {
-    const possibleActions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT', 'APPROVED'];
+    const possibleActions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'RETURNED', 'COORDINATE', 'CHAT', 'APPROVE', 'APPROVED', 'IN_PROGRESS', 'PENDING_APPROVAL', 'DONE'];
     const allowed: string[] = [];
     
     for (const action of possibleActions) {

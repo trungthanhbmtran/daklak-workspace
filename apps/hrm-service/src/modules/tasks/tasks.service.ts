@@ -11,6 +11,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TasksService.name);
   private integrationService: any;
   private userService: any;
+  private workflowService: any;
   private scanInterval: NodeJS.Timeout;
 
   constructor(
@@ -18,11 +19,13 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
     @Inject('INTEGRATION_PACKAGE') private integrationClient: any,
     @Inject('USER_PACKAGE') private userClient: any,
+    @Inject('WORKFLOW_PACKAGE') private workflowClient: any,
   ) { }
 
   onModuleInit() {
     this.integrationService = this.integrationClient.getService('IntegrationService');
     this.userService = this.userClient.getService('UserService');
+    this.workflowService = this.workflowClient.getService('WorkflowService');
     this.startDueTaskScanner();
   }
 
@@ -293,32 +296,53 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    const actions: string[] = [];
+    let actions: string[] = [];
 
-    if (access.isOwner) {
-      actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
-      if (t.status === 'PENDING_APPROVAL') {
-        actions.push('APPROVE', 'RETURN');
+    // Tích hợp Workflow để lấy Allowed Actions
+    if (t.workflowInstId && this.workflowService) {
+      try {
+        const allowedRes = await firstValueFrom<any>(this.workflowService.GetAllowedActions({
+          instanceId: t.workflowInstId,
+          userRoles: query.currentUserPermissions || [],
+          userId: query.currentEmployeeCode
+        }));
+        if (allowedRes && allowedRes.allowedActions) {
+          actions = allowedRes.allowedActions;
+        }
+      } catch (err) {
+        this.logger.error('Failed to get allowed actions from workflow for task ' + t.id, err);
       }
-    }
+      
+      // Vẫn giữ lại các action nội bộ không thuộc quy trình workflow như EDIT, DELETE, CHAT
+      if (access.isOwner && !actions.includes('EDIT')) actions.push('EDIT', 'DELETE', 'ADD_SUBTASK');
+      if (!actions.includes('CHAT')) actions.push('CHAT');
+    } else {
+      // Fallback cho task cũ không có workflow
+      if (access.isOwner) {
+        actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
+        if (t.status === 'PENDING_APPROVAL') {
+          actions.push('APPROVE', 'RETURN');
+        }
+      }
 
-    if (access.isAssignee) {
-      actions.push('ADD_SUBTASK', 'CHAT');
-      if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'COORDINATE');
-    }
+      if (access.isAssignee) {
+        actions.push('ADD_SUBTASK', 'CHAT');
+        if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'COORDINATE');
+      }
 
-    if (access.isSupervisor || access.isDeptLeader) {
-      actions.push('CHAT');
-      if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'RETURN');
-      if (t.status === 'PENDING_APPROVAL') actions.push('APPROVE', 'RETURN');
-    }
+      if (access.isSupervisor || access.isDeptLeader) {
+        actions.push('CHAT');
+        if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'RETURN');
+        if (t.status === 'PENDING_APPROVAL') actions.push('APPROVE', 'RETURN');
+      }
 
-    if (access.isCoordinator) {
-      actions.push('CHAT');
-    }
+      if (access.isCoordinator) {
+        actions.push('CHAT');
+      }
 
-    if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
-      actions.push('CHAT');
+      if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
+        actions.push('CHAT');
+      }
     }
 
     return Array.from(new Set(actions));
@@ -867,6 +891,32 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
 
 
+    // Bắt đầu workflow cho Task
+    try {
+      if (this.workflowService) {
+        const startWorkflowRes = await firstValueFrom<any>(this.workflowService.StartWorkflow({
+          workflowId: 'TASK_PROCESSING_ID',
+          initiatorId: creatorCode,
+          businessId: t.id.toString(),
+          businessType: 'TASK',
+          initialContext: {
+            assigneeId: data.assigneeCode,
+            reviewerId: data.supervisorCode,
+            requiresApproval: !!data.supervisorCode
+          }
+        }));
+        if (startWorkflowRes && startWorkflowRes.id) {
+          await this.prisma.task.update({
+            where: { id: t.id },
+            data: { workflowInstId: startWorkflowRes.id }
+          });
+          t.workflowInstId = startWorkflowRes.id;
+        }
+      }
+    } catch (err) {
+      this.logger.error('Failed to start workflow for task ' + t.id, err);
+    }
+
     const createdTask = await this.prisma.task.findUnique({
       where: { id: t.id },
       include: {
@@ -903,6 +953,25 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const tCheckArr = [rawTask];
     await this.enrichTasks(tCheckArr);
     const tCheck: any = tCheckArr[0];
+
+    // GỌI WORKFLOW ĐỂ VALIDATE
+    if (rawTask.workflowInstId && this.workflowService) {
+      try {
+        let actionName = status; // IN_PROGRESS, PENDING_APPROVAL, DONE, RETURNED
+        const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
+          instanceId: rawTask.workflowInstId,
+          actionName: actionName,
+          userRoles: context?.currentUserPermissions || [],
+          userId: actorCode
+        }));
+        if (validateRes && !validateRes.allowed) {
+          throw new RpcException(`Workflow không cho phép thực hiện hành động ${status}.`);
+        }
+      } catch (err) {
+        if (err instanceof RpcException) throw err;
+        this.logger.error('Lỗi gọi workflow ValidateAction', err);
+      }
+    }
 
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
@@ -985,6 +1054,24 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     assignerCode?: string,
     context?: { currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }
   ) {
+    const rawTaskForCheck = await this.prisma.task.findUnique({ where: { id } });
+    if (rawTaskForCheck?.workflowInstId && this.workflowService) {
+      try {
+        const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
+          instanceId: rawTaskForCheck.workflowInstId,
+          actionName: 'ASSIGN',
+          userRoles: context?.currentUserPermissions || [],
+          userId: context?.currentEmployeeCode
+        }));
+        if (validateRes && !validateRes.allowed) {
+          throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
+        }
+      } catch (err) {
+        if (err instanceof RpcException) throw err;
+        this.logger.error('Lỗi gọi workflow ValidateAction for ASSIGN', err);
+      }
+    }
+
     const t = await this.prisma.$transaction(async (tx) => {
       const currentTask = await tx.task.findUnique({
         where: { id },

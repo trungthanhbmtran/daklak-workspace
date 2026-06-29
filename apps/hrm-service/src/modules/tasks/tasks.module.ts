@@ -27,22 +27,6 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
     ]),
     ClientsModule.register([
       {
-        name: 'INTEGRATION_PACKAGE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'integration',
-          protoPath: require('path').join(PROTO_ROOT, 'users/integration.proto'),
-          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
-          loader: {
-            keepCase: false,
-            longs: String,
-            enums: String,
-            defaults: true,
-            includeDirs: [PROTO_ROOT],
-          },
-        },
-      },
-      {
         name: 'USER_PACKAGE',
         transport: Transport.GRPC,
         options: {
@@ -65,6 +49,22 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
           package: 'organization',
           protoPath: require('path').join(PROTO_ROOT, 'users/organization.proto'),
           url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [PROTO_ROOT],
+          },
+        },
+      },
+      {
+        name: 'WORKFLOW_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'workflow',
+          protoPath: require('path').join(PROTO_ROOT, 'workflow/workflow.proto'),
+          url: process.env.WORKFLOW_SERVICE_ADDR || 'workflow-service:50059',
           loader: {
             keepCase: false,
             longs: String,
