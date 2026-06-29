@@ -59,7 +59,7 @@ export function ManualPlanSelectorByRankClient() {
     }));
 
     const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC'>('CONG_CHUC');
-    const [activeRankFilter, setActiveRankFilter] = useState<string>('SPECIALIST');
+    const [activeRankFilter, setActiveRankFilter] = useState<string>('');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
@@ -168,7 +168,7 @@ export function ManualPlanSelectorByRankClient() {
 
                     <div className="flex flex-col md:flex-row gap-6 h-[600px]">
                         {/* LEFT SIDEBAR - RANK SELECTION */}
-                        <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-full border rounded-xl overflow-hidden bg-background shadow-sm">
+                        <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-[200px] md:h-full border rounded-xl overflow-hidden bg-background shadow-sm">
                             <div className="p-4 bg-muted/30 border-b flex-shrink-0">
                                 <h3 className="font-semibold text-sm uppercase tracking-wider">Danh mục Ngạch</h3>
                             </div>
@@ -265,18 +265,18 @@ export function ManualPlanSelectorByRankClient() {
                                 </div>
 
                                 <ScrollArea className="flex-1 w-full">
-                                    <Table>
+                                    <Table className="table-fixed w-full">
                                         <TableHeader className="sticky top-0 bg-muted/30 z-10 shadow-sm">
                                             <TableRow>
-                                                <TableHead className="w-[55%] text-xs font-semibold">Nội dung Nhiệm vụ</TableHead>
-                                                <TableHead className="text-right text-xs font-semibold">Chỉ tiêu bắt buộc</TableHead>
-                                                <TableHead className="w-[60px] text-center"></TableHead>
+                                                <TableHead className="w-[60%] text-xs font-semibold">Nội dung Nhiệm vụ</TableHead>
+                                                <TableHead className="w-[30%] text-right text-xs font-semibold">Chỉ tiêu bắt buộc</TableHead>
+                                                <TableHead className="w-[10%] text-center"></TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {addedPlans.map((plan) => (
                                                 <TableRow key={plan.id}>
-                                                    <TableCell className="font-medium whitespace-normal leading-relaxed text-xs">
+                                                    <TableCell className="font-medium whitespace-normal break-words leading-relaxed text-xs">
                                                         {plan.title}
                                                     </TableCell>
                                                     <TableCell className="text-right">
