@@ -21,20 +21,6 @@ export function WorkflowBuilderClient() {
   const [isCreating, setIsCreating] = useState(false);
   const [activeTab, setActiveTab] = useState("definitions");
 
-  if (editingId || isCreating) {
-    return (
-      <main className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
-        <WorkflowEditor
-          id={editingId || undefined}
-          onBack={() => {
-            setEditingId(null);
-            setIsCreating(false);
-          }}
-        />
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen relative bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       {/* Premium Background Blobs */}
@@ -74,43 +60,57 @@ export function WorkflowBuilderClient() {
         </div>
       </header>
 
-      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <div className="flex justify-center mb-8">
-            <TabsList className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 p-1.5 rounded-2xl shadow-sm inline-flex h-14">
-              <TabsTrigger
-                value="definitions"
-                className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
-              >
-                <Layers className="h-4 w-4" />
-                Định nghĩa Quy trình
-              </TabsTrigger>
-              <TabsTrigger
-                value="instances"
-                className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
-              >
-                <Activity className="h-4 w-4" />
-                Quy trình Đang chạy
-              </TabsTrigger>
-            </TabsList>
+      {editingId || isCreating ? (
+        <div className="w-full px-2 sm:px-4 lg:px-6 py-4" style={{ height: "calc(100vh - 100px)" }}>
+          <div className="w-full h-full min-h-[600px] flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl relative z-10 animate-in fade-in zoom-in-95 duration-300">
+            <WorkflowEditor
+              id={editingId || undefined}
+              onBack={() => {
+                setEditingId(null);
+                setIsCreating(false);
+              }}
+            />
           </div>
-
-          <TabsContent value="definitions" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-2 sm:p-8 shadow-2xl shadow-violet-900/5">
-              <WorkflowList
-                onEdit={(id) => setEditingId(id)}
-                onCreate={() => setIsCreating(true)}
-              />
+        </div>
+      ) : (
+        <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10 animate-in fade-in duration-300">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <div className="flex justify-center mb-8">
+              <TabsList className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 p-1.5 rounded-2xl shadow-sm inline-flex h-14">
+                <TabsTrigger
+                  value="definitions"
+                  className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
+                >
+                  <Layers className="h-4 w-4" />
+                  Định nghĩa Quy trình
+                </TabsTrigger>
+                <TabsTrigger
+                  value="instances"
+                  className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
+                >
+                  <Activity className="h-4 w-4" />
+                  Quy trình Đang chạy
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </TabsContent>
 
-          <TabsContent value="instances" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <CardContainer>
-              <WorkflowInstanceList />
-            </CardContainer>
-          </TabsContent>
-        </Tabs>
-      </div>
+            <TabsContent value="definitions" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-2 sm:p-8 shadow-2xl shadow-violet-900/5">
+                <WorkflowList
+                  onEdit={(id) => setEditingId(id)}
+                  onCreate={() => setIsCreating(true)}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="instances" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <CardContainer>
+                <WorkflowInstanceList />
+              </CardContainer>
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
     </main>
   );
 }
