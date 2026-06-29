@@ -69,7 +69,7 @@ export function ResourceClient() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-120px)]">
+      <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-10 w-10 animate-spin" />
           <p className="text-sm font-medium">Đang tải danh sách tài nguyên...</p>
@@ -80,7 +80,7 @@ export function ResourceClient() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-120px)]">
+      <div className="flex items-center justify-center h-full">
         <Card className="p-8 max-w-md border-destructive/50">
           <p className="text-destructive font-medium text-center">Không thể tải dữ liệu từ máy chủ.</p>
           <p className="text-sm text-muted-foreground mt-2 text-center">Vui lòng kiểm tra kết nối và thử lại.</p>
@@ -90,7 +90,7 @@ export function ResourceClient() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start h-[calc(100vh-120px)]">
+    <div className="flex flex-col lg:flex-row gap-6 items-start h-full">
       {/* CỘT TRÁI: DANH SÁCH TÀI NGUYÊN */}
       <Card className="w-full lg:w-[420px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0">
         <div className="p-4 space-y-4 border-b bg-muted/20 shrink-0">
@@ -213,7 +213,7 @@ export function ResourceClient() {
       </Card>
 
       {/* CỘT PHẢI: CHI TIẾT & CHỈNH SỬA */}
-      <div className="flex-1 h-full min-w-0 hidden lg:block">
+      <div className="flex-1 h-full min-w-0 hidden lg:block overflow-y-auto p-1">
         {!selectedResource ? (
           <Card className="w-full h-full shadow-sm border-border flex items-center justify-center bg-muted/10 border-dashed rounded-xl">
             <div className="flex flex-col items-center max-w-sm text-center">
