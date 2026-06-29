@@ -237,7 +237,7 @@ export function ManualPlanSelectorByRankClient() {
                                                 type="number"
                                                 value={targetValue}
                                                 onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
-                                                className="w-16 h-9 text-center font-mono text-xs bg-background"
+                                                className="w-24 h-9 text-center font-mono text-xs bg-background"
                                             />
                                             <span className="text-[11px] text-muted-foreground font-medium truncate w-[40px]">
                                                 {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : ''}
@@ -288,7 +288,7 @@ export function ManualPlanSelectorByRankClient() {
                                                                     const val = Number(e.target.value);
                                                                     setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
                                                                 }}
-                                                                className="w-14 h-7 text-center font-mono text-xs bg-muted/20"
+                                                                className="w-24 h-7 text-center font-mono text-xs bg-muted/20"
                                                             />
                                                             <span className="text-[11px] text-muted-foreground min-w-[50px] text-left">
                                                                 {plan.unit}
