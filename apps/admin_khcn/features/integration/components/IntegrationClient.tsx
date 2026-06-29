@@ -21,10 +21,9 @@ export function IntegrationClient() {
   const [isCreating, setIsCreating] = useState(false);
   const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway'>('dashboard');
 
-  // Handle Workflow Editor View
   if (editingId || isCreating) {
     return (
-      <main className="h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+      <div className="w-full h-full min-h-[calc(100vh-120px)] flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl animate-in fade-in zoom-in-95 duration-300">
         <WorkflowEditor
           id={editingId || undefined}
           onBack={() => {
@@ -32,7 +31,7 @@ export function IntegrationClient() {
             setIsCreating(false);
           }}
         />
-      </main>
+      </div>
     );
   }
 
