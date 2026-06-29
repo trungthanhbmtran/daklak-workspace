@@ -474,89 +474,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Security Data Scoping constraints
-    const perms = query.currentUserPermissions || [];
-    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
-
-    if (!isAdmin) {
-      const scopingConditions: any[] = [];
-
-      // 1. Participant check
-      if (query.currentEmployeeCode) {
-        scopingConditions.push({
-          participants: {
-            some: {
-              employeeCode: query.currentEmployeeCode
-            }
-          }
-        });
-        scopingConditions.push({
-          creatorEmployeeCode: query.currentEmployeeCode
-        });
-      }
-
-      // 2. Phân quyền theo Sơ đồ thẩm quyền (từ user-service)
-      const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
-      const hasAllowedDepts = query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0;
-      const hasAllowedCodes = query.allowedEmployeeCodes && query.allowedEmployeeCodes.length > 0;
-
-      if (hasAllowedDepts || hasAllowedCodes) {
-        const leaderOrConditions: any[] = [];
-        const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
-        const allowedCodes = query.allowedEmployeeCodes || [];
-
-        let allAllowedCodes = [...allowedCodes];
-
-        if (allowedDepts.length > 0) {
-          const empsInDepts = await this.prisma.employee.findMany({
-            where: { departmentId: { in: allowedDepts } },
-            select: { employeeCode: true }
-          });
-          const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
-          allAllowedCodes = Array.from(new Set([...allAllowedCodes, ...deptEmployeeCodes]));
-
-          leaderOrConditions.push({
-            plan: { departmentId: { in: allowedDepts } }
-          });
-          leaderOrConditions.push({
-            monitoredUnitId: { in: allowedDepts }
-          });
-        }
-
-        const allowedDomains = query.allowedDomainIds?.map(Number).filter(Boolean) || [];
-        if (allowedDomains.length > 0) {
-          leaderOrConditions.push({
-            domainId: { in: allowedDomains }
-          });
-        }
-
-        if (allAllowedCodes.length > 0) {
-          leaderOrConditions.push({
-            participants: {
-              some: {
-                employeeCode: { in: allAllowedCodes },
-                participantRole: 'ASSIGNEE'
-              }
-            }
-          });
-          leaderOrConditions.push({
-            creatorEmployeeCode: { in: allAllowedCodes }
-          });
-        }
-
-        scopingConditions.push(...leaderOrConditions);
-      }
-
-      if (scopingConditions.length > 0) {
-        console.log('[DEBUG HRM] Applied Scoping Conditions:', JSON.stringify(scopingConditions));
-        conditions.push({
-          OR: scopingConditions
-        });
-      } else {
-        console.log('[DEBUG HRM] NO SCOPING CONDITIONS. Returning empty data.');
-        // If no scoping conditions can be resolved, prevent any query return
-        conditions.push({ id: -1 });
-      }
+    const scopeWhere = await this.buildScopingWhereClause(query);
+    if (scopeWhere) {
+      conditions.push(scopeWhere);
     }
+
+    // End of scoping constraint application
 
     console.log('[DEBUG HRM] Final Prisma Where Conditions:', JSON.stringify(conditions));
 
@@ -1379,8 +1302,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const childIds = closureData.map(c => c.descendantId);
 
+    const where: any = { id: { in: childIds }, status: { not: 'TEMPLATE' } };
+    
+    // Apply scoping constraints to children to ensure unrelated people don't see others' subtasks
+    const scopeWhere = await this.buildScopingWhereClause(query);
+    if (scopeWhere) {
+      where.AND = [scopeWhere];
+    }
+
     const tasks = await this.prisma.task.findMany({
-      where: { id: { in: childIds }, status: { not: 'TEMPLATE' } },
+      where,
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
 
@@ -1409,10 +1340,23 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       orderBy: { depth: 'asc' }
     });
 
-    const descendants = closureData.map(c => ({
-      ...(c.descendant as any),
-      depth: c.depth
-    }));
+    // Apply scoping constraints to the tree
+    const scopeWhere = await this.buildScopingWhereClause(query);
+    let validIds: Set<number> | null = null;
+    if (scopeWhere) {
+      const validTasks = await this.prisma.task.findMany({
+        where: scopeWhere,
+        select: { id: true }
+      });
+      validIds = new Set(validTasks.map(t => t.id));
+    }
+
+    const descendants = closureData
+      .filter(c => validIds === null || validIds.has(c.descendantId))
+      .map(c => ({
+        ...(c.descendant as any),
+        depth: c.depth
+      }));
 
     const enriched = await this.enrichTasks(descendants);
 
@@ -1950,5 +1894,88 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
       return { success: true };
     });
+  }
+
+  private async buildScopingWhereClause(query: any): Promise<any | null> {
+    const perms = query.currentUserPermissions || [];
+    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
+
+    if (isAdmin) {
+      return null; // Admin sees everything
+    }
+
+    const scopingConditions: any[] = [];
+
+    // 1. Participant check
+    if (query.currentEmployeeCode) {
+      scopingConditions.push({
+        participants: {
+          some: {
+            employeeCode: query.currentEmployeeCode
+          }
+        }
+      });
+      scopingConditions.push({
+        creatorEmployeeCode: query.currentEmployeeCode
+      });
+    }
+
+    // 2. Phân quyền theo Sơ đồ thẩm quyền
+    const hasAllowedDepts = query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0;
+    const hasAllowedCodes = query.allowedEmployeeCodes && query.allowedEmployeeCodes.length > 0;
+
+    if (hasAllowedDepts || hasAllowedCodes) {
+      const leaderOrConditions: any[] = [];
+      const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
+      const allowedCodes = query.allowedEmployeeCodes || [];
+
+      let allAllowedCodes = [...allowedCodes];
+
+      if (allowedDepts.length > 0) {
+        const empsInDepts = await this.prisma.employee.findMany({
+          where: { departmentId: { in: allowedDepts } },
+          select: { employeeCode: true }
+        });
+        const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
+        allAllowedCodes = Array.from(new Set([...allAllowedCodes, ...deptEmployeeCodes]));
+
+        leaderOrConditions.push({
+          plan: { departmentId: { in: allowedDepts } }
+        });
+        leaderOrConditions.push({
+          monitoredUnitId: { in: allowedDepts }
+        });
+      }
+
+      const allowedDomains = query.allowedDomainIds?.map(Number).filter(Boolean) || [];
+      if (allowedDomains.length > 0) {
+        leaderOrConditions.push({
+          domainId: { in: allowedDomains }
+        });
+      }
+
+      if (allAllowedCodes.length > 0) {
+        leaderOrConditions.push({
+          participants: {
+            some: {
+              employeeCode: { in: allAllowedCodes },
+              participantRole: 'ASSIGNEE'
+            }
+          }
+        });
+        leaderOrConditions.push({
+          creatorEmployeeCode: { in: allAllowedCodes }
+        });
+      }
+
+      scopingConditions.push(...leaderOrConditions);
+    }
+
+    if (scopingConditions.length > 0) {
+      return { OR: scopingConditions };
+    }
+
+    // If no scoping conditions can be resolved, prevent any query return
+    return { id: -1 };
   }
 }
