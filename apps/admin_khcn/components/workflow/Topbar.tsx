@@ -11,7 +11,8 @@ import {
   Layers,
   Edit3,
   Check,
-  Loader2
+  Loader2,
+  PanelLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ interface TopbarProps {
   setWorkflowName: (name: string) => void;
   isSaving: boolean;
   onOpenSettings?: () => void;
+  onOpenPalette?: () => void;
 }
 
 export const Topbar = ({
@@ -35,7 +37,8 @@ export const Topbar = ({
   workflowName,
   setWorkflowName,
   isSaving,
-  onOpenSettings
+  onOpenSettings,
+  onOpenPalette
 }: TopbarProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
 
@@ -49,6 +52,16 @@ export const Topbar = ({
           onClick={onBack}
         >
           <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <div className="h-6 w-[1px] bg-border/60 mx-[-4px]" />
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-xl border-border/60 hover:bg-muted/60 transition-colors"
+          onClick={onOpenPalette}
+          title="Mở thanh Tác nhân"
+        >
+          <PanelLeft className="h-4 w-4" />
         </Button>
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
           <Layers className="h-5 w-5" />

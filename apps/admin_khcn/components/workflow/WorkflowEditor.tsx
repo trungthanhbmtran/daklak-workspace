@@ -56,6 +56,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   const [isLoading, setIsLoading] = useState(!!id);
   
   const [isPropertiesOpen, setIsPropertiesOpen] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   
   const { apps: availableServices } = useHubServices();
   const { screenToFlowPosition, setViewport } = useReactFlow();
@@ -281,7 +282,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   }
 
   return (
-    <div className="flex flex-col w-full h-full min-h-[700px] overflow-hidden bg-background rounded-xl border border-border shadow-sm">
+    <div className="flex flex-col w-full h-full overflow-hidden bg-background">
       <Topbar 
         onSave={onSave} 
         onPublish={onPublish} 
@@ -293,10 +294,11 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
           setSelectedNodeId(null);
           setIsPropertiesOpen(true);
         }}
+        onOpenPalette={() => setIsPaletteOpen(!isPaletteOpen)}
       />
       
       <div className="flex flex-1 overflow-hidden relative min-h-0" ref={reactFlowWrapper}>
-        <NodePalette />
+        <NodePalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} />
         
         <div className="flex-1 relative bg-muted/20 min-h-[500px]">
           <ReactFlow
