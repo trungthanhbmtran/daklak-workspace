@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useDossierComponents, useCabinetFiles, useDossierComponentMutations } from "../../hooks/useDocumentFormData";
+import { DossierStatusBadge, DossierComponentStatusBadge, DossierComponentStatusIcon } from "@/components/shared/badges/DocumentBadges";
 
 export function DossierDetailClient({ dossierId }: { dossierId: string }) {
   const dossier = {
@@ -86,23 +87,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
     setIsAddComponentModalOpen(true);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch(status) {
-      case 'VALID': return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
-      case 'MISSING': return <AlertCircle className="h-5 w-5 text-rose-500" />;
-      case 'PENDING_REVIEW': return <AlertCircle className="h-5 w-5 text-amber-500" />;
-      default: return <FileText className="h-5 w-5 text-slate-400" />;
-    }
-  };
 
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'VALID': return <Badge className="bg-emerald-100 text-emerald-700">Hợp lệ</Badge>;
-      case 'MISSING': return <Badge className="bg-rose-100 text-rose-700">Còn thiếu</Badge>;
-      case 'PENDING_REVIEW': return <Badge className="bg-amber-100 text-amber-700">Chờ duyệt</Badge>;
-      default: return <Badge variant="outline">Chưa rõ</Badge>;
-    }
-  };
 
   return (
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-20">
@@ -116,7 +101,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
               </Button>
             </Link>
             <Badge variant="outline" className="font-mono text-indigo-700 bg-indigo-50 border-indigo-200">{dossier.id}</Badge>
-            <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Đang xử lý</Badge>
+            <DossierStatusBadge code={dossier.status} />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">{dossier.procedureName}</h2>
           <p className="text-slate-500 mt-1">Người nộp: <span className="font-medium text-slate-700">{dossier.applicant}</span> • Nộp ngày: {dossier.submitDate}</p>
@@ -147,14 +132,16 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                 
                 <div className="flex gap-4 items-start flex-1">
                   <div className="mt-1">
-                    {getStatusIcon(comp.status)}
+                    <DossierComponentStatusIcon code={comp.status} />
                   </div>
-                  <div>
-                    <h4 className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                      {comp.name}
-                      {comp.isRequired && <span className="text-rose-500 text-sm">*</span>}
-                      {getStatusBadge(comp.status)}
-                    </h4>
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <DossierComponentStatusBadge code={comp.status} />
+                      <h4 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                        {comp.name}
+                        {comp.isRequired && <span className="text-rose-500 text-sm">*</span>}
+                      </h4>
+                    </div>
                     {comp.fileUrl ? (
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="secondary" className="bg-white border border-slate-200 text-indigo-700 hover:bg-slate-100 cursor-pointer">

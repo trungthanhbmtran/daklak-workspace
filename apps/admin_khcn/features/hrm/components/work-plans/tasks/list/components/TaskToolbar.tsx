@@ -5,17 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter, Target, User, Users, ClipboardList, Eye, CheckCircle2, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 
-export type TaskRoleFilter = 'ALL' | 'UNASSIGNED' | 'ASSIGNEE' | 'OWNER' | 'APPROVER' | 'COORDINATOR';
-
-export const ROLE_META: Record<TaskRoleFilter, { label: string; icon: React.ReactNode; color: string }> = {
-  ALL: { label: 'Tất cả công việc', icon: <ClipboardList className="w-4 h-4" />, color: 'text-slate-600 bg-slate-100' },
-  ASSIGNEE: { label: 'Việc tôi làm', icon: <CheckCircle2 className="w-4 h-4" />, color: 'text-indigo-600 bg-indigo-100' },
-  OWNER: { label: 'Việc tôi giao', icon: <User className="w-4 h-4" />, color: 'text-emerald-600 bg-emerald-100' },
-  APPROVER: { label: 'Tôi giám sát', icon: <Eye className="w-4 h-4" />, color: 'text-rose-600 bg-rose-100' },
-  COORDINATOR: { label: 'Tôi phối hợp', icon: <Users className="w-4 h-4" />, color: 'text-amber-600 bg-amber-100' },
-  UNASSIGNED: { label: 'Chờ phân công', icon: <Target className="w-4 h-4" />, color: 'text-orange-600 bg-orange-100' },
-};
+import { TaskRoleFilter, TASK_ROLE_META } from '@/components/shared/badges/TaskBadges';
 
 interface TaskToolbarProps {
   roleFilter: TaskRoleFilter;
@@ -27,7 +19,6 @@ interface TaskToolbarProps {
   onPriorityChange: (v: string) => void;
   onSearchChange: (v: string) => void;
   onCreateTask?: () => void;
-  taskStatusCategories?: any[];
 }
 
 export const TaskToolbar = memo(function TaskToolbar({
@@ -40,13 +31,15 @@ export const TaskToolbar = memo(function TaskToolbar({
   onPriorityChange,
   onSearchChange,
   onCreateTask,
-  taskStatusCategories = [],
 }: TaskToolbarProps) {
+  const { data: statusRes }: any = useGetCategoryByGroup('TASK_STATUS');
+  const taskStatusCategories = statusRes?.data || [];
+  
   return (
     <div className="flex flex-col gap-4 mb-4">
       {/* Role Filter Tabs (Segmented Control) */}
       <div className="inline-flex items-center p-1 bg-slate-100/80 dark:bg-slate-800/80 rounded-xl overflow-x-auto hide-scrollbar max-w-full">
-        {Object.entries(ROLE_META).map(([key, meta]) => {
+        {Object.entries(TASK_ROLE_META).map(([key, meta]) => {
           const isActive = roleFilter === key;
           // Extract just the text color from meta.color (e.g., 'text-indigo-600')
           const textColor = meta.color.split(' ').find(c => c.startsWith('text-'));

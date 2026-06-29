@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { 
   Plus, 
   MoreHorizontal, 
@@ -93,10 +93,14 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
     }
   };
 
-  const filteredWorkflows = workflows.filter(w => 
-    w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    w.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredWorkflows = useMemo(() => {
+    if (!searchTerm) return workflows;
+    const lowerTerm = searchTerm.toLowerCase();
+    return workflows.filter(w => 
+      w.name.toLowerCase().includes(lowerTerm) ||
+      w.description?.toLowerCase().includes(lowerTerm)
+    );
+  }, [workflows, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -138,7 +142,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
              <p className="text-muted-foreground">Bắt đầu bằng cách tạo quy trình đầu tiên của bạn.</p>
           </div>
         ) : (
-          filteredWorkflows.map((workflow) => (
+          filteredWorkflows.map((workflow: any) => (
             <div 
               key={workflow.id} 
               className="group relative bg-card border border-border/60 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300"

@@ -20,16 +20,16 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { hrmTasksApi, hrmApi } from "@/features/hrm/api";
+import { hrmKeys } from '@/features/hrm/keys';
 import { cn } from '@/lib/utils';
 
 interface SmartAssignDrawerProps {
   task: any | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAssignSuccess: () => void;
 }
 
-export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }: SmartAssignDrawerProps) {
+export function SmartAssignDrawer({ task, open, onOpenChange }: SmartAssignDrawerProps) {
   const queryClient = useQueryClient();
   const [assignStrategy, setAssignStrategy] = useState<string>('LOW_PERFORMANCE');
   const [leadCode, setLeadCode] = useState<string>('');
@@ -114,8 +114,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
     },
     onSuccess: () => {
       toast.success('Giao việc thành công!');
-      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
-      onAssignSuccess();
+      queryClient.invalidateQueries({ queryKey: hrmKeys.tasks() });
       onOpenChange(false);
     },
     onError: (e: any) => toast.error(e?.response?.data?.message || e?.message || 'Giao việc thất bại')

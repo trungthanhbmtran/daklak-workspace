@@ -581,23 +581,25 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     pageSize: 500,
   } as any);
 
-  const allEmployees = allEmployeesData?.data || [];
+  const allEmployees = React.useMemo(() => allEmployeesData?.data || [], [allEmployeesData]);
 
-  const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
-    const fullName = emp.fullName || [emp.firstname, emp.lastname].filter(Boolean).join(' ');
-    return {
-      code: emp.employeeCode,
-      name: fullName,
-      rankLimit: emp.rankLimit,
-      availableCapacity: emp.availableCapacity,
-      currentLoad: emp.currentTaskCount,
-      priorityScore: emp.priorityScore,
-      isOverloaded: emp.isOverloaded,
-      department: emp.department,
-      jobTitle: emp.jobTitle,
-      civilServantRank: emp.civilServantRank,
-    };
-  });
+  const assignableEmployees = React.useMemo(() => {
+    return (employeesData?.data || []).map((emp: any) => {
+      const fullName = emp.fullName || [emp.firstname, emp.lastname].filter(Boolean).join(' ');
+      return {
+        code: emp.employeeCode,
+        name: fullName,
+        rankLimit: emp.rankLimit,
+        availableCapacity: emp.availableCapacity,
+        currentLoad: emp.currentTaskCount,
+        priorityScore: emp.priorityScore,
+        isOverloaded: emp.isOverloaded,
+        department: emp.department,
+        jobTitle: emp.jobTitle,
+        civilServantRank: emp.civilServantRank,
+      };
+    });
+  }, [employeesData]);
 
   const groupedEmployees = React.useMemo(() => {
     const groups: { [key: string]: typeof assignableEmployees } = {};

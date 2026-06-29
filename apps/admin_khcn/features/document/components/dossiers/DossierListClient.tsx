@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreateDossierModal } from "./CreateDossierModal";
 import { useDossierList } from "../../hooks/useDocumentFormData";
+import { DossierStatusBadge } from "@/components/shared/badges/DocumentBadges";
 
 export function DossierListClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,15 +20,7 @@ export function DossierListClient() {
   // React Query — loại bỏ useEffect + apiClient trực tiếp
   const { data: dossiers = [], isLoading, refetch } = useDossierList();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "PROCESSING":      return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Đang xử lý</Badge>;
-      case "WAITING_FOR_DOCS": return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Chờ bổ sung</Badge>;
-      case "COMPLETED":       return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Hoàn thành</Badge>;
-      case "REJECTED":        return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Từ chối</Badge>;
-      default:                return <Badge variant="outline">Mới tiếp nhận</Badge>;
-    }
-  };
+
 
   return (
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-20">
@@ -81,7 +74,7 @@ export function DossierListClient() {
                       <div>
                         <div className="flex items-center gap-3 mb-1">
                           <span className="font-mono text-sm font-semibold text-slate-500">{hs.code}</span>
-                          {getStatusBadge(hs.status)}
+                          <DossierStatusBadge code={hs.status} />
                         </div>
                         <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 group-hover:text-indigo-700 transition-colors">
                           {hs.procedureName || "Hồ sơ chưa phân loại"}

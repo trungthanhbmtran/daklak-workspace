@@ -27,20 +27,7 @@ function flattenTree(nodes: any[], prefix = '', depth = 0): MatrixRow[] {
   return rows;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-  TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'text-slate-500' },
-  UNASSIGNED: { label: 'Chưa phân công', icon: <Circle className="w-3.5 h-3.5" />, cls: 'text-slate-500' },
-  TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-blue-600' },
-  PENDING: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-blue-600' },
-  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-amber-600' },
-  PROCESSING: { label: 'Đang xử lý', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-amber-600' },
-  REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-violet-600' },
-  DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'text-emerald-600' },
-  OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-red-600' },
-  RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-orange-600' },
-  REJECTED: { label: 'Từ chối', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-slate-600' },
-  CANCELED: { label: 'Hủy bỏ', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-slate-600' },
-};
+import { TaskStatusBadge, TASK_STATUS_CONFIG } from '@/components/shared/badges/TaskBadges';
 
 // Row background theo depth
 const DEPTH_BG = [
@@ -72,7 +59,7 @@ function exportCsv(rows: MatrixRow[], planTitle: string) {
       `"${r.task.assigneeName || r.task.assigneeCode || ''}"`,
       `"${r.task.assignerName || r.task.assignerCode || ''}"`,
       r.task.dueDate ? new Date(r.task.dueDate).toLocaleDateString('vi-VN') : '',
-      STATUS_CONFIG[r.task.status]?.label || r.task.status,
+      TASK_STATUS_CONFIG[r.task.status]?.label || r.task.status,
     ].join(','))
   ];
 
@@ -186,7 +173,6 @@ export function PlanExecutionMatrix({ tasks, planTitle, isLoading }: PlanExecuti
                 </tr>
               ) : (
                 rows.map((row, i) => {
-                  const statusCfg = STATUS_CONFIG[row.task.status] || STATUS_CONFIG.TODO;
                   const bgCls = DEPTH_BG[Math.min(row.depth, DEPTH_BG.length - 1)];
                   const fwCls = DEPTH_FW[Math.min(row.depth, DEPTH_FW.length - 1)];
                   const isOverdue = row.task.dueDate && new Date(row.task.dueDate) < new Date() && row.task.status !== 'DONE';
@@ -265,10 +251,7 @@ export function PlanExecutionMatrix({ tasks, planTitle, isLoading }: PlanExecuti
 
                       {/* Trạng thái */}
                       <td className="px-3 py-2.5 text-center">
-                        <span className={cn('flex items-center justify-center gap-1 text-xs font-semibold', statusCfg.cls)}>
-                          {statusCfg.icon}
-                          <span className="hidden sm:inline">{statusCfg.label}</span>
-                        </span>
+                        <TaskStatusBadge code={row.task.status} className="font-semibold text-[11px]" />
                       </td>
                     </tr>
                   );

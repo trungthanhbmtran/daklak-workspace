@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Users, Search, CheckCheck, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { hrmTasksApi } from "@/features/hrm/api";
+import { hrmKeys } from '@/features/hrm/keys';
 
 interface AssignCoordinationModalProps {
   task: any | null;
@@ -76,7 +77,7 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
     }),
     onSuccess: () => {
       toast.success('Lead & Coordinators assigned successfully!');
-      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
+      queryClient.invalidateQueries({ queryKey: hrmKeys.tasks() });
       onSuccess();
       onOpenChange(false);
     },

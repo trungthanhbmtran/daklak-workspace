@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { ClipboardList, Calendar, Flag } from 'lucide-react';
 import { hrmTasksApi } from '@/features/hrm/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { hrmKeys } from '@/features/hrm/keys';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -16,6 +18,7 @@ interface CreateTaskModalProps {
 }
 
 export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
+  const qc = useQueryClient();
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -41,6 +44,7 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
       });
 
       toast.success(`Đã khởi tạo: ${form.title}`);
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       setForm({ title: '', description: '', priority: 'MEDIUM', dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0] });
       onClose(true);
     } catch {

@@ -6,28 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import {
   ChevronDown, ChevronRight, PlusCircle,
   Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw,
-  Target, User, Users, Eye, ClipboardList
+  Target, User, Users, Eye, ClipboardList, History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ROLE_META } from './TaskToolbar';
 import { useTaskSubtasks } from '@/features/hrm/hooks/useTasks';
-
-const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string; dot: string }> = {
-  TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'bg-slate-100/80 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
-  TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-blue-50/80 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
-  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'bg-amber-50/80 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
-  REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-violet-50/80 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
-  DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'bg-emerald-50/80 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
-  OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'bg-rose-50/80 text-rose-700 border-rose-200', dot: 'bg-rose-500' },
-  RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'bg-orange-50/80 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
-};
-
-function getRoleBadge(task: any) {
-  if (task.assigneeCode === 'UNASSIGNED') {
-    return { key: 'UNASSIGNED', ...ROLE_META.UNASSIGNED };
-  }
-  return null;
-}
+import { TaskStatusBadge, TaskPriorityBadge, TaskRoleBadge, TASK_STATUS_CONFIG } from '@/components/shared/badges/TaskBadges';
 
 interface TaskRowProps {
   task: any;
@@ -35,10 +18,11 @@ interface TaskRowProps {
   indexSequence: string;
   isLastChild?: boolean;
   onSelectTask: (task: any) => void;
+  onSelectTaskHistory?: (task: any) => void;
   onSmartAssign: (task: any) => void;
 }
 
-const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSelectTask, onSmartAssign, isLastChild }: TaskRowProps) {
+const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSelectTask, onSelectTaskHistory, onSmartAssign, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth === 0);
 
   const hasLoadedChildren = task.children?.length > 0;
@@ -55,10 +39,9 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
   const allowedActions = task.allowedActions || [];
   const canAssign = allowedActions.includes('ASSIGN');
 
-  const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+  const statusCfg = TASK_STATUS_CONFIG[task.status] || TASK_STATUS_CONFIG.TODO;
   const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
 
-  const roleBadge = getRoleBadge(task);
   const isRoot = depth === 0;
 
   return (
@@ -114,15 +97,11 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                {roleBadge && (
-                  <Badge variant="outline" className={cn('text-[11px] font-bold border-0 px-2 py-0.5 gap-1.5 shadow-sm', roleBadge.color)}>
-                    {roleBadge.icon} {roleBadge.label}
-                  </Badge>
+                {isUnassigned && (
+                  <TaskRoleBadge role="UNASSIGNED" />
                 )}
-                {task.priority === 'HIGH' && (
-                  <Badge variant="outline" className="text-[10px] bg-rose-50 text-rose-600 border-rose-200 uppercase tracking-widest font-black">
-                    🔴 Ưu tiên cao
-                  </Badge>
+                {task.priority && task.priority !== 'NORMAL' && (
+                  <TaskPriorityBadge code={task.priority} />
                 )}
                 {hasChildren && (
                   <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-600 border-slate-200 gap-1 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
@@ -141,9 +120,7 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
               </h4>
 
               <div className="flex flex-wrap items-center gap-3 mt-2.5">
-                <Badge variant="outline" className={cn('text-[11px] font-bold border px-2 py-0.5 gap-1.5 shadow-sm', statusCfg.cls)}>
-                  {statusCfg.icon} {statusCfg.label}
-                </Badge>
+                <TaskStatusBadge code={task.status} showIcon />
 
                 {!isUnassigned ? (
                   <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 pl-1 pr-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
@@ -200,8 +177,22 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
                     onSmartAssign(task);
                   }}
                 >
-                  <Users className="w-3.5 h-3.5 mr-1.5" />
-                  Phân công
+                  <Target className="w-4 h-4 mr-1.5" /> Giao việc
+                </Button>
+              )}
+              {onSelectTaskHistory && task.workflowInstId && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-3 text-xs font-bold text-slate-500 hover:text-indigo-600 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 shadow-sm transition-colors rounded-xl"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelectTaskHistory(task);
+                  }}
+                  title="Xem lịch sử"
+                >
+                  <History className="w-4 h-4" />
                 </Button>
               )}
             </div>
@@ -225,6 +216,7 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
               depth={depth + 1}
               indexSequence={`${indexSequence}.${index + 1}`}
               onSelectTask={onSelectTask}
+              onSelectTaskHistory={onSelectTaskHistory}
               onSmartAssign={onSmartAssign}
               isLastChild={index === displayChildren.length - 1}
             />
@@ -239,6 +231,7 @@ interface GlobalTaskTreeProps {
   tasks: any[];
   isLoading?: boolean;
   onSelectTask: (task: any) => void;
+  onSelectTaskHistory?: (task: any) => void;
   onSmartAssign: (task: any) => void;
 }
 
@@ -246,6 +239,7 @@ export const GlobalTaskTree = React.memo(function GlobalTaskTree({
   tasks,
   isLoading,
   onSelectTask,
+  onSelectTaskHistory,
   onSmartAssign,
 }: GlobalTaskTreeProps) {
 
@@ -303,6 +297,7 @@ export const GlobalTaskTree = React.memo(function GlobalTaskTree({
             depth={0}
             indexSequence={`${index + 1}`}
             onSelectTask={onSelectTask}
+            onSelectTaskHistory={onSelectTaskHistory}
             onSmartAssign={onSmartAssign}
             isLastChild={index === tree.length - 1}
           />

@@ -10,17 +10,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ─── Status Config ────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-  TEMPLATE:    { label: 'Chờ giao',      icon: <Circle className="w-3 h-3" />,       cls: 'bg-slate-100 text-slate-600 border-slate-200' },
-  TODO:        { label: 'Chờ thực hiện', icon: <Clock className="w-3 h-3" />,        cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  IN_PROGRESS: { label: 'Đang thực hiện',icon: <RotateCcw className="w-3 h-3" />,   cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  REVIEWING:   { label: 'Chờ duyệt',     icon: <Clock className="w-3 h-3" />,        cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-  DONE:        { label: 'Hoàn thành',    icon: <CheckCircle2 className="w-3 h-3" />, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  OVERDUE:     { label: 'Quá hạn',       icon: <AlertTriangle className="w-3 h-3" />,cls: 'bg-red-50 text-red-700 border-red-200' },
-  RETURNED:    { label: 'Trả lại',       icon: <RotateCcw className="w-3 h-3" />,   cls: 'bg-orange-50 text-orange-700 border-orange-200' },
-};
+import { TaskStatusBadge } from '@/components/shared/badges/TaskBadges';
 
 // ─── TaskRow ──────────────────────────────────────────────────────────────────
 
@@ -40,7 +30,6 @@ function TaskRow({ task, depth, planId, indexSequence, onRequestAssign, isLastCh
   const allowedActions = task.allowedActions || [];
   const canAssign = allowedActions.includes('ASSIGN');
 
-  const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
   const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
 
   return (
@@ -90,9 +79,7 @@ function TaskRow({ task, depth, planId, indexSequence, onRequestAssign, isLastCh
               </p>
 
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <Badge variant="outline" className={cn('text-[10px] font-bold border px-1.5 py-0 gap-1', statusCfg.cls)}>
-                  {statusCfg.icon} {statusCfg.label}
-                </Badge>
+                <TaskStatusBadge code={task.status} showIcon className="text-[10px] px-1.5 py-0" />
 
                 {!isUnassigned ? (
                   <span className="text-xs text-slate-500 flex items-center gap-1">

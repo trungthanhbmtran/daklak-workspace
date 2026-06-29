@@ -2,9 +2,7 @@ import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
 import {
-  useTaskComments,
   useTaskSubtasks,
-  useAddComment,
   useUpdateStatus,
 } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
@@ -17,14 +15,10 @@ import { toast } from 'sonner';
  *  - Optimistic update khi gửi comment
  *  - Tự dedup nếu nhiều nơi cùng query cùng taskId
  */
-export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: number | undefined, onRefetch: () => void) {
+export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: number | undefined) {
   const qc = useQueryClient();
 
   // ── Queries ──────────────────────────────────────────────────────────────
-  const {
-    data: commentsRes,
-    isLoading: isLoadingComments,
-  } = useTaskComments(activeTaskId);
 
   const {
     data: subtasksRes,
@@ -32,24 +26,13 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
     refetch: refetchChain,
   } = useTaskSubtasks(rootTaskId);
 
-  const taskComments   = commentsRes?.data  || [];
+
   const delegationChain = subtasksRes?.data || [];
 
   // ── Mutations ─────────────────────────────────────────────────────────────
-  const addComment   = useAddComment(activeTaskId);
   const updateStatus = useUpdateStatus(activeTaskId);
 
   // ── Stable action handlers ────────────────────────────────────────────────
-
-  const handleSendMessage = useCallback(async (
-    message: string,
-    onClearInput: () => void,
-  ) => {
-    if (!message.trim() || !activeTaskId || addComment.isPending) return;
-    addComment.mutate(message.trim(), {
-      onSuccess: () => onClearInput(),
-    });
-  }, [activeTaskId, addComment]);
 
   const handleCompleteTask = useCallback(async (onClose: () => void) => {
     if (!activeTaskId) return;
@@ -58,13 +41,13 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
       {
         onSuccess: () => {
           toast.success('Đã hoàn thành công việc!');
-          onRefetch();
+          qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
           onClose();
         },
         onError: () => toast.error('Lỗi khi hoàn thành công việc'),
       },
     );
-  }, [activeTaskId, updateStatus, onRefetch]);
+  }, [activeTaskId, updateStatus, qc]);
 
   const handleRejectTask = useCallback(async (
     reason: string,
@@ -76,13 +59,13 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
       {
         onSuccess: () => {
           toast.success('Đã trả lại công việc');
-          onRefetch();
+          qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
           onClose();
         },
         onError: () => toast.error('Lỗi khi trả lại công việc'),
       },
     );
-  }, [activeTaskId, updateStatus, onRefetch]);
+  }, [activeTaskId, updateStatus, qc]);
 
   const handleApproveTask = useCallback(async (onClose: () => void) => {
     if (!activeTaskId) return;
@@ -91,13 +74,13 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
       {
         onSuccess: () => {
           toast.success('Đã nghiệm thu công việc');
-          onRefetch();
+          qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
           onClose();
         },
         onError: () => toast.error('Lỗi khi nghiệm thu công việc'),
       },
     );
-  }, [activeTaskId, updateStatus, onRefetch]);
+  }, [activeTaskId, updateStatus, qc]);
 
   /** Refresh comments thủ công (dùng sau khi CoordinationModal thành công) */
   const fetchComments = useCallback(() => {
@@ -112,15 +95,11 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
 
   return {
     // data
-    taskComments,
-    isLoadingComments,
-    isSendingMessage: addComment.isPending,
     delegationChain,
     isLoadingChain,
     // actions
     fetchComments,
     fetchDelegationChain,
-    handleSendMessage,
     handleCompleteTask,
     handleRejectTask,
     handleApproveTask,

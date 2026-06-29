@@ -1,34 +1,5 @@
-import { Badge } from '@/components/ui/badge';
+import React from 'react';
 import { Calendar, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
-
-export const getStatusBadge = (status: string, categories?: any[]) => {
-  const matched = categories?.find(c => c.code === status);
-  const label = matched?.name || status;
-
-  switch (status) {
-    case 'DONE':        return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200">{label}</Badge>;
-    case 'IN_PROGRESS': 
-    case 'PROCESSING':  return <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200">{label}</Badge>;
-    case 'TODO':        
-    case 'PENDING':     return <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200">{label}</Badge>;
-    case 'PENDING_APPROVAL': return <Badge className="bg-fuchsia-500/10 text-fuchsia-600 hover:bg-fuchsia-500/20 border-fuchsia-200">{label}</Badge>;
-    case 'OVERDUE':     return <Badge className="bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-200">{label}</Badge>;
-    case 'RETURNED':    return <Badge className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-200">{label}</Badge>;
-    case 'REJECTED':
-    case 'CANCELED':    return <Badge className="bg-slate-500/10 text-slate-600 hover:bg-slate-500/20 border-slate-200">{label}</Badge>;
-    case 'UNASSIGNED':  return <Badge className="bg-slate-100 text-slate-500 border-slate-200 border-dashed">{label}</Badge>;
-    default:            return <Badge variant="outline">{label}</Badge>;
-  }
-};
-
-export const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'HIGH':   return 'text-rose-500';
-    case 'MEDIUM': return 'text-amber-500';
-    case 'LOW':    return 'text-emerald-500';
-    default:       return 'text-slate-500';
-  }
-};
 
 export type DueDateInfo = {
   label: string;
@@ -88,16 +59,4 @@ export const getDueDateDisplay = (
     border: 'border-indigo-100 dark:border-indigo-800/30',
     icon: <Calendar className="w-4 h-4" />,
   };
-};
-
-export const getPriorityName = (code: string, priorities: any[]): string => {
-  const upper = (code || 'MEDIUM').toUpperCase();
-  const matched = priorities.find((p: any) => p.code?.toUpperCase() === upper);
-  if (matched?.name) return matched.name;
-  switch (upper) {
-    case 'HIGH':   return 'Cao';
-    case 'MEDIUM': return 'Trung bình';
-    case 'LOW':    return 'Thấp';
-    default:       return upper;
-  }
 };

@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Sparkles, Calendar, Flag, UserPlus, Trash2, Split } from 'lucide-react';
 import { hrmTasksApi } from '@/features/hrm/api';
 import { aiApi } from '@/features/hrm/api/ai.api';
+import { useQueryClient } from '@tanstack/react-query';
+import { hrmKeys } from '@/features/hrm/keys';
 
 interface AiTaskBreakdownModalProps {
   isOpen: boolean;
@@ -26,6 +28,7 @@ interface GeneratedSubtask {
 }
 
 export function AiTaskBreakdownModal({ isOpen, onClose, parentTask, planId }: AiTaskBreakdownModalProps) {
+  const qc = useQueryClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTasks, setGeneratedTasks] = useState<GeneratedSubtask[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,6 +116,10 @@ export function AiTaskBreakdownModal({ isOpen, onClose, parentTask, planId }: Ai
       await Promise.all(promises);
 
       toast.success(`Đã tạo thành công ${generatedTasks.length} công việc con!`);
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      if (parentTask?.id) {
+        qc.invalidateQueries({ queryKey: hrmKeys.taskSubtasks(parentTask.id) });
+      }
       setGeneratedTasks([]);
       onClose(true);
     } catch (error) {

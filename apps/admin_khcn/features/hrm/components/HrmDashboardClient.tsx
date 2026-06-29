@@ -43,8 +43,8 @@ import {
   Cell
 } from "recharts";
 
-// Import hook lấy dữ liệu thật
-import { useTasksList } from "@/features/hrm/hooks/useTasks";
+// Import hook lấy dữ liệu thống kê từ server
+import { useTaskStats } from "@/features/hrm/hooks/useTasks";
 
 // --- Sortable Item Component ---
 function SortableWidget({ id, children }: { id: string, children: React.ReactNode }) {
@@ -108,97 +108,23 @@ export function HrmDashboardClient() {
     }
   };
 
-  // --- GET REAL DATA ---
-  const { data: tasksRes, isLoading } = useTasksList({ pageSize: 1000 });
-  const tasks = tasksRes?.data || [];
+  // --- GET SERVER SIDE STATS ---
+  const { data: statsRes, isLoading } = useTaskStats({});
+  const serverStats = statsRes?.data || {
+    overdue: 0, warning: 0, inTime: 0, doneInTime: 0, doneOverdue: 0, statsByUnit: []
+  };
 
-  // --- Tính toán thống kê từ data thật ---
-  const totalTasks = tasks.length;
-
-  const completedTasks = tasks.filter((t: any) => t.status === 'COMPLETED' || t.progress === 100).length;
-  const pendingTasks = totalTasks - completedTasks;
-
-  const now = new Date();
-  const threeDaysFromNow = new Date();
-  threeDaysFromNow.setDate(now.getDate() + 3);
-
-  const overdueTasks = tasks.filter((t: any) => {
-    if (t.status === 'COMPLETED' || t.progress === 100) return false;
-    if (!t.dueDate) return false;
-    return new Date(t.dueDate) < now;
-  }).length;
-
-  const approachingTasks = tasks.filter((t: any) => {
-    if (t.status === 'COMPLETED' || t.progress === 100) return false;
-    if (!t.dueDate) return false;
-    const dueDate = new Date(t.dueDate);
-    return dueDate >= now && dueDate <= threeDaysFromNow;
-  }).length;
+  const completedTasks = serverStats.doneInTime + serverStats.doneOverdue;
+  const pendingTasks = serverStats.overdue + serverStats.warning + serverStats.inTime;
+  const totalTasks = completedTasks + pendingTasks;
+  const overdueTasks = serverStats.overdue;
+  const approachingTasks = serverStats.warning;
 
   // --- Data cho biểu đồ BarChart (Theo Đơn vị) ---
-  const progressByUnitData = useMemo(() => {
-    if (!tasks.length) return [];
-    const map: Record<string, { completed: number, pending: number }> = {};
-
-    tasks.forEach((t: any) => {
-      let unit = "Chưa phân bổ";
-      const assignee = t.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
-
-      // Fallback tìm tên phòng ban, giả định API trả về ở assignee.employee.department.name
-      if (assignee?.employee?.department?.name) {
-        unit = assignee.employee.department.name;
-      } else if (assignee?.departmentName) {
-        unit = assignee.departmentName;
-      } else if (assignee?.employee?.jobTitle?.name) {
-        unit = assignee.employee.jobTitle.name;
-      }
-
-      if (!map[unit]) map[unit] = { completed: 0, pending: 0 };
-
-      if (t.status === 'COMPLETED' || t.progress === 100) {
-        map[unit].completed++;
-      } else {
-        map[unit].pending++;
-      }
-    });
-
-    return Object.entries(map).map(([unit, counts]) => ({
-      unit: unit.length > 15 ? unit.substring(0, 15) + '...' : unit,
-      fullUnit: unit,
-      completed: counts.completed,
-      pending: counts.pending,
-    })).sort((a, b) => (b.completed + b.pending) - (a.completed + a.pending)).slice(0, 7);
-  }, [tasks]);
+  const progressByUnitData = serverStats.statsByUnit || [];
 
   // --- Data cho biểu đồ PieChart (Theo Lãnh đạo / Ban giám đốc / Chủ trì) ---
-  const statsByLeaderData = useMemo(() => {
-    if (!tasks.length) return [];
-    const map: Record<string, number> = {};
-
-    tasks.forEach((t: any) => {
-      let leader = "Chưa phân bổ";
-      const owner = t.participants?.find((p: any) => p.participantRole === 'OWNER');
-
-      if (owner?.employee?.fullName) {
-        leader = owner.employee.fullName;
-      } else if (owner?.employeeCode) {
-        leader = owner.employeeCode;
-      } else {
-        const assignee = t.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
-        if (assignee?.employee?.department?.name) {
-          leader = assignee.employee.department.name;
-        }
-      }
-
-      map[leader] = (map[leader] || 0) + 1;
-    });
-
-    return Object.entries(map).map(([name, value]) => ({
-      name: name.length > 20 ? name.substring(0, 20) + '...' : name,
-      fullName: name,
-      value
-    })).sort((a, b) => b.value - a.value).slice(0, 5);
-  }, [tasks]);
+  const statsByLeaderData = serverStats.statsByLeader || [];
 
   const renderWidgetContent = (type: string) => {
     switch (type) {
@@ -304,7 +230,7 @@ export function HrmDashboardClient() {
                   margin={{ top: 5, right: 30, left: -20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="unit" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <XAxis dataKey="unitName" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                   <Tooltip
                     cursor={{ fill: 'transparent' }}
@@ -336,9 +262,10 @@ export function HrmDashboardClient() {
                     outerRadius={100}
                     paddingAngle={2}
                     dataKey="value"
+                    nameKey="leaderName"
                     stroke="none"
                   >
-                    {statsByLeaderData.map((entry, index) => (
+                    {statsByLeaderData.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

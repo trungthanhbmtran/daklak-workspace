@@ -777,18 +777,51 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const allStatsTasks = await this.prisma.task.findMany({
       where,
-      select: { status: true, dueDate: true, completedAt: true, updatedAt: true }
+      select: { 
+        status: true, 
+        progress: true,
+        dueDate: true, 
+        completedAt: true, 
+        updatedAt: true,
+        participants: {
+          where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } },
+          select: { employeeCode: true, participantRole: true }
+        }
+      }
     });
 
     let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
+    const statsByUnitMap: Record<string, { completed: number, pending: number }> = {};
+    const statsByLeaderMap: Record<string, number> = {};
+    const empCodes = new Set<string>();
+    allStatsTasks.forEach((t: any) => {
+      t.participants?.forEach((p: any) => empCodes.add(p.employeeCode));
+    });
+
+    const empMap = new Map<string, any>();
+    if (empCodes.size > 0) {
+      const employees = await this.prisma.employee.findMany({
+        where: { employeeCode: { in: Array.from(empCodes) } },
+        select: { employeeCode: true, fullName: true, departmentId: true, jobTitleId: true }
+      });
+      employees.forEach(emp => {
+        empMap.set(emp.employeeCode, {
+          unit: emp.departmentId ? `Phòng ban ${emp.departmentId}` : (emp.jobTitleId ? `Chức danh ${emp.jobTitleId}` : "Chưa phân bổ"),
+          fullName: emp.fullName
+        });
+      });
+    }
+
     allStatsTasks.forEach((t: any) => {
       const due = t.dueDate ? new Date(t.dueDate) : null;
       if (due) due.setHours(0, 0, 0, 0);
 
-      if (t.status === 'DONE') {
+      const isCompleted = t.status === 'DONE' || t.status === 'COMPLETED' || t.progress === 100;
+
+      if (isCompleted) {
         const completedDate = new Date(t.completedAt || t.updatedAt || Date.now());
         completedDate.setHours(0, 0, 0, 0);
         if (due && completedDate > due) {
@@ -805,12 +838,49 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           else inTime++;
         }
       }
+
+      // Group by Unit & Leader
+      let unit = "Chưa phân bổ";
+      let leader = "Chưa phân bổ";
+      const assignee = t.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
+      const owner = t.participants?.find((p: any) => p.participantRole === 'OWNER');
+
+      if (assignee && empMap.has(assignee.employeeCode)) {
+        unit = empMap.get(assignee.employeeCode)!.unit;
+      }
+      if (owner && empMap.has(owner.employeeCode)) {
+        leader = empMap.get(owner.employeeCode)!.fullName;
+      } else if (assignee && empMap.has(assignee.employeeCode)) {
+        leader = empMap.get(assignee.employeeCode)!.unit;
+      }
+
+      if (!statsByUnitMap[unit]) statsByUnitMap[unit] = { completed: 0, pending: 0 };
+      if (isCompleted) {
+        statsByUnitMap[unit].completed++;
+      } else {
+        statsByUnitMap[unit].pending++;
+      }
+
+      statsByLeaderMap[leader] = (statsByLeaderMap[leader] || 0) + 1;
     });
+
+    const statsByUnit = Object.keys(statsByUnitMap).map(unitName => ({
+      unitName: unitName.length > 15 ? unitName.substring(0, 15) + '...' : unitName,
+      fullUnit: unitName,
+      completed: statsByUnitMap[unitName].completed,
+      pending: statsByUnitMap[unitName].pending
+    })).sort((a, b) => (b.completed + b.pending) - (a.completed + a.pending)).slice(0, 7);
+
+    const statsByLeader = Object.keys(statsByLeaderMap).map(leaderName => ({
+      leaderName: leaderName.length > 20 ? leaderName.substring(0, 20) + '...' : leaderName,
+      fullName: leaderName,
+      value: statsByLeaderMap[leaderName]
+    })).sort((a, b) => b.value - a.value).slice(0, 5);
 
     return {
       success: true,
       message: 'Lấy thống kê nhiệm vụ thành công',
-      data: { overdue, warning, inTime, doneInTime, doneOverdue }
+      data: { overdue, warning, inTime, doneInTime, doneOverdue, statsByUnit }
     };
   }
 

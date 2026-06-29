@@ -165,12 +165,27 @@ message ListTasksRequest {
   int32 currentUserId = 20;
 }
 
+message UnitStats {
+  string unitName = 1;
+  int32 completed = 2;
+  int32 pending = 3;
+  string fullUnit = 4;
+}
+
+message LeaderStats {
+  string leaderName = 1;
+  int32 value = 2;
+  string fullName = 3;
+}
+
 message TaskStats {
   int32 overdue = 1;
   int32 warning = 2;
   int32 inTime = 3;
   int32 doneInTime = 4;
   int32 doneOverdue = 5;
+  repeated UnitStats statsByUnit = 6;
+  repeated LeaderStats statsByLeader = 7;
 }
 
 message ListTasksResponse {

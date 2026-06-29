@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UserCheck, CheckCircle2, Target, BarChart3 } from 'lucide-react';
-import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
+import { TaskStatusBadge, TaskPriorityBadge, TaskRoleBadge } from '@/components/shared/badges/TaskBadges';
+import { getDueDateDisplay } from '../utils';
 
 type TaskTab = 'ALL' | 'PENDING_ASSIGN' | 'MY_EXECUTION' | 'I_ASSIGNED' | 'DEPARTMENT' | 'REJECTED' | 'OVERDUE' | 'COMPLETED';
 
@@ -69,7 +70,7 @@ export const TaskGrid = memo(function TaskGrid({
                 {/* Header: status + plan badge */}
                 <div className="flex justify-between items-start mb-3 gap-2">
                   <div className="flex flex-wrap gap-2 items-center max-w-[80%]">
-                    {getStatusBadge(task.status || 'TODO', taskStatusCategories)}
+                    <TaskStatusBadge code={task.status} showIcon />
                     {task.plan && (
                       <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 text-[10px] px-1.5 font-bold flex items-center gap-1 max-w-full">
                         <Target className="w-3 h-3 shrink-0" />
@@ -137,10 +138,14 @@ export const TaskGrid = memo(function TaskGrid({
 
               {/* Footer: action by context */}
               <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 transition-colors duration-200">
-                <span className={`text-[10px] font-bold uppercase tracking-widest flex items-center ${getPriorityColor(task.priority)}`}>
-                  <div className="w-1.5 h-1.5 rounded-full mr-1.5 bg-current shadow-sm" />
-                  {getPriorityName(task.priority, priorities)}
-                </span>
+                <div className="flex gap-2">
+                  {isUnassigned && (
+                    <TaskRoleBadge role="UNASSIGNED" className="border-0 px-2 shadow-none" />
+                  )}
+                  {task.priority !== 'NORMAL' && (
+                    <TaskPriorityBadge code={task.priority} className="px-2" />
+                  )}
+                </div>
 
                 {/* Context-specific quick action */}
                 {context === 'PENDING_ASSIGN' && isUnassigned && (

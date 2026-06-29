@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Send, Users, ArrowUpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { hrmTasksApi } from "@/features/hrm/api";
+import { hrmKeys } from '@/features/hrm/keys';
 
 interface CoordinationModalProps {
   task: any | null;
@@ -33,7 +34,7 @@ export function CoordinationModal({ task, open, onOpenChange, onSuccess }: Coord
     },
     onSuccess: () => {
       toast.success('Đã gửi yêu cầu phối hợp đến lãnh đạo!');
-      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
+      queryClient.invalidateQueries({ queryKey: hrmKeys.tasks() });
       setMessage('');
       onSuccess();
       onOpenChange(false);

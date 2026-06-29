@@ -4,7 +4,8 @@ import React, { memo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, UserCheck, CheckCircle2, BarChart3, Target } from 'lucide-react';
-import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
+import { getDueDateDisplay } from '../utils';
+import { TaskStatusBadge, TaskPriorityBadge } from '@/components/shared/badges/TaskBadges';
 
 interface TaskTableProps {
   tasks: any[];
@@ -82,14 +83,13 @@ export const TaskTable = memo(function TaskTable({
                   </td>
 
                   {/* Status */}
-                  <td className="px-6 py-5">{getStatusBadge(task.status || 'TODO', taskStatusCategories)}</td>
+                  <td className="px-6 py-5">
+                    <TaskStatusBadge code={task.status || 'TODO'} showIcon />
+                  </td>
 
                   {/* Priority */}
                   <td className="px-6 py-5">
-                    <span className={`font-black tracking-widest text-xs flex items-center ${getPriorityColor(task.priority)}`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-current mr-2 animate-pulse" />
-                      {getPriorityName(task.priority, priorities)}
-                    </span>
+                    <TaskPriorityBadge code={task.priority || 'NORMAL'} />
                   </td>
 
                   {/* 4th col: dynamic per context */}

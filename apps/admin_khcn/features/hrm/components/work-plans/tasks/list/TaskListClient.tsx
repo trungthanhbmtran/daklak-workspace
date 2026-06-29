@@ -6,19 +6,23 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTasksList, useTaskStats } from '@/features/hrm/hooks';
 import { hrmTasksApi } from '@/features/hrm/api';
 import { hrmKeys } from '@/features/hrm/keys';
-import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 
-import { TaskToolbar, TaskRoleFilter } from './components/TaskToolbar';
+import { TaskToolbar } from './components/TaskToolbar';
+import { TaskRoleFilter } from '@/components/shared/badges/TaskBadges';
 import { GlobalTaskTree } from './components/GlobalTaskTree';
 import { TaskStatsBar } from './components/TaskStatsBar';
-import { SmartAssignDrawer } from '../assign/SmartAssignDrawer';
-import { CreateTaskModal } from './components/CreateTaskModal';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
 
 import { useDebounce } from './hooks/useDebounce';
 
 const TaskDetailDialog = lazy(() =>
   import('./components/TaskDetailDialog').then((m) => ({ default: m.TaskDetailDialog })),
+);
+const SmartAssignDrawer = lazy(() =>
+  import('../assign/SmartAssignDrawer').then((m) => ({ default: m.SmartAssignDrawer })),
+);
+const CreateTaskModal = lazy(() =>
+  import('./components/CreateTaskModal').then((m) => ({ default: m.CreateTaskModal })),
 );
 
 export const TaskListClient = () => {
@@ -36,6 +40,7 @@ export const TaskListClient = () => {
   const [pageSize, setPageSize] = useState(20);
 
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [initialDetailTab, setInitialDetailTab] = useState<'CHAT' | 'HISTORY'>('CHAT');
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -43,7 +48,7 @@ export const TaskListClient = () => {
   const debouncedPriority = useDebounce(priorityFilter, 300);
   const debouncedSearch = useDebounce(searchQuery, 400);
 
-  const { data: tasksResponse, isLoading, isFetching, refetch } = useTasksList({
+  const { data: tasksResponse, isLoading, isFetching } = useTasksList({
     search: debouncedSearch,
     priority: debouncedPriority === 'ALL' ? undefined : debouncedPriority,
     status: debouncedStatus === 'ALL' ? undefined : debouncedStatus,
@@ -70,22 +75,13 @@ export const TaskListClient = () => {
   const meta = tasksResponse?.meta || {};
   const totalPages = meta.pagination?.totalPages || 1;
 
-  // ── Categories ──────────────────────────────────────────────────────────────
-  const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
-  const priorities = prioritiesRes?.data || [];
-
-  const { data: statusRes }: any = useGetCategoryByGroup('TASK_STATUS');
-  const taskStatusCategories = statusRes?.data || [];
-
-  const { data: roleRes }: any = useGetCategoryByGroup('TASK_ROLE');
-  const taskRoleCategories = roleRes?.data || [];
-
   // ── StatsBar filter ────────────────────────────────────────────────────────
   // We use server-side statsFilter so no need to filter displayedTasks in JS anymore
   const displayedTasks = allTasks;
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
-  const handleSelectTask = useCallback((task: any) => setSelectedTask(task), []);
+  const handleSelectTask = useCallback((task: any) => { setSelectedTask(task); setInitialDetailTab('CHAT'); }, []);
+  const handleSelectTaskHistory = useCallback((task: any) => { setSelectedTask(task); setInitialDetailTab('HISTORY'); }, []);
   const handleSmartAssign = useCallback((task: any) => setTaskToAssign(task), []);
   const handleCloseDetail = useCallback(() => setSelectedTask(null), []);
   const handleFilterChange = useCallback((id: string | null) => setActiveFilter(id), []);
@@ -96,10 +92,7 @@ export const TaskListClient = () => {
 
   const handleCloseCreateModal = useCallback((created?: boolean) => {
     setIsCreateModalOpen(false);
-    if (created) {
-      refetch();
-    }
-  }, [refetch]);
+  }, []);
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500 font-sans">
@@ -129,7 +122,6 @@ export const TaskListClient = () => {
         onPriorityChange={(v) => { setPriorityFilter(v); setPage(1); }}
         onSearchChange={(v) => { setSearchQuery(v); setPage(1); }}
         onCreateTask={handleCreateTask}
-        taskStatusCategories={taskStatusCategories}
       />
 
       {/* Tree Content */}
@@ -137,6 +129,7 @@ export const TaskListClient = () => {
         tasks={displayedTasks}
         isLoading={isLoading}
         onSelectTask={handleSelectTask}
+        onSelectTaskHistory={handleSelectTaskHistory}
         onSmartAssign={handleSmartAssign}
       />
 
@@ -146,22 +139,22 @@ export const TaskListClient = () => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setPage(p => Math.max(1, p - 1))} 
-                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                <PaginationPrevious
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
-              
+
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
                 if (
-                  p === 1 || 
-                  p === totalPages || 
+                  p === 1 ||
+                  p === totalPages ||
                   (p >= page - 1 && p <= page + 1)
                 ) {
                   return (
                     <PaginationItem key={p}>
-                      <PaginationLink 
-                        isActive={page === p} 
+                      <PaginationLink
+                        isActive={page === p}
                         onClick={() => setPage(p)}
                         className="cursor-pointer"
                       >
@@ -180,9 +173,9 @@ export const TaskListClient = () => {
               })}
 
               <PaginationItem>
-                <PaginationNext 
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
-                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} 
+                <PaginationNext
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -191,22 +184,23 @@ export const TaskListClient = () => {
       )}
 
       {/* Create Modal */}
-      <CreateTaskModal
-        isOpen={isCreateModalOpen}
-        onClose={handleCloseCreateModal}
-      />
+      {isCreateModalOpen && (
+        <Suspense fallback={null}>
+          <CreateTaskModal
+            isOpen={isCreateModalOpen}
+            onClose={handleCloseCreateModal}
+          />
+        </Suspense>
+      )}
 
       {/* Detail Dialog */}
       {selectedTask && (
         <Suspense fallback={null}>
           <TaskDetailDialog
             task={selectedTask}
-            priorities={priorities}
-            taskStatusCategories={taskStatusCategories}
-            taskRoleCategories={taskRoleCategories}
+            initialTab={initialDetailTab}
             context={roleFilter === 'UNASSIGNED' ? 'PENDING_ASSIGN' : 'MY_EXECUTION'}
             onClose={handleCloseDetail}
-            onRefetch={refetch}
             onSmartAssign={handleSmartAssign}
             onSelectTask={handleSelectTask}
           />
@@ -214,12 +208,15 @@ export const TaskListClient = () => {
       )}
 
       {/* Smart Assign Drawer */}
-      <SmartAssignDrawer
-        task={taskToAssign}
-        open={!!taskToAssign}
-        onOpenChange={(open) => !open && setTaskToAssign(null)}
-        onAssignSuccess={refetch}
-      />
+      {!!taskToAssign && (
+        <Suspense fallback={null}>
+          <SmartAssignDrawer
+            task={taskToAssign}
+            open={!!taskToAssign}
+            onOpenChange={(open) => !open && setTaskToAssign(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

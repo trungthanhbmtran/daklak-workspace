@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { PlusCircle, Calendar, Flag } from 'lucide-react';
 import { hrmTasksApi } from '@/features/hrm/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { hrmKeys } from '@/features/hrm/keys';
 
 interface SubTaskModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ interface SubTaskModalProps {
 }
 
 export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskModalProps) {
+  const qc = useQueryClient();
 
   const [form, setForm] = useState({
     title: '',
@@ -61,6 +64,11 @@ export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskMod
       }
 
       toast.success(`Đã thêm: ${form.title}`);
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      if (parentTask?.id) {
+        qc.invalidateQueries({ queryKey: hrmKeys.taskSubtasks(parentTask.id) });
+        // Optional: also root rootTaskId if it's different, but invalidating tasks() is enough.
+      }
       setForm({ title: '', description: '', priority: 'MEDIUM', dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0] });
       onClose(true);
     } catch {

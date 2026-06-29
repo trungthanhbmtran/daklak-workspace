@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,24 +9,34 @@ import {
   MessageSquare, Send, Reply, User, Users, Target, BarChart3, AlertCircle,
 } from 'lucide-react';
 import { useTaskDetail } from '../hooks/useTaskDetail';
-import { SubTaskModal } from '../../subtask/SubTaskModal';
-import { AiTaskBreakdownModal } from '../../subtask/AiTaskBreakdownModal';
-import { CoordinationModal } from '../../coordination/CoordinationModal';
-import { AssignCoordinationModal } from '../../assign/AssignCoordinationModal';
-import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
-import { MentionInput } from '../../../../MentionInput';
+import { getDueDateDisplay } from '../utils';
+import { TaskStatusBadge, TaskPriorityBadge, TASK_STATUS_CONFIG } from '@/components/shared/badges/TaskBadges';
+
+const SubTaskModal = lazy(() => import('../../subtask/SubTaskModal').then(m => ({ default: m.SubTaskModal })));
+const AiTaskBreakdownModal = lazy(() => import('../../subtask/AiTaskBreakdownModal').then(m => ({ default: m.AiTaskBreakdownModal })));
+const CoordinationModal = lazy(() => import('../../coordination/CoordinationModal').then(m => ({ default: m.CoordinationModal })));
+const AssignCoordinationModal = lazy(() => import('../../assign/AssignCoordinationModal').then(m => ({ default: m.AssignCoordinationModal })));
 import { WorkflowTimeline } from '@/features/workflow/components/WorkflowTimeline';
+import { TaskChatContainer } from './TaskChatContainer';
+import { useTaskChat } from '../hooks/useTaskChat';
+import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 import { History } from 'lucide-react';
+
+function TaskChatBadge({ activeTaskId }: { activeTaskId: number | undefined }) {
+  const { taskComments } = useTaskChat(activeTaskId);
+  return (
+    <Badge variant="secondary" className="rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 border border-indigo-100">
+      {taskComments.length} tin
+    </Badge>
+  );
+}
 
 interface TaskDetailDialogProps {
   task: any | null;
-  priorities: any[];
   onClose: () => void;
-  onRefetch: () => void;
   onSmartAssign: (task: any) => void;
   onSelectTask?: (task: any) => void;
-  taskStatusCategories?: any[];
-  taskRoleCategories?: any[];
+  initialTab?: 'CHAT' | 'HISTORY';
   /** Context xác định actions nào hiển thị — tránh trùng chức năng giữa các tab */
   context?: any;
 }
@@ -41,22 +51,24 @@ interface TaskDetailDialogProps {
  */
 export function TaskDetailDialog({
   task,
-  priorities,
   onClose,
-  onRefetch,
   onSmartAssign,
-  taskStatusCategories = [],
+  initialTab = 'CHAT',
   context = 'MY_EXECUTION',
 }: TaskDetailDialogProps) {
   const [activeTask, setActiveTask] = React.useState(task);
-  const [activeTab, setActiveTab] = useState<'CHAT' | 'HISTORY'>('CHAT');
+  const [activeTab, setActiveTab] = useState<'CHAT' | 'HISTORY'>(initialTab);
 
   // Sync activeTask when root task changes
   React.useEffect(() => {
     setActiveTask(task);
   }, [task]);
 
-  const [chatMessage, setChatMessage] = useState('');
+  // Sync initialTab if dialog was re-opened
+  React.useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [isCoordinationModalOpen, setIsCoordinationModalOpen] = useState(false);
@@ -65,15 +77,10 @@ export function TaskDetailDialog({
   const [isAiBreakdownModalOpen, setIsAiBreakdownModalOpen] = useState(false);
 
   const {
-    taskComments, isLoadingComments, isSendingMessage,
     delegationChain, isLoadingChain,
     fetchComments, fetchDelegationChain,
-    handleSendMessage, handleCompleteTask, handleRejectTask, handleApproveTask,
-  } = useTaskDetail(activeTask?.id, task?.rootTaskId || task?.id, onRefetch);
-
-  const handleSend = useCallback(() => {
-    handleSendMessage(chatMessage, () => setChatMessage(''));
-  }, [chatMessage, handleSendMessage]);
+    handleCompleteTask, handleRejectTask, handleApproveTask,
+  } = useTaskDetail(activeTask?.id, task?.rootTaskId || task?.id);
 
   const hasSubtasks = (delegationChain || []).some(
     (n: any) => n.parentId === activeTask?.id
@@ -109,11 +116,12 @@ export function TaskDetailDialog({
             {/* ── TOP HEADER ── */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="scale-90 origin-left shrink-0">{getStatusBadge(activeTask.status || 'TODO', taskStatusCategories)}</div>
-                <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border border-current ${getPriorityColor(activeTask.priority)} bg-white dark:bg-slate-800`}>
-                  <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                  {getPriorityName(activeTask.priority, priorities)}
-                </span>
+                <div className="scale-90 origin-left shrink-0">
+                  <TaskStatusBadge code={activeTask.status || 'TODO'} showIcon />
+                </div>
+                <div className="hidden sm:block">
+                  <TaskPriorityBadge code={activeTask.priority || 'NORMAL'} className="px-3 py-1 text-[11px]" />
+                </div>
                 {activeTask.plan && (
                   <Badge variant="outline" className="hidden md:flex bg-indigo-50 text-indigo-700 border-indigo-200 px-2.5 py-1 rounded-lg font-bold items-center gap-1.5 shrink-0">
                     <Target className="w-3.5 h-3.5" /> {activeTask.plan.title}
@@ -176,9 +184,7 @@ export function TaskDetailDialog({
                       </div>
                       
                       {activeTab === 'CHAT' && (
-                        <Badge variant="secondary" className="rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 border border-indigo-100">
-                          {taskComments.length} tin
-                        </Badge>
+                        <TaskChatBadge activeTaskId={activeTask?.id} />
                       )}
                     </div>
 
@@ -188,89 +194,10 @@ export function TaskDetailDialog({
                         <WorkflowTimeline instanceId={activeTask.workflowInstId} />
                       </div>
                     ) : (
-                      <>
-                        {/* Messages */}
-                        {allowedActions.includes('CHAT') ? (
-                          <>
-                            <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/20 dark:bg-slate-900/10 max-h-[400px]">
-                          {isLoadingComments ? (
-                            <div className="flex justify-center items-center h-32">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
-                            </div>
-                          ) : taskComments.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                              <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
-                                <MessageSquare className="w-7 h-7 text-slate-300" />
-                              </div>
-                              <p className="text-sm font-medium text-slate-400">Chưa có trao đổi nào</p>
-                            </div>
-                          ) : (
-                            taskComments.map((msg: any, idx: number) => {
-                              const isMine = msg.isMine;
-                              return (
-                                <div key={idx} className={`flex gap-3 ${isMine ? 'flex-row-reverse' : ''}`}>
-                                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/50 dark:to-indigo-800/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 text-xs font-black shrink-0 ring-2 ring-white dark:ring-slate-800">
-                                    {msg.authorName?.charAt(0) || msg.authorCode?.charAt(0) || '🔔'}
-                                  </div>
-                                  <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[13.5px] shadow-sm ${msg.isSystemMessage ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 border border-amber-100' : isMine ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-100 rounded-tl-sm'}`}>
-                                    {!msg.isSystemMessage && !isMine && (
-                                      <p className="text-[10px] font-black mb-1 opacity-50">{msg.authorName || msg.authorCode}</p>
-                                    )}
-                                    <p className="leading-relaxed whitespace-pre-wrap wrap-break-word">
-                                      {msg.content.split(/(@\[.*?\]\([^)]+\))/g).map((part: string, i: number) => {
-                                        const match = part.match(/@\[(.*?)\]\(([^)]+)\)/);
-                                        if (match) {
-                                          return (
-                                            <span key={i} className="font-bold text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/30 px-1 py-0.5 rounded">
-                                              @{match[1]}
-                                            </span>
-                                          );
-                                        }
-                                        return <span key={i}>{part}</span>;
-                                      })}
-                                    </p>
-                                    <p className={`text-[10px] mt-1.5 text-right ${isMine ? 'text-indigo-200' : 'opacity-30'}`}>
-                                      {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · {new Date(msg.createdAt).toLocaleDateString('vi-VN')}
-                                    </p>
-                                  </div>
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-
-                        {/* Input */}
-                        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800">
-                          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-2 border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-indigo-400/50 transition-all">
-                            <MentionInput
-                              disabled={['DONE', 'PENDING_APPROVAL'].includes(activeTask.status) || isSendingMessage}
-                              value={chatMessage}
-                              onChange={(e: any) => setChatMessage(e.target.value)}
-                              onSend={handleSend}
-                              placeholder={['DONE', 'PENDING_APPROVAL'].includes(activeTask.status) ? 'Công việc đã đóng/chờ duyệt' : 'Nhập nội dung trao đổi...'}
-                            />
-                            <Button
-                              disabled={['DONE', 'PENDING_APPROVAL'].includes(activeTask.status) || !chatMessage.trim() || isSendingMessage}
-                              onClick={handleSend}
-                              className="rounded-full w-9 h-9 p-0 bg-indigo-600 hover:bg-indigo-700 shadow-md disabled:opacity-40"
-                            >
-                              {isSendingMessage
-                                ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                : <Send className="w-3.5 h-3.5 ml-0.5 text-white" />}
-                            </Button>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center flex-1 text-center py-12">
-                        <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
-                          <MessageSquare className="w-7 h-7 text-slate-300" />
-                        </div>
-                        <p className="text-sm font-bold text-slate-500">Nội dung trao đổi nội bộ</p>
-                        <p className="text-[12px] text-slate-400 mt-1 max-w-[200px]">Bạn không được phân công nên không thể xem trao đổi tại nhiệm vụ này.</p>
-                      </div>
-                    )}
-                  </>
+                      <TaskChatContainer
+                        activeTask={activeTask}
+                        allowedActions={allowedActions}
+                      />
                 )}
               </div>
             </div>
@@ -515,19 +442,7 @@ export function TaskDetailDialog({
                           // 2. Recursive Renderer
                           const renderNode = (node: any, isLast: boolean, depth: number) => {
                             const isCurrent = node.id === activeTask?.id;
-                            const sc: Record<string, { dot: string; badge: string; label: string }> = {
-                              DONE: { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
-                              IN_PROGRESS: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
-                              PROCESSING: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
-                              TODO: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Chờ' },
-                              PENDING: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Chờ' },
-                              OVERDUE: { dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700', label: 'Trễ' },
-                              RETURNED: { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', label: 'Trả lại' },
-                              REJECTED: { dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700', label: 'Từ chối' },
-                              CANCELED: { dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700', label: 'Hủy bỏ' },
-                              UNASSIGNED: { dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700', label: 'Chưa giao' },
-                            };
-                            const color = sc[node.status] || { dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', label: node.status };
+                            const statusCfg = TASK_STATUS_CONFIG[node.status] || TASK_STATUS_CONFIG.TODO;
 
                             return (
                               <div key={node.id} className="relative">
@@ -551,14 +466,14 @@ export function TaskDetailDialog({
                                   className={`relative flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shadow-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800'}`}
                                 >
                                   {/* Dot */}
-                                  <div className={`mt-1 w-2.5 h-2.5 rounded-full ${color.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm shrink-0 z-10`} />
+                                  <div className={`mt-1 w-2.5 h-2.5 rounded-full ${statusCfg.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm shrink-0 z-10`} />
 
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-1 mb-1">
                                       <span className={`text-[9.5px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600' : 'text-slate-400'}`}>
                                         {node.level === -1 ? '🌳 Gốc' : isCurrent ? '▶ Đang xem' : node.children.length > 0 ? '🪵 Nhánh' : '🌿 Lá'}
                                       </span>
-                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${color.badge}`}>{color.label}</span>
+                                      <TaskStatusBadge code={node.status} className="text-[9px] font-black px-1.5 py-0.5" />
                                     </div>
                                     <p className={`font-bold text-[12.5px] line-clamp-3 leading-snug mb-1.5 ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
                                       {node.title}
@@ -626,48 +541,61 @@ export function TaskDetailDialog({
       </Dialog>
 
       {/* ── Modals ── */}
-      <SubTaskModal
-        isOpen={isSubTaskModalOpen}
-        onClose={(created) => {
-          setIsSubTaskModalOpen(false);
-          if (created) {
-            onRefetch();
-            fetchDelegationChain();
-          }
-        }}
-        parentTask={activeTask}
-        planId={activeTask?.planId}
-      />
+      {isSubTaskModalOpen && (
+        <Suspense fallback={null}>
+          <SubTaskModal
+            isOpen={isSubTaskModalOpen}
+            onClose={(created) => {
+              setIsSubTaskModalOpen(false);
+              if (created) {
+                fetchDelegationChain();
+              }
+            }}
+            parentTask={activeTask}
+            planId={activeTask?.planId}
+          />
+        </Suspense>
+      )}
 
-      <AiTaskBreakdownModal
-        isOpen={isAiBreakdownModalOpen}
-        onClose={(created) => {
-          setIsAiBreakdownModalOpen(false);
-          if (created) {
-            onRefetch();
-            fetchDelegationChain();
-          }
-        }}
-        parentTask={activeTask}
-        planId={activeTask?.planId}
-      />
+      {isAiBreakdownModalOpen && (
+        <Suspense fallback={null}>
+          <AiTaskBreakdownModal
+            isOpen={isAiBreakdownModalOpen}
+            onClose={(created) => {
+              setIsAiBreakdownModalOpen(false);
+              if (created) {
+                fetchDelegationChain();
+              }
+            }}
+            parentTask={activeTask}
+            planId={activeTask?.planId}
+          />
+        </Suspense>
+      )}
 
-      <CoordinationModal
-        task={activeTask}
-        open={isCoordinationModalOpen}
-        onOpenChange={setIsCoordinationModalOpen}
-        onSuccess={() => fetchComments()}
-      />
+      {isCoordinationModalOpen && (
+        <Suspense fallback={null}>
+          <CoordinationModal
+            task={activeTask}
+            open={isCoordinationModalOpen}
+            onOpenChange={setIsCoordinationModalOpen}
+            onSuccess={() => fetchComments()}
+          />
+        </Suspense>
+      )}
 
-      <AssignCoordinationModal
-        task={activeTask}
-        open={isAssignCoordinationOpen}
-        onOpenChange={setIsAssignCoordinationOpen}
-        onSuccess={() => {
-          onRefetch();
-          fetchComments();
-        }}
-      />
+      {isAssignCoordinationOpen && (
+        <Suspense fallback={null}>
+          <AssignCoordinationModal
+            task={activeTask}
+            open={isAssignCoordinationOpen}
+            onOpenChange={setIsAssignCoordinationOpen}
+            onSuccess={() => {
+              fetchComments();
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
 }
