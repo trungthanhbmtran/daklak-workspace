@@ -13,8 +13,11 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 interface PropertiesPanelProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
   selectedNode: Node | null;
   availableServices?: any[];
   availableTriggers?: any[];
@@ -29,6 +32,8 @@ interface PropertiesPanelProps {
 }
 
 export const PropertiesPanel = ({
+  isOpen,
+  onOpenChange,
   selectedNode,
   availableServices = [],
   availableTriggers = [],
@@ -501,58 +506,53 @@ export const PropertiesPanel = ({
   };
 
   return (
-    <aside className={cn(
-      "w-80 border-l border-border bg-card flex flex-col transition-all overflow-hidden shadow-2xl",
-      (selectedNode || !selectedNode) ? "translate-x-0" : "translate-x-full"
-    )}>
-      <div className="flex items-center justify-between p-4 border-b border-border/60 bg-muted/10">
-        <div className="flex items-center gap-2">
-          {selectedNode ? <Settings2 className="h-4 w-4 text-primary" /> : <Activity className="h-4 w-4 text-primary" />}
-          <h3 className="text-sm font-bold truncate max-w-[140px]">
-            {selectedNode ? `${data.label || selectedNode.type}` : "Cấu hình quy trình"}
-          </h3>
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+      <SheetContent className="w-[320px] sm:w-[400px] border-l border-border bg-card p-0 flex flex-col shadow-2xl z-50">
+        <div className="flex items-center justify-between p-4 border-b border-border/60 bg-muted/10">
+          <div className="flex items-center gap-2">
+            {selectedNode ? <Settings2 className="h-4 w-4 text-primary" /> : <Activity className="h-4 w-4 text-primary" />}
+            <h3 className="text-sm font-bold truncate max-w-[200px]">
+              {selectedNode ? `${data.label || selectedNode.type}` : "Cấu hình quy trình"}
+            </h3>
+          </div>
+          {/* Note: SheetContent includes its own close button natively */}
         </div>
-        {selectedNode && (
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted transition-colors">
-            <X className="h-4 w-4 text-muted-foreground" />
-          </button>
-        )}
-      </div>
 
-      <div className="flex-1 overflow-y-auto p-5">
-        {selectedNode && (
-          <div className="mb-6 pb-6 border-b border-border/40">
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">
-              Thông tin Node
-            </label>
-            <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/60">
-              <div className="text-[10px] font-mono font-bold bg-background px-2 py-0.5 rounded border border-border/80 shadow-sm">
-                #{selectedNode.id.slice(-6)}
-              </div>
-              <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
-                {selectedNode.type}
+        <div className="flex-1 overflow-y-auto p-5">
+          {selectedNode && (
+            <div className="mb-6 pb-6 border-b border-border/40">
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">
+                Thông tin Node
+              </label>
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/60">
+                <div className="text-[10px] font-mono font-bold bg-background px-2 py-0.5 rounded border border-border/80 shadow-sm">
+                  #{selectedNode.id.slice(-6)}
+                </div>
+                <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                  {selectedNode.type}
+                </div>
               </div>
             </div>
+          )}
+
+          {renderFields()}
+        </div>
+
+        {selectedNode && (
+          <div className="p-4 border-t border-border/60 bg-muted/5 flex items-center justify-between gap-3 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 rounded-xl"
+              onClick={() => onDelete(selectedNode.id)}
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-2" />
+              Xóa bước này
+            </Button>
           </div>
         )}
-
-        {renderFields()}
-      </div>
-
-      {selectedNode && (
-        <div className="p-4 border-t border-border/60 bg-muted/5 flex items-center justify-between gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 rounded-xl"
-            onClick={() => onDelete(selectedNode.id)}
-          >
-            <Trash2 className="h-3.5 w-3.5 mr-2" />
-            Xóa bước này
-          </Button>
-        </div>
-      )}
-    </aside>
+      </SheetContent>
+    </Sheet>
   );
 };
 

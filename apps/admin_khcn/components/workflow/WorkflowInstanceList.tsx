@@ -73,15 +73,15 @@ const WorkflowInstanceList = () => {
 
       <Search placeholder="Tìm theo ID hoặc tên quy trình..." className="max-w-sm" />
 
-      <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
-        <table className="w-full text-sm text-left">
+      <div className="border border-border/60 rounded-xl overflow-x-auto bg-card w-full">
+        <table className="w-full table-fixed text-sm text-left">
           <thead className="text-xs text-muted-foreground uppercase bg-muted/40 border-b">
             <tr>
-              <th className="px-4 py-3 font-semibold">Mã Instance</th>
-              <th className="px-4 py-3 font-semibold">Quy trình</th>
-              <th className="px-4 py-3 font-semibold">Trạng thái</th>
-              <th className="px-4 py-3 font-semibold">Bắt đầu lúc</th>
-              <th className="px-4 py-3 font-semibold text-right">Thao tác</th>
+              <th className="px-4 py-3 font-semibold w-[20%]">Mã Instance</th>
+              <th className="px-4 py-3 font-semibold w-[35%]">Quy trình</th>
+              <th className="px-4 py-3 font-semibold w-[20%]">Trạng thái</th>
+              <th className="px-4 py-3 font-semibold w-[15%]">Bắt đầu lúc</th>
+              <th className="px-4 py-3 font-semibold text-right w-[10%]">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">
@@ -104,10 +104,10 @@ const WorkflowInstanceList = () => {
                 
                 return (
                   <tr key={instance.id} className="hover:bg-muted/20 transition-colors group">
-                    <td className="px-4 py-4 font-mono text-xs text-muted-foreground">
+                    <td className="px-4 py-4 font-mono text-xs text-muted-foreground whitespace-normal break-words">
                       {instance.id.substring(0, 13)}...
                     </td>
-                    <td className="px-4 py-4 font-medium">
+                    <td className="px-4 py-4 font-medium whitespace-normal break-words">
                       {instance.workflowName || "Quy trình không xác định"}
                     </td>
                     <td className="px-4 py-4">

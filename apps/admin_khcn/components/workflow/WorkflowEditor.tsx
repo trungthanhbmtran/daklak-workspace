@@ -55,6 +55,8 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!id);
   
+  const [isPropertiesOpen, setIsPropertiesOpen] = useState(false);
+  
   const { apps: availableServices } = useHubServices();
   const { screenToFlowPosition, setViewport } = useReactFlow();
   
@@ -201,6 +203,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);
+    setIsPropertiesOpen(true);
   }, []);
 
   const onPaneClick = useCallback(() => {
@@ -222,6 +225,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
     setEdges((eds: Edge[]) => eds.filter((edge) => edge.source !== id && edge.target !== id));
     setSelectedNodeId(null);
+    setIsPropertiesOpen(false);
   }, [setNodes, setEdges]);
 
   const onSave = useCallback(async () => {
@@ -248,7 +252,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     } finally {
       setIsSaving(false);
     }
-  }, [nodes, edges, workflowId, workflowName, workflowDesc]);
+  }, [nodes, edges, workflowId, workflowName, workflowDesc, workflowTrigger]);
 
   const onPublish = useCallback(async () => {
     if (!workflowId) {
@@ -285,6 +289,10 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         workflowName={workflowName}
         setWorkflowName={setWorkflowName}
         isSaving={isSaving}
+        onOpenSettings={() => {
+          setSelectedNodeId(null);
+          setIsPropertiesOpen(true);
+        }}
       />
       
       <div className="flex flex-1 overflow-hidden relative min-h-0" ref={reactFlowWrapper}>
@@ -333,13 +341,15 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         </div>
 
         <PropertiesPanel 
+          isOpen={isPropertiesOpen}
+          onOpenChange={setIsPropertiesOpen}
           selectedNode={selectedNode}
           availableServices={dynamicServices.length > 0 ? dynamicServices : availableServices}
           availableTriggers={dynamicTriggers}
           taskRoles={taskRoles}
           onUpdate={onUpdateNodeData}
           onDelete={onDeleteNode}
-          onClose={() => setSelectedNodeId(null)}
+          onClose={() => setIsPropertiesOpen(false)}
           workflowDesc={workflowDesc}
           setWorkflowDesc={setWorkflowDesc}
           workflowTrigger={workflowTrigger}
