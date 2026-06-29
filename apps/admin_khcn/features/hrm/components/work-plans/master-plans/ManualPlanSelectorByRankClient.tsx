@@ -149,209 +149,195 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-6 p-4 max-w-[1600px] mx-auto h-[calc(100vh-2rem)] min-h-[600px]">
-            {/* LEFT SIDEBAR - RANK SELECTION */}
-            <aside className="w-full md:w-[350px] flex-shrink-0 flex flex-col h-full">
-                <Card className="h-full flex flex-col border shadow-sm">
-                    <CardHeader className="pb-4 border-b">
-                        <CardTitle className="text-lg">Danh mục Ngạch</CardTitle>
-                        <CardDescription>Chọn nhóm và ngạch để thiết lập</CardDescription>
-                        
-                        <div className="mt-4">
-                            <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="CONG_CHUC">Công chức</TabsTrigger>
-                                    <TabsTrigger value="VIEN_CHUC">Viên chức</TabsTrigger>
-                                </TabsList>
-                            </Tabs>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-0 flex-1 overflow-hidden">
-                        <ScrollArea className="h-full w-full">
-                            <div className="flex flex-col gap-1 p-3">
-                                {activeRanksList.map((rank: any) => (
-                                    <Button
-                                        key={rank.code}
-                                        variant={activeRankFilter === rank.code ? "secondary" : "ghost"}
-                                        className={`justify-start text-left h-auto py-3 px-4 ${activeRankFilter === rank.code ? 'border-l-4 border-l-primary rounded-l-none' : ''}`}
-                                        onClick={() => setActiveRankFilter(rank.code)}
-                                    >
-                                        <div className="flex flex-col items-start gap-1 w-full">
-                                            <span className={`font-semibold text-sm leading-tight whitespace-normal ${activeRankFilter === rank.code ? 'text-primary' : ''}`}>
+        <Card className="max-w-5xl mx-auto mt-6 shadow-sm border">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl font-black text-foreground">
+                    <Target className="w-5 h-5 text-primary" /> Thiết lập Chỉ tiêu Định biên Thủ công
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-1">
+                    Hệ thống hóa danh mục công việc dựa trên phân hạng Ngạch giúp phân rã khối lượng công việc đúng năng lực, đúng thẩm quyền pháp lý.
+                </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+                <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                        <TabsTrigger value="CONG_CHUC">Khối Công chức</TabsTrigger>
+                        <TabsTrigger value="VIEN_CHUC">Khối Viên chức</TabsTrigger>
+                    </TabsList>
+
+                    <div className="flex flex-col md:flex-row gap-6 h-[600px]">
+                        {/* LEFT SIDEBAR - RANK SELECTION */}
+                        <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-full border rounded-xl overflow-hidden bg-background shadow-sm">
+                            <div className="p-4 bg-muted/30 border-b flex-shrink-0">
+                                <h3 className="font-semibold text-sm uppercase tracking-wider">Danh mục Ngạch</h3>
+                            </div>
+                            <ScrollArea className="flex-1 w-full">
+                                <div className="flex flex-col gap-1 p-3">
+                                    {activeRanksList.map((rank: any) => (
+                                        <Button
+                                            key={rank.code}
+                                            variant={activeRankFilter === rank.code ? "secondary" : "ghost"}
+                                            className={`justify-start text-left h-auto py-2.5 px-3 transition-colors ${activeRankFilter === rank.code ? 'border-l-4 border-primary rounded-l-none bg-secondary' : ''}`}
+                                            onClick={() => setActiveRankFilter(rank.code)}
+                                        >
+                                            <span className={`text-xs font-semibold whitespace-normal leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-muted-foreground'}`}>
                                                 {rank.nameVi || rank.name}
                                             </span>
-                                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{rank.code}</span>
-                                        </div>
-                                    </Button>
-                                ))}
-                            </div>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
-            </aside>
-
-            {/* RIGHT MAIN AREA - TASK ASSIGNMENT */}
-            <main className="flex-1 flex flex-col gap-6 min-w-0 h-full">
-                {/* Form Add Task */}
-                <Card className="flex-shrink-0 border shadow-sm">
-                    <CardHeader className="pb-4 border-b bg-muted/10">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="text-base">Thiết lập Chỉ tiêu</CardTitle>
-                                <CardDescription className="mt-1">
-                                    Đang cấu hình cho: <span className="font-semibold text-foreground">{getRankName(activeRankFilter)}</span>
-                                </CardDescription>
-                            </div>
+                                        </Button>
+                                    ))}
+                                </div>
+                            </ScrollArea>
                         </div>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
-                            <div className="md:col-span-6 space-y-2">
-                                <Label>Nhiệm vụ mẫu</Label>
-                                <Select
-                                    value={selectedTaskId || undefined}
-                                    onValueChange={val => {
-                                        setSelectedTaskId(val);
-                                        const task = availableTasks.find(t => t.id === val);
-                                        if (task) setTargetValue(task.defaultWeight);
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="-- Vui lòng chọn nhiệm vụ --" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableTasks.map(task => {
-                                            const isAdded = addedPlans.some(p => p.title === task.taskName);
-                                            return (
-                                                <SelectItem key={task.id} value={task.id} disabled={isAdded}>
-                                                    {task.taskName} {isAdded ? '(Đã thêm)' : ''}
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </SelectContent>
-                                </Select>
-                                {availableTasks.length === 0 && (
-                                    <p className="text-xs text-muted-foreground mt-1">Không có nhiệm vụ mẫu nào cho ngạch này.</p>
-                                )}
-                            </div>
-                            <div className="md:col-span-3 space-y-2">
-                                <Label>Chỉ tiêu bắt buộc</Label>
-                                <div className="flex items-center gap-3">
-                                    <Input
-                                        type="number"
-                                        value={targetValue}
-                                        onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
-                                        className="w-24 font-mono text-center"
-                                    />
-                                    <span className="text-sm text-muted-foreground font-medium">
-                                        {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : ''}
-                                    </span>
+
+                        {/* RIGHT MAIN AREA - TASK ASSIGNMENT */}
+                        <div className="flex-1 flex flex-col min-w-0 h-full border rounded-xl overflow-hidden bg-background shadow-sm">
+                            
+                            {/* Form Add Task */}
+                            <div className="p-4 bg-muted/10 border-b flex-shrink-0 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-sm">Thêm chỉ tiêu bắt buộc</h3>
+                                    <span className="text-[11px] text-muted-foreground">Đang chọn: <span className="font-semibold text-foreground">{getRankName(activeRankFilter)}</span></span>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                                    <div className="flex-1 w-full space-y-1.5">
+                                        <Label className="text-[10px] font-bold text-muted-foreground uppercase">Nhiệm vụ mẫu</Label>
+                                        <Select
+                                            value={selectedTaskId || undefined}
+                                            onValueChange={val => {
+                                                setSelectedTaskId(val);
+                                                const task = availableTasks.find(t => t.id === val);
+                                                if (task) setTargetValue(task.defaultWeight);
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-9 text-xs bg-background">
+                                                <SelectValue placeholder="-- Chọn nhiệm vụ --" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableTasks.map(task => {
+                                                    const isAdded = addedPlans.some(p => p.title === task.taskName);
+                                                    return (
+                                                        <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs">
+                                                            {task.taskName} {isAdded ? '(Đã thêm)' : ''}
+                                                        </SelectItem>
+                                                    );
+                                                })}
+                                            </SelectContent>
+                                        </Select>
+                                        {availableTasks.length === 0 && (
+                                            <p className="text-[10px] text-muted-foreground mt-1">Không có nhiệm vụ mẫu nào.</p>
+                                        )}
+                                    </div>
+                                    <div className="w-[120px] space-y-1.5">
+                                        <Label className="text-[10px] font-bold text-muted-foreground uppercase">Chỉ tiêu</Label>
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                type="number"
+                                                value={targetValue}
+                                                onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
+                                                className="w-16 h-9 text-center font-mono text-xs bg-background"
+                                            />
+                                            <span className="text-[11px] text-muted-foreground font-medium truncate w-[40px]">
+                                                {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : ''}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={handleAssignTask}
+                                        disabled={!selectedTaskId}
+                                        className="w-full sm:w-auto h-9 px-4 gap-2 text-xs"
+                                    >
+                                        <Plus className="w-3.5 h-3.5" /> Thêm
+                                    </Button>
                                 </div>
                             </div>
-                            <div className="md:col-span-3">
-                                <Button
-                                    onClick={handleAssignTask}
-                                    disabled={!selectedTaskId}
-                                    className="w-full gap-2"
-                                >
-                                    <Plus className="w-4 h-4" /> Thêm vào cấu trúc
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
-                {/* Table Execution Matrix */}
-                <Card className="flex-1 flex flex-col border shadow-sm min-h-0">
-                    <CardHeader className="flex flex-row items-center justify-between py-4 border-b flex-shrink-0 bg-muted/10">
-                        <div className="flex flex-col gap-1">
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <Target className="w-4 h-4" /> Ma trận Thực thi
-                            </CardTitle>
-                            <CardDescription>
-                                Đã thêm {addedPlans.length} chỉ tiêu cho ngạch này.
-                            </CardDescription>
-                        </div>
-                        {addedPlans.length > 0 && (
-                            <Button
-                                onClick={handleSubmitPlan}
-                                disabled={isPending}
-                                className="gap-2 shadow-sm"
-                            >
-                                {isPending ? <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-                                Lưu Cấu trúc Định biên
-                            </Button>
-                        )}
-                    </CardHeader>
-                    <CardContent className="p-0 flex-1 overflow-hidden relative">
-                        {isLoadingQuotas ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
-                                <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            {/* Table Execution Matrix */}
+                            <div className="flex-1 flex flex-col overflow-hidden relative bg-background">
+                                {isLoadingQuotas && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
+                                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                    </div>
+                                )}
+                                
+                                <div className="p-4 border-b flex-shrink-0 flex items-center justify-between bg-white">
+                                    <h4 className="text-sm font-semibold flex items-center gap-2">
+                                        <Target className="w-4 h-4 text-primary" /> Ma trận Thực thi ({addedPlans.length})
+                                    </h4>
+                                </div>
+
+                                <ScrollArea className="flex-1 w-full">
+                                    <Table>
+                                        <TableHeader className="sticky top-0 bg-muted/30 z-10 shadow-sm">
+                                            <TableRow>
+                                                <TableHead className="w-[55%] text-xs font-semibold">Nội dung Nhiệm vụ</TableHead>
+                                                <TableHead className="text-right text-xs font-semibold">Chỉ tiêu bắt buộc</TableHead>
+                                                <TableHead className="w-[60px] text-center"></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {addedPlans.map((plan) => (
+                                                <TableRow key={plan.id}>
+                                                    <TableCell className="font-medium whitespace-normal leading-relaxed text-xs">
+                                                        {plan.title}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex items-center justify-end gap-2 w-full">
+                                                            <Input
+                                                                type="number"
+                                                                value={plan.targetValue}
+                                                                onChange={e => {
+                                                                    const val = Number(e.target.value);
+                                                                    setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
+                                                                }}
+                                                                className="w-14 h-7 text-center font-mono text-xs bg-muted/20"
+                                                            />
+                                                            <span className="text-[11px] text-muted-foreground min-w-[50px] text-left">
+                                                                {plan.unit}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
+                                                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                            {addedPlans.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={3} className="h-40 text-center text-[13px] text-muted-foreground">
+                                                        Chưa có nhiệm vụ nào được cấu hình cho ngạch này.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </ScrollArea>
                             </div>
-                        ) : null}
-                        
-                        <ScrollArea className="h-full w-full">
-                            <Table>
-                                <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
-                                    <TableRow>
-                                        <TableHead className="w-[50%] min-w-[300px]">Nội dung Nhiệm vụ</TableHead>
-                                        <TableHead className="min-w-[120px]">Áp dụng cho</TableHead>
-                                        <TableHead className="text-right min-w-[150px]">Chỉ tiêu bắt buộc</TableHead>
-                                        <TableHead className="w-[60px] text-center"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {addedPlans.map((plan) => (
-                                        <TableRow key={plan.id}>
-                                            <TableCell className="font-medium whitespace-normal leading-relaxed">
-                                                {plan.title}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant="secondary" className="font-medium bg-muted">
-                                                    {getRankName(plan.rankType)}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex items-center justify-end gap-3 w-full">
-                                                    <Input
-                                                        type="number"
-                                                        value={plan.targetValue}
-                                                        onChange={e => {
-                                                            const val = Number(e.target.value);
-                                                            setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
-                                                        }}
-                                                        className="w-16 h-8 text-center font-mono"
-                                                    />
-                                                    <span className="text-sm text-muted-foreground min-w-[60px] text-left">
-                                                        {plan.unit}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
-                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {addedPlans.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={4} className="h-40 text-center text-muted-foreground">
-                                                Chưa có nhiệm vụ nào được cấu hình cho ngạch này.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
-            </main>
-        </div>
+                        </div>
+                    </div>
+                </Tabs>
+            </CardContent>
+
+            <CardFooter className="flex justify-end pt-4 pb-4 border-t bg-muted/30 rounded-b-2xl">
+                <Button
+                    onClick={handleSubmitPlan}
+                    disabled={isPending || addedPlans.length === 0}
+                    className="gap-2 font-bold text-xs h-10 px-6 rounded-xl"
+                >
+                    {isPending ? (
+                        <>Đang lưu...</>
+                    ) : (
+                        <><Save className="w-4 h-4" /> LƯU CẤU TRÚC ĐỊNH BIÊN</>
+                    )}
+                </Button>
+            </CardFooter>
+        </Card>
     );
 }

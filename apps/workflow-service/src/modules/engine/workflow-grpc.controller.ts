@@ -276,6 +276,7 @@ export class WorkflowGrpcController {
     actionName: string;
     userRoles?: string[];
     userId?: string;
+    businessData?: any;
   }) {
     try {
       const result = await this.engine.validateAction(
@@ -283,6 +284,7 @@ export class WorkflowGrpcController {
         data.actionName,
         data.userRoles || [],
         data.userId,
+        data.businessData,
       );
       return { allowed: result.allowed, reason: result.reason || '' };
     } catch (e) {
@@ -295,12 +297,14 @@ export class WorkflowGrpcController {
     instanceId: string;
     userRoles?: string[];
     userId?: string;
+    businessData?: any;
   }) {
     try {
       const allowedActions = await this.engine.getAllowedActions(
         data.instanceId,
         data.userRoles || [],
         data.userId,
+        data.businessData,
       );
       return { allowedActions };
     } catch (e) {

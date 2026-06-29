@@ -199,6 +199,7 @@ export class WorkflowEngineService implements OnModuleInit {
     actionName: string,
     userRoles: string[] = [],
     userId?: string,
+    businessData?: any,
   ): Promise<{ allowed: boolean; reason?: string }> {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: instanceId },
@@ -245,6 +246,7 @@ export class WorkflowEngineService implements OnModuleInit {
 
          const evalContext = {
            ...instance.context as any,
+           ...businessData,
            actionName,
            userId,
            userRoles,
@@ -277,12 +279,13 @@ export class WorkflowEngineService implements OnModuleInit {
     instanceId: string,
     userRoles: string[] = [],
     userId?: string,
+    businessData?: any,
   ): Promise<string[]> {
-    const possibleActions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'RETURNED', 'COORDINATE', 'CHAT', 'APPROVE', 'APPROVED', 'IN_PROGRESS', 'PENDING_APPROVAL', 'DONE'];
+    const possibleActions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'APPROVE', 'RETURN', 'CHAT', 'COORDINATE'];
     const allowed: string[] = [];
     
     for (const action of possibleActions) {
-      const res = await this.validateAction(instanceId, action, userRoles, userId);
+      const res = await this.validateAction(instanceId, action, userRoles, userId, businessData);
       if (res.allowed) allowed.push(action);
     }
     

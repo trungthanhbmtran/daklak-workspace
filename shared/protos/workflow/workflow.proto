@@ -83,6 +83,7 @@ message ValidateActionRequest {
   string actionName = 2;
   repeated string userRoles = 3;
   string userId = 4;
+  google.protobuf.Struct businessData = 5;
 }
 
 message ValidateActionResponse {
@@ -94,6 +95,7 @@ message GetAllowedActionsRequest {
   string instanceId = 1;
   repeated string userRoles = 2;
   string userId = 3;
+  google.protobuf.Struct businessData = 4;
 }
 
 message GetAllowedActionsResponse {

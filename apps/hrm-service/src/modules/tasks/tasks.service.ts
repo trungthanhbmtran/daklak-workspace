@@ -304,7 +304,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         const allowedRes = await firstValueFrom<any>(this.workflowService.GetAllowedActions({
           instanceId: t.workflowInstId,
           userRoles: query.currentUserPermissions || [],
-          userId: query.currentEmployeeCode
+          userId: query.currentEmployeeCode,
+          businessData: {
+            status: t.status,
+            hasChildren,
+            isOwner: access.isOwner,
+            isAssignee: access.isAssignee,
+            isSupervisor: access.isSupervisor,
+            isCoordinator: access.isCoordinator,
+            isDeptLeader: access.isDeptLeader,
+          }
         }));
         if (allowedRes && allowedRes.allowedActions) {
           actions = allowedRes.allowedActions;
@@ -945,7 +954,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     return enrichedTaskResponse;
   }
 
-  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any) {
+  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionNameForWorkflow?: string) {
     if (context) await this.populateQueryHierarchy(context);
     const rawTask = await this.prisma.task.findUnique({ where: { id } });
     if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
@@ -957,15 +966,34 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     // GỌI WORKFLOW ĐỂ VALIDATE
     if (rawTask.workflowInstId && this.workflowService) {
       try {
-        let actionName = status; // IN_PROGRESS, PENDING_APPROVAL, DONE, RETURNED
+        let actionName = actionNameForWorkflow || status;
+        
+        // Cần truyền trạng thái gốc của task trước khi update để workflow đánh giá
+        let hasChildren = false;
+        const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: rawTask.id, depth: 1 } });
+        hasChildren = childrenCount > 0;
+        
+        // Tính toán các access level
+        const queryContext = { ...context, currentEmployeeCode: actorCode, currentUserId: context?.currentUserId };
+        const access = await this.checkTaskAccess(tCheck, queryContext);
+
         const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
           instanceId: rawTask.workflowInstId,
           actionName: actionName,
           userRoles: context?.currentUserPermissions || [],
-          userId: actorCode
+          userId: actorCode,
+          businessData: {
+            status: rawTask.status, // Current status, not the next one
+            hasChildren,
+            isOwner: access.isOwner,
+            isAssignee: access.isAssignee,
+            isSupervisor: access.isSupervisor,
+            isCoordinator: access.isCoordinator,
+            isDeptLeader: access.isDeptLeader,
+          }
         }));
         if (validateRes && !validateRes.allowed) {
-          throw new RpcException(`Workflow không cho phép thực hiện hành động ${status}.`);
+          throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}.`);
         }
       } catch (err) {
         if (err instanceof RpcException) throw err;
@@ -1054,14 +1082,30 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     assignerCode?: string,
     context?: { currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }
   ) {
-    const rawTaskForCheck = await this.prisma.task.findUnique({ where: { id } });
+    const rawTaskForCheck = await this.prisma.task.findUnique({ 
+      where: { id },
+      include: { participants: true }
+    });
     if (rawTaskForCheck?.workflowInstId && this.workflowService) {
       try {
+        const tCheckArr = [rawTaskForCheck];
+        await this.enrichTasks(tCheckArr);
+        const queryContext = { ...context, currentEmployeeCode: context?.currentEmployeeCode, currentUserId: context?.currentUserId };
+        const access = await this.checkTaskAccess(tCheckArr[0], queryContext);
+
         const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
           instanceId: rawTaskForCheck.workflowInstId,
           actionName: 'ASSIGN',
           userRoles: context?.currentUserPermissions || [],
-          userId: context?.currentEmployeeCode
+          userId: context?.currentEmployeeCode,
+          businessData: {
+            status: rawTaskForCheck.status,
+            isOwner: access.isOwner,
+            isAssignee: access.isAssignee,
+            isSupervisor: access.isSupervisor,
+            isDeptLeader: access.isDeptLeader,
+            isCoordinator: access.isCoordinator
+          }
         }));
         if (validateRes && !validateRes.allowed) {
           throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
@@ -1575,10 +1619,10 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       const t: any = tArr[0];
       const requiresApproval = t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED';
       const nextStatus = requiresApproval ? 'PENDING_APPROVAL' : 'DONE';
-      return this.updateTaskStatus(id, nextStatus, undefined, body?.currentEmployeeCode);
+      return this.updateTaskStatus(id, nextStatus, undefined, body?.currentEmployeeCode, body, action);
     }
-    if (action === 'APPROVE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode);
-    if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentEmployeeCode);
+    if (action === 'APPROVE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode, body, action);
+    if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentEmployeeCode, body, action);
   }
   async updateTask(id: number, data: any) {
     const updateData = { ...data };

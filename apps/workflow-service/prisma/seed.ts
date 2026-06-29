@@ -26,40 +26,24 @@ async function main() {
           role: '', // Không dùng hardcode PBAC cơ bản nữa
           validationExpression: `
             (function() {
-              // actionName, userId, userRoles, userContext, context (from Workflow) are available
+              if (actionName === 'CHAT') return true;
               
-              if (actionName === 'ASSIGN') {
-                 // Giao việc: Quản lý hoặc admin mới được giao/uỷ quyền
-                 var isAdmin = userRoles.includes('SUPER_ADMIN');
-                 var isManager = userRoles.includes('MANAGER');
-                 return isAdmin || isManager;
+              if (typeof isOwner !== 'undefined' && isOwner) {
+                if (['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE'].includes(actionName)) return true;
+                if (status === 'PENDING_APPROVAL' && ['APPROVE', 'RETURN'].includes(actionName)) return true;
               }
               
-              if (actionName === 'IN_PROGRESS' || actionName === 'PENDING_APPROVAL') {
-                 // Chuyển sang đang làm hoặc trình duyệt: Cần phải là người được giao (assignee)
-                 // context.assigneeId sẽ được truyền từ hrm-service khi start/trigger workflow
-                 return !context.assigneeId || userId === context.assigneeId; 
+              if (typeof isAssignee !== 'undefined' && isAssignee) {
+                if (actionName === 'ADD_SUBTASK') return true;
+                if (!hasChildren && status !== 'PENDING_APPROVAL' && ['COMPLETE', 'COORDINATE'].includes(actionName)) return true;
               }
               
-              if (actionName === 'DONE') {
-                 // Nếu workflow yêu cầu duyệt (requiresApproval), chỉ người duyệt mới được DONE
-                 if (context.requiresApproval) {
-                     var isReviewer = userId === context.reviewerId || userRoles.includes('SUPER_ADMIN') || userRoles.includes('MANAGER');
-                     return isReviewer;
-                 }
-                 // Ngược lại, người làm có thể tự DONE
-                 return !context.assigneeId || userId === context.assigneeId;
+              if ((typeof isSupervisor !== 'undefined' && isSupervisor) || (typeof isDeptLeader !== 'undefined' && isDeptLeader)) {
+                if (!hasChildren && status !== 'PENDING_APPROVAL' && ['COMPLETE', 'RETURN'].includes(actionName)) return true;
+                if (status === 'PENDING_APPROVAL' && ['APPROVE', 'RETURN'].includes(actionName)) return true;
               }
               
-              if (actionName === 'RETURNED' || actionName === 'APPROVE') {
-                 // Trả lại hoặc Duyệt: Dành cho người đánh giá (reviewer/manager)
-                 var isReviewer = userId === context.reviewerId;
-                 var isAdmin = userRoles.includes('SUPER_ADMIN');
-                 var isManager = userRoles.includes('MANAGER');
-                 return isReviewer || isAdmin || isManager;
-              }
-              
-              return true; 
+              return false;
             })()
           `
         },

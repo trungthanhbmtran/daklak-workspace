@@ -15,6 +15,8 @@ import { CoordinationModal } from '../../coordination/CoordinationModal';
 import { AssignCoordinationModal } from '../../assign/AssignCoordinationModal';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
 import { MentionInput } from '../../../../MentionInput';
+import { WorkflowTimeline } from '@/features/workflow/components/WorkflowTimeline';
+import { History } from 'lucide-react';
 
 interface TaskDetailDialogProps {
   task: any | null;
@@ -47,6 +49,7 @@ export function TaskDetailDialog({
   context = 'MY_EXECUTION',
 }: TaskDetailDialogProps) {
   const [activeTask, setActiveTask] = React.useState(task);
+  const [activeTab, setActiveTab] = useState<'CHAT' | 'HISTORY'>('CHAT');
 
   // Sync activeTask when root task changes
   React.useEffect(() => {
@@ -150,21 +153,46 @@ export function TaskDetailDialog({
                     </div>
                   </div>
 
-                  {/* Chat */}
+                  {/* Chat & History */}
                   <div className="flex flex-col flex-1 min-h-[360px]">
                     <div className="px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
-                      <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                        <MessageSquare className="w-3.5 h-3.5 text-indigo-500" /> Trao đổi & Tiến độ
-                      </h4>
-                      <Badge variant="secondary" className="rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 border border-indigo-100">
-                        {taskComments.length} tin
-                      </Badge>
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => setActiveTab('CHAT')}
+                          className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${
+                            activeTab === 'CHAT' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" /> Trao đổi
+                        </button>
+                        <button
+                          onClick={() => setActiveTab('HISTORY')}
+                          className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${
+                            activeTab === 'HISTORY' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                        >
+                          <History className="w-3.5 h-3.5" /> Lịch sử
+                        </button>
+                      </div>
+                      
+                      {activeTab === 'CHAT' && (
+                        <Badge variant="secondary" className="rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 border border-indigo-100">
+                          {taskComments.length} tin
+                        </Badge>
+                      )}
                     </div>
 
-                    {/* Messages */}
-                    {allowedActions.includes('CHAT') ? (
+                    {/* Content Area */}
+                    {activeTab === 'HISTORY' ? (
+                      <div className="flex-1 overflow-y-auto px-6 bg-slate-50/20 dark:bg-slate-900/10 max-h-[465px]">
+                        <WorkflowTimeline instanceId={activeTask.workflowInstId} />
+                      </div>
+                    ) : (
                       <>
-                        <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/20 dark:bg-slate-900/10 max-h-[400px]">
+                        {/* Messages */}
+                        {allowedActions.includes('CHAT') ? (
+                          <>
+                            <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/20 dark:bg-slate-900/10 max-h-[400px]">
                           {isLoadingComments ? (
                             <div className="flex justify-center items-center h-32">
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
@@ -242,10 +270,12 @@ export function TaskDetailDialog({
                         <p className="text-[12px] text-slate-400 mt-1 max-w-[200px]">Bạn không được phân công nên không thể xem trao đổi tại nhiệm vụ này.</p>
                       </div>
                     )}
-                  </div>
-                </div>
+                  </>
+                )}
+              </div>
+            </div>
 
-                {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
+            {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
                 <div className="flex flex-col gap-0 bg-white dark:bg-slate-900 overflow-y-auto">
                   {/* Roles */}
                   <div className="p-5 border-b border-slate-100 dark:border-slate-800">
