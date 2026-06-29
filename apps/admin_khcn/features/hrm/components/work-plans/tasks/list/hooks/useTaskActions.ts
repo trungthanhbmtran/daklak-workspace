@@ -1,38 +1,15 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
-import {
-  useTaskSubtasks,
-  useUpdateStatus,
-} from '@/features/hrm/hooks';
+import { useUpdateStatus } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
 
 /**
- * Hook tổng hợp cho TaskDetailDialog.
- *
- * Dùng React Query để:
- *  - Cache comments + subtasks (tránh refetch thừa khi đóng/mở lại dialog)
- *  - Optimistic update khi gửi comment
- *  - Tự dedup nếu nhiều nơi cùng query cùng taskId
+ * Hook quản lý các thao tác hoàn thành, từ chối, nghiệm thu công việc.
  */
-export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: number | undefined) {
+export function useTaskActions(activeTaskId: number | undefined) {
   const qc = useQueryClient();
-
-  // ── Queries ──────────────────────────────────────────────────────────────
-
-  const {
-    data: subtasksRes,
-    isLoading: isLoadingChain,
-    refetch: refetchChain,
-  } = useTaskSubtasks(rootTaskId);
-
-
-  const delegationChain = subtasksRes?.data || [];
-
-  // ── Mutations ─────────────────────────────────────────────────────────────
   const updateStatus = useUpdateStatus(activeTaskId);
-
-  // ── Stable action handlers ────────────────────────────────────────────────
 
   const handleCompleteTask = useCallback(async (onClose: () => void) => {
     if (!activeTaskId) return;
@@ -82,24 +59,7 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
     );
   }, [activeTaskId, updateStatus, qc]);
 
-  /** Refresh comments thủ công (dùng sau khi CoordinationModal thành công) */
-  const fetchComments = useCallback(() => {
-    if (!activeTaskId) return;
-    qc.invalidateQueries({ queryKey: hrmKeys.taskComments(activeTaskId) });
-  }, [activeTaskId, qc]);
-
-  /** Refresh cây công việc (dùng sau khi tạo SubTask) */
-  const fetchDelegationChain = useCallback(() => {
-    refetchChain();
-  }, [refetchChain]);
-
   return {
-    // data
-    delegationChain,
-    isLoadingChain,
-    // actions
-    fetchComments,
-    fetchDelegationChain,
     handleCompleteTask,
     handleRejectTask,
     handleApproveTask,
