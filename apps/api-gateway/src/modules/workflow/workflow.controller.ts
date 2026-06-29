@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -182,6 +182,25 @@ export class WorkflowController implements OnModuleInit {
       }),
     )) as any;
     return { data: result };
+  }
+
+  @Get('instances')
+  @ApiOperation({ summary: 'Danh sách workflow instances' })
+  async listInstances(
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('workflowId') workflowId?: string,
+    @Query('status') status?: string,
+  ) {
+    const result = (await firstValueFrom(
+      this.workflowService.ListInstances({
+        skip: skip ? parseInt(skip, 10) : undefined,
+        take: take ? parseInt(take, 10) : undefined,
+        workflowId,
+        status,
+      }),
+    )) as any;
+    return { data: result.items, meta: { total: result.total } };
   }
 
   @Get('instances/:id')

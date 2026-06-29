@@ -19,6 +19,7 @@ service WorkflowService {
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
   rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
+  rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
 }
 
 message CreateWorkflowRequest {
@@ -139,6 +140,18 @@ message WorkflowInstanceResponse {
 
 message GetLogsResponse {
   repeated ExecutionLog logs = 1;
+}
+
+message ListInstancesRequest {
+  int32 skip = 1;
+  int32 take = 2;
+  string workflowId = 3;
+  string status = 4;
+}
+
+message ListInstancesResponse {
+  repeated WorkflowInstanceResponse items = 1;
+  int32 total = 2;
 }
 
 message ExecutionLog {

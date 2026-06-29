@@ -338,4 +338,28 @@ export class WorkflowGrpcController {
     });
     return { logs: logs.map((l) => this.mapLog(l)) };
   }
+
+  @GrpcMethod('WorkflowService', 'ListInstances')
+  async listInstances(data: { skip?: number; take?: number; workflowId?: string; status?: string }) {
+    const { skip = 0, take = 50, workflowId, status } = data;
+    const where: any = {};
+    if (workflowId) where.workflowId = workflowId;
+    if (status) where.status = status;
+
+    const [items, total] = await Promise.all([
+      this.prisma.workflowInstance.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: { workflow: true },
+      }),
+      this.prisma.workflowInstance.count({ where }),
+    ]);
+
+    return {
+      items: items.map((instance) => this.mapInstance(instance)),
+      total,
+    };
+  }
 }

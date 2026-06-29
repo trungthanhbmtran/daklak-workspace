@@ -48,6 +48,12 @@ export const workflowApi = {
       meta: unwrapMeta(res),
     })),
 
+  listInstances: (params: { skip?: number; take?: number; workflowId?: string; status?: string } = {}) =>
+    apiClient.get("/workflow/instances", { params }).then((res: any) => ({
+      data: unwrapData<WorkflowInstance[]>(res),
+      meta: unwrapMeta(res),
+    })),
+
   getOne: (id: string) =>
     apiClient.get(`/workflow/${id}`).then((res: any) => unwrapData<Workflow>(res)),
 
