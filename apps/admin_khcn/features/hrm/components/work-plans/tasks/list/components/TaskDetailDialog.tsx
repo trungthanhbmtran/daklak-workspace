@@ -107,8 +107,7 @@ export function TaskDetailDialog({
             </div>
 
             {/* ── 3 COLUMNS ── */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px_400px] gap-0 h-full divide-x divide-slate-200/60 dark:divide-slate-800">
+            <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_320px_320px] 2xl:grid-cols-[1fr_340px_340px] divide-y xl:divide-y-0 xl:divide-x divide-slate-200 dark:divide-slate-800">
 
                 {/* ── COL 1: Mô tả + Chat ── */}
                 <div className="flex flex-col gap-0 overflow-y-auto">
@@ -170,33 +169,30 @@ export function TaskDetailDialog({
                     )}
                   </div>
                 </div>
-              </div>
 
-            {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
-            <TaskActionPanel
-              activeTask={activeTask}
-              context={context}
-              allowedActions={allowedActions}
-              dueInfo={dueInfo}
-              onSmartAssign={onSmartAssign}
-              onOpenSubTaskModal={() => setIsSubTaskModalOpen(true)}
-              onOpenAiBreakdownModal={() => setIsAiBreakdownModalOpen(true)}
-              onOpenCoordinationModal={() => setIsCoordinationModalOpen(true)}
-              onCloseDialog={() => onClose()}
-            />
+                {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
+                <TaskActionPanel
+                  activeTask={activeTask}
+                  context={context}
+                  allowedActions={allowedActions}
+                  dueInfo={dueInfo}
+                  onSmartAssign={onSmartAssign}
+                  onOpenSubTaskModal={() => setIsSubTaskModalOpen(true)}
+                  onOpenAiBreakdownModal={() => setIsAiBreakdownModalOpen(true)}
+                  onOpenCoordinationModal={() => setIsCoordinationModalOpen(true)}
+                  onCloseDialog={() => onClose()}
+                />
 
-            {/* ── COL 3: Cây công việc ── */}
-            <TaskDelegationTree
-              rootTaskId={task?.rootTaskId || task?.id}
-              activeTaskId={activeTask?.id}
-              onSelectTask={setActiveTask}
-            />
+                {/* ── COL 3: Cây công việc ── */}
+              <TaskDelegationTree
+                rootTaskId={task?.rootTaskId || task?.id}
+                activeTaskId={activeTask?.id}
+                onSelectTask={setActiveTask}
+              />
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-
-
+        </DialogContent>
+      </Dialog>
 
       {/* ── Modals ── */}
       {isSubTaskModalOpen && (

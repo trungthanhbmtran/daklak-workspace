@@ -46,7 +46,7 @@ export function TaskActionPanel({
   };
 
   return (
-    <div className="flex flex-col gap-0 bg-white dark:bg-slate-900 overflow-y-auto">
+    <div className="flex flex-col min-h-0 gap-0 bg-white dark:bg-slate-900 overflow-y-auto">
       {/* Roles */}
       <div className="p-5 border-b border-slate-100 dark:border-slate-800">
         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">

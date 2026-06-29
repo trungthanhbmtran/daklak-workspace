@@ -14,7 +14,7 @@ export function TaskDelegationTree({ rootTaskId, activeTaskId, onSelectTask }: T
   const { delegationChain, isLoadingChain } = useTaskDelegation(rootTaskId);
 
   return (
-    <div className="flex flex-col bg-slate-50/60 dark:bg-slate-900/50 overflow-y-auto border-t xl:border-t-0 border-slate-200 dark:border-slate-800 h-full">
+    <div className="flex flex-col min-h-0 bg-slate-50/60 dark:bg-slate-900/50 overflow-y-auto border-t xl:border-t-0 border-slate-200 dark:border-slate-800">
       <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 sticky top-0 backdrop-blur-md z-10">
         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
           <ArrowLeftCircle className="w-3.5 h-3.5 text-indigo-400 rotate-180" /> Cây công việc
