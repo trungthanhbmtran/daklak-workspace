@@ -222,6 +222,8 @@ export class KpiEvaluationsService {
   async calculatePersonalKpi(data: { periodId: number, employeeCode: string }) {
     const { periodId, employeeCode } = data;
 
+
+
     const period = await this.prisma.kpiPeriod.findUnique({ where: { id: periodId } });
     if (!period) {
       return { success: false, message: 'Kỳ đánh giá không tồn tại', totalScore: 0, tasks: [] };
@@ -293,25 +295,32 @@ export class KpiEvaluationsService {
       where: { employeeCode, periodId }
     });
 
-    if (existingEvaluation) {
-      if (existingEvaluation.status === 'DRAFT' || existingEvaluation.status === 'COMPUTING') {
-        await this.prisma.kpiEvaluation.update({
-          where: { id: existingEvaluation.id },
-          data: { totalScore, status: 'COMPUTING' }
-        });
-      }
-    }
     let evaluationId = existingEvaluation?.id;
-    if (!existingEvaluation) {
-      const newEval = await this.prisma.kpiEvaluation.create({
-        data: {
-          employeeCode,
-          periodId,
-          totalScore,
-          status: 'COMPUTING'
+
+    try {
+      if (existingEvaluation) {
+        if (existingEvaluation.status === 'DRAFT' || existingEvaluation.status === 'COMPUTING') {
+          await this.prisma.kpiEvaluation.update({
+            where: { id: existingEvaluation.id },
+            data: { totalScore, status: 'COMPUTING' }
+          });
         }
-      });
-      evaluationId = newEval.id;
+      } else {
+        const newEval = await this.prisma.kpiEvaluation.create({
+          data: {
+            employeeCode,
+            periodId,
+            totalScore,
+            status: 'COMPUTING'
+          }
+        });
+        evaluationId = newEval.id;
+      }
+    } catch (error: any) {
+      if (error.code === 'P2003') {
+        return { success: false, message: 'Nhân viên không tồn tại trong hệ thống', totalScore: 0, tasks: [] };
+      }
+      throw error;
     }
 
     return {
