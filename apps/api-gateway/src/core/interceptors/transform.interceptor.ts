@@ -120,12 +120,14 @@ export class TransformInterceptor implements NestInterceptor {
     // Chuẩn { success, data, meta } — giữ nguyên nhưng normalize
     if ('success' in response) {
       const meta = this.normalizeMeta(response.meta);
+      const { success, data, meta: _m, message, timestamp: _t, ...extra } = response;
       return {
         success: response.success,
         data: this.normalizeData(response.data, meta, isListRequest),
         meta,
         ...(response.message ? { message: response.message } : {}),
         timestamp,
+        ...extra
       };
     }
 

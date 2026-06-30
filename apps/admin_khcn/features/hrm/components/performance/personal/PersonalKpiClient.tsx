@@ -46,8 +46,9 @@ export function PersonalKpiClient() {
   const calculateMutation = useMutation({
     mutationFn: (periodId: number) => hrmKpiEvaluationsApi.calculatePersonal({ periodId }),
     onSuccess: (res: any) => {
-      if (res?.success && res.evaluationId) {
-        setEvaluationId(res.evaluationId);
+      const evalId = res?.evaluationId || res?.data?.evaluationId;
+      if (res?.success && evalId) {
+        setEvaluationId(evalId);
       } else {
         toast.error(res?.message || "Có lỗi xảy ra");
       }
