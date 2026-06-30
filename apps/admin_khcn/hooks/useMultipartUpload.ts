@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 // Giả sử Mạnh đang dùng một instance axios có gắn sẵn token cho API nội bộ
 import apiClient from "@/lib/axiosInstance";
+import imageCompression from "browser-image-compression";
 
 // Hằng số S3: Cắt mỗi cục 5MB
 const CHUNK_SIZE = 5 * 1024 * 1024;
@@ -10,16 +11,35 @@ export const useMultipartUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const uploadLargeFile = async (file: File) => {
-    if (!file) return;
+  const uploadLargeFile = async (rawFile: File) => {
+    if (!rawFile) return;
 
     setIsUploading(true);
     setProgress(0);
 
     try {
+      let file = rawFile;
+      // Nén ảnh nếu là định dạng ảnh, trừ SVG
+      if (file.type.startsWith("image/") && file.type !== "image/svg+xml") {
+        try {
+          file = await imageCompression(rawFile, {
+            maxSizeMB: 5, // Với multipart upload thường là file lớn, nén với mức giới hạn cao hơn
+            maxWidthOrHeight: 2560,
+            useWebWorker: true,
+            fileType: "image/webp",
+          });
+        } catch (error) {
+          console.warn("Lỗi nén ảnh, sử dụng ảnh gốc:", error);
+        }
+      }
+
+      const originalName = file.type === "image/webp" 
+        ? file.name.replace(/\.[^/.]+$/, ".webp") 
+        : file.name;
+
       // BƯỚC 1: Gọi Gateway xin mở phiên Upload
       const { data: initData } = await apiClient.post('/media/init-multipart-upload', {
-        originalName: file.name,
+        originalName,
         mimeType: file.type,
         size: file.size,
       });

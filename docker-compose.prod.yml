@@ -49,6 +49,9 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password123}
+      MINIO_COMPRESSION_ENABLE: "on"
+      MINIO_COMPRESSION_EXTENSIONS: ".txt,.log,.csv,.json,.tar,.xml,.bin"
+      MINIO_COMPRESSION_MIME_TYPES: "text/*,application/json,application/xml"
     ports:
       - "9000:9000"
       - "9001:9001"

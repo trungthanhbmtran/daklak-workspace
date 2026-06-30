@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import imageCompression from "browser-image-compression";
 
 interface UploadOptions {
   onSuccess?: (fileInfo: any) => void;
@@ -13,16 +14,35 @@ export const useFileUpload = (options?: UploadOptions) => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const uploadFile = async (file: File) => {
-    if (!file) return;
+  const uploadFile = async (rawFile: File) => {
+    if (!rawFile) return;
 
     setIsUploading(true);
     setProgress(0);
 
     try {
+      let file = rawFile;
+      // Nếu là ảnh (không phải svg), nén ảnh trước khi upload
+      if (file.type.startsWith("image/") && file.type !== "image/svg+xml") {
+        try {
+          file = await imageCompression(rawFile, {
+            maxSizeMB: 1, // Kích thước tối đa 1MB
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: "image/webp",
+          });
+        } catch (error) {
+          console.warn("Lỗi nén ảnh, sử dụng ảnh gốc:", error);
+        }
+      }
+
       // 1. Request Upload URL and fileId
+      const originalName = file.type === "image/webp" 
+        ? file.name.replace(/\.[^/.]+$/, ".webp") 
+        : file.name;
+
       const res: any = await apiClient.post("/media/request-upload", {
-        originalName: file.name,
+        originalName,
         mimeType: file.type,
         size: file.size,
       });
