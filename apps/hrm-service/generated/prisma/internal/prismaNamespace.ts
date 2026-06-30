@@ -1313,7 +1313,8 @@ export const TaskParticipantScalarFieldEnum = {
   taskId: 'taskId',
   employeeCode: 'employeeCode',
   participantRole: 'participantRole',
-  assignedAt: 'assignedAt'
+  assignedAt: 'assignedAt',
+  contributionPercentage: 'contributionPercentage'
 } as const
 
 export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]

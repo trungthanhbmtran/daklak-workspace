@@ -54,12 +54,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: { id: number; assigneeCode: string; coassigneeCodes?: string[]; departmentId?: number; assignerCode?: string; currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }) {
-    return this.tasksService.assignTask(data.id, data.assigneeCode, data.coassigneeCodes, data.departmentId, data.assignerCode, {
-      currentUserPermissions: data.currentUserPermissions,
-      currentUserId: data.currentUserId,
-      currentEmployeeCode: data.currentEmployeeCode
-    });
+  assignTask(data: any) {
+    return this.tasksService.assignTask(data);
   }
 
   @GrpcMethod('TaskService', 'AddComment')

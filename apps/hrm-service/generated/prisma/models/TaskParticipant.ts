@@ -28,10 +28,12 @@ export type AggregateTaskParticipant = {
 
 export type TaskParticipantAvgAggregateOutputType = {
   taskId: number | null
+  contributionPercentage: number | null
 }
 
 export type TaskParticipantSumAggregateOutputType = {
   taskId: number | null
+  contributionPercentage: number | null
 }
 
 export type TaskParticipantMinAggregateOutputType = {
@@ -39,6 +41,7 @@ export type TaskParticipantMinAggregateOutputType = {
   employeeCode: string | null
   participantRole: $Enums.TaskRole | null
   assignedAt: Date | null
+  contributionPercentage: number | null
 }
 
 export type TaskParticipantMaxAggregateOutputType = {
@@ -46,6 +49,7 @@ export type TaskParticipantMaxAggregateOutputType = {
   employeeCode: string | null
   participantRole: $Enums.TaskRole | null
   assignedAt: Date | null
+  contributionPercentage: number | null
 }
 
 export type TaskParticipantCountAggregateOutputType = {
@@ -53,16 +57,19 @@ export type TaskParticipantCountAggregateOutputType = {
   employeeCode: number
   participantRole: number
   assignedAt: number
+  contributionPercentage: number
   _all: number
 }
 
 
 export type TaskParticipantAvgAggregateInputType = {
   taskId?: true
+  contributionPercentage?: true
 }
 
 export type TaskParticipantSumAggregateInputType = {
   taskId?: true
+  contributionPercentage?: true
 }
 
 export type TaskParticipantMinAggregateInputType = {
@@ -70,6 +77,7 @@ export type TaskParticipantMinAggregateInputType = {
   employeeCode?: true
   participantRole?: true
   assignedAt?: true
+  contributionPercentage?: true
 }
 
 export type TaskParticipantMaxAggregateInputType = {
@@ -77,6 +85,7 @@ export type TaskParticipantMaxAggregateInputType = {
   employeeCode?: true
   participantRole?: true
   assignedAt?: true
+  contributionPercentage?: true
 }
 
 export type TaskParticipantCountAggregateInputType = {
@@ -84,6 +93,7 @@ export type TaskParticipantCountAggregateInputType = {
   employeeCode?: true
   participantRole?: true
   assignedAt?: true
+  contributionPercentage?: true
   _all?: true
 }
 
@@ -178,6 +188,7 @@ export type TaskParticipantGroupByOutputType = {
   employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt: Date
+  contributionPercentage: number
   _count: TaskParticipantCountAggregateOutputType | null
   _avg: TaskParticipantAvgAggregateOutputType | null
   _sum: TaskParticipantSumAggregateOutputType | null
@@ -208,7 +219,9 @@ export type TaskParticipantWhereInput = {
   employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
+  contributionPercentage?: Prisma.FloatFilter<"TaskParticipant"> | number
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
+  employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
 }
 
 export type TaskParticipantOrderByWithRelationInput = {
@@ -216,7 +229,9 @@ export type TaskParticipantOrderByWithRelationInput = {
   employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
+  employee?: Prisma.EmployeeOrderByWithRelationInput
   _relevance?: Prisma.TaskParticipantOrderByRelevanceInput
 }
 
@@ -229,7 +244,9 @@ export type TaskParticipantWhereUniqueInput = Prisma.AtLeast<{
   employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
+  contributionPercentage?: Prisma.FloatFilter<"TaskParticipant"> | number
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
+  employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
 }, "taskId_employeeCode_participantRole">
 
 export type TaskParticipantOrderByWithAggregationInput = {
@@ -237,6 +254,7 @@ export type TaskParticipantOrderByWithAggregationInput = {
   employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
   _count?: Prisma.TaskParticipantCountOrderByAggregateInput
   _avg?: Prisma.TaskParticipantAvgOrderByAggregateInput
   _max?: Prisma.TaskParticipantMaxOrderByAggregateInput
@@ -252,13 +270,15 @@ export type TaskParticipantScalarWhereWithAggregatesInput = {
   employeeCode?: Prisma.StringWithAggregatesFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleWithAggregatesFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeWithAggregatesFilter<"TaskParticipant"> | Date | string
+  contributionPercentage?: Prisma.FloatWithAggregatesFilter<"TaskParticipant"> | number
 }
 
 export type TaskParticipantCreateInput = {
-  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
+  contributionPercentage?: number
   task: Prisma.TaskCreateNestedOneWithoutParticipantsInput
+  employee: Prisma.EmployeeCreateNestedOneWithoutTaskParticipantsInput
 }
 
 export type TaskParticipantUncheckedCreateInput = {
@@ -266,13 +286,15 @@ export type TaskParticipantUncheckedCreateInput = {
   employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
+  contributionPercentage?: number
 }
 
 export type TaskParticipantUpdateInput = {
-  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
   task?: Prisma.TaskUpdateOneRequiredWithoutParticipantsNestedInput
+  employee?: Prisma.EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
 }
 
 export type TaskParticipantUncheckedUpdateInput = {
@@ -280,6 +302,7 @@ export type TaskParticipantUncheckedUpdateInput = {
   employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskParticipantCreateManyInput = {
@@ -287,12 +310,13 @@ export type TaskParticipantCreateManyInput = {
   employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
+  contributionPercentage?: number
 }
 
 export type TaskParticipantUpdateManyMutationInput = {
-  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskParticipantUncheckedUpdateManyInput = {
@@ -300,6 +324,7 @@ export type TaskParticipantUncheckedUpdateManyInput = {
   employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskParticipantListRelationFilter = {
@@ -329,10 +354,12 @@ export type TaskParticipantCountOrderByAggregateInput = {
   employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
 }
 
 export type TaskParticipantAvgOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
 }
 
 export type TaskParticipantMaxOrderByAggregateInput = {
@@ -340,6 +367,7 @@ export type TaskParticipantMaxOrderByAggregateInput = {
   employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
 }
 
 export type TaskParticipantMinOrderByAggregateInput = {
@@ -347,10 +375,54 @@ export type TaskParticipantMinOrderByAggregateInput = {
   employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
 }
 
 export type TaskParticipantSumOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
+  contributionPercentage?: Prisma.SortOrder
+}
+
+export type TaskParticipantCreateNestedManyWithoutEmployeeInput = {
+  create?: Prisma.XOR<Prisma.TaskParticipantCreateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput> | Prisma.TaskParticipantCreateWithoutEmployeeInput[] | Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput[]
+  connectOrCreate?: Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput | Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput[]
+  createMany?: Prisma.TaskParticipantCreateManyEmployeeInputEnvelope
+  connect?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+}
+
+export type TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput = {
+  create?: Prisma.XOR<Prisma.TaskParticipantCreateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput> | Prisma.TaskParticipantCreateWithoutEmployeeInput[] | Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput[]
+  connectOrCreate?: Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput | Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput[]
+  createMany?: Prisma.TaskParticipantCreateManyEmployeeInputEnvelope
+  connect?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+}
+
+export type TaskParticipantUpdateManyWithoutEmployeeNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskParticipantCreateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput> | Prisma.TaskParticipantCreateWithoutEmployeeInput[] | Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput[]
+  connectOrCreate?: Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput | Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput[]
+  upsert?: Prisma.TaskParticipantUpsertWithWhereUniqueWithoutEmployeeInput | Prisma.TaskParticipantUpsertWithWhereUniqueWithoutEmployeeInput[]
+  createMany?: Prisma.TaskParticipantCreateManyEmployeeInputEnvelope
+  set?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  disconnect?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  delete?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  connect?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  update?: Prisma.TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput | Prisma.TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput[]
+  updateMany?: Prisma.TaskParticipantUpdateManyWithWhereWithoutEmployeeInput | Prisma.TaskParticipantUpdateManyWithWhereWithoutEmployeeInput[]
+  deleteMany?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
+}
+
+export type TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskParticipantCreateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput> | Prisma.TaskParticipantCreateWithoutEmployeeInput[] | Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput[]
+  connectOrCreate?: Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput | Prisma.TaskParticipantCreateOrConnectWithoutEmployeeInput[]
+  upsert?: Prisma.TaskParticipantUpsertWithWhereUniqueWithoutEmployeeInput | Prisma.TaskParticipantUpsertWithWhereUniqueWithoutEmployeeInput[]
+  createMany?: Prisma.TaskParticipantCreateManyEmployeeInputEnvelope
+  set?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  disconnect?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  delete?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  connect?: Prisma.TaskParticipantWhereUniqueInput | Prisma.TaskParticipantWhereUniqueInput[]
+  update?: Prisma.TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput | Prisma.TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput[]
+  updateMany?: Prisma.TaskParticipantUpdateManyWithWhereWithoutEmployeeInput | Prisma.TaskParticipantUpdateManyWithWhereWithoutEmployeeInput[]
+  deleteMany?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
 }
 
 export type TaskParticipantCreateNestedManyWithoutTaskInput = {
@@ -399,16 +471,69 @@ export type EnumTaskRoleFieldUpdateOperationsInput = {
   set?: $Enums.TaskRole
 }
 
-export type TaskParticipantCreateWithoutTaskInput = {
-  employeeCode: string
+export type TaskParticipantCreateWithoutEmployeeInput = {
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
+  contributionPercentage?: number
+  task: Prisma.TaskCreateNestedOneWithoutParticipantsInput
+}
+
+export type TaskParticipantUncheckedCreateWithoutEmployeeInput = {
+  taskId: number
+  participantRole: $Enums.TaskRole
+  assignedAt?: Date | string
+  contributionPercentage?: number
+}
+
+export type TaskParticipantCreateOrConnectWithoutEmployeeInput = {
+  where: Prisma.TaskParticipantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskParticipantCreateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput>
+}
+
+export type TaskParticipantCreateManyEmployeeInputEnvelope = {
+  data: Prisma.TaskParticipantCreateManyEmployeeInput | Prisma.TaskParticipantCreateManyEmployeeInput[]
+  skipDuplicates?: boolean
+}
+
+export type TaskParticipantUpsertWithWhereUniqueWithoutEmployeeInput = {
+  where: Prisma.TaskParticipantWhereUniqueInput
+  update: Prisma.XOR<Prisma.TaskParticipantUpdateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedUpdateWithoutEmployeeInput>
+  create: Prisma.XOR<Prisma.TaskParticipantCreateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedCreateWithoutEmployeeInput>
+}
+
+export type TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput = {
+  where: Prisma.TaskParticipantWhereUniqueInput
+  data: Prisma.XOR<Prisma.TaskParticipantUpdateWithoutEmployeeInput, Prisma.TaskParticipantUncheckedUpdateWithoutEmployeeInput>
+}
+
+export type TaskParticipantUpdateManyWithWhereWithoutEmployeeInput = {
+  where: Prisma.TaskParticipantScalarWhereInput
+  data: Prisma.XOR<Prisma.TaskParticipantUpdateManyMutationInput, Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeInput>
+}
+
+export type TaskParticipantScalarWhereInput = {
+  AND?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
+  OR?: Prisma.TaskParticipantScalarWhereInput[]
+  NOT?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
+  taskId?: Prisma.IntFilter<"TaskParticipant"> | number
+  employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
+  participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
+  assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
+  contributionPercentage?: Prisma.FloatFilter<"TaskParticipant"> | number
+}
+
+export type TaskParticipantCreateWithoutTaskInput = {
+  participantRole: $Enums.TaskRole
+  assignedAt?: Date | string
+  contributionPercentage?: number
+  employee: Prisma.EmployeeCreateNestedOneWithoutTaskParticipantsInput
 }
 
 export type TaskParticipantUncheckedCreateWithoutTaskInput = {
   employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
+  contributionPercentage?: number
 }
 
 export type TaskParticipantCreateOrConnectWithoutTaskInput = {
@@ -437,38 +562,60 @@ export type TaskParticipantUpdateManyWithWhereWithoutTaskInput = {
   data: Prisma.XOR<Prisma.TaskParticipantUpdateManyMutationInput, Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskInput>
 }
 
-export type TaskParticipantScalarWhereInput = {
-  AND?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
-  OR?: Prisma.TaskParticipantScalarWhereInput[]
-  NOT?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
-  taskId?: Prisma.IntFilter<"TaskParticipant"> | number
-  employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
-  participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
-  assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
+export type TaskParticipantCreateManyEmployeeInput = {
+  taskId: number
+  participantRole: $Enums.TaskRole
+  assignedAt?: Date | string
+  contributionPercentage?: number
+}
+
+export type TaskParticipantUpdateWithoutEmployeeInput = {
+  participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
+  task?: Prisma.TaskUpdateOneRequiredWithoutParticipantsNestedInput
+}
+
+export type TaskParticipantUncheckedUpdateWithoutEmployeeInput = {
+  taskId?: Prisma.IntFieldUpdateOperationsInput | number
+  participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
+}
+
+export type TaskParticipantUncheckedUpdateManyWithoutEmployeeInput = {
+  taskId?: Prisma.IntFieldUpdateOperationsInput | number
+  participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskParticipantCreateManyTaskInput = {
   employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
+  contributionPercentage?: number
 }
 
 export type TaskParticipantUpdateWithoutTaskInput = {
-  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
+  employee?: Prisma.EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
 }
 
 export type TaskParticipantUncheckedUpdateWithoutTaskInput = {
   employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskParticipantUncheckedUpdateManyWithoutTaskInput = {
   employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contributionPercentage?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 
@@ -478,7 +625,9 @@ export type TaskParticipantSelect<ExtArgs extends runtime.Types.Extensions.Inter
   employeeCode?: boolean
   participantRole?: boolean
   assignedAt?: boolean
+  contributionPercentage?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["taskParticipant"]>
 
 
@@ -488,23 +637,27 @@ export type TaskParticipantSelectScalar = {
   employeeCode?: boolean
   participantRole?: boolean
   assignedAt?: boolean
+  contributionPercentage?: boolean
 }
 
-export type TaskParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt", ExtArgs["result"]["taskParticipant"]>
+export type TaskParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt" | "contributionPercentage", ExtArgs["result"]["taskParticipant"]>
 export type TaskParticipantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
 }
 
 export type $TaskParticipantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TaskParticipant"
   objects: {
     task: Prisma.$TaskPayload<ExtArgs>
+    employee: Prisma.$EmployeePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     taskId: number
     employeeCode: string
     participantRole: $Enums.TaskRole
     assignedAt: Date
+    contributionPercentage: number
   }, ExtArgs["result"]["taskParticipant"]>
   composites: {}
 }
@@ -846,6 +999,7 @@ readonly fields: TaskParticipantFieldRefs;
 export interface Prisma__TaskParticipantClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   task<T extends Prisma.TaskDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TaskDefaultArgs<ExtArgs>>): Prisma.Prisma__TaskClient<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  employee<T extends Prisma.EmployeeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmployeeDefaultArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -879,6 +1033,7 @@ export interface TaskParticipantFieldRefs {
   readonly employeeCode: Prisma.FieldRef<"TaskParticipant", 'String'>
   readonly participantRole: Prisma.FieldRef<"TaskParticipant", 'TaskRole'>
   readonly assignedAt: Prisma.FieldRef<"TaskParticipant", 'DateTime'>
+  readonly contributionPercentage: Prisma.FieldRef<"TaskParticipant", 'Float'>
 }
     
 

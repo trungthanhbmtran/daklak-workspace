@@ -1,11 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-import { ClientProxy } from '@nestjs/microservices';
-import { OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { TaskRole } from '@prisma/client';
-import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
@@ -47,6 +44,54 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     return { owner, assignee, approver, coordinators };
   }
+
+  /**
+   * Helper function to extract common participant logic for createTask and assignTask
+   */
+  private buildParticipantsData(taskId: number, data: any): any[] {
+    const participantsData: any[] = [];
+    
+    // Assignee
+    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
+    const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
+    if (assigneeCode) {
+      participantsData.push({ 
+        taskId, 
+        employeeCode: assigneeCode, 
+        participantRole: TaskRole.ASSIGNEE,
+        contributionPercentage: assigneePct
+      });
+    }
+
+    // Owner (Assigner)
+    const assignerCode = data.assignerCode || 'UNASSIGNED';
+    if (assignerCode) {
+      participantsData.push({ taskId, employeeCode: assignerCode, participantRole: TaskRole.OWNER });
+    }
+
+    // Supervisor (Approver)
+    if (data.supervisorCode) {
+      participantsData.push({ taskId, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
+    }
+
+    // Co-assignees (Coordinators)
+    const coassigneeCodes = data.coassigneeCodes || [];
+    const coassigneePcts = data.coassigneePercentages || {};
+    for (const coCode of coassigneeCodes) {
+      if (coCode) {
+        const coPct = typeof coassigneePcts[coCode] === 'number' ? coassigneePcts[coCode] : 0;
+        participantsData.push({
+          taskId,
+          employeeCode: coCode,
+          participantRole: TaskRole.COORDINATOR,
+          contributionPercentage: coPct
+        });
+      }
+    }
+
+    return participantsData;
+  }
+
 
   private async enrichTasks(tasks: any[]) {
     if (!tasks || tasks.length === 0) return tasks;
@@ -886,43 +931,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         }
       });
 
-      // Tạo participants
-      const participantsData: any[] = [];
-      const assigneeCode = data.assigneeCode || 'UNASSIGNED';
-      const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
-      
-      if (assigneeCode) {
-        participantsData.push({ 
-          taskId: newTask.id, 
-          employeeCode: assigneeCode, 
-          participantRole: TaskRole.ASSIGNEE,
-          contributionPercentage: assigneePct
-        });
-      }
-
-      const assignerCode = data.assignerCode || 'UNASSIGNED';
-      if (assignerCode) {
-        participantsData.push({ taskId: newTask.id, employeeCode: assignerCode, participantRole: TaskRole.OWNER });
-      }
-
-      if (data.supervisorCode) {
-        participantsData.push({ taskId: newTask.id, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
-      }
-
-      const coassigneeCodes = data.coassigneeCodes || [];
-      const coassigneePcts = data.coassigneePercentages || [];
-      for (let i = 0; i < coassigneeCodes.length; i++) {
-        const coCode = coassigneeCodes[i];
-        if (coCode) {
-          const coPct = typeof coassigneePcts[i] === 'number' ? coassigneePcts[i] : 0;
-          participantsData.push({
-            taskId: newTask.id,
-            employeeCode: coCode,
-            participantRole: TaskRole.COORDINATOR,
-            contributionPercentage: coPct
-          });
-        }
-      }
+      // Tạo participants using helper
+      const participantsData = this.buildParticipantsData(newTask.id, data);
 
       if (participantsData.length > 0) {
         await tx.taskParticipant.createMany({ data: participantsData, skipDuplicates: true });
@@ -1128,14 +1138,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     return this.toTaskResponse(enriched[0]);
   }
 
-  async assignTask(
-    id: number,
-    assigneeCode: string,
-    coassigneeCodes?: string[],
-    departmentId?: number,
-    assignerCode?: string,
-    context?: { currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }
-  ) {
+  async assignTask(data: any) {
+    const id = data.id;
+    const context = data;
     const rawTaskForCheck = await this.prisma.task.findUnique({ 
       where: { id },
       include: { participants: true }
@@ -1185,54 +1190,18 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
       const isUnassigned = currentAssigneeCode === 'UNASSIGNED' || currentTask.status === 'TEMPLATE';
 
-      // Update assignee
-      if (assigneeCode !== undefined) {
-        await tx.taskParticipant.deleteMany({
-          where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
-        });
-        const finalAssigneeCode = assigneeCode || 'UNASSIGNED';
-        const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
-        await tx.taskParticipant.create({
-          data: { 
-            taskId: id, 
-            employeeCode: finalAssigneeCode, 
-            participantRole: TaskRole.ASSIGNEE,
-            contributionPercentage: assigneePct
-          }
-        });
-      }
-
-      // Update owner
-      if (assignerCode) {
-        await tx.taskParticipant.deleteMany({
-          where: { taskId: id, participantRole: TaskRole.OWNER }
-        });
-        await tx.taskParticipant.create({
-          data: { taskId: id, employeeCode: assignerCode, participantRole: TaskRole.OWNER }
-        });
-      }
-
-      // Update coordinators
-      if (coassigneeCodes) {
-        await tx.taskParticipant.deleteMany({
-          where: { taskId: id, participantRole: TaskRole.COORDINATOR }
-        });
-        const coData: any[] = [];
-        const coassigneePcts = data.coassigneePercentages || [];
-        coassigneeCodes.forEach((code, i) => {
-          if (code) {
-            const coPct = typeof coassigneePcts[i] === 'number' ? coassigneePcts[i] : 0;
-            coData.push({ 
-              taskId: id, 
-              employeeCode: code, 
-              participantRole: TaskRole.COORDINATOR,
-              contributionPercentage: coPct
-            });
-          }
-        });
-        if (coData.length > 0) {
-          await tx.taskParticipant.createMany({ data: coData, skipDuplicates: true });
+      // Delete old participants for assignee, owner, coordinator
+      await tx.taskParticipant.deleteMany({
+        where: { 
+          taskId: id, 
+          participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] } 
         }
+      });
+
+      // Re-create participants using helper
+      const participantsData = this.buildParticipantsData(id, data);
+      if (participantsData.length > 0) {
+        await tx.taskParticipant.createMany({ data: participantsData, skipDuplicates: true });
       }
 
       // Update status to TODO if it was TEMPLATE
@@ -1246,11 +1215,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const enriched = await this.enrichTasks([t]);
     const enrichedTaskResponse = this.toTaskResponse(enriched[0]);
 
-    if (assigneeCode) {
+    if (data.assigneeCode) {
       try {
         this.notificationClient.emit('send_notification', {
           channel: 'console',
-          recipient: assigneeCode,
+          recipient: data.assigneeCode,
           subject: 'Có công việc mới được giao',
           body: `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`
         });

@@ -374,6 +374,7 @@ export type EmployeeWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   kpiEvaluations?: Prisma.KpiEvaluationListRelationFilter
   kpiReviews?: Prisma.KpiEvaluationListRelationFilter
+  taskParticipants?: Prisma.TaskParticipantListRelationFilter
 }
 
 export type EmployeeOrderByWithRelationInput = {
@@ -402,6 +403,7 @@ export type EmployeeOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   kpiEvaluations?: Prisma.KpiEvaluationOrderByRelationAggregateInput
   kpiReviews?: Prisma.KpiEvaluationOrderByRelationAggregateInput
+  taskParticipants?: Prisma.TaskParticipantOrderByRelationAggregateInput
   _relevance?: Prisma.EmployeeOrderByRelevanceInput
 }
 
@@ -434,6 +436,7 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   kpiEvaluations?: Prisma.KpiEvaluationListRelationFilter
   kpiReviews?: Prisma.KpiEvaluationListRelationFilter
+  taskParticipants?: Prisma.TaskParticipantListRelationFilter
 }, "id" | "employeeCode">
 
 export type EmployeeOrderByWithAggregationInput = {
@@ -521,6 +524,7 @@ export type EmployeeCreateInput = {
   updatedAt?: Date | string
   kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
+  taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUncheckedCreateInput = {
@@ -549,6 +553,7 @@ export type EmployeeUncheckedCreateInput = {
   updatedAt?: Date | string
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
+  taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUpdateInput = {
@@ -576,6 +581,7 @@ export type EmployeeUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
+  taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeUncheckedUpdateInput = {
@@ -604,6 +610,7 @@ export type EmployeeUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
+  taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeCreateManyInput = {
@@ -823,6 +830,20 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type EmployeeCreateNestedOneWithoutTaskParticipantsInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutTaskParticipantsInput, Prisma.EmployeeUncheckedCreateWithoutTaskParticipantsInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutTaskParticipantsInput
+  connect?: Prisma.EmployeeWhereUniqueInput
+}
+
+export type EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutTaskParticipantsInput, Prisma.EmployeeUncheckedCreateWithoutTaskParticipantsInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutTaskParticipantsInput
+  upsert?: Prisma.EmployeeUpsertWithoutTaskParticipantsInput
+  connect?: Prisma.EmployeeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutTaskParticipantsInput, Prisma.EmployeeUpdateWithoutTaskParticipantsInput>, Prisma.EmployeeUncheckedUpdateWithoutTaskParticipantsInput>
+}
+
 export type EmployeeCreateNestedOneWithoutKpiEvaluationsInput = {
   create?: Prisma.XOR<Prisma.EmployeeCreateWithoutKpiEvaluationsInput, Prisma.EmployeeUncheckedCreateWithoutKpiEvaluationsInput>
   connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutKpiEvaluationsInput
@@ -853,6 +874,132 @@ export type EmployeeUpdateOneWithoutKpiReviewsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutKpiReviewsInput, Prisma.EmployeeUpdateWithoutKpiReviewsInput>, Prisma.EmployeeUncheckedUpdateWithoutKpiReviewsInput>
 }
 
+export type EmployeeCreateWithoutTaskParticipantsInput = {
+  userId?: string | null
+  firstname: string
+  lastname: string
+  fullName: string
+  employeeCode: string
+  email?: string | null
+  phone?: string | null
+  gender?: string | null
+  birthday?: Date | string | null
+  identityCard?: string | null
+  employmentType?: string | null
+  employmentStatus?: string
+  contractInfo?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  address?: string | null
+  avatar?: string | null
+  departmentId?: number | null
+  jobTitleId?: number | null
+  civilServantRankId?: number | null
+  partyTitleId?: number | null
+  startDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
+  kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
+}
+
+export type EmployeeUncheckedCreateWithoutTaskParticipantsInput = {
+  id?: number
+  userId?: string | null
+  firstname: string
+  lastname: string
+  fullName: string
+  employeeCode: string
+  email?: string | null
+  phone?: string | null
+  gender?: string | null
+  birthday?: Date | string | null
+  identityCard?: string | null
+  employmentType?: string | null
+  employmentStatus?: string
+  contractInfo?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  address?: string | null
+  avatar?: string | null
+  departmentId?: number | null
+  jobTitleId?: number | null
+  civilServantRankId?: number | null
+  partyTitleId?: number | null
+  startDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
+  kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
+}
+
+export type EmployeeCreateOrConnectWithoutTaskParticipantsInput = {
+  where: Prisma.EmployeeWhereUniqueInput
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutTaskParticipantsInput, Prisma.EmployeeUncheckedCreateWithoutTaskParticipantsInput>
+}
+
+export type EmployeeUpsertWithoutTaskParticipantsInput = {
+  update: Prisma.XOR<Prisma.EmployeeUpdateWithoutTaskParticipantsInput, Prisma.EmployeeUncheckedUpdateWithoutTaskParticipantsInput>
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutTaskParticipantsInput, Prisma.EmployeeUncheckedCreateWithoutTaskParticipantsInput>
+  where?: Prisma.EmployeeWhereInput
+}
+
+export type EmployeeUpdateToOneWithWhereWithoutTaskParticipantsInput = {
+  where?: Prisma.EmployeeWhereInput
+  data: Prisma.XOR<Prisma.EmployeeUpdateWithoutTaskParticipantsInput, Prisma.EmployeeUncheckedUpdateWithoutTaskParticipantsInput>
+}
+
+export type EmployeeUpdateWithoutTaskParticipantsInput = {
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstname?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  identityCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  contractInfo?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  jobTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  civilServantRankId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  partyTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
+  kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
+}
+
+export type EmployeeUncheckedUpdateWithoutTaskParticipantsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstname?: Prisma.StringFieldUpdateOperationsInput | string
+  lastname?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  identityCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  contractInfo?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  jobTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  civilServantRankId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  partyTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
+  kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
+}
+
 export type EmployeeCreateWithoutKpiEvaluationsInput = {
   userId?: string | null
   firstname: string
@@ -877,6 +1024,7 @@ export type EmployeeCreateWithoutKpiEvaluationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
+  taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUncheckedCreateWithoutKpiEvaluationsInput = {
@@ -904,6 +1052,7 @@ export type EmployeeUncheckedCreateWithoutKpiEvaluationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
+  taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeCreateOrConnectWithoutKpiEvaluationsInput = {
@@ -935,6 +1084,7 @@ export type EmployeeCreateWithoutKpiReviewsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
+  taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeUncheckedCreateWithoutKpiReviewsInput = {
@@ -962,6 +1112,7 @@ export type EmployeeUncheckedCreateWithoutKpiReviewsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
+  taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
 export type EmployeeCreateOrConnectWithoutKpiReviewsInput = {
@@ -1004,6 +1155,7 @@ export type EmployeeUpdateWithoutKpiEvaluationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
+  taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeUncheckedUpdateWithoutKpiEvaluationsInput = {
@@ -1031,6 +1183,7 @@ export type EmployeeUncheckedUpdateWithoutKpiEvaluationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
+  taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeUpsertWithoutKpiReviewsInput = {
@@ -1068,6 +1221,7 @@ export type EmployeeUpdateWithoutKpiReviewsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
+  taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
 }
 
 export type EmployeeUncheckedUpdateWithoutKpiReviewsInput = {
@@ -1095,6 +1249,7 @@ export type EmployeeUncheckedUpdateWithoutKpiReviewsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
+  taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
 
@@ -1105,11 +1260,13 @@ export type EmployeeUncheckedUpdateWithoutKpiReviewsInput = {
 export type EmployeeCountOutputType = {
   kpiEvaluations: number
   kpiReviews: number
+  taskParticipants: number
 }
 
 export type EmployeeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   kpiEvaluations?: boolean | EmployeeCountOutputTypeCountKpiEvaluationsArgs
   kpiReviews?: boolean | EmployeeCountOutputTypeCountKpiReviewsArgs
+  taskParticipants?: boolean | EmployeeCountOutputTypeCountTaskParticipantsArgs
 }
 
 /**
@@ -1134,6 +1291,13 @@ export type EmployeeCountOutputTypeCountKpiEvaluationsArgs<ExtArgs extends runti
  */
 export type EmployeeCountOutputTypeCountKpiReviewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.KpiEvaluationWhereInput
+}
+
+/**
+ * EmployeeCountOutputType without action
+ */
+export type EmployeeCountOutputTypeCountTaskParticipantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskParticipantWhereInput
 }
 
 
@@ -1163,6 +1327,7 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updatedAt?: boolean
   kpiEvaluations?: boolean | Prisma.Employee$kpiEvaluationsArgs<ExtArgs>
   kpiReviews?: boolean | Prisma.Employee$kpiReviewsArgs<ExtArgs>
+  taskParticipants?: boolean | Prisma.Employee$taskParticipantsArgs<ExtArgs>
   _count?: boolean | Prisma.EmployeeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["employee"]>
 
@@ -1198,6 +1363,7 @@ export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type EmployeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   kpiEvaluations?: boolean | Prisma.Employee$kpiEvaluationsArgs<ExtArgs>
   kpiReviews?: boolean | Prisma.Employee$kpiReviewsArgs<ExtArgs>
+  taskParticipants?: boolean | Prisma.Employee$taskParticipantsArgs<ExtArgs>
   _count?: boolean | Prisma.EmployeeCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1206,6 +1372,7 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     kpiEvaluations: Prisma.$KpiEvaluationPayload<ExtArgs>[]
     kpiReviews: Prisma.$KpiEvaluationPayload<ExtArgs>[]
+    taskParticipants: Prisma.$TaskParticipantPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1573,6 +1740,7 @@ export interface Prisma__EmployeeClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   kpiEvaluations<T extends Prisma.Employee$kpiEvaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$kpiEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   kpiReviews<T extends Prisma.Employee$kpiReviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$kpiReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  taskParticipants<T extends Prisma.Employee$taskParticipantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$taskParticipantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2018,6 +2186,30 @@ export type Employee$kpiReviewsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.KpiEvaluationScalarFieldEnum | Prisma.KpiEvaluationScalarFieldEnum[]
+}
+
+/**
+ * Employee.taskParticipants
+ */
+export type Employee$taskParticipantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskParticipant
+   */
+  select?: Prisma.TaskParticipantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskParticipant
+   */
+  omit?: Prisma.TaskParticipantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskParticipantInclude<ExtArgs> | null
+  where?: Prisma.TaskParticipantWhereInput
+  orderBy?: Prisma.TaskParticipantOrderByWithRelationInput | Prisma.TaskParticipantOrderByWithRelationInput[]
+  cursor?: Prisma.TaskParticipantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskParticipantScalarFieldEnum | Prisma.TaskParticipantScalarFieldEnum[]
 }
 
 /**

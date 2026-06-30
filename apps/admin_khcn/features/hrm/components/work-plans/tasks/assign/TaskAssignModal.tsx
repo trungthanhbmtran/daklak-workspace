@@ -529,6 +529,117 @@ const TaskParameters = React.memo(function TaskParameters({
 });
 
 // ==========================================
+// FORM SUB-COMPONENTS
+// ==========================================
+
+const CrossDomainAlert = React.memo(function CrossDomainAlert({
+  assigneeCode,
+  recommendedCodes
+}: {
+  assigneeCode: string;
+  recommendedCodes: string[];
+}) {
+  if (!assigneeCode || recommendedCodes.length === 0 || recommendedCodes.includes(assigneeCode)) return null;
+  return (
+    <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-900/40 rounded-xl text-xs text-amber-900 dark:text-amber-200 leading-relaxed shadow-sm">
+      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+      <p>
+        <strong>Cảnh báo giao trái thẩm quyền:</strong> Cán bộ xử lý chính không phụ trách lĩnh vực này. Điểm KPI khi hoàn thành sẽ được hệ thống <strong>tự động nhân hệ số 1.5x</strong> để khuyến khích (Cross-domain Bonus).
+      </p>
+    </div>
+  );
+});
+
+const ContributionKPIEditor = React.memo(function ContributionKPIEditor({
+  taskState,
+  setTaskState,
+  assignableEmployees,
+}: {
+  taskState: any;
+  setTaskState: any;
+  assignableEmployees: any[];
+}) {
+  const handleCoAssigneeChange = React.useCallback((code: string, value: string) => {
+    setTaskState((p: any) => ({
+      ...p,
+      coAssigneePercentages: { ...p.coAssigneePercentages, [code]: Number(value) }
+    }));
+  }, [setTaskState]);
+
+  const total = taskState.assigneePercentage + Object.values(taskState.coAssigneePercentages as Record<string, number>).reduce((a, b) => a + b, 0);
+
+  const renderRow = (code: string, namePrefix: string, fallbackName: string, value: number, isMain: boolean) => (
+    <div key={code || 'main'} className="flex items-center gap-3">
+      <div className="flex-1 text-[11px] font-semibold text-slate-700 truncate pl-3">
+        {namePrefix} {assignableEmployees.find(e => e.code === code)?.name || fallbackName}
+      </div>
+      <Input
+        type="number"
+        min={0} max={100}
+        value={value}
+        onChange={(e) => isMain 
+          ? setTaskState((p: any) => ({ ...p, assigneePercentage: Number(e.target.value) })) 
+          : handleCoAssigneeChange(code, e.target.value)}
+        className="w-20 h-7 text-xs text-center font-bold"
+      />
+      <span className="text-xs text-slate-400">%</span>
+    </div>
+  );
+
+  return (
+    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+      <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center justify-between">
+        Tỷ lệ đóng góp KPI
+        {total !== 100 && (
+          <span className="text-red-500 text-[10px]">Tổng phải = 100%</span>
+        )}
+      </span>
+      {taskState.assigneeCode && renderRow(taskState.assigneeCode, '👑', 'Chủ trì', taskState.assigneePercentage, true)}
+      {taskState.coAssigneeCodes.map((code: string) => renderRow(code, '🤝', 'Phối hợp', taskState.coAssigneePercentages[code] || 0, false))}
+    </div>
+  );
+});
+
+const CrossDepartmentToggle = React.memo(function CrossDepartmentToggle({
+  crossDepartment,
+  setCrossDepartment
+}: {
+  crossDepartment: boolean;
+  setCrossDepartment: (v: boolean) => void;
+}) {
+  return (
+    <>
+      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Chế độ phối hợp</span>
+        <label className={cn(
+          "flex items-center gap-2 cursor-pointer select-none rounded-xl px-3 py-1.5 border transition-all text-xs font-bold",
+          crossDepartment
+            ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-900/30 text-amber-700 dark:text-amber-300 shadow-sm"
+            : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+        )}>
+          <input
+            type="checkbox"
+            checked={crossDepartment}
+            onChange={(e) => setCrossDepartment(e.target.checked)}
+            className="w-4 h-4 rounded border-slate-350 dark:border-slate-700 text-amber-655 focus:ring-amber-500/20 bg-white dark:bg-slate-900"
+          />
+          🤝 Phối hợp liên phòng ban
+        </label>
+      </div>
+
+      {crossDepartment && (
+        <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-900/20 rounded-xl text-xs text-amber-800 dark:text-amber-300 leading-relaxed shadow-sm">
+          <span className="text-base leading-none">💡</span>
+          <p>
+            Chế độ <strong>Phối hợp liên phòng ban</strong>: Danh sách sẽ ưu tiên lọc và hiển thị <strong>lãnh đạo phòng ban khác</strong>. Bạn nên chọn người chịu trách nhiệm chính làm <strong>Chủ trì</strong>, các thành viên khác làm <strong>Phối hợp</strong>.
+          </p>
+        </div>
+      )}
+    </>
+  );
+});
+
+// ==========================================
 // MAIN COMPONENT
 // ==========================================
 
@@ -746,85 +857,21 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                 />
               </div>
               
-              {taskState.assigneeCode && recommendedCodes.length > 0 && !recommendedCodes.includes(taskState.assigneeCode) && (
-                <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-900/40 rounded-xl text-xs text-amber-900 dark:text-amber-200 leading-relaxed shadow-sm">
-                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                  <p>
-                    <strong>Cảnh báo giao trái thẩm quyền:</strong> Cán bộ xử lý chính không phụ trách lĩnh vực này. Điểm KPI khi hoàn thành sẽ được hệ thống <strong>tự động nhân hệ số 1.5x</strong> để khuyến khích (Cross-domain Bonus).
-                  </p>
-                </div>
-              )}
+              <CrossDomainAlert 
+                assigneeCode={taskState.assigneeCode} 
+                recommendedCodes={recommendedCodes} 
+              />
 
-              {/* Tỷ lệ đóng góp KPI */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center justify-between">
-                  Tỷ lệ đóng góp KPI
-                  {taskState.assigneePercentage + Object.values(taskState.coAssigneePercentages).reduce((a,b)=>a+b, 0) !== 100 && (
-                    <span className="text-red-500 text-[10px]">Tổng phải = 100%</span>
-                  )}
-                </span>
-                {taskState.assigneeCode && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 text-[11px] font-semibold text-slate-700 truncate">
-                      👑 {assignableEmployees.find(e => e.code === taskState.assigneeCode)?.name || 'Chủ trì'}
-                    </div>
-                    <Input
-                      type="number"
-                      min={0} max={100}
-                      value={taskState.assigneePercentage}
-                      onChange={(e) => setTaskState(p => ({ ...p, assigneePercentage: Number(e.target.value) }))}
-                      className="w-20 h-7 text-xs text-center font-bold"
-                    />
-                    <span className="text-xs text-slate-400">%</span>
-                  </div>
-                )}
-                {taskState.coAssigneeCodes.map(code => (
-                  <div key={code} className="flex items-center gap-3">
-                    <div className="flex-1 text-[11px] font-medium text-slate-600 truncate pl-3">
-                      🤝 {assignableEmployees.find(e => e.code === code)?.name || 'Phối hợp'}
-                    </div>
-                    <Input
-                      type="number"
-                      min={0} max={100}
-                      value={taskState.coAssigneePercentages[code] || 0}
-                      onChange={(e) => setTaskState(p => ({
-                        ...p,
-                        coAssigneePercentages: { ...p.coAssigneePercentages, [code]: Number(e.target.value) }
-                      }))}
-                      className="w-20 h-7 text-xs text-center font-medium"
-                    />
-                    <span className="text-xs text-slate-400">%</span>
-                  </div>
-                ))}
-              </div>
+              <ContributionKPIEditor 
+                taskState={taskState} 
+                setTaskState={setTaskState} 
+                assignableEmployees={assignableEmployees} 
+              />
 
-              {/* Tùy chọn liên phòng ban */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Chế độ phối hợp</span>
-                <label className={cn(
-                  "flex items-center gap-2 cursor-pointer select-none rounded-xl px-3 py-1.5 border transition-all text-xs font-bold",
-                  crossDepartment
-                    ? "bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-900/30 text-amber-700 dark:text-amber-300 shadow-sm"
-                    : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}>
-                  <input
-                    type="checkbox"
-                    checked={crossDepartment}
-                    onChange={(e) => setCrossDepartment(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-350 dark:border-slate-700 text-amber-655 focus:ring-amber-500/20 bg-white dark:bg-slate-900"
-                  />
-                  🤝 Phối hợp liên phòng ban
-                </label>
-              </div>
-
-              {crossDepartment && (
-                <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-900/20 rounded-xl text-xs text-amber-800 dark:text-amber-300 leading-relaxed shadow-sm">
-                  <span className="text-base leading-none">💡</span>
-                  <p>
-                    Chế độ <strong>Phối hợp liên phòng ban</strong>: Danh sách sẽ ưu tiên lọc và hiển thị <strong>lãnh đạo phòng ban khác</strong>. Bạn nên chọn người chịu trách nhiệm chính làm <strong>Chủ trì</strong>, các thành viên khác làm <strong>Phối hợp</strong>.
-                  </p>
-                </div>
-              )}
+              <CrossDepartmentToggle 
+                crossDepartment={crossDepartment} 
+                setCrossDepartment={setCrossDepartment} 
+              />
             </div>
 
             {/* Selected personnel display cards */}
