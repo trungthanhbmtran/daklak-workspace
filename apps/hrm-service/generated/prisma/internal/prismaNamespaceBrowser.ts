@@ -135,7 +135,10 @@ export const TaskScalarFieldEnum = {
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
   progress: 'progress',
-  rejectReason: 'rejectReason'
+  rejectReason: 'rejectReason',
+  kpiCriteriaId: 'kpiCriteriaId',
+  isCrossDomain: 'isCrossDomain',
+  crossDomainMultiplier: 'crossDomainMultiplier'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]

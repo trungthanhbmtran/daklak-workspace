@@ -37,6 +37,8 @@ export type TaskAvgAggregateOutputType = {
   monitoredUnitId: number | null
   planId: number | null
   progress: number | null
+  kpiCriteriaId: number | null
+  crossDomainMultiplier: number | null
 }
 
 export type TaskSumAggregateOutputType = {
@@ -50,6 +52,8 @@ export type TaskSumAggregateOutputType = {
   monitoredUnitId: number | null
   planId: number | null
   progress: number | null
+  kpiCriteriaId: number | null
+  crossDomainMultiplier: number | null
 }
 
 export type TaskMinAggregateOutputType = {
@@ -76,6 +80,9 @@ export type TaskMinAggregateOutputType = {
   planId: number | null
   progress: number | null
   rejectReason: string | null
+  kpiCriteriaId: number | null
+  isCrossDomain: boolean | null
+  crossDomainMultiplier: number | null
 }
 
 export type TaskMaxAggregateOutputType = {
@@ -102,6 +109,9 @@ export type TaskMaxAggregateOutputType = {
   planId: number | null
   progress: number | null
   rejectReason: string | null
+  kpiCriteriaId: number | null
+  isCrossDomain: boolean | null
+  crossDomainMultiplier: number | null
 }
 
 export type TaskCountAggregateOutputType = {
@@ -130,6 +140,9 @@ export type TaskCountAggregateOutputType = {
   planId: number
   progress: number
   rejectReason: number
+  kpiCriteriaId: number
+  isCrossDomain: number
+  crossDomainMultiplier: number
   _all: number
 }
 
@@ -145,6 +158,8 @@ export type TaskAvgAggregateInputType = {
   monitoredUnitId?: true
   planId?: true
   progress?: true
+  kpiCriteriaId?: true
+  crossDomainMultiplier?: true
 }
 
 export type TaskSumAggregateInputType = {
@@ -158,6 +173,8 @@ export type TaskSumAggregateInputType = {
   monitoredUnitId?: true
   planId?: true
   progress?: true
+  kpiCriteriaId?: true
+  crossDomainMultiplier?: true
 }
 
 export type TaskMinAggregateInputType = {
@@ -184,6 +201,9 @@ export type TaskMinAggregateInputType = {
   planId?: true
   progress?: true
   rejectReason?: true
+  kpiCriteriaId?: true
+  isCrossDomain?: true
+  crossDomainMultiplier?: true
 }
 
 export type TaskMaxAggregateInputType = {
@@ -210,6 +230,9 @@ export type TaskMaxAggregateInputType = {
   planId?: true
   progress?: true
   rejectReason?: true
+  kpiCriteriaId?: true
+  isCrossDomain?: true
+  crossDomainMultiplier?: true
 }
 
 export type TaskCountAggregateInputType = {
@@ -238,6 +261,9 @@ export type TaskCountAggregateInputType = {
   planId?: true
   progress?: true
   rejectReason?: true
+  kpiCriteriaId?: true
+  isCrossDomain?: true
+  crossDomainMultiplier?: true
   _all?: true
 }
 
@@ -353,6 +379,9 @@ export type TaskGroupByOutputType = {
   planId: number | null
   progress: number
   rejectReason: string | null
+  kpiCriteriaId: number | null
+  isCrossDomain: boolean
+  crossDomainMultiplier: number
   _count: TaskCountAggregateOutputType | null
   _avg: TaskAvgAggregateOutputType | null
   _sum: TaskSumAggregateOutputType | null
@@ -404,11 +433,15 @@ export type TaskWhereInput = {
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
+  kpiCriteriaId?: Prisma.IntNullableFilter<"Task"> | number | null
+  isCrossDomain?: Prisma.BoolFilter<"Task"> | boolean
+  crossDomainMultiplier?: Prisma.FloatFilter<"Task"> | number
   plan?: Prisma.XOR<Prisma.MasterPlanNullableScalarRelationFilter, Prisma.MasterPlanWhereInput> | null
   participants?: Prisma.TaskParticipantListRelationFilter
   ancestors?: Prisma.TaskClosureListRelationFilter
   descendants?: Prisma.TaskClosureListRelationFilter
   comments?: Prisma.TaskCommentListRelationFilter
+  kpiCriteria?: Prisma.XOR<Prisma.KpiCriteriaNullableScalarRelationFilter, Prisma.KpiCriteriaWhereInput> | null
 }
 
 export type TaskOrderByWithRelationInput = {
@@ -437,11 +470,15 @@ export type TaskOrderByWithRelationInput = {
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isCrossDomain?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
   plan?: Prisma.MasterPlanOrderByWithRelationInput
   participants?: Prisma.TaskParticipantOrderByRelationAggregateInput
   ancestors?: Prisma.TaskClosureOrderByRelationAggregateInput
   descendants?: Prisma.TaskClosureOrderByRelationAggregateInput
   comments?: Prisma.TaskCommentOrderByRelationAggregateInput
+  kpiCriteria?: Prisma.KpiCriteriaOrderByWithRelationInput
   _relevance?: Prisma.TaskOrderByRelevanceInput
 }
 
@@ -474,11 +511,15 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
+  kpiCriteriaId?: Prisma.IntNullableFilter<"Task"> | number | null
+  isCrossDomain?: Prisma.BoolFilter<"Task"> | boolean
+  crossDomainMultiplier?: Prisma.FloatFilter<"Task"> | number
   plan?: Prisma.XOR<Prisma.MasterPlanNullableScalarRelationFilter, Prisma.MasterPlanWhereInput> | null
   participants?: Prisma.TaskParticipantListRelationFilter
   ancestors?: Prisma.TaskClosureListRelationFilter
   descendants?: Prisma.TaskClosureListRelationFilter
   comments?: Prisma.TaskCommentListRelationFilter
+  kpiCriteria?: Prisma.XOR<Prisma.KpiCriteriaNullableScalarRelationFilter, Prisma.KpiCriteriaWhereInput> | null
 }, "id">
 
 export type TaskOrderByWithAggregationInput = {
@@ -507,6 +548,9 @@ export type TaskOrderByWithAggregationInput = {
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isCrossDomain?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
   _count?: Prisma.TaskCountOrderByAggregateInput
   _avg?: Prisma.TaskAvgOrderByAggregateInput
   _max?: Prisma.TaskMaxOrderByAggregateInput
@@ -543,6 +587,9 @@ export type TaskScalarWhereWithAggregatesInput = {
   planId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   progress?: Prisma.FloatWithAggregatesFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
+  kpiCriteriaId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
+  isCrossDomain?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
+  crossDomainMultiplier?: Prisma.FloatWithAggregatesFilter<"Task"> | number
 }
 
 export type TaskCreateInput = {
@@ -569,11 +616,14 @@ export type TaskCreateInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
 }
 
 export type TaskUncheckedCreateInput = {
@@ -602,6 +652,9 @@ export type TaskUncheckedCreateInput = {
   planId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
@@ -632,11 +685,14 @@ export type TaskUpdateInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
 }
 
 export type TaskUncheckedUpdateInput = {
@@ -665,6 +721,9 @@ export type TaskUncheckedUpdateInput = {
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
@@ -697,6 +756,9 @@ export type TaskCreateManyInput = {
   planId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
 }
 
 export type TaskUpdateManyMutationInput = {
@@ -723,6 +785,8 @@ export type TaskUpdateManyMutationInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskUncheckedUpdateManyInput = {
@@ -751,6 +815,9 @@ export type TaskUncheckedUpdateManyInput = {
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 export type TaskOrderByRelevanceInput = {
@@ -785,6 +852,9 @@ export type TaskCountOrderByAggregateInput = {
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrder
+  isCrossDomain?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
 }
 
 export type TaskAvgOrderByAggregateInput = {
@@ -798,6 +868,8 @@ export type TaskAvgOrderByAggregateInput = {
   monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
 }
 
 export type TaskMaxOrderByAggregateInput = {
@@ -824,6 +896,9 @@ export type TaskMaxOrderByAggregateInput = {
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrder
+  isCrossDomain?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
 }
 
 export type TaskMinOrderByAggregateInput = {
@@ -850,6 +925,9 @@ export type TaskMinOrderByAggregateInput = {
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrder
+  isCrossDomain?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
 }
 
 export type TaskSumOrderByAggregateInput = {
@@ -863,6 +941,8 @@ export type TaskSumOrderByAggregateInput = {
   monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  kpiCriteriaId?: Prisma.SortOrder
+  crossDomainMultiplier?: Prisma.SortOrder
 }
 
 export type TaskScalarRelationFilter = {
@@ -894,6 +974,10 @@ export type FloatFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type TaskCreateNestedOneWithoutParticipantsInput = {
@@ -994,6 +1078,48 @@ export type TaskUncheckedUpdateManyWithoutPlanNestedInput = {
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
 }
 
+export type TaskCreateNestedManyWithoutKpiCriteriaInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutKpiCriteriaInput, Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput> | Prisma.TaskCreateWithoutKpiCriteriaInput[] | Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput | Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput[]
+  createMany?: Prisma.TaskCreateManyKpiCriteriaInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUncheckedCreateNestedManyWithoutKpiCriteriaInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutKpiCriteriaInput, Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput> | Prisma.TaskCreateWithoutKpiCriteriaInput[] | Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput | Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput[]
+  createMany?: Prisma.TaskCreateManyKpiCriteriaInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUpdateManyWithoutKpiCriteriaNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutKpiCriteriaInput, Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput> | Prisma.TaskCreateWithoutKpiCriteriaInput[] | Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput | Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutKpiCriteriaInput | Prisma.TaskUpsertWithWhereUniqueWithoutKpiCriteriaInput[]
+  createMany?: Prisma.TaskCreateManyKpiCriteriaInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutKpiCriteriaInput | Prisma.TaskUpdateWithWhereUniqueWithoutKpiCriteriaInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutKpiCriteriaInput | Prisma.TaskUpdateManyWithWhereWithoutKpiCriteriaInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type TaskUncheckedUpdateManyWithoutKpiCriteriaNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutKpiCriteriaInput, Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput> | Prisma.TaskCreateWithoutKpiCriteriaInput[] | Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput | Prisma.TaskCreateOrConnectWithoutKpiCriteriaInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutKpiCriteriaInput | Prisma.TaskUpsertWithWhereUniqueWithoutKpiCriteriaInput[]
+  createMany?: Prisma.TaskCreateManyKpiCriteriaInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutKpiCriteriaInput | Prisma.TaskUpdateWithWhereUniqueWithoutKpiCriteriaInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutKpiCriteriaInput | Prisma.TaskUpdateManyWithWhereWithoutKpiCriteriaInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
 export type TaskCreateWithoutParticipantsInput = {
   parentId?: number | null
   title: string
@@ -1018,10 +1144,13 @@ export type TaskCreateWithoutParticipantsInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
 }
 
 export type TaskUncheckedCreateWithoutParticipantsInput = {
@@ -1050,6 +1179,9 @@ export type TaskUncheckedCreateWithoutParticipantsInput = {
   planId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1095,10 +1227,13 @@ export type TaskUpdateWithoutParticipantsInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutParticipantsInput = {
@@ -1127,6 +1262,9 @@ export type TaskUncheckedUpdateWithoutParticipantsInput = {
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -1156,10 +1294,13 @@ export type TaskCreateWithoutDescendantsInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
 }
 
 export type TaskUncheckedCreateWithoutDescendantsInput = {
@@ -1188,6 +1329,9 @@ export type TaskUncheckedCreateWithoutDescendantsInput = {
   planId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1222,10 +1366,13 @@ export type TaskCreateWithoutAncestorsInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
 }
 
 export type TaskUncheckedCreateWithoutAncestorsInput = {
@@ -1254,6 +1401,9 @@ export type TaskUncheckedCreateWithoutAncestorsInput = {
   planId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1299,10 +1449,13 @@ export type TaskUpdateWithoutDescendantsInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutDescendantsInput = {
@@ -1331,6 +1484,9 @@ export type TaskUncheckedUpdateWithoutDescendantsInput = {
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -1371,10 +1527,13 @@ export type TaskUpdateWithoutAncestorsInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutAncestorsInput = {
@@ -1403,6 +1562,9 @@ export type TaskUncheckedUpdateWithoutAncestorsInput = {
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -1432,10 +1594,13 @@ export type TaskCreateWithoutCommentsInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
 }
 
 export type TaskUncheckedCreateWithoutCommentsInput = {
@@ -1464,6 +1629,9 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   planId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
@@ -1509,10 +1677,13 @@ export type TaskUpdateWithoutCommentsInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutCommentsInput = {
@@ -1541,6 +1712,9 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
@@ -1570,10 +1744,13 @@ export type TaskCreateWithoutPlanInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
 }
 
 export type TaskUncheckedCreateWithoutPlanInput = {
@@ -1601,6 +1778,9 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
@@ -1662,6 +1842,102 @@ export type TaskScalarWhereInput = {
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
+  kpiCriteriaId?: Prisma.IntNullableFilter<"Task"> | number | null
+  isCrossDomain?: Prisma.BoolFilter<"Task"> | boolean
+  crossDomainMultiplier?: Prisma.FloatFilter<"Task"> | number
+}
+
+export type TaskCreateWithoutKpiCriteriaInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  creatorEmployeeCode?: string | null
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  progress?: number
+  rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+}
+
+export type TaskUncheckedCreateWithoutKpiCriteriaInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  creatorEmployeeCode?: string | null
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  progress?: number
+  rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+}
+
+export type TaskCreateOrConnectWithoutKpiCriteriaInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutKpiCriteriaInput, Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput>
+}
+
+export type TaskCreateManyKpiCriteriaInputEnvelope = {
+  data: Prisma.TaskCreateManyKpiCriteriaInput | Prisma.TaskCreateManyKpiCriteriaInput[]
+  skipDuplicates?: boolean
+}
+
+export type TaskUpsertWithWhereUniqueWithoutKpiCriteriaInput = {
+  where: Prisma.TaskWhereUniqueInput
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutKpiCriteriaInput, Prisma.TaskUncheckedUpdateWithoutKpiCriteriaInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutKpiCriteriaInput, Prisma.TaskUncheckedCreateWithoutKpiCriteriaInput>
+}
+
+export type TaskUpdateWithWhereUniqueWithoutKpiCriteriaInput = {
+  where: Prisma.TaskWhereUniqueInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutKpiCriteriaInput, Prisma.TaskUncheckedUpdateWithoutKpiCriteriaInput>
+}
+
+export type TaskUpdateManyWithWhereWithoutKpiCriteriaInput = {
+  where: Prisma.TaskScalarWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateManyMutationInput, Prisma.TaskUncheckedUpdateManyWithoutKpiCriteriaInput>
 }
 
 export type TaskCreateManyPlanInput = {
@@ -1689,6 +1965,9 @@ export type TaskCreateManyPlanInput = {
   monitoredUnitId?: number | null
   progress?: number
   rejectReason?: string | null
+  kpiCriteriaId?: number | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
 }
 
 export type TaskUpdateWithoutPlanInput = {
@@ -1715,10 +1994,13 @@ export type TaskUpdateWithoutPlanInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutPlanInput = {
@@ -1746,6 +2028,9 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
@@ -1777,6 +2062,136 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+}
+
+export type TaskCreateManyKpiCriteriaInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  creatorEmployeeCode?: string | null
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  progress?: number
+  rejectReason?: string | null
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
+}
+
+export type TaskUpdateWithoutKpiCriteriaInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutKpiCriteriaInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateManyWithoutKpiCriteriaInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
 }
 
 
@@ -1863,11 +2278,15 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   planId?: boolean
   progress?: boolean
   rejectReason?: boolean
+  kpiCriteriaId?: boolean
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: boolean
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   participants?: boolean | Prisma.Task$participantsArgs<ExtArgs>
   ancestors?: boolean | Prisma.Task$ancestorsArgs<ExtArgs>
   descendants?: boolean | Prisma.Task$descendantsArgs<ExtArgs>
   comments?: boolean | Prisma.Task$commentsArgs<ExtArgs>
+  kpiCriteria?: boolean | Prisma.Task$kpiCriteriaArgs<ExtArgs>
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["task"]>
 
@@ -1899,15 +2318,19 @@ export type TaskSelectScalar = {
   planId?: boolean
   progress?: boolean
   rejectReason?: boolean
+  kpiCriteriaId?: boolean
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "creatorEmployeeCode" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "documentIds" | "workflowInstId" | "metadata" | "startDate" | "dueDate" | "completedAt" | "createdAt" | "updatedAt" | "domainId" | "monitoredUnitId" | "planId" | "progress" | "rejectReason", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "creatorEmployeeCode" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "documentIds" | "workflowInstId" | "metadata" | "startDate" | "dueDate" | "completedAt" | "createdAt" | "updatedAt" | "domainId" | "monitoredUnitId" | "planId" | "progress" | "rejectReason" | "kpiCriteriaId" | "isCrossDomain" | "crossDomainMultiplier", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   participants?: boolean | Prisma.Task$participantsArgs<ExtArgs>
   ancestors?: boolean | Prisma.Task$ancestorsArgs<ExtArgs>
   descendants?: boolean | Prisma.Task$descendantsArgs<ExtArgs>
   comments?: boolean | Prisma.Task$commentsArgs<ExtArgs>
+  kpiCriteria?: boolean | Prisma.Task$kpiCriteriaArgs<ExtArgs>
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1919,6 +2342,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     ancestors: Prisma.$TaskClosurePayload<ExtArgs>[]
     descendants: Prisma.$TaskClosurePayload<ExtArgs>[]
     comments: Prisma.$TaskCommentPayload<ExtArgs>[]
+    kpiCriteria: Prisma.$KpiCriteriaPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1946,6 +2370,9 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     planId: number | null
     progress: number
     rejectReason: string | null
+    kpiCriteriaId: number | null
+    isCrossDomain: boolean
+    crossDomainMultiplier: number
   }, ExtArgs["result"]["task"]>
   composites: {}
 }
@@ -2291,6 +2718,7 @@ export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Typ
   ancestors<T extends Prisma.Task$ancestorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$ancestorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   descendants<T extends Prisma.Task$descendantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$descendantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Task$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  kpiCriteria<T extends Prisma.Task$kpiCriteriaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$kpiCriteriaArgs<ExtArgs>>): Prisma.Prisma__KpiCriteriaClient<runtime.Types.Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2345,6 +2773,9 @@ export interface TaskFieldRefs {
   readonly planId: Prisma.FieldRef<"Task", 'Int'>
   readonly progress: Prisma.FieldRef<"Task", 'Float'>
   readonly rejectReason: Prisma.FieldRef<"Task", 'String'>
+  readonly kpiCriteriaId: Prisma.FieldRef<"Task", 'Int'>
+  readonly isCrossDomain: Prisma.FieldRef<"Task", 'Boolean'>
+  readonly crossDomainMultiplier: Prisma.FieldRef<"Task", 'Float'>
 }
     
 
@@ -2805,6 +3236,25 @@ export type Task$commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.TaskCommentScalarFieldEnum | Prisma.TaskCommentScalarFieldEnum[]
+}
+
+/**
+ * Task.kpiCriteria
+ */
+export type Task$kpiCriteriaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KpiCriteria
+   */
+  select?: Prisma.KpiCriteriaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KpiCriteria
+   */
+  omit?: Prisma.KpiCriteriaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KpiCriteriaInclude<ExtArgs> | null
+  where?: Prisma.KpiCriteriaWhereInput
 }
 
 /**

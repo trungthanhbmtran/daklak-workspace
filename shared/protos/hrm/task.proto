@@ -26,7 +26,8 @@ message AssignTaskRequest {
   int32 departmentId = 3;
   string assignerCode = 4;
   repeated string coassigneeCodes = 5;
-
+  optional float assigneePercentage = 6;
+  repeated float coassigneePercentages = 7;
 }
 
 message RecommendAssigneesRequest {
@@ -114,6 +115,7 @@ message TaskResponse {
   float progress = 29;
   repeated TaskResponse children = 30;
   repeated string coassigneeNames = 31;
+  optional int32 kpiCriteriaId = 32;
 }
 
 message TaskPlan {
@@ -140,6 +142,10 @@ message CreateTaskRequest {
   int32 parentId = 15;
   string status = 16;
   string priority = 17;
+  optional int32 kpiCriteriaId = 18;
+  optional float assigneePercentage = 19;
+  repeated string coassigneeCodes = 20;
+  repeated float coassigneePercentages = 21;
 }
 
 message ListTasksRequest {
@@ -217,6 +223,7 @@ message UpdateTaskRequest {
   float baseScore = 6;
   string title = 7;
   string description = 8;
+  optional int32 kpiCriteriaId = 9;
 }
 
 message TaskTemplateResponse {

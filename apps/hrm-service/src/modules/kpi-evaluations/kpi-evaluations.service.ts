@@ -233,7 +233,7 @@ export class KpiEvaluationsService {
     const taskParticipants = await this.prisma.taskParticipant.findMany({
       where: {
         employeeCode: employeeCode,
-        participantRole: 'ASSIGNEE',
+        participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] },
         task: {
           status: 'DONE',
           completedAt: {
@@ -247,8 +247,13 @@ export class KpiEvaluationsService {
       }
     });
 
+    const coordCriteria = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: 'phối hợp' } } });
+    const coordCriteriaId = coordCriteria?.id || null;
+
     let totalScore = 0;
     const calculatedTasks: any[] = [];
+    const groupedScores: Record<number, number> = {};
+    const groupedTasksCount: Record<number, number> = {};
 
     for (const tp of taskParticipants) {
       const task = tp.task;
@@ -277,7 +282,29 @@ export class KpiEvaluationsService {
         }
       }
 
+      if (task.isCrossDomain && task.crossDomainMultiplier) {
+        finalScore = finalScore * task.crossDomainMultiplier;
+      }
+
+      // Nhân tỷ lệ đóng góp
+      const contribution = tp.contributionPercentage != null ? tp.contributionPercentage : 100.0;
+      finalScore = finalScore * (contribution / 100.0);
+
       totalScore += finalScore;
+
+      let criteriaId = task.kpiCriteriaId;
+      if (tp.participantRole === 'COORDINATOR' && coordCriteriaId) {
+        criteriaId = coordCriteriaId;
+      }
+
+      if (criteriaId) {
+        if (!groupedScores[criteriaId]) {
+          groupedScores[criteriaId] = 0;
+          groupedTasksCount[criteriaId] = 0;
+        }
+        groupedScores[criteriaId] += finalScore;
+        groupedTasksCount[criteriaId] += 1;
+      }
 
       calculatedTasks.push({
         taskId: task.id,
@@ -286,7 +313,8 @@ export class KpiEvaluationsService {
         finalScore: finalScore,
         completedAt: task.completedAt ? task.completedAt.toISOString() : '',
         dueDate: task.dueDate ? task.dueDate.toISOString() : '',
-        status: task.status
+        status: task.status,
+        kpiCriteriaId: criteriaId
       });
     }
 
@@ -328,7 +356,9 @@ export class KpiEvaluationsService {
       message: 'Tính điểm KPI thành công',
       totalScore,
       evaluationId,
-      tasks: calculatedTasks
+      tasks: calculatedTasks,
+      groupedScores,
+      groupedTasksCount
     };
   }
 
@@ -359,8 +389,9 @@ export class KpiEvaluationsService {
       let notes = existingDetail?.notes || '';
       
       if (crit.scoringMethod === 'AUTOMATIC') {
-         autoScore = calcResult.totalScore;
-         notes = `Hệ thống tổng hợp từ ${calcResult.tasks.length} công việc đã hoàn thành.`;
+         autoScore = calcResult.groupedScores?.[crit.id] || 0;
+         const count = calcResult.groupedTasksCount?.[crit.id] || 0;
+         notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
       }
 
       return {

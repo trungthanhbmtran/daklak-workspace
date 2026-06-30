@@ -1300,7 +1300,10 @@ export const TaskScalarFieldEnum = {
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
   progress: 'progress',
-  rejectReason: 'rejectReason'
+  rejectReason: 'rejectReason',
+  kpiCriteriaId: 'kpiCriteriaId',
+  isCrossDomain: 'isCrossDomain',
+  crossDomainMultiplier: 'crossDomainMultiplier'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
@@ -1650,16 +1653,16 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
 
 
 /**
- * Reference to a field of type 'TaskRole'
+ * Reference to a field of type 'Boolean'
  */
-export type EnumTaskRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskRole'>
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
 /**
- * Reference to a field of type 'Boolean'
+ * Reference to a field of type 'TaskRole'
  */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+export type EnumTaskRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskRole'>
     
 
 /**

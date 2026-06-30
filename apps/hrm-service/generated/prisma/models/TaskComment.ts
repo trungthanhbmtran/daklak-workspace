@@ -457,10 +457,6 @@ export type TaskCommentUncheckedUpdateManyWithoutTaskNestedInput = {
   deleteMany?: Prisma.TaskCommentScalarWhereInput | Prisma.TaskCommentScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TaskCommentCreateWithoutTaskInput = {
   authorCode?: string | null
   content: string

@@ -1,41 +1,40 @@
 // Nhân viên HRM – departmentId, jobTitleId tham chiếu sang user-service (OrganizationUnit, JobTitle)
 model Employee {
-  id           Int      @id @default(autoincrement())
+  id     Int     @id @default(autoincrement())
   // Thêm user_id theo chuẩn DDD (Tham chiếu sang user-service)
-  userId       String?  @map("user_id")
+  userId String? @map("user_id")
 
-  firstname    String   @map("firstname")
-  lastname     String   @map("lastname")
-  fullName     String   @map("full_name")
-  employeeCode String   @unique @map("employee_code")
+  firstname    String    @map("firstname")
+  lastname     String    @map("lastname")
+  fullName     String    @map("full_name")
+  employeeCode String    @unique @map("employee_code")
   email        String?
   phone        String?
-  gender       String?  @default("male")
+  gender       String?   @default("male")
   birthday     DateTime? @db.Date
-  identityCard String?  @map("identity_card")
-  
+  identityCard String?   @map("identity_card")
+
   // Employment information
   employmentType   String? @map("employment_type")
   employmentStatus String  @default("active") @map("employment_status")
   contractInfo     Json?   @map("contract_information")
-  
-  address      String?  @db.LongText
-  avatar       String?  @db.Text
-  
+
+  address String? @db.LongText
+  avatar  String? @db.Text
+
   // Lưu dưới dạng Projection (Read Model) ID, không lấy tên từ đây
-  departmentId Int?     @map("department_id") 
-  jobTitleId   Int?     @map("job_title_id")   
-  civilServantRankId Int? @map("civil_servant_rank_id")
-  partyTitleId       Int? @map("party_title_id")
-  startDate    DateTime @db.Date @map("start_date")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  departmentId       Int?     @map("department_id")
+  jobTitleId         Int?     @map("job_title_id")
+  civilServantRankId Int?     @map("civil_servant_rank_id")
+  partyTitleId       Int?     @map("party_title_id")
+  startDate          DateTime @map("start_date") @db.Date
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   // Relations (Đã gỡ bỏ các relation trực tiếp với Task cũ)
-  kpiEvaluations    KpiEvaluation[] @relation("KpiEmployee")
-  kpiReviews        KpiEvaluation[] @relation("KpiReviewer")
-  // Task Comments relation updated/removed
-  // taskComments      TaskComment[]   @relation("CommentAuthor")
+  kpiEvaluations   KpiEvaluation[]   @relation("KpiEmployee")
+  kpiReviews       KpiEvaluation[]   @relation("KpiReviewer")
+  taskParticipants TaskParticipant[] @relation("EmployeeTasks")
 
   @@map("employees")
 }

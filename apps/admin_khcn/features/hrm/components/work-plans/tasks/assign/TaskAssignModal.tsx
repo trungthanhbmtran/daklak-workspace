@@ -186,6 +186,7 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
   onChangeCoAssignees,
   groupedEmployees,
   assignableEmployees,
+  recommendedCodes,
 }: {
   assigneeCode: string;
   coAssigneeCodes: string[];
@@ -193,6 +194,7 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
   onChangeCoAssignees: (codes: string[]) => void;
   groupedEmployees: { [key: string]: any[] };
   assignableEmployees: any[];
+  recommendedCodes?: string[];
 }) {
   const [openPopover, setOpenPopover] = useState(false);
 
@@ -241,6 +243,7 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                     const isMain = assigneeCode === emp.code;
                     const isCo = coAssigneeCodes.includes(emp.code);
                     const isSelected = isMain || isCo;
+                    const isRecommended = recommendedCodes && recommendedCodes.includes(emp.code);
 
                     return (
                       <CommandItem
@@ -272,11 +275,13 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                                 <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{emp.name}</span>
                               </div>
                               <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 mt-0.5">
-                                {emp.jobTitle?.name || 'Cán bộ'}
+                                {emp.jobTitle?.name || 'Cán bộ'} - {emp.department?.name || 'Chưa xác định'}
                               </div>
-                              <div className="text-[10px] text-muted-foreground mt-0.5">
-                                {emp.department?.name || 'Chưa xác định'}
-                              </div>
+                              {isRecommended && (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-sm mt-0.5 max-w-max">
+                                  <Check className="w-2.5 h-2.5" /> Đúng chuyên môn
+                                </span>
+                              )}
                             </div>
                             {(isMain || isCo || emp.isOverloaded) && (
                               <div className="flex gap-1.5 mt-1.5">
@@ -286,9 +291,9 @@ const EmployeeSelector = React.memo(function EmployeeSelector({
                               </div>
                             )}
                           </div>
-                          <span className={cn("text-[10px] font-bold shrink-0 whitespace-nowrap px-2 py-1 rounded bg-slate-100 dark:bg-slate-800", emp.isOverloaded ? "text-red-500 bg-red-50 dark:bg-red-950/20" : "text-indigo-600 dark:text-indigo-400")}>
-                            Còn {emp.availableCapacity}đ
-                          </span>
+                        <span className={cn("text-[10px] font-bold shrink-0 whitespace-nowrap px-2 py-1 rounded bg-slate-100 dark:bg-slate-800", emp.isOverloaded ? "text-red-500 bg-red-50 dark:bg-red-950/20" : "text-indigo-600 dark:text-indigo-400")}>
+                          Còn {emp.availableCapacity}đ
+                        </span>
                         </div>
                       </CommandItem>
                     );
@@ -533,6 +538,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   const [taskState, setTaskState] = useState({
     assigneeCode: '',
     coAssigneeCodes: [] as string[],
+    assigneePercentage: 100,
+    coAssigneePercentages: {} as Record<string, number>,
     priority: 'MEDIUM',
     baseScore: 10,
     startDate: new Date().toISOString().split('T')[0],
@@ -545,6 +552,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
       setTaskState({
         assigneeCode: (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') ? task.assigneeCode : '',
         coAssigneeCodes: [],
+        assigneePercentage: 100,
+        coAssigneePercentages: {},
         priority: task.priority || 'MEDIUM',
         baseScore: task.baseScore || task.targetValue || 10,
         startDate: task.startDate ? task.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
@@ -563,6 +572,13 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     queryFn: () => organizationApi.getTree(),
     enabled: isOpen,
   });
+
+  const { data: recommendData } = useQuery({
+    queryKey: ['recommend-assignees', task?.domainId],
+    queryFn: () => hrmTasksApi.recommendAssignees({ domainId: task?.domainId }),
+    enabled: !!task?.domainId && isOpen,
+  });
+  const recommendedCodes = React.useMemo(() => (recommendData?.data || []).filter((r: any) => r.matchScore > 0).map((r: any) => r.employeeCode), [recommendData]);
 
   const units = React.useMemo(() => {
     return flattenUnits(treeNodes?.items || []);
@@ -647,6 +663,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
       await hrmTasksApi.assignTask(taskId, {
         assigneeCode: taskState.assigneeCode,
         coAssigneeCodes: taskState.coAssigneeCodes,
+        assigneePercentage: taskState.assigneePercentage,
+        coassigneePercentages: taskState.coAssigneeCodes.map(c => taskState.coAssigneePercentages[c] || 0),
         departmentId: selectedDeptId !== 'ALL' ? selectedDeptId : undefined
       });
       return taskId;
@@ -664,6 +682,10 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   const handleSubmit = () => {
     if (!taskState.assigneeCode) return toast.error('Vui lòng chọn người chủ trì chính!');
     if (isOverload) return toast.error('Người chủ trì chính đang quá tải khối lượng công việc.');
+    
+    const totalPercentage = taskState.assigneePercentage + Object.values(taskState.coAssigneePercentages).reduce((a, b) => a + b, 0);
+    if (totalPercentage !== 100) return toast.error(`Tổng tỷ lệ đóng góp KPI phải bằng 100%. Hiện tại là ${totalPercentage}%`);
+
     assignMutation.mutate();
   };
 
@@ -676,7 +698,11 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   }, []);
 
   const handleChangeCoAssignees = React.useCallback((codes: string[]) => {
-    setTaskState(p => ({ ...p, coAssigneeCodes: codes }));
+    setTaskState(p => {
+      const newPcts = { ...p.coAssigneePercentages };
+      codes.forEach(c => { if (newPcts[c] === undefined) newPcts[c] = 0; });
+      return { ...p, coAssigneeCodes: codes, coAssigneePercentages: newPcts };
+    });
   }, []);
 
   if (!task) return null;
@@ -716,7 +742,60 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                   onChangeCoAssignees={handleChangeCoAssignees}
                   groupedEmployees={groupedEmployees}
                   assignableEmployees={assignableEmployees}
+                  recommendedCodes={recommendedCodes}
                 />
+              </div>
+              
+              {taskState.assigneeCode && recommendedCodes.length > 0 && !recommendedCodes.includes(taskState.assigneeCode) && (
+                <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-900/40 rounded-xl text-xs text-amber-900 dark:text-amber-200 leading-relaxed shadow-sm">
+                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <p>
+                    <strong>Cảnh báo giao trái thẩm quyền:</strong> Cán bộ xử lý chính không phụ trách lĩnh vực này. Điểm KPI khi hoàn thành sẽ được hệ thống <strong>tự động nhân hệ số 1.5x</strong> để khuyến khích (Cross-domain Bonus).
+                  </p>
+                </div>
+              )}
+
+              {/* Tỷ lệ đóng góp KPI */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center justify-between">
+                  Tỷ lệ đóng góp KPI
+                  {taskState.assigneePercentage + Object.values(taskState.coAssigneePercentages).reduce((a,b)=>a+b, 0) !== 100 && (
+                    <span className="text-red-500 text-[10px]">Tổng phải = 100%</span>
+                  )}
+                </span>
+                {taskState.assigneeCode && (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 text-[11px] font-semibold text-slate-700 truncate">
+                      👑 {assignableEmployees.find(e => e.code === taskState.assigneeCode)?.name || 'Chủ trì'}
+                    </div>
+                    <Input
+                      type="number"
+                      min={0} max={100}
+                      value={taskState.assigneePercentage}
+                      onChange={(e) => setTaskState(p => ({ ...p, assigneePercentage: Number(e.target.value) }))}
+                      className="w-20 h-7 text-xs text-center font-bold"
+                    />
+                    <span className="text-xs text-slate-400">%</span>
+                  </div>
+                )}
+                {taskState.coAssigneeCodes.map(code => (
+                  <div key={code} className="flex items-center gap-3">
+                    <div className="flex-1 text-[11px] font-medium text-slate-600 truncate pl-3">
+                      🤝 {assignableEmployees.find(e => e.code === code)?.name || 'Phối hợp'}
+                    </div>
+                    <Input
+                      type="number"
+                      min={0} max={100}
+                      value={taskState.coAssigneePercentages[code] || 0}
+                      onChange={(e) => setTaskState(p => ({
+                        ...p,
+                        coAssigneePercentages: { ...p.coAssigneePercentages, [code]: Number(e.target.value) }
+                      }))}
+                      className="w-20 h-7 text-xs text-center font-medium"
+                    />
+                    <span className="text-xs text-slate-400">%</span>
+                  </div>
+                ))}
               </div>
 
               {/* Tùy chọn liên phòng ban */}

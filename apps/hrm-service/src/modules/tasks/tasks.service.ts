@@ -4,6 +4,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { TaskRole } from '@prisma/client';
 import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
@@ -368,6 +369,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       progress: t.progress ?? 0,
       coassigneeNames: t.coassigneeNames || [],
       children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
+      kpiCriteriaId: t.kpiCriteriaId || undefined
     };
   }
 
@@ -824,6 +826,40 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     let creatorCode = data.currentEmployeeCode || 'SYSTEM';
 
+    let isCrossDomain = false;
+    let autoKpiCriteriaId = data.kpiCriteriaId ? parseInt(data.kpiCriteriaId, 10) : null;
+
+    if (!autoKpiCriteriaId) {
+      if (planId) {
+        const crit = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: 'định mức' } } });
+        if (crit) autoKpiCriteriaId = crit.id;
+      } else {
+        const crit = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: 'đột xuất' } } });
+        if (crit) autoKpiCriteriaId = crit.id;
+      }
+    }
+
+    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
+    if (assigneeCode !== 'UNASSIGNED' && data.domainId) {
+      const assigneeEmp = await this.prisma.employee.findUnique({
+        where: { employeeCode: assigneeCode },
+        select: { userId: true }
+      });
+      if (assigneeEmp?.userId) {
+        try {
+          const subordinatesRes: any = await firstValueFrom(
+            this.userService.GetSubordinates({ userId: assigneeEmp.userId })
+          );
+          const allowedDomains = subordinatesRes?.allowedDomainIds || subordinatesRes?.allowed_domain_ids || [];
+          if (!allowedDomains.includes(parseInt(data.domainId, 10))) {
+            isCrossDomain = true;
+          }
+        } catch (e) {
+          console.error('[DEBUG HRM] Failed to get domains for assignee:', e);
+        }
+      }
+    }
+
     // Mở transaction để tạo Task, Participants và Closure
     const t = await this.prisma.$transaction(async (tx) => {
       const newTask = await tx.task.create({
@@ -843,15 +879,25 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           creatorEmployeeCode: creatorCode,
           planId,
           domainId: data.domainId ? parseInt(data.domainId, 10) : null,
-          monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null
+          monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
+          kpiCriteriaId: autoKpiCriteriaId,
+          isCrossDomain,
+          crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0
         }
       });
 
       // Tạo participants
       const participantsData: any[] = [];
       const assigneeCode = data.assigneeCode || 'UNASSIGNED';
+      const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
+      
       if (assigneeCode) {
-        participantsData.push({ taskId: newTask.id, employeeCode: assigneeCode, participantRole: TaskRole.ASSIGNEE });
+        participantsData.push({ 
+          taskId: newTask.id, 
+          employeeCode: assigneeCode, 
+          participantRole: TaskRole.ASSIGNEE,
+          contributionPercentage: assigneePct
+        });
       }
 
       const assignerCode = data.assignerCode || 'UNASSIGNED';
@@ -861,6 +907,21 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
       if (data.supervisorCode) {
         participantsData.push({ taskId: newTask.id, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
+      }
+
+      const coassigneeCodes = data.coassigneeCodes || [];
+      const coassigneePcts = data.coassigneePercentages || [];
+      for (let i = 0; i < coassigneeCodes.length; i++) {
+        const coCode = coassigneeCodes[i];
+        if (coCode) {
+          const coPct = typeof coassigneePcts[i] === 'number' ? coassigneePcts[i] : 0;
+          participantsData.push({
+            taskId: newTask.id,
+            employeeCode: coCode,
+            participantRole: TaskRole.COORDINATOR,
+            contributionPercentage: coPct
+          });
+        }
       }
 
       if (participantsData.length > 0) {
@@ -1130,8 +1191,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
         });
         const finalAssigneeCode = assigneeCode || 'UNASSIGNED';
+        const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
         await tx.taskParticipant.create({
-          data: { taskId: id, employeeCode: finalAssigneeCode, participantRole: TaskRole.ASSIGNEE }
+          data: { 
+            taskId: id, 
+            employeeCode: finalAssigneeCode, 
+            participantRole: TaskRole.ASSIGNEE,
+            contributionPercentage: assigneePct
+          }
         });
       }
 
@@ -1151,9 +1218,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           where: { taskId: id, participantRole: TaskRole.COORDINATOR }
         });
         const coData: any[] = [];
-        coassigneeCodes.forEach(code => {
+        const coassigneePcts = data.coassigneePercentages || [];
+        coassigneeCodes.forEach((code, i) => {
           if (code) {
-            coData.push({ taskId: id, employeeCode: code, participantRole: TaskRole.COORDINATOR });
+            const coPct = typeof coassigneePcts[i] === 'number' ? coassigneePcts[i] : 0;
+            coData.push({ 
+              taskId: id, 
+              employeeCode: code, 
+              participantRole: TaskRole.COORDINATOR,
+              contributionPercentage: coPct
+            });
           }
         });
         if (coData.length > 0) {
