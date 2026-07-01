@@ -7,6 +7,7 @@ const SmtpAdapter = require('./SmtpAdapter');
 const TelegramAdapter = require('./TelegramAdapter');
 const ZaloAdapter = require('./ZaloAdapter');
 const FacebookAdapter = require('./FacebookAdapter');
+const InAppAdapter = require('./InAppAdapter');
 
 const typeMap = {
   console: ConsoleAdapter,
@@ -15,6 +16,7 @@ const typeMap = {
   telegram: TelegramAdapter,
   zalo: ZaloAdapter,
   facebook: FacebookAdapter,
+  inapp: InAppAdapter,
 };
 
 /**

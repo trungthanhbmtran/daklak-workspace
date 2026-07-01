@@ -1011,13 +1011,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (data.assigneeCode) {
       try {
         this.notificationClient.emit('send_notification', {
-          channel: 'console',
-          recipient: data.assigneeCode,
-          subject: 'Có công việc mới được giao',
-          body: `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`
+          title: 'Có công việc mới được giao',
+          message: `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
+          type: 'SYSTEM',
+          recipients: [data.assigneeCode],
+          metadata: { taskId: enrichedTaskResponse.id },
         });
       } catch (e) {
-        console.error('Failed to send in-app notification', e);
+        console.error('Failed to send notification', e);
       }
     }
 
@@ -1225,13 +1226,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (data.assigneeCode) {
       try {
         this.notificationClient.emit('send_notification', {
-          channel: 'console',
-          recipient: data.assigneeCode,
-          subject: 'Có công việc mới được giao',
-          body: `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`
+          title: 'Có công việc mới được giao',
+          message: `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`,
+          type: 'SYSTEM',
+          recipients: [data.assigneeCode],
+          metadata: { taskId: enrichedTaskResponse.id },
         });
       } catch (e) {
-        console.error('Failed to send in-app notification', e);
+        console.error('Failed to send notification', e);
       }
     }
 
@@ -1272,13 +1274,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
           for (const code of assignees) {
             try {
-              // Gửi sang Notification Service (Email, Telegram...)
-              // Lưu ý: Cần tra cứu email từ employeeCode nếu Notification Service yêu cầu email
               this.notificationClient.emit('send_notification', {
-                channel: 'console', // Cấu hình gửi mail hoặc telegram tại đây
-                recipient: code,
-                subject: 'Cảnh báo hạn chót công việc',
-                body: `Công việc "${task.title}" sắp đến hạn vào ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'vài ngày tới'}.`
+                title: 'Cảnh báo hạn chót công việc',
+                message: `Công việc "${task.title}" sắp đến hạn vào ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'vài ngày tới'}.`,
+                type: 'SYSTEM',
+                recipients: [code],
+                metadata: { taskId: task.id },
               });
             } catch (e) {
               this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);

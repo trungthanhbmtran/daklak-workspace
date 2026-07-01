@@ -1,4 +1,5 @@
 import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
+import { EventPattern, Payload } from '@nestjs/microservices';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -11,7 +12,6 @@ import { NotificationsService } from './notifications.service';
 
 @ApiTags('Notifications')
 @Controller('admin/notifications')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class NotificationsController {
   constructor(
@@ -19,6 +19,7 @@ export class NotificationsController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Danh sách thông báo in-app cho user đăng nhập' })
   @ApiResponse({
     status: 200,
@@ -34,6 +35,7 @@ export class NotificationsController {
   }
 
   @Patch(':id/read')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Đánh dấu đã đọc' })
   @ApiResponse({ status: 200, description: 'success' })
   markRead(
@@ -44,5 +46,13 @@ export class NotificationsController {
     const employeeCode = req.user?.employeeCode;
     const ok = this.notificationsService.markRead(id, userId, employeeCode);
     return { success: ok };
+  }
+
+  @EventPattern('send_inapp_notification')
+  async handleInAppNotification(@Payload() data: any) {
+    if (!data.recipients || !data.recipients.length) return;
+    for (const recipient of data.recipients) {
+      this.notificationsService.push(recipient, data.title, data.message || data.body);
+    }
   }
 }

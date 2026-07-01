@@ -1,53 +1,92 @@
 /**
- * Consumer RabbitMQ – nhận message từ queue, gửi qua adapter theo channel (config-driven).
- * Message format: { channel, recipient, subject, body, metadata } hoặc { data: { ... } } (NestJS style).
+ * Smart Notification Router
+ * Consumes 'send_notification' messages, fetches active configs from PostgreSQL,
+ * and dynamically broadcasts messages to configured channels (inapp, telegram, etc).
  */
 const amqp = require('amqplib');
+const { Client } = require('pg');
 const config = require('../config');
-const { buildRegistry } = require('../adapters');
+const { createAdapter } = require('../adapters');
 
-const registry = buildRegistry(config.notification.adapters);
-const defaultChannel = config.notification.defaultChannel;
 const queueName = config.rabbitmq.queues.notifications;
 const rabbitUrl = config.rabbitmq.url;
+const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/daklak_db?schema=public';
 
 let connection = null;
 let channel = null;
+let dbClient = null;
 
 function parseMessage(content) {
   const raw = typeof content === 'string' ? JSON.parse(content) : content;
   const data = raw.data != null ? raw.data : raw;
   return {
-    channel: data.channel || defaultChannel,
-    recipient: data.recipient || '',
+    recipients: data.recipients || (data.recipient ? [data.recipient] : []),
     subject: data.subject || data.title || '',
-    body: data.body || data.text || '',
+    body: data.body || data.message || data.text || '',
     metadata: data.metadata || {},
   };
 }
 
-async function handleMessage(msg) {
-  const payload = parseMessage(msg.content.toString());
-  const adapter = registry.get(payload.channel);
-  if (!adapter) {
-    console.warn(`[Notification] Unknown channel: ${payload.channel}, skip. Available: ${[...registry.keys()].join(', ')}`);
-    return;
-  }
+const INTEGRATION_MAP = {
+  'NOTIFY_INAPP': 'inapp',
+  'NOTIFY_TELEGRAM': 'telegram',
+  'NOTIFY_ZALO': 'zalo',
+  'NOTIFY_SMTP': 'smtp',
+};
+
+async function fetchActiveAdapters() {
+  const adapters = [];
   try {
-    const result = await adapter.send({
-      recipient: payload.recipient,
-      subject: payload.subject,
-      body: payload.body,
-      metadata: payload.metadata,
-    });
-    if (result.success) {
-      console.log(`[Notification] ${payload.channel} -> ${payload.recipient} ok`);
-    } else {
-      console.error(`[Notification] ${payload.channel} -> ${payload.recipient} failed:`, result.error);
+    if (!dbClient) {
+      dbClient = new Client({ connectionString: dbUrl });
+      await dbClient.connect();
+    }
+    const res = await dbClient.query('SELECT integration_code, config_data FROM integration_configs WHERE is_active = true');
+    
+    for (const row of res.rows) {
+      const type = INTEGRATION_MAP[row.integration_code];
+      if (type) {
+        const adapter = createAdapter({ id: row.integration_code, type, enabled: true, config: row.config_data });
+        if (adapter) adapters.push(adapter);
+      }
     }
   } catch (err) {
-    console.error(`[Notification] ${payload.channel} error:`, err.message);
-    throw err;
+    console.error('[Notification] Error fetching integration configs:', err.message);
+  }
+  return adapters;
+}
+
+async function handleMessage(msg) {
+  const payload = parseMessage(msg.content.toString());
+  
+  if (payload.recipients.length === 0) {
+    console.warn('[Notification] No recipients, skip.');
+    return;
+  }
+
+  const activeAdapters = await fetchActiveAdapters();
+  
+  if (activeAdapters.length === 0) {
+    console.warn('[Notification] No active notification channels configured.');
+    return;
+  }
+
+  for (const adapter of activeAdapters) {
+    try {
+      const result = await adapter.send({
+        recipient: payload.recipients,
+        subject: payload.subject,
+        body: payload.body,
+        metadata: payload.metadata,
+      });
+      if (result.success) {
+        console.log(`[Notification] Broadcasted to ${adapter.id} ok`);
+      } else {
+        console.error(`[Notification] Broadcast to ${adapter.id} failed:`, result.error);
+      }
+    } catch (err) {
+      console.error(`[Notification] Adapter ${adapter.id} error:`, err.message);
+    }
   }
 }
 
@@ -74,13 +113,10 @@ async function startConsumer() {
   }
   if (!connection) {
     console.error('[Notification] Không kết nối được RabbitMQ.');
-    console.error('  - Kiểm tra RabbitMQ đã chạy chưa (port 5672). Ví dụ: docker run -d -p 5672:5672 rabbitmq:3-management');
-    console.error('  - Set RABBITMQ_URL trong .env (ví dụ: RABBITMQ_URL=amqp://guest:guest@localhost:5672)');
     throw lastErr || new Error('RabbitMQ connection failed');
   }
   channel = await connection.createChannel();
   await channel.assertQueue(queueName, { durable: false });
-  // Thuật toán Concurrency: Mở rộng prefetch để xử lý song song 50 message cùng lúc
   channel.prefetch(50);
   console.log(`[Notification] Consuming queue: ${queueName}`);
   channel.consume(queueName, async (msg) => {
@@ -99,6 +135,10 @@ async function startConsumer() {
 async function stopConsumer() {
   if (channel) await channel.close();
   if (connection) await connection.close();
+  if (dbClient) {
+    await dbClient.end();
+    dbClient = null;
+  }
 }
 
 module.exports = { startConsumer, stopConsumer };
