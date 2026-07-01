@@ -393,11 +393,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       startDate: t.startDate instanceof Date ? t.startDate.toISOString() : (t.startDate || ''),
       createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
       updatedAt: t.updatedAt instanceof Date ? t.updatedAt.toISOString() : (t.updatedAt || ''),
-      baseScore: t.baseScore ?? 0,
-      weight: t.weight ?? 0,
-      scoringMethod: t.scoringMethod ?? '',
-      bonusPerDay: t.bonusPerDay ?? 0,
-      penaltyPerDay: t.penaltyPerDay ?? 0,
+      baseScore: t.kpiSettings?.baseScore ?? 0,
+      weight: t.kpiSettings?.weight ?? 0,
+      scoringMethod: t.kpiSettings?.scoringMethod ?? '',
+      bonusPerDay: t.kpiSettings?.bonusPerDay ?? 0,
+      penaltyPerDay: t.kpiSettings?.penaltyPerDay ?? 0,
       supervisorCode: t.supervisorCode ?? '',
       planId: t.planId ?? 0,
       assigneeName: t.assigneeName ?? '',
@@ -414,7 +414,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       progress: t.progress ?? 0,
       coassigneeNames: t.coassigneeNames || [],
       children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
-      kpiCriteriaId: t.kpiCriteriaId || undefined
+      kpiCriteriaId: t.kpiSettings?.kpiCriteriaId || undefined
     };
   }
 
@@ -586,7 +586,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         include: {
           participants: true,
           plan: { select: { id: true, title: true, createdByCode: true } },
-          _count: { select: { descendants: true } }
+          _count: { select: { descendants: true } },
+          kpiSettings: true
         }
       })
     ]);
@@ -916,18 +917,22 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           priority: data.priority || 'MEDIUM',
           startDate: data.startDate ? new Date(data.startDate) : null,
           dueDate: data.dueDate ? new Date(data.dueDate) : null,
-          baseScore: data.baseScore,
-          weight: data.weight,
-          scoringMethod: data.scoringMethod || 'MANUAL',
-          bonusPerDay: data.bonusPerDay,
-          penaltyPerDay: data.penaltyPerDay,
           creatorEmployeeCode: creatorCode,
           planId,
           domainId: data.domainId ? parseInt(data.domainId, 10) : null,
           monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
-          kpiCriteriaId: autoKpiCriteriaId,
-          isCrossDomain,
-          crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0
+          kpiSettings: {
+            create: {
+              baseScore: data.baseScore,
+              weight: data.weight,
+              scoringMethod: data.scoringMethod || 'MANUAL',
+              bonusPerDay: data.bonusPerDay,
+              penaltyPerDay: data.penaltyPerDay,
+              kpiCriteriaId: autoKpiCriteriaId,
+              isCrossDomain,
+              crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0
+            }
+          }
         }
       });
 
@@ -994,7 +999,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { id: t.id },
       include: {
         participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true } }
+        plan: { select: { id: true, title: true, createdByCode: true } },
+        kpiSettings: true
       }
     });
 
@@ -1131,7 +1137,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { id },
       include: {
         participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true } }
+        plan: { select: { id: true, title: true, createdByCode: true } },
+        kpiSettings: true
       }
     });
     const enriched = await this.enrichTasks([updatedTask]);
@@ -1209,7 +1216,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         await tx.task.update({ where: { id }, data: { status: 'TODO' } });
       }
 
-      return tx.task.findUnique({ where: { id }, include: { participants: true } });
+      return tx.task.findUnique({ where: { id }, include: { participants: true, kpiSettings: true } });
     });
 
     const enriched = await this.enrichTasks([t]);
@@ -1301,7 +1308,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { id },
       include: {
         participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } }
+        plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } },
+        kpiSettings: true
       }
     });
     if (!t) throw new RpcException('Không tìm thấy nhiệm vụ');
@@ -1690,12 +1698,36 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (updateData.dueDate) {
       updateData.dueDate = new Date(updateData.dueDate);
     }
+
+    const { baseScore, weight, scoringMethod, bonusPerDay, penaltyPerDay, kpiCriteriaId, isCrossDomain, crossDomainMultiplier, ...taskData } = updateData;
+
+    const kpiData: any = {};
+    if (baseScore !== undefined) kpiData.baseScore = baseScore;
+    if (weight !== undefined) kpiData.weight = weight;
+    if (scoringMethod !== undefined) kpiData.scoringMethod = scoringMethod;
+    if (bonusPerDay !== undefined) kpiData.bonusPerDay = bonusPerDay;
+    if (penaltyPerDay !== undefined) kpiData.penaltyPerDay = penaltyPerDay;
+    if (kpiCriteriaId !== undefined) kpiData.kpiCriteriaId = kpiCriteriaId;
+    if (isCrossDomain !== undefined) kpiData.isCrossDomain = isCrossDomain;
+    if (crossDomainMultiplier !== undefined) kpiData.crossDomainMultiplier = crossDomainMultiplier;
+
     const t = await this.prisma.task.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...taskData,
+        ...(Object.keys(kpiData).length > 0 && {
+          kpiSettings: {
+            upsert: {
+              create: kpiData,
+              update: kpiData
+            }
+          }
+        })
+      },
       include: {
         participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true } }
+        plan: { select: { id: true, title: true, createdByCode: true } },
+        kpiSettings: true
       }
     });
     const enriched = await this.enrichTasks([t]);

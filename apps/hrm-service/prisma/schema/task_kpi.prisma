@@ -4,56 +4,74 @@ model Task {
   title       String  @map("title")
   description String? @db.Text
 
-  status   String @default("TODO")
-  priority String @default("MEDIUM")
-
-  // Auditing
-  creatorEmployeeCode String? @map("creator_employee_code")
-
-  // Scoring
-  baseScore     Float? @map("base_score")
-  weight        Float? @map("weight")
-  scoringMethod String @default("MANUAL") @map("scoring_method")
-  bonusPerDay   Float? @map("bonus_per_day")
-  penaltyPerDay Float? @map("penalty_per_day")
-
-  documentIds    Json?   @map("document_ids")
-  workflowInstId String? @map("workflow_instance_id")
-  metadata       Json?   @map("metadata")
+  status      String  @default("TODO")
+  priority    String  @default("MEDIUM")
+  progress    Float   @default(0) @map("progress")
+  rejectReason String? @map("reject_reason") @db.Text
 
   startDate   DateTime? @map("start_date") @db.Date
   dueDate     DateTime? @map("due_date") @db.Date
   completedAt DateTime? @map("completed_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   domainId        Int? @map("domain_id")
   monitoredUnitId Int? @map("monitored_unit_id")
+  planId          Int? @map("plan_id")
 
-  planId Int?        @map("plan_id")
-  plan   MasterPlan? @relation(fields: [planId], references: [id])
+  workflowInstId String? @map("workflow_instance_id")
+  metadata       Json?   @map("metadata")
 
-  progress     Float   @default(0) @map("progress")
-  rejectReason String? @map("reject_reason") @db.Text
+  creatorEmployeeCode String? @map("creator_employee_code")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
-  // Quan hệ DDD mới
+  plan         MasterPlan?      @relation(fields: [planId], references: [id])
+  kpiSettings  TaskKpiSetting?
+  
   participants TaskParticipant[]
-  ancestors    TaskClosure[]     @relation("TaskClosureDescendant")
-  descendants  TaskClosure[]     @relation("TaskClosureAncestor")
+  attachments  TaskAttachment[]
   comments     TaskComment[]
+  
+  ancestors    TaskClosure[]    @relation("TaskClosureDescendant")
+  descendants  TaskClosure[]    @relation("TaskClosureAncestor")
 
-  kpiCriteriaId Int?         @map("kpi_criteria_id")
-  kpiCriteria   KpiCriteria? @relation(fields: [kpiCriteriaId], references: [id])
+  @@index([dueDate])
+  @@index([status, dueDate])
+  @@index([parentId])
+  @@index([planId])
+  @@index([createdAt])
+  @@map("tasks")
+}
+
+model TaskKpiSetting {
+  taskId        Int    @id @map("task_id")
+  baseScore     Float? @map("base_score")
+  weight        Float? @map("weight")
+  scoringMethod String @default("MANUAL") @map("scoring_method")
 
   isCrossDomain         Boolean @default(false) @map("is_cross_domain")
   crossDomainMultiplier Float   @default(1.0) @map("cross_domain_multiplier")
 
-  @@index([dueDate])
-  @@index([status, dueDate])
-  @@index([createdAt])
-  @@index([parentId])
-  @@index([planId])
-  @@map("tasks")
+  bonusPerDay   Float? @map("bonus_per_day")
+  penaltyPerDay Float? @map("penalty_per_day")
+
+  kpiCriteriaId Int?         @map("kpi_criteria_id")
+  kpiCriteria   KpiCriteria? @relation(fields: [kpiCriteriaId], references: [id])
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  @@map("task_kpi_settings")
+}
+
+model TaskAttachment {
+  id         Int      @id @default(autoincrement())
+  taskId     Int      @map("task_id")
+  documentId String   @map("document_id")
+  type       String   @default("REFERENCE")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  @@index([taskId])
+  @@map("task_attachments")
 }
 
 enum TaskRole {
@@ -109,16 +127,15 @@ model MasterPlan {
   id          Int     @id @default(autoincrement())
   title       String  @map("title")
   description String? @db.Text
-  type        String  @default("SMART_GOAL") // SMART_GOAL, OKR, MASTER_PLAN
+  type        String  @default("SMART_GOAL")
 
   startDate DateTime? @map("start_date") @db.Date
   endDate   DateTime? @map("end_date") @db.Date
-  status    String    @default("ACTIVE") // DRAFT, ACTIVE, COMPLETED, CANCELLED
+  status    String    @default("ACTIVE")
 
   departmentId  Int?    @map("department_id")
   createdByCode String? @map("created_by_code")
 
-  // Document Reference (Nghị quyết, Chủ trương sinh ra MasterPlan này)
   documentId String? @map("document_id")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -131,7 +148,7 @@ model MasterPlan {
 
 model KpiPeriod {
   id          Int             @id @default(autoincrement())
-  name        String          @map("name") // e.g. "Tháng 5/2026"
+  name        String          @map("name")
   startDate   DateTime        @map("start_date") @db.Date
   endDate     DateTime        @map("end_date") @db.Date
   evaluations KpiEvaluation[]
@@ -146,33 +163,40 @@ model KpiCriteria {
   id            Int     @id @default(autoincrement())
   name          String  @map("name")
   description   String? @db.Text
+  categoryId    Int?    @map("category_id")
+
+  settings KpiCriteriaSetting?
+  
+  details KpiEvaluationDetail[]
+  tasks   TaskKpiSetting[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("kpi_criteria")
+}
+
+model KpiCriteriaSetting {
+  criteriaId    Int     @id @map("criteria_id")
   weight        Float   @default(1.0) @map("weight")
   baseScore     Float?  @map("base_score")
   scoringMethod String  @default("MANUAL") @map("scoring_method")
-  categoryId    Int?    @map("category_id")
 
-  // Mở rộng cấu hình Độ khó & Thưởng phạt bằng Điểm tuyệt đối
   difficulty           String @default("NORMAL") @map("difficulty")
   difficultyMultiplier Float  @default(1.0) @map("difficulty_multiplier")
   bonusThresholdDays   Int    @default(0) @map("bonus_threshold_days")
   bonusPerDay          Float  @default(0) @map("bonus_per_day")
   penaltyPerDay        Float  @default(0) @map("penalty_per_day")
 
-  details KpiEvaluationDetail[]
-  tasks   Task[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("kpi_criteria")
+  criteria KpiCriteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  @@map("kpi_criteria_settings")
 }
 
 model KpiEvaluation {
   id           Int     @id @default(autoincrement())
-  employeeCode String  @map("employee_code") // Đổi sang Code để decouple
+  employeeCode String  @map("employee_code")
   periodId     Int     @map("period_id")
   totalScore   Float?  @map("total_score")
-  status       String  @default("DRAFT") // DRAFT, COMPUTING, SUBMITTED, APPROVED
+  status       String  @default("DRAFT")
   reviewerCode String? @map("reviewer_code")
 
   employee Employee              @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
@@ -205,8 +229,8 @@ model KpiEvaluationDetail {
 
 model TaskRankTemplate {
   id             Int     @id @default(autoincrement())
-  classification String  @map("classification") // CONG_CHUC, VIEN_CHUC
-  rank           String  @map("rank") // CHUYEN_VIEN_CAO_CAP, vv
+  classification String  @map("classification")
+  rank           String  @map("rank")
   taskName       String  @map("task_name")
   defaultUnit    String  @map("default_unit")
   defaultWeight  Float?  @map("default_weight")

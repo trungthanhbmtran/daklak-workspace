@@ -386,12 +386,15 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  TaskKpiSetting: 'TaskKpiSetting',
+  TaskAttachment: 'TaskAttachment',
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
   TaskComment: 'TaskComment',
   MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
+  KpiCriteriaSetting: 'KpiCriteriaSetting',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   TaskRankTemplate: 'TaskRankTemplate',
@@ -411,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "task" | "taskParticipant" | "taskClosure" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "task" | "taskKpiSetting" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -544,6 +547,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TaskCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TaskCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskKpiSetting: {
+      payload: Prisma.$TaskKpiSettingPayload<ExtArgs>
+      fields: Prisma.TaskKpiSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskKpiSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskKpiSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskKpiSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskKpiSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
+        }
+        findMany: {
+          args: Prisma.TaskKpiSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>[]
+        }
+        create: {
+          args: Prisma.TaskKpiSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
+        }
+        createMany: {
+          args: Prisma.TaskKpiSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.TaskKpiSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
+        }
+        update: {
+          args: Prisma.TaskKpiSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskKpiSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskKpiSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.TaskKpiSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskKpiSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskKpiSetting>
+        }
+        groupBy: {
+          args: Prisma.TaskKpiSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskKpiSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskKpiSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskKpiSettingCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskAttachment: {
+      payload: Prisma.$TaskAttachmentPayload<ExtArgs>
+      fields: Prisma.TaskAttachmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskAttachmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskAttachmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskAttachmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskAttachmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>
+        }
+        findMany: {
+          args: Prisma.TaskAttachmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>[]
+        }
+        create: {
+          args: Prisma.TaskAttachmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>
+        }
+        createMany: {
+          args: Prisma.TaskAttachmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.TaskAttachmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>
+        }
+        update: {
+          args: Prisma.TaskAttachmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskAttachmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskAttachmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.TaskAttachmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskAttachmentPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskAttachmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskAttachment>
+        }
+        groupBy: {
+          args: Prisma.TaskAttachmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskAttachmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskAttachmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskAttachmentCountAggregateOutputType> | number
         }
       }
     }
@@ -943,6 +1078,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KpiCriteriaSetting: {
+      payload: Prisma.$KpiCriteriaSettingPayload<ExtArgs>
+      fields: Prisma.KpiCriteriaSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KpiCriteriaSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KpiCriteriaSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.KpiCriteriaSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KpiCriteriaSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
+        }
+        findMany: {
+          args: Prisma.KpiCriteriaSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>[]
+        }
+        create: {
+          args: Prisma.KpiCriteriaSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
+        }
+        createMany: {
+          args: Prisma.KpiCriteriaSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.KpiCriteriaSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
+        }
+        update: {
+          args: Prisma.KpiCriteriaSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.KpiCriteriaSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KpiCriteriaSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.KpiCriteriaSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.KpiCriteriaSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKpiCriteriaSetting>
+        }
+        groupBy: {
+          args: Prisma.KpiCriteriaSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KpiCriteriaSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KpiCriteriaSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KpiCriteriaSettingCountAggregateOutputType> | number
+        }
+      }
+    }
     KpiEvaluation: {
       payload: Prisma.$KpiEvaluationPayload<ExtArgs>
       fields: Prisma.KpiEvaluationFieldRefs
@@ -1282,31 +1483,48 @@ export const TaskScalarFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
-  creatorEmployeeCode: 'creatorEmployeeCode',
-  baseScore: 'baseScore',
-  weight: 'weight',
-  scoringMethod: 'scoringMethod',
-  bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay',
-  documentIds: 'documentIds',
-  workflowInstId: 'workflowInstId',
-  metadata: 'metadata',
+  progress: 'progress',
+  rejectReason: 'rejectReason',
   startDate: 'startDate',
   dueDate: 'dueDate',
   completedAt: 'completedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   domainId: 'domainId',
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
-  progress: 'progress',
-  rejectReason: 'rejectReason',
-  kpiCriteriaId: 'kpiCriteriaId',
-  isCrossDomain: 'isCrossDomain',
-  crossDomainMultiplier: 'crossDomainMultiplier'
+  workflowInstId: 'workflowInstId',
+  metadata: 'metadata',
+  creatorEmployeeCode: 'creatorEmployeeCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskKpiSettingScalarFieldEnum = {
+  taskId: 'taskId',
+  baseScore: 'baseScore',
+  weight: 'weight',
+  scoringMethod: 'scoringMethod',
+  isCrossDomain: 'isCrossDomain',
+  crossDomainMultiplier: 'crossDomainMultiplier',
+  bonusPerDay: 'bonusPerDay',
+  penaltyPerDay: 'penaltyPerDay',
+  kpiCriteriaId: 'kpiCriteriaId'
+} as const
+
+export type TaskKpiSettingScalarFieldEnum = (typeof TaskKpiSettingScalarFieldEnum)[keyof typeof TaskKpiSettingScalarFieldEnum]
+
+
+export const TaskAttachmentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  documentId: 'documentId',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskAttachmentScalarFieldEnum = (typeof TaskAttachmentScalarFieldEnum)[keyof typeof TaskAttachmentScalarFieldEnum]
 
 
 export const TaskParticipantScalarFieldEnum = {
@@ -1376,20 +1594,27 @@ export const KpiCriteriaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  weight: 'weight',
-  baseScore: 'baseScore',
-  scoringMethod: 'scoringMethod',
   categoryId: 'categoryId',
-  difficulty: 'difficulty',
-  difficultyMultiplier: 'difficultyMultiplier',
-  bonusThresholdDays: 'bonusThresholdDays',
-  bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type KpiCriteriaScalarFieldEnum = (typeof KpiCriteriaScalarFieldEnum)[keyof typeof KpiCriteriaScalarFieldEnum]
+
+
+export const KpiCriteriaSettingScalarFieldEnum = {
+  criteriaId: 'criteriaId',
+  weight: 'weight',
+  baseScore: 'baseScore',
+  scoringMethod: 'scoringMethod',
+  difficulty: 'difficulty',
+  difficultyMultiplier: 'difficultyMultiplier',
+  bonusThresholdDays: 'bonusThresholdDays',
+  bonusPerDay: 'bonusPerDay',
+  penaltyPerDay: 'penaltyPerDay'
+} as const
+
+export type KpiCriteriaSettingScalarFieldEnum = (typeof KpiCriteriaSettingScalarFieldEnum)[keyof typeof KpiCriteriaSettingScalarFieldEnum]
 
 
 export const KpiEvaluationScalarFieldEnum = {
@@ -1515,13 +1740,27 @@ export const TaskOrderByRelevanceFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
-  creatorEmployeeCode: 'creatorEmployeeCode',
-  scoringMethod: 'scoringMethod',
+  rejectReason: 'rejectReason',
   workflowInstId: 'workflowInstId',
-  rejectReason: 'rejectReason'
+  creatorEmployeeCode: 'creatorEmployeeCode'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskKpiSettingOrderByRelevanceFieldEnum = {
+  scoringMethod: 'scoringMethod'
+} as const
+
+export type TaskKpiSettingOrderByRelevanceFieldEnum = (typeof TaskKpiSettingOrderByRelevanceFieldEnum)[keyof typeof TaskKpiSettingOrderByRelevanceFieldEnum]
+
+
+export const TaskAttachmentOrderByRelevanceFieldEnum = {
+  documentId: 'documentId',
+  type: 'type'
+} as const
+
+export type TaskAttachmentOrderByRelevanceFieldEnum = (typeof TaskAttachmentOrderByRelevanceFieldEnum)[keyof typeof TaskAttachmentOrderByRelevanceFieldEnum]
 
 
 export const TaskParticipantOrderByRelevanceFieldEnum = {
@@ -1560,12 +1799,18 @@ export type KpiPeriodOrderByRelevanceFieldEnum = (typeof KpiPeriodOrderByRelevan
 
 export const KpiCriteriaOrderByRelevanceFieldEnum = {
   name: 'name',
-  description: 'description',
+  description: 'description'
+} as const
+
+export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]
+
+
+export const KpiCriteriaSettingOrderByRelevanceFieldEnum = {
   scoringMethod: 'scoringMethod',
   difficulty: 'difficulty'
 } as const
 
-export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]
+export type KpiCriteriaSettingOrderByRelevanceFieldEnum = (typeof KpiCriteriaSettingOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaSettingOrderByRelevanceFieldEnum]
 
 
 export const KpiEvaluationOrderByRelevanceFieldEnum = {
@@ -1763,12 +2008,15 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   employee?: Prisma.EmployeeOmit
   task?: Prisma.TaskOmit
+  taskKpiSetting?: Prisma.TaskKpiSettingOmit
+  taskAttachment?: Prisma.TaskAttachmentOmit
   taskParticipant?: Prisma.TaskParticipantOmit
   taskClosure?: Prisma.TaskClosureOmit
   taskComment?: Prisma.TaskCommentOmit
   masterPlan?: Prisma.MasterPlanOmit
   kpiPeriod?: Prisma.KpiPeriodOmit
   kpiCriteria?: Prisma.KpiCriteriaOmit
+  kpiCriteriaSetting?: Prisma.KpiCriteriaSettingOmit
   kpiEvaluation?: Prisma.KpiEvaluationOmit
   kpiEvaluationDetail?: Prisma.KpiEvaluationDetailOmit
   taskRankTemplate?: Prisma.TaskRankTemplateOmit

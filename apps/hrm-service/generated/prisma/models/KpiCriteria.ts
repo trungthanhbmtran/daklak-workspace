@@ -28,39 +28,19 @@ export type AggregateKpiCriteria = {
 
 export type KpiCriteriaAvgAggregateOutputType = {
   id: number | null
-  weight: number | null
-  baseScore: number | null
   categoryId: number | null
-  difficultyMultiplier: number | null
-  bonusThresholdDays: number | null
-  bonusPerDay: number | null
-  penaltyPerDay: number | null
 }
 
 export type KpiCriteriaSumAggregateOutputType = {
   id: number | null
-  weight: number | null
-  baseScore: number | null
   categoryId: number | null
-  difficultyMultiplier: number | null
-  bonusThresholdDays: number | null
-  bonusPerDay: number | null
-  penaltyPerDay: number | null
 }
 
 export type KpiCriteriaMinAggregateOutputType = {
   id: number | null
   name: string | null
   description: string | null
-  weight: number | null
-  baseScore: number | null
-  scoringMethod: string | null
   categoryId: number | null
-  difficulty: string | null
-  difficultyMultiplier: number | null
-  bonusThresholdDays: number | null
-  bonusPerDay: number | null
-  penaltyPerDay: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -69,15 +49,7 @@ export type KpiCriteriaMaxAggregateOutputType = {
   id: number | null
   name: string | null
   description: string | null
-  weight: number | null
-  baseScore: number | null
-  scoringMethod: string | null
   categoryId: number | null
-  difficulty: string | null
-  difficultyMultiplier: number | null
-  bonusThresholdDays: number | null
-  bonusPerDay: number | null
-  penaltyPerDay: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -86,15 +58,7 @@ export type KpiCriteriaCountAggregateOutputType = {
   id: number
   name: number
   description: number
-  weight: number
-  baseScore: number
-  scoringMethod: number
   categoryId: number
-  difficulty: number
-  difficultyMultiplier: number
-  bonusThresholdDays: number
-  bonusPerDay: number
-  penaltyPerDay: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -103,39 +67,19 @@ export type KpiCriteriaCountAggregateOutputType = {
 
 export type KpiCriteriaAvgAggregateInputType = {
   id?: true
-  weight?: true
-  baseScore?: true
   categoryId?: true
-  difficultyMultiplier?: true
-  bonusThresholdDays?: true
-  bonusPerDay?: true
-  penaltyPerDay?: true
 }
 
 export type KpiCriteriaSumAggregateInputType = {
   id?: true
-  weight?: true
-  baseScore?: true
   categoryId?: true
-  difficultyMultiplier?: true
-  bonusThresholdDays?: true
-  bonusPerDay?: true
-  penaltyPerDay?: true
 }
 
 export type KpiCriteriaMinAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  weight?: true
-  baseScore?: true
-  scoringMethod?: true
   categoryId?: true
-  difficulty?: true
-  difficultyMultiplier?: true
-  bonusThresholdDays?: true
-  bonusPerDay?: true
-  penaltyPerDay?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -144,15 +88,7 @@ export type KpiCriteriaMaxAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  weight?: true
-  baseScore?: true
-  scoringMethod?: true
   categoryId?: true
-  difficulty?: true
-  difficultyMultiplier?: true
-  bonusThresholdDays?: true
-  bonusPerDay?: true
-  penaltyPerDay?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -161,15 +97,7 @@ export type KpiCriteriaCountAggregateInputType = {
   id?: true
   name?: true
   description?: true
-  weight?: true
-  baseScore?: true
-  scoringMethod?: true
   categoryId?: true
-  difficulty?: true
-  difficultyMultiplier?: true
-  bonusThresholdDays?: true
-  bonusPerDay?: true
-  penaltyPerDay?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -265,15 +193,7 @@ export type KpiCriteriaGroupByOutputType = {
   id: number
   name: string
   description: string | null
-  weight: number
-  baseScore: number | null
-  scoringMethod: string
   categoryId: number | null
-  difficulty: string
-  difficultyMultiplier: number
-  bonusThresholdDays: number
-  bonusPerDay: number
-  penaltyPerDay: number
   createdAt: Date
   updatedAt: Date
   _count: KpiCriteriaCountAggregateOutputType | null
@@ -305,38 +225,24 @@ export type KpiCriteriaWhereInput = {
   id?: Prisma.IntFilter<"KpiCriteria"> | number
   name?: Prisma.StringFilter<"KpiCriteria"> | string
   description?: Prisma.StringNullableFilter<"KpiCriteria"> | string | null
-  weight?: Prisma.FloatFilter<"KpiCriteria"> | number
-  baseScore?: Prisma.FloatNullableFilter<"KpiCriteria"> | number | null
-  scoringMethod?: Prisma.StringFilter<"KpiCriteria"> | string
   categoryId?: Prisma.IntNullableFilter<"KpiCriteria"> | number | null
-  difficulty?: Prisma.StringFilter<"KpiCriteria"> | string
-  difficultyMultiplier?: Prisma.FloatFilter<"KpiCriteria"> | number
-  bonusThresholdDays?: Prisma.IntFilter<"KpiCriteria"> | number
-  bonusPerDay?: Prisma.FloatFilter<"KpiCriteria"> | number
-  penaltyPerDay?: Prisma.FloatFilter<"KpiCriteria"> | number
   createdAt?: Prisma.DateTimeFilter<"KpiCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiCriteria"> | Date | string
+  settings?: Prisma.XOR<Prisma.KpiCriteriaSettingNullableScalarRelationFilter, Prisma.KpiCriteriaSettingWhereInput> | null
   details?: Prisma.KpiEvaluationDetailListRelationFilter
-  tasks?: Prisma.TaskListRelationFilter
+  tasks?: Prisma.TaskKpiSettingListRelationFilter
 }
 
 export type KpiCriteriaOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
-  scoringMethod?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
-  difficulty?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  settings?: Prisma.KpiCriteriaSettingOrderByWithRelationInput
   details?: Prisma.KpiEvaluationDetailOrderByRelationAggregateInput
-  tasks?: Prisma.TaskOrderByRelationAggregateInput
+  tasks?: Prisma.TaskKpiSettingOrderByRelationAggregateInput
   _relevance?: Prisma.KpiCriteriaOrderByRelevanceInput
 }
 
@@ -347,34 +253,19 @@ export type KpiCriteriaWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.KpiCriteriaWhereInput | Prisma.KpiCriteriaWhereInput[]
   name?: Prisma.StringFilter<"KpiCriteria"> | string
   description?: Prisma.StringNullableFilter<"KpiCriteria"> | string | null
-  weight?: Prisma.FloatFilter<"KpiCriteria"> | number
-  baseScore?: Prisma.FloatNullableFilter<"KpiCriteria"> | number | null
-  scoringMethod?: Prisma.StringFilter<"KpiCriteria"> | string
   categoryId?: Prisma.IntNullableFilter<"KpiCriteria"> | number | null
-  difficulty?: Prisma.StringFilter<"KpiCriteria"> | string
-  difficultyMultiplier?: Prisma.FloatFilter<"KpiCriteria"> | number
-  bonusThresholdDays?: Prisma.IntFilter<"KpiCriteria"> | number
-  bonusPerDay?: Prisma.FloatFilter<"KpiCriteria"> | number
-  penaltyPerDay?: Prisma.FloatFilter<"KpiCriteria"> | number
   createdAt?: Prisma.DateTimeFilter<"KpiCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiCriteria"> | Date | string
+  settings?: Prisma.XOR<Prisma.KpiCriteriaSettingNullableScalarRelationFilter, Prisma.KpiCriteriaSettingWhereInput> | null
   details?: Prisma.KpiEvaluationDetailListRelationFilter
-  tasks?: Prisma.TaskListRelationFilter
+  tasks?: Prisma.TaskKpiSettingListRelationFilter
 }, "id">
 
 export type KpiCriteriaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
-  scoringMethod?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
-  difficulty?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.KpiCriteriaCountOrderByAggregateInput
@@ -391,15 +282,7 @@ export type KpiCriteriaScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"KpiCriteria"> | number
   name?: Prisma.StringWithAggregatesFilter<"KpiCriteria"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"KpiCriteria"> | string | null
-  weight?: Prisma.FloatWithAggregatesFilter<"KpiCriteria"> | number
-  baseScore?: Prisma.FloatNullableWithAggregatesFilter<"KpiCriteria"> | number | null
-  scoringMethod?: Prisma.StringWithAggregatesFilter<"KpiCriteria"> | string
   categoryId?: Prisma.IntNullableWithAggregatesFilter<"KpiCriteria"> | number | null
-  difficulty?: Prisma.StringWithAggregatesFilter<"KpiCriteria"> | string
-  difficultyMultiplier?: Prisma.FloatWithAggregatesFilter<"KpiCriteria"> | number
-  bonusThresholdDays?: Prisma.IntWithAggregatesFilter<"KpiCriteria"> | number
-  bonusPerDay?: Prisma.FloatWithAggregatesFilter<"KpiCriteria"> | number
-  penaltyPerDay?: Prisma.FloatWithAggregatesFilter<"KpiCriteria"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"KpiCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"KpiCriteria"> | Date | string
 }
@@ -407,90 +290,54 @@ export type KpiCriteriaScalarWhereWithAggregatesInput = {
 export type KpiCriteriaCreateInput = {
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-  tasks?: Prisma.TaskCreateNestedManyWithoutKpiCriteriaInput
+  tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateInput = {
   id?: number
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutKpiCriteriaInput
+  tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
 }
 
 export type KpiCriteriaUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-  tasks?: Prisma.TaskUpdateManyWithoutKpiCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutKpiCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
 }
 
 export type KpiCriteriaCreateManyInput = {
   id?: number
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -498,15 +345,7 @@ export type KpiCriteriaCreateManyInput = {
 export type KpiCriteriaUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -515,15 +354,7 @@ export type KpiCriteriaUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -543,43 +374,21 @@ export type KpiCriteriaCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrder
-  scoringMethod?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
-  difficulty?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type KpiCriteriaAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
 }
 
 export type KpiCriteriaMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrder
-  scoringMethod?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
-  difficulty?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -588,28 +397,14 @@ export type KpiCriteriaMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrder
-  scoringMethod?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
-  difficulty?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type KpiCriteriaSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  weight?: Prisma.SortOrder
-  baseScore?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
-  difficultyMultiplier?: Prisma.SortOrder
-  bonusThresholdDays?: Prisma.SortOrder
-  bonusPerDay?: Prisma.SortOrder
-  penaltyPerDay?: Prisma.SortOrder
 }
 
 export type KpiCriteriaScalarRelationFilter = {
@@ -633,6 +428,20 @@ export type KpiCriteriaUpdateOneWithoutTasksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.KpiCriteriaUpdateToOneWithWhereWithoutTasksInput, Prisma.KpiCriteriaUpdateWithoutTasksInput>, Prisma.KpiCriteriaUncheckedUpdateWithoutTasksInput>
 }
 
+export type KpiCriteriaCreateNestedOneWithoutSettingsInput = {
+  create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutSettingsInput, Prisma.KpiCriteriaUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutSettingsInput
+  connect?: Prisma.KpiCriteriaWhereUniqueInput
+}
+
+export type KpiCriteriaUpdateOneRequiredWithoutSettingsNestedInput = {
+  create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutSettingsInput, Prisma.KpiCriteriaUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutSettingsInput
+  upsert?: Prisma.KpiCriteriaUpsertWithoutSettingsInput
+  connect?: Prisma.KpiCriteriaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.KpiCriteriaUpdateToOneWithWhereWithoutSettingsInput, Prisma.KpiCriteriaUpdateWithoutSettingsInput>, Prisma.KpiCriteriaUncheckedUpdateWithoutSettingsInput>
+}
+
 export type KpiCriteriaCreateNestedOneWithoutDetailsInput = {
   create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutDetailsInput, Prisma.KpiCriteriaUncheckedCreateWithoutDetailsInput>
   connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutDetailsInput
@@ -650,17 +459,10 @@ export type KpiCriteriaUpdateOneRequiredWithoutDetailsNestedInput = {
 export type KpiCriteriaCreateWithoutTasksInput = {
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
 }
 
@@ -668,17 +470,10 @@ export type KpiCriteriaUncheckedCreateWithoutTasksInput = {
   id?: number
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
 }
 
@@ -701,17 +496,10 @@ export type KpiCriteriaUpdateToOneWithWhereWithoutTasksInput = {
 export type KpiCriteriaUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
 }
 
@@ -719,53 +507,90 @@ export type KpiCriteriaUncheckedUpdateWithoutTasksInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
+  details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
+}
+
+export type KpiCriteriaCreateWithoutSettingsInput = {
+  name: string
+  description?: string | null
+  categoryId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
+}
+
+export type KpiCriteriaUncheckedCreateWithoutSettingsInput = {
+  id?: number
+  name: string
+  description?: string | null
+  categoryId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
+}
+
+export type KpiCriteriaCreateOrConnectWithoutSettingsInput = {
+  where: Prisma.KpiCriteriaWhereUniqueInput
+  create: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutSettingsInput, Prisma.KpiCriteriaUncheckedCreateWithoutSettingsInput>
+}
+
+export type KpiCriteriaUpsertWithoutSettingsInput = {
+  update: Prisma.XOR<Prisma.KpiCriteriaUpdateWithoutSettingsInput, Prisma.KpiCriteriaUncheckedUpdateWithoutSettingsInput>
+  create: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutSettingsInput, Prisma.KpiCriteriaUncheckedCreateWithoutSettingsInput>
+  where?: Prisma.KpiCriteriaWhereInput
+}
+
+export type KpiCriteriaUpdateToOneWithWhereWithoutSettingsInput = {
+  where?: Prisma.KpiCriteriaWhereInput
+  data: Prisma.XOR<Prisma.KpiCriteriaUpdateWithoutSettingsInput, Prisma.KpiCriteriaUncheckedUpdateWithoutSettingsInput>
+}
+
+export type KpiCriteriaUpdateWithoutSettingsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
+}
+
+export type KpiCriteriaUncheckedUpdateWithoutSettingsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
 }
 
 export type KpiCriteriaCreateWithoutDetailsInput = {
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  tasks?: Prisma.TaskCreateNestedManyWithoutKpiCriteriaInput
+  settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateWithoutDetailsInput = {
   id?: number
   name: string
   description?: string | null
-  weight?: number
-  baseScore?: number | null
-  scoringMethod?: string
   categoryId?: number | null
-  difficulty?: string
-  difficultyMultiplier?: number
-  bonusThresholdDays?: number
-  bonusPerDay?: number
-  penaltyPerDay?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutKpiCriteriaInput
+  settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
 }
 
 export type KpiCriteriaCreateOrConnectWithoutDetailsInput = {
@@ -787,36 +612,22 @@ export type KpiCriteriaUpdateToOneWithWhereWithoutDetailsInput = {
 export type KpiCriteriaUpdateWithoutDetailsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tasks?: Prisma.TaskUpdateManyWithoutKpiCriteriaNestedInput
+  settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateWithoutDetailsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  weight?: Prisma.FloatFieldUpdateOperationsInput | number
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
   categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  difficulty?: Prisma.StringFieldUpdateOperationsInput | string
-  difficultyMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
-  penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tasks?: Prisma.TaskUncheckedUpdateManyWithoutKpiCriteriaNestedInput
+  settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
 }
 
 
@@ -855,7 +666,7 @@ export type KpiCriteriaCountOutputTypeCountDetailsArgs<ExtArgs extends runtime.T
  * KpiCriteriaCountOutputType without action
  */
 export type KpiCriteriaCountOutputTypeCountTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TaskWhereInput
+  where?: Prisma.TaskKpiSettingWhereInput
 }
 
 
@@ -863,17 +674,10 @@ export type KpiCriteriaSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   name?: boolean
   description?: boolean
-  weight?: boolean
-  baseScore?: boolean
-  scoringMethod?: boolean
   categoryId?: boolean
-  difficulty?: boolean
-  difficultyMultiplier?: boolean
-  bonusThresholdDays?: boolean
-  bonusPerDay?: boolean
-  penaltyPerDay?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  settings?: boolean | Prisma.KpiCriteria$settingsArgs<ExtArgs>
   details?: boolean | Prisma.KpiCriteria$detailsArgs<ExtArgs>
   tasks?: boolean | Prisma.KpiCriteria$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs>
@@ -885,21 +689,14 @@ export type KpiCriteriaSelectScalar = {
   id?: boolean
   name?: boolean
   description?: boolean
-  weight?: boolean
-  baseScore?: boolean
-  scoringMethod?: boolean
   categoryId?: boolean
-  difficulty?: boolean
-  difficultyMultiplier?: boolean
-  bonusThresholdDays?: boolean
-  bonusPerDay?: boolean
-  penaltyPerDay?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type KpiCriteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "weight" | "baseScore" | "scoringMethod" | "categoryId" | "difficulty" | "difficultyMultiplier" | "bonusThresholdDays" | "bonusPerDay" | "penaltyPerDay" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiCriteria"]>
+export type KpiCriteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "categoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiCriteria"]>
 export type KpiCriteriaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  settings?: boolean | Prisma.KpiCriteria$settingsArgs<ExtArgs>
   details?: boolean | Prisma.KpiCriteria$detailsArgs<ExtArgs>
   tasks?: boolean | Prisma.KpiCriteria$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs>
@@ -908,22 +705,15 @@ export type KpiCriteriaInclude<ExtArgs extends runtime.Types.Extensions.Internal
 export type $KpiCriteriaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "KpiCriteria"
   objects: {
+    settings: Prisma.$KpiCriteriaSettingPayload<ExtArgs> | null
     details: Prisma.$KpiEvaluationDetailPayload<ExtArgs>[]
-    tasks: Prisma.$TaskPayload<ExtArgs>[]
+    tasks: Prisma.$TaskKpiSettingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     name: string
     description: string | null
-    weight: number
-    baseScore: number | null
-    scoringMethod: string
     categoryId: number | null
-    difficulty: string
-    difficultyMultiplier: number
-    bonusThresholdDays: number
-    bonusPerDay: number
-    penaltyPerDay: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["kpiCriteria"]>
@@ -1266,8 +1056,9 @@ readonly fields: KpiCriteriaFieldRefs;
  */
 export interface Prisma__KpiCriteriaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  settings<T extends Prisma.KpiCriteria$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$settingsArgs<ExtArgs>>): Prisma.Prisma__KpiCriteriaSettingClient<runtime.Types.Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   details<T extends Prisma.KpiCriteria$detailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$detailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  tasks<T extends Prisma.KpiCriteria$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tasks<T extends Prisma.KpiCriteria$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1300,15 +1091,7 @@ export interface KpiCriteriaFieldRefs {
   readonly id: Prisma.FieldRef<"KpiCriteria", 'Int'>
   readonly name: Prisma.FieldRef<"KpiCriteria", 'String'>
   readonly description: Prisma.FieldRef<"KpiCriteria", 'String'>
-  readonly weight: Prisma.FieldRef<"KpiCriteria", 'Float'>
-  readonly baseScore: Prisma.FieldRef<"KpiCriteria", 'Float'>
-  readonly scoringMethod: Prisma.FieldRef<"KpiCriteria", 'String'>
   readonly categoryId: Prisma.FieldRef<"KpiCriteria", 'Int'>
-  readonly difficulty: Prisma.FieldRef<"KpiCriteria", 'String'>
-  readonly difficultyMultiplier: Prisma.FieldRef<"KpiCriteria", 'Float'>
-  readonly bonusThresholdDays: Prisma.FieldRef<"KpiCriteria", 'Int'>
-  readonly bonusPerDay: Prisma.FieldRef<"KpiCriteria", 'Float'>
-  readonly penaltyPerDay: Prisma.FieldRef<"KpiCriteria", 'Float'>
   readonly createdAt: Prisma.FieldRef<"KpiCriteria", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"KpiCriteria", 'DateTime'>
 }
@@ -1659,6 +1442,25 @@ export type KpiCriteriaDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * KpiCriteria.settings
+ */
+export type KpiCriteria$settingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KpiCriteriaSetting
+   */
+  select?: Prisma.KpiCriteriaSettingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KpiCriteriaSetting
+   */
+  omit?: Prisma.KpiCriteriaSettingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KpiCriteriaSettingInclude<ExtArgs> | null
+  where?: Prisma.KpiCriteriaSettingWhereInput
+}
+
+/**
  * KpiCriteria.details
  */
 export type KpiCriteria$detailsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1687,23 +1489,23 @@ export type KpiCriteria$detailsArgs<ExtArgs extends runtime.Types.Extensions.Int
  */
 export type KpiCriteria$tasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Task
+   * Select specific fields to fetch from the TaskKpiSetting
    */
-  select?: Prisma.TaskSelect<ExtArgs> | null
+  select?: Prisma.TaskKpiSettingSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Task
+   * Omit specific fields from the TaskKpiSetting
    */
-  omit?: Prisma.TaskOmit<ExtArgs> | null
+  omit?: Prisma.TaskKpiSettingOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TaskInclude<ExtArgs> | null
-  where?: Prisma.TaskWhereInput
-  orderBy?: Prisma.TaskOrderByWithRelationInput | Prisma.TaskOrderByWithRelationInput[]
-  cursor?: Prisma.TaskWhereUniqueInput
+  include?: Prisma.TaskKpiSettingInclude<ExtArgs> | null
+  where?: Prisma.TaskKpiSettingWhereInput
+  orderBy?: Prisma.TaskKpiSettingOrderByWithRelationInput | Prisma.TaskKpiSettingOrderByWithRelationInput[]
+  cursor?: Prisma.TaskKpiSettingWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.TaskScalarFieldEnum | Prisma.TaskScalarFieldEnum[]
+  distinct?: Prisma.TaskKpiSettingScalarFieldEnum | Prisma.TaskKpiSettingScalarFieldEnum[]
 }
 
 /**

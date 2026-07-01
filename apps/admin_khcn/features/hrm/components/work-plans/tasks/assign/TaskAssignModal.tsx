@@ -24,6 +24,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrmTasksApi } from "@/features/hrm/api";
 import { useHrmEmployeesList, useKpiCriteriaList } from "@/features/hrm/hooks";
 import { organizationApi } from "@/features/system-admin/organization/api";
+import apiClient from "@/lib/axiosInstance";
 
 interface TaskAssignModalProps {
   isOpen: boolean;
@@ -436,6 +437,10 @@ const TaskParameters = React.memo(function TaskParameters({
   dueDate,
   kpiCriteriaId,
   kpiCriteriaList,
+  domainId,
+  domains,
+  monitoredUnitId,
+  geoAreas,
   onChange,
 }: {
   priority: string;
@@ -445,6 +450,10 @@ const TaskParameters = React.memo(function TaskParameters({
   dueDate: string;
   kpiCriteriaId: number | null;
   kpiCriteriaList: any[];
+  domainId: number | null;
+  domains: any[];
+  monitoredUnitId: number | null;
+  geoAreas: any[];
   onChange: (field: string, value: any) => void;
 }) {
   return (
@@ -487,6 +496,48 @@ const TaskParameters = React.memo(function TaskParameters({
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Lĩnh vực & Địa bàn (Grid 2 cột) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lĩnh vực chuyên môn</label>
+            <Select 
+              value={domainId ? domainId.toString() : "NONE"} 
+              onValueChange={(v) => onChange('domainId', v === "NONE" ? null : Number(v))}
+            >
+              <SelectTrigger className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-semibold rounded-xl text-slate-700 dark:text-slate-350">
+                <SelectValue placeholder="Chưa xác định..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl max-h-[300px]">
+                <SelectItem value="NONE" className="text-slate-500 italic">Không phân loại</SelectItem>
+                {domains.map((d) => (
+                  <SelectItem key={d.id} value={d.id.toString()}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Địa bàn theo dõi</label>
+            <Select 
+              value={monitoredUnitId ? monitoredUnitId.toString() : "NONE"} 
+              onValueChange={(v) => onChange('monitoredUnitId', v === "NONE" ? null : Number(v))}
+            >
+              <SelectTrigger className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-semibold rounded-xl text-slate-700 dark:text-slate-350">
+                <SelectValue placeholder="Chưa xác định..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl max-h-[300px]">
+                <SelectItem value="NONE" className="text-slate-500 italic">Toàn bộ địa bàn</SelectItem>
+                {geoAreas.map((g) => (
+                  <SelectItem key={g.id} value={g.id.toString()}>
+                    {g.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Grid 2 cột cho các tham số điểm/trọng số */}
@@ -680,7 +731,9 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     startDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
     weight: 20,
-    kpiCriteriaId: null as number | null
+    kpiCriteriaId: null as number | null,
+    domainId: null as number | null,
+    monitoredUnitId: null as number | null
   });
 
   useEffect(() => {
@@ -695,7 +748,9 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         startDate: task.startDate ? task.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
         dueDate: task.endDate ? task.endDate.split('T')[0] : new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
         weight: task.weight || 20,
-        kpiCriteriaId: task.kpiCriteriaId || null
+        kpiCriteriaId: task.kpiCriteriaId || null,
+        domainId: task.domainId || null,
+        monitoredUnitId: task.monitoredUnitId || null
       });
     }
   }, [task, isOpen]);
@@ -712,10 +767,30 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   const { data: kpiCriteriaList = [] } = useKpiCriteriaList({ activeOnly: true });
 
+  const { data: domains = [] } = useQuery({
+    queryKey: ['categories', 'DOMAIN'],
+    queryFn: async () => {
+      const res = await apiClient.get("/categories", { params: { group: "DOMAIN", limit: 200 } }) as any;
+      const data = res?.data;
+      return Array.isArray(data) ? data : (data?.data || []);
+    },
+    enabled: isOpen
+  });
+
+  const { data: geoAreas = [] } = useQuery({
+    queryKey: ['categories', 'GEO_AREA'],
+    queryFn: async () => {
+      const res = await apiClient.get("/categories", { params: { group: "GEO_AREA", limit: 200 } }) as any;
+      const data = res?.data;
+      return Array.isArray(data) ? data : (data?.data || []);
+    },
+    enabled: isOpen
+  });
+
   const { data: recommendData } = useQuery({
-    queryKey: ['recommend-assignees', task?.domainId],
-    queryFn: () => hrmTasksApi.recommendAssignees({ domainId: task?.domainId }),
-    enabled: !!task?.domainId && isOpen,
+    queryKey: ['recommend-assignees', taskState.domainId],
+    queryFn: () => hrmTasksApi.recommendAssignees({ domainId: taskState.domainId || undefined }),
+    enabled: !!taskState.domainId && isOpen,
   });
   const recommendedCodes = React.useMemo(() => (recommendData?.data || []).filter((r: any) => r.matchScore > 0).map((r: any) => r.employeeCode), [recommendData]);
 
@@ -798,6 +873,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         priority: taskState.priority,
         baseScore: taskState.baseScore,
         kpiCriteriaId: taskState.kpiCriteriaId,
+        domainId: taskState.domainId,
+        monitoredUnitId: taskState.monitoredUnitId,
       });
 
       await hrmTasksApi.assignTask(taskId, {
@@ -925,6 +1002,10 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
               dueDate={taskState.dueDate}
               kpiCriteriaId={taskState.kpiCriteriaId}
               kpiCriteriaList={kpiCriteriaList}
+              domainId={taskState.domainId}
+              domains={domains}
+              monitoredUnitId={taskState.monitoredUnitId}
+              geoAreas={geoAreas}
               onChange={(f, v) => setTaskState(p => ({ ...p, [f]: v }))}
             />
           </div>

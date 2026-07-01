@@ -107,15 +107,19 @@ export class KpiEvaluationsService {
       data: {
         name: data.name,
         description: data.description,
-        weight: data.weight || 1.0,
-        baseScore: data.baseScore,
-        scoringMethod: data.scoringMethod || 'MANUAL',
-        difficulty: data.difficulty || 'NORMAL',
-        difficultyMultiplier: data.difficultyMultiplier || 1.0,
-        bonusThresholdDays: data.bonusThresholdDays || 0,
-        bonusPerDay: data.bonusPerDay || 0,
-        penaltyPerDay: data.penaltyPerDay || 0,
         categoryId: data.categoryId,
+        settings: {
+          create: {
+            weight: data.weight || 1.0,
+            baseScore: data.baseScore,
+            scoringMethod: data.scoringMethod || 'MANUAL',
+            difficulty: data.difficulty || 'NORMAL',
+            difficultyMultiplier: data.difficultyMultiplier || 1.0,
+            bonusThresholdDays: data.bonusThresholdDays || 0,
+            bonusPerDay: data.bonusPerDay || 0,
+            penaltyPerDay: data.penaltyPerDay || 0,
+          }
+        }
       }
     });
 
@@ -128,19 +132,31 @@ export class KpiEvaluationsService {
     const updateData: any = {};
     if (data.name) updateData.name = data.name;
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.weight !== undefined) updateData.weight = data.weight;
-    if (data.baseScore !== undefined) updateData.baseScore = data.baseScore;
-    if (data.scoringMethod) updateData.scoringMethod = data.scoringMethod;
-    if (data.difficulty) updateData.difficulty = data.difficulty;
-    if (data.difficultyMultiplier !== undefined) updateData.difficultyMultiplier = data.difficultyMultiplier;
-    if (data.bonusThresholdDays !== undefined) updateData.bonusThresholdDays = data.bonusThresholdDays;
-    if (data.bonusPerDay !== undefined) updateData.bonusPerDay = data.bonusPerDay;
-    if (data.penaltyPerDay !== undefined) updateData.penaltyPerDay = data.penaltyPerDay;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
+
+    const settingsData: any = {};
+    if (data.weight !== undefined) settingsData.weight = data.weight;
+    if (data.baseScore !== undefined) settingsData.baseScore = data.baseScore;
+    if (data.scoringMethod) settingsData.scoringMethod = data.scoringMethod;
+    if (data.difficulty) settingsData.difficulty = data.difficulty;
+    if (data.difficultyMultiplier !== undefined) settingsData.difficultyMultiplier = data.difficultyMultiplier;
+    if (data.bonusThresholdDays !== undefined) settingsData.bonusThresholdDays = data.bonusThresholdDays;
+    if (data.bonusPerDay !== undefined) settingsData.bonusPerDay = data.bonusPerDay;
+    if (data.penaltyPerDay !== undefined) settingsData.penaltyPerDay = data.penaltyPerDay;
 
     const c = await this.prisma.kpiCriteria.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...updateData,
+        ...(Object.keys(settingsData).length > 0 && {
+          settings: {
+            upsert: {
+              create: settingsData,
+              update: settingsData
+            }
+          }
+        })
+      },
     });
 
     // Invalidate cache
@@ -243,7 +259,9 @@ export class KpiEvaluationsService {
         }
       },
       include: {
-        task: true
+        task: {
+          include: { kpiSettings: true }
+        }
       }
     });
 
@@ -257,11 +275,11 @@ export class KpiEvaluationsService {
 
     for (const tp of taskParticipants) {
       const task = tp.task;
-      const baseScore = task.baseScore || 0;
+      const baseScore = task.kpiSettings?.baseScore || 0;
       let finalScore = baseScore;
 
-      const bonusPerDay = task.bonusPerDay || 0;
-      const penaltyPerDay = task.penaltyPerDay || 0;
+      const bonusPerDay = task.kpiSettings?.bonusPerDay || 0;
+      const penaltyPerDay = task.kpiSettings?.penaltyPerDay || 0;
 
       if (task.completedAt && task.dueDate) {
         // Calculate days difference
@@ -282,8 +300,8 @@ export class KpiEvaluationsService {
         }
       }
 
-      if (task.isCrossDomain && task.crossDomainMultiplier) {
-        finalScore = finalScore * task.crossDomainMultiplier;
+      if (task.kpiSettings?.isCrossDomain && task.kpiSettings?.crossDomainMultiplier) {
+        finalScore = finalScore * task.kpiSettings.crossDomainMultiplier;
       }
 
       // Nhân tỷ lệ đóng góp
@@ -292,7 +310,7 @@ export class KpiEvaluationsService {
 
       totalScore += finalScore;
 
-      let criteriaId = task.kpiCriteriaId;
+      let criteriaId = task.kpiSettings?.kpiCriteriaId;
       if (tp.participantRole === 'COORDINATOR' && coordCriteriaId) {
         criteriaId = coordCriteriaId;
       }
@@ -376,7 +394,8 @@ export class KpiEvaluationsService {
     }
 
     const allCriteria = await this.prisma.kpiCriteria.findMany({
-      orderBy: { id: 'asc' }
+      orderBy: { id: 'asc' },
+      include: { settings: true }
     });
     
     // Auto-calculate tasks if status is DRAFT or COMPUTING
@@ -388,7 +407,7 @@ export class KpiEvaluationsService {
       let autoScore: number | null = null;
       let notes = existingDetail?.notes || '';
       
-      if (crit.scoringMethod === 'AUTOMATIC') {
+      if (crit.settings?.scoringMethod === 'AUTOMATIC') {
          autoScore = calcResult.groupedScores?.[crit.id] || 0;
          const count = calcResult.groupedTasksCount?.[crit.id] || 0;
          notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
@@ -399,10 +418,10 @@ export class KpiEvaluationsService {
         criteriaId: crit.id,
         criteriaName: crit.name,
         description: crit.description,
-        scoringMethod: crit.scoringMethod,
-        baseScore: crit.baseScore,
-        weight: crit.weight,
-        selfScore: existingDetail?.selfScore ?? (crit.scoringMethod === 'AUTOMATIC' ? autoScore : null),
+        scoringMethod: crit.settings?.scoringMethod,
+        baseScore: crit.settings?.baseScore,
+        weight: crit.settings?.weight,
+        selfScore: existingDetail?.selfScore ?? (crit.settings?.scoringMethod === 'AUTOMATIC' ? autoScore : null),
         reviewerScore: existingDetail?.reviewerScore ?? null,
         notes: notes,
       };

@@ -50,6 +50,16 @@ export type Employee = Prisma.EmployeeModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model TaskKpiSetting
+ * 
+ */
+export type TaskKpiSetting = Prisma.TaskKpiSettingModel
+/**
+ * Model TaskAttachment
+ * 
+ */
+export type TaskAttachment = Prisma.TaskAttachmentModel
+/**
  * Model TaskParticipant
  * 
  */
@@ -79,6 +89,11 @@ export type KpiPeriod = Prisma.KpiPeriodModel
  * 
  */
 export type KpiCriteria = Prisma.KpiCriteriaModel
+/**
+ * Model KpiCriteriaSetting
+ * 
+ */
+export type KpiCriteriaSetting = Prisma.KpiCriteriaSettingModel
 /**
  * Model KpiEvaluation
  * 

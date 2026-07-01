@@ -53,12 +53,15 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  TaskKpiSetting: 'TaskKpiSetting',
+  TaskAttachment: 'TaskAttachment',
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
   TaskComment: 'TaskComment',
   MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
+  KpiCriteriaSetting: 'KpiCriteriaSetting',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   TaskRankTemplate: 'TaskRankTemplate',
@@ -117,31 +120,48 @@ export const TaskScalarFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
-  creatorEmployeeCode: 'creatorEmployeeCode',
-  baseScore: 'baseScore',
-  weight: 'weight',
-  scoringMethod: 'scoringMethod',
-  bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay',
-  documentIds: 'documentIds',
-  workflowInstId: 'workflowInstId',
-  metadata: 'metadata',
+  progress: 'progress',
+  rejectReason: 'rejectReason',
   startDate: 'startDate',
   dueDate: 'dueDate',
   completedAt: 'completedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   domainId: 'domainId',
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
-  progress: 'progress',
-  rejectReason: 'rejectReason',
-  kpiCriteriaId: 'kpiCriteriaId',
-  isCrossDomain: 'isCrossDomain',
-  crossDomainMultiplier: 'crossDomainMultiplier'
+  workflowInstId: 'workflowInstId',
+  metadata: 'metadata',
+  creatorEmployeeCode: 'creatorEmployeeCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskKpiSettingScalarFieldEnum = {
+  taskId: 'taskId',
+  baseScore: 'baseScore',
+  weight: 'weight',
+  scoringMethod: 'scoringMethod',
+  isCrossDomain: 'isCrossDomain',
+  crossDomainMultiplier: 'crossDomainMultiplier',
+  bonusPerDay: 'bonusPerDay',
+  penaltyPerDay: 'penaltyPerDay',
+  kpiCriteriaId: 'kpiCriteriaId'
+} as const
+
+export type TaskKpiSettingScalarFieldEnum = (typeof TaskKpiSettingScalarFieldEnum)[keyof typeof TaskKpiSettingScalarFieldEnum]
+
+
+export const TaskAttachmentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  documentId: 'documentId',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskAttachmentScalarFieldEnum = (typeof TaskAttachmentScalarFieldEnum)[keyof typeof TaskAttachmentScalarFieldEnum]
 
 
 export const TaskParticipantScalarFieldEnum = {
@@ -211,20 +231,27 @@ export const KpiCriteriaScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  weight: 'weight',
-  baseScore: 'baseScore',
-  scoringMethod: 'scoringMethod',
   categoryId: 'categoryId',
-  difficulty: 'difficulty',
-  difficultyMultiplier: 'difficultyMultiplier',
-  bonusThresholdDays: 'bonusThresholdDays',
-  bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type KpiCriteriaScalarFieldEnum = (typeof KpiCriteriaScalarFieldEnum)[keyof typeof KpiCriteriaScalarFieldEnum]
+
+
+export const KpiCriteriaSettingScalarFieldEnum = {
+  criteriaId: 'criteriaId',
+  weight: 'weight',
+  baseScore: 'baseScore',
+  scoringMethod: 'scoringMethod',
+  difficulty: 'difficulty',
+  difficultyMultiplier: 'difficultyMultiplier',
+  bonusThresholdDays: 'bonusThresholdDays',
+  bonusPerDay: 'bonusPerDay',
+  penaltyPerDay: 'penaltyPerDay'
+} as const
+
+export type KpiCriteriaSettingScalarFieldEnum = (typeof KpiCriteriaSettingScalarFieldEnum)[keyof typeof KpiCriteriaSettingScalarFieldEnum]
 
 
 export const KpiEvaluationScalarFieldEnum = {
@@ -350,13 +377,27 @@ export const TaskOrderByRelevanceFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
-  creatorEmployeeCode: 'creatorEmployeeCode',
-  scoringMethod: 'scoringMethod',
+  rejectReason: 'rejectReason',
   workflowInstId: 'workflowInstId',
-  rejectReason: 'rejectReason'
+  creatorEmployeeCode: 'creatorEmployeeCode'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskKpiSettingOrderByRelevanceFieldEnum = {
+  scoringMethod: 'scoringMethod'
+} as const
+
+export type TaskKpiSettingOrderByRelevanceFieldEnum = (typeof TaskKpiSettingOrderByRelevanceFieldEnum)[keyof typeof TaskKpiSettingOrderByRelevanceFieldEnum]
+
+
+export const TaskAttachmentOrderByRelevanceFieldEnum = {
+  documentId: 'documentId',
+  type: 'type'
+} as const
+
+export type TaskAttachmentOrderByRelevanceFieldEnum = (typeof TaskAttachmentOrderByRelevanceFieldEnum)[keyof typeof TaskAttachmentOrderByRelevanceFieldEnum]
 
 
 export const TaskParticipantOrderByRelevanceFieldEnum = {
@@ -395,12 +436,18 @@ export type KpiPeriodOrderByRelevanceFieldEnum = (typeof KpiPeriodOrderByRelevan
 
 export const KpiCriteriaOrderByRelevanceFieldEnum = {
   name: 'name',
-  description: 'description',
+  description: 'description'
+} as const
+
+export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]
+
+
+export const KpiCriteriaSettingOrderByRelevanceFieldEnum = {
   scoringMethod: 'scoringMethod',
   difficulty: 'difficulty'
 } as const
 
-export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]
+export type KpiCriteriaSettingOrderByRelevanceFieldEnum = (typeof KpiCriteriaSettingOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaSettingOrderByRelevanceFieldEnum]
 
 
 export const KpiEvaluationOrderByRelevanceFieldEnum = {
