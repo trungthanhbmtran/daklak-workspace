@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrmTasksApi } from "@/features/hrm/api";
-import { useHrmEmployeesList } from "@/features/hrm/hooks";
+import { useHrmEmployeesList, useKpiCriteriaList } from "@/features/hrm/hooks";
 import { organizationApi } from "@/features/system-admin/organization/api";
 
 interface TaskAssignModalProps {
@@ -434,6 +434,8 @@ const TaskParameters = React.memo(function TaskParameters({
   baseScore,
   startDate,
   dueDate,
+  kpiCriteriaId,
+  kpiCriteriaList,
   onChange,
 }: {
   priority: string;
@@ -441,6 +443,8 @@ const TaskParameters = React.memo(function TaskParameters({
   baseScore: number;
   startDate: string;
   dueDate: string;
+  kpiCriteriaId: number | null;
+  kpiCriteriaList: any[];
   onChange: (field: string, value: any) => void;
 }) {
   return (
@@ -450,7 +454,6 @@ const TaskParameters = React.memo(function TaskParameters({
       </h3>
       
       <div className="space-y-4">
-        {/* Độ ưu tiên */}
         <div className="space-y-1.5">
           <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Độ ưu tiên</label>
           <Select value={priority} onValueChange={(v) => onChange('priority', v)}>
@@ -461,6 +464,27 @@ const TaskParameters = React.memo(function TaskParameters({
               <SelectItem value="HIGH">🔴 Cao (High)</SelectItem>
               <SelectItem value="MEDIUM">🟡 Trung bình (Medium)</SelectItem>
               <SelectItem value="LOW">🟢 Thấp (Low)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Tiêu chí KPI */}
+        <div className="space-y-1.5">
+          <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Bộ tiêu chí KPI</label>
+          <Select 
+            value={kpiCriteriaId ? kpiCriteriaId.toString() : "NONE"} 
+            onValueChange={(v) => onChange('kpiCriteriaId', v === "NONE" ? null : Number(v))}
+          >
+            <SelectTrigger className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-semibold rounded-xl text-slate-700 dark:text-slate-350">
+              <SelectValue placeholder="Chọn bộ tiêu chí đánh giá KPI..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl max-h-[300px]">
+              <SelectItem value="NONE" className="text-slate-500 italic">Không áp dụng KPI</SelectItem>
+              {kpiCriteriaList.map((kpi) => (
+                <SelectItem key={kpi.id} value={kpi.id.toString()}>
+                  🎯 {kpi.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -655,7 +679,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     baseScore: 10,
     startDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-    weight: 20
+    weight: 20,
+    kpiCriteriaId: null as number | null
   });
 
   useEffect(() => {
@@ -669,7 +694,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         baseScore: task.baseScore || task.targetValue || 10,
         startDate: task.startDate ? task.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
         dueDate: task.endDate ? task.endDate.split('T')[0] : new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        weight: task.weight || 20
+        weight: task.weight || 20,
+        kpiCriteriaId: task.kpiCriteriaId || null
       });
     }
   }, [task, isOpen]);
@@ -683,6 +709,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     queryFn: () => organizationApi.getTree(),
     enabled: isOpen,
   });
+
+  const { data: kpiCriteriaList = [] } = useKpiCriteriaList({ activeOnly: true });
 
   const { data: recommendData } = useQuery({
     queryKey: ['recommend-assignees', task?.domainId],
@@ -769,6 +797,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         dueDate: taskState.dueDate,
         priority: taskState.priority,
         baseScore: taskState.baseScore,
+        kpiCriteriaId: taskState.kpiCriteriaId,
       });
 
       await hrmTasksApi.assignTask(taskId, {
@@ -894,7 +923,9 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
               baseScore={taskState.baseScore}
               startDate={taskState.startDate}
               dueDate={taskState.dueDate}
-              onChange={handleParamChange}
+              kpiCriteriaId={taskState.kpiCriteriaId}
+              kpiCriteriaList={kpiCriteriaList}
+              onChange={(f, v) => setTaskState(p => ({ ...p, [f]: v }))}
             />
           </div>
         </div>
