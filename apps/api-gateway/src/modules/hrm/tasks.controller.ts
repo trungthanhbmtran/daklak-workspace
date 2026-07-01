@@ -640,25 +640,4 @@ export class TasksController implements OnModuleInit {
       ),
     );
   }
-  @Get('recommend-assignees')
-  async recommendAssignees(
-    @Req() req: any,
-    @Query('domainId') domainId: string,
-    @Query('jobTitleId') jobTitleId?: string,
-    @Query('strategy') strategy?: string,
-  ) {
-    return firstValueFrom(
-      this.taskService.RecommendAssignees(
-        {
-          domainId: domainId || '',
-          jobTitleId: jobTitleId || '',
-          strategy: strategy || 'LOW_PERFORMANCE',
-          rankCode: '',
-          allowedDepartmentIds: [],
-          allowedEmployeeCodes: [],
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
-  }
 }

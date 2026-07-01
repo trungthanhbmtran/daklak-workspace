@@ -68,6 +68,13 @@ export const MICROSERVICES = {
     URL: getUserUrl(),
     SERVICE: 'CategoryService',
   },
+  INTEGRATION: {
+    PACKAGE: 'integration',
+    SYMBOL: 'INTEGRATION_PACKAGE',
+    PROTO: 'users/integration.proto',
+    URL: getUserUrl(),
+    SERVICE: 'IntegrationService',
+  },
   TRANSLATE: {
     PACKAGE: 'translation',
     SYMBOL: 'TRANSLATE_PACKAGE',
