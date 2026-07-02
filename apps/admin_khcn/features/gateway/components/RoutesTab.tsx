@@ -108,7 +108,7 @@ export function RoutesTab() {
       <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200 shadow-sm rounded-md overflow-hidden">
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-600 uppercase text-xs font-semibold tracking-wider border-b border-slate-100">
+            <thead className="sticky top-0 z-10 bg-slate-50 text-slate-600 uppercase text-xs font-semibold tracking-wider shadow-[0_1px_0_0_#e2e8f0]">
               <tr>
                 <th className="px-6 py-5">Đường dẫn (Path)</th>
                 <th className="px-6 py-5">Service Target</th>

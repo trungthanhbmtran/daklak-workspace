@@ -251,9 +251,10 @@ export function NotificationConfigPanel() {
     }
   ];
   return (
-    <div className="w-full max-w-5xl mx-auto pb-10">
-      <div className="w-full">
-        {/* Channels List */}
+    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar w-full animate-in fade-in duration-500">
+      <div className="max-w-5xl mx-auto pb-10">
+        <div className="w-full">
+          {/* Channels List */}
         <div className="p-6 md:p-8 space-y-6 bg-slate-50 dark:bg-slate-900/50">
           {channels.map((channel) => {
             const isExpanded = expandedId === channel.id;
@@ -331,6 +332,7 @@ export function NotificationConfigPanel() {
           })}
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -47,8 +47,8 @@ export function NotificationListClient() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="flex-1 min-h-0 flex flex-col space-y-6 animate-in fade-in duration-500 overflow-hidden pb-4">
+      <div className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Trung tâm Thông báo</h2>
           <p className="text-slate-500 mt-2">Quản lý và theo dõi toàn bộ thông báo từ tất cả các phân hệ trong hệ thống.</p>
@@ -60,7 +60,7 @@ export function NotificationListClient() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input placeholder="Tìm kiếm thông báo..." className="pl-10 bg-slate-50 border-none" />
@@ -72,8 +72,8 @@ export function NotificationListClient() {
         </div>
       </div>
 
-      <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
-        <CardContent className="p-0">
+      <Card className="flex-1 min-h-0 flex flex-col border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+        <CardContent className="flex-1 overflow-y-auto custom-scrollbar p-0">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
