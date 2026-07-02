@@ -25,6 +25,21 @@ export async function getNotifications(): Promise<NotificationItem[]> {
 }
 
 export async function markNotificationRead(id: string): Promise<{ success: boolean }> {
-  const res = await apiClient.patch<{ success?: boolean }>(`/notifications/${id}/read`);
+  const res = await apiClient.patch<{ success?: boolean }>("/notifications/$id/read");
   return { success: (res as { success?: boolean })?.success ?? false };
 }
+
+export const notificationConfigApi = {
+  list: async () => {
+    const res = await apiClient.get("/integrations");
+    return (res as any)?.data ?? res;
+  },
+  create: async (body: any) => {
+    const res = await apiClient.post("/integrations", body);
+    return (res as any)?.data ?? res;
+  },
+  update: async (id: number, body: any) => {
+    const res = await apiClient.put(`/integrations/${id}`, body);
+    return (res as any)?.data ?? res;
+  },
+};

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { integrationApi } from "../../users/api";
+import { notificationConfigApi } from "../api";
 import { Loader2, BellRing, Mail, MessageCircle, Send, ChevronDown, CheckCircle2, Server } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ export function NotificationConfigPanel() {
   const fetchConfigs = async () => {
     try {
       setLoading(true);
-      const res = await integrationApi.list();
+      const res = await notificationConfigApi.list();
       const ids: Record<string, number> = {};
       const states: Record<string, boolean> = {
         NOTIFY_INAPP: false,
@@ -92,9 +92,9 @@ export function NotificationConfigPanel() {
       };
       
       if (id) {
-        await integrationApi.update(id, body);
+        await notificationConfigApi.update(id, body);
       } else {
-        await integrationApi.create(body);
+        await notificationConfigApi.create(body);
       }
       toast.success(`Đã lưu cấu hình ${systemName}`);
       await fetchConfigs();
@@ -112,7 +112,7 @@ export function NotificationConfigPanel() {
       const id = integrationIds[code];
       if (id) {
         // Just update active state if it exists
-        const res = await integrationApi.update(id, {
+        const res = await notificationConfigApi.update(id, {
           systemName,
           integrationCode: code,
           isActive: newState,
