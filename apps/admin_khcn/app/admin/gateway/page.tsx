@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function GatewayPage() {
   return (
-    <div className="w-full h-full overflow-y-auto p-4 md:p-8">
+    <div className="w-full h-full flex flex-col overflow-hidden p-4 md:p-8">
       <GatewayClient />
     </div>
   );
