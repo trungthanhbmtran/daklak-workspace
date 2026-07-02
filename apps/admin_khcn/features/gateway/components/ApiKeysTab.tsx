@@ -74,8 +74,8 @@ export function ApiKeysTab() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <Card className="border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
+    <div className="flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
+      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6 relative overflow-hidden">
           <CardTitle className="flex items-center gap-2 text-xl relative z-10 text-slate-800">
             <ShieldAlert className="w-5 h-5 text-emerald-500" /> Khởi tạo Khóa bảo mật (API Key)
@@ -102,8 +102,9 @@ export function ApiKeysTab() {
         </CardContent>
       </Card>
 
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-2 pb-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         {apiKeys.map(k => (
           <Card key={k.id} className="relative overflow-hidden group border border-slate-200 rounded-md shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300 bg-white">
             <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors duration-300 ${k.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
@@ -158,7 +159,9 @@ export function ApiKeysTab() {
              <p className="text-sm mt-1">Sử dụng form bên trên để tạo mới</p>
             </div>
           )}
+          </div>
         </div>
+      </div>
     </div>
   );
 }

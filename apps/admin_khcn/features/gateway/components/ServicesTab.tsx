@@ -55,8 +55,8 @@ export function ServicesTab() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <Card className="border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
+    <div className="flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
+      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Network className="w-5 h-5 text-blue-500" /> Thêm mới Service Upstream
@@ -69,11 +69,11 @@ export function ServicesTab() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
             <div className="space-y-2 md:col-span-3">
               <Label className="text-slate-600">Mã Service (Name)</Label>
-              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500" placeholder="user-service" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} />
+              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500" placeholder="user-service" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} />
             </div>
             <div className="space-y-2 md:col-span-6">
               <Label className="text-slate-600">Địa chỉ URL nội bộ (Target URL)</Label>
-              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500 font-mono text-sm" placeholder="http://user-service:50051" value={newService.url} onChange={e => setNewService({...newService, url: e.target.value})} />
+              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500 font-mono text-sm" placeholder="http://user-service:50051" value={newService.url} onChange={e => setNewService({ ...newService, url: e.target.value })} />
             </div>
             <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-blue-600 hover:bg-blue-700 shadow-sm text-white w-full">
               {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Plus className="w-5 h-5 mr-1.5" />}
@@ -83,9 +83,10 @@ export function ServicesTab() {
         </CardContent>
       </Card>
 
-      <div>
-        <h3 className="text-lg font-semibold text-slate-800 mb-4 px-2">Danh sách Services ({services.length})</h3>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <h3 className="shrink-0 text-lg font-semibold text-slate-800 mb-4 px-2">Danh sách Services ({services.length})</h3>
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-2 pb-6">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {services.map(s => (
             <Card key={s.id} className="group relative border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 rounded-md overflow-hidden bg-white">
               <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
@@ -110,13 +111,13 @@ export function ServicesTab() {
                     {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </Button>
                 </div>
-                
+
                 <div className="bg-slate-50 border border-slate-100 rounded-md p-3 flex items-center gap-3 overflow-hidden">
                   <div className="flex-1 truncate font-mono text-sm text-slate-600">
                     {s.url}
                   </div>
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500 font-medium">
                   <span>ID: #{s.id}</span>
                   <span>{(s as any).routes?.length || 0} routes liên kết</span>
@@ -131,6 +132,7 @@ export function ServicesTab() {
             </div>
           )}
           </div>
+        </div>
       </div>
     </div>
   );
