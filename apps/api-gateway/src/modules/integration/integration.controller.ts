@@ -23,7 +23,7 @@ export class IntegrationController {
         useSsl: useSsl ?? false,
         ignoreTlsVerify: ignoreTlsVerify ?? true,
         isActive: isActive ?? true
-      }
+      } as any
     });
     return { success: true, data: service };
   }
@@ -41,7 +41,7 @@ export class IntegrationController {
         useSsl,
         ignoreTlsVerify,
         isActive
-      }
+      } as any
     });
     return { success: true, data: service };
   }
