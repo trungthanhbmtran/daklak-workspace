@@ -33,6 +33,11 @@ COPY --chown=app:app --from=builder /app/adapters ./adapters
 COPY --chown=app:app --from=builder /app/config ./config
 COPY --chown=app:app --from=builder /app/worker ./worker
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
+COPY --chown=app:app apps/notification_service/prisma ./prisma
+COPY --chown=app:app apps/notification_service/prisma.config.ts ./prisma.config.ts
+
+ENV DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy"
+RUN npx prisma generate
 
 ENV PROTO_PATH=/app/protos
 

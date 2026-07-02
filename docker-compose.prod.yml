@@ -195,6 +195,7 @@ services:
     environment:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
       NOTIFICATION_QUEUE: notifications
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification
 
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
@@ -276,6 +277,15 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db
+
+  notification-service-migrate:
+    image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
+    profiles: [ "migrate" ]
+    command: npx prisma migrate deploy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification
 
   # =============================
   # Nginx

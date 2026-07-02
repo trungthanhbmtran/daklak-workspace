@@ -6,18 +6,8 @@ export const metadata = {
 
 export default function NotificationsPage() {
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Cấu hình Thông báo</h2>
-          <p className="text-muted-foreground">
-            Quản lý các dịch vụ thông báo như Email, Telegram, Zalo
-          </p>
-        </div>
-      </div>
-      <div className="space-y-4">
-        <NotificationConfigPanel />
-      </div>
+    <div className="w-full min-h-[calc(100vh-64px)] bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
+      <NotificationConfigPanel />
     </div>
   );
 }

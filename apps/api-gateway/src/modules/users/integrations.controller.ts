@@ -6,13 +6,12 @@ import {
   Delete,
   Body,
   Param,
-  Inject,
-  OnModuleInit,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 
@@ -20,43 +19,54 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 @Controller('admin/integrations')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-export class IntegrationsController implements OnModuleInit {
-  private integrationService: any;
+export class IntegrationsController {
+  private readonly notificationServiceUrl = 'http://notification-service:50075/api/v1/integrations';
 
-  constructor(
-    @Inject(MICROSERVICES.INTEGRATION.SYMBOL) private readonly client: any,
-  ) {}
-
-  onModuleInit() {
-    this.integrationService = this.client.getService('IntegrationService');
-  }
+  constructor(private readonly httpService: HttpService) {}
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách các cấu hình thông báo' })
-  async list() {
-    const response = (await firstValueFrom(
-      this.integrationService.FindAll({ search: '' }),
-    )) as any;
-    return response.data || [];
+  async list(@Req() req: any) {
+    const search = req.query?.search || '';
+    const { data } = await firstValueFrom(
+      this.httpService.get(this.notificationServiceUrl, { params: { search } })
+    );
+    return data.data || [];
   }
 
   @Post()
   @ApiOperation({ summary: 'Tạo cấu hình thông báo mới' })
   async create(@Body() body: any) {
-    return firstValueFrom(this.integrationService.Create(body));
+    const { data } = await firstValueFrom(
+      this.httpService.post(this.notificationServiceUrl, body)
+    );
+    return data;
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật cấu hình thông báo' })
   async update(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(
-      this.integrationService.Update({ id: parseInt(id), ...body }),
+    const { data } = await firstValueFrom(
+      this.httpService.put(`${this.notificationServiceUrl}/${id}`, body)
     );
+    return data;
+  }
+
+  @Put(':id/active')
+  @ApiOperation({ summary: 'Cập nhật trạng thái kích hoạt' })
+  async toggleActive(@Param('id') id: string, @Body() body: any) {
+    const { data } = await firstValueFrom(
+      this.httpService.put(`${this.notificationServiceUrl}/${id}/active`, body)
+    );
+    return data;
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa cấu hình thông báo' })
   async delete(@Param('id') id: string) {
-    return firstValueFrom(this.integrationService.Delete({ id: parseInt(id) }));
+    const { data } = await firstValueFrom(
+      this.httpService.delete(`${this.notificationServiceUrl}/${id}`)
+    );
+    return data;
   }
 }

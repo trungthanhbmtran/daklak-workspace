@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -19,6 +20,7 @@ import { IntegrationsController } from './integrations.controller';
 
 @Module({
   imports: [
+    HttpModule,
     NotificationsModule,
     registerGrpcService(MICROSERVICES.USER),
     registerGrpcService(MICROSERVICES.PBAC),
@@ -27,7 +29,6 @@ import { IntegrationsController } from './integrations.controller';
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
     registerGrpcService(MICROSERVICES.EMPLOYEE),
-    registerGrpcService(MICROSERVICES.INTEGRATION),
   ],
   controllers: [
     UserController,

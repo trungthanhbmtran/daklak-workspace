@@ -4,25 +4,38 @@
  * and dynamically broadcasts messages to configured channels (inapp, telegram, etc).
  */
 const amqp = require('amqplib');
-const { Client } = require('pg');
+require('dotenv').config();
+const { PrismaClient } = require('@prisma/client');
+const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
+const mariadb = require('mariadb');
+
+const url = process.env.DATABASE_URL || 'mysql://root:mypassword@127.0.0.1:3306/admin_notification';
+const adapter = new PrismaMariaDb(url);
+const prisma = new PrismaClient({ adapter });
 const config = require('../config');
 const { createAdapter } = require('../adapters');
 
 const queueName = config.rabbitmq.queues.notifications;
 const rabbitUrl = config.rabbitmq.url;
-const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/daklak_db?schema=public';
 
 let connection = null;
 let channel = null;
-let dbClient = null;
 
 function parseMessage(content) {
   const raw = typeof content === 'string' ? JSON.parse(content) : content;
   const data = raw.data != null ? raw.data : raw;
+  
+  let recipients = [];
+  if (data.recipients) recipients = data.recipients;
+  else if (data.recipient) recipients = [data.recipient];
+  else if (data.email) recipients = [data.email]; // for notification.position_assigned
+  else if (data.userId) recipients = [data.userId];
+  
   return {
-    recipients: data.recipients || (data.recipient ? [data.recipient] : []),
-    subject: data.subject || data.title || '',
-    body: data.body || data.message || data.text || '',
+    pattern: raw.pattern || '',
+    recipients,
+    subject: data.subject || data.title || (raw.pattern === 'notification.position_assigned' ? 'Thông báo giao việc' : ''),
+    body: data.body || data.message || data.text || (raw.pattern === 'notification.position_assigned' ? `Bạn đã được giao vị trí ${data.position} tại ${data.department}` : ''),
     metadata: data.metadata || {},
   };
 }
@@ -37,17 +50,15 @@ const INTEGRATION_MAP = {
 async function fetchActiveAdapters() {
   const adapters = [];
   try {
-    if (!dbClient) {
-      dbClient = new Client({ connectionString: dbUrl });
-      await dbClient.connect();
-    }
-    const res = await dbClient.query('SELECT integration_code, config_data FROM integration_configs WHERE is_active = true');
+    const rows = await prisma.notificationChannel.findMany({ where: { isActive: true } });
 
-    for (const row of res.rows) {
-      const type = INTEGRATION_MAP[row.integration_code];
+    for (const row of rows) {
+      const type = INTEGRATION_MAP[row.code];
       if (type) {
-        const adapter = createAdapter({ id: row.integration_code, type, enabled: true, config: row.config_data });
-        if (adapter) adapters.push(adapter);
+        const adapter = createAdapter({ id: row.code, type, enabled: true, config: row.config });
+        if (adapter) {
+          adapters.push({ adapter, channelId: row.id });
+        }
       }
     }
   } catch (err) {
@@ -71,9 +82,10 @@ async function handleMessage(msg) {
     return;
   }
 
-  for (const adapter of activeAdapters) {
+  for (const { adapter, channelId } of activeAdapters) {
+    let result = { success: false, error: 'Unknown' };
     try {
-      const result = await adapter.send({
+      result = await adapter.send({
         recipient: payload.recipients,
         subject: payload.subject,
         body: payload.body,
@@ -86,6 +98,26 @@ async function handleMessage(msg) {
       }
     } catch (err) {
       console.error(`[Notification] Adapter ${adapter.id} error:`, err.message);
+      result.error = err.message;
+    }
+
+    // Save to NotificationLog
+    for (const recipient of payload.recipients) {
+      try {
+        await prisma.notificationLog.create({
+          data: {
+            channelId: channelId,
+            recipient: recipient,
+            subject: payload.subject,
+            body: payload.body,
+            status: result.success ? 'SENT' : 'FAILED',
+            errorMsg: result.success ? null : (result.error || 'Unknown error'),
+            sentAt: result.success ? new Date() : null,
+          }
+        });
+      } catch (logErr) {
+        console.error('[Notification] Failed to write log:', logErr.message);
+      }
     }
   }
 }
@@ -116,7 +148,7 @@ async function startConsumer() {
     throw lastErr || new Error('RabbitMQ connection failed');
   }
   channel = await connection.createChannel();
-  await channel.assertQueue(queueName, { durable: false });
+  await channel.assertQueue(queueName, { durable: true });
   channel.prefetch(50);
   console.log(`[Notification] Consuming queue: ${queueName}`);
   channel.consume(queueName, async (msg) => {
@@ -135,10 +167,7 @@ async function startConsumer() {
 async function stopConsumer() {
   if (channel) await channel.close();
   if (connection) await connection.close();
-  if (dbClient) {
-    await dbClient.end();
-    dbClient = null;
-  }
+  await prisma.$disconnect();
 }
 
 module.exports = { startConsumer, stopConsumer };

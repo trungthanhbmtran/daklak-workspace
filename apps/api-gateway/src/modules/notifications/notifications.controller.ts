@@ -25,12 +25,14 @@ export class NotificationsController {
     status: 200,
     description: 'Mảng thông báo (id, title, body, createdAt, read)',
   })
-  list(@Req() req: { user?: { id?: string | number; employeeCode?: string } }) {
+  list(@Req() req: { user?: { id?: string | number; employeeCode?: string; email?: string } }) {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
+    const email = req.user?.email;
     return this.notificationsService.listByUserOrEmployeeCode(
       userId,
       employeeCode,
+      email,
     );
   }
 
@@ -40,11 +42,12 @@ export class NotificationsController {
   @ApiResponse({ status: 200, description: 'success' })
   markRead(
     @Param('id') id: string,
-    @Req() req: { user?: { id?: string | number; employeeCode?: string } },
+    @Req() req: { user?: { id?: string | number; employeeCode?: string; email?: string } },
   ) {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
-    const ok = this.notificationsService.markRead(id, userId, employeeCode);
+    const email = req.user?.email;
+    const ok = this.notificationsService.markRead(id, userId, employeeCode, email);
     return { success: ok };
   }
 

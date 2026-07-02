@@ -106,6 +106,22 @@ services:
     env_file:
       - apps/translate_service/.env
 
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification_service/Dockerfile
+    container_name: notification-service
+    restart: always
+    depends_on:
+      - mysql
+      - rabbitmq
+    ports:
+      - "50075:50075"
+    env_file:
+      - apps/notification_service/.env
+    environment:
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_notification
+
 volumes:
   mysql_data:
   minio_data:
