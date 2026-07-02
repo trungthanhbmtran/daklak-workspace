@@ -13,15 +13,19 @@ export class IntegrationController {
 
   @Post('services')
   async createService(@Body() data: any) {
-    const service = await this.prisma.gatewayService.create({ data });
+    const { name, url, description, isActive } = data;
+    const service = await this.prisma.gatewayService.create({
+      data: { name, url, description, isActive: isActive ?? true }
+    });
     return { success: true, data: service };
   }
 
   @Put('services/:id')
   async updateService(@Param('id') id: string, @Body() data: any) {
+    const { name, url, description, isActive } = data;
     const service = await this.prisma.gatewayService.update({
       where: { id: parseInt(id) },
-      data
+      data: { name, url, description, isActive }
     });
     return { success: true, data: service };
   }
@@ -40,15 +44,19 @@ export class IntegrationController {
 
   @Post('routes')
   async createRoute(@Body() data: any) {
-    const route = await this.prisma.gatewayRoute.create({ data });
+    const { path, stripPath, serviceId, methods, isActive } = data;
+    const route = await this.prisma.gatewayRoute.create({
+      data: { path, stripPath, serviceId: parseInt(serviceId), methods, isActive: isActive ?? true }
+    });
     return { success: true, data: route };
   }
 
   @Put('routes/:id')
   async updateRoute(@Param('id') id: string, @Body() data: any) {
+    const { path, stripPath, serviceId, methods, isActive } = data;
     const route = await this.prisma.gatewayRoute.update({
       where: { id: parseInt(id) },
-      data
+      data: { path, stripPath, serviceId: serviceId ? parseInt(serviceId) : undefined, methods, isActive }
     });
     return { success: true, data: route };
   }
@@ -69,17 +77,19 @@ export class IntegrationController {
   async createApiKey(@Body() data: any) {
     const crypto = require('crypto');
     const key = crypto.randomBytes(32).toString('hex');
+    const { name, description, isActive } = data;
     const apikey = await this.prisma.apiKey.create({
-      data: { ...data, key }
+      data: { name, description, isActive: isActive ?? true, key }
     });
     return { success: true, data: apikey };
   }
 
   @Put('apikeys/:id')
   async updateApiKey(@Param('id') id: string, @Body() data: any) {
+    const { name, description, isActive } = data;
     const apikey = await this.prisma.apiKey.update({
       where: { id: parseInt(id) },
-      data
+      data: { name, description, isActive }
     });
     return { success: true, data: apikey };
   }
