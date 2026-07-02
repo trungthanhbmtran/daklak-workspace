@@ -20,7 +20,7 @@ export function GatewayClient() {
   const { data: apiKeys = [] } = useQuery({ queryKey: ['gateway', 'apikeys'], queryFn: gatewayApi.getApiKeys });
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full overflow-hidden">
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1 min-h-0 overflow-hidden">
       
       {/* Back Button */}
       <div className="shrink-0">

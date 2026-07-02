@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function GatewayPage() {
   return (
-    <div className="container mx-auto p-6 max-w-5xl h-full flex flex-col overflow-hidden">
+    <div className="container mx-auto p-6 max-w-5xl flex-1 min-h-0 flex flex-col overflow-hidden">
       <GatewayClient />
     </div>
   );
