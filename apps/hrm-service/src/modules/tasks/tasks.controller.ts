@@ -1,5 +1,5 @@
 import { Controller, UseInterceptors } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, EventPattern } from '@nestjs/microservices';
 import { TasksService } from './tasks.service';
 import { GrpcContextInterceptor } from '../../core/interceptors/grpc-context.interceptor';
 
@@ -76,5 +76,10 @@ export class TasksController {
   @GrpcMethod('TaskService', 'RequestCoordination')
   requestCoordination(data: { taskId: number; requesterCode: string; message?: string; leadCode?: string; coordinatorCodes?: string[] }) {
     return this.tasksService.requestCoordination(data.taskId, data);
+  }
+
+  @EventPattern('WORKFLOW_UPDATED')
+  handleWorkflowUpdated(data: { workflowId: string; definition: any }) {
+    return this.tasksService.invalidateWorkflowCache(data.workflowId, data.definition);
   }
 }

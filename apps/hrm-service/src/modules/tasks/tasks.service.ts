@@ -3,6 +3,7 @@ import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
@@ -10,6 +11,33 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   private userService: any;
   private workflowService: any;
   private scanInterval: NodeJS.Timeout;
+  private workflowCache: Map<string, any> = new Map();
+
+  private async getWorkflowDefinition(workflowId: string): Promise<any> {
+    if (this.workflowCache.has(workflowId)) {
+      return this.workflowCache.get(workflowId);
+    }
+    try {
+      const res = await firstValueFrom<any>(this.workflowService.FindOneWorkflow({ id: workflowId }));
+      if (res && res.definition) {
+        this.workflowCache.set(workflowId, res.definition);
+        return res.definition;
+      }
+    } catch (e) {
+      this.logger.error(`Failed to fetch workflow definition for ${workflowId}`, e);
+    }
+    return null;
+  }
+
+  public invalidateWorkflowCache(workflowId: string, newDefinition?: any) {
+    if (newDefinition) {
+      this.workflowCache.set(workflowId, newDefinition);
+      this.logger.log(`Workflow ${workflowId} cache updated directly from event`);
+    } else {
+      this.workflowCache.delete(workflowId);
+      this.logger.log(`Workflow ${workflowId} cache invalidated`);
+    }
+  }
 
   constructor(
     private prisma: PrismaService,
@@ -321,28 +349,32 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     let actions: string[] = [];
 
-    // Tích hợp Workflow để lấy Allowed Actions
-    if (t.workflowInstId && this.workflowService) {
+    // Tích hợp Workflow chuẩn (Decentralized Engine)
+    const activeWorkflowId = t.workflowId || t.workflowInstId; // Dùng workflowId hoặc InstId làm ID tạm
+    
+    if (activeWorkflowId && t.currentNodeId) {
       try {
-        const allowedRes = await firstValueFrom<any>(this.workflowService.GetAllowedActions({
-          instanceId: t.workflowInstId,
-          userRoles: query.currentUserPermissions || [],
-          userId: query.currentEmployeeCode,
-          businessData: {
-            status: t.status,
-            hasChildren,
-            isOwner: access.isOwner,
-            isAssignee: access.isAssignee,
-            isSupervisor: access.isSupervisor,
-            isCoordinator: access.isCoordinator,
-            isDeptLeader: access.isDeptLeader,
-          }
-        }));
-        if (allowedRes && allowedRes.allowedActions) {
-          actions = allowedRes.allowedActions;
+        const definition = await this.getWorkflowDefinition(activeWorkflowId);
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          actions = engine.getAllowedActions(
+            t.currentNodeId,
+            query.currentUserPermissions || [],
+            query.currentEmployeeCode,
+            {
+              status: t.status,
+              hasChildren,
+              isOwner: access.isOwner,
+              isAssignee: access.isAssignee,
+              isSupervisor: access.isSupervisor,
+              isCoordinator: access.isCoordinator,
+              isDeptLeader: access.isDeptLeader,
+              allowedEmployeeCodes: query.allowedEmployeeCodes || [],
+            }
+          );
         }
       } catch (err) {
-        this.logger.error('Failed to get allowed actions from workflow for task ' + t.id, err);
+        this.logger.error('Failed to calculate allowed actions from local engine for task ' + t.id, err);
       }
       
       // Vẫn giữ lại các action nội bộ không thuộc quy trình workflow như EDIT, DELETE, CHAT
@@ -969,30 +1001,29 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
 
 
-    // Bắt đầu workflow cho Task
+    // Bắt đầu workflow chuẩn cho Task (Decentralized)
     try {
-      if (this.workflowService) {
-        const startWorkflowRes = await firstValueFrom<any>(this.workflowService.StartWorkflow({
-          workflowId: 'TASK_PROCESSING_ID',
-          initiatorId: creatorCode,
-          businessId: t.id.toString(),
-          businessType: 'TASK',
-          initialContext: {
-            assigneeId: data.assigneeCode,
-            reviewerId: data.supervisorCode,
-            requiresApproval: !!data.supervisorCode
-          }
-        }));
-        if (startWorkflowRes && startWorkflowRes.id) {
+      const workflowId = 'TASK_PROCESSING_ID';
+      const definition = await this.getWorkflowDefinition(workflowId);
+      
+      if (definition) {
+        const engine = new WorkflowEngine(definition);
+        const initialNodeId = engine.getInitialNodeId();
+        
+        if (initialNodeId) {
           await this.prisma.task.update({
             where: { id: t.id },
-            data: { workflowInstId: startWorkflowRes.id }
+            data: { 
+              workflowId: workflowId,
+              currentNodeId: initialNodeId
+            }
           });
-          t.workflowInstId = startWorkflowRes.id;
+          t.workflowId = workflowId;
+          t.currentNodeId = initialNodeId;
         }
       }
     } catch (err) {
-      this.logger.error('Failed to start workflow for task ' + t.id, err);
+      this.logger.error('Failed to init local workflow for task ' + t.id, err);
     }
 
     const createdTask = await this.prisma.task.findUnique({
@@ -1034,47 +1065,61 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     await this.enrichTasks(tCheckArr);
     const tCheck: any = tCheckArr[0];
 
-    // GỌI WORKFLOW ĐỂ VALIDATE
-    if (rawTask.workflowInstId && this.workflowService) {
+    // GỌI WORKFLOW ĐỂ VALIDATE VÀ NHẢY BƯỚC
+    const activeWorkflowId = rawTask.workflowId || rawTask.workflowInstId;
+    let nextNodeIdToSave: string | undefined = undefined;
+
+    if (activeWorkflowId && rawTask.currentNodeId) {
       try {
         let actionName = actionNameForWorkflow || status;
         
-        // Cần truyền trạng thái gốc của task trước khi update để workflow đánh giá
         let hasChildren = false;
         const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: rawTask.id, depth: 1 } });
         hasChildren = childrenCount > 0;
         
-        // Tính toán các access level
         const queryContext = { ...context, currentEmployeeCode: actorCode, currentUserId: context?.currentUserId };
         const access = await this.checkTaskAccess(tCheck, queryContext);
 
-        const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
-          instanceId: rawTask.workflowInstId,
-          actionName: actionName,
-          userRoles: context?.currentUserPermissions || [],
-          userId: actorCode,
-          businessData: {
-            status: rawTask.status, // Current status, not the next one
-            hasChildren,
-            isOwner: access.isOwner,
-            isAssignee: access.isAssignee,
-            isSupervisor: access.isSupervisor,
-            isCoordinator: access.isCoordinator,
-            isDeptLeader: access.isDeptLeader,
+        const definition = await this.getWorkflowDefinition(activeWorkflowId);
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          const validateRes = engine.validateAction(
+            rawTask.currentNodeId,
+            actionName,
+            context?.currentUserPermissions || [],
+            actorCode,
+            {
+              status: rawTask.status,
+              hasChildren,
+              isOwner: access.isOwner,
+              isAssignee: access.isAssignee,
+              isSupervisor: access.isSupervisor,
+              isCoordinator: access.isCoordinator,
+              isDeptLeader: access.isDeptLeader,
+              allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
+            }
+          );
+          
+          if (!validateRes.allowed) {
+            throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}.`);
           }
-        }));
-        if (validateRes && !validateRes.allowed) {
-          throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}.`);
+
+          // Nhảy bước
+          const nextNodeId = engine.getNextNodeId(rawTask.currentNodeId, actionName);
+          if (nextNodeId) {
+            nextNodeIdToSave = nextNodeId;
+          }
         }
       } catch (err) {
         if (err instanceof RpcException) throw err;
-        this.logger.error('Lỗi gọi workflow ValidateAction', err);
+        this.logger.error('Lỗi tính toán ValidateAction qua local engine', err);
       }
     }
 
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
     if (status === 'DONE') dataToUpdate.completedAt = new Date();
+    if (nextNodeIdToSave) dataToUpdate.currentNodeId = nextNodeIdToSave;
 
     const t = await this.prisma.task.update({
       where: { id },
@@ -1153,33 +1198,43 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { id },
       include: { participants: true }
     });
-    if (rawTaskForCheck?.workflowInstId && this.workflowService) {
+    const activeWorkflowId = rawTaskForCheck?.workflowId || rawTaskForCheck?.workflowInstId;
+    if (activeWorkflowId && rawTaskForCheck?.currentNodeId) {
       try {
         const tCheckArr = [rawTaskForCheck];
         await this.enrichTasks(tCheckArr);
         const queryContext = { ...context, currentEmployeeCode: context?.currentEmployeeCode, currentUserId: context?.currentUserId };
         const access = await this.checkTaskAccess(tCheckArr[0], queryContext);
 
-        const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
-          instanceId: rawTaskForCheck.workflowInstId,
-          actionName: 'ASSIGN',
-          userRoles: context?.currentUserPermissions || [],
-          userId: context?.currentEmployeeCode,
-          businessData: {
-            status: rawTaskForCheck.status,
-            isOwner: access.isOwner,
-            isAssignee: access.isAssignee,
-            isSupervisor: access.isSupervisor,
-            isDeptLeader: access.isDeptLeader,
-            isCoordinator: access.isCoordinator
+        const definition = await this.getWorkflowDefinition(activeWorkflowId);
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          const validateRes = engine.validateAction(
+            rawTaskForCheck.currentNodeId,
+            'ASSIGN',
+            context?.currentUserPermissions || [],
+            context?.currentEmployeeCode,
+            {
+              status: rawTaskForCheck.status,
+              isOwner: access.isOwner,
+              isAssignee: access.isAssignee,
+              isSupervisor: access.isSupervisor,
+              isDeptLeader: access.isDeptLeader,
+              isCoordinator: access.isCoordinator,
+              allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
+            }
+          );
+          
+          if (!validateRes.allowed) {
+            throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
           }
-        }));
-        if (validateRes && !validateRes.allowed) {
-          throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
+          
+          // Chú ý: action ASSIGN thường không làm nhảy bước workflow (không đổi trạng thái task)
+          // nên ở đây ta không cần tìm getNextNodeId và update currentNodeId
         }
       } catch (err) {
         if (err instanceof RpcException) throw err;
-        this.logger.error('Lỗi gọi workflow ValidateAction for ASSIGN', err);
+        this.logger.error('Lỗi tính toán ValidateAction for ASSIGN qua local engine', err);
       }
     }
 

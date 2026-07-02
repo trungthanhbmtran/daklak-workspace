@@ -19,7 +19,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
             urls: [config.get<string>('RABBITMQ_URL') || 'amqp://guest:guest@localhost:5672'],
             queue: config.get<string>('NOTIFICATION_QUEUE') || 'notifications',
             queueOptions: {
-              durable: false,
+              durable: true,
             },
           },
         }),

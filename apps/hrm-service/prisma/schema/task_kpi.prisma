@@ -18,6 +18,8 @@ model Task {
   planId          Int? @map("plan_id")
 
   workflowInstId String? @map("workflow_instance_id")
+  workflowId     String? @map("workflow_id")
+  currentNodeId  String? @map("current_node_id")
   metadata       Json?   @map("metadata")
 
   creatorEmployeeCode String? @map("creator_employee_code")

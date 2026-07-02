@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { WorkflowEngineService } from './workflow-engine.service';
 import { WorkflowController } from './workflow.controller';
 import { WorkflowGrpcController } from './workflow-grpc.controller';
 import { PrismaModule } from '@/database/prisma.module';
@@ -104,10 +103,17 @@ const protoRoot =
           },
         },
       },
+      {
+        name: 'REDIS_SERVICE',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+        },
+      },
     ]),
   ],
   controllers: [WorkflowController, WorkflowGrpcController],
-  providers: [WorkflowEngineService],
-  exports: [WorkflowEngineService],
+  providers: [],
 })
 export class WorkflowModule {}

@@ -1,7 +1,6 @@
-import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { Controller, Inject } from '@nestjs/common';
+import { GrpcMethod, RpcException, ClientProxy } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
-import { WorkflowEngineService } from './workflow-engine.service';
 import { PrismaService } from '@/database/prisma.service';
 
 export interface WorkflowDefinition {
@@ -24,8 +23,8 @@ export interface WorkflowItem {
 @Controller()
 export class WorkflowGrpcController {
   constructor(
-    private readonly engine: WorkflowEngineService,
     private readonly prisma: PrismaService,
+    @Inject('REDIS_SERVICE') private readonly redisClient: ClientProxy,
   ) {}
 
   private ensureValidDefinition(def: any): any {
@@ -99,7 +98,16 @@ export class WorkflowGrpcController {
         where: { id: data.id },
         data: updateData,
       });
-      return this.mapWorkflow(workflow);
+
+      const mappedWorkflow = this.mapWorkflow(workflow);
+      
+      // Phát event qua Redis Pub/Sub để các service khác biết và invalidate cache
+      this.redisClient.emit('WORKFLOW_UPDATED', {
+        workflowId: mappedWorkflow.id,
+        definition: JSON.parse(mappedWorkflow.definition)
+      });
+
+      return mappedWorkflow;
     } catch (e) {
       console.error('[WorkflowService] Update error:', e);
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
@@ -172,194 +180,4 @@ export class WorkflowGrpcController {
     };
   }
 
-  private mapInstance(inst: any) {
-    return {
-      id: inst.id,
-      workflowId: inst.workflowId,
-      status: inst.status,
-      currentNodeId: inst.currentNodeId || '',
-      context: inst.context || {},
-      createdAt: inst.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: inst.updatedAt?.toISOString() || new Date().toISOString(),
-      workflowName: inst.workflow?.name || inst.workflowName || '',
-      logs: (inst.logs || []).map((l: any) => this.mapLog(l)),
-    };
-  }
-
-  private mapLog(l: any) {
-    return {
-      id: l.id,
-      nodeId: l.nodeId || '',
-      nodeType: l.nodeType || '',
-      nodeLabel: l.nodeLabel || '',
-      action: l.action || '',
-      data: l.data || {},
-      error: l.error || '',
-      createdAt: l.createdAt?.toISOString() || new Date().toISOString(),
-    };
-  }
-
-  // --- Execution Engine ---
-
-  @GrpcMethod('WorkflowService', 'StartWorkflow')
-  async startWorkflow(data: {
-    workflowId: string;
-    initialContext?: any;
-    initiatorId?: string;
-    businessId?: string;
-    businessType?: string;
-  }) {
-    try {
-      const result = await this.engine.startWorkflow(
-        data.workflowId,
-        data.initialContext || {},
-        data.initiatorId,
-        data.businessId,
-        data.businessType,
-      );
-      return this.mapInstance(result);
-    } catch (e) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
-    }
-  }
-
-  @GrpcMethod('WorkflowService', 'TriggerWorkflow')
-  async triggerWorkflow(data: {
-    trigger: string;
-    initialContext?: any;
-    initiatorId?: string;
-    businessId?: string;
-    businessType?: string;
-  }) {
-    try {
-      // NOTE: engine.triggerWorkflow must be updated to accept businessId and businessType too
-      const instance = await this.engine.triggerWorkflow(
-        data.trigger,
-        data.initialContext || {},
-        data.initiatorId,
-        data.businessId,
-        data.businessType,
-      );
-      if (!instance) {
-        return { id: '', status: 'NOT_FOUND' };
-      }
-      return this.mapInstance(instance);
-    } catch (e) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
-    }
-  }
-
-  @GrpcMethod('WorkflowService', 'ResumeWorkflow')
-  async resumeWorkflow(data: {
-    instanceId: string;
-    nodeId: string;
-    actionData?: any;
-    userRoles?: string[];
-  }) {
-    try {
-      await this.engine.resumeWorkflow(
-        data.instanceId,
-        data.nodeId,
-        data.actionData || {},
-        data.userRoles || [],
-      );
-      // return a default success response
-      return { id: data.instanceId, status: 'RUNNING' };
-    } catch (e) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
-    }
-  }
-
-  @GrpcMethod('WorkflowService', 'ValidateAction')
-  async validateAction(data: {
-    instanceId: string;
-    actionName: string;
-    userRoles?: string[];
-    userId?: string;
-    businessData?: any;
-  }) {
-    try {
-      const result = await this.engine.validateAction(
-        data.instanceId,
-        data.actionName,
-        data.userRoles || [],
-        data.userId,
-        data.businessData,
-      );
-      return { allowed: result.allowed, reason: result.reason || '' };
-    } catch (e) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
-    }
-  }
-
-  @GrpcMethod('WorkflowService', 'GetAllowedActions')
-  async getAllowedActions(data: {
-    instanceId: string;
-    userRoles?: string[];
-    userId?: string;
-    businessData?: any;
-  }) {
-    try {
-      const allowedActions = await this.engine.getAllowedActions(
-        data.instanceId,
-        data.userRoles || [],
-        data.userId,
-        data.businessData,
-      );
-      return { allowedActions };
-    } catch (e) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
-    }
-  }
-
-  @GrpcMethod('WorkflowService', 'GetInstance')
-  async getInstance(data: { id: string }) {
-    const instance = await this.prisma.workflowInstance.findUnique({
-      where: { id: data.id },
-      include: {
-        workflow: true,
-        logs: { orderBy: { createdAt: 'desc' }, take: 50 },
-      },
-    });
-    if (!instance) {
-      throw new RpcException({
-        code: GrpcStatus.NOT_FOUND,
-        message: 'Instance not found',
-      });
-    }
-    return this.mapInstance(instance);
-  }
-
-  @GrpcMethod('WorkflowService', 'GetLogs')
-  async getLogs(data: { instanceId: string }) {
-    const logs = await this.prisma.executionLog.findMany({
-      where: { instanceId: data.instanceId },
-      orderBy: { createdAt: 'desc' },
-    });
-    return { logs: logs.map((l) => this.mapLog(l)) };
-  }
-
-  @GrpcMethod('WorkflowService', 'ListInstances')
-  async listInstances(data: { skip?: number; take?: number; workflowId?: string; status?: string }) {
-    const { skip = 0, take = 50, workflowId, status } = data;
-    const where: any = {};
-    if (workflowId) where.workflowId = workflowId;
-    if (status) where.status = status;
-
-    const [items, total] = await Promise.all([
-      this.prisma.workflowInstance.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { createdAt: 'desc' },
-        include: { workflow: true },
-      }),
-      this.prisma.workflowInstance.count({ where }),
-    ]);
-
-    return {
-      items: items.map((instance) => this.mapInstance(instance)),
-      total,
-    };
-  }
 }
