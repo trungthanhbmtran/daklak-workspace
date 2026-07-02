@@ -55,8 +55,8 @@ export function ServicesTab() {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
-      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <Card className="border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Network className="w-5 h-5 text-blue-500" /> Thêm mới Service Upstream
@@ -83,10 +83,9 @@ export function ServicesTab() {
         </CardContent>
       </Card>
 
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <h3 className="shrink-0 text-lg font-semibold text-slate-800 mb-4 px-2">Danh sách Services ({services.length})</h3>
-        <div className="flex-1 overflow-y-auto custom-scrollbar px-2 pb-6">
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div>
+        <h3 className="text-lg font-semibold text-slate-800 mb-4 px-2">Danh sách Services ({services.length})</h3>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {services.map(s => (
             <Card key={s.id} className="group relative border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 rounded-md overflow-hidden bg-white">
               <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
@@ -132,7 +131,6 @@ export function ServicesTab() {
             </div>
           )}
           </div>
-        </div>
       </div>
     </div>
   );
