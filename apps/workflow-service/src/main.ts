@@ -45,6 +45,7 @@ async function bootstrap() {
   });
 
   // 4. Start both REST and gRPC
+  app.enableShutdownHooks();
   await app.startAllMicroservices();
 
   const port = process.env.PORT || 3001;

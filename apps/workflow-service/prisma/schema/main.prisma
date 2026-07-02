@@ -54,3 +54,20 @@ model ExecutionLog {
 
   @@map("execution_logs")
 }
+
+model IntegrationConnection {
+  id          String   @id @default(uuid())
+  name        String   // Tên hệ thống (VD: Cổng DVC Quốc Gia)
+  code        String   @unique // Mã liên thông (VD: DVCQG_SYNC)
+  description String?  @db.Text
+  type        String   @default("REST") // REST hoặc SOAP
+  baseUrl     String   
+  authConfig  Json?    
+  headers     Json?    
+  endpoints   Json?    
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("integration_connections")
+}
