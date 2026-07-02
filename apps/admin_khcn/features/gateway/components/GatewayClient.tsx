@@ -22,14 +22,7 @@ export function GatewayClient() {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 flex-1 min-h-0 overflow-hidden">
       
-      {/* Back Button */}
-      <div className="shrink-0">
-          <Link href="/hub" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors bg-white px-3 py-1.5 border border-slate-200 rounded-md shadow-sm">
-            <ArrowLeft className="w-4 h-4 mr-1.5" /> Quay lại Hub
-          </Link>
-        </div>
-
-        {/* Header & Dashboard Stats */}
+      {/* Header & Dashboard Stats */}
       <div className="shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 bg-white border border-slate-200 p-6 rounded-lg shadow-sm relative overflow-hidden">
         {/* Decorative elements */}
           <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-20"></div>
