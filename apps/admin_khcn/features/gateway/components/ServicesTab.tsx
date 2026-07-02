@@ -56,8 +56,8 @@ export function ServicesTab() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <Card className="border-none shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden bg-white">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-6">
+      <Card className="border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
+        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Network className="w-5 h-5 text-blue-500" /> Thêm mới Service Upstream
           </CardTitle>
@@ -69,13 +69,13 @@ export function ServicesTab() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
             <div className="space-y-2 md:col-span-3">
               <Label className="text-slate-600">Mã Service (Name)</Label>
-              <Input className="h-11 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-blue-500" placeholder="user-service" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} />
+              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500" placeholder="user-service" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} />
             </div>
             <div className="space-y-2 md:col-span-6">
               <Label className="text-slate-600">Địa chỉ URL nội bộ (Target URL)</Label>
-              <Input className="h-11 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-blue-500 font-mono text-sm" placeholder="http://user-service:50051" value={newService.url} onChange={e => setNewService({...newService, url: e.target.value})} />
+              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500 font-mono text-sm" placeholder="http://user-service:50051" value={newService.url} onChange={e => setNewService({...newService, url: e.target.value})} />
             </div>
-            <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-11 md:col-span-3 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 text-white w-full">
+            <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-blue-600 hover:bg-blue-700 shadow-sm text-white w-full">
               {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Plus className="w-5 h-5 mr-1.5" />}
               Khởi tạo Service
             </Button>
@@ -87,8 +87,8 @@ export function ServicesTab() {
         <h3 className="text-lg font-semibold text-slate-800 mb-4 px-2">Danh sách Services ({services.length})</h3>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {services.map(s => (
-            <Card key={s.id} className="group relative border border-slate-200/60 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 rounded-2xl overflow-hidden bg-white">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+            <Card key={s.id} className="group relative border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 rounded-md overflow-hidden bg-white">
+              <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
@@ -111,7 +111,7 @@ export function ServicesTab() {
                   </Button>
                 </div>
                 
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center gap-3 overflow-hidden">
+                <div className="bg-slate-50 border border-slate-100 rounded-md p-3 flex items-center gap-3 overflow-hidden">
                   <div className="flex-1 truncate font-mono text-sm text-slate-600">
                     {s.url}
                   </div>
@@ -125,7 +125,7 @@ export function ServicesTab() {
             </Card>
           ))}
           {services.length === 0 && (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+            <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-md border border-dashed border-slate-200">
               <Network className="w-12 h-12 mb-3 text-slate-300" />
               <p>Chưa có Service nào được định nghĩa</p>
             </div>

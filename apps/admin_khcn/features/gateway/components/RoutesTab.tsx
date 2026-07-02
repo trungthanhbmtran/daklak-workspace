@@ -65,8 +65,8 @@ export function RoutesTab() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <Card className="border-none shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden bg-white">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-6">
+      <Card className="border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
+        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6">
           <CardTitle className="flex items-center gap-2 text-xl">
             <RouteIcon className="w-5 h-5 text-indigo-500" /> Đăng ký Route mới
           </CardTitle>
@@ -78,26 +78,26 @@ export function RoutesTab() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
             <div className="space-y-2 md:col-span-5">
               <Label className="text-slate-600">Đường dẫn Request (Path Matcher)</Label>
-              <Input className="h-11 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-indigo-500 font-mono text-sm" placeholder="/api/v1/external/users/*" value={newRoute.path} onChange={e => setNewRoute({...newRoute, path: e.target.value})} />
+              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-indigo-500 font-mono text-sm" placeholder="/api/v1/external/users/*" value={newRoute.path} onChange={e => setNewRoute({...newRoute, path: e.target.value})} />
             </div>
             <div className="space-y-2 md:col-span-3">
               <Label className="text-slate-600">Service đích (Target)</Label>
               <Select value={newRoute.serviceId} onValueChange={v => setNewRoute({...newRoute, serviceId: v})}>
-                <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:ring-indigo-500">
+                <SelectTrigger className="h-10 rounded-md bg-white border-slate-200 focus:ring-indigo-500">
                   <SelectValue placeholder="Chọn Service..." />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                <SelectContent className="rounded-md border-slate-100 shadow-md">
                   {services.map(s => <SelectItem key={s.id} value={s.id.toString()} className="cursor-pointer">{s.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2 md:col-span-2 flex flex-col items-center">
               <Label className="text-slate-600">Strip Path</Label>
-              <div className="h-11 flex items-center">
+              <div className="h-10 flex items-center">
                 <Switch checked={newRoute.stripPath} onCheckedChange={v => setNewRoute({...newRoute, stripPath: v})} />
               </div>
             </div>
-            <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-11 md:col-span-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 text-white w-full">
+            <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-2 rounded-md bg-indigo-600 hover:bg-indigo-700 shadow-sm text-white w-full">
               {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Plus className="w-5 h-5 mr-1.5" />} 
               Thêm Route
             </Button>
@@ -105,7 +105,7 @@ export function RoutesTab() {
         </CardContent>
       </Card>
 
-      <div className="bg-white border border-slate-200/60 shadow-sm rounded-3xl overflow-hidden">
+      <div className="bg-white border border-slate-200 shadow-sm rounded-md overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-600 uppercase text-xs font-semibold tracking-wider border-b border-slate-100">

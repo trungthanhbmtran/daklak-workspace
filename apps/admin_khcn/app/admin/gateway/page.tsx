@@ -1,4 +1,4 @@
-﻿import { GatewayClient } from "@/features/gateway/components/GatewayClient";
+import { GatewayClient } from "@/features/gateway/components/GatewayClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function GatewayPage() {
   return (
-    <div className="w-full flex-1">
+    <div className="w-full h-full overflow-y-auto p-4 md:p-8">
       <GatewayClient />
     </div>
   );
