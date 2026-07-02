@@ -30,6 +30,7 @@ export class WorkflowEngineService implements OnModuleInit {
     @Inject('HRM_SERVICE') private readonly hrmClient: ClientGrpc,
     @Inject('POSTS_SERVICE') private readonly postsClient: ClientGrpc,
     @Inject('DOCUMENT_SERVICE') private readonly documentClient: ClientGrpc,
+    @Inject('NOTIFICATION_SERVICE') private readonly notificationClient: any,
   ) {}
 
   onModuleInit() {
@@ -353,6 +354,38 @@ export class WorkflowEngineService implements OnModuleInit {
 
         case 'user_task':
           await this.updateStatus(instanceId, WorkflowStatus.WAITING);
+          
+          // Gửi message queue thông báo khi đến bước user_task
+          try {
+            const role = node.data?.role;
+            const assignee = (instance.context as any)?.assignee || node.data?.assignee;
+            let recipients: string[] = [];
+            
+            if (assignee) recipients.push(assignee);
+            if (!assignee && role) recipients.push(`role:${role}`);
+            
+            // Nếu không có assignee hoặc role rõ ràng, có thể fallback gửi cho initiatorId
+            if (recipients.length === 0 && instance.initiatorId) {
+               recipients.push(instance.initiatorId);
+            }
+            
+            if (recipients.length > 0 && this.notificationClient) {
+              this.logger.log(`Dispatching notification via message queue to ${recipients.join(', ')}`);
+              this.notificationClient.emit('send_notification', {
+                recipients,
+                subject: `Công việc mới: ${instance.workflow?.name || 'Quy trình xử lý'}`,
+                body: `Bạn vừa nhận được một công việc mới: ${node.data?.label || 'Cần xử lý'}. Vui lòng đăng nhập vào hệ thống để tiếp nhận.`,
+                metadata: {
+                  workflowId: instance.workflowId,
+                  instanceId: instance.id,
+                  nodeId: node.id,
+                }
+              });
+            }
+          } catch (err) {
+            this.logger.error(`Failed to send user_task notification: ${err.message}`);
+          }
+
           nextOperation = 'HALT';
           break;
 

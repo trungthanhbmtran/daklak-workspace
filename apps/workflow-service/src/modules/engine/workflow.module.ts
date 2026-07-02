@@ -93,6 +93,17 @@ const protoRoot =
           },
         },
       },
+      {
+        name: 'NOTIFICATION_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'],
+          queue: process.env.NOTIFICATION_QUEUE || 'notifications',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
     ]),
   ],
   controllers: [WorkflowController, WorkflowGrpcController],
