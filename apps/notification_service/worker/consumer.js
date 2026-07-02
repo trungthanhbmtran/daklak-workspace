@@ -42,7 +42,7 @@ async function fetchActiveAdapters() {
       await dbClient.connect();
     }
     const res = await dbClient.query('SELECT integration_code, config_data FROM integration_configs WHERE is_active = true');
-    
+
     for (const row of res.rows) {
       const type = INTEGRATION_MAP[row.integration_code];
       if (type) {
@@ -58,14 +58,14 @@ async function fetchActiveAdapters() {
 
 async function handleMessage(msg) {
   const payload = parseMessage(msg.content.toString());
-  
+
   if (payload.recipients.length === 0) {
     console.warn('[Notification] No recipients, skip.');
     return;
   }
 
   const activeAdapters = await fetchActiveAdapters();
-  
+
   if (activeAdapters.length === 0) {
     console.warn('[Notification] No active notification channels configured.');
     return;
