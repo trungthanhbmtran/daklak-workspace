@@ -64,8 +64,8 @@ export function RoutesTab() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-4">
-      <Card className="border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
+    <div className="flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
+      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6">
           <CardTitle className="flex items-center gap-2 text-xl">
             <RouteIcon className="w-5 h-5 text-indigo-500" /> Đăng ký Route mới
@@ -105,8 +105,8 @@ export function RoutesTab() {
         </CardContent>
       </Card>
 
-      <div className="bg-white border border-slate-200 shadow-sm rounded-md overflow-hidden">
-        <div className="h-[calc(100vh-420px)] min-h-[400px] overflow-y-auto custom-scrollbar">
+      <div className="flex-1 flex flex-col min-h-0 bg-white border border-slate-200 shadow-sm rounded-md overflow-hidden">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-600 uppercase text-xs font-semibold tracking-wider border-b border-slate-100">
               <tr>
