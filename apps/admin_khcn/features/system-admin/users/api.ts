@@ -131,33 +131,33 @@ export const userApi = {
     return { success: data?.success ?? true, message: data?.message };
   },
 
-  /** Cập nhật tùy chọn nhận thông báo cá nhân (PUT /admin/users/:id/notification-prefs) */
-  updateNotificationPrefs: async (id: number, prefs: Record<string, any>): Promise<{ success: boolean; data?: any }> => {
-    const res = await apiClient.put(`/admin/users/${id}/notification-prefs`, {
-      notificationPrefs: JSON.stringify(prefs),
+  /** Cập nhật tùy chọn nhận thông báo cá nhân (PUT /users/:id/notification-prefs) */
+  updateNotificationPrefs: async (id: number, prefs: Record<string, boolean>) => {
+    const res = await apiClient.put(`/users/${id}/notification-prefs`, {
+      notificationPrefs: prefs,
     });
-    return { success: true, data: unwrapData(res) };
+    return unwrapData<any>(res);
   },
 };
 
 export const notificationApi = {
   getEvents: async (): Promise<any[]> => {
-    const res = await apiClient.get("/admin/notifications/events");
+    const res = await apiClient.get("/notifications/events");
     return unwrapData<any[]>(res);
   },
 };
 
 export const integrationApi = {
   list: async () => {
-    const res = await apiClient.get("/admin/integrations");
+    const res = await apiClient.get("/integrations");
     return unwrapData<any[]>(res);
   },
   create: async (body: any) => {
-    const res = await apiClient.post("/admin/integrations", body);
+    const res = await apiClient.post("/integrations", body);
     return unwrapData<any>(res);
   },
   update: async (id: number, body: any) => {
-    const res = await apiClient.put(`/admin/integrations/${id}`, body);
+    const res = await apiClient.put(`/integrations/${id}`, body);
     return unwrapData<any>(res);
   },
 };

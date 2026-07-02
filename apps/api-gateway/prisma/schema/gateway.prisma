@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model GatewayService {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  url         String   // e.g., http://user-service:50051
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  routes      GatewayRoute[]
+}
+
+model GatewayRoute {
+  id          Int      @id @default(autoincrement())
+  path        String   @unique // e.g., /api/v1/external/users
+  stripPath   Boolean  @default(true) // Whether to strip the path before sending to upstream
+  serviceId   Int
+  service     GatewayService @relation(fields: [serviceId], references: [id])
+  methods     String   @default("GET,POST,PUT,DELETE,PATCH") // Comma separated allowed methods
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ApiKey {
+  id          Int      @id @default(autoincrement())
+  name        String   // Tên tổ chức/bên thứ 3 được cấp
+  key         String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

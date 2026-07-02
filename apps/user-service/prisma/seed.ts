@@ -4860,7 +4860,7 @@ async function main() {
 
     // 2.5 Trung tâm Thông báo (Hub)
     { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: 'NOTIFICATION', type: 'SERVICE_ITEM' },
-    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/services/admin/notifications', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
+    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/hub/notifications?tab=config', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
 
     // 3. Quản lý Nhân sự & Công việc
     { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: 'HRM_EMPLOYEE', type: 'SERVICE_ITEM' },

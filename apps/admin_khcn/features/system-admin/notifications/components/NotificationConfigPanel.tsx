@@ -250,30 +250,9 @@ export function NotificationConfigPanel() {
       )
     }
   ];
-
   return (
     <div className="w-full max-w-5xl mx-auto pb-10">
-      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
-        {/* Header Banner */}
-        <div className="relative bg-gradient-to-r from-violet-600 to-indigo-600 p-8 md:p-10 overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Server className="w-48 h-48 rotate-12" />
-          </div>
-          <div className="relative z-10 flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-inner">
-              <BellRing className="w-6 h-6" />
-            </div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/90 backdrop-blur-md text-sm font-medium border border-white/20">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>Gateway Đang Hoạt Động</span>
-            </div>
-          </div>
-          <h2 className="relative z-10 text-3xl font-bold text-white mb-2">Trung tâm Thông báo</h2>
-          <p className="relative z-10 text-violet-100 max-w-2xl text-lg">
-            Quản lý và cấu hình các kênh giao tiếp đa nền tảng. Hệ thống Notification Service sẽ tự động định tuyến thông điệp dựa trên các kênh được kích hoạt tại đây.
-          </p>
-        </div>
-
+      <div className="w-full">
         {/* Channels List */}
         <div className="p-6 md:p-8 space-y-6 bg-slate-50 dark:bg-slate-900/50">
           {channels.map((channel) => {

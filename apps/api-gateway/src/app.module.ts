@@ -10,9 +10,11 @@ import { AppController } from './modules/app/app.controller';
 import { MediaModule } from './modules/media/media.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
-import { AiModule } from './modules/ai/ai.module';
 import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
+import { IntegrationModule } from './modules/integration/integration.module';
+import { DynamicProxyMiddleware } from './modules/integration/dynamic-proxy.middleware';
+import { PrismaModule } from './core/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -32,12 +34,16 @@ import { GlobalClientModule } from './core/global-client.module';
     TranslateModule,
     AiModule,
     RedisModule,
+    IntegrationModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DynamicProxyMiddleware).forRoutes('*');
+
     consumer
       .apply((req: any, res: any, next: () => void) => {
         // 1. Extract lang from query, cookies, x-lang header, or Accept-Language header

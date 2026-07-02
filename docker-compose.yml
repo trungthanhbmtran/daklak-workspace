@@ -125,3 +125,17 @@ services:
 volumes:
   mysql_data:
   minio_data:
+
+
+    build:
+      context: .
+      dockerfile: apps/integration_service/Dockerfile
+    container_name: integration-service
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "50080:50080"
+    environment:
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_systems
+

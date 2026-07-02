@@ -1,66 +1,87 @@
 import apiClient from "@/lib/axiosInstance";
 
-export interface GatewayRoute {
-  id: string;
-  gatewayId: string;
-  path: string;
-  targetService: string;
-  stripPrefix: boolean;
-  rateLimit: number | null;
-  timeout: number | null;
-  order: number;
+export interface GatewayService {
+  id: number;
+  name: string;
+  url: string;
+  description: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface GatewayConfig {
-  id: string;
-  name: string;
-  provider: string;
-  httpPort: number;
-  httpsPort: number;
-  enableHttps: boolean;
-  sslCert: string | null;
-  sslKey: string | null;
-  rawConfig: string | null;
+export interface GatewayRoute {
+  id: number;
+  path: string;
+  stripPath: boolean;
+  serviceId: number;
+  methods: string;
   isActive: boolean;
-  version: number;
-  routes: GatewayRoute[];
+  createdAt: string;
+  updatedAt: string;
+  service?: GatewayService;
+}
+
+export interface ApiKey {
+  id: number;
+  name: string;
+  key: string;
+  description: string | null;
+  isActive: boolean;
+  expiresAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export const gatewayApi = {
-  getGatewayConfigs: async (): Promise<GatewayConfig[]> => {
-    return apiClient.get('/gateway');
+  // Services
+  getServices: async (): Promise<GatewayService[]> => {
+    const res = await apiClient.get('/integration/services');
+    return res.data?.data || [];
+  },
+  createService: async (data: Partial<GatewayService>): Promise<GatewayService> => {
+    const res = await apiClient.post('/integration/services', data);
+    return res.data?.data;
+  },
+  updateService: async (id: number, data: Partial<GatewayService>): Promise<GatewayService> => {
+    const res = await apiClient.put(`/integration/services/${id}`, data);
+    return res.data?.data;
+  },
+  deleteService: async (id: number): Promise<void> => {
+    await apiClient.delete(`/integration/services/${id}`);
   },
 
-  getGatewayConfigById: async (id: string): Promise<GatewayConfig> => {
-    return apiClient.get(`/gateway/${id}`);
+  // Routes
+  getRoutes: async (): Promise<GatewayRoute[]> => {
+    const res = await apiClient.get('/integration/routes');
+    return res.data?.data || [];
+  },
+  createRoute: async (data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
+    const res = await apiClient.post('/integration/routes', data);
+    return res.data?.data;
+  },
+  updateRoute: async (id: number, data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
+    const res = await apiClient.put(`/integration/routes/${id}`, data);
+    return res.data?.data;
+  },
+  deleteRoute: async (id: number): Promise<void> => {
+    await apiClient.delete(`/integration/routes/${id}`);
   },
 
-  createGatewayConfig: async (data: Partial<GatewayConfig>): Promise<GatewayConfig> => {
-    return apiClient.post('/gateway', data);
+  // ApiKeys
+  getApiKeys: async (): Promise<ApiKey[]> => {
+    const res = await apiClient.get('/integration/apikeys');
+    return res.data?.data || [];
   },
-
-  updateGatewayConfig: async (id: string, data: Partial<GatewayConfig>): Promise<GatewayConfig> => {
-    return apiClient.patch(`/gateway/${id}`, data);
+  createApiKey: async (data: Partial<ApiKey>): Promise<ApiKey> => {
+    const res = await apiClient.post('/integration/apikeys', data);
+    return res.data?.data;
   },
-
-  deleteGatewayConfig: async (id: string): Promise<void> => {
-    return apiClient.delete(`/gateway/${id}`);
+  updateApiKey: async (id: number, data: Partial<ApiKey>): Promise<ApiKey> => {
+    const res = await apiClient.put(`/integration/apikeys/${id}`, data);
+    return res.data?.data;
   },
-
-  addRoute: async (gatewayId: string, data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
-    return apiClient.post(`/gateway/${gatewayId}/routes`, data);
-  },
-
-  updateRoute: async (routeId: string, data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
-    return apiClient.patch(`/gateway/routes/${routeId}`, data);
-  },
-
-  deleteRoute: async (routeId: string): Promise<void> => {
-    return apiClient.delete(`/gateway/routes/${routeId}`);
-  },
+  deleteApiKey: async (id: number): Promise<void> => {
+    await apiClient.delete(`/integration/apikeys/${id}`);
+  }
 };
