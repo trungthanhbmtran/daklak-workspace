@@ -1,10 +1,10 @@
-﻿import { Global, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { MICROSERVICES } from './constants/services';
 import { join } from 'path';
 
 const PROTO_ROOT =
-  process.env.PROTO_PATH || join(__dirname, '../../../../../../shared/protos');
+  process.env.PROTO_PATH || join(__dirname, '../../../../../shared/protos');
 
 @Global()
 @Module({

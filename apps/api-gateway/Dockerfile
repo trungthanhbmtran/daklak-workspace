@@ -10,6 +10,7 @@ RUN npm ci
 COPY apps/api-gateway/ ./
 COPY shared/protos ./shared/protos
 
+RUN npx prisma generate
 RUN npm run build
 
 
@@ -31,6 +32,7 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # Copy build outputs from builder stage with correct ownership
 COPY --chown=app:app --from=builder /app/dist ./dist
+COPY --chown=app:app --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 ENV PROTO_PATH=/app/protos

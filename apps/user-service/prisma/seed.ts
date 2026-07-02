@@ -35,6 +35,7 @@ async function main() {
     { code: 'ORGANIZATION', name: 'Cây tổ chức', serviceCode: 'USER_SERVICE' },
     { code: 'CATEGORY', name: 'Danh mục hệ thống', serviceCode: 'USER_SERVICE' },
     { code: 'NOTIFICATION', name: 'Thông báo hệ thống', serviceCode: 'NOTIFICATION_SERVICE' },
+    { code: 'API_GATEWAY', name: 'Quản lý API Gateway', serviceCode: 'API_GATEWAY' },
 
     // Document Management
     { code: 'DOCUMENT', name: 'Quản lý Văn bản', serviceCode: 'DOCUMENT_SERVICE' },
@@ -291,6 +292,13 @@ async function main() {
       order: 7,
       nameVi: 'Dịch vụ Thông báo',
       nameEn: 'Notification Service',
+    },
+    {
+      group: 'MICROSERVICE',
+      code: 'API_GATEWAY',
+      order: 8,
+      nameVi: 'Dịch vụ API Gateway',
+      nameEn: 'API Gateway Service',
     },
 
     // --- AI & TRANSLATION ---
@@ -4861,6 +4869,9 @@ async function main() {
     // 2.5 Trung tâm Thông báo (Hub)
     { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: 'NOTIFICATION', type: 'SERVICE_ITEM' },
     { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/hub/notifications?tab=config', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
+
+    // 2.6 Quản lý API Gateway
+    { code: 'API_GATEWAY_GROUP', name: 'Quản lý API Gateway', route: '/admin/gateway', icon: 'Server', order: 11, linkedResourceCode: 'API_GATEWAY', type: 'SERVICE_ITEM' },
 
     // 3. Quản lý Nhân sự & Công việc
     { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: 'HRM_EMPLOYEE', type: 'SERVICE_ITEM' },

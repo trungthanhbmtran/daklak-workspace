@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
+import { API_BASE_URL } from "@/config/constants";
 import type { UserItem, UserDetail, UserCreatePayload } from "./types";
 
 function normalizeUser(raw: Record<string, unknown>): UserItem {
@@ -149,15 +150,15 @@ export const notificationApi = {
 
 export const integrationApi = {
   list: async () => {
-    const res = await apiClient.get("/integrations");
+    const res = await apiClient.get(`${API_BASE_URL}/integrations`, { baseURL: '' });
     return unwrapData<any[]>(res);
   },
   create: async (body: any) => {
-    const res = await apiClient.post("/integrations", body);
+    const res = await apiClient.post(`${API_BASE_URL}/integrations`, body, { baseURL: '' });
     return unwrapData<any>(res);
   },
   update: async (id: number, body: any) => {
-    const res = await apiClient.put(`/integrations/${id}`, body);
+    const res = await apiClient.put(`${API_BASE_URL}/integrations/${id}`, body, { baseURL: '' });
     return unwrapData<any>(res);
   },
 };
