@@ -1016,7 +1016,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           type: 'SYSTEM',
           recipients: [data.assigneeCode],
           metadata: { taskId: enrichedTaskResponse.id },
-        });
+        }).subscribe();
       } catch (e) {
         console.error('Failed to send notification', e);
       }
@@ -1107,7 +1107,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             type: 'SYSTEM',
             recipients: [emp.userId],
             metadata: { taskId: id },
-          });
+          }).subscribe();
         }
       }
     } else if (status === 'RETURNED' && actorCode !== tCheck.assigneeCode) {
@@ -1119,7 +1119,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           type: 'SYSTEM',
           recipients: [emp.userId],
           metadata: { taskId: id },
-        });
+        }).subscribe();
       }
     } else if (status === 'DONE' && tCheck.status === 'PENDING_APPROVAL' && actorCode !== tCheck.assigneeCode) {
       const emp = await this.prisma.employee.findUnique({ where: { employeeCode: tCheck.assigneeCode }, select: { userId: true } });
@@ -1130,7 +1130,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           type: 'SYSTEM',
           recipients: [emp.userId],
           metadata: { taskId: id },
-        });
+        }).subscribe();
       }
     }
 
@@ -1231,7 +1231,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           type: 'SYSTEM',
           recipients: [data.assigneeCode],
           metadata: { taskId: enrichedTaskResponse.id },
-        });
+        }).subscribe();
       } catch (e) {
         console.error('Failed to send notification', e);
       }
@@ -1280,7 +1280,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
                 type: 'SYSTEM',
                 recipients: [code],
                 metadata: { taskId: task.id },
-              });
+              }).subscribe();
             } catch (e) {
               this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);
             }
@@ -1812,7 +1812,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             type: 'SYSTEM',
             recipients: userIds,
             metadata: { taskId: t.id },
-          });
+          }).subscribe();
         }
       }
     }
