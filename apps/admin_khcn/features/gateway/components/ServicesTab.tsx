@@ -12,7 +12,14 @@ import { Network, Plus, Trash2, Loader2 } from "lucide-react";
 
 export function ServicesTab() {
   const queryClient = useQueryClient();
-  const [newService, setNewService] = useState({ name: '', url: '', description: '' });
+  const [newService, setNewService] = useState({ 
+    name: '', 
+    url: '', 
+    description: '',
+    loadBalanceStrategy: 'ROUND_ROBIN',
+    useSsl: false,
+    ignoreTlsVerify: true
+  });
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ['gateway', 'services'],
@@ -23,7 +30,14 @@ export function ServicesTab() {
     mutationFn: gatewayApi.createService,
     onSuccess: () => {
       toast.success('Đã thêm Service mới');
-      setNewService({ name: '', url: '', description: '' });
+      setNewService({ 
+        name: '', 
+        url: '', 
+        description: '',
+        loadBalanceStrategy: 'ROUND_ROBIN',
+        useSsl: false,
+        ignoreTlsVerify: true
+      });
       queryClient.invalidateQueries({ queryKey: ['gateway', 'services'] });
     },
     onError: () => toast.error('Lỗi khi thêm Service')
@@ -72,9 +86,45 @@ export function ServicesTab() {
               <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500" placeholder="user-service" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} />
             </div>
             <div className="space-y-2 md:col-span-6">
-              <Label className="text-slate-600">Địa chỉ URL nội bộ (Target URL)</Label>
-              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500 font-mono text-sm" placeholder="http://user-service:50051" value={newService.url} onChange={e => setNewService({ ...newService, url: e.target.value })} />
+              <Label className="text-slate-600">Địa chỉ URL nội bộ (cách nhau bởi dấu phẩy)</Label>
+              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-blue-500 font-mono text-sm" placeholder="http://srv1:80, http://srv2:80" value={newService.url} onChange={e => setNewService({ ...newService, url: e.target.value })} />
             </div>
+            <div className="space-y-2 md:col-span-3">
+              <Label className="text-slate-600">Chiến lược Cân bằng tải</Label>
+              <select 
+                className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={newService.loadBalanceStrategy}
+                onChange={e => setNewService({ ...newService, loadBalanceStrategy: e.target.value })}
+              >
+                <option value="ROUND_ROBIN">Round Robin</option>
+                <option value="RANDOM">Random</option>
+                <option value="NONE">None</option>
+              </select>
+            </div>
+            
+            <div className="md:col-span-9 flex items-center gap-6 mt-2 mb-2 p-3 bg-slate-50 rounded-md border border-slate-100">
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox" 
+                  id="useSsl"
+                  className="w-4 h-4 text-blue-600 rounded border-slate-300"
+                  checked={newService.useSsl} 
+                  onChange={e => setNewService({ ...newService, useSsl: e.target.checked })} 
+                />
+                <Label htmlFor="useSsl" className="text-slate-600 cursor-pointer">Dùng SSL (HTTPS)</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox" 
+                  id="ignoreTlsVerify"
+                  className="w-4 h-4 text-blue-600 rounded border-slate-300"
+                  checked={newService.ignoreTlsVerify} 
+                  onChange={e => setNewService({ ...newService, ignoreTlsVerify: e.target.checked })} 
+                />
+                <Label htmlFor="ignoreTlsVerify" className="text-slate-600 cursor-pointer">Bỏ qua lỗi chứng chỉ (Self-signed)</Label>
+              </div>
+            </div>
+
             <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-blue-600 hover:bg-blue-700 shadow-sm text-white w-full">
               {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Plus className="w-5 h-5 mr-1.5" />}
               Khởi tạo Service
@@ -112,9 +162,24 @@ export function ServicesTab() {
                   </Button>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-100 rounded-md p-3 flex items-center gap-3 overflow-hidden">
-                  <div className="flex-1 truncate font-mono text-sm text-slate-600">
+                <div className="bg-slate-50 border border-slate-100 rounded-md p-3 flex flex-col gap-2 overflow-hidden">
+                  <div className="flex-1 truncate font-mono text-sm text-slate-600" title={s.url}>
                     {s.url}
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-[10px] font-semibold tracking-wider uppercase">
+                    <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-600">
+                      LB: {s.loadBalanceStrategy || 'ROUND_ROBIN'}
+                    </span>
+                    {s.useSsl && (
+                      <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-700">
+                        HTTPS
+                      </span>
+                    )}
+                    {s.ignoreTlsVerify && (
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                        Ignore TLS
+                      </span>
+                    )}
                   </div>
                 </div>
 

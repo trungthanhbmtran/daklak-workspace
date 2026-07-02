@@ -15,6 +15,7 @@ export class IntegrationService implements OnModuleInit {
       return this.getTargetUrl(req);
     },
     changeOrigin: true,
+    secure: false, // Default to false to support internal self-signed certs (controlled via ignoreTlsVerify at service level if needed, but globally false is safer for internal microservices)
     pathRewrite: (path, req) => {
       return this.rewritePath(path, req);
     },
@@ -48,10 +49,35 @@ export class IntegrationService implements OnModuleInit {
     return this.config.apikeys.some((k: any) => k.key === key && k.isActive);
   }
 
+  private lbCounters: Record<number, number> = {};
+
   private getTargetUrl(req: any): string | undefined {
     const route = this.matchRoute(req.originalUrl || req.url);
     if (route && route.service) {
-      return route.service.url;
+      const service = route.service;
+      const urls = service.url.split(',').map((u: string) => u.trim()).filter(Boolean);
+      
+      if (urls.length === 0) return undefined;
+
+      let targetUrl = urls[0];
+
+      if (urls.length > 1) {
+        if (service.loadBalanceStrategy === 'RANDOM') {
+          targetUrl = urls[Math.floor(Math.random() * urls.length)];
+        } else if (service.loadBalanceStrategy === 'ROUND_ROBIN') {
+          if (this.lbCounters[service.id] === undefined) {
+            this.lbCounters[service.id] = 0;
+          }
+          targetUrl = urls[this.lbCounters[service.id] % urls.length];
+          this.lbCounters[service.id]++;
+        }
+      }
+
+      if (service.useSsl && targetUrl.startsWith('http://')) {
+        targetUrl = targetUrl.replace('http://', 'https://');
+      }
+
+      return targetUrl;
     }
     return undefined; // Let it fall through or fail
   }

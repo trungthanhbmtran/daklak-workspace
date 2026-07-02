@@ -6,6 +6,9 @@ export interface GatewayService {
   url: string;
   description: string | null;
   isActive: boolean;
+  loadBalanceStrategy: string;
+  useSsl: boolean;
+  ignoreTlsVerify: boolean;
   createdAt: string;
   updatedAt: string;
 }

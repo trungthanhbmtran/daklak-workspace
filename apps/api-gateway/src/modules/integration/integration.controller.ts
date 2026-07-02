@@ -13,19 +13,35 @@ export class IntegrationController {
 
   @Post('services')
   async createService(@Body() data: any) {
-    const { name, url, description, isActive } = data;
+    const { name, url, description, isActive, loadBalanceStrategy, useSsl, ignoreTlsVerify } = data;
     const service = await this.prisma.gatewayService.create({
-      data: { name, url, description, isActive: isActive ?? true }
+      data: {
+        name,
+        url,
+        description,
+        loadBalanceStrategy: loadBalanceStrategy ?? 'ROUND_ROBIN',
+        useSsl: useSsl ?? false,
+        ignoreTlsVerify: ignoreTlsVerify ?? true,
+        isActive: isActive ?? true
+      }
     });
     return { success: true, data: service };
   }
 
   @Put('services/:id')
   async updateService(@Param('id') id: string, @Body() data: any) {
-    const { name, url, description, isActive } = data;
+    const { name, url, description, isActive, loadBalanceStrategy, useSsl, ignoreTlsVerify } = data;
     const service = await this.prisma.gatewayService.update({
       where: { id: parseInt(id) },
-      data: { name, url, description, isActive }
+      data: {
+        name,
+        url,
+        description,
+        loadBalanceStrategy,
+        useSsl,
+        ignoreTlsVerify,
+        isActive
+      }
     });
     return { success: true, data: service };
   }
