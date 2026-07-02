@@ -74,7 +74,7 @@ export function ApiKeysTab() {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
+    <div className="flex-1 min-h-0 flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
       <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
         <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6 relative overflow-hidden">
           <CardTitle className="flex items-center gap-2 text-xl relative z-10 text-slate-800">
