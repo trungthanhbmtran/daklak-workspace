@@ -20,7 +20,7 @@ export function GatewayClient() {
   const { data: apiKeys = [] } = useQuery({ queryKey: ['gateway', 'apikeys'], queryFn: gatewayApi.getApiKeys });
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full overflow-hidden">
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* Back Button */}
       <div className="shrink-0">
@@ -65,8 +65,8 @@ export function GatewayClient() {
         </div>
 
         {/* Main Content Tabs */}
-      <Tabs defaultValue="services" className="flex flex-col flex-1 min-h-0">
-        <div className="shrink-0 flex justify-start mb-6">
+      <Tabs defaultValue="services" className="flex flex-col gap-2">
+        <div className="flex justify-start mb-4">
           <TabsList className="h-10 bg-slate-100 rounded-md p-1 border border-slate-200">
               <TabsTrigger value="services" className="rounded-sm px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all">
                 <Network className="w-4 h-4 mr-2" />
@@ -83,15 +83,15 @@ export function GatewayClient() {
             </TabsList>
           </div>
 
-          <TabsContent value="services" className="flex flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none">
+          <TabsContent value="services" className="focus-visible:outline-none">
           <ServicesTab />
         </TabsContent>
 
-        <TabsContent value="routes" className="flex flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none">
+        <TabsContent value="routes" className="focus-visible:outline-none">
           <RoutesTab />
         </TabsContent>
 
-        <TabsContent value="apikeys" className="flex flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none">
+        <TabsContent value="apikeys" className="focus-visible:outline-none">
           <ApiKeysTab />
         </TabsContent>
       </Tabs>
