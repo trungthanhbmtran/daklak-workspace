@@ -83,15 +83,15 @@ export function GatewayClient() {
           </TabsList>
         </div>
 
-        <TabsContent value="services" className="flex-1 overflow-y-auto px-1 pb-10 focus-visible:outline-none">
+        <TabsContent value="services" className="flex flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none">
           <ServicesTab />
         </TabsContent>
 
-        <TabsContent value="routes" className="flex-1 overflow-y-auto px-1 pb-10 focus-visible:outline-none">
+        <TabsContent value="routes" className="flex flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none">
           <RoutesTab />
         </TabsContent>
 
-        <TabsContent value="apikeys" className="flex-1 overflow-y-auto px-1 pb-10 focus-visible:outline-none">
+        <TabsContent value="apikeys" className="flex flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none">
           <ApiKeysTab />
         </TabsContent>
       </Tabs>
