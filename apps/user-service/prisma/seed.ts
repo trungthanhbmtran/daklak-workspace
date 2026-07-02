@@ -34,7 +34,7 @@ async function main() {
     { code: 'MENU', name: 'Quản lý Menu', serviceCode: 'USER_SERVICE' },
     { code: 'ORGANIZATION', name: 'Cây tổ chức', serviceCode: 'USER_SERVICE' },
     { code: 'CATEGORY', name: 'Danh mục hệ thống', serviceCode: 'USER_SERVICE' },
-    { code: 'NOTIFICATION', name: 'Thông báo hệ thống', serviceCode: 'USER_SERVICE' },
+    { code: 'NOTIFICATION', name: 'Thông báo hệ thống', serviceCode: 'NOTIFICATION_SERVICE' },
 
     // Document Management
     { code: 'DOCUMENT', name: 'Quản lý Văn bản', serviceCode: 'DOCUMENT_SERVICE' },
@@ -284,6 +284,13 @@ async function main() {
       order: 6,
       nameVi: 'Dịch vụ Liên thông',
       nameEn: 'Integration Service',
+    },
+    {
+      group: 'MICROSERVICE',
+      code: 'NOTIFICATION_SERVICE',
+      order: 7,
+      nameVi: 'Dịch vụ Thông báo',
+      nameEn: 'Notification Service',
     },
 
     // --- AI & TRANSLATION ---
@@ -4849,11 +4856,11 @@ async function main() {
     { code: 'SYS_RESOURCE', name: 'Tài nguyên PBAC', route: '/services/admin/resources', icon: 'Database', order: 4, parentCode: 'SYS_GROUP', linkedResourceCode: 'RESOURCE', type: 'MENU' },
     { code: 'SYS_MENU', name: 'Quản lý Menu', route: '/services/admin/menus', icon: 'Menu', order: 5, parentCode: 'SYS_GROUP', linkedResourceCode: 'MENU', type: 'MENU' },
     { code: 'SYS_CAT', name: 'Danh mục', route: '/services/admin/categories', icon: 'ListTree', order: 6, parentCode: 'SYS_GROUP', linkedResourceCode: 'CATEGORY', type: 'MENU' },
-    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/services/admin/notifications', icon: 'Mail', order: 7, parentCode: 'SYS_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
-    
-    // 2.5 Trung tâm Thông báo (Hub)
-    { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'SYS_SETTING', name: 'Cấu hình chung', route: '/services/admin/settings', icon: 'Settings', order: 8, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
+
+    // 2.5 Trung tâm Thông báo (Hub)
+    { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: 'NOTIFICATION', type: 'SERVICE_ITEM' },
+    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/services/admin/notifications', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
 
     // 3. Quản lý Nhân sự & Công việc
     { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: 'HRM_EMPLOYEE', type: 'SERVICE_ITEM' },
