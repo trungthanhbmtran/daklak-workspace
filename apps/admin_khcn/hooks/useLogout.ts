@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import apiClient from "@/lib/axiosInstance";
 
 /**
@@ -11,7 +10,6 @@ import apiClient from "@/lib/axiosInstance";
  */
 export function useLogout() {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleLogout() {
@@ -25,9 +23,11 @@ export function useLogout() {
       } catch (error) {
         console.error("Logout error:", error);
       } finally {
-        // 3. Middleware (proxy.ts) sẽ detect không có token và redirect về /login
-        // router.push tự thêm basePath /admin → thành /admin/login
-        router.push("/login");
+        // 3. Thay vì hardNavigate, ta dùng reload.
+        // Trình duyệt tải lại trang (VD: /admin/hub).
+        // Middleware (middleware.ts) sẽ nhận thấy mất token và tự động redirect về /login,
+        // giữ nguyên basePath và đảm bảo clear sạch memory state.
+        window.location.reload();
       }
     });
   }

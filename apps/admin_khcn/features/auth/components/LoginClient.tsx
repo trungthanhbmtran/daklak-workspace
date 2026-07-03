@@ -63,11 +63,10 @@ export function LoginClient() {
 
         toast.success("Đăng nhập thành công! Đang chuyển hướng...");
 
-        if (callbackUrl) {
-          router.push(callbackUrl);
-        } else {
-          router.push('/hub');
-        }
+        // Thay vì redirect tĩnh, ta gọi reload để Hard Navigation.
+        // Middleware (proxy.ts -> middleware.ts) sẽ nhận thấy cookie và tự động redirect về /hub hoặc callbackUrl,
+        // giữ nguyên basePath và đảm bảo clear sạch memory state.
+        window.location.reload();
       } catch (error: any) {
         const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
         toast.error(message);

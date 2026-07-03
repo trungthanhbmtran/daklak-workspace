@@ -17,14 +17,19 @@ export function proxy(request: NextRequest) {
 
     // ❌ Chưa login → redirect login
     if (!token && !isPublic) {
-        const loginUrl = new URL("/admin/login", request.url);
+        const loginUrl = request.nextUrl.clone();
+        loginUrl.pathname = "/login";
         loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
     }
 
-    // ✅ Đã login mà vào login → đẩy về trang hub
+    // ✅ Đã login mà vào login → đẩy về trang hub (hoặc callbackUrl)
     if (token && pathname === "/login") {
-        return NextResponse.redirect(new URL("/admin/hub", request.url));
+        const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+        const targetUrl = request.nextUrl.clone();
+        targetUrl.pathname = callbackUrl || "/hub";
+        targetUrl.searchParams.delete("callbackUrl");
+        return NextResponse.redirect(targetUrl);
     }
 
     return NextResponse.next();
