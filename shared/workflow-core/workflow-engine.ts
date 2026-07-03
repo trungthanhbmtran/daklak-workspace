@@ -100,7 +100,7 @@ export class WorkflowEngine {
           'context',
           `
              with (context) {
-                ${node.data.validationExpression}
+                return ${node.data.validationExpression}
              }
           `
         );
