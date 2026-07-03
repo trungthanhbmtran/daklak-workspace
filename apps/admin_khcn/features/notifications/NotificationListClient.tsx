@@ -10,8 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getNotifications, markNotificationRead, type NotificationItem } from "./api";
+import Link from "next/link";
 
 const NOTIFICATIONS_KEY = ["notifications"];
+
+const resolveHref = (item: NotificationItem) => {
+  const { module, type, id, link } = item.metadata || {};
+  if (module && type && id) return `/services/${module}/${type}/${id}`;
+  if (link) return link;
+  return "#";
+};
 
 export function NotificationListClient() {
   const queryClient = useQueryClient();
@@ -84,36 +92,55 @@ export function NotificationListClient() {
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {list.map((item) => (
-                <div key={item.id} className={`p-5 flex gap-4 hover:bg-slate-50 transition-colors ${!item.read ? 'bg-blue-50/50' : 'bg-white'}`}>
-                  <div className="mt-1 flex-shrink-0">
-                    {getIcon(item.type)}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <h4 className={`text-base font-semibold ${!item.read ? 'text-slate-900' : 'text-slate-700'}`}>{item.title}</h4>
-                        {getPriorityBadge(item.type)}
-                        {!item.read && <span className="h-2 w-2 rounded-full bg-blue-600"></span>}
-                      </div>
-                      <div className="flex items-center text-xs text-slate-500 gap-1">
-                        <Clock className="h-3 w-3" />
-                        {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi }) : ""}
-                      </div>
+              {list.map((item) => {
+                const href = resolveHref(item);
+                const isLink = href !== "#";
+
+                const content = (
+                  <div className={`p-5 flex gap-4 hover:bg-slate-50 transition-colors ${!item.read ? 'bg-blue-50/50' : 'bg-white'}`}>
+                    <div className="mt-1 flex-shrink-0">
+                      {getIcon(item.type)}
                     </div>
-                    <p className="text-sm text-slate-600">{item.body}</p>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`text-base font-semibold ${!item.read ? 'text-slate-900' : 'text-slate-700'}`}>{item.title}</h4>
+                          {getPriorityBadge(item.type)}
+                          {!item.read && <span className="h-2 w-2 rounded-full bg-blue-600"></span>}
+                        </div>
+                        <div className="flex items-center text-xs text-slate-500 gap-1">
+                          <Clock className="h-3 w-3" />
+                          {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi }) : ""}
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600">{item.body}</p>
+                    </div>
+                    <div className="flex-shrink-0 flex items-center justify-center pl-4">
+                      {!item.read ? (
+                        <Button variant="outline" size="sm" className="text-xs relative z-10" onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          markRead.mutate(item.id);
+                        }}>
+                          Đánh dấu đã đọc
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-400">Đã đọc</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-shrink-0 flex items-center justify-center pl-4">
-                    {!item.read ? (
-                      <Button variant="outline" size="sm" className="text-xs" onClick={() => markRead.mutate(item.id)}>
-                        Đánh dấu đã đọc
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-slate-400">Đã đọc</span>
-                    )}
+                );
+
+                return isLink ? (
+                  <Link key={item.id} href={href} className="block cursor-pointer" onClick={() => !item.read && markRead.mutate(item.id)}>
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={item.id}>
+                    {content}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

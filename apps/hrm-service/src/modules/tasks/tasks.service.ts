@@ -195,11 +195,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         );
         query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
         query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
-        console.log('[DEBUG HRM] GetSubordinates response:', JSON.stringify(subordinatesRes));
-        console.log('[DEBUG HRM] Allowed Depts:', query.allowedDepartmentIds);
-        console.log('[DEBUG HRM] Allowed Codes:', query.allowedEmployeeCodes);
       } catch (e) {
-        console.error('[DEBUG HRM] Failed to get subordinates in hrm-service:', e);
       }
     }
   }
@@ -498,6 +494,10 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     await this.populateQueryHierarchy(query);
     const where: any = {};
 
+    if (query.id) {
+      where.id = parseInt(query.id, 10);
+    }
+
     const conditions: any[] = [];
 
     // Default status filter
@@ -573,7 +573,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     // End of scoping constraint application
 
-    console.log('[DEBUG HRM] Final Prisma Where Conditions:', JSON.stringify(conditions));
 
     if (conditions.length > 0) {
       where.AND = conditions;
@@ -650,7 +649,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    console.log('[DEBUG HRM] PRISMA TASKS RETURNED:', finalTasks.length, 'TOTAL:', total);
 
     const enrichedTasks = await this.enrichTasks(finalTasks);
 
@@ -683,7 +681,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     });
 
     const finalData = roots.map(t => this.toTaskResponse(t));
-    console.log('[DEBUG HRM] FINAL DATA LENGTH TO RETURN:', finalData.length);
 
     return {
       success: true,
@@ -701,7 +698,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getTaskStats(query: any) {
-    console.log('[DEBUG HRM] getTaskStats with Query:', JSON.stringify(query));
 
     const where: any = {};
     const conditions: any[] = [];
@@ -789,7 +785,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       delete where.status;
     }
 
-    console.log('[DEBUG HRM] Final Prisma Where Conditions (Stats):', JSON.stringify(where));
 
     const allStatsTasks = await this.prisma.task.findMany({
       where,
@@ -901,7 +896,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   }
 
   async createTask(data: any) {
-    console.log('[DEBUG HRM] CREATE TASK PAYLOAD:', JSON.stringify(data));
     let planId = data.planId || null;
     let parentId = data.parentId ? parseInt(data.parentId, 10) : null;
 
@@ -946,7 +940,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             isCrossDomain = true;
           }
         } catch (e) {
-          console.error('[DEBUG HRM] Failed to get domains for assignee:', e);
         }
       }
     }
@@ -1074,7 +1067,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           recipients: [data.assigneeCode],
           metadata: { 
             module: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).module) ? (enrichedTaskResponse.metadata as any).module : 'hrm',
-            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'tasks',
+            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'work-plans/tasks',
             id: enrichedTaskResponse.id
           },
         }).subscribe();
@@ -1186,7 +1179,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             recipients: [emp.userId],
             metadata: { 
             module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
-            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'tasks',
+            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'work-plans/tasks',
             id: id
           },
           }).subscribe();
@@ -1202,7 +1195,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           recipients: [emp.userId],
           metadata: { 
             module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
-            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'tasks',
+            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'work-plans/tasks',
             id: id
           },
         }).subscribe();
@@ -1217,7 +1210,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           recipients: [emp.userId],
           metadata: { 
             module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
-            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'tasks',
+            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'work-plans/tasks',
             id: id
           },
         }).subscribe();
@@ -1334,7 +1327,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           recipients: [data.assigneeCode],
           metadata: { 
             module: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).module) ? (enrichedTaskResponse.metadata as any).module : 'hrm',
-            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'tasks',
+            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'work-plans/tasks',
             id: enrichedTaskResponse.id
           },
         }).subscribe();
@@ -1387,7 +1380,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
                 recipients: [code],
                 metadata: { 
             module: (task.metadata && (task.metadata as any).module) ? (task.metadata as any).module : 'hrm',
-            type: (task.metadata && (task.metadata as any).type) ? (task.metadata as any).type : 'tasks',
+            type: (task.metadata && (task.metadata as any).type) ? (task.metadata as any).type : 'work-plans/tasks',
             id: task.id
           },
               }).subscribe();
@@ -1942,7 +1935,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             recipients: userIds,
             metadata: { 
             module: (t.metadata && (t.metadata as any).module) ? (t.metadata as any).module : 'hrm',
-            type: (t.metadata && (t.metadata as any).type) ? (t.metadata as any).type : 'tasks',
+            type: (t.metadata && (t.metadata as any).type) ? (t.metadata as any).type : 'work-plans/tasks',
             id: t.id
           },
           }).subscribe();

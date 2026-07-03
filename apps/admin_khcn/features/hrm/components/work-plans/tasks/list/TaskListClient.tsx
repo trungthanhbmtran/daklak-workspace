@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useMemo, useCallback, lazy, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTasksList, useTaskStats } from '@/features/hrm/hooks';
@@ -28,6 +28,7 @@ const CreateTaskModal = lazy(() =>
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
   const defaultSearch = searchParams.get('search') || '';
+  const urlTaskId = searchParams.get('taskId');
   const qc = useQueryClient();
 
   const [roleFilter, setRoleFilter] = useState<TaskRoleFilter>('ALL');
@@ -65,6 +66,17 @@ export const TaskListClient = () => {
     role: (roleFilter !== 'ALL' && roleFilter !== 'UNASSIGNED') ? roleFilter : undefined,
     assigneeCode: roleFilter === 'UNASSIGNED' ? 'UNASSIGNED' : undefined,
   });
+
+  useEffect(() => {
+    if (urlTaskId && !selectedTask) {
+      hrmTasksApi.list({ id: Number(urlTaskId) }).then(res => {
+        if (res.data && res.data.length > 0) {
+          setSelectedTask(res.data[0]);
+          setInitialDetailTab('CHAT');
+        }
+      }).catch(console.error);
+    }
+  }, [urlTaskId, selectedTask]);
 
   // --- NO MOCK DATA ---
   // Using real data from backend API
