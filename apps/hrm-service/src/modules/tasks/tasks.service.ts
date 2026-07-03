@@ -358,6 +358,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         const definition = await this.getWorkflowDefinition(activeWorkflowId);
         if (definition) {
           const engine = new WorkflowEngine(definition);
+          const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
           actions = engine.getAllowedActions(
             metadata.currentNodeId,
             query.currentUserPermissions || [],
@@ -371,6 +372,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
               isCoordinator: access.isCoordinator,
               isDeptLeader: access.isDeptLeader,
               allowedEmployeeCodes: query.allowedEmployeeCodes || [],
+              isUnassigned,
             }
           );
         }
@@ -379,12 +381,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
       
       // Vẫn giữ lại các action nội bộ không thuộc quy trình workflow như EDIT, DELETE, CHAT
-      if (access.isOwner && !actions.includes('EDIT')) actions.push('EDIT', 'DELETE', 'ADD_SUBTASK');
+      const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
+      if (access.isOwner && !actions.includes('EDIT')) actions.push('EDIT', 'ADD_SUBTASK');
+      if (access.isOwner && isUnassigned && !hasChildren && !actions.includes('DELETE')) actions.push('DELETE');
       if (!actions.includes('CHAT')) actions.push('CHAT');
     } else {
       // Fallback cho task cũ không có workflow
+      const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
       if (access.isOwner) {
-        actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'CHAT');
+        actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'CHAT');
+        if (isUnassigned && !hasChildren) actions.push('DELETE');
         if (t.status === 'PENDING_APPROVAL') {
           actions.push('APPROVE', 'RETURN');
         }
@@ -408,6 +414,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
         actions.push('CHAT');
       }
+    }
+
+    if (actions.length === 0) {
+      this.logger.error(`[DEBUG] actions is empty! access: ${JSON.stringify(access)}, query: ${query.currentEmployeeCode}`);
+    } else if (!actions.includes('ASSIGN')) {
+      this.logger.error(`[DEBUG] ASSIGN is missing! actions: ${actions.join(',')}, access: ${JSON.stringify(access)}`);
     }
 
     return Array.from(new Set(actions));
@@ -1043,6 +1055,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const enriched = await this.enrichTasks([createdTask]);
     const enrichedTask = enriched[0];
+    
+    // Add allowed actions for the newly created task so the frontend can render buttons immediately
+    const allowedActions = await this.computeAllowedActions(enrichedTask, {
+      currentEmployeeCode: creatorCode,
+      currentUserPermissions: data.currentUserPermissions || [],
+    });
+    enrichedTask.allowedActions = allowedActions;
+    
     const enrichedTaskResponse = this.toTaskResponse(enrichedTask);
 
     if (data.assigneeCode) {
@@ -1236,6 +1256,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           );
           
           if (!validateRes.allowed) {
+            this.logger.error(`Validate Action blocked ASSIGN: ${validateRes.reason}, businessData: ${JSON.stringify({ isOwner: access.isOwner, creator: tCheckArr[0]?.creatorEmployeeCode, current: context?.currentEmployeeCode })}`);
             throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
           }
           
@@ -1525,11 +1546,30 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   }
 
   async deleteTask(id: number) {
+    const rawTask = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true }
+    });
+    if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
+
+    const assigneeP = rawTask.participants.find(p => p.participantRole === TaskRole.ASSIGNEE);
+    const isUnassigned = !assigneeP || assigneeP.employeeCode === 'UNASSIGNED';
+    
+    if (!isUnassigned) {
+      throw new RpcException('Không thể xóa công việc đã được giao cho người khác');
+    }
+
     // Xoá tất cả node con qua Closure
     const descendants = await this.prisma.taskClosure.findMany({
       where: { ancestorId: id },
-      select: { descendantId: true }
+      select: { descendantId: true, depth: true }
     });
+    
+    const hasChildren = descendants.some(d => d.depth > 0);
+    if (hasChildren) {
+      throw new RpcException('Không thể xóa công việc đã có công việc con');
+    }
+    
     const idsToDelete = descendants.map(d => d.descendantId);
 
     if (idsToDelete.length > 0) {
