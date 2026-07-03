@@ -9,9 +9,7 @@ export class RedisService implements OnModuleDestroy {
   private hasLoggedError = false;
 
   constructor() {
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || (process.env.REDIS_URL ? new URL(process.env.REDIS_URL).hostname : '127.0.0.1'),
-      port: parseInt(process.env.REDIS_PORT || (process.env.REDIS_URL ? new URL(process.env.REDIS_URL).port : '6379'), 10),
+    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
       db: parseInt(process.env.REDIS_DB || '0', 10),
       retryStrategy: (times) => {
         // Chỉ retry tối đa 3 lần nếu không có Redis, tránh spam log console

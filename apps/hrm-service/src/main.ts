@@ -37,8 +37,7 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.REDIS,
     options: {
-      host: process.env.REDIS_HOST || (process.env.REDIS_URL ? new URL(process.env.REDIS_URL).hostname : 'localhost'),
-      port: parseInt(process.env.REDIS_PORT || (process.env.REDIS_URL ? new URL(process.env.REDIS_URL).port : '6379')),
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
     },
   });
 
