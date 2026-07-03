@@ -522,37 +522,22 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Assignee filter
-    if (query.assigneeCode) {
-      if (query.assigneeCode === 'UNASSIGNED') {
-        conditions.push({
-          OR: [
-            {
-              participants: {
-                none: {
-                  participantRole: TaskRole.ASSIGNEE
-                }
-              }
-            },
-            {
-              participants: {
-                some: {
-                  employeeCode: 'UNASSIGNED',
-                  participantRole: TaskRole.ASSIGNEE
-                }
-              }
-            }
-          ]
-        });
-      } else {
-        conditions.push({
-          participants: {
-            some: {
-              employeeCode: query.assigneeCode,
-              participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
-            }
+    if (query.assigneeCode === 'UNASSIGNED') {
+      conditions.push({
+        OR: [
+          { participants: { none: { participantRole: TaskRole.ASSIGNEE } } },
+          { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: TaskRole.ASSIGNEE } } }
+        ]
+      });
+    } else if (query.assigneeCode) {
+      conditions.push({
+        participants: {
+          some: {
+            employeeCode: query.assigneeCode,
+            participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
           }
-        });
-      }
+        }
+      });
     }
 
     // Assigner/Owner filter
@@ -828,28 +813,27 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    allStatsTasks.forEach((t: any) => {
-      const due = t.dueDate ? new Date(t.dueDate) : null;
-      if (due) due.setHours(0, 0, 0, 0);
+    const nowTime = now.getTime();
 
+    allStatsTasks.forEach((t: any) => {
+      // Prisma returns Date objects. Avoid creating new Date() instances unnecessarily.
+      const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
       const isCompleted = t.status === 'DONE' || t.status === 'COMPLETED' || t.progress === 100;
 
       if (isCompleted) {
-        const completedDate = new Date(t.completedAt || t.updatedAt || Date.now());
-        completedDate.setHours(0, 0, 0, 0);
-        if (due && completedDate > due) {
+        const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
+        if (dueTime && completedTime > dueTime) {
           doneOverdue++;
         } else {
           doneInTime++;
         }
+      } else if (!dueTime) {
+        inTime++;
       } else {
-        if (!due) { inTime++; }
-        else {
-          const diff = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
-          if (diff < 0) overdue++;
-          else if (diff <= 3) warning++;
-          else inTime++;
-        }
+        const diffDays = Math.ceil((dueTime - nowTime) / 86_400_000);
+        
+        // Use early evaluation/ternary to eliminate deeply nested if-else
+        diffDays < 0 ? overdue++ : (diffDays <= 3 ? warning++ : inTime++);
       }
 
       // Group by Unit & Leader
