@@ -39,7 +39,7 @@ const protoRoot =
           urls: [process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672'],
           queue: process.env.NOTIFICATION_QUEUE || 'notifications', // Cùng queue với notification_service
           queueOptions: {
-            durable: false, // Queue tạm thời hay bền vững
+            durable: true, // Queue tạm thời hay bền vững
           },
         },
       },

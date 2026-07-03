@@ -99,7 +99,7 @@ const protoRoot =
           urls: [process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672'],
           queue: process.env.NOTIFICATION_QUEUE || 'notifications',
           queueOptions: {
-            durable: false,
+            durable: true,
           },
         },
       },

@@ -64,7 +64,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
         options: {
           package: 'workflow',
           protoPath: require('path').join(PROTO_ROOT, 'workflow/workflow.proto'),
-          url: process.env.WORKFLOW_SERVICE_ADDR || 'workflow-service:50059',
+          url: process.env.WORKFLOW_SERVICE_URL || 'workflow-service:50060',
           loader: {
             keepCase: false,
             longs: String,
