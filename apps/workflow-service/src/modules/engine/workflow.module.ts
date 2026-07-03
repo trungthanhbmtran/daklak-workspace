@@ -107,7 +107,7 @@ const protoRoot =
         name: 'REDIS_SERVICE',
         transport: Transport.REDIS,
         options: {
-          url: process.env.REDIS_URL || 'redis://localhost:6379',
+          url: process.env.REDIS_URL || 'redis://redis:6379',
         },
       },
     ]),
