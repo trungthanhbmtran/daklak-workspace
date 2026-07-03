@@ -500,11 +500,13 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const conditions: any[] = [];
 
-    // Default status filter
+    // Optimized status filter using positive conditions (IN) instead of negative (NOT IN) for index performance
+    const activeStatuses = ['TODO', 'IN_PROGRESS', 'REVIEWING', 'OVERDUE', 'RETURNED'];
+    
     if (query.status && query.status !== 'ALL') {
       where.status = query.status;
-    } else {
-      where.status = { not: 'TEMPLATE' };
+    } else if (!query.statsFilter) {
+      where.status = { in: activeStatuses };
     }
 
     // Role filter
@@ -591,30 +593,30 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const limit = query.limit ? parseInt(query.limit, 10) : 20;
     const skip = (page - 1) * limit;
 
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const threeDaysLater = new Date(now);
-    threeDaysLater.setDate(now.getDate() + 3);
-
-    // Apply statsFilter range conditions
+    // Apply statsFilter range conditions (Optimized: Lazy evaluation to avoid redundant Date allocations and unused objects)
     if (query.statsFilter) {
-      if (query.statsFilter === 'overdue') {
-        where.status = { not: 'DONE' };
-        where.dueDate = { lt: now };
-      } else if (query.statsFilter === 'warning') {
-        where.status = { not: 'DONE' };
-        where.dueDate = { gte: now, lte: threeDaysLater };
-      } else if (query.statsFilter === 'inTime') {
-        where.status = { not: 'DONE' };
-        // dueDate can be greater than threeDaysLater, or null
-        where.OR = [
-          { dueDate: { gt: threeDaysLater } },
-          { dueDate: null }
-        ];
-      } else if (query.statsFilter === 'doneInTime') {
+      if (query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue') {
         where.status = 'DONE';
-      } else if (query.statsFilter === 'doneOverdue') {
-        where.status = 'DONE';
+      } else {
+        // Only calculate dates if the filter actually needs them
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        if (query.statsFilter === 'overdue') {
+          where.status = { in: activeStatuses };
+          where.dueDate = { lt: now };
+        } else {
+          const threeDaysLater = new Date(now);
+          threeDaysLater.setDate(now.getDate() + 3);
+
+          if (query.statsFilter === 'warning') {
+            where.status = { in: activeStatuses };
+            where.dueDate = { gte: now, lte: threeDaysLater };
+          } else if (query.statsFilter === 'inTime') {
+            where.status = { in: activeStatuses };
+            where.OR = [{ dueDate: { gt: threeDaysLater } }, { dueDate: null }];
+          }
+        }
       }
     }
 

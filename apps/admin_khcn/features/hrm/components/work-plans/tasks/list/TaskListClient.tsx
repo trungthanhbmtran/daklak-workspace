@@ -38,7 +38,7 @@ export const TaskListClient = () => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [initialDetailTab, setInitialDetailTab] = useState<'CHAT' | 'HISTORY'>('CHAT');

@@ -23,7 +23,7 @@ interface TaskRowProps {
 }
 
 const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSelectTask, onSelectTaskHistory, onSmartAssign, isLastChild }: TaskRowProps) {
-  const [expanded, setExpanded] = useState(depth === 0);
+  const [expanded, setExpanded] = useState(false);
 
   const hasLoadedChildren = task.children?.length > 0;
   const countChildren = task._count?.children || 0;
