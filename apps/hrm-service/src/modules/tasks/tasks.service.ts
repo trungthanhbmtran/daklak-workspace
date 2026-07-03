@@ -1072,7 +1072,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           message: `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
           type: 'SYSTEM',
           recipients: [data.assigneeCode],
-          metadata: { taskId: enrichedTaskResponse.id },
+          metadata: { 
+            module: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).module) ? (enrichedTaskResponse.metadata as any).module : 'hrm',
+            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'tasks',
+            id: enrichedTaskResponse.id
+          },
         }).subscribe();
       } catch (e) {
         console.error('Failed to send notification', e);
@@ -1180,7 +1184,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             message: `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`,
             type: 'SYSTEM',
             recipients: [emp.userId],
-            metadata: { taskId: id },
+            metadata: { 
+            module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
+            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'tasks',
+            id: id
+          },
           }).subscribe();
         }
       }
@@ -1192,7 +1200,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           message: `Công việc "${tCheck.title}" của bạn đã bị trả lại. Lý do: ${rejectReason}`,
           type: 'SYSTEM',
           recipients: [emp.userId],
-          metadata: { taskId: id },
+          metadata: { 
+            module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
+            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'tasks',
+            id: id
+          },
         }).subscribe();
       }
     } else if (status === 'DONE' && tCheck.status === 'PENDING_APPROVAL' && actorCode !== tCheck.assigneeCode) {
@@ -1203,7 +1215,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           message: `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`,
           type: 'SYSTEM',
           recipients: [emp.userId],
-          metadata: { taskId: id },
+          metadata: { 
+            module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
+            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'tasks',
+            id: id
+          },
         }).subscribe();
       }
     }
@@ -1316,7 +1332,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           message: `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`,
           type: 'SYSTEM',
           recipients: [data.assigneeCode],
-          metadata: { taskId: enrichedTaskResponse.id },
+          metadata: { 
+            module: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).module) ? (enrichedTaskResponse.metadata as any).module : 'hrm',
+            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'tasks',
+            id: enrichedTaskResponse.id
+          },
         }).subscribe();
       } catch (e) {
         console.error('Failed to send notification', e);
@@ -1365,7 +1385,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
                 message: `Công việc "${task.title}" sắp đến hạn vào ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'vài ngày tới'}.`,
                 type: 'SYSTEM',
                 recipients: [code],
-                metadata: { taskId: task.id },
+                metadata: { 
+            module: (task.metadata && (task.metadata as any).module) ? (task.metadata as any).module : 'hrm',
+            type: (task.metadata && (task.metadata as any).type) ? (task.metadata as any).type : 'tasks',
+            id: task.id
+          },
               }).subscribe();
             } catch (e) {
               this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);
@@ -1916,7 +1940,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             message: `${actorName} đã nhắc đến bạn trong bình luận của công việc "${t.title}"`,
             type: 'SYSTEM',
             recipients: userIds,
-            metadata: { taskId: t.id },
+            metadata: { 
+            module: (t.metadata && (t.metadata as any).module) ? (t.metadata as any).module : 'hrm',
+            type: (t.metadata && (t.metadata as any).type) ? (t.metadata as any).type : 'tasks',
+            id: t.id
+          },
           }).subscribe();
         }
       }

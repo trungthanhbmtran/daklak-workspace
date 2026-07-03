@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, Loader2, Calendar, FileText, CheckCircle2, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,9 +27,16 @@ function NotificationRow({
   onMarkRead: (id: string) => void;
   onClick: (item: NotificationItem) => void;
 }) {
-  return (
+  const resolveHref = (item: NotificationItem) => {
+    const { module, type, id, link } = item.metadata || {};
+    if (module && type && id) return `/services/${module}/${type}/${id}`;
+    if (link) return link;
+    return "#";
+  };
+  const href = resolveHref(item);
+
+  const content = (
     <div
-      onClick={() => onClick(item)}
       className={`
         group flex flex-col gap-1.5 px-4 py-3 border-b border-border/40 last:border-0 cursor-pointer
         transition-all duration-200 hover:bg-muted/50
@@ -59,8 +65,9 @@ function NotificationRow({
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 shrink-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary"
+            className="h-7 w-7 shrink-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary relative z-10"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onMarkRead(item.id);
             }}
@@ -72,10 +79,19 @@ function NotificationRow({
       </div>
     </div>
   );
+
+  if (href === "#") {
+    return <div onClick={() => onClick(item)}>{content}</div>;
+  }
+
+  return (
+    <Link href={href} prefetch={true} onClick={() => onClick(item)} className="block">
+      {content}
+    </Link>
+  );
 }
 
 export function NotificationBell() {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { data: list = [], isLoading } = useQuery({
@@ -96,11 +112,6 @@ export function NotificationBell() {
       markRead.mutate(item.id);
     }
     setOpen(false);
-
-    // Route based on metadata if available
-    if (item.metadata?.taskId) {
-      router.push(`/services/hrm/tasks/${item.metadata.taskId}`);
-    }
   };
 
   const unreadCount = list.filter((n) => !n.read).length;
