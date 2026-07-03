@@ -350,15 +350,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     let actions: string[] = [];
 
     // Tích hợp Workflow chuẩn (Decentralized Engine)
-    const activeWorkflowId = t.workflowId || t.workflowInstId; // Dùng workflowId hoặc InstId làm ID tạm
+    const metadata = (t.metadata as any) || {};
+    const activeWorkflowId = metadata.workflowId || t.workflowInstId; // Dùng workflowId hoặc InstId làm ID tạm
     
-    if (activeWorkflowId && t.currentNodeId) {
+    if (activeWorkflowId && metadata.currentNodeId) {
       try {
         const definition = await this.getWorkflowDefinition(activeWorkflowId);
         if (definition) {
           const engine = new WorkflowEngine(definition);
           actions = engine.getAllowedActions(
-            t.currentNodeId,
+            metadata.currentNodeId,
             query.currentUserPermissions || [],
             query.currentEmployeeCode,
             {
@@ -1014,12 +1015,17 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           await this.prisma.task.update({
             where: { id: t.id },
             data: { 
-              workflowId: workflowId,
-              currentNodeId: initialNodeId
+              metadata: {
+                ...((t.metadata as any) || {}),
+                workflowId,
+                currentNodeId: initialNodeId
+              }
             }
           });
-          t.workflowId = workflowId;
-          t.currentNodeId = initialNodeId;
+          const updatedMeta = (t.metadata as any) || {};
+          updatedMeta.workflowId = workflowId;
+          updatedMeta.currentNodeId = initialNodeId;
+          t.metadata = updatedMeta;
         }
       }
     } catch (err) {
@@ -1066,10 +1072,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const tCheck: any = tCheckArr[0];
 
     // GỌI WORKFLOW ĐỂ VALIDATE VÀ NHẢY BƯỚC
-    const activeWorkflowId = rawTask.workflowId || rawTask.workflowInstId;
+    const metadata = (rawTask.metadata as any) || {};
+    const activeWorkflowId = metadata.workflowId || rawTask.workflowInstId;
     let nextNodeIdToSave: string | undefined = undefined;
 
-    if (activeWorkflowId && rawTask.currentNodeId) {
+    if (activeWorkflowId && metadata.currentNodeId) {
       try {
         let actionName = actionNameForWorkflow || status;
         
@@ -1084,7 +1091,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         if (definition) {
           const engine = new WorkflowEngine(definition);
           const validateRes = engine.validateAction(
-            rawTask.currentNodeId,
+            metadata.currentNodeId,
             actionName,
             context?.currentUserPermissions || [],
             actorCode,
@@ -1105,7 +1112,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           }
 
           // Nhảy bước
-          const nextNodeId = engine.getNextNodeId(rawTask.currentNodeId, actionName);
+          const nextNodeId = engine.getNextNodeId(metadata.currentNodeId, actionName);
           if (nextNodeId) {
             nextNodeIdToSave = nextNodeId;
           }
@@ -1119,7 +1126,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
     if (status === 'DONE') dataToUpdate.completedAt = new Date();
-    if (nextNodeIdToSave) dataToUpdate.currentNodeId = nextNodeIdToSave;
+    if (nextNodeIdToSave) {
+      dataToUpdate.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: nextNodeIdToSave };
+    }
 
     const t = await this.prisma.task.update({
       where: { id },
@@ -1198,8 +1207,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { id },
       include: { participants: true }
     });
-    const activeWorkflowId = rawTaskForCheck?.workflowId || rawTaskForCheck?.workflowInstId;
-    if (activeWorkflowId && rawTaskForCheck?.currentNodeId) {
+    const metadataForCheck = (rawTaskForCheck?.metadata as any) || {};
+    const activeWorkflowId = metadataForCheck.workflowId || rawTaskForCheck?.workflowInstId;
+    if (activeWorkflowId && metadataForCheck.currentNodeId) {
       try {
         const tCheckArr = [rawTaskForCheck];
         await this.enrichTasks(tCheckArr);
@@ -1210,12 +1220,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         if (definition) {
           const engine = new WorkflowEngine(definition);
           const validateRes = engine.validateAction(
-            rawTaskForCheck.currentNodeId,
+            metadataForCheck.currentNodeId,
             'ASSIGN',
             context?.currentUserPermissions || [],
             context?.currentEmployeeCode,
             {
-              status: rawTaskForCheck.status,
+              status: rawTaskForCheck!.status,
               isOwner: access.isOwner,
               isAssignee: access.isAssignee,
               isSupervisor: access.isSupervisor,
