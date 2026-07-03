@@ -1,9 +1,10 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Check, Loader2 } from "lucide-react";
+import { Bell, Check, Loader2, Calendar, FileText, CheckCircle2, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,104 +15,168 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { getNotifications, markNotificationRead, type NotificationItem } from "./api";
+import { useState } from "react";
 
 const NOTIFICATIONS_KEY = ["notifications"];
 
 function NotificationRow({
   item,
   onMarkRead,
+  onClick,
 }: {
   item: NotificationItem;
   onMarkRead: (id: string) => void;
+  onClick: (item: NotificationItem) => void;
 }) {
   return (
     <div
+      onClick={() => onClick(item)}
       className={`
-        flex flex-col gap-0.5 px-3 py-2.5 border-b border-border/50 last:border-0
-        ${item.read ? "bg-muted/20" : "bg-primary/5"}
+        group flex flex-col gap-1.5 px-4 py-3 border-b border-border/40 last:border-0 cursor-pointer
+        transition-all duration-200 hover:bg-muted/50
+        ${item.read ? "bg-transparent opacity-70" : "bg-primary/5"}
       `}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">{item.title}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2.5">
+          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${item.read ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
+            {item.type === 'SYSTEM' ? <FileText className="h-3.5 w-3.5" /> : <Bell className="h-3.5 w-3.5" />}
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <p className={`text-sm ${item.read ? 'font-medium text-foreground/80' : 'font-semibold text-foreground'}`}>
+              {item.title}
+            </p>
+            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+              {item.body}
+            </p>
+            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground/70">
+              <Calendar className="h-3 w-3" />
+              {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi }) : ""}
+            </div>
+          </div>
+        </div>
         {!item.read && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 shrink-0"
-            onClick={() => onMarkRead(item.id)}
+            className="h-7 w-7 shrink-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMarkRead(item.id);
+            }}
+            title="Đánh dấu đã đọc"
           >
-            <Check className="h-3.5 w-3.5 text-muted-foreground" />
+            <CheckCircle2 className="h-4 w-4" />
           </Button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground line-clamp-2">{item.body}</p>
-      <span className="text-[10px] text-muted-foreground/80">
-        {item.createdAt
-          ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi })
-          : ""}
-      </span>
     </div>
   );
 }
 
 export function NotificationBell() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { data: list = [], isLoading } = useQuery({
     queryKey: NOTIFICATIONS_KEY,
     queryFn: getNotifications,
     refetchInterval: 30_000,
   });
+
   const markRead = useMutation({
     mutationFn: markNotificationRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
     },
   });
+
+  const handleNotificationClick = (item: NotificationItem) => {
+    if (!item.read) {
+      markRead.mutate(item.id);
+    }
+    setOpen(false);
+
+    // Route based on metadata if available
+    if (item.metadata?.taskId) {
+      router.push(`/services/hrm/tasks/${item.metadata.taskId}`);
+    }
+  };
+
   const unreadCount = list.filter((n) => !n.read).length;
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors h-10 w-10 rounded-full">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground ring-2 ring-background">
+            <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground ring-2 ring-background animate-in zoom-in">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[360px] p-0 border-border align-end" align="end" sideOffset={8}>
-        <div className="border-b px-3 py-2.5 font-medium text-sm text-foreground">
-          Thông báo
+      <PopoverContent className="w-[380px] p-0 border-border/50 shadow-xl rounded-xl align-end overflow-hidden" align="end" sideOffset={8}>
+        <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold text-sm text-foreground">Thông báo</h4>
+            {unreadCount > 0 && (
+              <span className="bg-primary/10 text-primary text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                {unreadCount} mới
+              </span>
+            )}
+          </div>
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto p-0 text-xs text-muted-foreground hover:text-primary hover:bg-transparent"
+              onClick={() => {
+                const unreadItems = list.filter(n => !n.read);
+                unreadItems.forEach(n => markRead.mutate(n.id));
+              }}
+            >
+              Đánh dấu tất cả đã đọc
+            </Button>
+          )}
         </div>
-        <ScrollArea className="h-[280px]">
+
+        <ScrollArea className="h-[320px]">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
+              <p className="text-xs">Đang tải thông báo...</p>
             </div>
           ) : list.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              Chưa có thông báo
+            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
+              <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center">
+                <Bell className="h-5 w-5 opacity-50" />
+              </div>
+              <p className="text-sm">Bạn chưa có thông báo nào</p>
             </div>
           ) : (
-            list.map((item) => (
+            <div className="flex flex-col">
+              {list.map((item) => (
                 <NotificationRow
                   key={item.id}
                   item={item}
                   onMarkRead={(id) => markRead.mutate(id)}
+                  onClick={handleNotificationClick}
                 />
-              ))
-            )}
-          </ScrollArea>
-          <div className="p-2 border-t border-border">
-            <Link href="/hub/notifications" className="block">
-              <Button variant="ghost" className="w-full text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
-                Xem tất cả thông báo
-              </Button>
-            </Link>
-          </div>
-        </PopoverContent>
-      </Popover>
-    );
-  }
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+
+        <div className="p-1 border-t border-border/40 bg-muted/10">
+          <Link href="/hub/notifications" onClick={() => setOpen(false)}>
+            <Button variant="ghost" className="w-full h-9 text-xs font-medium text-primary hover:text-primary hover:bg-primary/5 rounded-lg">
+              Xem tất cả thông báo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}

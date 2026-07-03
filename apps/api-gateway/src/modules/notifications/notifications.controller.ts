@@ -55,7 +55,7 @@ export class NotificationsController {
   async handleInAppNotification(@Payload() data: any) {
     if (!data.recipients || !data.recipients.length) return;
     for (const recipient of data.recipients) {
-      this.notificationsService.push(recipient, data.title, data.message || data.body);
+      this.notificationsService.push(recipient, data.title, data.message || data.body, data.metadata);
     }
   }
 }

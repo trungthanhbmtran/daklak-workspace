@@ -7,6 +7,7 @@ export interface InAppNotification {
   body: string;
   createdAt: Date;
   read: boolean;
+  metadata?: Record<string, any>;
 }
 
 @Injectable()
@@ -18,6 +19,7 @@ export class NotificationsService {
     userId: string | number,
     title: string,
     body: string,
+    metadata?: Record<string, any>,
   ): InAppNotification {
     const id = `n-${++this.idCounter}-${Date.now()}`;
     const n: InAppNotification = {
@@ -27,6 +29,7 @@ export class NotificationsService {
       body,
       createdAt: new Date(),
       read: false,
+      metadata,
     };
     this.store.push(n);
     return n;

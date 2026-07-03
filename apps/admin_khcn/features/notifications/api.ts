@@ -8,6 +8,7 @@ export interface NotificationItem {
   createdAt: string;
   read: boolean;
   type?: string;
+  metadata?: Record<string, any>;
 }
 
 export async function getNotifications(): Promise<NotificationItem[]> {
@@ -21,6 +22,7 @@ export async function getNotifications(): Promise<NotificationItem[]> {
     createdAt: n.createdAt ?? "",
     read: Boolean(n.read),
     type: n.type,
+    metadata: n.metadata,
   }));
 }
 

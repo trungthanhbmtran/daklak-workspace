@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { useUser } from "@/hooks/useUser";
 import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
+import { NotificationBell } from "@/features/notifications/NotificationBell";
 
 // 2. TÁCH HEADER COMPONENT: Cho code gọn gàng
 export function PortalHeader() {
@@ -33,7 +34,10 @@ export function PortalHeader() {
           </div>
         </div>
 
-        <HeaderUserProfile showName />
+        <div className="flex items-center gap-2 md:gap-4">
+          <NotificationBell />
+          <HeaderUserProfile showName />
+        </div>
 
       </div>
     </header>
