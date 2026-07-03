@@ -15,7 +15,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@generated/*": ["generated/*"],
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": ["../../shared/*", "./shared/*"]
     },
     "incremental": true,
     "skipLibCheck": true,
