@@ -7,7 +7,7 @@ import { Layout } from "lucide-react";
 import { MultiLangTitleSlug } from "@/components/shared/MultiLangTitleSlug";
 import { useMultiLangTitleSlugState } from "@/components/shared/hooks/useMultiLangTitleSlugState";
 import { toast } from "sonner";
-import { CustomPageMeta } from "./hooks/usePortalBuilder";
+import { CustomPageMeta } from "./hooks/usePagesList";
 
 export interface PageMetaModalRef {
     openAdd: () => void;

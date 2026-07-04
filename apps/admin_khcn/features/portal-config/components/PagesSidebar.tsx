@@ -5,26 +5,22 @@ import { cn } from "@/lib/utils";
 import { SidebarHeader } from "./SidebarHeader";
 import { PageItem } from "./PageItem";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+import { usePagesList } from "./hooks/usePagesList";
+import { usePortalBuilderUI } from "./PortalBuilderUIProvider";
 
 interface PagesSidebarProps {
-  pagesList: any[];
-  selectedPageId: string;
-  setSelectedPageId: (id: string) => void;
-  setShowPagesSidebar: (show: boolean) => void;
-  handleDeletePage: (pageId: string) => void;
   onOpenAddPage: () => void;
   onOpenEditPage: (page: any) => void;
 }
 
 export default function PagesSidebar({
-  pagesList,
-  selectedPageId,
-  setSelectedPageId,
-  setShowPagesSidebar,
-  handleDeletePage,
   onOpenAddPage,
   onOpenEditPage,
 }: PagesSidebarProps) {
+  const { selectedPageId, setSelectedPageId, setShowPagesSidebar } = usePortalBuilderUI();
+  const { pagesList, handleDeletePage } = usePagesList(selectedPageId, setSelectedPageId);
+
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 

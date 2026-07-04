@@ -3,26 +3,24 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Save, Loader2, Columns } from "lucide-react";
+import { usePortalBuilderUI } from "./PortalBuilderUIProvider";
+import { usePagesList } from "./hooks/usePagesList";
+import { usePageLayout } from "./hooks/usePageLayout";
 import { cn } from "@/lib/utils";
-import { CustomPageMeta } from "./hooks/usePortalBuilder";
 
-interface BuilderHeaderProps {
-    selectedPageMeta: CustomPageMeta;
-    isSaving: boolean;
-    showPagesSidebar: boolean;
-    setShowPagesSidebar: (show: boolean) => void;
-    onSync: () => void;
-    onPublish: () => void;
-}
+export function BuilderHeader() {
+    const { selectedPageId, showPagesSidebar, setShowPagesSidebar } = usePortalBuilderUI();
+    const { pagesList } = usePagesList(selectedPageId, () => {});
+    
+    const selectedPageMeta = pagesList.find(p => p.id === selectedPageId) || pagesList[0];
+    
+    const { isSaving, handleSaveLayout, refetch } = usePageLayout(
+        selectedPageId, 
+        selectedPageMeta?.isActive ?? false, 
+        selectedPageMeta?.title?.vi || selectedPageId
+    );
 
-export function BuilderHeader({
-    selectedPageMeta,
-    isSaving,
-    showPagesSidebar,
-    setShowPagesSidebar,
-    onSync,
-    onPublish
-}: BuilderHeaderProps) {
+
     return (
         <header className="flex items-start justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
             <div>
@@ -60,12 +58,12 @@ export function BuilderHeader({
                     </div>
                 </div>
 
-                <Button variant="outline" onClick={onSync} className="h-10 lg:h-11 px-3 lg:px-5 border-slate-200 dark:border-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest gap-1.5 shadow-sm">
+                <Button onClick={() => refetch()} variant="outline" size="sm" className="h-10 lg:h-11 px-3 lg:px-6 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 font-bold tracking-wide rounded-2xl text-[10px] uppercase gap-1.5 shadow-sm transition-all">
                     <RefreshCw className="w-4 h-4" />
                     <span className="hidden sm:inline">Đồng bộ</span>
                 </Button>
 
-                <Button onClick={onPublish} disabled={isSaving} className="h-10 lg:h-11 px-4 lg:px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl text-[10px] gap-1.5 shadow-xl">
+                <Button onClick={handleSaveLayout} disabled={isSaving} className="h-10 lg:h-11 px-4 lg:px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl text-[10px] gap-1.5 shadow-xl">
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     <span>Xuất bản Portal</span>
                 </Button>

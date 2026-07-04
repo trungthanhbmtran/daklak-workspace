@@ -122,3 +122,23 @@ export const EMPTY_TRANSLATION = {
   aboutHistory: "", aboutArea: "", aboutPopulation: "", aboutSubdivisions: "",
   aboutStandard: "",
 };
+
+export const portalConfigDefaults: Record<string, { name: string, multiLang: boolean, vi: string, en: string }> = {
+  unit_name: { name: "Tên Đơn vị / Tổ chức", multiLang: true, vi: "UBND XÃ DANG KANG", en: "DANG KANG COMMUNE PEOPLE'S COMMITTEE" },
+  unit_title: { name: "Tiêu đề trang (Header)", multiLang: true, vi: "TRANG THÔNG TIN ĐIỆN TỬ", en: "ELECTRONIC INFORMATION PORTAL" },
+  unit_identifier: { name: "Định danh địa phương", multiLang: true, vi: "HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK", en: "KRONG BONG DISTRICT - DAK LAK PROVINCE" },
+  unit_logo: { name: "Logo đơn vị", multiLang: false, vi: "", en: "" },
+  citizen_schedule: { name: "Lịch tiếp công dân", multiLang: true, vi: "Thứ 5 hàng tuần • 08:00 - 11:30", en: "Every Thursday • 08:00 - 11:30" },
+  license_info: { name: "Giấy phép bản quyền", multiLang: true, vi: "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp", en: "License No: 45/GP-TTĐT issued by Dak Lak Department of Information and Communications" },
+  responsible_person: { name: "Người chịu trách nhiệm", multiLang: true, vi: "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang", en: "Mr. Tran Van Minh - Chairman of Dang Kang Commune People's Committee" },
+  address: { name: "Địa chỉ trụ sở", multiLang: true, vi: "Địa chỉ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk", en: "Address: Village 6, Dang Kang Commune, Krong Bong District, Dak Lak Province" },
+  hotline: { name: "Đường dây nóng", multiLang: false, vi: "0262.3812.345", en: "0262.3812.345" },
+  fax: { name: "Số Fax", multiLang: false, vi: "0262.3812.346", en: "0262.3812.346" },
+  email: { name: "Email công vụ", multiLang: false, vi: "xadangkang@krongbong.daklak.gov.vn", en: "xadangkang@krongbong.daklak.gov.vn" },
+  contact_form_title: { name: "Tiêu đề Form liên hệ", multiLang: true, vi: "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG", en: "SEND FEEDBACK TO THE OFFICE" },
+  contact_form_success_desc: { name: "Lời cảm ơn khi gửi form", multiLang: true, vi: "Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn và sẽ phản hồi sớm nhất có thể.", en: "We have received your feedback and will respond as soon as possible." },
+  contact_map_title: { name: "Tiêu đề bản đồ", multiLang: true, vi: "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG", en: "ADMINISTRATIVE ZONING MAP OF DANG KANG COMMUNE" },
+  footer_portal_title: { name: "Tiêu đề Widget DVC", multiLang: true, vi: "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG", en: "ONLINE PUBLIC SERVICE PORTAL" },
+  footer_portal_subtitle: { name: "Mô tả Widget DVC", multiLang: true, vi: "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng", en: "Modern and fast one-stop administrative procedures" },
+  custom_map_iframe: { name: "Iframe Bản đồ tuỳ chỉnh", multiLang: false, vi: "", en: "" }
+};
