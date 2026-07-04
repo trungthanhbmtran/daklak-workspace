@@ -4,7 +4,16 @@ import React, { useState } from "react";
 import { Plus, LayoutTemplate, MoreVertical, Trash2, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportBuilder } from "./ReportBuilder";
-import { ChartRenderer } from "./ChartRenderer";
+import dynamic from "next/dynamic";
+
+const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartRenderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center w-full h-[300px] bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 animate-pulse">
+      <span className="text-slate-400 text-sm">Đang tải biểu đồ...</span>
+    </div>
+  ),
+});
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
