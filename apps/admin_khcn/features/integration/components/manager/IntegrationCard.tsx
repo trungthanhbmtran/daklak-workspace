@@ -39,7 +39,7 @@ export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProp
   return (
     <Card className="group relative flex flex-col hover:shadow-lg transition-all duration-300 hover:border-violet-300 dark:hover:border-violet-700/50">
       <CardHeader className="flex flex-row items-center gap-4 pb-4 space-y-0">
-        <div className="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-900/30 border border-violet-100 dark:border-violet-800/50 flex flex-shrink-0 items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-900/30 border border-violet-100 dark:border-violet-800/50 flex shrink-0 items-center justify-center">
           <Activity className="w-6 h-6 text-violet-600 dark:text-violet-400" />
         </div>
         <div className="flex flex-col gap-1.5 overflow-hidden">
@@ -49,7 +49,7 @@ export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProp
           </CardDescription>
         </div>
       </CardHeader>
-      
+
       <CardContent className="flex-1 space-y-4">
         <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
           <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -58,7 +58,7 @@ export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProp
             {item.isActive ? "Đang hoạt động" : "Đã vô hiệu hóa"}
           </Badge>
         </div>
-        
+
         <div className="text-xs text-slate-500 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
           <span>Cập nhật lần cuối:</span>
           <span className="font-medium">{item.updatedAt ? format(new Date(item.updatedAt), "dd/MM/yyyy HH:mm") : "-"}</span>
@@ -67,9 +67,9 @@ export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProp
 
       <CardFooter className="border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Switch 
-            checked={item.isActive} 
-            onCheckedChange={() => handleToggleActive(item.isActive)} 
+          <Switch
+            checked={item.isActive}
+            onCheckedChange={() => handleToggleActive(item.isActive)}
           />
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Hoạt động</span>
         </div>

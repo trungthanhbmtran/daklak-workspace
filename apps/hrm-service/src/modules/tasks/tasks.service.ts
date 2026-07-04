@@ -58,6 +58,25 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  private sendTaskNotification(recipients: string[], title: string, message: string, taskData: any) {
+    if (!recipients || recipients.length === 0) return;
+    try {
+      this.notificationClient.emit('send_notification', {
+        title,
+        message,
+        type: 'SYSTEM',
+        recipients,
+        metadata: { 
+          module: (taskData.metadata && (taskData.metadata as any).module) ? (taskData.metadata as any).module : 'hrm',
+          type: (taskData.metadata && (taskData.metadata as any).type) ? (taskData.metadata as any).type : 'work-plans/tasks',
+          id: taskData.id
+        },
+      }).subscribe();
+    } catch (e) {
+      console.error(`Failed to send notification "${title}"`, e);
+    }
+  }
+
   private parseParticipants(participants: any[]) {
     if (!participants) return { owner: null, assignee: null, approver: null, coordinators: [] };
 
@@ -1045,20 +1064,39 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const enrichedTaskResponse = this.toTaskResponse(enrichedTask);
 
     if (data.assigneeCode) {
+      this.sendTaskNotification(
+        [data.assigneeCode],
+        'Có công việc mới được giao',
+        `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
+        enrichedTaskResponse
+      );
+    }
+
+    if (Array.isArray(data.coassigneeCodes) && data.coassigneeCodes.length > 0) {
+      this.sendTaskNotification(
+        data.coassigneeCodes,
+        'Có công việc phối hợp mới',
+        `Bạn được phân công phối hợp thực hiện nhiệm vụ: "${enrichedTaskResponse.title}"`,
+        enrichedTaskResponse
+      );
+    }
+
+    if (data.monitoredUnitId) {
       try {
-        this.notificationClient.emit('send_notification', {
-          title: 'Có công việc mới được giao',
-          message: `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
-          type: 'SYSTEM',
-          recipients: [data.assigneeCode],
-          metadata: { 
-            module: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).module) ? (enrichedTaskResponse.metadata as any).module : 'hrm',
-            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'work-plans/tasks',
-            id: enrichedTaskResponse.id
-          },
-        }).subscribe();
+        const monitorsRes: any = await firstValueFrom(
+          this.userService.GetEmployeesByScope({ monitored_unit_id: parseInt(data.monitoredUnitId, 10) })
+        );
+        const followerCodes = monitorsRes?.employeeCodes || monitorsRes?.employee_codes || [];
+        if (followerCodes.length > 0) {
+          this.sendTaskNotification(
+            followerCodes,
+            'Có công việc mới tại phòng ban theo dõi',
+            `Một nhiệm vụ mới ("${enrichedTaskResponse.title}") vừa được giao cho phòng ban bạn đang phụ trách theo dõi.`,
+            enrichedTaskResponse
+          );
+        }
       } catch (e) {
-        console.error('Failed to send notification', e);
+        console.error('Failed to notify monitors', e);
       }
     }
 
@@ -1305,21 +1343,21 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const enrichedTaskResponse = this.toTaskResponse(enriched[0]);
 
     if (data.assigneeCode) {
-      try {
-        this.notificationClient.emit('send_notification', {
-          title: 'Có công việc mới được giao',
-          message: `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`,
-          type: 'SYSTEM',
-          recipients: [data.assigneeCode],
-          metadata: { 
-            module: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).module) ? (enrichedTaskResponse.metadata as any).module : 'hrm',
-            type: (enrichedTaskResponse.metadata && (enrichedTaskResponse.metadata as any).type) ? (enrichedTaskResponse.metadata as any).type : 'work-plans/tasks',
-            id: enrichedTaskResponse.id
-          },
-        }).subscribe();
-      } catch (e) {
-        console.error('Failed to send notification', e);
-      }
+      this.sendTaskNotification(
+        [data.assigneeCode],
+        'Có công việc mới được giao',
+        `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`,
+        enrichedTaskResponse
+      );
+    }
+
+    if (Array.isArray(data.coassigneeCodes) && data.coassigneeCodes.length > 0) {
+      this.sendTaskNotification(
+        data.coassigneeCodes,
+        'Có công việc phối hợp mới',
+        `Bạn được phân công phối hợp thực hiện nhiệm vụ: "${enrichedTaskResponse.title}"`,
+        enrichedTaskResponse
+      );
     }
 
     return enrichedTaskResponse;
@@ -1339,7 +1377,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         const tasks = await this.prisma.task.findMany({
           where: {
             status: { notIn: ['COMPLETED', 'CANCELLED', 'REJECTED', 'DONE', 'TEMPLATE'] },
-            dueDate: { lte: futureDate, gte: new Date() },
+            dueDate: { not: null }
           },
           include: {
             participants: true,
@@ -1349,41 +1387,73 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           }
         });
 
+        const now = new Date();
+
         for (const task of tasks) {
           if (task.comments && task.comments.length > 0) continue; // Already warned
 
-          const assignees = task.participants
-            .filter(p => p.participantRole === 'ASSIGNEE')
-            .map(p => p.employeeCode)
-            .filter(Boolean);
+          let shouldWarn = false;
+          let warnTitle = '';
+          let warnMessage = '';
 
-          for (const code of assignees) {
-            try {
-              this.notificationClient.emit('send_notification', {
-                title: 'Cảnh báo hạn chót công việc',
-                message: `Công việc "${task.title}" sắp đến hạn vào ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'vài ngày tới'}.`,
-                type: 'SYSTEM',
-                recipients: [code],
-                metadata: { 
-            module: (task.metadata && (task.metadata as any).module) ? (task.metadata as any).module : 'hrm',
-            type: (task.metadata && (task.metadata as any).type) ? (task.metadata as any).type : 'work-plans/tasks',
-            id: task.id
-          },
-              }).subscribe();
-            } catch (e) {
-              this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);
+          const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+          const startDate = task.startDate ? new Date(task.startDate) : null;
+
+          if (dueDate) {
+            if (dueDate <= futureDate && dueDate >= now) {
+              shouldWarn = true;
+              warnTitle = 'Cảnh báo hạn chót công việc';
+              warnMessage = `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`;
+            } else if (dueDate > futureDate && startDate && task.progress != null) {
+              const totalDuration = dueDate.getTime() - startDate.getTime();
+              const elapsed = now.getTime() - startDate.getTime();
+              
+              if (totalDuration > 0 && elapsed > 0) {
+                const expectedProgress = (elapsed / totalDuration) * 100;
+                // Nếu đã qua > 50% thời gian mà tiến độ thực tế ít hơn dự kiến > 20%
+                if (expectedProgress > 50 && (expectedProgress - task.progress > 20)) {
+                  shouldWarn = true;
+                  warnTitle = 'Cảnh báo nguy cơ chậm tiến độ';
+                  warnMessage = `Công việc "${task.title}" có nguy cơ chậm tiến độ (Thời gian đã qua: ${Math.round(expectedProgress)}%, Tiến độ thực tế: ${task.progress}%).`;
+                }
+              }
             }
           }
 
-          // Mark as warned
-          await this.prisma.taskComment.create({
-            data: {
-              taskId: task.id,
-              authorCode: null,
-              content: `Hệ thống đã tự động gửi cảnh báo sắp hết hạn`,
-              isSystemMessage: true,
+          if (shouldWarn) {
+            const assignees = task.participants
+              .filter(p => p.participantRole === 'ASSIGNEE')
+              .map(p => p.employeeCode)
+              .filter(Boolean);
+
+            for (const code of assignees) {
+              try {
+                this.notificationClient.emit('send_notification', {
+                  title: warnTitle,
+                  message: warnMessage,
+                  type: 'SYSTEM',
+                  recipients: [code],
+                  metadata: { 
+                    module: (task.metadata && (task.metadata as any).module) ? (task.metadata as any).module : 'hrm',
+                    type: (task.metadata && (task.metadata as any).type) ? (task.metadata as any).type : 'work-plans/tasks',
+                    id: task.id
+                  },
+                }).subscribe();
+              } catch (e) {
+                this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);
+              }
             }
-          });
+
+            // Mark as warned
+            await this.prisma.taskComment.create({
+              data: {
+                taskId: task.id,
+                authorCode: null,
+                content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}`,
+                isSystemMessage: true,
+              }
+            });
+          }
         }
       } catch (err) {
         this.logger.error('Error in due task scanner', err);

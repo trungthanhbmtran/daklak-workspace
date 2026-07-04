@@ -31,6 +31,7 @@ service PostService {
   rpc GetPostBySlug(GetPostBySlugRequest) returns (Post) {}
   rpc GetPostsByCategorySlug(GetPostsByCategorySlugRequest) returns (ListPostsResponse) {}
   rpc IncrementViewCount(GetPostRequest) returns (PostResponse) {}
+  rpc GetPostStats(GetPostStatsRequest) returns (PostStatsResponse) {}
 }
 
 
@@ -119,6 +120,21 @@ message GetPostRequest {
 
 message GetPostBySlugRequest {
   string slug = 1;
+}
+
+message GetPostStatsRequest {
+  string categoryId = 1;
+  string authorId = 2;
+}
+
+message PostStatsResponse {
+  int32 total = 1;
+  int32 published = 2;
+  int32 draft = 3;
+  int32 pending = 4;
+  int32 reviewing = 5;
+  int32 rejected = 6;
+  int32 totalViews = 7;
 }
 
 // ====================== List ======================
