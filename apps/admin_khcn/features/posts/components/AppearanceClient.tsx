@@ -21,10 +21,10 @@ export function AppearanceClient() {
 
     return (
         <ThemeProvider>
-            <div className="h-full w-full overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-950 p-4 md:p-8 text-slate-900 dark:text-slate-50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="h-full w-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 p-4 md:p-8 text-slate-900 dark:text-slate-50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
 
                 {/* 1. TOP HEADER BAR (Chuẩn CMS: Tách biệt tiêu đề và thanh action cố định) */}
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
+                <div className="shrink-0 max-w-7xl w-full mx-auto flex flex-col md:flex-row md:items-center md:justify-between pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight">Quản lý Giao diện</h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -41,7 +41,7 @@ export function AppearanceClient() {
                 </div>
 
                 {/* 2. NAVIGATION TABS (Phân chia luồng công việc của CMS) */}
-                <div className="max-w-7xl mx-auto mb-6">
+                <div className="shrink-0 max-w-7xl w-full mx-auto mb-6">
                     <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-6">
                         <button
                             onClick={() => setActiveTab("customize")}
@@ -65,18 +65,18 @@ export function AppearanceClient() {
                 </div>
 
                 {/* 3. MAIN WORKSPACE */}
-                <div className="max-w-7xl mx-auto">
+                <div className="flex-1 overflow-hidden max-w-7xl w-full mx-auto">
                     {activeTab === "library" ? (
                         /* KHO GIAO DIỆN (Dạng Lưới - Toàn màn hình) */
-                        <div className="animate-in fade-in duration-300">
+                        <div className="h-full overflow-y-auto animate-in fade-in duration-300 custom-scrollbar pr-2">
                             <ThemeMarketplace onCustomizeClick={() => setActiveTab("customize")} />
                         </div>
                     ) : (
                         /* BỘ TÙY BIẾN & THIẾT LẬP NÂNG CAO (Bố cục 2 cột Split-Screen chuẩn Studio) */
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        <div className="h-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                             {/* CỘT TRÁI: TẤT CẢ CONFIGURATION PANEL (Chiếm 5/12 cột) */}
-                            <div className="lg:col-span-5 space-y-6 max-h-[calc(100vh-220px)] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="lg:col-span-5 h-full overflow-y-auto space-y-6 pr-2 custom-scrollbar">
 
                                 {activeTab === "customize" && (
                                     <div className="space-y-6 animate-in fade-in duration-300">
@@ -123,8 +123,8 @@ export function AppearanceClient() {
                             </div>
 
                             {/* CỘT PHẢI: REAL-TIME LIVE PREVIEW (Chiếm 7/12 cột) */}
-                            <div className="lg:col-span-7 lg:sticky lg:top-8 space-y-3">
-                                <div className="flex items-center justify-between px-2">
+                            <div className="lg:col-span-7 h-full flex flex-col space-y-3 pb-2">
+                                <div className="shrink-0 flex items-center justify-between px-2">
                                     <span className="text-xs font-semibold text-slate-400 flex items-center gap-2">
                                         <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                         Xem trước thời gian thực
@@ -138,7 +138,7 @@ export function AppearanceClient() {
                                 </div>
 
                                 {/* Khung Preview được bọc trong viền Mockup thiết bị */}
-                                <div className="rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 overflow-hidden h-[650px] transition-all">
+                                <div className="flex-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 overflow-hidden transition-all">
                                     <ThemePreview />
                                 </div>
                             </div>
