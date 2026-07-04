@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { WorkflowEditor, WorkflowList, WorkflowInstanceList } from "@/features/workflow";
 import { IntegrationConfig } from "./IntegrationConfig";
-import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network, Server, ArrowRight } from "lucide-react";
+import { IntegrationManager } from "./IntegrationManager";
+import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network, Server, ArrowRight, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function CardContainer({ children }: { children: React.ReactNode }) {
@@ -19,7 +20,7 @@ export function IntegrationClient() {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis'>('dashboard');
 
   if (editingId || isCreating) {
     return (
@@ -52,6 +53,7 @@ export function IntegrationClient() {
             {activeView === 'definitions' && "Định nghĩa Quy trình (BPMN)"}
             {activeView === 'instances' && "Theo dõi Quy trình Đang chạy"}
             {activeView === 'gateway' && "Cấu hình API Gateway"}
+            {activeView === 'apis' && "Quản lý Kết nối API"}
           </h2>
         </div>
 
@@ -71,6 +73,9 @@ export function IntegrationClient() {
           )}
           {activeView === 'gateway' && (
             <IntegrationConfig />
+          )}
+          {activeView === 'apis' && (
+            <IntegrationManager />
           )}
         </div>
       </div>
@@ -99,6 +104,13 @@ export function IntegrationClient() {
       description: "Quản trị định tuyến (Routing), bảo mật và cấu hình NGINX cho các Microservices.",
       icon: Network,
       theme: { light: "bg-violet-50", dark: "dark:bg-violet-900/20", border: "border-violet-200 dark:border-violet-800", icon: "text-violet-600 dark:text-violet-400" },
+    },
+    {
+      id: 'apis',
+      title: "Kết nối API Đầu vào",
+      description: "Quản lý cấu hình, xác thực và Keys để kết nối với các hệ thống ngoài (LGSP, Webhook, Postman).",
+      icon: Plug,
+      theme: { light: "bg-amber-50", dark: "dark:bg-amber-900/20", border: "border-amber-200 dark:border-amber-800", icon: "text-amber-600 dark:text-amber-400" },
     }
   ];
 
@@ -120,7 +132,7 @@ export function IntegrationClient() {
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
         {modules.map((module) => {
           const style = module.theme;
           return (
