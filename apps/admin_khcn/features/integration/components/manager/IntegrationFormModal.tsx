@@ -13,7 +13,7 @@ import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from ".
 import { toast } from "sonner";
 
 export interface IntegrationFormModalRef {
-  openCreate: () => void;
+  openCreate: (initialData?: any) => void;
   openEdit: (item: IntegrationConfig) => void;
 }
 
@@ -38,20 +38,20 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   const [isRawMode, setIsRawMode] = useState(false);
 
   useImperativeHandle(ref, () => ({
-    openCreate: () => {
+    openCreate: (initialData?: any) => {
       setEditingItem(null);
       setFormData({
-        systemName: "",
-        integrationCode: "",
+        systemName: initialData?.systemName || "",
+        integrationCode: initialData?.integrationCode || "",
         isActive: true,
-        type: "LGSP",
-        apiUrl: "",
-        apiToken: "",
-        clientId: "",
-        clientSecret: "",
-        rawConfig: "{}"
+        type: initialData?.type || "LGSP",
+        apiUrl: initialData?.apiUrl || "",
+        apiToken: initialData?.apiToken || "",
+        clientId: initialData?.clientId || "",
+        clientSecret: initialData?.clientSecret || "",
+        rawConfig: initialData?.rawConfig || "{}"
       });
-      setIsRawMode(false);
+      setIsRawMode(!!initialData?.isRawMode);
       setIsOpen(true);
     },
     openEdit: (item: IntegrationConfig) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Edit, Trash2, ShieldCheck, Activity } from "lucide-react";
+import { Edit, Trash2, ShieldCheck, Activity, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -12,9 +12,10 @@ import { format } from "date-fns";
 interface IntegrationCardProps {
   item: IntegrationConfig;
   onEdit: (item: IntegrationConfig) => void;
+  onExplore?: (item: IntegrationConfig) => void;
 }
 
-export function IntegrationCard({ item, onEdit }: IntegrationCardProps) {
+export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProps) {
   const deleteMutation = useDeleteIntegration();
   const toggleActiveMutation = useToggleActiveIntegration();
 
@@ -51,6 +52,11 @@ export function IntegrationCard({ item, onEdit }: IntegrationCardProps) {
         
         {/* Actions context */}
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {onExplore && (
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-violet-600 rounded-lg bg-violet-50/0 hover:bg-violet-50 dark:hover:bg-violet-900/30" onClick={() => onExplore(item)} title="Quản lý Endpoints">
+              <Plug className="w-4 h-4" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600 rounded-lg" onClick={() => onEdit(item)}>
             <Edit className="w-4 h-4" />
           </Button>
