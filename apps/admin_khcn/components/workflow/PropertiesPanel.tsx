@@ -173,14 +173,19 @@ export const PropertiesPanel = ({
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Biểu thức xác thực động (Validation fx)
               </label>
-              <input
-                type="text"
-                name="validationExpression"
-                value={data.validationExpression || ""}
-                onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2.5 font-mono text-xs focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                placeholder="e.g. userContext.allowedEmployeeCodes.includes('NV_001')"
-              />
+              <div className="relative group">
+                <div className="absolute left-3 top-3.5 text-slate-400 group-focus-within:text-violet-500 transition-colors">
+                  <span className="font-mono text-xs font-bold bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">fx</span>
+                </div>
+                <textarea
+                  name="validationExpression"
+                  value={data.validationExpression || ""}
+                  onChange={handleChange}
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 pl-12 text-sm font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[100px] resize-y leading-relaxed"
+                  placeholder={`// Viết biểu thức JavaScript (trả về true/false)\ne.g. userContext.allowedEmployeeCodes.includes('NV_001')`}
+                  spellCheck={false}
+                />
+              </div>
             </div>
           </div>
         );
