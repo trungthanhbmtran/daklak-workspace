@@ -21,7 +21,7 @@ export function AppearanceClient() {
 
     return (
         <ThemeProvider>
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 text-slate-900 dark:text-slate-50">
+            <div className="h-full w-full overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-950 p-4 md:p-8 text-slate-900 dark:text-slate-50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
 
                 {/* 1. TOP HEADER BAR (Chuẩn CMS: Tách biệt tiêu đề và thanh action cố định) */}
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 gap-4">

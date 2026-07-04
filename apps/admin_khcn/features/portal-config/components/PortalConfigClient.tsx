@@ -19,7 +19,7 @@ export function PortalConfigClient() {
   const activeLangs = rawLanguages.length > 0 ? rawLanguages : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
   return (
-    <div className="h-[calc(100vh-64px)] w-full overflow-y-auto custom-scrollbar">
+    <div className="h-full w-full overflow-y-auto custom-scrollbar bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">

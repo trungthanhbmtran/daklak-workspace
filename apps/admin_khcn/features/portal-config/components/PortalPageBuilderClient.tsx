@@ -42,7 +42,7 @@ export function PortalPageBuilderInner() {
 
   return (
     <ThemeProvider>
-      <div className="h-[calc(100vh-64px)] flex flex-col overflow-hidden bg-white dark:bg-slate-950">
+      <div className="h-full w-full flex flex-col overflow-hidden bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         {/* 1. HEADER */}
         <BuilderHeader />
 
