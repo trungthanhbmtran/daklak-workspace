@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { WorkflowEditor, WorkflowList, WorkflowInstanceList } from "@/features/workflow";
 import { IntegrationConfig } from "./IntegrationConfig";
 import { IntegrationManager } from "./IntegrationManager";
-import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network, Server, ArrowRight, Plug } from "lucide-react";
+import { ReportDashboard } from "./reports/ReportDashboard";
+import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network, Server, ArrowRight, Plug, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function CardContainer({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,7 @@ export function IntegrationClient() {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports'>('dashboard');
 
   if (editingId || isCreating) {
     return (
@@ -54,6 +55,7 @@ export function IntegrationClient() {
             {activeView === 'instances' && "Theo dõi Quy trình Đang chạy"}
             {activeView === 'gateway' && "Cấu hình API Gateway"}
             {activeView === 'apis' && "Quản lý Kết nối API"}
+            {activeView === 'reports' && "Bảng điều khiển Báo cáo (Dashboards)"}
           </h2>
         </div>
 
@@ -76,6 +78,9 @@ export function IntegrationClient() {
           )}
           {activeView === 'apis' && (
             <IntegrationManager />
+          )}
+          {activeView === 'reports' && (
+            <ReportDashboard />
           )}
         </div>
       </div>
@@ -111,6 +116,13 @@ export function IntegrationClient() {
       description: "Quản lý cấu hình, xác thực và Keys để kết nối với các hệ thống ngoài (LGSP, Webhook, Postman).",
       icon: Plug,
       theme: { light: "bg-amber-50", dark: "dark:bg-amber-900/20", border: "border-amber-200 dark:border-amber-800", icon: "text-amber-600 dark:text-amber-400" },
+    },
+    {
+      id: 'reports',
+      title: "Thiết kế Báo cáo",
+      description: "Tạo và lưu trữ các biểu đồ, bảng dữ liệu thống kê từ các API hoặc Kho CSDL hệ thống.",
+      icon: PieChart,
+      theme: { light: "bg-pink-50", dark: "dark:bg-pink-900/20", border: "border-pink-200 dark:border-pink-800", icon: "text-pink-600 dark:text-pink-400" },
     }
   ];
 

@@ -2283,6 +2283,17 @@ async function main() {
     },
   });
 
+  const orgAdminRole = await prisma.role.upsert({
+    where: { code: 'ORG_ADMIN' },
+    update: {
+      name: 'Quản trị viên đơn vị',
+    },
+    create: {
+      code: 'ORG_ADMIN',
+      name: 'Quản trị viên đơn vị',
+    },
+  });
+
   // Gán đầy đủ policies cho ADMIN role
   // Policy<->Role là many-to-many nên phải dùng findFirst/create + role.update connect
   const adminResourceCodes = ['USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'SYSTEM', 'NOTIFICATION', 'HRM_EMPLOYEE', 'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_PROCESSING', 'DOC_PUBLISH', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES', 'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION', 'WORKFLOW', 'TASK', 'PLAN', 'REPORT'];
@@ -2305,6 +2316,31 @@ async function main() {
       data: { policies: { connect: adminPolicyIds.map(id => ({ id })) } },
     });
   }
+
+  // Gán policies cho ORG_ADMIN (Giới hạn trong đơn vị)
+  const orgAdminPolicyIds: number[] = [];
+  for (const resCode of adminResourceCodes) {
+    const resId = resources[resCode]?.id;
+    if (!resId) continue;
+    for (const action of adminActions) {
+      let policy = await prisma.policy.findFirst({ 
+        where: { resourceId: resId, action, effect: 'ALLOW', conditions: { equals: { expression: 'targetUser.unitCode STARTSWITH user.unitCode' } } } 
+      });
+      if (!policy) {
+        policy = await prisma.policy.create({ 
+          data: { resourceId: resId, action, effect: 'ALLOW', conditions: { expression: 'targetUser.unitCode STARTSWITH user.unitCode' } } 
+        });
+      }
+      orgAdminPolicyIds.push(policy.id);
+    }
+  }
+  if (orgAdminPolicyIds.length > 0) {
+    await prisma.role.update({
+      where: { id: orgAdminRole.id },
+      data: { policies: { connect: orgAdminPolicyIds.map(id => ({ id })) } },
+    });
+  }
+
   // --- CMS ROLES ---
   const cmsRoles = [
     {
@@ -2327,6 +2363,7 @@ async function main() {
   const roleMap: Record<string, any> = {
     SUPER_ADMIN: superAdminRole,
     ADMIN: adminRole,
+    ORG_ADMIN: orgAdminRole,
   };
 
   const cmsResources = ['POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION'];
@@ -2390,6 +2427,18 @@ async function main() {
 
   // --- CMS USERS ---
   const cmsUsers = [
+    {
+      email: 'admin@sys.com',
+      username: 'admin',
+      fullName: 'System Administrator',
+      role: 'ADMIN',
+    },
+    {
+      email: 'orgadmin@daklak.gov.vn',
+      username: 'orgadmin',
+      fullName: 'Quản trị viên Đơn vị',
+      role: 'ORG_ADMIN',
+    },
     {
       email: 'author@daklak.gov.vn',
       username: 'author',
@@ -3108,6 +3157,8 @@ async function main() {
 
   console.log('🎉 COMPREHENSIVE E-GOV SEED COMPLETED');
   console.log(`👉 SuperAdmin: superadmin@sys.com / ${DEFAULT_PASSWORD}`);
+  console.log(`👉 Admin: admin@sys.com / ${DEFAULT_PASSWORD}`);
+  console.log(`👉 OrgAdmin: orgadmin@daklak.gov.vn / ${DEFAULT_PASSWORD}`);
 
   console.log('📦 Seeding Departments for Organizations...');
 
@@ -4914,6 +4965,7 @@ async function main() {
     { code: 'WORKFLOW_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/integration/gateway', icon: 'Network', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
     { code: 'WORKFLOW_SYSTEM_MENU', name: 'Quy trình hệ thống', route: '/services/integration/workflows', icon: 'GitBranch', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
     { code: 'WORKFLOW_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/integration/apis', icon: 'Plug', order: 4, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
+    { code: 'WORKFLOW_REPORT_MENU', name: 'Thiết kế Báo cáo', route: '/services/integration/reports', icon: 'PieChart', order: 5, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
   ];
 
   for (const m of menuData) {

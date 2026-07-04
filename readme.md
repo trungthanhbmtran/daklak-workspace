@@ -150,3 +150,10 @@ Dưới đây là danh sách các tài khoản tiêu biểu dùng để test cá
   - Username: `nguyenvuhuy` (Cơ quan: Phòng Hạ tầng đô thị IOC - `H15.07.04.03`)
 - **Lê Thị Thanh Kiều** (Nhân viên)
   - Username: `lethithanhkieu` (Cơ quan: Phòng Khai thác và Quản lý dữ liệu - `H15.07.04.02`)
+
+### 6.4. Quản trị hệ thống & Đơn vị (Dành cho ADMIN / ORG_ADMIN)
+> **Quyền hạn**: Quản lý tài khoản, phân quyền, menu, tài nguyên và cấu hình hệ thống (hoặc đơn vị trực thuộc).
+- **Quản trị viên Hệ thống** (Toàn quyền)
+  - Username: `admin` / Email: `admin@sys.com` (Mật khẩu: `Admin@123`)
+- **Quản trị viên Đơn vị** (Giới hạn trong đơn vị)
+  - Username: `orgadmin` / Email: `orgadmin@daklak.gov.vn` (Mật khẩu: `Admin@123`)
