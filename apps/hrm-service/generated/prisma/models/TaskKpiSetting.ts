@@ -539,10 +539,6 @@ export type NullableFloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput = {
   create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutKpiCriteriaInput, Prisma.TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput> | Prisma.TaskKpiSettingCreateWithoutKpiCriteriaInput[] | Prisma.TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput[]
   connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput | Prisma.TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput[]

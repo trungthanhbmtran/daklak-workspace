@@ -10,7 +10,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TasksService.name);
   private userService: any;
   private workflowService: any;
-  private scanInterval: NodeJS.Timeout;
+
   private workflowCache: Map<string, any> = new Map();
 
   private async getWorkflowDefinition(workflowId: string): Promise<any> {
@@ -49,13 +49,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     this.userService = this.userClient.getService('UserService');
     this.workflowService = this.workflowClient.getService('WorkflowService');
-    this.startDueTaskScanner();
   }
 
   onModuleDestroy() {
-    if (this.scanInterval) {
-      clearInterval(this.scanInterval);
-    }
   }
 
   private sendTaskNotification(recipients: string[], title: string, message: string, taskData: any) {
@@ -1364,102 +1360,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   }
 
 
-  async startDueTaskScanner() {
-    const scanPeriodHours = 1;
-    this.logger.log(`Starting due task scanner every ${scanPeriodHours} hour(s)`);
-    
-    this.scanInterval = setInterval(async () => {
-      try {
-        const days = 3;
-        const futureDate = new Date();
-        futureDate.setDate(futureDate.getDate() + days);
-
-        const tasks = await this.prisma.task.findMany({
-          where: {
-            status: { notIn: ['COMPLETED', 'CANCELLED', 'REJECTED', 'DONE', 'TEMPLATE'] },
-            dueDate: { not: null }
-          },
-          include: {
-            participants: true,
-            comments: {
-              where: { content: { startsWith: 'Hệ thống đã tự động gửi cảnh báo' } }
-            }
-          }
-        });
-
-        const now = new Date();
-
-        for (const task of tasks) {
-          if (task.comments && task.comments.length > 0) continue; // Already warned
-
-          let shouldWarn = false;
-          let warnTitle = '';
-          let warnMessage = '';
-
-          const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-          const startDate = task.startDate ? new Date(task.startDate) : null;
-
-          if (dueDate) {
-            if (dueDate <= futureDate && dueDate >= now) {
-              shouldWarn = true;
-              warnTitle = 'Cảnh báo hạn chót công việc';
-              warnMessage = `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`;
-            } else if (dueDate > futureDate && startDate && task.progress != null) {
-              const totalDuration = dueDate.getTime() - startDate.getTime();
-              const elapsed = now.getTime() - startDate.getTime();
-              
-              if (totalDuration > 0 && elapsed > 0) {
-                const expectedProgress = (elapsed / totalDuration) * 100;
-                // Nếu đã qua > 50% thời gian mà tiến độ thực tế ít hơn dự kiến > 20%
-                if (expectedProgress > 50 && (expectedProgress - task.progress > 20)) {
-                  shouldWarn = true;
-                  warnTitle = 'Cảnh báo nguy cơ chậm tiến độ';
-                  warnMessage = `Công việc "${task.title}" có nguy cơ chậm tiến độ (Thời gian đã qua: ${Math.round(expectedProgress)}%, Tiến độ thực tế: ${task.progress}%).`;
-                }
-              }
-            }
-          }
-
-          if (shouldWarn) {
-            const assignees = task.participants
-              .filter(p => p.participantRole === 'ASSIGNEE')
-              .map(p => p.employeeCode)
-              .filter(Boolean);
-
-            for (const code of assignees) {
-              try {
-                this.notificationClient.emit('send_notification', {
-                  title: warnTitle,
-                  message: warnMessage,
-                  type: 'SYSTEM',
-                  recipients: [code],
-                  metadata: { 
-                    module: (task.metadata && (task.metadata as any).module) ? (task.metadata as any).module : 'hrm',
-                    type: (task.metadata && (task.metadata as any).type) ? (task.metadata as any).type : 'work-plans/tasks',
-                    id: task.id
-                  },
-                }).subscribe();
-              } catch (e) {
-                this.logger.error(`Error sending warning for task ${task.id} to ${code}`, e);
-              }
-            }
-
-            // Mark as warned
-            await this.prisma.taskComment.create({
-              data: {
-                taskId: task.id,
-                authorCode: null,
-                content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}`,
-                isSystemMessage: true,
-              }
-            });
-          }
-        }
-      } catch (err) {
-        this.logger.error('Error in due task scanner', err);
-      }
-    }, scanPeriodHours * 60 * 60 * 1000); // Mặc định chạy 1 tiếng 1 lần
-  }
 
 
   async getTask(id: number, query: any) {

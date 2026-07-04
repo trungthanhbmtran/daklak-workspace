@@ -56,6 +56,8 @@ export type TaskMinAggregateOutputType = {
   startDate: Date | null
   dueDate: Date | null
   completedAt: Date | null
+  isDeadlineWarned: boolean | null
+  isRiskWarned: boolean | null
   domainId: number | null
   monitoredUnitId: number | null
   planId: number | null
@@ -77,6 +79,8 @@ export type TaskMaxAggregateOutputType = {
   startDate: Date | null
   dueDate: Date | null
   completedAt: Date | null
+  isDeadlineWarned: boolean | null
+  isRiskWarned: boolean | null
   domainId: number | null
   monitoredUnitId: number | null
   planId: number | null
@@ -98,6 +102,8 @@ export type TaskCountAggregateOutputType = {
   startDate: number
   dueDate: number
   completedAt: number
+  isDeadlineWarned: number
+  isRiskWarned: number
   domainId: number
   monitoredUnitId: number
   planId: number
@@ -140,6 +146,8 @@ export type TaskMinAggregateInputType = {
   startDate?: true
   dueDate?: true
   completedAt?: true
+  isDeadlineWarned?: true
+  isRiskWarned?: true
   domainId?: true
   monitoredUnitId?: true
   planId?: true
@@ -161,6 +169,8 @@ export type TaskMaxAggregateInputType = {
   startDate?: true
   dueDate?: true
   completedAt?: true
+  isDeadlineWarned?: true
+  isRiskWarned?: true
   domainId?: true
   monitoredUnitId?: true
   planId?: true
@@ -182,6 +192,8 @@ export type TaskCountAggregateInputType = {
   startDate?: true
   dueDate?: true
   completedAt?: true
+  isDeadlineWarned?: true
+  isRiskWarned?: true
   domainId?: true
   monitoredUnitId?: true
   planId?: true
@@ -291,6 +303,8 @@ export type TaskGroupByOutputType = {
   startDate: Date | null
   dueDate: Date | null
   completedAt: Date | null
+  isDeadlineWarned: boolean
+  isRiskWarned: boolean
   domainId: number | null
   monitoredUnitId: number | null
   planId: number | null
@@ -336,6 +350,8 @@ export type TaskWhereInput = {
   startDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFilter<"Task"> | boolean
+  isRiskWarned?: Prisma.BoolFilter<"Task"> | boolean
   domainId?: Prisma.IntNullableFilter<"Task"> | number | null
   monitoredUnitId?: Prisma.IntNullableFilter<"Task"> | number | null
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
@@ -365,6 +381,8 @@ export type TaskOrderByWithRelationInput = {
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isDeadlineWarned?: Prisma.SortOrder
+  isRiskWarned?: Prisma.SortOrder
   domainId?: Prisma.SortOrderInput | Prisma.SortOrder
   monitoredUnitId?: Prisma.SortOrderInput | Prisma.SortOrder
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -398,6 +416,8 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   startDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFilter<"Task"> | boolean
+  isRiskWarned?: Prisma.BoolFilter<"Task"> | boolean
   domainId?: Prisma.IntNullableFilter<"Task"> | number | null
   monitoredUnitId?: Prisma.IntNullableFilter<"Task"> | number | null
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
@@ -427,6 +447,8 @@ export type TaskOrderByWithAggregationInput = {
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isDeadlineWarned?: Prisma.SortOrder
+  isRiskWarned?: Prisma.SortOrder
   domainId?: Prisma.SortOrderInput | Prisma.SortOrder
   monitoredUnitId?: Prisma.SortOrderInput | Prisma.SortOrder
   planId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -457,6 +479,8 @@ export type TaskScalarWhereWithAggregatesInput = {
   startDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   dueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+  isDeadlineWarned?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
+  isRiskWarned?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
   domainId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   monitoredUnitId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   planId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
@@ -478,6 +502,8 @@ export type TaskCreateInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -506,6 +532,8 @@ export type TaskUncheckedCreateInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -533,6 +561,8 @@ export type TaskUpdateInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -561,6 +591,8 @@ export type TaskUncheckedUpdateInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -589,6 +621,8 @@ export type TaskCreateManyInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -610,6 +644,8 @@ export type TaskUpdateManyMutationInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -631,6 +667,8 @@ export type TaskUncheckedUpdateManyInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -659,6 +697,8 @@ export type TaskCountOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  isDeadlineWarned?: Prisma.SortOrder
+  isRiskWarned?: Prisma.SortOrder
   domainId?: Prisma.SortOrder
   monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
@@ -690,6 +730,8 @@ export type TaskMaxOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  isDeadlineWarned?: Prisma.SortOrder
+  isRiskWarned?: Prisma.SortOrder
   domainId?: Prisma.SortOrder
   monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
@@ -711,6 +753,8 @@ export type TaskMinOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  isDeadlineWarned?: Prisma.SortOrder
+  isRiskWarned?: Prisma.SortOrder
   domainId?: Prisma.SortOrder
   monitoredUnitId?: Prisma.SortOrder
   planId?: Prisma.SortOrder
@@ -750,6 +794,10 @@ export type FloatFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type TaskCreateNestedOneWithoutKpiSettingsInput = {
@@ -889,6 +937,8 @@ export type TaskCreateWithoutKpiSettingsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -916,6 +966,8 @@ export type TaskUncheckedCreateWithoutKpiSettingsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -958,6 +1010,8 @@ export type TaskUpdateWithoutKpiSettingsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -985,6 +1039,8 @@ export type TaskUncheckedUpdateWithoutKpiSettingsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1011,6 +1067,8 @@ export type TaskCreateWithoutAttachmentsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1038,6 +1096,8 @@ export type TaskUncheckedCreateWithoutAttachmentsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -1080,6 +1140,8 @@ export type TaskUpdateWithoutAttachmentsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1107,6 +1169,8 @@ export type TaskUncheckedUpdateWithoutAttachmentsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1133,6 +1197,8 @@ export type TaskCreateWithoutParticipantsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1160,6 +1226,8 @@ export type TaskUncheckedCreateWithoutParticipantsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -1202,6 +1270,8 @@ export type TaskUpdateWithoutParticipantsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1229,6 +1299,8 @@ export type TaskUncheckedUpdateWithoutParticipantsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1255,6 +1327,8 @@ export type TaskCreateWithoutDescendantsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1282,6 +1356,8 @@ export type TaskUncheckedCreateWithoutDescendantsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -1313,6 +1389,8 @@ export type TaskCreateWithoutAncestorsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1340,6 +1418,8 @@ export type TaskUncheckedCreateWithoutAncestorsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -1382,6 +1462,8 @@ export type TaskUpdateWithoutDescendantsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1409,6 +1491,8 @@ export type TaskUncheckedUpdateWithoutDescendantsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1446,6 +1530,8 @@ export type TaskUpdateWithoutAncestorsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1473,6 +1559,8 @@ export type TaskUncheckedUpdateWithoutAncestorsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1499,6 +1587,8 @@ export type TaskCreateWithoutCommentsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1526,6 +1616,8 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   planId?: number | null
@@ -1568,6 +1660,8 @@ export type TaskUpdateWithoutCommentsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1595,6 +1689,8 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1621,6 +1717,8 @@ export type TaskCreateWithoutPlanInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1648,6 +1746,8 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1704,6 +1804,8 @@ export type TaskScalarWhereInput = {
   startDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFilter<"Task"> | boolean
+  isRiskWarned?: Prisma.BoolFilter<"Task"> | boolean
   domainId?: Prisma.IntNullableFilter<"Task"> | number | null
   monitoredUnitId?: Prisma.IntNullableFilter<"Task"> | number | null
   planId?: Prisma.IntNullableFilter<"Task"> | number | null
@@ -1726,6 +1828,8 @@ export type TaskCreateManyPlanInput = {
   startDate?: Date | string | null
   dueDate?: Date | string | null
   completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: number | null
   monitoredUnitId?: number | null
   workflowInstId?: string | null
@@ -1746,6 +1850,8 @@ export type TaskUpdateWithoutPlanInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1773,6 +1879,8 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1800,6 +1908,8 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1888,6 +1998,8 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   startDate?: boolean
   dueDate?: boolean
   completedAt?: boolean
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: boolean
   monitoredUnitId?: boolean
   planId?: boolean
@@ -1920,6 +2032,8 @@ export type TaskSelectScalar = {
   startDate?: boolean
   dueDate?: boolean
   completedAt?: boolean
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
   domainId?: boolean
   monitoredUnitId?: boolean
   planId?: boolean
@@ -1930,7 +2044,7 @@ export type TaskSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isDeadlineWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   kpiSettings?: boolean | Prisma.Task$kpiSettingsArgs<ExtArgs>
@@ -1965,6 +2079,8 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     startDate: Date | null
     dueDate: Date | null
     completedAt: Date | null
+    isDeadlineWarned: boolean
+    isRiskWarned: boolean
     domainId: number | null
     monitoredUnitId: number | null
     planId: number | null
@@ -2360,6 +2476,8 @@ export interface TaskFieldRefs {
   readonly startDate: Prisma.FieldRef<"Task", 'DateTime'>
   readonly dueDate: Prisma.FieldRef<"Task", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly isDeadlineWarned: Prisma.FieldRef<"Task", 'Boolean'>
+  readonly isRiskWarned: Prisma.FieldRef<"Task", 'Boolean'>
   readonly domainId: Prisma.FieldRef<"Task", 'Int'>
   readonly monitoredUnitId: Prisma.FieldRef<"Task", 'Int'>
   readonly planId: Prisma.FieldRef<"Task", 'Int'>

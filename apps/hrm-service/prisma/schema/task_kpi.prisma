@@ -13,6 +13,9 @@ model Task {
   dueDate     DateTime? @map("due_date") @db.Date
   completedAt DateTime? @map("completed_at")
 
+  isDeadlineWarned Boolean @default(false) @map("is_deadline_warned")
+  isRiskWarned     Boolean @default(false) @map("is_risk_warned")
+
   domainId        Int? @map("domain_id")
   monitoredUnitId Int? @map("monitored_unit_id")
   planId          Int? @map("plan_id")

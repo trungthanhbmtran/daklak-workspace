@@ -3,6 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
+import { TasksCronService } from './tasks.cron';
 
 const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(), '../../shared/protos');
 
@@ -77,6 +78,6 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
     ]),
   ],
   controllers: [TasksController],
-  providers: [TasksService]
+  providers: [TasksService, TasksCronService]
 })
 export class TasksModule { }

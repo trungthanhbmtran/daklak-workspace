@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@/config/config.module';
 import { PrismaModule } from '@/database/prisma.module';
 import { EmployeesModule } from '@/modules/employees/employees.module';
@@ -9,6 +10,16 @@ import { KpiEvaluationsModule } from './modules/kpi-evaluations/kpi-evaluations.
 import { RankQuotasModule } from './modules/rank-quotas/rank-quotas.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, EmployeesModule, TasksModule, TaskTemplatesModule, MasterPlansModule, KpiEvaluationsModule, RankQuotasModule],
+  imports: [
+    ConfigModule, 
+    PrismaModule, 
+    ScheduleModule.forRoot(),
+    EmployeesModule, 
+    TasksModule, 
+    TaskTemplatesModule, 
+    MasterPlansModule, 
+    KpiEvaluationsModule, 
+    RankQuotasModule
+  ],
 })
 export class AppModule {}
