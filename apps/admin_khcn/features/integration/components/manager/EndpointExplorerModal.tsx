@@ -132,7 +132,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
             <Button 
               onClick={handleSave} 
               disabled={updateMutation.isPending}
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className="bg-violet-600 hover:bg-violet-700 text-white mr-8"
             >
               <Save className="w-4 h-4 mr-2" />
               {updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
