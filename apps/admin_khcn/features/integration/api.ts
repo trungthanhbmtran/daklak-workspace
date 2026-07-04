@@ -7,12 +7,18 @@ export interface LGSPConfigData {
   type: 'LGSP' | 'WEBHOOK' | 'SYSTEM' | 'POSTMAN';
   apiUrl?: string;
   apiToken?: string;
+  authUrl?: string;
   keys?: {
     clientId: string;
     clientSecret: string;
     publicKey?: string;
     privateKey?: string;
   };
+  endpoints?: Array<{
+    path: string;
+    method: string;
+    description: string;
+  }>;
   permissions?: string[];
   [key: string]: any;
 }

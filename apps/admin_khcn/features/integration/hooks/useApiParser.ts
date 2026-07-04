@@ -26,7 +26,7 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
         const data = JSON.parse(result);
         
         let initialData: any = {
-          isRawMode: true,
+          isRawMode: false,
           rawConfig: JSON.stringify(data, null, 2),
         };
 
@@ -62,6 +62,7 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
 
         // Detect Postman Collection
         if (data.info && data.item) {
+          initialData.isRawMode = true;
           initialData.type = "POSTMAN";
           initialData.systemName = data.info.name || "Postman API";
           initialData.integrationCode = (data.info.name || "POSTMAN").toUpperCase().replace(/[^A-Z0-9]/g, '_');
@@ -138,6 +139,13 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
           _parsedEndpoints: endpoints
         };
         initialData.rawConfig = JSON.stringify(finalConfig, null, 2);
+        
+        // Populate the visual endpoints array
+        initialData.endpoints = endpoints.map(ep => ({
+          path: ep.path,
+          method: ep.method,
+          description: ep.name || ""
+        }));
 
         onSuccess(initialData);
         toast.success(`Đã trích xuất cấu hình: ${initialData.systemName}`);
