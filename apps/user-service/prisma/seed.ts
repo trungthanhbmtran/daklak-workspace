@@ -2296,7 +2296,7 @@ async function main() {
 
   // Gán đầy đủ policies cho ADMIN role
   // Policy<->Role là many-to-many nên phải dùng findFirst/create + role.update connect
-  const adminResourceCodes = ['USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'SYSTEM', 'NOTIFICATION', 'HRM_EMPLOYEE', 'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_PROCESSING', 'DOC_PUBLISH', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES', 'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION', 'WORKFLOW', 'TASK', 'PLAN', 'REPORT'];
+  const adminResourceCodes = ['USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'SYSTEM', 'NOTIFICATION', 'HRM_EMPLOYEE', 'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_PROCESSING', 'DOC_PUBLISH', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES', 'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION', 'WORKFLOW', 'TASK', 'PLAN', 'REPORT', 'INTEGRATION', 'API_GATEWAY'];
   const adminActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'PUBLISH', 'APPROVE'];
   const adminPolicyIds: number[] = [];
   for (const resCode of adminResourceCodes) {
