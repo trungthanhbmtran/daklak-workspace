@@ -95,12 +95,26 @@ export class WorkflowEngine {
       return { allowed: false, reason: `Requires role: ${requiredRole}` };
     }
 
+    // System/Global Actions that bypass strict business rules (collaboration/monitoring)
+    const systemActions = ['CHAT', 'MONITOR'];
+    const ctx = currentContext || businessData || {};
+    const isOwner = !!ctx.isOwner;
+    const isAssignee = !!ctx.isAssignee;
+    const isSupervisor = !!ctx.isSupervisor;
+    const isDeptLeader = !!ctx.isDeptLeader;
+    const isCoordinator = !!ctx.isCoordinator;
+    const isParticipant = isOwner || isAssignee || isSupervisor || isDeptLeader || isCoordinator;
+    
+    if (systemActions.includes(actionName)) {
+        if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
+        return { allowed: true };
+    }
+
     // Evaluate dynamic validation expression if present
     if (node?.data?.validationExpression) {
       try {
         const evalContext: ValidationContext = {
-          ...(currentContext || {}),
-          ...(businessData || {}),
+          ...ctx,
           actionName,
           userId,
           userRoles,
@@ -124,15 +138,8 @@ export class WorkflowEngine {
       }
     } else {
       // Smart PBAC Defaults if no validationExpression is provided
-      const ctx = currentContext || businessData || {};
       if (node.type === 'user_task') {
-        const isOwner = !!ctx.isOwner;
-        const isAssignee = !!ctx.isAssignee;
-        const isSupervisor = !!ctx.isSupervisor;
-        const isDeptLeader = !!ctx.isDeptLeader;
-        const isCoordinator = !!ctx.isCoordinator;
         const isManager = isSupervisor || isDeptLeader;
-        const isParticipant = isOwner || isAssignee || isManager || isCoordinator;
 
         // Suy luận từ danh sách nhân viên cấp dưới (Cây tổ chức)
         const allowedCodes = ctx.allowedEmployeeCodes || [];
@@ -181,12 +188,9 @@ export class WorkflowEngine {
             break;
 
           case 'CHAT':
-            if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
-            break;
-
           case 'MONITOR':
-            if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
-            break;
+             // Already handled above
+             break;
 
           case 'COORDINATE':
             if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể xin phối hợp.' };
