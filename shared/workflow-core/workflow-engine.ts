@@ -134,9 +134,15 @@ export class WorkflowEngine {
         const isManager = isSupervisor || isDeptLeader;
         const isParticipant = isOwner || isAssignee || isManager || isCoordinator;
 
+        // Suy luận từ danh sách nhân viên cấp dưới (Cây tổ chức)
+        const allowedCodes = ctx.allowedEmployeeCodes || [];
+        const currentEmpCode = userId || '';
+        const hasSubordinates = allowedCodes.filter((c: string) => c !== currentEmpCode).length > 0;
+
         switch (actionName) {
           case 'ASSIGN':
           case 'ASSIGN_STAFF':
+            if (!hasSubordinates && !ctx.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân công/giao việc.' };
             if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
             break;
 
@@ -155,6 +161,7 @@ export class WorkflowEngine {
           case 'APPROVE':
           case 'REJECT':
           case 'ROUTE':
+            if (ctx.status !== 'PENDING_APPROVAL' && ctx.status !== 'REVIEWING') return { allowed: false, reason: 'Công việc chưa được báo cáo hoàn thành để duyệt.' };
             if (!isOwner) return { allowed: false, reason: 'Chỉ người giao việc mới có quyền nghiệm thu (duyệt).' };
             break;
 
@@ -164,6 +171,7 @@ export class WorkflowEngine {
             break;
 
           case 'ADD_SUBTASK':
+            if (!hasSubordinates && !ctx.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân rã công việc.' };
             if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân rã.' };
             break;
 

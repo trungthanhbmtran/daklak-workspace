@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { MessageSquare, Send, ChevronRight } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MentionInput } from '../../../../MentionInput';
 
@@ -8,13 +8,11 @@ import { useTaskChat } from '../hooks/useTaskChat';
 interface TaskChatContainerProps {
   activeTask: any;
   allowedActions: string[];
-  delegationChain?: any[];
 }
 
 export const TaskChatContainer = React.memo(({
   activeTask,
   allowedActions,
-  delegationChain,
 }: TaskChatContainerProps) => {
   const [chatMessage, setChatMessage] = useState('');
   
@@ -28,22 +26,6 @@ export const TaskChatContainer = React.memo(({
   const handleSend = useCallback(() => {
     handleSendMessage(chatMessage, () => setChatMessage(''));
   }, [chatMessage, handleSendMessage]);
-
-  const chatPath = React.useMemo(() => {
-    if (!delegationChain || !activeTask) return [];
-    const path = [];
-    let currentId = activeTask.id;
-    while (currentId) {
-      const node = delegationChain.find(t => t.id === currentId);
-      if (node) {
-        path.unshift(node);
-        currentId = node.parentId;
-      } else {
-        break;
-      }
-    }
-    return path;
-  }, [delegationChain, activeTask]);
 
   if (!allowedActions.includes('CHAT')) {
     return (
@@ -60,20 +42,6 @@ export const TaskChatContainer = React.memo(({
   return (
     <>
       <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/20 dark:bg-slate-900/10 max-h-[400px]">
-        {/* Context Breadcrumb */}
-        {chatPath && chatPath.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 p-3 mb-2 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/30 text-[11px] font-medium text-slate-600 dark:text-slate-300">
-            {chatPath.map((node, index) => (
-              <React.Fragment key={node.id}>
-                <span className={node.id === activeTask.id ? "text-indigo-700 dark:text-indigo-300 font-bold" : "opacity-70"}>
-                  {node.title}
-                </span>
-                {index < chatPath.length - 1 && <ChevronRight className="w-3 h-3 text-slate-400 opacity-50" />}
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-
         {isLoadingComments ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />

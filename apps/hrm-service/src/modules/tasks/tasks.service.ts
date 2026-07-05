@@ -223,6 +223,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     isSupervisor: boolean;
     isCoordinator: boolean;
     isDeptLeader: boolean;
+    isLowestLevel: boolean;
   }> {
     if (!query) {
       return {
@@ -233,6 +234,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         isSupervisor: true,
         isCoordinator: true,
         isDeptLeader: true,
+        isLowestLevel: false,
       };
     }
 
@@ -249,6 +251,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         isSupervisor: false,
         isCoordinator: false,
         isDeptLeader: false,
+        isLowestLevel: false,
       };
     }
 
@@ -290,6 +293,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         }
       }
     }
+    const allowedCodesForLowestLevel = query.allowedEmployeeCodes || [];
+    const allowedDeptsForLowestLevel = query.allowedDepartmentIds || [];
+    const hasSubordinates = allowedCodesForLowestLevel.filter((c: string) => c !== currentEmployeeCode).length > 0 || allowedDeptsForLowestLevel.length > 0;
+    const isLowestLevel = !isAdmin && !hasSubordinates;
+
     const hasAccess = isAdmin || isOwner || isAssignee || isSupervisor || isCoordinator || isDeptLeader;
 
     return {
@@ -300,6 +308,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       isSupervisor,
       isCoordinator,
       isDeptLeader,
+      isLowestLevel,
     };
   }
 
@@ -382,6 +391,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
               isSupervisor: access.isSupervisor,
               isCoordinator: access.isCoordinator,
               isDeptLeader: access.isDeptLeader,
+              isLowestLevel: access.isLowestLevel,
               allowedEmployeeCodes: query.allowedEmployeeCodes || [],
               isUnassigned,
             }
@@ -1144,6 +1154,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const rawTask = await this.prisma.task.findUnique({ where: { id } });
     if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
 
+    const actualActorCode = actorCode || context?.currentEmployeeCode;
+
     const tCheckArr = [rawTask];
     await this.enrichTasks(tCheckArr);
     const tCheck: any = tCheckArr[0];
@@ -1161,7 +1173,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: rawTask.id, depth: 1 } });
         hasChildren = childrenCount > 0;
 
-        const queryContext = { ...context, currentEmployeeCode: actorCode, currentUserId: context?.currentUserId };
+        const queryContext = { ...context, currentEmployeeCode: actualActorCode, currentUserId: context?.currentUserId };
         const access = await this.checkTaskAccess(tCheck, queryContext);
 
         const businessData = {
@@ -1172,6 +1184,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           isSupervisor: access.isSupervisor,
           isCoordinator: access.isCoordinator,
           isDeptLeader: access.isDeptLeader,
+          isLowestLevel: access.isLowestLevel,
           allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
         };
 
@@ -1182,12 +1195,13 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             metadata.currentNodeId,
             actionName,
             context?.currentUserPermissions || [],
-            actorCode,
+            actualActorCode,
             businessData
           );
 
           if (!validateRes.allowed) {
-            throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}.`);
+            const reasonMsg = validateRes.reason ? ` (${validateRes.reason})` : '';
+            throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}${reasonMsg}.`);
           }
 
           // Nhảy bước
@@ -1236,7 +1250,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       await this.prisma.taskComment.create({
         data: {
           taskId: id,
-          authorCode: actorCode || null,
+          authorCode: actualActorCode || null,
           content: `Đã trả lại công việc với lý do: ${rejectReason}`,
           isSystemMessage: true,
         }
@@ -1244,9 +1258,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (nextNodeData?.autoProgress !== undefined) {
-      await this.updateTaskProgress(id, nextNodeData.autoProgress, actorCode);
+      await this.updateTaskProgress(id, nextNodeData.autoProgress, actualActorCode);
     } else if (targetStatus === 'DONE') {
-      await this.updateTaskProgress(id, 100, actorCode);
+      await this.updateTaskProgress(id, 100, actualActorCode);
     }
 
     // Xử lý gửi thông báo tự động dựa trên cấu hình Workflow Engine (Node tiếp theo)
@@ -1312,7 +1326,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             }
 
             // Lọc danh sách và loại trừ người đang thao tác
-            const uniqueCodes = [...new Set(recipientCodes.filter(c => c && c !== actorCode))];
+            const uniqueCodes = [...new Set(recipientCodes.filter(c => c && c !== actualActorCode))];
 
             for (const code of uniqueCodes) {
               const emp = await this.prisma.employee.findUnique({ where: { employeeCode: code }, select: { userId: true } });
@@ -1380,6 +1394,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
               isSupervisor: access.isSupervisor,
               isDeptLeader: access.isDeptLeader,
               isCoordinator: access.isCoordinator,
+              isLowestLevel: access.isLowestLevel,
               allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
             }
           );

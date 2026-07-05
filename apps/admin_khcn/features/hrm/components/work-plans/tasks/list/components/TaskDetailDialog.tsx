@@ -3,7 +3,8 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar,
+import {
+  Calendar,
   MessageSquare, Target, AlertCircle, History,
 } from 'lucide-react';
 import { getDueDateDisplay } from '../utils';
@@ -15,7 +16,6 @@ import { TaskDelegationTree } from './TaskDelegationTree';
 import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
 import { useTaskChat } from '../hooks/useTaskChat';
-import { useTaskDelegation } from '../hooks/useTaskDelegation';
 
 function TaskChatBadge({ activeTaskId }: { activeTaskId: number | undefined }) {
   const { taskComments } = useTaskChat(activeTaskId);
@@ -63,8 +63,6 @@ export function TaskDetailDialog({
   const [isCoordinationModalOpen, setIsCoordinationModalOpen] = useState(false);
   const [isAssignCoordinationModalOpen, setIsAssignCoordinationModalOpen] = useState(false);
 
-  const { delegationChain, isLoadingChain } = useTaskDelegation(task?.rootTaskId || task?.id);
-  
   const qc = useQueryClient();
   const fetchComments = () => {
     if (activeTask?.id) {
@@ -110,87 +108,82 @@ export function TaskDetailDialog({
             {/* ── 3 COLUMNS ── */}
             <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_320px_320px] 2xl:grid-cols-[1fr_340px_340px] divide-y xl:divide-y-0 xl:divide-x divide-slate-200 dark:divide-slate-800">
 
-                {/* ── COL 1: Mô tả + Chat ── */}
-                <div className="flex flex-col gap-0 overflow-y-auto">
-                  {activeTask.status === 'PENDING_APPROVAL' && (
-                    <div className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 p-3 px-6 flex items-center gap-2 text-[13px] font-bold border-b border-fuchsia-100 dark:border-fuchsia-800">
-                      <AlertCircle className="w-4 h-4" /> ⏳ Đang chờ lãnh đạo nghiệm thu... (Tạm khóa)
-                    </div>
-                  )}
-                  {/* Description */}
-                  <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <div className="w-4 h-[2px] bg-slate-300 rounded" /> Mô tả công việc
-                    </h3>
-                    <div className="relative">
-                      <div className="absolute left-0 top-0 bottom-0 w-0.5  bg-linear-to-br from-indigo-400 to-indigo-200 rounded-full" />
-                      <div className="pl-5 text-slate-600 dark:text-slate-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
-                        {activeTask.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
-                      </div>
-                    </div>
+              {/* ── COL 1: Mô tả + Chat ── */}
+              <div className="flex flex-col gap-0 overflow-y-auto">
+                {activeTask.status === 'PENDING_APPROVAL' && (
+                  <div className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 p-3 px-6 flex items-center gap-2 text-[13px] font-bold border-b border-fuchsia-100 dark:border-fuchsia-800">
+                    <AlertCircle className="w-4 h-4" /> ⏳ Đang chờ lãnh đạo nghiệm thu... (Tạm khóa)
                   </div>
-
-                  {/* Chat & History */}
-                  <div className="flex flex-col flex-1 min-h-[360px]">
-                    <div className="px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <button
-                          onClick={() => setActiveTab('CHAT')}
-                          className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${
-                            activeTab === 'CHAT' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
-                          }`}
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" /> Trao đổi
-                        </button>
-                        <button
-                          onClick={() => setActiveTab('HISTORY')}
-                          className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${
-                            activeTab === 'HISTORY' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
-                          }`}
-                        >
-                          <History className="w-3.5 h-3.5" /> Lịch sử
-                        </button>
-                      </div>
-                      
-                      {activeTab === 'CHAT' && (
-                        <TaskChatBadge activeTaskId={activeTask?.id} />
-                      )}
+                )}
+                {/* Description */}
+                <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <div className="w-4 h-[2px] bg-slate-300 rounded" /> Mô tả công việc
+                  </h3>
+                  <div className="relative">
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5  bg-linear-to-br from-indigo-400 to-indigo-200 rounded-full" />
+                    <div className="pl-5 text-slate-600 dark:text-slate-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
+                      {activeTask.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
                     </div>
-
-                    {/* Content Area */}
-                    {activeTab === 'HISTORY' ? (
-                      <div className="flex-1 overflow-y-auto px-6 bg-slate-50/20 dark:bg-slate-900/10 max-h-[465px]">
-                        <WorkflowTimeline instanceId={activeTask.workflowInstId} />
-                      </div>
-                    ) : (
-                      <TaskChatContainer
-                        activeTask={activeTask}
-                        allowedActions={allowedActions}
-                        delegationChain={delegationChain}
-                      />
-                    )}
                   </div>
                 </div>
 
-                {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
-                <TaskActionPanel
-                  activeTask={activeTask}
-                  context={context}
-                  allowedActions={allowedActions}
-                  dueInfo={dueInfo}
-                  onSmartAssign={onSmartAssign}
-                  onOpenSubTaskModal={() => setIsSubTaskModalOpen(true)}
-                  onOpenAiBreakdownModal={() => setIsAiBreakdownModalOpen(true)}
-                  onOpenCoordinationModal={() => setIsCoordinationModalOpen(true)}
-                  onCloseDialog={() => onClose()}
-                />
+                {/* Chat & History */}
+                <div className="flex flex-col flex-1 min-h-[360px]">
+                  <div className="px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => setActiveTab('CHAT')}
+                        className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${activeTab === 'CHAT' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" /> Trao đổi
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('HISTORY')}
+                        className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${activeTab === 'HISTORY' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                      >
+                        <History className="w-3.5 h-3.5" /> Lịch sử
+                      </button>
+                    </div>
 
-                {/* ── COL 3: Cây công việc ── */}
+                    {activeTab === 'CHAT' && (
+                      <TaskChatBadge activeTaskId={activeTask?.id} />
+                    )}
+                  </div>
+
+                  {/* Content Area */}
+                  {activeTab === 'HISTORY' ? (
+                    <div className="flex-1 overflow-y-auto px-6 bg-slate-50/20 dark:bg-slate-900/10 max-h-[465px]">
+                      <WorkflowTimeline instanceId={activeTask.workflowInstId} />
+                    </div>
+                  ) : (
+                    <TaskChatContainer
+                      activeTask={activeTask}
+                      allowedActions={allowedActions}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
+              <TaskActionPanel
+                activeTask={activeTask}
+                context={context}
+                allowedActions={allowedActions}
+                dueInfo={dueInfo}
+                onSmartAssign={onSmartAssign}
+                onOpenSubTaskModal={() => setIsSubTaskModalOpen(true)}
+                onOpenAiBreakdownModal={() => setIsAiBreakdownModalOpen(true)}
+                onOpenCoordinationModal={() => setIsCoordinationModalOpen(true)}
+                onCloseDialog={() => onClose()}
+              />
+
+              {/* ── COL 3: Cây công việc ── */}
               <TaskDelegationTree
                 rootTaskId={task?.rootTaskId || task?.id}
                 activeTaskId={activeTask?.id}
-                delegationChain={delegationChain}
-                isLoadingChain={isLoadingChain}
                 onSelectTask={setActiveTask}
               />
             </div>
