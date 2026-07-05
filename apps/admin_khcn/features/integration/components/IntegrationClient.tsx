@@ -17,11 +17,11 @@ function CardContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function IntegrationClient() {
+export function IntegrationClient({ initialView = 'dashboard' }: { initialView?: 'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports' }) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports'>(initialView);
 
   if (editingId || isCreating) {
     return (
