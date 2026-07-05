@@ -59,9 +59,9 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
   return (
     <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center rounded-2xl">
       <div className="flex flex-1 w-full flex-col sm:flex-row flex-wrap gap-3">
-        <Search 
-          placeholder="Tìm theo tiêu đề bài viết..." 
-          className="w-full sm:w-80" 
+        <Search
+          placeholder="Tìm theo tiêu đề bài viết..."
+          className="w-full sm:w-80"
         />
 
         <Select value={statusFilter} onValueChange={(val) => updateParams('status', val)}>
@@ -112,7 +112,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
 
       <Button
         onClick={onNavigateToCreate}
-        className="w-full lg:w-auto h-10 px-6 shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold uppercase text-[11px] tracking-wide rounded-xl transition-all duration-300 hover:shadow-indigo-500/10 hover:shadow-lg"
+        className="w-full lg:w-auto h-10 px-6 shadow-sm bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold uppercase text-[11px] tracking-wide rounded-xl transition-all duration-300 hover:shadow-indigo-500/10 hover:shadow-lg"
       >
         <Plus className="h-4 w-4 mr-2 stroke-[3px]" /> Viết bài mới
       </Button>

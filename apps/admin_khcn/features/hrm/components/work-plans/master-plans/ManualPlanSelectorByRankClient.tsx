@@ -109,7 +109,7 @@ export function ManualPlanSelectorByRankClient() {
     console.log("DEBUG_TASKS: activeRankFilter =", activeRankFilter);
     console.log("DEBUG_TASKS: activeDomainFilter =", activeDomainFilter);
     console.log("DEBUG_TASKS: availableTasks =", availableTasks);
-    
+
     const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
 
     const handleAssignTask = () => {
@@ -153,9 +153,9 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <Card className="max-w-6xl mx-auto mt-6 shadow-xl border-0 ring-1 ring-black/5 overflow-hidden h-[calc(100vh-100px)] flex flex-col bg-gradient-to-b from-muted/20 to-background rounded-2xl">
-            <CardHeader className="flex-shrink-0 bg-white/50 backdrop-blur-md border-b pb-4 pt-6 px-6 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <Card className="max-w-6xl mx-auto mt-6 shadow-xl border-0 ring-1 ring-black/5 overflow-hidden h-[calc(100vh-100px)] flex flex-col bg-linear-to-b from-muted/20 to-background rounded-2xl">
+            <CardHeader className="shrink-0 bg-white/50 backdrop-blur-md border-b pb-4 pt-6 px-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-transparent pointer-events-none" />
                 <div className="relative z-10">
                     <CardTitle className="flex items-center gap-3 text-2xl font-black text-foreground tracking-tight">
                         <div className="p-2.5 bg-primary/10 rounded-xl">
@@ -168,10 +168,10 @@ export function ManualPlanSelectorByRankClient() {
                     </CardDescription>
                 </div>
             </CardHeader>
-            
+
             <CardContent className="flex-1 flex flex-col min-h-0 p-6 gap-6">
                 {/* FILTER SECTION */}
-                <div className="flex-shrink-0 bg-white rounded-2xl border p-4 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-end">
+                <div className="shrink-0 bg-white rounded-2xl border p-4 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-end">
                     <div className="flex-1 w-full space-y-3">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại Ngạch</Label>
                         <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
@@ -197,7 +197,7 @@ export function ManualPlanSelectorByRankClient() {
                             </SelectContent>
                         </Select>
                     </div>
-                    
+
                     <div className="flex-1 w-full space-y-3">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Lĩnh vực (Chuyên ngành)</Label>
                         <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
@@ -222,7 +222,7 @@ export function ManualPlanSelectorByRankClient() {
                             <div className="w-1.5 h-6 bg-primary rounded-full" />
                             <h3 className="font-bold text-sm tracking-tight text-foreground">Danh sách chỉ tiêu bắt buộc</h3>
                         </div>
-                        
+
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
                             <Select
                                 value={selectedTaskId}
@@ -246,7 +246,7 @@ export function ManualPlanSelectorByRankClient() {
                                     })}
                                 </SelectContent>
                             </Select>
-                            
+
                             <div className="flex w-full sm:w-auto items-center bg-white border rounded-xl overflow-hidden h-10">
                                 <div className="px-3 text-xs font-medium text-muted-foreground border-r bg-muted/10 h-full flex items-center">Chỉ tiêu</div>
                                 <Input
@@ -256,7 +256,7 @@ export function ManualPlanSelectorByRankClient() {
                                     className="w-20 h-full border-0 focus-visible:ring-0 text-center font-semibold text-sm bg-transparent"
                                 />
                             </div>
-                            
+
                             <Button
                                 onClick={handleAssignTask}
                                 disabled={!selectedTaskId}
@@ -283,7 +283,7 @@ export function ManualPlanSelectorByRankClient() {
                                         <TableRow key={plan.id} className="group transition-colors hover:bg-muted/10">
                                             <TableCell className="font-medium text-foreground py-3">
                                                 <div className="flex items-start gap-3">
-                                                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-semibold text-muted-foreground flex-shrink-0 mt-0.5">
+                                                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-semibold text-muted-foreground shrink-0 mt-0.5">
                                                         {idx + 1}
                                                     </span>
                                                     <span className="mt-0.5 leading-relaxed">{plan.title}</span>
@@ -337,7 +337,7 @@ export function ManualPlanSelectorByRankClient() {
                 </div>
             </CardContent>
 
-            <CardFooter className="flex justify-between items-center px-6 py-4 border-t bg-white relative z-10 flex-shrink-0">
+            <CardFooter className="flex justify-between items-center px-6 py-4 border-t bg-white relative z-10 shrink-0">
                 <div className="text-xs text-muted-foreground">
                     Tổng số nhiệm vụ định biên: <strong className="text-foreground">{addedPlans.length}</strong>
                 </div>

@@ -241,7 +241,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
               return (
                 <Card key={banner.id} className="group overflow-hidden border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200/80 transition-all flex flex-col bg-card rounded-2xl relative">
                   {/* Visual Thumbnail */}
-                  <div className="relative aspect-[21/9] overflow-hidden bg-slate-50 border-b border-slate-100/80 flex items-center justify-center">
+                  <div className="relative aspect-21/9 overflow-hidden bg-slate-50 border-b border-slate-100/80 flex items-center justify-center">
                     {isSlogan && sloganStyles ? (
                       <div
                         className="w-full h-full flex flex-col justify-center items-center p-3 text-center relative overflow-hidden"

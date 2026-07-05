@@ -47,7 +47,7 @@ export function KpiDashboardClient() {
             Báo cáo kết quả thực hiện, điểm KPI trung bình theo từng Phòng/Ban/Đơn vị
           </p>
         </div>
-        
+
         <div className="w-full md:w-[300px]">
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger className="h-11 bg-white rounded-xl shadow-sm border-slate-200 font-medium">
@@ -65,7 +65,7 @@ export function KpiDashboardClient() {
       </div>
 
       {!selectedPeriod ? (
-        <Card className="border-0 shadow-sm bg-slate-50 border-dashed border-2 border-slate-200">
+        <Card className=" shadow-sm bg-slate-50 border-dashed border-2 border-slate-200">
           <CardContent className="flex flex-col items-center justify-center py-24 text-center">
             <Target className="h-16 w-16 text-slate-300 mb-4" />
             <h3 className="text-xl font-bold text-slate-700">Vui lòng chọn Kỳ đánh giá</h3>
@@ -80,7 +80,7 @@ export function KpiDashboardClient() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="border-0 shadow-sm overflow-hidden rounded-2xl relative">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-400 to-emerald-600"></div>
               <CardHeader className="pb-2">
                 <CardDescription className="font-semibold text-emerald-600 uppercase tracking-wider text-xs">Tổng nhân sự đã đánh giá</CardDescription>
                 <CardTitle className="text-4xl font-black text-slate-800">{statsData.totalEvaluations || 0}</CardTitle>
@@ -93,7 +93,7 @@ export function KpiDashboardClient() {
             </Card>
 
             <Card className="border-0 shadow-sm overflow-hidden rounded-2xl relative">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-purple-600"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-indigo-400 to-purple-600"></div>
               <CardHeader className="pb-2">
                 <CardDescription className="font-semibold text-indigo-600 uppercase tracking-wider text-xs">Điểm Trung Bình Toàn Cơ Quan</CardDescription>
                 <CardTitle className="text-4xl font-black text-slate-800">{statsData.companyAvgScore || 0}</CardTitle>
@@ -118,10 +118,10 @@ export function KpiDashboardClient() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} margin={{ top: 20, right: 30, left: -20, bottom: 60 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                        <XAxis 
-                          dataKey="departmentName" 
-                          axisLine={false} 
-                          tickLine={false} 
+                        <XAxis
+                          dataKey="departmentName"
+                          axisLine={false}
+                          tickLine={false}
                           tick={{ fontSize: 11, fill: '#64748b' }}
                           angle={-45}
                           textAnchor="end"
