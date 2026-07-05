@@ -169,61 +169,32 @@ export function ManualPlanSelectorByRankClient() {
                 </div>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col min-h-0 p-6 gap-6">
-                {/* FILTER SECTION */}
-                <div className="shrink-0 bg-white rounded-2xl border p-4 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-end">
-                    <div className="flex-1 w-full space-y-3">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại Ngạch</Label>
-                        <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted/50 rounded-xl">
-                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Khối Công chức</TabsTrigger>
-                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Khối Viên chức</TabsTrigger>
-                            </TabsList>
-                        </Tabs>
-                    </div>
-
-                    <div className="flex-1 w-full space-y-3">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Chọn Chức danh / Hạng</Label>
-                        <Select value={activeRankFilter} onValueChange={setActiveRankFilter}>
-                            <SelectTrigger className="h-10 rounded-xl bg-muted/20 border-muted">
-                                <SelectValue placeholder="Chọn chức danh..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {activeRanksList.map((rank: any) => (
-                                    <SelectItem key={rank.code} value={rank.code} className="cursor-pointer">
-                                        {rank.nameVi || rank.name} ({rank.code})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="flex-1 w-full space-y-3">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Lĩnh vực (Chuyên ngành)</Label>
-                        <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
-                            <SelectTrigger className="h-10 rounded-xl bg-muted/20 border-muted">
-                                <SelectValue placeholder="Chọn lĩnh vực..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {DOMAINS.map(domain => (
-                                    <SelectItem key={domain.code} value={domain.code} className="cursor-pointer">
-                                        {domain.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-
-                {/* MAIN CONTENT AREA */}
-                <div className="flex-1 flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden">
-                    <div className="p-4 border-b bg-muted/5 flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
+            <CardContent className="flex-1 flex flex-col lg:flex-row min-h-0 p-6 gap-6">
+                {/* LEFT COLUMN: MAIN CONTENT AREA */}
+                <div className="flex-[3] flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden h-full">
+                    <div className="p-4 border-b bg-muted/5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-6 bg-primary rounded-full" />
                             <h3 className="font-bold text-sm tracking-tight text-foreground">Danh sách chỉ tiêu bắt buộc</h3>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+                        <div className="w-full sm:w-[300px]">
+                            <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
+                                <SelectTrigger className="h-10 rounded-xl bg-white border-muted shadow-sm">
+                                    <SelectValue placeholder="Chọn lĩnh vực..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {DOMAINS.map(domain => (
+                                        <SelectItem key={domain.code} value={domain.code} className="cursor-pointer">
+                                            {domain.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    
+                    <div className="p-4 border-b bg-white flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                             <Select
                                 value={selectedTaskId}
                                 onValueChange={val => {
@@ -232,22 +203,24 @@ export function ManualPlanSelectorByRankClient() {
                                     if (task) setTargetValue(task.defaultWeight);
                                 }}
                             >
-                                <SelectTrigger className="w-full sm:w-[350px] h-10 rounded-xl bg-white">
+                                <SelectTrigger className="w-full flex-1 h-10 rounded-xl bg-white shadow-sm border-muted-foreground/20">
                                     <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ thư viện --" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {availableTasks.map(task => {
                                         const isAdded = addedPlans.some(p => p.title === task.taskName);
                                         return (
-                                            <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm">
-                                                {task.taskName} {isAdded ? '(Đã thêm)' : ''}
+                                            <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm whitespace-normal">
+                                                <div className="break-words max-w-[300px] sm:max-w-[400px] md:max-w-[500px] leading-relaxed">
+                                                    {task.taskName} {isAdded ? <span className="text-muted-foreground ml-1 italic">(Đã thêm)</span> : ''}
+                                                </div>
                                             </SelectItem>
                                         );
                                     })}
                                 </SelectContent>
                             </Select>
 
-                            <div className="flex w-full sm:w-auto items-center bg-white border rounded-xl overflow-hidden h-10">
+                            <div className="flex w-full sm:w-auto items-center bg-white border rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
                                 <div className="px-3 text-xs font-medium text-muted-foreground border-r bg-muted/10 h-full flex items-center">Chỉ tiêu</div>
                                 <Input
                                     type="number"
@@ -260,7 +233,7 @@ export function ManualPlanSelectorByRankClient() {
                             <Button
                                 onClick={handleAssignTask}
                                 disabled={!selectedTaskId}
-                                className="w-full sm:w-auto h-10 px-5 rounded-xl font-semibold shadow-sm transition-all hover:scale-105 active:scale-95"
+                                className="w-full sm:w-auto h-10 px-5 rounded-xl font-semibold shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
                             >
                                 <Plus className="w-4 h-4 mr-2" /> Thêm
                             </Button>
@@ -286,7 +259,7 @@ export function ManualPlanSelectorByRankClient() {
                                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-semibold text-muted-foreground shrink-0 mt-0.5">
                                                         {idx + 1}
                                                     </span>
-                                                    <span className="mt-0.5 leading-relaxed">{plan.title}</span>
+                                                    <span className="mt-0.5 leading-relaxed break-words whitespace-normal min-w-[200px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">{plan.title}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center text-muted-foreground">
@@ -332,6 +305,43 @@ export function ManualPlanSelectorByRankClient() {
                                     )}
                                 </TableBody>
                             </Table>
+                        </ScrollArea>
+                    </div>
+                </div>
+
+                {/* RIGHT COLUMN: FILTER SECTION */}
+                <div className="flex-1 shrink-0 flex flex-col gap-4 bg-white rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
+                    <div className="space-y-3 shrink-0">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại Ngạch</Label>
+                        <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
+                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted/50 rounded-xl">
+                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Khối Công chức</TabsTrigger>
+                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Khối Viên chức</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    </div>
+
+                    <div className="space-y-3 flex-1 flex flex-col min-h-0">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Ngạch / Hạng</Label>
+                        <ScrollArea className="flex-1 pr-4">
+                            <div className="space-y-2 pb-4">
+                                {activeRanksList.map((rank: any) => (
+                                    <div
+                                        key={rank.code}
+                                        onClick={() => setActiveRankFilter(rank.code)}
+                                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                                            activeRankFilter === rank.code
+                                                ? 'bg-primary/5 border-primary shadow-sm'
+                                                : 'bg-white border-transparent hover:bg-muted/50 hover:border-muted'
+                                        }`}
+                                    >
+                                        <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-slate-700'}`}>
+                                            {rank.nameVi || rank.name}
+                                        </h4>
+                                        <p className="text-[11px] text-muted-foreground font-mono mt-1">{rank.code}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </ScrollArea>
                     </div>
                 </div>
