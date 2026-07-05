@@ -114,6 +114,22 @@ export const PropertiesPanel = ({
           <div className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Mã hành động nghiệp vụ (Action)
+              </label>
+              <input
+                type="text"
+                name="actionName"
+                value={data.actionName || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+                placeholder="VD: ASSIGN, APPROVE, IN_PROGRESS"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Mã này giúp backend nhận diện bước này đóng vai trò gì.
+              </p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Vai trò xử lý (PBAC)
               </label>
               <select
@@ -130,12 +146,24 @@ export const PropertiesPanel = ({
                 ) : (
                   <>
                     <option value="ADMIN">Administrator</option>
-                    <option value="MANAGER">Quản lý phòng ban</option>
-                    <option value="STAFF">Nhân viên nghiệp vụ</option>
+                    <option value="MANAGER">Quản lý / Lãnh đạo</option>
+                    <option value="STAFF">Nhân viên / Chuyên viên</option>
                     <option value="EXPERT">Chuyên gia phản biện</option>
                   </>
                 )}
               </select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/10 mt-2">
+              <label className="text-sm font-semibold text-primary">
+                Gửi thông báo hệ thống
+              </label>
+              <input
+                type="checkbox"
+                name="sendNotification"
+                checked={data.sendNotification || false}
+                onChange={(e) => handleChange({ target: { name: 'sendNotification', value: e.target.checked } } as any)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
@@ -218,36 +246,7 @@ export const PropertiesPanel = ({
             </div>
           </div>
         );
-      case "condition":
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Biểu thức logic (fx)
-              </label>
-              <div className="relative group">
-                <div className="absolute left-3 top-3 text-muted-foreground group-focus-within:text-primary transition-colors">
-                  <span className="font-mono text-xs font-bold">fx</span>
-                </div>
-                <input
-                  name="expression"
-                  value={data.expression || ""}
-                  onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg p-2.5 pl-10 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                  placeholder="e.g. status === 'approved'"
-                />
-              </div>
-            </div>
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-              <div className="flex gap-2">
-                <Info className="h-4 w-4 text-amber-600 shrink-0" />
-                <p className="text-[11px] text-amber-800 leading-normal">
-                  Nếu kết quả là <b>true</b>, quy trình đi theo nhánh "True". Nếu <b>false</b>, đi theo nhánh "False".
-                </p>
-              </div>
-            </div>
-          </div>
-        );
+
       case "service_task":
         return (
           <div className="space-y-4">

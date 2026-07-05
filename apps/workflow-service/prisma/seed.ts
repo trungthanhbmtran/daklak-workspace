@@ -15,37 +15,37 @@ async function main() {
         id: 'node_assign', 
         type: 'user_task', 
         position: { x: 250, y: 150 }, 
-        data: { label: 'Giao việc', actionName: 'ASSIGN', role: 'MANAGER' } 
+        data: { label: 'Giao việc', role: 'MANAGER', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true } 
       },
       { 
         id: 'node_in_progress', 
         type: 'user_task', 
         position: { x: 500, y: 150 }, 
-        data: { label: 'Tiếp nhận & Xử lý', actionName: 'IN_PROGRESS', role: 'ASSIGNEE' } 
+        data: { label: 'Tiếp nhận & Xử lý', role: 'STAFF', description: 'Nhân viên thụ lý và thực hiện công việc chính', actionName: 'IN_PROGRESS', sendNotification: true } 
       },
       { 
         id: 'node_coordinate', 
         type: 'user_task', 
         position: { x: 500, y: 300 }, 
-        data: { label: 'Phối hợp thực hiện', actionName: 'COORDINATE', role: 'COORDINATOR' } 
+        data: { label: 'Phối hợp thực hiện', role: 'STAFF', description: 'Người phối hợp tham gia cùng xử lý', actionName: 'COORDINATE', sendNotification: true } 
       },
       { 
         id: 'node_monitor', 
         type: 'user_task', 
         position: { x: 500, y: 0 }, 
-        data: { label: 'Lãnh đạo theo dõi', actionName: 'MONITOR', role: 'OBSERVER' } 
+        data: { label: 'Lãnh đạo theo dõi', role: 'MANAGER', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false } 
       },
       { 
         id: 'node_report', 
         type: 'user_task', 
         position: { x: 750, y: 150 }, 
-        data: { label: 'Báo cáo kết quả', actionName: 'DONE', role: 'ASSIGNEE' } 
+        data: { label: 'Báo cáo kết quả', role: 'STAFF', description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'DONE', sendNotification: true } 
       },
       { 
         id: 'node_approve', 
         type: 'user_task', 
         position: { x: 1000, y: 150 }, 
-        data: { label: 'Phê duyệt / Trả lại', actionName: 'APPROVED', role: 'MANAGER' } 
+        data: { label: 'Phê duyệt / Trả lại', role: 'MANAGER', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true } 
       },
       { id: 'node_end', type: 'end', position: { x: 1250, y: 150 }, data: { label: 'Kết thúc' } }
     ],
