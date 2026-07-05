@@ -15,39 +15,39 @@ async function main() {
         id: 'node_assign', 
         type: 'user_task', 
         position: { x: 250, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Giao việc', validationExpression: 'isOwner || isDeptLeader', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY' } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY' } 
       },
       { id: 'gw_split', type: 'parallel_gateway', position: { x: 500, y: 150 }, data: { label: 'Tách luồng' } },
       { 
         id: 'node_in_progress', 
         type: 'user_task', 
         position: { x: 700, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Xử lý', validationExpression: 'isAssignee', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT' } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Xử lý', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT' } 
       },
       { 
         id: 'node_coordinate', 
         type: 'user_task', 
         position: { x: 700, y: 300 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Phối hợp thực hiện', validationExpression: 'isCoordinator', targetStatus: 'IN_PROGRESS', description: 'Người phối hợp tham gia cùng xử lý', actionName: 'COORDINATE', sendNotification: true, assignmentStrategy: 'ANY' } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Phối hợp thực hiện', targetStatus: 'IN_PROGRESS', description: 'Người phối hợp tham gia cùng xử lý', actionName: 'COORDINATE', sendNotification: true, assignmentStrategy: 'ANY' } 
       },
       { 
         id: 'node_monitor', 
         type: 'user_task', 
         position: { x: 700, y: 0 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo theo dõi', validationExpression: 'isOwner || isDeptLeader', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER' } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER' } 
       },
       { id: 'gw_join', type: 'parallel_gateway', position: { x: 950, y: 150 }, data: { label: 'Gộp luồng' } },
       { 
         id: 'node_report', 
         type: 'user_task', 
         position: { x: 1100, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Báo cáo kết quả', validationExpression: 'isAssignee', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'DONE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Báo cáo kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'DONE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' } } 
       },
       { 
         id: 'node_approve', 
         type: 'user_task', 
         position: { x: 1350, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Phê duyệt / Trả lại', validationExpression: 'isOwner || isDeptLeader || isSupervisor', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Phê duyệt / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' } 
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 1600, y: 150 }, data: { label: 'Quyết định' } },
       { id: 'node_end', type: 'end', position: { x: 1800, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Công việc đã được nghiệm thu', template: 'Công việc của bạn đã được duyệt hoàn thành.', recipientExpression: '[assigneeCode]' } } }
@@ -95,39 +95,39 @@ async function main() {
         id: 'node_receive', 
         type: 'user_task', 
         position: { x: 250, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Vào sổ', validationExpression: "userRoles.includes('CLERK')", description: 'Văn thư tiếp nhận văn bản', actionName: 'RECEIVE', sendNotification: false, assignmentStrategy: 'ANY', targetStatus: 'TODO' } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Vào sổ', description: 'Văn thư tiếp nhận văn bản', actionName: 'RECEIVE', sendNotification: false, assignmentStrategy: 'ANY', targetStatus: 'TODO' } 
       },
       { 
         id: 'node_route', 
         type: 'user_task', 
         position: { x: 500, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo Bút phê', validationExpression: 'isOwner || isDeptLeader', description: 'Lãnh đạo cơ quan điều chuyển văn bản', actionName: 'ROUTE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Có văn bản cần phê duyệt', template: 'Văn bản "{{taskTitle}}" đang chờ ý kiến chỉ đạo của bạn.', recipientExpression: '[supervisorCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo Bút phê', description: 'Lãnh đạo cơ quan điều chuyển văn bản', actionName: 'ROUTE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Có văn bản cần phê duyệt', template: 'Văn bản "{{taskTitle}}" đang chờ ý kiến chỉ đạo của bạn.', recipientExpression: '[supervisorCode]' } } 
       },
       { id: 'gw_route', type: 'exclusive_gateway', position: { x: 750, y: 150 }, data: { label: 'Điều chuyển' } },
       { 
         id: 'node_assign_staff', 
         type: 'user_task', 
         position: { x: 1000, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Trưởng phòng phân công', validationExpression: 'isDeptLeader', description: 'Lãnh đạo phòng ban giao việc cho chuyên viên', actionName: 'ASSIGN_STAFF', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Có văn bản cần phân công', template: 'Đã có chỉ đạo cho văn bản "{{taskTitle}}". Vui lòng phân công chuyên viên xử lý.', recipientExpression: '[assigneeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Trưởng phòng phân công', description: 'Lãnh đạo phòng ban giao việc cho chuyên viên', actionName: 'ASSIGN_STAFF', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Có văn bản cần phân công', template: 'Đã có chỉ đạo cho văn bản "{{taskTitle}}". Vui lòng phân công chuyên viên xử lý.', recipientExpression: '[assigneeCode]' } } 
       },
       { 
         id: 'node_process', 
         type: 'user_task', 
         position: { x: 1250, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Chuyên viên xử lý', validationExpression: 'isAssignee', targetStatus: 'IN_PROGRESS', description: 'Chuyên viên thụ lý dự thảo phản hồi', actionName: 'PROCESS', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Bạn được giao xử lý văn bản', template: 'Bạn vừa được phân công thụ lý văn bản "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Chuyên viên xử lý', targetStatus: 'IN_PROGRESS', description: 'Chuyên viên thụ lý dự thảo phản hồi', actionName: 'PROCESS', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Bạn được giao xử lý văn bản', template: 'Bạn vừa được phân công thụ lý văn bản "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } } 
       },
       { 
         id: 'node_approve', 
         type: 'user_task', 
         position: { x: 1500, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Duyệt kết quả', validationExpression: 'isOwner || isDeptLeader || isSupervisor', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Lãnh đạo duyệt dự thảo', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Trình duyệt kết quả xử lý', template: 'Chuyên viên đã hoàn thành xử lý văn bản "{{taskTitle}}". Vui lòng kiểm tra.', recipientExpression: '[supervisorCode, assignerCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Duyệt kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Lãnh đạo duyệt dự thảo', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Trình duyệt kết quả xử lý', template: 'Chuyên viên đã hoàn thành xử lý văn bản "{{taskTitle}}". Vui lòng kiểm tra.', recipientExpression: '[supervisorCode, assignerCode]' } } 
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 1750, y: 150 }, data: { label: 'Quyết định' } },
       { 
         id: 'node_issue', 
         type: 'user_task', 
         position: { x: 2000, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Ban hành / Lưu trữ', validationExpression: "userRoles.includes('CLERK')", description: 'Văn thư ban hành văn bản đi hoặc lưu trữ', actionName: 'ISSUE', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Văn bản đã được duyệt', template: 'Văn bản "{{taskTitle}}" đã được duyệt và sẵn sàng để ban hành.', recipientExpression: '[creatorEmployeeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Ban hành / Lưu trữ', description: 'Văn thư ban hành văn bản đi hoặc lưu trữ', actionName: 'ISSUE', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Văn bản đã được duyệt', template: 'Văn bản "{{taskTitle}}" đã được duyệt và sẵn sàng để ban hành.', recipientExpression: '[creatorEmployeeCode]' } } 
       },
       { id: 'node_end', type: 'end', position: { x: 2250, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Văn bản đã ban hành', template: 'Quá trình xử lý văn bản "{{taskTitle}}" đã hoàn tất.', recipientExpression: '[assigneeCode, assignerCode]' } } }
     ],
@@ -172,27 +172,27 @@ async function main() {
         id: 'node_draft', 
         type: 'user_task', 
         position: { x: 250, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Soạn thảo', validationExpression: 'isOwner || isAssignee', description: 'Tác giả soạn thảo bản thảo bài viết', actionName: 'SUBMIT_DRAFT', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'IN_PROGRESS', notification: { title: 'Yêu cầu viết bài', template: 'Bạn được phân công soạn thảo bài viết "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Soạn thảo', description: 'Tác giả soạn thảo bản thảo bài viết', actionName: 'SUBMIT_DRAFT', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'IN_PROGRESS', notification: { title: 'Yêu cầu viết bài', template: 'Bạn được phân công soạn thảo bài viết "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } } 
       },
       { 
         id: 'node_edit', 
         type: 'user_task', 
         position: { x: 500, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Biên tập', validationExpression: "isDeptLeader || userRoles.includes('EDITOR')", description: 'Biên tập viên chỉnh sửa nội dung bài viết', actionName: 'EDIT_ARTICLE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'REVIEWING', notification: { title: 'Có bài viết chờ biên tập', template: 'Bài viết "{{taskTitle}}" vừa được nộp và đang chờ bạn biên tập.', recipientExpression: '[supervisorCode, assignerCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Biên tập', description: 'Biên tập viên chỉnh sửa nội dung bài viết', actionName: 'EDIT_ARTICLE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'REVIEWING', notification: { title: 'Có bài viết chờ biên tập', template: 'Bài viết "{{taskTitle}}" vừa được nộp và đang chờ bạn biên tập.', recipientExpression: '[supervisorCode, assignerCode]' } } 
       },
       { id: 'gw_edit', type: 'exclusive_gateway', position: { x: 750, y: 150 }, data: { label: 'Đạt yêu cầu?' } },
       { 
         id: 'node_approve', 
         type: 'user_task', 
         position: { x: 1000, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo duyệt', validationExpression: "isOwner || userRoles.includes('CHIEF_EDITOR')", targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Tổng biên tập phê duyệt bài viết', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Có bài viết chờ phê duyệt', template: 'Bài viết "{{taskTitle}}" đã được biên tập và cần sự phê duyệt của bạn.', recipientExpression: '[creatorEmployeeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo duyệt', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Tổng biên tập phê duyệt bài viết', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Có bài viết chờ phê duyệt', template: 'Bài viết "{{taskTitle}}" đã được biên tập và cần sự phê duyệt của bạn.', recipientExpression: '[creatorEmployeeCode]' } } 
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 1250, y: 150 }, data: { label: 'Quyết định' } },
       { 
         id: 'node_publish', 
         type: 'user_task', 
         position: { x: 1500, y: 150 }, 
-        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Xuất bản', validationExpression: "userRoles.includes('PUBLISHER') || userRoles.includes('CLERK')", description: 'Xuất bản bài viết lên cổng thông tin', actionName: 'PUBLISH', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Yêu cầu xuất bản bài viết', template: 'Bài viết "{{taskTitle}}" đã được duyệt và sẵn sàng để xuất bản.', recipientExpression: '[assigneeCode]' } } 
+        data: { allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Xuất bản', description: 'Xuất bản bài viết lên cổng thông tin', actionName: 'PUBLISH', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Yêu cầu xuất bản bài viết', template: 'Bài viết "{{taskTitle}}" đã được duyệt và sẵn sàng để xuất bản.', recipientExpression: '[assigneeCode]' } } 
       },
       { id: 'node_end', type: 'end', position: { x: 1750, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Bài viết đã xuất bản', template: 'Quá trình biên tập bài viết "{{taskTitle}}" đã hoàn tất.', recipientExpression: '[assignerCode, creatorEmployeeCode]' } } }
     ],

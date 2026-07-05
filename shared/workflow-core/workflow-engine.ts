@@ -122,6 +122,54 @@ export class WorkflowEngine {
       } catch (e: any) {
         return { allowed: false, reason: `Lỗi tính toán biểu thức phân quyền: ${e.message}` };
       }
+    } else {
+      // Smart PBAC Defaults if no validationExpression is provided
+      if (node.type === 'user_task' && currentContext) {
+        const isOwner = !!currentContext.isOwner;
+        const isAssignee = !!currentContext.isAssignee;
+        const isSupervisor = !!currentContext.isSupervisor;
+        const isDeptLeader = !!currentContext.isDeptLeader;
+        const isCoordinator = !!currentContext.isCoordinator;
+        const isManager = isSupervisor || isDeptLeader;
+        const isParticipant = isOwner || isAssignee || isManager || isCoordinator;
+
+        switch (actionName) {
+          case 'ASSIGN':
+          case 'COMPLETE':
+          case 'PROCESS':
+          case 'IN_PROGRESS':
+          case 'DONE':
+          case 'SUBMIT_DRAFT':
+          case 'EDIT_ARTICLE':
+          case 'PUBLISH':
+          case 'ISSUE':
+            if (!isAssignee && !isOwner) return { allowed: false, reason: 'Chỉ người được phân công hoặc người tạo mới có quyền thực hiện.' };
+            break;
+            
+          case 'APPROVE':
+          case 'REJECT':
+          case 'RETURN':
+          case 'ROUTE':
+            if (!isManager && !isOwner) return { allowed: false, reason: 'Chỉ quản lý hoặc người giao việc mới có quyền duyệt/trả lại.' };
+            break;
+
+          case 'ADD_SUBTASK':
+          case 'ASSIGN_STAFF':
+            if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
+            break;
+
+          case 'EDIT':
+          case 'DELETE':
+            if (!isOwner) return { allowed: false, reason: 'Chỉ người tạo mới có quyền sửa/xóa.' };
+            break;
+
+          case 'CHAT':
+          case 'COORDINATE':
+          case 'MONITOR':
+            if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
+            break;
+        }
+      }
     }
 
     return { allowed: true };
