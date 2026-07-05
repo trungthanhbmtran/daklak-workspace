@@ -304,6 +304,7 @@ export const TaskRankTemplateScalarFieldEnum = {
   id: 'id',
   classification: 'classification',
   rank: 'rank',
+  domainCode: 'domainCode',
   taskName: 'taskName',
   defaultUnit: 'defaultUnit',
   defaultWeight: 'defaultWeight',
@@ -319,6 +320,7 @@ export type TaskRankTemplateScalarFieldEnum = (typeof TaskRankTemplateScalarFiel
 export const RankQuotaScalarFieldEnum = {
   id: 'id',
   rankCode: 'rankCode',
+  domainCode: 'domainCode',
   taskName: 'taskName',
   unit: 'unit',
   targetValue: 'targetValue',
@@ -496,6 +498,7 @@ export type KpiEvaluationDetailOrderByRelevanceFieldEnum = (typeof KpiEvaluation
 export const TaskRankTemplateOrderByRelevanceFieldEnum = {
   classification: 'classification',
   rank: 'rank',
+  domainCode: 'domainCode',
   taskName: 'taskName',
   defaultUnit: 'defaultUnit',
   rankNameVN: 'rankNameVN',
@@ -507,6 +510,7 @@ export type TaskRankTemplateOrderByRelevanceFieldEnum = (typeof TaskRankTemplate
 
 export const RankQuotaOrderByRelevanceFieldEnum = {
   rankCode: 'rankCode',
+  domainCode: 'domainCode',
   taskName: 'taskName',
   unit: 'unit'
 } as const

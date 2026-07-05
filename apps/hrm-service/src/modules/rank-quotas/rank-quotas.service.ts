@@ -9,11 +9,11 @@ export class RankQuotasService {
   constructor(private prisma: PrismaService) { }
 
   async SaveRankQuotas(data: any) {
-    const { rankCode, quotas } = data;
+    const { rankCode, domainCode = 'GENERIC', quotas } = data;
 
-    // Xóa định biên cũ của ngạch này
+    // Xóa định biên cũ của ngạch và chuyên ngành này
     await this.prisma.rankQuota.deleteMany({
-      where: { rankCode }
+      where: { rankCode, domainCode }
     });
     
     // Xóa cache
@@ -24,6 +24,7 @@ export class RankQuotasService {
       await this.prisma.rankQuota.createMany({
         data: quotas.map(q => ({
           rankCode,
+          domainCode,
           taskName: q.taskName,
           unit: q.unit,
           targetValue: q.targetValue,
@@ -33,7 +34,7 @@ export class RankQuotasService {
     }
 
     const savedQuotas = await this.prisma.rankQuota.findMany({
-      where: { rankCode }
+      where: { rankCode, domainCode }
     });
 
     return {
@@ -44,15 +45,16 @@ export class RankQuotasService {
   }
 
   async GetRankQuotasByRank(data: any) {
-    const { rankCode } = data;
+    const { rankCode, domainCode = 'GENERIC' } = data;
     
-    const cached = this.cache.get(rankCode);
+    const cacheKey = `${rankCode}_${domainCode}`;
+    const cached = this.cache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.data;
     }
 
     const quotas = await this.prisma.rankQuota.findMany({
-      where: { rankCode }
+      where: { rankCode, domainCode }
     });
 
     const result = {
@@ -61,7 +63,7 @@ export class RankQuotasService {
       data: quotas
     };
     
-    this.cache.set(rankCode, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    this.cache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
     return result;
   }
 }

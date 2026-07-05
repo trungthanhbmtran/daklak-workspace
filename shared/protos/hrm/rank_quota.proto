@@ -12,6 +12,7 @@ service RankQuotaService {
 message RankQuota {
   int32 id = 1;
   string rankCode = 2;
+  string domainCode = 9;
   string taskName = 3;
   string unit = 4;
   float targetValue = 5;
@@ -29,6 +30,7 @@ message RankQuotaPayload {
 
 message SaveRankQuotasRequest {
   string rankCode = 1;
+  string domainCode = 3;
   repeated RankQuotaPayload quotas = 2;
 }
 
@@ -40,6 +42,7 @@ message SaveRankQuotasResponse {
 
 message GetRankQuotasByRankRequest {
   string rankCode = 1;
+  string domainCode = 2;
 }
 
 message RankQuotaList {

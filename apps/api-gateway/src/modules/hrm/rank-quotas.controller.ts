@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Inject } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Query, Inject } from '@nestjs/common';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 
@@ -25,9 +25,12 @@ export class RankQuotasController {
   }
 
   @Get(':rankCode')
-  async getRankQuotasByRank(@Param('rankCode') rankCode: string) {
+  async getRankQuotasByRank(
+    @Param('rankCode') rankCode: string,
+    @Query('domainCode') domainCode: string
+  ) {
     const data = await firstValueFrom(
-      this.rankQuotaService.GetRankQuotasByRank({ rankCode }),
+      this.rankQuotaService.GetRankQuotasByRank({ rankCode, domainCode }),
     );
     return data;
   }

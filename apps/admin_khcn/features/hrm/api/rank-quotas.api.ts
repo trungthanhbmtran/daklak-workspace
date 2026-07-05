@@ -9,9 +9,9 @@ export interface RankQuotaPayload {
 }
 
 export const hrmRankQuotasApi = {
-  save: (rankCode: string, quotas: RankQuotaPayload[]): Promise<ApiResponse<any>> =>
-    apiClient.post('/hrm/rank-quotas', { rankCode, quotas }) as any,
+  save: (rankCode: string, domainCode: string, quotas: RankQuotaPayload[]): Promise<ApiResponse<any>> =>
+    apiClient.post('/hrm/rank-quotas', { rankCode, domainCode, quotas }) as any,
 
-  getByRank: (rankCode: string): Promise<ApiResponse<any>> =>
-    apiClient.get(`/hrm/rank-quotas/${rankCode}`) as any,
+  getByRank: (rankCode: string, domainCode?: string): Promise<ApiResponse<any>> =>
+    apiClient.get(`/hrm/rank-quotas/${rankCode}`, { params: { domainCode } }) as any,
 };

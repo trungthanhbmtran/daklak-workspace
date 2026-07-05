@@ -40,6 +40,7 @@ export type TaskRankTemplateMinAggregateOutputType = {
   id: number | null
   classification: string | null
   rank: string | null
+  domainCode: string | null
   taskName: string | null
   defaultUnit: string | null
   defaultWeight: number | null
@@ -53,6 +54,7 @@ export type TaskRankTemplateMaxAggregateOutputType = {
   id: number | null
   classification: string | null
   rank: string | null
+  domainCode: string | null
   taskName: string | null
   defaultUnit: string | null
   defaultWeight: number | null
@@ -66,6 +68,7 @@ export type TaskRankTemplateCountAggregateOutputType = {
   id: number
   classification: number
   rank: number
+  domainCode: number
   taskName: number
   defaultUnit: number
   defaultWeight: number
@@ -91,6 +94,7 @@ export type TaskRankTemplateMinAggregateInputType = {
   id?: true
   classification?: true
   rank?: true
+  domainCode?: true
   taskName?: true
   defaultUnit?: true
   defaultWeight?: true
@@ -104,6 +108,7 @@ export type TaskRankTemplateMaxAggregateInputType = {
   id?: true
   classification?: true
   rank?: true
+  domainCode?: true
   taskName?: true
   defaultUnit?: true
   defaultWeight?: true
@@ -117,6 +122,7 @@ export type TaskRankTemplateCountAggregateInputType = {
   id?: true
   classification?: true
   rank?: true
+  domainCode?: true
   taskName?: true
   defaultUnit?: true
   defaultWeight?: true
@@ -217,6 +223,7 @@ export type TaskRankTemplateGroupByOutputType = {
   id: number
   classification: string
   rank: string
+  domainCode: string
   taskName: string
   defaultUnit: string
   defaultWeight: number | null
@@ -253,6 +260,7 @@ export type TaskRankTemplateWhereInput = {
   id?: Prisma.IntFilter<"TaskRankTemplate"> | number
   classification?: Prisma.StringFilter<"TaskRankTemplate"> | string
   rank?: Prisma.StringFilter<"TaskRankTemplate"> | string
+  domainCode?: Prisma.StringFilter<"TaskRankTemplate"> | string
   taskName?: Prisma.StringFilter<"TaskRankTemplate"> | string
   defaultUnit?: Prisma.StringFilter<"TaskRankTemplate"> | string
   defaultWeight?: Prisma.FloatNullableFilter<"TaskRankTemplate"> | number | null
@@ -266,6 +274,7 @@ export type TaskRankTemplateOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   classification?: Prisma.SortOrder
   rank?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   defaultUnit?: Prisma.SortOrder
   defaultWeight?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -283,6 +292,7 @@ export type TaskRankTemplateWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TaskRankTemplateWhereInput | Prisma.TaskRankTemplateWhereInput[]
   classification?: Prisma.StringFilter<"TaskRankTemplate"> | string
   rank?: Prisma.StringFilter<"TaskRankTemplate"> | string
+  domainCode?: Prisma.StringFilter<"TaskRankTemplate"> | string
   taskName?: Prisma.StringFilter<"TaskRankTemplate"> | string
   defaultUnit?: Prisma.StringFilter<"TaskRankTemplate"> | string
   defaultWeight?: Prisma.FloatNullableFilter<"TaskRankTemplate"> | number | null
@@ -296,6 +306,7 @@ export type TaskRankTemplateOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   classification?: Prisma.SortOrder
   rank?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   defaultUnit?: Prisma.SortOrder
   defaultWeight?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -317,6 +328,7 @@ export type TaskRankTemplateScalarWhereWithAggregatesInput = {
   id?: Prisma.IntWithAggregatesFilter<"TaskRankTemplate"> | number
   classification?: Prisma.StringWithAggregatesFilter<"TaskRankTemplate"> | string
   rank?: Prisma.StringWithAggregatesFilter<"TaskRankTemplate"> | string
+  domainCode?: Prisma.StringWithAggregatesFilter<"TaskRankTemplate"> | string
   taskName?: Prisma.StringWithAggregatesFilter<"TaskRankTemplate"> | string
   defaultUnit?: Prisma.StringWithAggregatesFilter<"TaskRankTemplate"> | string
   defaultWeight?: Prisma.FloatNullableWithAggregatesFilter<"TaskRankTemplate"> | number | null
@@ -329,6 +341,7 @@ export type TaskRankTemplateScalarWhereWithAggregatesInput = {
 export type TaskRankTemplateCreateInput = {
   classification: string
   rank: string
+  domainCode?: string
   taskName: string
   defaultUnit: string
   defaultWeight?: number | null
@@ -342,6 +355,7 @@ export type TaskRankTemplateUncheckedCreateInput = {
   id?: number
   classification: string
   rank: string
+  domainCode?: string
   taskName: string
   defaultUnit: string
   defaultWeight?: number | null
@@ -354,6 +368,7 @@ export type TaskRankTemplateUncheckedCreateInput = {
 export type TaskRankTemplateUpdateInput = {
   classification?: Prisma.StringFieldUpdateOperationsInput | string
   rank?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultUnit?: Prisma.StringFieldUpdateOperationsInput | string
   defaultWeight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -367,6 +382,7 @@ export type TaskRankTemplateUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   classification?: Prisma.StringFieldUpdateOperationsInput | string
   rank?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultUnit?: Prisma.StringFieldUpdateOperationsInput | string
   defaultWeight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -380,6 +396,7 @@ export type TaskRankTemplateCreateManyInput = {
   id?: number
   classification: string
   rank: string
+  domainCode?: string
   taskName: string
   defaultUnit: string
   defaultWeight?: number | null
@@ -392,6 +409,7 @@ export type TaskRankTemplateCreateManyInput = {
 export type TaskRankTemplateUpdateManyMutationInput = {
   classification?: Prisma.StringFieldUpdateOperationsInput | string
   rank?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultUnit?: Prisma.StringFieldUpdateOperationsInput | string
   defaultWeight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -405,6 +423,7 @@ export type TaskRankTemplateUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   classification?: Prisma.StringFieldUpdateOperationsInput | string
   rank?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultUnit?: Prisma.StringFieldUpdateOperationsInput | string
   defaultWeight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -424,6 +443,7 @@ export type TaskRankTemplateCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   classification?: Prisma.SortOrder
   rank?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   defaultUnit?: Prisma.SortOrder
   defaultWeight?: Prisma.SortOrder
@@ -442,6 +462,7 @@ export type TaskRankTemplateMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   classification?: Prisma.SortOrder
   rank?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   defaultUnit?: Prisma.SortOrder
   defaultWeight?: Prisma.SortOrder
@@ -455,6 +476,7 @@ export type TaskRankTemplateMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   classification?: Prisma.SortOrder
   rank?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   defaultUnit?: Prisma.SortOrder
   defaultWeight?: Prisma.SortOrder
@@ -475,6 +497,7 @@ export type TaskRankTemplateSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id?: boolean
   classification?: boolean
   rank?: boolean
+  domainCode?: boolean
   taskName?: boolean
   defaultUnit?: boolean
   defaultWeight?: boolean
@@ -490,6 +513,7 @@ export type TaskRankTemplateSelectScalar = {
   id?: boolean
   classification?: boolean
   rank?: boolean
+  domainCode?: boolean
   taskName?: boolean
   defaultUnit?: boolean
   defaultWeight?: boolean
@@ -499,7 +523,7 @@ export type TaskRankTemplateSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TaskRankTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classification" | "rank" | "taskName" | "defaultUnit" | "defaultWeight" | "rankNameVN" | "legalBasis" | "createdAt" | "updatedAt", ExtArgs["result"]["taskRankTemplate"]>
+export type TaskRankTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "classification" | "rank" | "domainCode" | "taskName" | "defaultUnit" | "defaultWeight" | "rankNameVN" | "legalBasis" | "createdAt" | "updatedAt", ExtArgs["result"]["taskRankTemplate"]>
 
 export type $TaskRankTemplatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TaskRankTemplate"
@@ -508,6 +532,7 @@ export type $TaskRankTemplatePayload<ExtArgs extends runtime.Types.Extensions.In
     id: number
     classification: string
     rank: string
+    domainCode: string
     taskName: string
     defaultUnit: string
     defaultWeight: number | null
@@ -887,6 +912,7 @@ export interface TaskRankTemplateFieldRefs {
   readonly id: Prisma.FieldRef<"TaskRankTemplate", 'Int'>
   readonly classification: Prisma.FieldRef<"TaskRankTemplate", 'String'>
   readonly rank: Prisma.FieldRef<"TaskRankTemplate", 'String'>
+  readonly domainCode: Prisma.FieldRef<"TaskRankTemplate", 'String'>
   readonly taskName: Prisma.FieldRef<"TaskRankTemplate", 'String'>
   readonly defaultUnit: Prisma.FieldRef<"TaskRankTemplate", 'String'>
   readonly defaultWeight: Prisma.FieldRef<"TaskRankTemplate", 'Float'>

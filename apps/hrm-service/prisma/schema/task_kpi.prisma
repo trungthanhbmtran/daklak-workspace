@@ -257,6 +257,7 @@ model TaskRankTemplate {
   id             Int     @id @default(autoincrement())
   classification String  @map("classification")
   rank           String  @map("rank")
+  domainCode     String  @default("GENERIC") @map("domain_code")
   taskName       String  @map("task_name")
   defaultUnit    String  @map("default_unit")
   defaultWeight  Float?  @map("default_weight")
@@ -272,6 +273,7 @@ model TaskRankTemplate {
 model RankQuota {
   id          Int    @id @default(autoincrement())
   rankCode    String @map("rank_code")
+  domainCode  String @default("GENERIC") @map("domain_code")
   taskName    String @map("task_name")
   unit        String @map("unit")
   targetValue Float  @map("target_value")

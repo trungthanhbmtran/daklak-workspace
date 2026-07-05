@@ -33,6 +33,14 @@ interface SelectedPlanItem {
 }
 
 export function ManualPlanSelectorByRankClient() {
+    const DOMAINS = [
+        { code: 'GENERIC', name: 'Dùng chung / Hành chính' },
+        { code: 'IOC', name: 'Trung tâm Điều hành thông minh (IOC)' },
+        { code: 'IT', name: 'Công nghệ thông tin' },
+        { code: 'HEALTHCARE', name: 'Y tế' },
+        { code: 'EDUCATION', name: 'Giáo dục' },
+    ];
+
     const { data: congChucRanks = [] } = useQuery({
         queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
         queryFn: async () => (await categoryApi.fetchByGroup('CIVIL_SERVANT_RANK')).data,
@@ -52,6 +60,7 @@ export function ManualPlanSelectorByRankClient() {
         id: t.id.toString(),
         classification: t.classification,
         rank: t.rank,
+        domainCode: t.domainCode || 'GENERIC',
         taskName: t.taskName,
         defaultUnit: t.defaultUnit || 'Lượt',
         defaultWeight: t.defaultWeight || 1
@@ -59,6 +68,7 @@ export function ManualPlanSelectorByRankClient() {
 
     const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC'>('CONG_CHUC');
     const [activeRankFilter, setActiveRankFilter] = useState<string>('');
+    const [activeDomainFilter, setActiveDomainFilter] = useState<string>('GENERIC');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
@@ -74,8 +84,8 @@ export function ManualPlanSelectorByRankClient() {
     }, [classification, congChucRanks, vienChucRanks]);
 
     const { data: existingQuotasData, isLoading: isLoadingQuotas } = useQuery({
-        queryKey: ['rank-quotas', activeRankFilter],
-        queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter),
+        queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter],
+        queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter, activeDomainFilter),
         enabled: !!activeRankFilter,
         staleTime: 0,
     });
@@ -94,9 +104,10 @@ export function ManualPlanSelectorByRankClient() {
         }
     }, [existingQuotasData, activeRankFilter]);
 
-    const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter);
+    const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter && item.domainCode === activeDomainFilter);
     console.log("DEBUG_TASKS: serverTemplates =", serverTemplates);
     console.log("DEBUG_TASKS: activeRankFilter =", activeRankFilter);
+    console.log("DEBUG_TASKS: activeDomainFilter =", activeDomainFilter);
     console.log("DEBUG_TASKS: availableTasks =", availableTasks);
     
     const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
@@ -127,11 +138,10 @@ export function ManualPlanSelectorByRankClient() {
             const quotas = addedPlans.map(p => ({
                 taskName: p.title,
                 unit: p.unit,
-                targetValue: p.targetValue,
-                weight: 5
+                targetValue: Number(p.targetValue),
+                weight: 1
             }));
-
-            await hrmRankQuotasApi.save(activeRankFilter, quotas);
+            await hrmRankQuotasApi.save(activeRankFilter, activeDomainFilter, quotas);
             toast.success('Lưu định biên thành công!', {
                 description: `Đã cập nhật ${addedPlans.length} chỉ tiêu vào danh sách.`
             });
@@ -140,11 +150,6 @@ export function ManualPlanSelectorByRankClient() {
                 description: 'Không thể lưu định biên vào lúc này.'
             });
         }
-    };
-
-    const getRankName = (code: string) => {
-        const r: any = [...congChucRanks, ...vienChucRanks].find((r: any) => r.code === code);
-        return r ? (r.nameVi || r.name) : code.replace(/_/g, ' ');
     };
 
     return (
@@ -165,39 +170,44 @@ export function ManualPlanSelectorByRankClient() {
                         <TabsTrigger value="VIEN_CHUC">Khối Viên chức</TabsTrigger>
                     </TabsList>
 
-                    <div className="flex flex-col md:flex-row gap-6 h-[600px]">
-                        {/* LEFT SIDEBAR - RANK SELECTION */}
-                        <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-[200px] md:h-full border rounded-xl overflow-hidden bg-background shadow-sm">
-                            <div className="p-4 bg-muted/30 border-b flex-shrink-0">
-                                <h3 className="font-semibold text-sm uppercase tracking-wider">Danh mục Ngạch</h3>
-                            </div>
-                            <ScrollArea className="flex-1 w-full">
-                                <div className="flex flex-col gap-1 p-3">
-                                    {activeRanksList.map((rank: any) => (
-                                        <Button
-                                            key={rank.code}
-                                            variant={activeRankFilter === rank.code ? "secondary" : "ghost"}
-                                            className={`justify-start text-left h-auto py-2.5 px-3 transition-colors ${activeRankFilter === rank.code ? 'border-l-4 border-primary rounded-l-none bg-secondary' : ''}`}
-                                            onClick={() => setActiveRankFilter(rank.code)}
-                                        >
-                                            <span className={`text-xs font-semibold whitespace-normal leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-muted-foreground'}`}>
-                                                {rank.nameVi || rank.name}
-                                            </span>
-                                        </Button>
+                    <div className="flex flex-col gap-4 mb-6">
+                        <div className="grid gap-2">
+                            <Label>Chọn Chức danh / Hạng:</Label>
+                            <Select value={activeRankFilter} onValueChange={setActiveRankFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Chọn chức danh..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {activeRanks.map((rank: any) => (
+                                        <SelectItem key={rank.code} value={rank.code}>
+                                            {rank.nameVi || rank.name} ({rank.code})
+                                        </SelectItem>
                                     ))}
-                                </div>
-                            </ScrollArea>
+                                </SelectContent>
+                            </Select>
                         </div>
+                        
+                        <div className="grid gap-2">
+                            <Label>Chọn Lĩnh vực (Chuyên ngành):</Label>
+                            <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Chọn lĩnh vực..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {DOMAINS.map(domain => (
+                                        <SelectItem key={domain.code} value={domain.code}>
+                                            {domain.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
 
-                        {/* RIGHT MAIN AREA - TASK ASSIGNMENT */}
+                    <div className="flex flex-col md:flex-row gap-6 h-[600px]">
                         <div className="flex-1 flex flex-col min-w-0 h-full border rounded-xl overflow-hidden bg-background shadow-sm">
-                            
-                            {/* Form Add Task */}
                             <div className="p-4 bg-muted/10 border-b flex-shrink-0 space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-sm">Thêm chỉ tiêu bắt buộc</h3>
-                                    <span className="text-[11px] text-muted-foreground">Đang chọn: <span className="font-semibold text-foreground">{getRankName(activeRankFilter)}</span></span>
-                                </div>
+                                <h3 className="font-semibold text-sm">Thêm chỉ tiêu bắt buộc</h3>
                                 <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
                                     <div className="flex-1 w-full space-y-1.5">
                                         <Label className="text-[10px] font-bold text-muted-foreground uppercase">Nhiệm vụ mẫu</Label>
@@ -209,25 +219,20 @@ export function ManualPlanSelectorByRankClient() {
                                                 if (task) setTargetValue(task.defaultWeight);
                                             }}
                                         >
-                                            <SelectTrigger className="w-full h-auto min-h-9 whitespace-normal break-words text-left bg-background text-xs [&>span]:line-clamp-none [&>span]:whitespace-normal [&>span]:break-words">
+                                            <SelectTrigger className="w-full h-auto min-h-9 text-xs">
                                                 <SelectValue placeholder="-- Chọn nhiệm vụ --" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {availableTasks.map(task => {
                                                     const isAdded = addedPlans.some(p => p.title === task.taskName);
                                                     return (
-                                                        <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs whitespace-normal break-words pr-8">
+                                                        <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs">
                                                             {task.taskName} {isAdded ? '(Đã thêm)' : ''}
                                                         </SelectItem>
                                                     );
                                                 })}
                                             </SelectContent>
                                         </Select>
-                                        {availableTasks.length === 0 && (
-                                            <p className="text-[10px] text-muted-foreground mt-1">
-                                                Không có nhiệm vụ mẫu nào. (Tổng: {serverTemplates.length}, Đang lọc theo: {activeRankFilter})
-                                            </p>
-                                        )}
                                     </div>
                                     <div className="w-[120px] space-y-1.5">
                                         <Label className="text-[10px] font-bold text-muted-foreground uppercase">Chỉ tiêu</Label>
@@ -238,68 +243,49 @@ export function ManualPlanSelectorByRankClient() {
                                                 onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
                                                 className="w-24 h-9 text-center font-mono text-xs bg-background"
                                             />
-                                            <span className="text-[11px] text-muted-foreground font-medium truncate w-[40px]">
-                                                {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : ''}
-                                            </span>
                                         </div>
                                     </div>
                                     <Button
                                         onClick={handleAssignTask}
                                         disabled={!selectedTaskId}
-                                        className="w-full sm:w-auto h-9 px-4 gap-2 text-xs"
+                                        className="h-9 px-4 text-xs"
                                     >
-                                        <Plus className="w-3.5 h-3.5" /> Thêm
+                                        <Plus className="w-3.5 h-3.5 mr-2" /> Thêm
                                     </Button>
                                 </div>
                             </div>
 
-                            {/* Table Execution Matrix */}
-                            <div className="flex-1 flex flex-col overflow-hidden relative bg-background">
-
-                                
-                                <div className="p-4 border-b flex-shrink-0 flex items-center justify-between bg-white">
-                                    <h4 className="text-sm font-semibold flex items-center gap-2">
-                                        <Target className="w-4 h-4 text-primary" /> Ma trận Thực thi ({addedPlans.length})
-                                    </h4>
-                                </div>
-
-                                <ScrollArea className="flex-1 w-full">
-                                    <Table className="table-fixed w-full">
-                                        <TableHeader className="sticky top-0 bg-muted/30 z-10 shadow-sm">
+                            <div className="flex-1 overflow-hidden">
+                                <ScrollArea className="h-full">
+                                    <Table>
+                                        <TableHeader>
                                             <TableRow>
-                                                <TableHead className="w-[60%] text-xs font-semibold">Nội dung Nhiệm vụ</TableHead>
-                                                <TableHead className="w-[30%] text-right text-xs font-semibold">Chỉ tiêu bắt buộc</TableHead>
-                                                <TableHead className="w-[10%] text-center"></TableHead>
+                                                <TableHead>Nội dung</TableHead>
+                                                <TableHead className="w-[150px]">Chỉ tiêu</TableHead>
+                                                <TableHead className="w-[50px]"></TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {addedPlans.map((plan) => (
                                                 <TableRow key={plan.id}>
-                                                    <TableCell className="font-medium whitespace-normal break-words leading-relaxed text-xs">
-                                                        {plan.title}
+                                                    <TableCell className="text-xs">{plan.title}</TableCell>
+                                                    <TableCell>
+                                                        <Input
+                                                            type="number"
+                                                            value={plan.targetValue}
+                                                            onChange={e => {
+                                                                const val = Number(e.target.value);
+                                                                setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
+                                                            }}
+                                                            className="w-24 h-7 text-center font-mono text-xs bg-muted/20"
+                                                        />
                                                     </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <div className="flex items-center justify-end gap-2 w-full">
-                                                            <Input
-                                                                type="number"
-                                                                value={plan.targetValue}
-                                                                onChange={e => {
-                                                                    const val = Number(e.target.value);
-                                                                    setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
-                                                                }}
-                                                                className="w-24 h-7 text-center font-mono text-xs bg-muted/20"
-                                                            />
-                                                            <span className="text-[11px] text-muted-foreground min-w-[50px] text-left">
-                                                                {plan.unit}
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="text-center">
+                                                    <TableCell>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
-                                                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
                                                         >
                                                             <Trash2 className="w-3.5 h-3.5" />
                                                         </Button>

@@ -545,35 +545,21 @@ async function main() {
       nameEn: 'Staff',
     },
 
-    // --- PUBLIC_EMPLOYEE_RANK ---
-    {
-      group: 'PUBLIC_EMPLOYEE_RANK',
-      code: 'GRADE_1',
-      order: 1,
-      nameVi: 'Viên chức Hạng I',
-      nameEn: 'Grade I Public Employee',
-    },
-    {
-      group: 'PUBLIC_EMPLOYEE_RANK',
-      code: 'GRADE_2',
-      order: 2,
-      nameVi: 'Viên chức Hạng II',
-      nameEn: 'Grade II Public Employee',
-    },
-    {
-      group: 'PUBLIC_EMPLOYEE_RANK',
-      code: 'GRADE_3',
-      order: 3,
-      nameVi: 'Viên chức Hạng III',
-      nameEn: 'Grade III Public Employee',
-    },
-    {
-      group: 'PUBLIC_EMPLOYEE_RANK',
-      code: 'GRADE_4',
-      order: 4,
-      nameVi: 'Viên chức Hạng IV',
-      nameEn: 'Grade IV Public Employee',
-    },
+    // --- PUBLIC_EMPLOYEE_RANK (VIÊN CHỨC THEO ĐỀ ÁN VTVL) ---
+    // 1. Chức danh nghề nghiệp chuyên ngành (Y tế, Giáo dục, KHCN, CNTT...)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_1', order: 1, nameVi: 'Viên chức Chuyên ngành Hạng I', nameEn: 'Specialized Public Employee Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_2', order: 2, nameVi: 'Viên chức Chuyên ngành Hạng II', nameEn: 'Specialized Public Employee Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_3', order: 3, nameVi: 'Viên chức Chuyên ngành Hạng III', nameEn: 'Specialized Public Employee Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_4', order: 4, nameVi: 'Viên chức Chuyên ngành Hạng IV', nameEn: 'Specialized Public Employee Grade IV' },
+    
+    // 2. Chức danh nghề nghiệp chuyên môn dùng chung (Hành chính, Tổ chức, Kế toán...)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_1', order: 5, nameVi: 'Viên chức Dùng chung Hạng I (Chuyên viên cao cấp)', nameEn: 'Common Public Employee Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_2', order: 6, nameVi: 'Viên chức Dùng chung Hạng II (Chuyên viên chính)', nameEn: 'Common Public Employee Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_3', order: 7, nameVi: 'Viên chức Dùng chung Hạng III (Chuyên viên)', nameEn: 'Common Public Employee Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_4', order: 8, nameVi: 'Viên chức Dùng chung Hạng IV (Cán sự)', nameEn: 'Common Public Employee Grade IV' },
+    
+    // 3. Chức danh nghề nghiệp hỗ trợ, phục vụ (Lễ tân, bảo vệ, tạp vụ, lái xe...)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_HT_HANG_5', order: 9, nameVi: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', nameEn: 'Support Public Employee Grade V' },
 
     // =========================
     // ĐIỀU HÀNH - HÀNH CHÍNH
@@ -4935,6 +4921,8 @@ async function main() {
     { code: 'HRM_SELECTOR_MENU', name: 'Đăng ký nhiệm vụ', route: '/services/hrm/work-plans/manual-selector', icon: 'Layers', order: 7, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
     { code: 'HRM_CRITERIA_MENU', name: 'Tiêu chí đánh giá', route: '/services/hrm/work-plans/criteria', icon: 'BarChart2', order: 8, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
     { code: 'HRM_PERSONAL_KPI_MENU', name: 'KPI Cá nhân', route: '/services/hrm/work-plans/personal-kpi', icon: 'Target', order: 9, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
+    { code: 'HRM_REVIEW_KPI_MENU', name: 'Đánh giá KPI', route: '/services/hrm/work-plans/review-kpi', icon: 'CheckCircle', order: 10, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
+    { code: 'HRM_DASHBOARD_KPI_MENU', name: 'Tổng hợp KPI', route: '/services/hrm/work-plans/dashboard-kpi', icon: 'PieChart', order: 11, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
 
     // 4. Quản lý Văn bản
     { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: '/services/documents', icon: 'FileText', order: 3, linkedResourceCode: 'DOC_INCOMING', type: 'SERVICE_ITEM' },

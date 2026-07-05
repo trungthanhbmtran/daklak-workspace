@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Plus, Settings2, Edit, Trash2, Library, Info, Activity, Calculator } from "lucide-react";
 import { useKpiCriteriaList, useCreateKpiCriterion, useUpdateKpiCriterion, useDeleteKpiCriterion } from "@/features/hrm/hooks/useKpis";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function KpiCriteriaClient() {
   const { data: criteriaList = [], isLoading } = useKpiCriteriaList();
@@ -136,49 +137,65 @@ export function KpiCriteriaClient() {
       {isLoading ? (
         <div className="flex justify-center p-12"><Activity className="animate-spin text-indigo-500" /></div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {criteriaList.map((item: any) => (
-            <Card key={item.id} className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
-              <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-bold text-slate-800 line-clamp-2" title={item.name}>{item.name}</h3>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 bg-indigo-50/0 hover:bg-indigo-50 rounded-lg" onClick={() => openModal(item)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 bg-rose-50/0 hover:bg-rose-50 rounded-lg" onClick={() => handleDelete(item.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Settings2 className="w-4 h-4 text-emerald-500" />
-                    <span>Phương pháp: <strong className="text-slate-800">{item.scoringMethod === 'MANUAL' ? 'Đánh giá thủ công' : item.scoringMethod === 'INTEGRATION_API' ? 'Kết nối liên thông (LGSP/API)' : 'Tính điểm tự động (Máy tính)'}</strong></span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Calculator className="w-4 h-4 text-amber-500" />
-                    <span>Điểm: <strong className="text-slate-800">{item.baseScore}</strong> | Độ khó: <strong className="text-slate-800">{item.difficulty === 'EASY' ? 'Dễ (x' + item.difficultyMultiplier + ')' : item.difficulty === 'NORMAL' ? 'Bình thường (x' + item.difficultyMultiplier + ')' : item.difficulty === 'HARD' ? 'Khó (x' + item.difficultyMultiplier + ')' : 'Phức tạp (x' + item.difficultyMultiplier + ')'}</strong></span>
-                  </div>
-                  {(item.bonusPerDay > 0 || item.penaltyPerDay > 0) && (
-                    <div className="bg-slate-100 rounded-lg p-2 flex gap-4 text-xs font-medium">
-                      {item.bonusPerDay > 0 && <span className="text-emerald-600">Thưởng: +{item.bonusPerDay}đ/ngày (Trước {item.bonusThresholdDays} ngày)</span>}
-                      {item.penaltyPerDay > 0 && <span className="text-rose-600">Phạt: -{item.penaltyPerDay}đ/ngày trễ</span>}
+        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+          <Table>
+            <TableHeader className="bg-slate-50/80">
+              <TableRow>
+                <TableHead className="font-bold text-slate-700">Tên tiêu chí</TableHead>
+                <TableHead className="font-bold text-slate-700">Phương pháp</TableHead>
+                <TableHead className="font-bold text-slate-700 text-center whitespace-nowrap">Đ.Chuẩn</TableHead>
+                <TableHead className="font-bold text-slate-700 text-center whitespace-nowrap">Độ khó</TableHead>
+                <TableHead className="font-bold text-slate-700 text-center whitespace-nowrap">Thưởng / Phạt</TableHead>
+                <TableHead className="font-bold text-slate-700 text-right">Thao tác</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {criteriaList.map((item: any) => (
+                <TableRow key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                  <TableCell className="w-[30%]">
+                    <div className="font-bold text-slate-800 line-clamp-2" title={item.name}>{item.name}</div>
+                    <div className="text-[11px] font-medium text-slate-500 mt-1 line-clamp-1" title={item.description}>{item.description || "—"}</div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 whitespace-nowrap">
+                      {item.scoringMethod === 'MANUAL' ? 'Thủ công' : item.scoringMethod === 'INTEGRATION_API' ? 'LGSP/API' : 'Tự động'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center font-black text-indigo-600">
+                    {item.baseScore}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-[11px] font-bold bg-slate-100 text-slate-600 whitespace-nowrap">
+                      {item.difficulty === 'EASY' ? `Dễ (x${item.difficultyMultiplier})` : item.difficulty === 'NORMAL' ? `Vừa (x${item.difficultyMultiplier})` : item.difficulty === 'HARD' ? `Khó (x${item.difficultyMultiplier})` : `Rất Khó (x${item.difficultyMultiplier})`}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col items-center justify-center gap-1.5 text-[10px] font-bold tracking-wide">
+                      {item.bonusPerDay > 0 ? <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded whitespace-nowrap">+{item.bonusPerDay}đ / ngày</span> : <span className="text-slate-300">—</span>}
+                      {item.penaltyPerDay > 0 ? <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded whitespace-nowrap">-{item.penaltyPerDay}đ / ngày</span> : null}
                     </div>
-                  )}
-                </div>
-
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
-                    <Info className="w-4 h-4 inline-block mr-1 -mt-0.5 text-indigo-400" />
-                    {item.description || "Chưa có mô tả hướng dẫn."}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" onClick={() => openModal(item)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {criteriaList.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-slate-500 font-medium">
+                    Chưa có Khung tiêu chí đánh giá nào.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       )}
 

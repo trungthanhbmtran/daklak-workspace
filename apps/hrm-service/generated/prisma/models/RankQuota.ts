@@ -41,6 +41,7 @@ export type RankQuotaSumAggregateOutputType = {
 export type RankQuotaMinAggregateOutputType = {
   id: number | null
   rankCode: string | null
+  domainCode: string | null
   taskName: string | null
   unit: string | null
   targetValue: number | null
@@ -52,6 +53,7 @@ export type RankQuotaMinAggregateOutputType = {
 export type RankQuotaMaxAggregateOutputType = {
   id: number | null
   rankCode: string | null
+  domainCode: string | null
   taskName: string | null
   unit: string | null
   targetValue: number | null
@@ -63,6 +65,7 @@ export type RankQuotaMaxAggregateOutputType = {
 export type RankQuotaCountAggregateOutputType = {
   id: number
   rankCode: number
+  domainCode: number
   taskName: number
   unit: number
   targetValue: number
@@ -88,6 +91,7 @@ export type RankQuotaSumAggregateInputType = {
 export type RankQuotaMinAggregateInputType = {
   id?: true
   rankCode?: true
+  domainCode?: true
   taskName?: true
   unit?: true
   targetValue?: true
@@ -99,6 +103,7 @@ export type RankQuotaMinAggregateInputType = {
 export type RankQuotaMaxAggregateInputType = {
   id?: true
   rankCode?: true
+  domainCode?: true
   taskName?: true
   unit?: true
   targetValue?: true
@@ -110,6 +115,7 @@ export type RankQuotaMaxAggregateInputType = {
 export type RankQuotaCountAggregateInputType = {
   id?: true
   rankCode?: true
+  domainCode?: true
   taskName?: true
   unit?: true
   targetValue?: true
@@ -208,6 +214,7 @@ export type RankQuotaGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type RankQuotaGroupByOutputType = {
   id: number
   rankCode: string
+  domainCode: string
   taskName: string
   unit: string
   targetValue: number
@@ -242,6 +249,7 @@ export type RankQuotaWhereInput = {
   NOT?: Prisma.RankQuotaWhereInput | Prisma.RankQuotaWhereInput[]
   id?: Prisma.IntFilter<"RankQuota"> | number
   rankCode?: Prisma.StringFilter<"RankQuota"> | string
+  domainCode?: Prisma.StringFilter<"RankQuota"> | string
   taskName?: Prisma.StringFilter<"RankQuota"> | string
   unit?: Prisma.StringFilter<"RankQuota"> | string
   targetValue?: Prisma.FloatFilter<"RankQuota"> | number
@@ -253,6 +261,7 @@ export type RankQuotaWhereInput = {
 export type RankQuotaOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   rankCode?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
@@ -268,6 +277,7 @@ export type RankQuotaWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.RankQuotaWhereInput[]
   NOT?: Prisma.RankQuotaWhereInput | Prisma.RankQuotaWhereInput[]
   rankCode?: Prisma.StringFilter<"RankQuota"> | string
+  domainCode?: Prisma.StringFilter<"RankQuota"> | string
   taskName?: Prisma.StringFilter<"RankQuota"> | string
   unit?: Prisma.StringFilter<"RankQuota"> | string
   targetValue?: Prisma.FloatFilter<"RankQuota"> | number
@@ -279,6 +289,7 @@ export type RankQuotaWhereUniqueInput = Prisma.AtLeast<{
 export type RankQuotaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   rankCode?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
@@ -298,6 +309,7 @@ export type RankQuotaScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RankQuotaScalarWhereWithAggregatesInput | Prisma.RankQuotaScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"RankQuota"> | number
   rankCode?: Prisma.StringWithAggregatesFilter<"RankQuota"> | string
+  domainCode?: Prisma.StringWithAggregatesFilter<"RankQuota"> | string
   taskName?: Prisma.StringWithAggregatesFilter<"RankQuota"> | string
   unit?: Prisma.StringWithAggregatesFilter<"RankQuota"> | string
   targetValue?: Prisma.FloatWithAggregatesFilter<"RankQuota"> | number
@@ -308,6 +320,7 @@ export type RankQuotaScalarWhereWithAggregatesInput = {
 
 export type RankQuotaCreateInput = {
   rankCode: string
+  domainCode?: string
   taskName: string
   unit: string
   targetValue: number
@@ -319,6 +332,7 @@ export type RankQuotaCreateInput = {
 export type RankQuotaUncheckedCreateInput = {
   id?: number
   rankCode: string
+  domainCode?: string
   taskName: string
   unit: string
   targetValue: number
@@ -329,6 +343,7 @@ export type RankQuotaUncheckedCreateInput = {
 
 export type RankQuotaUpdateInput = {
   rankCode?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -340,6 +355,7 @@ export type RankQuotaUpdateInput = {
 export type RankQuotaUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   rankCode?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -351,6 +367,7 @@ export type RankQuotaUncheckedUpdateInput = {
 export type RankQuotaCreateManyInput = {
   id?: number
   rankCode: string
+  domainCode?: string
   taskName: string
   unit: string
   targetValue: number
@@ -361,6 +378,7 @@ export type RankQuotaCreateManyInput = {
 
 export type RankQuotaUpdateManyMutationInput = {
   rankCode?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -372,6 +390,7 @@ export type RankQuotaUpdateManyMutationInput = {
 export type RankQuotaUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   rankCode?: Prisma.StringFieldUpdateOperationsInput | string
+  domainCode?: Prisma.StringFieldUpdateOperationsInput | string
   taskName?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -389,6 +408,7 @@ export type RankQuotaOrderByRelevanceInput = {
 export type RankQuotaCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   rankCode?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
@@ -406,6 +426,7 @@ export type RankQuotaAvgOrderByAggregateInput = {
 export type RankQuotaMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   rankCode?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
@@ -417,6 +438,7 @@ export type RankQuotaMaxOrderByAggregateInput = {
 export type RankQuotaMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   rankCode?: Prisma.SortOrder
+  domainCode?: Prisma.SortOrder
   taskName?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
@@ -436,6 +458,7 @@ export type RankQuotaSumOrderByAggregateInput = {
 export type RankQuotaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   rankCode?: boolean
+  domainCode?: boolean
   taskName?: boolean
   unit?: boolean
   targetValue?: boolean
@@ -449,6 +472,7 @@ export type RankQuotaSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type RankQuotaSelectScalar = {
   id?: boolean
   rankCode?: boolean
+  domainCode?: boolean
   taskName?: boolean
   unit?: boolean
   targetValue?: boolean
@@ -457,7 +481,7 @@ export type RankQuotaSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RankQuotaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rankCode" | "taskName" | "unit" | "targetValue" | "weight" | "createdAt" | "updatedAt", ExtArgs["result"]["rankQuota"]>
+export type RankQuotaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rankCode" | "domainCode" | "taskName" | "unit" | "targetValue" | "weight" | "createdAt" | "updatedAt", ExtArgs["result"]["rankQuota"]>
 
 export type $RankQuotaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RankQuota"
@@ -465,6 +489,7 @@ export type $RankQuotaPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     rankCode: string
+    domainCode: string
     taskName: string
     unit: string
     targetValue: number
@@ -842,6 +867,7 @@ export interface Prisma__RankQuotaClient<T, Null = never, ExtArgs extends runtim
 export interface RankQuotaFieldRefs {
   readonly id: Prisma.FieldRef<"RankQuota", 'Int'>
   readonly rankCode: Prisma.FieldRef<"RankQuota", 'String'>
+  readonly domainCode: Prisma.FieldRef<"RankQuota", 'String'>
   readonly taskName: Prisma.FieldRef<"RankQuota", 'String'>
   readonly unit: Prisma.FieldRef<"RankQuota", 'String'>
   readonly targetValue: Prisma.FieldRef<"RankQuota", 'Float'>
