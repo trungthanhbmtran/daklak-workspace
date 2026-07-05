@@ -15,19 +15,19 @@ export function useConfigureRankTasks() {
 
     const { data: units = [], isLoading: isLoadingUnits } = useQuery({
         queryKey: ['categories', 'UNIT'],
-        queryFn: () => categoryApi.fetchByGroup('UNIT'),
+        queryFn: async () => (await categoryApi.fetchByGroup('UNIT')).data,
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: congChucRanks = [], isLoading: isLoadingCC } = useQuery({
         queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
-        queryFn: () => categoryApi.fetchByGroup('CIVIL_SERVANT_RANK'),
+        queryFn: async () => (await categoryApi.fetchByGroup('CIVIL_SERVANT_RANK')).data,
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: vienChucRanks = [], isLoading: isLoadingVC } = useQuery({
         queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
-        queryFn: () => categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK'),
+        queryFn: async () => (await categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK')).data,
         staleTime: 5 * 60 * 1000,
     });
 

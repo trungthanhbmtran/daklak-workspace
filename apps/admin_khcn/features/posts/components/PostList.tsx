@@ -141,7 +141,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
     queryKey: ["system-categories"],
     queryFn: async () => {
       const res = await categoryApi.fetchByGroup('POST_STATUS');
-      return res || [];
+      return res.data || [];
     }
   });
 

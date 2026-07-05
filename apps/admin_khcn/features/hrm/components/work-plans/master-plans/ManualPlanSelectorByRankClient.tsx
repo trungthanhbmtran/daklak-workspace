@@ -35,13 +35,13 @@ interface SelectedPlanItem {
 export function ManualPlanSelectorByRankClient() {
     const { data: congChucRanks = [] } = useQuery({
         queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
-        queryFn: () => categoryApi.fetchByGroup('CIVIL_SERVANT_RANK'),
+        queryFn: async () => (await categoryApi.fetchByGroup('CIVIL_SERVANT_RANK')).data,
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: vienChucRanks = [] } = useQuery({
         queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
-        queryFn: () => categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK'),
+        queryFn: async () => (await categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK')).data,
         staleTime: 5 * 60 * 1000,
     });
 

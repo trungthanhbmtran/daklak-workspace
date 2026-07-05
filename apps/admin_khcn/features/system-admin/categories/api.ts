@@ -2,23 +2,29 @@ import apiClient from "@/lib/axiosInstance";
 import { CategoryItem, CategoryPayload } from "./types";
 
 export const categoryApi = {
-  fetchAll: async (): Promise<CategoryItem[]> => {
+  fetchAll: async (params?: any): Promise<{ data: CategoryItem[]; meta: any }> => {
     try {
-      const res: any = await apiClient.get("/categories");
-      return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      const res: any = await apiClient.get("/categories", { params });
+      return {
+        data: Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []),
+        meta: res?.meta || {},
+      };
     } catch (error) {
       console.error("[categoryApi] fetchAll error:", error);
-      return [];
+      return { data: [], meta: {} };
     }
   },
 
-  fetchByGroup: async (group: string): Promise<CategoryItem[]> => {
+  fetchByGroup: async (group: string, params?: any): Promise<{ data: CategoryItem[]; meta: any }> => {
     try {
-      const res: any = await apiClient.get(`/categories`, { params: { group } });
-      return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      const res: any = await apiClient.get(`/categories`, { params: { group, ...params } });
+      return {
+        data: Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []),
+        meta: res?.meta || {},
+      };
     } catch (error) {
       console.error(`[categoryApi] fetchByGroup ${group} error:`, error);
-      return [];
+      return { data: [], meta: {} };
     }
   },
 

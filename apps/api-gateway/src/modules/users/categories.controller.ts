@@ -109,21 +109,21 @@ export class CategoriesController implements OnModuleInit {
       : [];
 
     if (!group) {
-      const result = await firstValueFrom(
+      const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({}),
       );
-      return { success: true, data: (result as any)?.data || [] };
+      return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
     }
-    const result = await firstValueFrom(
+    const result: any = await firstValueFrom(
       this.categoryService.GetByGroup({
         group: group || '',
         search: q || '',
-        limit: limitNum,
+        take: limitNum,
         skip: skipNum,
         selectedIds: selectedIdsArr,
       }),
     );
-    return { success: true, data: (result as any)?.data || [] };
+    return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
   }
 
   @Post()
@@ -232,20 +232,20 @@ export class PublicCategoriesController implements OnModuleInit {
     const skipNum = query.skip ? parseInt(query.skip, 10) : 0;
 
     if (!group) {
-      const result = await firstValueFrom(
+      const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({ lang }),
       );
-      return { success: true, data: (result as any)?.data || [] };
+      return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
     }
-    const result = await firstValueFrom(
+    const result: any = await firstValueFrom(
       this.categoryService.GetByGroup({
         group: group || '',
         lang,
         search: query.q || '',
-        limit: limitNum,
+        take: limitNum,
         skip: skipNum,
       }),
     );
-    return { success: true, data: (result as any)?.data || [] };
+    return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
   }
 }

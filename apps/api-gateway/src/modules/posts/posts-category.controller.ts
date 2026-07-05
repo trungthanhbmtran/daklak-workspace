@@ -39,12 +39,22 @@ export class PostsCategoryController {
 
   @Get()
   async findAll(@Query() query: any) {
-    console.log('Gateway: Calling ListCategories with query:', query);
-    const result = await firstValueFrom(
-      this.categoryService.listCategories(query),
+    const take = query.take ? parseInt(query.take, 10) : (query.limit ? parseInt(query.limit, 10) : undefined);
+    const skip = query.skip ? parseInt(query.skip, 10) : undefined;
+    
+    const payload = {
+      ...query,
+      take,
+      skip,
+      search: query.q || query.search || undefined,
+    };
+
+    console.log('Gateway: Calling ListCategories with payload:', payload);
+    const result: any = await firstValueFrom(
+      this.categoryService.listCategories(payload),
     );
     console.log('Gateway: ListCategories response received');
-    return result;
+    return { success: true, data: result?.data || [], meta: result?.meta || {} };
   }
 
   @Get(':id')

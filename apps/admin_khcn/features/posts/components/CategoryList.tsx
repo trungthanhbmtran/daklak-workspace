@@ -5,10 +5,18 @@ import {
   Plus, Edit2, Trash2, Folder,
   MoreHorizontal, Loader2, FileText
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -51,13 +59,32 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
   const searchTerm = searchParams.get('search') || "";
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ["posts-categories"],
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  const { data: categoriesData, isLoading } = useQuery({
+    queryKey: ["posts-categories", page, searchTerm],
     queryFn: async () => {
-      const res = await postsApi.getCategories();
-      return res.data;
+      const res = await postsApi.getCategories({
+        page,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        mode: 'flat',
+      });
+      return {
+        items: res.data || [],
+        meta: res.meta || {},
+      };
     },
   });
+
+  const categories = categoriesData?.items || [];
+  const totalItems = Number(categoriesData?.meta?.total) || 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deleteCategory(id),
@@ -71,9 +98,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     setDeletingCategoryId(id);
   };
 
-  const filteredCategories = categories?.filter((cat: Category) =>
-    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter is handled by backend now
+
 
   if (isLoading) {
     return (
@@ -99,7 +125,10 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
       <Card>
         <CardHeader className="pb-3 px-6 border-b bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <Search placeholder="Tìm tên chuyên mục..." className="flex-1 max-w-sm" />
+            <Search 
+              placeholder="Tìm tên chuyên mục..." 
+              className="flex-1 max-w-sm" 
+            />
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -116,8 +145,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(filteredCategories?.length ?? 0) > 0 ? (
-                (filteredCategories ?? []).map((cat: Category) => (
+              {categories.length > 0 ? (
+                categories.map((cat: Category) => (
                   <TableRow key={cat.id} className="group hover:bg-slate-50/50 transition-colors">
                     <TableCell className="pl-6">
                       <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">
@@ -198,6 +227,47 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
           </Table>
         </CardContent>
       </Card>
+
+      {totalPages > 1 && (
+        <div className="py-4 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                let pageNum = i + 1;
+                if (totalPages > 5 && page > 3) {
+                  pageNum = page - 2 + i;
+                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                }
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      isActive={page === pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className="cursor-pointer"
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
     
       <AlertDialog open={!!deletingCategoryId} onOpenChange={(open) => !open && setDeletingCategoryId(null)}>

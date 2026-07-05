@@ -8,7 +8,7 @@ import {
   ExternalLink, Link as LinkIcon, Loader2,
   Calendar, MapPin, CheckCircle2, XCircle, Grid, Layers, PlayCircle, Sliders
 } from "lucide-react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
@@ -16,6 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { postsApi } from "../api";
 import { Banner } from "../types";
 import { useGetCategoryByGroup, useUpdateCategory } from "@/features/system-admin/categories/hooks/useCategoryApi";
@@ -57,10 +65,23 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     .filter((cat: any) => cat.group === "BANNER_POSITION" && cat.active !== 0)
     .sort((a: any, b: any) => (a.sort || 0) - (b.sort || 0));
 
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+
+  // The import should be at the top, I will just add useEffect to the imports if missing, but it is missing, so I'll add React.useEffect
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, activeTab]);
+
   const { data: banners, isLoading } = useQuery({
-    queryKey: ["banners"],
+    queryKey: ["banners", page, searchTerm, activeTab],
     queryFn: async () => {
-      const res = await postsApi.getBanners();
+      const res = await postsApi.getBanners({
+        page,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        position: activeTab === "all" ? undefined : activeTab,
+      });
       return {
         items: res.data || [],
         meta: res.meta || {}
@@ -77,13 +98,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     onError: () => toast.error("Có lỗi xảy ra khi xóa banner."),
   });
 
-  const filteredBanners = (banners?.items || []).filter((b: Banner) => {
-    const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase());
-    if (!matchesSearch) return false;
-
-    if (activeTab === "all") return true;
-    return b.position?.toLowerCase() === activeTab?.toLowerCase();
-  });
+  const filteredBanners = banners?.items || [];
+  const totalItems = Number(banners?.meta?.total) || 0;
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   if (isLoading) {
     return (
@@ -367,6 +384,47 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
             })
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="py-4 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+
+                {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                  let pageNum = i + 1;
+                  if (totalPages > 5 && page > 3) {
+                    pageNum = page - 2 + i;
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        isActive={page === pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       <AlertDialog open={!!deletingBannerId} onOpenChange={(open) => !open && setDeletingBannerId(null)}>

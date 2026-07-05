@@ -17,18 +17,21 @@ export class CategoriesService {
       },
     });
 
-    return items.map((item) => {
-      const trans = item.translations?.[0];
-      return {
-        id: item.id,
-        group: item.groupCode,
-        code: item.code,
-        order: item.order,
-        isActive: item.isActive,
-        name: trans?.name || '',
-        description: trans?.description || '',
-      };
-    });
+    return {
+      data: items.map((item) => {
+        const trans = item.translations?.[0];
+        return {
+          id: item.id,
+          group: item.groupCode,
+          code: item.code,
+          order: item.order,
+          isActive: item.isActive,
+          name: trans?.name || '',
+          description: trans?.description || '',
+        };
+      }),
+      total: items.length
+    };
   }
 
   // Lấy danh mục theo nhóm (tự động hợp nhất bản dịch)
@@ -57,30 +60,35 @@ export class CategoriesService {
 
     // 2. Fetch search results (loại trừ các ID đã có trong selected)
     const excludeIds = selectedItems.map((i) => i.id);
-    const searchItems = await this.prisma.category.findMany({
-      where: {
-        groupCode: group,
-        isActive: true,
-        ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
-        ...(search?.trim()
-          ? {
-              translations: {
-                some: {
-                  langCode: targetLang,
-                  name: { contains: search.trim() },
-                },
+    const where: any = {
+      groupCode: group,
+      isActive: true,
+      ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
+      ...(search?.trim()
+        ? {
+            translations: {
+              some: {
+                langCode: targetLang,
+                name: { contains: search.trim() },
               },
-            }
-          : {}),
-      },
-      orderBy: { order: 'asc' },
-      take:
-        limit && limit > 0
-          ? Math.max(limit - selectedItems.length, 0)
-          : undefined,
-      skip: skip && skip > 0 ? skip : undefined,
-      include: { translations: { where: { langCode: targetLang } } },
-    });
+            },
+          }
+        : {}),
+    };
+
+    const [searchItems, totalCount] = await Promise.all([
+      this.prisma.category.findMany({
+        where,
+        orderBy: { order: 'asc' },
+        take:
+          limit && limit > 0
+            ? Math.max(limit - selectedItems.length, 0)
+            : undefined,
+        skip: skip && skip > 0 ? skip : undefined,
+        include: { translations: { where: { langCode: targetLang } } },
+      }),
+      this.prisma.category.count({ where }),
+    ]);
 
     // 3. Merge: selected first, rồi search results
     const mapItem = (item: any, selected: boolean) => {
@@ -99,10 +107,13 @@ export class CategoriesService {
       };
     };
 
-    return [
-      ...selectedItems.map((i) => mapItem(i, true)),
-      ...searchItems.map((i) => mapItem(i, false)),
-    ];
+    return {
+      data: [
+        ...selectedItems.map((i) => mapItem(i, true)),
+        ...searchItems.map((i) => mapItem(i, false)),
+      ],
+      total: totalCount + selectedItems.length,
+    };
   }
 
   async getAllGroups() {

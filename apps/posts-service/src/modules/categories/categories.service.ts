@@ -36,10 +36,24 @@ export class CategoriesService {
     });
   }
 
-  async findAll() {
-    return this.prisma.category.findMany({
-      orderBy: { orderIndex: 'asc' },
-    });
+  async findAll(params?: { skip?: number; take?: number; search?: string }) {
+    const { skip, take, search } = params || {};
+    const where: any = {};
+    if (search) {
+      where.name = { contains: search, mode: 'insensitive' };
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.category.findMany({
+        where,
+        orderBy: { orderIndex: 'asc' },
+        skip: skip ? Number(skip) : undefined,
+        take: take ? Number(take) : undefined,
+      }),
+      this.prisma.category.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   async update(id: string, data: any) {

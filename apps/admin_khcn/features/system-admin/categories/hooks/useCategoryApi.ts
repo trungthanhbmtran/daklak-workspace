@@ -4,18 +4,33 @@ import { categoryApi } from "../api";
 import { CategoryPayload } from "../types";
 import { CATEGORY_KEYS } from "../keys";
 
-export function useGetCategories() {
+export function useGetCategories(params?: any) {
   return useQuery({
-    queryKey: CATEGORY_KEYS.all,
-    queryFn: categoryApi.fetchAll,
-    staleTime: 5 * 60 * 1000, // Tùy chọn: Cache 5 phút
+    queryKey: [CATEGORY_KEYS.all, params],
+    queryFn: async () => {
+      const res = await categoryApi.fetchAll(params);
+      return res.data; // Return array to maintain compatibility
+    },
+    staleTime: 5 * 60 * 1000,
   });
 }
 
-export function useGetCategoryByGroup(group: string) {
+export function useGetCategoryByGroup(group: string, params?: any) {
   return useQuery({
-    queryKey: [CATEGORY_KEYS.all, "group", group],
-    queryFn: () => categoryApi.fetchByGroup(group),
+    queryKey: [CATEGORY_KEYS.all, "group", group, params],
+    queryFn: async () => {
+      const res = await categoryApi.fetchByGroup(group, params);
+      return res.data; // Return array to maintain compatibility
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: !!group,
+  });
+}
+
+export function useGetPaginatedCategoryByGroup(group: string, params?: any) {
+  return useQuery({
+    queryKey: [CATEGORY_KEYS.all, "group", "paginated", group, params],
+    queryFn: () => categoryApi.fetchByGroup(group, params),
     staleTime: 5 * 60 * 1000,
     enabled: !!group,
   });

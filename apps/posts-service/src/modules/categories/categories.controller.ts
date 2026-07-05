@@ -80,16 +80,19 @@ export class CategoriesController {
     const mode = data?.mode || 'flat';
     console.log(`CategoryService.ListCategories called with mode: ${mode}`);
     try {
-      const result = mode === 'tree'
-        ? await this.categoriesService.getTree()
-        : await this.categoriesService.findAll();
-
-      console.log(`Result count: ${result?.length}`);
-      const sanitized = (result || []).map(cat => sanitizeCategory(cat)).filter(c => !!c);
-      console.log(`Sanitized count: ${sanitized.length}`);
-
-      // Safety check: ensure no nulls in children arrays
-      return { data: sanitized };
+      if (mode === 'tree') {
+        const result = await this.categoriesService.getTree();
+        const sanitized = (result || []).map(cat => sanitizeCategory(cat)).filter(c => !!c);
+        return { data: sanitized };
+      } else {
+        const result = await this.categoriesService.findAll({
+          skip: data.skip,
+          take: data.take,
+          search: data.search
+        });
+        const sanitized = (result.data || []).map(cat => sanitizeCategory(cat)).filter(c => !!c);
+        return { data: sanitized, meta: { total: result.total } };
+      }
     } catch (error) {
       console.error('Error in listCategories:', error);
       throw error;

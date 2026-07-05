@@ -22,7 +22,7 @@ export class CategoriesController {
   @GrpcMethod('CategoryService', 'GetAllCategories')
   async getAllCategories(data: { lang?: string }) {
     const list = await this.catService.getAll(data?.lang);
-    return { data: list.map(toItem) };
+    return { data: list.data.map(toItem), total: list.total };
   }
 
   @GrpcMethod('CategoryService', 'GetByGroup')
@@ -30,21 +30,22 @@ export class CategoriesController {
     group: string;
     lang?: string;
     search?: string;
-    limit?: number;
+    take?: number;
     skip?: number;
     selectedIds?: number[];
   }) {
-    const list = await this.catService.getByGroup(data.group || '', data.lang, {
+    const result = await this.catService.getByGroup(data.group || '', data.lang, {
       search: data.search,
-      limit: data.limit,
+      limit: data.take,
       skip: data.skip,
       selectedIds: data.selectedIds ?? [],
     });
     return {
-      data: list.map((item) => ({
+      data: result.data.map((item) => ({
         ...toItem(item),
         selected: item.selected ?? false,
       })),
+      total: result.total,
     };
   }
 

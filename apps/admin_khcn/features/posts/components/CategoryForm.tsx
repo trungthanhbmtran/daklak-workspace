@@ -90,7 +90,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const langs = await categoryApi.fetchByGroup('LANGUAGE');
-      return langs.filter((c: any) => c.active === 1);
+      return langs.data.filter((c: any) => c.active === 1);
     },
     staleTime: 5 * 60_000,
   });
