@@ -225,6 +225,7 @@ export type KpiPeriodWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"KpiPeriod"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiPeriod"> | Date | string
   evaluations?: Prisma.KpiEvaluationListRelationFilter
+  targets?: Prisma.EmployeeKpiTargetListRelationFilter
 }
 
 export type KpiPeriodOrderByWithRelationInput = {
@@ -235,6 +236,7 @@ export type KpiPeriodOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   evaluations?: Prisma.KpiEvaluationOrderByRelationAggregateInput
+  targets?: Prisma.EmployeeKpiTargetOrderByRelationAggregateInput
   _relevance?: Prisma.KpiPeriodOrderByRelevanceInput
 }
 
@@ -249,6 +251,7 @@ export type KpiPeriodWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"KpiPeriod"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiPeriod"> | Date | string
   evaluations?: Prisma.KpiEvaluationListRelationFilter
+  targets?: Prisma.EmployeeKpiTargetListRelationFilter
 }, "id">
 
 export type KpiPeriodOrderByWithAggregationInput = {
@@ -284,6 +287,7 @@ export type KpiPeriodCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutPeriodInput
+  targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutPeriodInput
 }
 
 export type KpiPeriodUncheckedCreateInput = {
@@ -294,6 +298,7 @@ export type KpiPeriodUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   evaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
+  targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
 }
 
 export type KpiPeriodUpdateInput = {
@@ -303,6 +308,7 @@ export type KpiPeriodUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluations?: Prisma.KpiEvaluationUpdateManyWithoutPeriodNestedInput
+  targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput
 }
 
 export type KpiPeriodUncheckedUpdateInput = {
@@ -313,6 +319,7 @@ export type KpiPeriodUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   evaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
+  targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
 }
 
 export type KpiPeriodCreateManyInput = {
@@ -387,6 +394,20 @@ export type KpiPeriodScalarRelationFilter = {
   isNot?: Prisma.KpiPeriodWhereInput
 }
 
+export type KpiPeriodCreateNestedOneWithoutTargetsInput = {
+  create?: Prisma.XOR<Prisma.KpiPeriodCreateWithoutTargetsInput, Prisma.KpiPeriodUncheckedCreateWithoutTargetsInput>
+  connectOrCreate?: Prisma.KpiPeriodCreateOrConnectWithoutTargetsInput
+  connect?: Prisma.KpiPeriodWhereUniqueInput
+}
+
+export type KpiPeriodUpdateOneRequiredWithoutTargetsNestedInput = {
+  create?: Prisma.XOR<Prisma.KpiPeriodCreateWithoutTargetsInput, Prisma.KpiPeriodUncheckedCreateWithoutTargetsInput>
+  connectOrCreate?: Prisma.KpiPeriodCreateOrConnectWithoutTargetsInput
+  upsert?: Prisma.KpiPeriodUpsertWithoutTargetsInput
+  connect?: Prisma.KpiPeriodWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.KpiPeriodUpdateToOneWithWhereWithoutTargetsInput, Prisma.KpiPeriodUpdateWithoutTargetsInput>, Prisma.KpiPeriodUncheckedUpdateWithoutTargetsInput>
+}
+
 export type KpiPeriodCreateNestedOneWithoutEvaluationsInput = {
   create?: Prisma.XOR<Prisma.KpiPeriodCreateWithoutEvaluationsInput, Prisma.KpiPeriodUncheckedCreateWithoutEvaluationsInput>
   connectOrCreate?: Prisma.KpiPeriodCreateOrConnectWithoutEvaluationsInput
@@ -401,12 +422,67 @@ export type KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.KpiPeriodUpdateToOneWithWhereWithoutEvaluationsInput, Prisma.KpiPeriodUpdateWithoutEvaluationsInput>, Prisma.KpiPeriodUncheckedUpdateWithoutEvaluationsInput>
 }
 
+export type KpiPeriodCreateWithoutTargetsInput = {
+  name: string
+  startDate: Date | string
+  endDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  evaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutPeriodInput
+}
+
+export type KpiPeriodUncheckedCreateWithoutTargetsInput = {
+  id?: number
+  name: string
+  startDate: Date | string
+  endDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  evaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
+}
+
+export type KpiPeriodCreateOrConnectWithoutTargetsInput = {
+  where: Prisma.KpiPeriodWhereUniqueInput
+  create: Prisma.XOR<Prisma.KpiPeriodCreateWithoutTargetsInput, Prisma.KpiPeriodUncheckedCreateWithoutTargetsInput>
+}
+
+export type KpiPeriodUpsertWithoutTargetsInput = {
+  update: Prisma.XOR<Prisma.KpiPeriodUpdateWithoutTargetsInput, Prisma.KpiPeriodUncheckedUpdateWithoutTargetsInput>
+  create: Prisma.XOR<Prisma.KpiPeriodCreateWithoutTargetsInput, Prisma.KpiPeriodUncheckedCreateWithoutTargetsInput>
+  where?: Prisma.KpiPeriodWhereInput
+}
+
+export type KpiPeriodUpdateToOneWithWhereWithoutTargetsInput = {
+  where?: Prisma.KpiPeriodWhereInput
+  data: Prisma.XOR<Prisma.KpiPeriodUpdateWithoutTargetsInput, Prisma.KpiPeriodUncheckedUpdateWithoutTargetsInput>
+}
+
+export type KpiPeriodUpdateWithoutTargetsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  evaluations?: Prisma.KpiEvaluationUpdateManyWithoutPeriodNestedInput
+}
+
+export type KpiPeriodUncheckedUpdateWithoutTargetsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  evaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
+}
+
 export type KpiPeriodCreateWithoutEvaluationsInput = {
   name: string
   startDate: Date | string
   endDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutPeriodInput
 }
 
 export type KpiPeriodUncheckedCreateWithoutEvaluationsInput = {
@@ -416,6 +492,7 @@ export type KpiPeriodUncheckedCreateWithoutEvaluationsInput = {
   endDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
 }
 
 export type KpiPeriodCreateOrConnectWithoutEvaluationsInput = {
@@ -440,6 +517,7 @@ export type KpiPeriodUpdateWithoutEvaluationsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput
 }
 
 export type KpiPeriodUncheckedUpdateWithoutEvaluationsInput = {
@@ -449,6 +527,7 @@ export type KpiPeriodUncheckedUpdateWithoutEvaluationsInput = {
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
 }
 
 
@@ -458,10 +537,12 @@ export type KpiPeriodUncheckedUpdateWithoutEvaluationsInput = {
 
 export type KpiPeriodCountOutputType = {
   evaluations: number
+  targets: number
 }
 
 export type KpiPeriodCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   evaluations?: boolean | KpiPeriodCountOutputTypeCountEvaluationsArgs
+  targets?: boolean | KpiPeriodCountOutputTypeCountTargetsArgs
 }
 
 /**
@@ -481,6 +562,13 @@ export type KpiPeriodCountOutputTypeCountEvaluationsArgs<ExtArgs extends runtime
   where?: Prisma.KpiEvaluationWhereInput
 }
 
+/**
+ * KpiPeriodCountOutputType without action
+ */
+export type KpiPeriodCountOutputTypeCountTargetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmployeeKpiTargetWhereInput
+}
+
 
 export type KpiPeriodSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -490,6 +578,7 @@ export type KpiPeriodSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdAt?: boolean
   updatedAt?: boolean
   evaluations?: boolean | Prisma.KpiPeriod$evaluationsArgs<ExtArgs>
+  targets?: boolean | Prisma.KpiPeriod$targetsArgs<ExtArgs>
   _count?: boolean | Prisma.KpiPeriodCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["kpiPeriod"]>
 
@@ -507,6 +596,7 @@ export type KpiPeriodSelectScalar = {
 export type KpiPeriodOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiPeriod"]>
 export type KpiPeriodInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   evaluations?: boolean | Prisma.KpiPeriod$evaluationsArgs<ExtArgs>
+  targets?: boolean | Prisma.KpiPeriod$targetsArgs<ExtArgs>
   _count?: boolean | Prisma.KpiPeriodCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -514,6 +604,7 @@ export type $KpiPeriodPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   name: "KpiPeriod"
   objects: {
     evaluations: Prisma.$KpiEvaluationPayload<ExtArgs>[]
+    targets: Prisma.$EmployeeKpiTargetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -863,6 +954,7 @@ readonly fields: KpiPeriodFieldRefs;
 export interface Prisma__KpiPeriodClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   evaluations<T extends Prisma.KpiPeriod$evaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiPeriod$evaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  targets<T extends Prisma.KpiPeriod$targetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiPeriod$targetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1267,6 +1359,30 @@ export type KpiPeriod$evaluationsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.KpiEvaluationScalarFieldEnum | Prisma.KpiEvaluationScalarFieldEnum[]
+}
+
+/**
+ * KpiPeriod.targets
+ */
+export type KpiPeriod$targetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmployeeKpiTarget
+   */
+  select?: Prisma.EmployeeKpiTargetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmployeeKpiTarget
+   */
+  omit?: Prisma.EmployeeKpiTargetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmployeeKpiTargetInclude<ExtArgs> | null
+  where?: Prisma.EmployeeKpiTargetWhereInput
+  orderBy?: Prisma.EmployeeKpiTargetOrderByWithRelationInput | Prisma.EmployeeKpiTargetOrderByWithRelationInput[]
+  cursor?: Prisma.EmployeeKpiTargetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmployeeKpiTargetScalarFieldEnum | Prisma.EmployeeKpiTargetScalarFieldEnum[]
 }
 
 /**

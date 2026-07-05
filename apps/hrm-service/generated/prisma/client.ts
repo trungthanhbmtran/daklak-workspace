@@ -95,6 +95,11 @@ export type KpiCriteria = Prisma.KpiCriteriaModel
  */
 export type KpiCriteriaSetting = Prisma.KpiCriteriaSettingModel
 /**
+ * Model EmployeeKpiTarget
+ * 
+ */
+export type EmployeeKpiTarget = Prisma.EmployeeKpiTargetModel
+/**
  * Model KpiEvaluation
  * 
  */

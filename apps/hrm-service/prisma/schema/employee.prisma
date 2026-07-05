@@ -32,9 +32,10 @@ model Employee {
   updatedAt          DateTime @updatedAt @map("updated_at")
 
   // Relations (Đã gỡ bỏ các relation trực tiếp với Task cũ)
-  kpiEvaluations   KpiEvaluation[]   @relation("KpiEmployee")
-  kpiReviews       KpiEvaluation[]   @relation("KpiReviewer")
-  taskParticipants TaskParticipant[] @relation("EmployeeTasks")
+  kpiEvaluations     KpiEvaluation[]     @relation("KpiEmployee")
+  kpiReviews         KpiEvaluation[]     @relation("KpiReviewer")
+  taskParticipants   TaskParticipant[]   @relation("EmployeeTasks")
+  employeeKpiTargets EmployeeKpiTarget[] @relation("EmployeeKpiTargets")
 
   @@map("employees")
 }

@@ -153,6 +153,26 @@ export const PropertiesPanel = ({
                 )}
               </select>
             </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Chiến lược phân công (Scope)
+              </label>
+              <select
+                name="assignmentStrategy"
+                value={data.assignmentStrategy || "ANY"}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <option value="ANY">Không giới hạn (Toàn hệ thống)</option>
+                <option value="BY_DOMAIN">Theo Lĩnh vực phụ trách</option>
+                <option value="BY_DEPARTMENT">Theo Phòng ban theo dõi</option>
+                <option value="BY_GEO_AREA">Theo Địa bàn phụ trách</option>
+                <option value="DIRECT_MANAGER">Cấp trên/dưới trực tiếp</option>
+              </select>
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Backend sẽ dựa vào chiến lược này để đối chiếu với cấu trúc PBAC.
+              </p>
+            </div>
             <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/10 mt-2">
               <label className="text-sm font-semibold text-primary">
                 Gửi thông báo hệ thống

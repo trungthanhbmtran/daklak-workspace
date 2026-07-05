@@ -1059,40 +1059,66 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     
     const enrichedTaskResponse = this.toTaskResponse(enrichedTask);
 
-    if (data.assigneeCode) {
-      this.sendTaskNotification(
-        [data.assigneeCode],
-        'Có công việc mới được giao',
-        `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
-        enrichedTaskResponse
-      );
-    }
+    const metadata = (enrichedTask.metadata as any) || {};
+    const workflowId = metadata.workflowId;
+    let sendNotify = true; // Fallback for tasks without workflow
+    let nodeLabel = 'Giao việc';
 
-    if (Array.isArray(data.coassigneeCodes) && data.coassigneeCodes.length > 0) {
-      this.sendTaskNotification(
-        data.coassigneeCodes,
-        'Có công việc phối hợp mới',
-        `Bạn được phân công phối hợp thực hiện nhiệm vụ: "${enrichedTaskResponse.title}"`,
-        enrichedTaskResponse
-      );
-    }
-
-    if (data.monitoredUnitId) {
+    if (workflowId) {
       try {
-        const monitorsRes: any = await firstValueFrom(
-          this.userService.GetEmployeesByScope({ monitored_unit_id: parseInt(data.monitoredUnitId, 10) })
-        );
-        const followerCodes = monitorsRes?.employeeCodes || monitorsRes?.employee_codes || [];
-        if (followerCodes.length > 0) {
-          this.sendTaskNotification(
-            followerCodes,
-            'Có công việc mới tại phòng ban theo dõi',
-            `Một nhiệm vụ mới ("${enrichedTaskResponse.title}") vừa được giao cho phòng ban bạn đang phụ trách theo dõi.`,
-            enrichedTaskResponse
-          );
+        const definition = await this.getWorkflowDefinition(workflowId);
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          const initialNodeId = engine.getInitialNodeId();
+          if (initialNodeId) {
+            const node = engine.getNode(initialNodeId);
+            if (node && node.data) {
+              sendNotify = !!node.data.sendNotification;
+              if (node.data.label) nodeLabel = node.data.label;
+            }
+          }
         }
-      } catch (e) {
-        console.error('Failed to notify monitors', e);
+      } catch (err) {
+        this.logger.error('Lỗi khi đọc Workflow cấu hình thông báo cho Task mới', err);
+      }
+    }
+
+    if (sendNotify) {
+      if (data.assigneeCode) {
+        this.sendTaskNotification(
+          [data.assigneeCode],
+          `Có công việc mới: ${nodeLabel}`,
+          `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
+          enrichedTaskResponse
+        );
+      }
+
+      if (Array.isArray(data.coassigneeCodes) && data.coassigneeCodes.length > 0) {
+        this.sendTaskNotification(
+          data.coassigneeCodes,
+          `Có công việc phối hợp mới: ${nodeLabel}`,
+          `Bạn được phân công phối hợp thực hiện nhiệm vụ: "${enrichedTaskResponse.title}"`,
+          enrichedTaskResponse
+        );
+      }
+
+      if (data.monitoredUnitId) {
+        try {
+          const monitorsRes: any = await firstValueFrom(
+            this.userService.GetEmployeesByScope({ monitored_unit_id: parseInt(data.monitoredUnitId, 10) })
+          );
+          const followerCodes = monitorsRes?.employeeCodes || monitorsRes?.employee_codes || [];
+          if (followerCodes.length > 0) {
+            this.sendTaskNotification(
+              followerCodes,
+              `Có công việc mới tại phòng ban theo dõi: ${nodeLabel}`,
+              `Một nhiệm vụ mới ("${enrichedTaskResponse.title}") vừa được giao cho phòng ban bạn đang phụ trách theo dõi.`,
+              enrichedTaskResponse
+            );
+          }
+        } catch (e) {
+          console.error('Failed to notify monitors', e);
+        }
       }
     }
 
@@ -1124,6 +1150,17 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         const queryContext = { ...context, currentEmployeeCode: actorCode, currentUserId: context?.currentUserId };
         const access = await this.checkTaskAccess(tCheck, queryContext);
 
+        const businessData = {
+          status: rawTask.status,
+          hasChildren,
+          isOwner: access.isOwner,
+          isAssignee: access.isAssignee,
+          isSupervisor: access.isSupervisor,
+          isCoordinator: access.isCoordinator,
+          isDeptLeader: access.isDeptLeader,
+          allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
+        };
+
         const definition = await this.getWorkflowDefinition(activeWorkflowId);
         if (definition) {
           const engine = new WorkflowEngine(definition);
@@ -1132,16 +1169,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             actionName,
             context?.currentUserPermissions || [],
             actorCode,
-            {
-              status: rawTask.status,
-              hasChildren,
-              isOwner: access.isOwner,
-              isAssignee: access.isAssignee,
-              isSupervisor: access.isSupervisor,
-              isCoordinator: access.isCoordinator,
-              isDeptLeader: access.isDeptLeader,
-              allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
-            }
+            businessData
           );
           
           if (!validateRes.allowed) {
@@ -1149,7 +1177,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           }
 
           // Nhảy bước
-          const nextNodeId = engine.getNextNodeId(metadata.currentNodeId, actionName);
+          const nextNodeId = engine.getNextNodeId(metadata.currentNodeId, actionName, { ...businessData, actionName });
           if (nextNodeId) {
             nextNodeIdToSave = nextNodeId;
           }
@@ -1186,54 +1214,64 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     if (status === 'DONE') await this.updateTaskProgress(id, 100, actorCode);
 
-    // Send notifications for Approval workflow
-    if (status === 'PENDING_APPROVAL') {
-      const recipientCode = tCheck.supervisorCode || tCheck.assignerCode || tCheck.creatorEmployeeCode;
-      if (recipientCode && recipientCode !== actorCode) {
-        const emp = await this.prisma.employee.findUnique({ where: { employeeCode: recipientCode }, select: { userId: true } });
-        if (emp?.userId) {
-          this.notificationClient.emit('send_notification', {
-            title: 'Yêu cầu nghiệm thu công việc',
-            message: `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`,
-            type: 'SYSTEM',
-            recipients: [emp.userId],
-            metadata: { 
-            module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
-            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'work-plans/tasks',
-            id: id
-          },
-          }).subscribe();
+    if (status === 'DONE') await this.updateTaskProgress(id, 100, actorCode);
+
+    // Xử lý gửi thông báo tự động dựa trên cấu hình Workflow Engine (Node tiếp theo)
+    if (nextNodeIdToSave && activeWorkflowId) {
+      try {
+        const definition = await this.getWorkflowDefinition(activeWorkflowId);
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          const nextNode = engine.getNode(nextNodeIdToSave);
+          
+          // Chỉ gửi nếu Node đích được cấu hình tick chọn Gửi thông báo
+          if (nextNode && nextNode.data && nextNode.data.sendNotification) {
+            let title = `Có cập nhật: ${nextNode.data.label}`;
+            let message = `Công việc "${tCheck.title}" đã chuyển sang bước: ${nextNode.data.label}. ${nextNode.data.description || ''}`;
+            let recipientCodes: string[] = [];
+
+            // Template thông báo chuyên biệt
+            if (status === 'RETURNED' || rejectReason) {
+              title = 'Công việc bị trả lại';
+              message = `Công việc "${tCheck.title}" của bạn đã bị trả lại.\nLý do: ${rejectReason}`;
+            } else if (nextNode.data.actionName === 'APPROVE') {
+              title = 'Yêu cầu nghiệm thu công việc';
+              message = `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`;
+            } else if (status === 'DONE' || nextNode.type === 'end') {
+              title = 'Công việc đã được nghiệm thu';
+              message = `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`;
+            }
+
+            // Đối soát người nhận dựa vào Vai trò
+            if (nextNode.data.role === 'MANAGER' || status === 'PENDING_APPROVAL') {
+              recipientCodes.push(tCheck.supervisorCode, tCheck.assignerCode, tCheck.creatorEmployeeCode);
+            } else {
+              recipientCodes.push(tCheck.assigneeCode);
+            }
+
+            // Lọc danh sách và loại trừ người đang thao tác
+            const uniqueCodes = [...new Set(recipientCodes.filter(c => c && c !== actorCode))];
+
+            for (const code of uniqueCodes) {
+              const emp = await this.prisma.employee.findUnique({ where: { employeeCode: code }, select: { userId: true } });
+              if (emp?.userId) {
+                this.notificationClient.emit('send_notification', {
+                  title,
+                  message,
+                  type: 'SYSTEM',
+                  recipients: [emp.userId],
+                  metadata: { 
+                    module: (tCheck.metadata as any)?.module || 'hrm',
+                    type: (tCheck.metadata as any)?.type || 'work-plans/tasks',
+                    id: id
+                  },
+                }).subscribe();
+              }
+            }
+          }
         }
-      }
-    } else if (status === 'RETURNED' && actorCode !== tCheck.assigneeCode) {
-      const emp = await this.prisma.employee.findUnique({ where: { employeeCode: tCheck.assigneeCode }, select: { userId: true } });
-      if (emp?.userId) {
-        this.notificationClient.emit('send_notification', {
-          title: 'Công việc bị trả lại',
-          message: `Công việc "${tCheck.title}" của bạn đã bị trả lại. Lý do: ${rejectReason}`,
-          type: 'SYSTEM',
-          recipients: [emp.userId],
-          metadata: { 
-            module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
-            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'work-plans/tasks',
-            id: id
-          },
-        }).subscribe();
-      }
-    } else if (status === 'DONE' && tCheck.status === 'PENDING_APPROVAL' && actorCode !== tCheck.assigneeCode) {
-      const emp = await this.prisma.employee.findUnique({ where: { employeeCode: tCheck.assigneeCode }, select: { userId: true } });
-      if (emp?.userId) {
-        this.notificationClient.emit('send_notification', {
-          title: 'Công việc đã được nghiệm thu',
-          message: `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`,
-          type: 'SYSTEM',
-          recipients: [emp.userId],
-          metadata: { 
-            module: (tCheck.metadata && (tCheck.metadata as any).module) ? (tCheck.metadata as any).module : 'hrm',
-            type: (tCheck.metadata && (tCheck.metadata as any).type) ? (tCheck.metadata as any).type : 'work-plans/tasks',
-            id: id
-          },
-        }).subscribe();
+      } catch (err) {
+        this.logger.error('Lỗi khi gửi thông báo tự động từ Workflow', err);
       }
     }
 

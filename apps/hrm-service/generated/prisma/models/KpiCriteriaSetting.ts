@@ -56,6 +56,8 @@ export type KpiCriteriaSettingMinAggregateOutputType = {
   bonusThresholdDays: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  integrationCode: string | null
+  formula: string | null
 }
 
 export type KpiCriteriaSettingMaxAggregateOutputType = {
@@ -68,6 +70,8 @@ export type KpiCriteriaSettingMaxAggregateOutputType = {
   bonusThresholdDays: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  integrationCode: string | null
+  formula: string | null
 }
 
 export type KpiCriteriaSettingCountAggregateOutputType = {
@@ -80,6 +84,8 @@ export type KpiCriteriaSettingCountAggregateOutputType = {
   bonusThresholdDays: number
   bonusPerDay: number
   penaltyPerDay: number
+  integrationCode: number
+  formula: number
   _all: number
 }
 
@@ -114,6 +120,8 @@ export type KpiCriteriaSettingMinAggregateInputType = {
   bonusThresholdDays?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  integrationCode?: true
+  formula?: true
 }
 
 export type KpiCriteriaSettingMaxAggregateInputType = {
@@ -126,6 +134,8 @@ export type KpiCriteriaSettingMaxAggregateInputType = {
   bonusThresholdDays?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  integrationCode?: true
+  formula?: true
 }
 
 export type KpiCriteriaSettingCountAggregateInputType = {
@@ -138,6 +148,8 @@ export type KpiCriteriaSettingCountAggregateInputType = {
   bonusThresholdDays?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  integrationCode?: true
+  formula?: true
   _all?: true
 }
 
@@ -237,6 +249,8 @@ export type KpiCriteriaSettingGroupByOutputType = {
   bonusThresholdDays: number
   bonusPerDay: number
   penaltyPerDay: number
+  integrationCode: string | null
+  formula: string | null
   _count: KpiCriteriaSettingCountAggregateOutputType | null
   _avg: KpiCriteriaSettingAvgAggregateOutputType | null
   _sum: KpiCriteriaSettingSumAggregateOutputType | null
@@ -272,6 +286,8 @@ export type KpiCriteriaSettingWhereInput = {
   bonusThresholdDays?: Prisma.IntFilter<"KpiCriteriaSetting"> | number
   bonusPerDay?: Prisma.FloatFilter<"KpiCriteriaSetting"> | number
   penaltyPerDay?: Prisma.FloatFilter<"KpiCriteriaSetting"> | number
+  integrationCode?: Prisma.StringNullableFilter<"KpiCriteriaSetting"> | string | null
+  formula?: Prisma.StringNullableFilter<"KpiCriteriaSetting"> | string | null
   criteria?: Prisma.XOR<Prisma.KpiCriteriaScalarRelationFilter, Prisma.KpiCriteriaWhereInput>
 }
 
@@ -285,6 +301,8 @@ export type KpiCriteriaSettingOrderByWithRelationInput = {
   bonusThresholdDays?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  integrationCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  formula?: Prisma.SortOrderInput | Prisma.SortOrder
   criteria?: Prisma.KpiCriteriaOrderByWithRelationInput
   _relevance?: Prisma.KpiCriteriaSettingOrderByRelevanceInput
 }
@@ -302,6 +320,8 @@ export type KpiCriteriaSettingWhereUniqueInput = Prisma.AtLeast<{
   bonusThresholdDays?: Prisma.IntFilter<"KpiCriteriaSetting"> | number
   bonusPerDay?: Prisma.FloatFilter<"KpiCriteriaSetting"> | number
   penaltyPerDay?: Prisma.FloatFilter<"KpiCriteriaSetting"> | number
+  integrationCode?: Prisma.StringNullableFilter<"KpiCriteriaSetting"> | string | null
+  formula?: Prisma.StringNullableFilter<"KpiCriteriaSetting"> | string | null
   criteria?: Prisma.XOR<Prisma.KpiCriteriaScalarRelationFilter, Prisma.KpiCriteriaWhereInput>
 }, "criteriaId">
 
@@ -315,6 +335,8 @@ export type KpiCriteriaSettingOrderByWithAggregationInput = {
   bonusThresholdDays?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  integrationCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  formula?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.KpiCriteriaSettingCountOrderByAggregateInput
   _avg?: Prisma.KpiCriteriaSettingAvgOrderByAggregateInput
   _max?: Prisma.KpiCriteriaSettingMaxOrderByAggregateInput
@@ -335,6 +357,8 @@ export type KpiCriteriaSettingScalarWhereWithAggregatesInput = {
   bonusThresholdDays?: Prisma.IntWithAggregatesFilter<"KpiCriteriaSetting"> | number
   bonusPerDay?: Prisma.FloatWithAggregatesFilter<"KpiCriteriaSetting"> | number
   penaltyPerDay?: Prisma.FloatWithAggregatesFilter<"KpiCriteriaSetting"> | number
+  integrationCode?: Prisma.StringNullableWithAggregatesFilter<"KpiCriteriaSetting"> | string | null
+  formula?: Prisma.StringNullableWithAggregatesFilter<"KpiCriteriaSetting"> | string | null
 }
 
 export type KpiCriteriaSettingCreateInput = {
@@ -346,6 +370,8 @@ export type KpiCriteriaSettingCreateInput = {
   bonusThresholdDays?: number
   bonusPerDay?: number
   penaltyPerDay?: number
+  integrationCode?: string | null
+  formula?: string | null
   criteria: Prisma.KpiCriteriaCreateNestedOneWithoutSettingsInput
 }
 
@@ -359,6 +385,8 @@ export type KpiCriteriaSettingUncheckedCreateInput = {
   bonusThresholdDays?: number
   bonusPerDay?: number
   penaltyPerDay?: number
+  integrationCode?: string | null
+  formula?: string | null
 }
 
 export type KpiCriteriaSettingUpdateInput = {
@@ -370,6 +398,8 @@ export type KpiCriteriaSettingUpdateInput = {
   bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  integrationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   criteria?: Prisma.KpiCriteriaUpdateOneRequiredWithoutSettingsNestedInput
 }
 
@@ -383,6 +413,8 @@ export type KpiCriteriaSettingUncheckedUpdateInput = {
   bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  integrationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type KpiCriteriaSettingCreateManyInput = {
@@ -395,6 +427,8 @@ export type KpiCriteriaSettingCreateManyInput = {
   bonusThresholdDays?: number
   bonusPerDay?: number
   penaltyPerDay?: number
+  integrationCode?: string | null
+  formula?: string | null
 }
 
 export type KpiCriteriaSettingUpdateManyMutationInput = {
@@ -406,6 +440,8 @@ export type KpiCriteriaSettingUpdateManyMutationInput = {
   bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  integrationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type KpiCriteriaSettingUncheckedUpdateManyInput = {
@@ -418,6 +454,8 @@ export type KpiCriteriaSettingUncheckedUpdateManyInput = {
   bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  integrationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type KpiCriteriaSettingNullableScalarRelationFilter = {
@@ -441,6 +479,8 @@ export type KpiCriteriaSettingCountOrderByAggregateInput = {
   bonusThresholdDays?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  integrationCode?: Prisma.SortOrder
+  formula?: Prisma.SortOrder
 }
 
 export type KpiCriteriaSettingAvgOrderByAggregateInput = {
@@ -463,6 +503,8 @@ export type KpiCriteriaSettingMaxOrderByAggregateInput = {
   bonusThresholdDays?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  integrationCode?: Prisma.SortOrder
+  formula?: Prisma.SortOrder
 }
 
 export type KpiCriteriaSettingMinOrderByAggregateInput = {
@@ -475,6 +517,8 @@ export type KpiCriteriaSettingMinOrderByAggregateInput = {
   bonusThresholdDays?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  integrationCode?: Prisma.SortOrder
+  formula?: Prisma.SortOrder
 }
 
 export type KpiCriteriaSettingSumOrderByAggregateInput = {
@@ -528,6 +572,8 @@ export type KpiCriteriaSettingCreateWithoutCriteriaInput = {
   bonusThresholdDays?: number
   bonusPerDay?: number
   penaltyPerDay?: number
+  integrationCode?: string | null
+  formula?: string | null
 }
 
 export type KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput = {
@@ -539,6 +585,8 @@ export type KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput = {
   bonusThresholdDays?: number
   bonusPerDay?: number
   penaltyPerDay?: number
+  integrationCode?: string | null
+  formula?: string | null
 }
 
 export type KpiCriteriaSettingCreateOrConnectWithoutCriteriaInput = {
@@ -566,6 +614,8 @@ export type KpiCriteriaSettingUpdateWithoutCriteriaInput = {
   bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  integrationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput = {
@@ -577,6 +627,8 @@ export type KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput = {
   bonusThresholdDays?: Prisma.IntFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
   penaltyPerDay?: Prisma.FloatFieldUpdateOperationsInput | number
+  integrationCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  formula?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -591,6 +643,8 @@ export type KpiCriteriaSettingSelect<ExtArgs extends runtime.Types.Extensions.In
   bonusThresholdDays?: boolean
   bonusPerDay?: boolean
   penaltyPerDay?: boolean
+  integrationCode?: boolean
+  formula?: boolean
   criteria?: boolean | Prisma.KpiCriteriaDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["kpiCriteriaSetting"]>
 
@@ -606,9 +660,11 @@ export type KpiCriteriaSettingSelectScalar = {
   bonusThresholdDays?: boolean
   bonusPerDay?: boolean
   penaltyPerDay?: boolean
+  integrationCode?: boolean
+  formula?: boolean
 }
 
-export type KpiCriteriaSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"criteriaId" | "weight" | "baseScore" | "scoringMethod" | "difficulty" | "difficultyMultiplier" | "bonusThresholdDays" | "bonusPerDay" | "penaltyPerDay", ExtArgs["result"]["kpiCriteriaSetting"]>
+export type KpiCriteriaSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"criteriaId" | "weight" | "baseScore" | "scoringMethod" | "difficulty" | "difficultyMultiplier" | "bonusThresholdDays" | "bonusPerDay" | "penaltyPerDay" | "integrationCode" | "formula", ExtArgs["result"]["kpiCriteriaSetting"]>
 export type KpiCriteriaSettingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   criteria?: boolean | Prisma.KpiCriteriaDefaultArgs<ExtArgs>
 }
@@ -628,6 +684,8 @@ export type $KpiCriteriaSettingPayload<ExtArgs extends runtime.Types.Extensions.
     bonusThresholdDays: number
     bonusPerDay: number
     penaltyPerDay: number
+    integrationCode: string | null
+    formula: string | null
   }, ExtArgs["result"]["kpiCriteriaSetting"]>
   composites: {}
 }
@@ -1007,6 +1065,8 @@ export interface KpiCriteriaSettingFieldRefs {
   readonly bonusThresholdDays: Prisma.FieldRef<"KpiCriteriaSetting", 'Int'>
   readonly bonusPerDay: Prisma.FieldRef<"KpiCriteriaSetting", 'Float'>
   readonly penaltyPerDay: Prisma.FieldRef<"KpiCriteriaSetting", 'Float'>
+  readonly integrationCode: Prisma.FieldRef<"KpiCriteriaSetting", 'String'>
+  readonly formula: Prisma.FieldRef<"KpiCriteriaSetting", 'String'>
 }
     
 

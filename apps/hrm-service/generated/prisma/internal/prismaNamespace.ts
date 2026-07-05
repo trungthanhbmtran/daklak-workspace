@@ -395,6 +395,7 @@ export const ModelName = {
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
   KpiCriteriaSetting: 'KpiCriteriaSetting',
+  EmployeeKpiTarget: 'EmployeeKpiTarget',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   TaskRankTemplate: 'TaskRankTemplate',
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "task" | "taskKpiSetting" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "task" | "taskKpiSetting" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1144,6 +1145,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EmployeeKpiTarget: {
+      payload: Prisma.$EmployeeKpiTargetPayload<ExtArgs>
+      fields: Prisma.EmployeeKpiTargetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmployeeKpiTargetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmployeeKpiTargetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
+        }
+        findFirst: {
+          args: Prisma.EmployeeKpiTargetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmployeeKpiTargetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
+        }
+        findMany: {
+          args: Prisma.EmployeeKpiTargetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>[]
+        }
+        create: {
+          args: Prisma.EmployeeKpiTargetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
+        }
+        createMany: {
+          args: Prisma.EmployeeKpiTargetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.EmployeeKpiTargetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
+        }
+        update: {
+          args: Prisma.EmployeeKpiTargetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmployeeKpiTargetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmployeeKpiTargetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.EmployeeKpiTargetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
+        }
+        aggregate: {
+          args: Prisma.EmployeeKpiTargetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmployeeKpiTarget>
+        }
+        groupBy: {
+          args: Prisma.EmployeeKpiTargetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeKpiTargetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmployeeKpiTargetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmployeeKpiTargetCountAggregateOutputType> | number
+        }
+      }
+    }
     KpiEvaluation: {
       payload: Prisma.$KpiEvaluationPayload<ExtArgs>
       fields: Prisma.KpiEvaluationFieldRefs
@@ -1613,10 +1680,25 @@ export const KpiCriteriaSettingScalarFieldEnum = {
   difficultyMultiplier: 'difficultyMultiplier',
   bonusThresholdDays: 'bonusThresholdDays',
   bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay'
+  penaltyPerDay: 'penaltyPerDay',
+  integrationCode: 'integrationCode',
+  formula: 'formula'
 } as const
 
 export type KpiCriteriaSettingScalarFieldEnum = (typeof KpiCriteriaSettingScalarFieldEnum)[keyof typeof KpiCriteriaSettingScalarFieldEnum]
+
+
+export const EmployeeKpiTargetScalarFieldEnum = {
+  id: 'id',
+  employeeCode: 'employeeCode',
+  periodId: 'periodId',
+  criteriaId: 'criteriaId',
+  targetValue: 'targetValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeeKpiTargetScalarFieldEnum = (typeof EmployeeKpiTargetScalarFieldEnum)[keyof typeof EmployeeKpiTargetScalarFieldEnum]
 
 
 export const KpiEvaluationScalarFieldEnum = {
@@ -1809,10 +1891,19 @@ export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRel
 
 export const KpiCriteriaSettingOrderByRelevanceFieldEnum = {
   scoringMethod: 'scoringMethod',
-  difficulty: 'difficulty'
+  difficulty: 'difficulty',
+  integrationCode: 'integrationCode',
+  formula: 'formula'
 } as const
 
 export type KpiCriteriaSettingOrderByRelevanceFieldEnum = (typeof KpiCriteriaSettingOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaSettingOrderByRelevanceFieldEnum]
+
+
+export const EmployeeKpiTargetOrderByRelevanceFieldEnum = {
+  employeeCode: 'employeeCode'
+} as const
+
+export type EmployeeKpiTargetOrderByRelevanceFieldEnum = (typeof EmployeeKpiTargetOrderByRelevanceFieldEnum)[keyof typeof EmployeeKpiTargetOrderByRelevanceFieldEnum]
 
 
 export const KpiEvaluationOrderByRelevanceFieldEnum = {
@@ -2019,6 +2110,7 @@ export type GlobalOmitConfig = {
   kpiPeriod?: Prisma.KpiPeriodOmit
   kpiCriteria?: Prisma.KpiCriteriaOmit
   kpiCriteriaSetting?: Prisma.KpiCriteriaSettingOmit
+  employeeKpiTarget?: Prisma.EmployeeKpiTargetOmit
   kpiEvaluation?: Prisma.KpiEvaluationOmit
   kpiEvaluationDetail?: Prisma.KpiEvaluationDetailOmit
   taskRankTemplate?: Prisma.TaskRankTemplateOmit

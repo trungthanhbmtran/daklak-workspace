@@ -202,6 +202,9 @@ export function PersonalKpiClient() {
                 <TableBody>
                   {formDetails.map((detail: any, idx: number) => {
                     const isAuto = detail.scoringMethod === 'AUTOMATIC';
+                    const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
+                    const isReadonlyItem = isAuto || isIntegration;
+
                     return (
                       <TableRow key={idx}>
                         <TableCell>
@@ -209,8 +212,8 @@ export function PersonalKpiClient() {
                           <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{detail.description}</div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={isAuto ? "default" : "secondary"}>
-                            {isAuto ? "Tự động" : "Thủ công"}
+                          <Badge variant={isAuto ? "default" : isIntegration ? "destructive" : "secondary"}>
+                            {isAuto ? "Tự động" : isIntegration ? "Liên thông" : "Thủ công"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center font-medium text-muted-foreground">{detail.weight}x</TableCell>
@@ -218,8 +221,8 @@ export function PersonalKpiClient() {
                         
                         {/* Tự chấm */}
                         <TableCell className="text-center">
-                          {isAuto ? (
-                            <span className="font-bold text-primary bg-primary/10 px-3 py-1 rounded-md border border-primary/20">{detail.selfScore ?? 0}</span>
+                          {isReadonlyItem ? (
+                            <span className={`font-bold px-3 py-1 rounded-md border ${isIntegration ? 'text-destructive bg-destructive/10 border-destructive/20' : 'text-primary bg-primary/10 border-primary/20'}`}>{detail.selfScore ?? 0}</span>
                           ) : (
                             <Input 
                               type="number" 
@@ -245,7 +248,7 @@ export function PersonalKpiClient() {
 
                         {/* Giải trình */}
                         <TableCell>
-                          {isAuto ? (
+                          {isReadonlyItem ? (
                             <div className="text-xs text-muted-foreground italic bg-muted p-2 rounded border">
                               {detail.notes}
                             </div>

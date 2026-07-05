@@ -169,6 +169,7 @@ export function ReviewKpiClient() {
                             <div className="font-semibold">{detail.criteriaName}</div>
                             <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{detail.description}</div>
                             {isAuto && <Badge variant="secondary" className="mt-2">Tự động (Máy tính)</Badge>}
+                            {detail.scoringMethod === 'INTEGRATION_API' && <Badge variant="destructive" className="mt-2 bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">Liên thông (LGSP)</Badge>}
                           </TableCell>
                           <TableCell className="text-center font-bold text-muted-foreground">{detail.baseScore}</TableCell>
                           

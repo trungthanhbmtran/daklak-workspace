@@ -62,6 +62,7 @@ export const ModelName = {
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
   KpiCriteriaSetting: 'KpiCriteriaSetting',
+  EmployeeKpiTarget: 'EmployeeKpiTarget',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   TaskRankTemplate: 'TaskRankTemplate',
@@ -250,10 +251,25 @@ export const KpiCriteriaSettingScalarFieldEnum = {
   difficultyMultiplier: 'difficultyMultiplier',
   bonusThresholdDays: 'bonusThresholdDays',
   bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay'
+  penaltyPerDay: 'penaltyPerDay',
+  integrationCode: 'integrationCode',
+  formula: 'formula'
 } as const
 
 export type KpiCriteriaSettingScalarFieldEnum = (typeof KpiCriteriaSettingScalarFieldEnum)[keyof typeof KpiCriteriaSettingScalarFieldEnum]
+
+
+export const EmployeeKpiTargetScalarFieldEnum = {
+  id: 'id',
+  employeeCode: 'employeeCode',
+  periodId: 'periodId',
+  criteriaId: 'criteriaId',
+  targetValue: 'targetValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmployeeKpiTargetScalarFieldEnum = (typeof EmployeeKpiTargetScalarFieldEnum)[keyof typeof EmployeeKpiTargetScalarFieldEnum]
 
 
 export const KpiEvaluationScalarFieldEnum = {
@@ -446,10 +462,19 @@ export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRel
 
 export const KpiCriteriaSettingOrderByRelevanceFieldEnum = {
   scoringMethod: 'scoringMethod',
-  difficulty: 'difficulty'
+  difficulty: 'difficulty',
+  integrationCode: 'integrationCode',
+  formula: 'formula'
 } as const
 
 export type KpiCriteriaSettingOrderByRelevanceFieldEnum = (typeof KpiCriteriaSettingOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaSettingOrderByRelevanceFieldEnum]
+
+
+export const EmployeeKpiTargetOrderByRelevanceFieldEnum = {
+  employeeCode: 'employeeCode'
+} as const
+
+export type EmployeeKpiTargetOrderByRelevanceFieldEnum = (typeof EmployeeKpiTargetOrderByRelevanceFieldEnum)[keyof typeof EmployeeKpiTargetOrderByRelevanceFieldEnum]
 
 
 export const KpiEvaluationOrderByRelevanceFieldEnum = {

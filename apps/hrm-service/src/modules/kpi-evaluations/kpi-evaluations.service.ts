@@ -8,6 +8,14 @@ export class KpiEvaluationsService {
 
   constructor(private prisma: PrismaService) { }
 
+  // Giả lập gọi RPC sang Integration Service
+  private async fetchMetricFromIntegration(integrationCode: string, employeeCode: string): Promise<number> {
+    // TODO: Triển khai gọi gRPC hoặc HTTP sang Integration Service (api-gateway)
+    // Ví dụ: return await this.integrationClient.fetchKpiMetric({ code: integrationCode, employeeCode });
+    console.log(`[Integration] Fetching metric for ${integrationCode} - Employee: ${employeeCode}`);
+    return Math.floor(Math.random() * 100) + 50; // Trả về số giả lập (50 - 150)
+  }
+
   async findPeriods() {
     const cached = this.cache.get('periods');
     if (cached && cached.expiresAt > Date.now()) {
@@ -272,7 +280,9 @@ export class KpiEvaluationsService {
     const calculatedTasks: any[] = [];
     const groupedScores: Record<number, number> = {};
     const groupedTasksCount: Record<number, number> = {};
+    const groupedIntegrationData: Record<number, { actual: number, target: number }> = {};
 
+    // 1. Tính toán điểm từ Tasks (Nội bộ)
     for (const tp of taskParticipants) {
       const task = tp.task;
       const baseScore = task.kpiSettings?.baseScore || 0;
@@ -336,6 +346,68 @@ export class KpiEvaluationsService {
       });
     }
 
+    // 2. Tính toán điểm từ Integration API (Ngoại bộ như LGSP)
+    const integrationCriteria = await this.prisma.kpiCriteria.findMany({
+      where: { settings: { scoringMethod: 'INTEGRATION_API' } },
+      include: { settings: true }
+    });
+
+    if (integrationCriteria.length > 0) {
+      // Lấy danh sách chỉ tiêu nhân viên đã đăng ký
+      const employeeTargets = await this.prisma.employeeKpiTarget.findMany({
+        where: { employeeCode, periodId }
+      });
+      const targetMap = new Map<number, number>();
+      for (const t of employeeTargets) {
+        targetMap.set(t.criteriaId, t.targetValue);
+      }
+
+      for (const criteria of integrationCriteria) {
+        const settings = criteria.settings;
+        if (!settings || !settings.integrationCode) continue;
+
+        // Gọi sang Integration Module để lấy dữ liệu thực tế
+        const actualValue = await this.fetchMetricFromIntegration(settings.integrationCode, employeeCode);
+        
+        // Lấy chỉ tiêu, mặc định 1 nếu chưa đăng ký để tránh lỗi chia 0 (tuỳ nghiệp vụ)
+        const targetValue = targetMap.get(criteria.id) || 1; 
+
+        // Tính điểm bằng công thức linh hoạt (evaluate string formula)
+        let formulaScore = 0;
+        const weight = settings.weight || 1.0;
+        const baseScore = settings.baseScore || 0;
+        const formulaStr = settings.formula;
+
+        if (formulaStr) {
+          try {
+            // Replace biến số trong chuỗi công thức
+            // VD: "(actual / target) * weight"
+            const evalStr = formulaStr
+              .replace(/actual/g, actualValue.toString())
+              .replace(/target/g, targetValue.toString())
+              .replace(/weight/g, weight.toString())
+              .replace(/baseScore/g, baseScore.toString());
+            
+            // eslint-disable-next-line no-new-func
+            formulaScore = new Function('return ' + evalStr)();
+          } catch (err) {
+            console.error('Error evaluating formula', formulaStr, err);
+          }
+        } else {
+          // Công thức mặc định nếu không cấu hình
+          formulaScore = (actualValue / targetValue) * (baseScore || weight * 10);
+        }
+
+        if (!groupedScores[criteria.id]) {
+          groupedScores[criteria.id] = 0;
+        }
+        groupedScores[criteria.id] += formulaScore;
+        totalScore += formulaScore;
+
+        groupedIntegrationData[criteria.id] = { actual: actualValue, target: targetValue };
+      }
+    }
+
     // Upsert the KpiEvaluation record
     const existingEvaluation = await this.prisma.kpiEvaluation.findFirst({
       where: { employeeCode, periodId }
@@ -376,7 +448,8 @@ export class KpiEvaluationsService {
       evaluationId,
       tasks: calculatedTasks,
       groupedScores,
-      groupedTasksCount
+      groupedTasksCount,
+      groupedIntegrationData
     };
   }
 
@@ -411,6 +484,14 @@ export class KpiEvaluationsService {
          autoScore = calcResult.groupedScores?.[crit.id] || 0;
          const count = calcResult.groupedTasksCount?.[crit.id] || 0;
          notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
+      } else if (crit.settings?.scoringMethod === 'INTEGRATION_API') {
+         autoScore = calcResult.groupedScores?.[crit.id] || 0;
+         const data = calcResult.groupedIntegrationData?.[crit.id];
+         if (data) {
+           notes = `Dữ liệu liên thông: Đạt ${data.actual} / Chỉ tiêu ${data.target}`;
+         } else {
+           notes = `Đang chờ số liệu liên thông.`;
+         }
       }
 
       return {
@@ -421,7 +502,7 @@ export class KpiEvaluationsService {
         scoringMethod: crit.settings?.scoringMethod,
         baseScore: crit.settings?.baseScore,
         weight: crit.settings?.weight,
-        selfScore: existingDetail?.selfScore ?? (crit.settings?.scoringMethod === 'AUTOMATIC' ? autoScore : null),
+        selfScore: existingDetail?.selfScore ?? (['AUTOMATIC', 'INTEGRATION_API'].includes(crit.settings?.scoringMethod || '') ? autoScore : null),
         reviewerScore: existingDetail?.reviewerScore ?? null,
         notes: notes,
       };

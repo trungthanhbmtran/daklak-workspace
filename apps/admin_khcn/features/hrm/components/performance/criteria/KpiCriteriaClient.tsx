@@ -35,6 +35,8 @@ export function KpiCriteriaClient() {
     bonusThresholdDays: 0,
     bonusPerDay: 0,
     penaltyPerDay: 0,
+    integrationCode: "",
+    formula: "",
   });
 
   // react-query automatically fetches data on mount
@@ -53,6 +55,8 @@ export function KpiCriteriaClient() {
         bonusThresholdDays: item.bonusThresholdDays || 0,
         bonusPerDay: item.bonusPerDay || 0,
         penaltyPerDay: item.penaltyPerDay || 0,
+        integrationCode: item.integrationCode || "",
+        formula: item.formula || "",
       });
     } else {
       setEditingId(null);
@@ -67,6 +71,8 @@ export function KpiCriteriaClient() {
         bonusThresholdDays: 0,
         bonusPerDay: 0,
         penaltyPerDay: 0,
+        integrationCode: "",
+        formula: "",
       });
     }
     setIsModalOpen(true);
@@ -150,7 +156,7 @@ export function KpiCriteriaClient() {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center gap-2 text-sm text-slate-600">
                     <Settings2 className="w-4 h-4 text-emerald-500" />
-                    <span>Phương pháp: <strong className="text-slate-800">{item.scoringMethod === 'MANUAL' ? 'Đánh giá thủ công' : item.scoringMethod === 'AUTO_DEADLINE' ? 'Theo tiến độ' : 'Theo kết quả'}</strong></span>
+                    <span>Phương pháp: <strong className="text-slate-800">{item.scoringMethod === 'MANUAL' ? 'Đánh giá thủ công' : item.scoringMethod === 'INTEGRATION_API' ? 'Kết nối liên thông (LGSP/API)' : 'Tính điểm tự động (Máy tính)'}</strong></span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-600">
                     <Calculator className="w-4 h-4 text-amber-500" />
@@ -252,11 +258,36 @@ export function KpiCriteriaClient() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="MANUAL">Đánh giá thủ công (Bởi Giám sát viên)</SelectItem>
-                  <SelectItem value="AUTO_DEADLINE">Tính điểm tự động (Dựa trên Hạn chót/Deadline)</SelectItem>
-                  <SelectItem value="AUTO_RESULT">Tính điểm tự động (Dựa trên Số lượng/Kết quả đầu ra)</SelectItem>
+                  <SelectItem value="AUTOMATIC">Tính điểm tự động từ tiến độ (Máy tính)</SelectItem>
+                  <SelectItem value="INTEGRATION_API">Kết nối dữ liệu liên thông (API, LGSP...)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {formData.scoringMethod === 'INTEGRATION_API' && (
+              <div className="grid grid-cols-2 gap-4 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                <div className="space-y-2">
+                  <Label className="font-bold text-indigo-700">Mã kết nối (Integration Code)</Label>
+                  <Input
+                    placeholder="VD: LGSP_HO_SO_01"
+                    value={formData.integrationCode}
+                    onChange={(e) => setFormData({ ...formData, integrationCode: e.target.value })}
+                    className="h-10 bg-white"
+                  />
+                  <p className="text-[10px] text-slate-500">Mã cấu hình Endpoint bên module Integration</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-indigo-700">Công thức tính điểm (Formula)</Label>
+                  <Input
+                    placeholder="(actual / target) * weight"
+                    value={formData.formula}
+                    onChange={(e) => setFormData({ ...formData, formula: e.target.value })}
+                    className="h-10 bg-white"
+                  />
+                  <p className="text-[10px] text-slate-500">Biến khả dụng: actual, target, weight, baseScore</p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-3 gap-4 p-4 bg-slate-100 rounded-xl border border-slate-200">
               <div className="space-y-2">
