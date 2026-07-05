@@ -124,12 +124,13 @@ export class WorkflowEngine {
       }
     } else {
       // Smart PBAC Defaults if no validationExpression is provided
-      if (node.type === 'user_task' && currentContext) {
-        const isOwner = !!currentContext.isOwner;
-        const isAssignee = !!currentContext.isAssignee;
-        const isSupervisor = !!currentContext.isSupervisor;
-        const isDeptLeader = !!currentContext.isDeptLeader;
-        const isCoordinator = !!currentContext.isCoordinator;
+      const ctx = currentContext || businessData || {};
+      if (node.type === 'user_task') {
+        const isOwner = !!ctx.isOwner;
+        const isAssignee = !!ctx.isAssignee;
+        const isSupervisor = !!ctx.isSupervisor;
+        const isDeptLeader = !!ctx.isDeptLeader;
+        const isCoordinator = !!ctx.isCoordinator;
         const isManager = isSupervisor || isDeptLeader;
         const isParticipant = isOwner || isAssignee || isManager || isCoordinator;
 
@@ -145,7 +146,7 @@ export class WorkflowEngine {
           case 'ISSUE':
             if (!isAssignee && !isOwner) return { allowed: false, reason: 'Chỉ người được phân công hoặc người tạo mới có quyền thực hiện.' };
             break;
-            
+
           case 'APPROVE':
           case 'REJECT':
           case 'RETURN':
@@ -188,7 +189,7 @@ export class WorkflowEngine {
   ): string[] {
     const node = this.getNode(currentNodeId);
     const possibleActions = ['ASSIGN', 'COMPLETE', 'APPROVE', 'RETURN'];
-    
+
     // Auxiliary Actions based on node configuration
     if (node?.data?.allowAddSubtask) possibleActions.push('ADD_SUBTASK');
     if (node?.data?.allowCoordinate) possibleActions.push('COORDINATE');
@@ -222,7 +223,7 @@ export class WorkflowEngine {
     const edges = this.definition.edges || [];
     const visited = new Set<string>();
     const queue = [currentNodeId];
-    
+
     visited.add(currentNodeId);
 
     while (queue.length > 0) {
@@ -255,7 +256,7 @@ export class WorkflowEngine {
           if (edge.label === actionName || targetNode.data?.actionName === actionName) {
             return targetNode.id;
           }
-        } 
+        }
         // Gateway: keep traversing
         else if (targetNode.type === 'parallel_gateway' || targetNode.type === 'exclusive_gateway') {
           if (!visited.has(targetNode.id)) {
@@ -265,7 +266,7 @@ export class WorkflowEngine {
         }
       }
     }
-    
+
     // Legacy fallback: if exactly 1 edge out and no label, and target is a concrete node
     const outEdges = edges.filter((e) => e.source === currentNodeId);
     if (outEdges.length === 1 && !outEdges[0].label) {

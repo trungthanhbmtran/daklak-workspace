@@ -1,1 +1,0 @@
-﻿const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { console.log('Tasks:', await prisma.taskRankTemplate.count()); console.log('Categories:', await prisma.$queryRaw + 'SELECT count(*) FROM admin_systems.categories WHERE group_code=\'CIVIL_SERVANT_RANK\'' + '); } main().finally(() => prisma.());
