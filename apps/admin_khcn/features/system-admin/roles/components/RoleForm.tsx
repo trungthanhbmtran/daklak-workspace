@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, Settings2 } from "lucide-react";
-import { Resolver, useForm, useWatch } from "react-hook-form";
+import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
+import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";

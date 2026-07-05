@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calculator, Award, Target, CheckCircle2, AlertCircle, Save, Send } from "lucide-react";
+import { Calculator, Award, CheckCircle2, Send } from "lucide-react";
 import { hrmKpiEvaluationsApi } from "@/features/hrm/api/kpis.api";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";

@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { hrmApi } from "@/features/hrm/api";
 import apiClient from "@/lib/axiosInstance";
-import React from "react";
 
 // Cache stale time configuration: 5 minutes
 const STALE_TIME = 5 * 60 * 1000;

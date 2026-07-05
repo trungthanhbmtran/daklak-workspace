@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import {
-  Plus, Filter, MessageSquareShare,
+  Plus, Filter,
   Clock, CheckCircle2, Eye, AlertCircle,
   Building2, ChevronRight, Activity,
   RotateCcw, ListFilter, LayoutGrid, Calendar
@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
 import { useListConsultations } from "@/features/document/hooks/useDocuments";

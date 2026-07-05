@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsApi } from "@/features/posts/api";
-import { Comment } from "@/features/posts/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Check, X, ShieldAlert, Trash2 } from "lucide-react";

@@ -4,16 +4,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { 
-  Users, Clock, MapPin, FileText, CheckCircle2, Save, X, Plus, Trash2, 
-  UserPlus, UserMinus, MessageSquare, ClipboardCheck, Loader2
+import { Clock, MapPin, CheckCircle2, Save, X, 
+  UserPlus, MessageSquare, ClipboardCheck, Loader2
 } from "lucide-react";
 import { useDocuments } from "../hooks/useDocuments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 

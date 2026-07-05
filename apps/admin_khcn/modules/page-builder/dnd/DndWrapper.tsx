@@ -1,10 +1,7 @@
 import React from "react";
 import {
-  DndContext,
   useDraggable,
   useDroppable,
-  DragEndEvent,
-  DragStartEvent,
   useSensors,
   useSensor,
   PointerSensor,

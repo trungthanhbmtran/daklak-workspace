@@ -3,7 +3,7 @@
 import React from "react";
 import { PortalMenu } from "@/features/posts/types";
 import { CategoryItem } from "@/features/system-admin/categories/types";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MenuTableRow } from "./MenuTableRow";
 import { Loader2 } from "lucide-react";
 

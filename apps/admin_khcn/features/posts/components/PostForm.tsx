@@ -27,7 +27,7 @@ import { categoryApi } from "@/features/system-admin/categories/api";
 
 import { useImageUpload } from "../hooks/useImageUpload";
 import { postsApi } from "../api";
-import { Category, Post } from "../types";
+import { Category } from "../types";
 import dynamic from "next/dynamic";
 import { convertToSlug } from "@/lib/slug";
 

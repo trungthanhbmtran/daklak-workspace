@@ -5,7 +5,6 @@ import { usePageLayout } from "./hooks/usePageLayout";
 import { useLanguages } from "./hooks/useLanguages";
 import { usePagesList } from "./hooks/usePagesList";
 import { VisualEditor } from "@/modules/page-builder";
-import { Row } from "@/modules/page-builder/core/types";
 
 export function PageBuilder() {
   const { selectedPageId } = usePortalBuilderUI();

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Plus, Edit, Trash2, LayoutDashboard, CornerDownRight,
-  ExternalLink, Lock, Shield, ShieldCheck, Loader2
+  ExternalLink, Shield, ShieldCheck, Loader2
 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

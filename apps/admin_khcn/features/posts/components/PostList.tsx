@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { usePostStats } from "../hooks/usePostStats";
@@ -20,11 +20,9 @@ import {
   Send,
   Star,
   Eye,
-  TrendingUp,
   BarChart3,
   Calendar,
   User,
-  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,

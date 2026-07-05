@@ -1,5 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
-import type { Resource, Permission, ResourceWithPermissions } from "./types";
+import type { Resource } from "./types";
 
 export const resourceApi = {
   getResources: async (): Promise<Resource[]> => {

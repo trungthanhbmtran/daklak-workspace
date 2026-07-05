@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { notificationConfigApi } from "../api";
-import { Loader2, BellRing, Mail, MessageCircle, Send, ChevronDown, CheckCircle2, Server } from "lucide-react";
+import { Loader2, BellRing, Mail, MessageCircle, Send, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function NotificationConfigPanel() {

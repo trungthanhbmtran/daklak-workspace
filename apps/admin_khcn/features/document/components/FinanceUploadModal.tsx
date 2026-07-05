@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   PieChart, UploadCloud, CheckCircle2, FileText,
-  X, FileSpreadsheet, Building2, Calendar, ShieldCheck, FileArchive,
+  X, FileSpreadsheet, Building2, ShieldCheck, FileArchive,
   FilePlus,
   Loader2
 } from "lucide-react";
@@ -17,7 +17,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 
 const financeSchema = z.object({
   title: z.string().min(10, "Tên hồ sơ công khai phải dài hơn 10 ký tự"),

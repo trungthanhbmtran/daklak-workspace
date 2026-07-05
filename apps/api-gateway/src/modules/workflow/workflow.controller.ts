@@ -108,8 +108,9 @@ export class WorkflowController implements OnModuleInit {
   async list(@Query() query: any) {
     const skip = parseInt(query.skip) || 0;
     const take = parseInt(query.take) || 20;
+    const search = query.search;
     const result = (await firstValueFrom(
-      this.workflowService.ListWorkflows({ skip, take }),
+      this.workflowService.ListWorkflows({ skip, take, search }),
     )) as any;
     const items = (result.items || []).map((item: any) => {
       if (typeof item.definition === 'string') {
@@ -191,6 +192,7 @@ export class WorkflowController implements OnModuleInit {
     @Query('take') take?: string,
     @Query('workflowId') workflowId?: string,
     @Query('status') status?: string,
+    @Query('search') search?: string,
   ) {
     const result = (await firstValueFrom(
       this.workflowService.ListInstances({
@@ -198,6 +200,7 @@ export class WorkflowController implements OnModuleInit {
         take: take ? parseInt(take, 10) : undefined,
         workflowId,
         status,
+        search,
       }),
     )) as any;
     return { data: result.items, meta: { total: result.total } };

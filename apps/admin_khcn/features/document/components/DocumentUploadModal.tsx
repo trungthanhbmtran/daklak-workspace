@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   UploadCloud, Link as LinkIcon, FileText, X, CheckCircle2,
-  CalendarIcon, Building2, UserCircle, Loader2, ShieldCheck, AlertTriangle
+  CalendarIcon, Building2, Loader2, ShieldCheck, AlertTriangle
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useDocuments } from "../hooks/useDocuments";

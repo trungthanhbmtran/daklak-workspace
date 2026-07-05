@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { DragEndEvent } from "@dnd-kit/core";
 import { toast } from "sonner";
 import { useEditorStore } from "../store/editorStore";

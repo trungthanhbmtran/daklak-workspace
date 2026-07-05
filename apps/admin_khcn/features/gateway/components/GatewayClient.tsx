@@ -5,8 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { gatewayApi } from "../api/gateway.api";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Key, Network, Route as RouteIcon, Activity, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { Key, Network, Route as RouteIcon, Activity } from "lucide-react";
 
 import { ServicesTab } from "./ServicesTab";
 import { RoutesTab } from "./RoutesTab";

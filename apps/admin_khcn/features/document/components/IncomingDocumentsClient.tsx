@@ -6,7 +6,6 @@ import { Inbox, Plus, FileText, Calendar, Building2, User, Filter, RefreshCw } f
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Search } from "@/components/ui/search";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -4,7 +4,6 @@
 import { Plus, ChevronRight, LayoutList, Layers, ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MenuItem } from "../types";
 import { useSidebarLogic } from "../hooks/useSidebarLogic";

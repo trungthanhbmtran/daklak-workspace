@@ -10,9 +10,7 @@ import {
   Activity,
   Calendar,
   Layers,
-  ChevronRight,
-  PauseCircle,
-  PlayCircle
+  ChevronRight
 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -21,12 +19,10 @@ import { workflowApi, Workflow } from "@/features/workflow/api";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -38,6 +34,25 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface WorkflowListProps {
   onEdit: (id: string) => void;
@@ -52,14 +67,25 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
+  const [testRunWorkflow, setTestRunWorkflow] = useState<Workflow | null>(null);
+  const [testContext, setTestContext] = useState("{\n  \n}");
+  const [isTestRunning, setIsTestRunning] = useState(false);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
+  const [page, setPage] = useState(1);
+  const pageSize = 9;
+  const [totalItems, setTotalItems] = useState(0);
 
   const loadWorkflows = async () => {
     setIsLoading(true);
     try {
-      const res = await workflowApi.list();
+      const res = await workflowApi.list({
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        search: searchTerm || undefined
+      });
       setWorkflows(Array.isArray(res?.data) ? res.data : []);
+      setTotalItems(res?.meta?.total || (res?.data?.length || 0));
     } catch (error) {
       console.error("Failed to load workflows:", error);
       toast.error("Không thể tải danh sách quy trình");
@@ -68,9 +94,14 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
     }
   };
 
+  // Reset page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
   useEffect(() => {
     loadWorkflows();
-  }, []);
+  }, [page, searchTerm]);
 
   const handleDelete = (id: string) => {
     setItemToDelete(id);
@@ -93,14 +124,33 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
     }
   };
 
-  const filteredWorkflows = useMemo(() => {
-    if (!searchTerm) return workflows;
-    const lowerTerm = searchTerm.toLowerCase();
-    return workflows.filter(w => 
-      w.name.toLowerCase().includes(lowerTerm) ||
-      w.description?.toLowerCase().includes(lowerTerm)
-    );
-  }, [workflows, searchTerm]);
+  const handleStartTestRun = async () => {
+    if (!testRunWorkflow) return;
+    let parsedContext = {};
+    try {
+      if (testContext.trim()) {
+        parsedContext = JSON.parse(testContext);
+      }
+    } catch (e) {
+      toast.error("Dữ liệu đầu vào (JSON) không hợp lệ");
+      return;
+    }
+    
+    setIsTestRunning(true);
+    try {
+      await workflowApi.start(testRunWorkflow.id, parsedContext);
+      toast.success("Khởi chạy quy trình thành công!");
+      setTestRunWorkflow(null);
+      setSelectedWorkflow(null); // Optional: close the details sheet if open
+    } catch (error) {
+      console.error("Test run error:", error);
+      toast.error("Lỗi khi khởi chạy quy trình");
+    } finally {
+      setIsTestRunning(false);
+    }
+  };
+
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <div className="space-y-6">
@@ -120,10 +170,10 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
         <Search placeholder="Tìm kiếm quy trình..." className="flex-1 max-w-sm" />
         <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10">
-                {workflows.length} Tổng số
+                {totalItems} Tổng số
             </Badge>
             <Badge variant="outline" className="rounded-lg py-1 px-3 bg-emerald-50 text-emerald-600 border-emerald-100">
-                {workflows.filter(w => w.active).length} Đang hoạt động
+                Hiển thị trang {page}/{Math.max(1, totalPages)}
             </Badge>
         </div>
       </div>
@@ -133,7 +183,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
           Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-[200px] rounded-2xl bg-muted/40 animate-pulse border border-border/40" />
           ))
-        ) : filteredWorkflows.length === 0 ? (
+        ) : workflows.length === 0 ? (
           <div className="col-span-full py-20 text-center space-y-3">
              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Layers className="h-8 w-8 text-muted-foreground/40" />
@@ -142,7 +192,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
              <p className="text-muted-foreground">Bắt đầu bằng cách tạo quy trình đầu tiên của bạn.</p>
           </div>
         ) : (
-          filteredWorkflows.map((workflow: any) => (
+          workflows.map((workflow: any) => (
             <div 
               key={workflow.id} 
               className="group relative bg-card border border-border/60 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300"
@@ -161,7 +211,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                     <DropdownMenuItem onClick={() => onEdit(workflow.id)} className="rounded-lg">
                       <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="rounded-lg">
+                    <DropdownMenuItem className="rounded-lg" onClick={() => { setTestContext("{\n  \n}"); setTestRunWorkflow(workflow); }}>
                       <Play className="mr-2 h-4 w-4" /> Chạy thử
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -216,6 +266,49 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
           ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="py-4 border-t border-border/40">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {/* Hiển thị một số trang (đơn giản) */}
+              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                // Logic hiển thị trang thông minh: luôn hiện xung quanh page hiện tại
+                let pageNum = i + 1;
+                if (totalPages > 5 && page > 3) {
+                  pageNum = page - 2 + i;
+                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                }
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink 
+                      isActive={page === pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className="cursor-pointer"
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       <ConfirmDeleteModal
         isOpen={isDeleteDialogOpen}
@@ -302,7 +395,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                         >
                             <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa luồng (BPMN Editor)
                         </Button>
-                        <Button variant="outline" className="flex-1 rounded-xl" onClick={() => toast.info("Tính năng chạy thử đang phát triển")}>
+                        <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { setTestContext("{\n  \n}"); setTestRunWorkflow(selectedWorkflow); }}>
                             <Play className="mr-2 h-4 w-4" /> Chạy thử quy trình
                         </Button>
                     </div>
@@ -310,6 +403,37 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
             )}
         </SheetContent>
       </Sheet>
+
+      <Dialog open={!!testRunWorkflow} onOpenChange={(open) => !open && setTestRunWorkflow(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chạy thử quy trình</DialogTitle>
+            <DialogDescription>
+              Khởi chạy thử nghiệm quy trình <strong>{testRunWorkflow?.name}</strong>. Bạn có thể truyền biến đầu vào (initial context) dưới dạng JSON.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="context-data">Dữ liệu đầu vào (JSON)</Label>
+              <Textarea
+                id="context-data"
+                placeholder='{"key": "value"}'
+                value={testContext}
+                onChange={(e) => setTestContext(e.target.value)}
+                className="font-mono h-32"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTestRunWorkflow(null)} disabled={isTestRunning}>
+              Hủy
+            </Button>
+            <Button onClick={handleStartTestRun} disabled={isTestRunning}>
+              {isTestRunning ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />} Bắt đầu chạy
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

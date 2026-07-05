@@ -4,15 +4,14 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Edit, Trash2, Image as ImageIcon,
-  ExternalLink, Link as LinkIcon, Loader2, MoreVertical,
-  Calendar, MapPin, CheckCircle2, XCircle, Grid, Layers, Type, PlayCircle, Eye, Sliders
+  Plus, Edit, Trash2,
+  ExternalLink, Link as LinkIcon, Loader2,
+  Calendar, MapPin, CheckCircle2, XCircle, Grid, Layers, PlayCircle, Sliders
 } from "lucide-react";
 import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

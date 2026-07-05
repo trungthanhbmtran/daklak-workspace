@@ -12,7 +12,6 @@ import {
   Search, 
   Activity, 
   Target,
-  User,
   Users,
   X,
   CheckCircle2,

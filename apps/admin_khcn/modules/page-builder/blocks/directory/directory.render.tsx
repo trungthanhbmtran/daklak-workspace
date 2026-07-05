@@ -1,7 +1,7 @@
 import React from "react";
 import { Widget } from "../../core/types";
-import { DirectoryData, DirectoryUnit } from "./directory.schema";
-import { Network, Landmark, Building2, ChevronRight, ChevronDown } from "lucide-react";
+import { DirectoryData } from "./directory.schema";
+import { Landmark, Building2, ChevronRight, ChevronDown } from "lucide-react";
 
 interface DirectoryRenderProps {
   widget: Widget<DirectoryData>;

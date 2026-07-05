@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   FileText, Calendar, User, Building2, ShieldCheck,
-  Download, Printer, Share2, AlertCircle, Clock, Paperclip,
-  CheckCircle2, X
+  Download, Printer, Share2, AlertCircle, Clock, Paperclip
 } from "lucide-react";
 import { useGetDocument } from "@/features/document/hooks/useDocuments";
 import { Skeleton } from "@/components/ui/skeleton";

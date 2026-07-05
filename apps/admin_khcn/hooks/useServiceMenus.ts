@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { lazy, Suspense } from "react";
-import type { LucideProps, LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { menuApi } from "@/features/system-admin/menus/api";
 

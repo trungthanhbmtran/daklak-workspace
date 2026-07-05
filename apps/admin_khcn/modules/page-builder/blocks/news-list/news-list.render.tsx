@@ -1,7 +1,7 @@
 import React from "react";
 import { Widget } from "../../core/types";
 import { NewsListData } from "./news-list.schema";
-import { Newspaper, Calendar, ArrowRight, Sparkles } from "lucide-react";
+import { Newspaper, Calendar, ArrowRight } from "lucide-react";
 
 interface NewsListRenderProps {
   widget: Widget<NewsListData>;

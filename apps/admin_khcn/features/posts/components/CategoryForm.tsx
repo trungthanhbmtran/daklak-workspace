@@ -6,16 +6,15 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, Save, Loader2, ImagePlus, X,
-  Info, ExternalLink, Settings, Layout, FileText, UploadCloud
+  Info, ExternalLink, Settings, FileText, UploadCloud
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { categoryApi } from "@/features/system-admin/categories/api";
-import { CategoryItem } from "@/features/system-admin/categories/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label as UILabel } from "@/components/ui/label";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

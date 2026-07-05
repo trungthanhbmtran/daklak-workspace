@@ -1,6 +1,6 @@
 import React from "react";
 import { Widget } from "../../core/types";
-import { DirectoryData, DirectoryUnit } from "./directory.schema";
+import { DirectoryData } from "./directory.schema";
 import { Label } from "@/components/ui/label";
 import { useOrganizationTreeQuery } from "../../services/dataBinding";
 import { Loader2, Landmark, Building2, CheckSquare2, Square, Network } from "lucide-react";

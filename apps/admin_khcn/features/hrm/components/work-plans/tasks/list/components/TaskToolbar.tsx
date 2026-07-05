@@ -3,7 +3,7 @@
 import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Filter, Target, User, Users, ClipboardList, Eye, CheckCircle2, Search } from 'lucide-react';
+import { Filter, Target, ClipboardList, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 

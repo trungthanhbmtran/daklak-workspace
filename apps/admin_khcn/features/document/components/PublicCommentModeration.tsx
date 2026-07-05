@@ -3,18 +3,15 @@
 import React, { useState } from 'react';
 import { 
   CheckCircle2, XCircle, Clock, MessageSquare, 
-  User, Mail, Phone, Calendar, ShieldCheck, 
-  Search, Filter, MoreHorizontal, Eye
+  User, Mail, Phone, Calendar, MoreHorizontal, Eye
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
   DropdownMenuTrigger, DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useDocuments, usePublicComments } from '../hooks/useDocuments';
 
 interface PublicCommentModerationProps {

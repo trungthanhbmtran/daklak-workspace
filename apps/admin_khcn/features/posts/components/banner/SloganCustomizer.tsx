@@ -1,5 +1,4 @@
 import * as React from "react";
-import { UseFormReturn } from "react-hook-form";
 import {
   Palette, Type, Sparkles, Upload, Loader2, Layers, Info
 } from "lucide-react";

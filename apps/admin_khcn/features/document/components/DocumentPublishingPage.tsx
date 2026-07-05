@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { 
   Globe, Link as LinkIcon, FileText, Calendar, 
-  CheckCircle2, Plus, X, Search as SearchIcon, FileSignature, Layers,
+  CheckCircle2, Plus, Search as SearchIcon, FileSignature, Layers,
   Loader2, ArrowRight, Building2, Check, ExternalLink
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { hrmKeys } from '@/features/hrm/keys';
 import { useTaskComments, useAddComment } from '@/features/hrm/hooks';
 
 export function useTaskChat(activeTaskId: number | undefined) {

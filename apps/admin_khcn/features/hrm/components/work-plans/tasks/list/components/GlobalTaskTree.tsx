@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  ChevronDown, ChevronRight, PlusCircle,
-  Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw,
-  Target, User, Users, Eye, ClipboardList, History
+  ChevronDown, ChevronRight,
+  Clock,
+  Target, Users, ClipboardList, History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTaskSubtasks } from '@/features/hrm/hooks/useTasks';

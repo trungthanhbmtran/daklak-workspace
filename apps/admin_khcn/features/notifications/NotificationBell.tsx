@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Check, Loader2, Calendar, FileText, CheckCircle2, ArrowRight } from "lucide-react";
+import { Bell, Loader2, Calendar, FileText, CheckCircle2, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 

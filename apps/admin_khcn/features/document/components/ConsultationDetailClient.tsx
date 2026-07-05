@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  MessageSquareShare, Clock, Calendar, Download,
-  Users, CheckCircle2, ChevronLeft, ArrowRight,
+import { Clock, Calendar, Download,
+  Users, CheckCircle2, ChevronLeft,
   Info, BarChart3, AlertCircle
 } from "lucide-react";
 import Link from "next/link";

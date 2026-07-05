@@ -16,9 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Info, Settings2, Network, MapPin, Users, Loader2 } from "lucide-react";
+import { Info, Settings2, Network, Loader2 } from "lucide-react";
 import type { JobTitleItem } from "../../types";
 
 type JobTitleConfigDialogProps = {

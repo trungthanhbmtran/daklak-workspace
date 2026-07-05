@@ -1,6 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
 import { CategoryItem, CategoryPayload } from "./types";
-import { GROUP_KEYS } from "./constants";
 
 export const categoryApi = {
   fetchAll: async (): Promise<CategoryItem[]> => {

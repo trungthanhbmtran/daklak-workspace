@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import {
-  Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe
+  Filter, Eye, Plus, Send, Trash2, Building2, User, Calendar
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";

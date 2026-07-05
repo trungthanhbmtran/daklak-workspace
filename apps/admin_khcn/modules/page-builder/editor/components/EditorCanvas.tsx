@@ -5,9 +5,8 @@ import { BlockRegistry } from "../../core/registry";
 import { initializeBlockRegistry } from "../../blocks";
 import { DroppableColumn, DraggableBlock } from "../../dnd/DndWrapper";
 import { cn } from "@/lib/utils";
-import { Trash2, Smartphone, Tablet, Monitor, Settings, Compass } from "lucide-react";
+import { Trash2, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import StructureTree from "./StructureTree";
 
 // Auto-initialize registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {

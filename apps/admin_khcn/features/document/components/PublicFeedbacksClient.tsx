@@ -3,8 +3,8 @@
 import { useState } from "react";
 import {
   Search, CheckCircle2, XCircle,
-  Globe, Clock, FileText, CheckSquare,
-  Mail, Phone, User, XCircleIcon
+  Globe, Clock, CheckSquare,
+  Mail, Phone, User
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

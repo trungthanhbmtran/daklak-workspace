@@ -5,7 +5,7 @@ import {
   Inbox, Send, FileText, AlertTriangle, Clock,
   CheckCircle2, TrendingUp, BarChart3, Activity,
   ShieldAlert, Calendar, ArrowRight, CornerUpRight,
-  MessageSquareShare, PieChart, ClipboardCheck, Settings2
+  MessageSquareShare, PieChart, ClipboardCheck
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

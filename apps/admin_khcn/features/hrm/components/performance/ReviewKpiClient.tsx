@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2, Search, FileText, Send, UserCheck, Award } from "lucide-react";
+import { CheckCircle2, Search, FileText, UserCheck, Award } from "lucide-react";
 import { hrmKpiEvaluationsApi } from "@/features/hrm/api/kpis.api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";

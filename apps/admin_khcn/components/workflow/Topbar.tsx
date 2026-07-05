@@ -7,7 +7,6 @@ import {
   Send,
   History,
   Settings,
-  MoreVertical,
   Layers,
   Edit3,
   Check,
@@ -17,7 +16,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 
 interface TopbarProps {
   onSave: () => void;

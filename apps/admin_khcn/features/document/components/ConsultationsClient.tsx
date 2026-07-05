@@ -3,16 +3,14 @@
 import { useState, useMemo, useEffect } from "react";
 import {
    Filter, Plus, Clock,
-   MessageSquareShare, CheckCircle2,
-   Users, Download,
-   ChevronRight, ArrowRight, BarChart3,
+   MessageSquareShare,
+   Users, Download, ArrowRight, BarChart3,
    Calendar, AlertCircle, FileText
 } from "lucide-react";
 import Link from "next/link";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";

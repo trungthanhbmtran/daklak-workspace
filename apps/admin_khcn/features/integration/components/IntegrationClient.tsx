@@ -2,12 +2,24 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { WorkflowEditor, WorkflowList, WorkflowInstanceList } from "@/features/workflow";
-import { IntegrationConfig } from "./IntegrationConfig";
-import { IntegrationManager } from "./IntegrationManager";
-import { ReportDashboard } from "./reports/ReportDashboard";
-import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network, Server, ArrowRight, Plug, PieChart } from "lucide-react";
+import { Layers, Activity, ChevronLeft, Sparkles, Network, ArrowRight, Plug, PieChart, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
+
+function Loading() {
+  return (
+    <div className="flex h-[400px] w-full items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+    </div>
+  );
+}
+
+const WorkflowEditor = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowEditor), { ssr: false, loading: Loading });
+const WorkflowList = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowList), { ssr: false, loading: Loading });
+const WorkflowInstanceList = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowInstanceList), { ssr: false, loading: Loading });
+const IntegrationConfig = dynamic(() => import("./IntegrationConfig").then(mod => mod.IntegrationConfig), { ssr: false, loading: Loading });
+const IntegrationManager = dynamic(() => import("./IntegrationManager").then(mod => mod.IntegrationManager), { ssr: false, loading: Loading });
+const ReportDashboard = dynamic(() => import("./reports/ReportDashboard").then(mod => mod.ReportDashboard), { ssr: false, loading: Loading });
 
 function CardContainer({ children }: { children: React.ReactNode }) {
   return (

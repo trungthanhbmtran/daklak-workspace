@@ -129,18 +129,28 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
-  async listWorkflows(data: { skip?: number; take?: number }) {
+  async listWorkflows(data: { skip?: number; take?: number; search?: string }) {
     const skip = data.skip || 0;
     const take = data.take || 10;
+    
+    const where: any = {};
+    if (data.search) {
+      where.OR = [
+        { name: { contains: data.search } },
+        { description: { contains: data.search } }
+      ];
+    }
+
     // Optimized via ID-Indexed Deferred Join
     const [idsResult, total] = await Promise.all([
       this.prisma.workflow.findMany({
+        where,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
         select: { id: true },
       }),
-      this.prisma.workflow.count(),
+      this.prisma.workflow.count({ where }),
     ]);
 
     const ids = idsResult.map((w) => w.id);
@@ -162,6 +172,47 @@ export class WorkflowGrpcController {
   async deleteWorkflow(data: { id: string }) {
     await this.prisma.workflow.delete({ where: { id: data.id } });
     return { success: true };
+  }
+
+  @GrpcMethod('WorkflowService', 'ListInstances')
+  async listInstances(data: { skip?: number; take?: number; workflowId?: string; status?: string; search?: string }) {
+    const skip = data.skip || 0;
+    const take = data.take || 10;
+    
+    const where: any = {};
+    if (data.workflowId) where.workflowId = data.workflowId;
+    if (data.status) where.status = data.status;
+    if (data.search) {
+      where.OR = [
+        { id: { contains: data.search } },
+        { workflow: { name: { contains: data.search } } }
+      ];
+    }
+    
+    const [instances, total] = await Promise.all([
+      this.prisma.workflowInstance.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: { workflow: { select: { name: true } } },
+      }),
+      this.prisma.workflowInstance.count({ where }),
+    ]);
+
+    return {
+      items: instances.map(i => ({
+        id: i.id,
+        workflowId: i.workflowId,
+        workflowName: i.workflow?.name || '',
+        status: i.status,
+        currentNodeId: i.currentNodeId || '',
+        context: i.context || {},
+        createdAt: i.createdAt.toISOString(),
+        updatedAt: i.updatedAt.toISOString(),
+      })),
+      total
+    };
   }
 
   // --- Helpers ---

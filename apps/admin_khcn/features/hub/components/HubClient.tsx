@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   ArrowRight,
   Loader2,
-  Layers,
   LucideIcon,
 } from "lucide-react";
 

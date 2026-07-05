@@ -1,5 +1,4 @@
 import apiClient from "@/lib/axiosInstance";
-import { API_BASE_URL } from "@/config/constants";
 import type { UserItem, UserDetail, UserCreatePayload } from "./types";
 
 function normalizeUser(raw: Record<string, unknown>): UserItem {

@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
-  Plus, Filter, Download, FileText,
-  PieChart, Building2, Calendar, CheckCircle2,
-  FileSpreadsheet, AlertCircle, Clock, TrendingUp, Globe2
+  Plus, Filter, FileText,
+  PieChart, Calendar, CheckCircle2, Clock, TrendingUp, Globe2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Plus, Settings2, FileText, Trash2, Edit, Save, Loader2, Upload, Paperclip } from "lucide-react";
+import { Plus, FileText, Trash2, Edit, Save, Loader2, Upload, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

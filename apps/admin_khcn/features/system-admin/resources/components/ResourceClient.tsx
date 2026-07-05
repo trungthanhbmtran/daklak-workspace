@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import {
-  KeyRound, ArrowRight, Plus, Trash2, Loader2,
-  ShieldAlert, Database, Component, ChevronLeft, ChevronRight
+  KeyRound, ArrowRight, Plus, Trash2, Loader2, Database, Component, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

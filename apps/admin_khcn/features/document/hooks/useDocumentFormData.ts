@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
-import type { ApiResponse } from "@/lib/api.types";
 
 const fetchList = async (group: string): Promise<any[]> => {
   const res: any = await apiClient.get("/categories", { params: { group } });

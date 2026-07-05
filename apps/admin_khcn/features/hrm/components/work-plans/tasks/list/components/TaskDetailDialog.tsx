@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useCallback, lazy, Suspense } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import React, { useState, lazy, Suspense } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import {
-  CheckCircle2, Calendar, Split, ArrowLeftCircle,
-  MessageSquare, Send, Reply, User, Users, Target, BarChart3, AlertCircle, History,
+import { Calendar,
+  MessageSquare, Target, AlertCircle, History,
 } from 'lucide-react';
 import { getDueDateDisplay } from '../utils';
 import { TaskStatusBadge, TaskPriorityBadge } from '@/components/shared/badges/TaskBadges';

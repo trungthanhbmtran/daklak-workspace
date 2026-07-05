@@ -44,6 +44,7 @@ message FindOneWorkflowRequest {
 message ListWorkflowsRequest {
   int32 skip = 1;
   int32 take = 2;
+  string search = 3;
 }
 
 message ListWorkflowsResponse {
@@ -147,6 +148,7 @@ message ListInstancesRequest {
   int32 take = 2;
   string workflowId = 3;
   string status = 4;
+  string search = 5;
 }
 
 message ListInstancesResponse {

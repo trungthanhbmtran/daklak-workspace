@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import {
-  Filter, Eye, Download, Calendar,
+import { Download, Calendar,
   Building2, PieChart, ShieldCheck, FileText,
   TrendingUp, ArrowUpRight, Plus
 } from "lucide-react";
@@ -13,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useDocuments, useListDocuments, useDocumentStats } from "@/features/document/hooks/useDocuments";
+import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export function TransparencyClient() {

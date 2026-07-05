@@ -7,9 +7,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Play,
-  RefreshCcw,
-  ChevronRight,
-  Eye
+  RefreshCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
@@ -21,11 +19,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { workflowApi, WorkflowInstance } from "@/features/workflow/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
+import { WorkflowExecutionHistory } from "./WorkflowExecutionHistory";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   RUNNING: { label: "Đang chạy", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Play },
@@ -38,32 +45,26 @@ const WorkflowInstanceList = () => {
   const [instances, setInstances] = useState<WorkflowInstance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedInstance, setSelectedInstance] = useState<WorkflowInstance | null>(null);
-  const [logs, setLogs] = useState<any[]>([]);
-  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const [totalItems, setTotalItems] = useState(0);
 
-  const handleViewHistory = async (instance: WorkflowInstance) => {
+  const handleViewHistory = (instance: WorkflowInstance) => {
     setSelectedInstance(instance);
-    setIsLoadingLogs(true);
-    try {
-      const res = await workflowApi.getLogs(instance.id);
-      setLogs(Array.isArray(res) ? res : (res as any)?.logs || []);
-    } catch (error) {
-      toast.error("Không thể tải lịch sử quy trình");
-    } finally {
-      setIsLoadingLogs(false);
-    }
   };
 
   const loadInstances = async () => {
     setIsLoading(true);
     try {
       const res = await workflowApi.listInstances({
-        skip: 0,
-        take: 50,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        search: searchTerm || undefined
       });
       setInstances(res.data || []);
+      setTotalItems(res?.meta?.total || (res?.data?.length || 0));
     } catch (error) {
       console.error("Failed to load instances:", error);
     } finally {
@@ -72,8 +73,14 @@ const WorkflowInstanceList = () => {
   };
 
   useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  useEffect(() => {
     loadInstances();
-  }, []);
+  }, [page, searchTerm]);
+
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <div className="space-y-6">
@@ -154,45 +161,51 @@ const WorkflowInstanceList = () => {
         </table>
       </div>
 
-      <Sheet open={!!selectedInstance} onOpenChange={(open) => !open && setSelectedInstance(null)}>
-        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Lịch sử thực thi</SheetTitle>
-            <SheetDescription>
-              {selectedInstance?.workflowName} ({selectedInstance?.id?.substring(0, 8)})
-            </SheetDescription>
-          </SheetHeader>
+      {totalPages > 1 && (
+        <div className="py-4 flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
 
-          <div className="mt-6 space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-border before:to-transparent">
-            {isLoadingLogs ? (
-              <div className="flex justify-center p-8">
-                <RefreshCcw className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : logs.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground py-8">Chưa có lịch sử nào.</p>
-            ) : (
-              logs.map((log, index) => (
-                <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 group-[.is-active]:bg-primary text-slate-500 group-[.is-active]:text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                    <Activity className="h-4 w-4" />
-                  </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
-                    <div className="flex items-center justify-between space-x-2 mb-1">
-                      <div className="font-bold text-slate-900 text-sm">{log.action || log.nodeLabel || "Hành động"}</div>
-                      <time className="font-mono text-xs text-indigo-500">
-                        {log.createdAt ? format(new Date(log.createdAt), "HH:mm dd/MM", { locale: vi }) : ""}
-                      </time>
-                    </div>
-                    <div className="text-slate-500 text-xs">
-                      {log.nodeLabel ? `Bước: ${log.nodeLabel}` : "Hệ thống ghi nhận"}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                let pageNum = i + 1;
+                if (totalPages > 5 && page > 3) {
+                  pageNum = page - 2 + i;
+                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                }
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      isActive={page === pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className="cursor-pointer"
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+
+      <WorkflowExecutionHistory 
+        instance={selectedInstance}
+        onClose={() => setSelectedInstance(null)}
+      />
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { PortalHeader } from '@/features/hub/components/HubClient';
 import { NotificationListClient } from '@/features/notifications/NotificationListClient';
 import { NotificationConfigPanel } from "@/features/notifications/components/NotificationConfigPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

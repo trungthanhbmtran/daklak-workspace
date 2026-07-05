@@ -24,7 +24,6 @@ import NodePalette from "./NodePalette";
 import PropertiesPanel from "./PropertiesPanel";
 import Topbar from "./Topbar";
 import { useHubServices } from "@/hooks/useServiceMenus";
-import { cn } from "@/lib/utils";
 import { workflowApi } from "@/features/workflow/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";

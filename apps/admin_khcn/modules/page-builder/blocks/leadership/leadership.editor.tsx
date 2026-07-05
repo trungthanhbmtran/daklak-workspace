@@ -1,12 +1,10 @@
 import React from "react";
 import { Widget } from "../../core/types";
-import { LeadershipData, LeaderInfo } from "./leadership.schema";
+import { LeadershipData } from "./leadership.schema";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useHrmEmployeesQuery } from "../../services/dataBinding";
 import { Search, Loader2, Check, X, ShieldAlert } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface LeadershipEditorProps {
   widget: Widget<LeadershipData>;

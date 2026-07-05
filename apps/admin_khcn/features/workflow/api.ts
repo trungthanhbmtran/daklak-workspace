@@ -42,13 +42,13 @@ function unwrapMeta(res: any): any {
 }
 
 export const workflowApi = {
-  list: (params: { skip?: number; take?: number } = {}) =>
+  list: (params: { skip?: number; take?: number; search?: string } = {}) =>
     apiClient.get("/workflow", { params }).then((res: any) => ({
       data: unwrapData<Workflow[]>(res),
       meta: unwrapMeta(res),
     })),
 
-  listInstances: (params: { skip?: number; take?: number; workflowId?: string; status?: string } = {}) =>
+  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string } = {}) =>
     apiClient.get("/workflow/instances", { params }).then((res: any) => ({
       data: unwrapData<WorkflowInstance[]>(res),
       meta: unwrapMeta(res),

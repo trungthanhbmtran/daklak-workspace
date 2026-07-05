@@ -2,7 +2,6 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useEffect, useRef } from "react";
-import { $getRoot, $getSelection, LexicalEditor } from "lexical";
 
 interface ValueUpdaterPluginProps {
   value: string;

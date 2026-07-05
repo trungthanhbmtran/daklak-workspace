@@ -2,10 +2,22 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { WorkflowEditor, WorkflowList, WorkflowInstanceList } from "@/features/workflow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layers, Activity, ChevronLeft, Sparkles, Workflow } from "lucide-react";
+import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
+
+function Loading() {
+  return (
+    <div className="flex h-[400px] w-full items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+    </div>
+  );
+}
+
+const WorkflowEditor = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowEditor), { ssr: false, loading: Loading });
+const WorkflowList = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowList), { ssr: false, loading: Loading });
+const WorkflowInstanceList = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowInstanceList), { ssr: false, loading: Loading });
 
 function CardContainer({ children }: { children: React.ReactNode }) {
   return (

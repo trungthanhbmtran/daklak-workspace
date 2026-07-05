@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Presentation } from "lucide-react";
 import { isThisWeek, isThisMonth, isThisQuarter, isThisYear, parseISO } from "date-fns";

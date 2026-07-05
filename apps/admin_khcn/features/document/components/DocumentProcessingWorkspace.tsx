@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   FileSignature, CornerUpRight, MessageSquare, History,
-  CheckCheck, XCircle, FileText, Download, Printer, Stamp,
+  CheckCheck, FileText, Download, Printer, Stamp,
   Globe2, Lock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

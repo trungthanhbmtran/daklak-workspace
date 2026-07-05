@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Briefcase, Network, Save, Loader2, MapPin, Users } from "lucide-react";
+import { Network, Save, Loader2, MapPin, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { StaffingSlotItem } from "../../types";

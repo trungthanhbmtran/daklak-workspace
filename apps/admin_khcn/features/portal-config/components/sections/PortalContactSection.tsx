@@ -5,7 +5,7 @@ import { AddressLicenseCard, CustomLabelsCard, ContactDetailsCard } from "../sub
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Map as MapIcon, X, Loader2, UploadCloud, CheckCircle2 } from "lucide-react";
+import { Map as MapIcon, X, Loader2, UploadCloud } from "lucide-react";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { useContactConfig } from "../hooks/useContactConfig";
 import { toast } from "sonner";

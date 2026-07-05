@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useMemo, useCallback, lazy, Suspense, useEffect } from 'react';
+import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTasksList, useTaskStats } from '@/features/hrm/hooks';
 import { hrmTasksApi } from '@/features/hrm/api';
-import { hrmKeys } from '@/features/hrm/keys';
 
 import { TaskToolbar } from './components/TaskToolbar';
 import { TaskRoleFilter } from '@/components/shared/badges/TaskBadges';

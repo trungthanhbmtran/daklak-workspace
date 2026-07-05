@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   ChevronDown, ChevronRight, PlusCircle,
-  Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw,
+  Clock, Circle,
   Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

@@ -1,19 +1,15 @@
 import React from "react";
 import { Node } from "@xyflow/react";
 import {
-  X,
   Settings2,
   Trash2,
   Info,
-  Type,
-  ChevronRight,
   FileText,
   Activity
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 interface PropertiesPanelProps {
   isOpen: boolean;

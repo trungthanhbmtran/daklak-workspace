@@ -25,12 +25,12 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
         const result = event.target?.result as string;
         const data = JSON.parse(result);
         
-        let initialData: any = {
+        const initialData: any = {
           isRawMode: false,
           rawConfig: JSON.stringify(data, null, 2),
         };
 
-        let endpoints: ParsedEndpoint[] = [];
+        const endpoints: ParsedEndpoint[] = [];
 
         // Recursive function for Postman
         const parsePostmanItems = (items: any[], parentPath = "") => {
@@ -105,8 +105,8 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
                 if (['get', 'post', 'put', 'delete', 'patch'].includes(method.toLowerCase())) {
                   const details = pathMethods[method];
                   
-                  let queryParams: any[] = [];
-                  let headers: any[] = [];
+                  const queryParams: any[] = [];
+                  const headers: any[] = [];
                   
                   if (details.parameters) {
                     details.parameters.forEach((p: any) => {

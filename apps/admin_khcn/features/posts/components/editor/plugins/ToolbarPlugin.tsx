@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState, useRef, forwardRef } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  $getSelection, $isRangeSelection, $isNodeSelection, $isElementNode, $isTextNode,
+  $getSelection, $isRangeSelection, $isElementNode, $isTextNode,
   FORMAT_TEXT_COMMAND, FORMAT_ELEMENT_COMMAND,
   UNDO_COMMAND, REDO_COMMAND
 } from "lexical";
@@ -11,8 +11,7 @@ import { $isHeadingNode, $createHeadingNode, $createQuoteNode } from "@lexical/r
 import { $setBlocksType, $patchStyleText } from "@lexical/selection";
 import { $createParagraphNode } from "lexical";
 import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND } from "@lexical/list";
-import { INSERT_TABLE_COMMAND, $isTableNode, $isTableSelection } from "@lexical/table";
-import { $findMatchingParent } from "@lexical/utils";
+import { INSERT_TABLE_COMMAND } from "@lexical/table";
 
 import { INSERT_IMAGE_COMMAND } from "./ImagePlugin";
 import { TOGGLE_LINK_COMMAND, $isLinkNode } from "@lexical/link";
@@ -20,8 +19,7 @@ import { TOGGLE_LINK_COMMAND, $isLinkNode } from "@lexical/link";
 import {
   Bold, Italic, Underline, Strikethrough,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  List, ListOrdered, Undo, Redo, ImagePlus, Table as TableIcon,
-  Video, Upload, Baseline, PaintBucket,
+  List, ListOrdered, Undo, Redo, ImagePlus, Table as TableIcon, Upload, Baseline, PaintBucket,
   Link as LinkIcon, Unlink,
   Subscript, Superscript, Eraser 
 } from "lucide-react";

@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings, Sparkles, Wand2, Languages, Loader2, ArrowRight, Trash2 } from "lucide-react";
+import { Settings, Sparkles, Wand2, Languages, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 // Auto-initialize registry if empty
