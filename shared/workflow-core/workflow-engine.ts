@@ -87,14 +87,6 @@ export class WorkflowEngine {
     const nodes = this.definition.nodes || [];
     const node = nodes.find((n) => n.id === currentNodeId);
 
-    if (!node) return { allowed: false, reason: 'Current node not found in workflow definition' };
-
-    // Check PBAC required role on node
-    const requiredRole = node?.data?.role;
-    if (requiredRole && !userRoles.includes(requiredRole)) {
-      return { allowed: false, reason: `Requires role: ${requiredRole}` };
-    }
-
     // System/Global Actions that bypass strict business rules (collaboration/monitoring)
     const systemActions = ['CHAT', 'MONITOR'];
     const ctx = currentContext || businessData || {};
@@ -108,6 +100,14 @@ export class WorkflowEngine {
     if (systemActions.includes(actionName)) {
         if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
         return { allowed: true };
+    }
+
+    if (!node) return { allowed: false, reason: 'Current node not found in workflow definition' };
+
+    // Check PBAC required role on node
+    const requiredRole = node?.data?.role;
+    if (requiredRole && !userRoles.includes(requiredRole)) {
+      return { allowed: false, reason: `Requires role: ${requiredRole}` };
     }
 
     // Evaluate dynamic validation expression if present
