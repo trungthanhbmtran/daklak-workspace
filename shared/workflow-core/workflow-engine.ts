@@ -136,6 +136,10 @@ export class WorkflowEngine {
 
         switch (actionName) {
           case 'ASSIGN':
+          case 'ASSIGN_STAFF':
+            if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
+            break;
+
           case 'COMPLETE':
           case 'PROCESS':
           case 'IN_PROGRESS':
@@ -144,19 +148,23 @@ export class WorkflowEngine {
           case 'EDIT_ARTICLE':
           case 'PUBLISH':
           case 'ISSUE':
+            if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể báo cáo hoàn thành/xử lý.' };
             if (!isAssignee && !isOwner) return { allowed: false, reason: 'Chỉ người được phân công hoặc người tạo mới có quyền thực hiện.' };
             break;
 
           case 'APPROVE':
           case 'REJECT':
-          case 'RETURN':
           case 'ROUTE':
-            if (!isManager && !isOwner) return { allowed: false, reason: 'Chỉ quản lý hoặc người giao việc mới có quyền duyệt/trả lại.' };
+            if (!isOwner) return { allowed: false, reason: 'Chỉ người giao việc mới có quyền nghiệm thu (duyệt).' };
+            break;
+
+          case 'RETURN':
+            if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể trả lại.' };
+            if (!isManager && !isOwner && !isAssignee) return { allowed: false, reason: 'Không có quyền trả lại công việc.' };
             break;
 
           case 'ADD_SUBTASK':
-          case 'ASSIGN_STAFF':
-            if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
+            if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân rã.' };
             break;
 
           case 'EDIT':
@@ -165,9 +173,16 @@ export class WorkflowEngine {
             break;
 
           case 'CHAT':
-          case 'COORDINATE':
+            if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
+            break;
+
           case 'MONITOR':
             if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
+            break;
+
+          case 'COORDINATE':
+            if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể xin phối hợp.' };
+            if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền xin phối hợp.' };
             break;
         }
       }

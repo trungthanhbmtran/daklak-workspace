@@ -2067,6 +2067,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         content: c.content,
         isSystemMessage: c.isSystemMessage,
         createdAt: c.createdAt.toISOString(),
+        isMine: emp ? emp.employeeCode === query.currentEmployeeCode : false,
       };
     });
 
