@@ -171,7 +171,7 @@ export function ManualPlanSelectorByRankClient() {
 
             <CardContent className="flex-1 flex flex-col lg:flex-row min-h-0 p-6 gap-6">
                 {/* LEFT COLUMN: MAIN CONTENT AREA */}
-                <div className="flex-[3] flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden h-full">
+                <div className="flex-3 flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden h-full">
                     <div className="p-4 border-b bg-muted/5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-6 bg-primary rounded-full" />
@@ -192,7 +192,7 @@ export function ManualPlanSelectorByRankClient() {
                             </Select>
                         </div>
                     </div>
-                    
+
                     <div className="p-4 border-b bg-white flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                             <Select
@@ -211,7 +211,7 @@ export function ManualPlanSelectorByRankClient() {
                                         const isAdded = addedPlans.some(p => p.title === task.taskName);
                                         return (
                                             <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm whitespace-normal">
-                                                <div className="break-words max-w-[300px] sm:max-w-[400px] md:max-w-[500px] leading-relaxed">
+                                                <div className="wrap-break-words max-w-[300px] sm:max-w-[400px] md:max-w-[500px] leading-relaxed">
                                                     {task.taskName} {isAdded ? <span className="text-muted-foreground ml-1 italic">(Đã thêm)</span> : ''}
                                                 </div>
                                             </SelectItem>
@@ -259,7 +259,7 @@ export function ManualPlanSelectorByRankClient() {
                                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-semibold text-muted-foreground shrink-0 mt-0.5">
                                                         {idx + 1}
                                                     </span>
-                                                    <span className="mt-0.5 leading-relaxed break-words whitespace-normal min-w-[200px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">{plan.title}</span>
+                                                    <span className="mt-0.5 leading-relaxed wrap-break-words whitespace-normal min-w-[200px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">{plan.title}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center text-muted-foreground">
@@ -329,11 +329,10 @@ export function ManualPlanSelectorByRankClient() {
                                     <div
                                         key={rank.code}
                                         onClick={() => setActiveRankFilter(rank.code)}
-                                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                                            activeRankFilter === rank.code
-                                                ? 'bg-primary/5 border-primary shadow-sm'
-                                                : 'bg-white border-transparent hover:bg-muted/50 hover:border-muted'
-                                        }`}
+                                        className={`p-3 rounded-xl border cursor-pointer transition-all ${activeRankFilter === rank.code
+                                            ? 'bg-primary/5 border-primary shadow-sm'
+                                            : 'bg-white border-transparent hover:bg-muted/50 hover:border-muted'
+                                            }`}
                                     >
                                         <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-slate-700'}`}>
                                             {rank.nameVi || rank.name}
