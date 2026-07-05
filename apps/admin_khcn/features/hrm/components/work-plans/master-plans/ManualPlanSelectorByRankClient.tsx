@@ -153,8 +153,8 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <Card className="max-w-5xl mx-auto mt-6 shadow-sm border">
-            <CardHeader>
+        <Card className="max-w-5xl mx-auto mt-6 shadow-sm border h-[calc(100vh-120px)] flex flex-col">
+            <CardHeader className="flex-shrink-0">
                 <CardTitle className="flex items-center gap-2 text-xl font-black text-foreground">
                     <Target className="w-5 h-5 text-primary" /> Thiết lập Chỉ tiêu Định biên Thủ công
                 </CardTitle>
@@ -163,12 +163,14 @@ export function ManualPlanSelectorByRankClient() {
                 </CardDescription>
             </CardHeader>
             
-            <CardContent>
-                <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6">
-                        <TabsTrigger value="CONG_CHUC">Khối Công chức</TabsTrigger>
-                        <TabsTrigger value="VIEN_CHUC">Khối Viên chức</TabsTrigger>
-                    </TabsList>
+            <CardContent className="flex-1 flex flex-col min-h-0 overflow-hidden pb-4">
+                <div className="flex-shrink-0">
+                    <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <TabsTrigger value="CONG_CHUC">Khối Công chức</TabsTrigger>
+                            <TabsTrigger value="VIEN_CHUC">Khối Viên chức</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
 
                     <div className="flex flex-col gap-4 mb-6">
                         <div className="grid gap-2">
@@ -203,9 +205,10 @@ export function ManualPlanSelectorByRankClient() {
                             </Select>
                         </div>
                     </div>
+                </div>
 
-                    <div className="flex flex-col md:flex-row gap-6 h-[600px]">
-                        <div className="flex-1 flex flex-col min-w-0 h-full border rounded-xl overflow-hidden bg-background shadow-sm">
+                <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-0">
+                    <div className="flex-1 flex flex-col min-w-0 h-full border rounded-xl overflow-hidden bg-background shadow-sm">
                             <div className="p-4 bg-muted/10 border-b flex-shrink-0 space-y-3">
                                 <h3 className="font-semibold text-sm">Thêm chỉ tiêu bắt buộc</h3>
                                 <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
@@ -304,8 +307,7 @@ export function ManualPlanSelectorByRankClient() {
                                 </ScrollArea>
                             </div>
                         </div>
-                    </div>
-                </Tabs>
+                </div>
             </CardContent>
 
             <CardFooter className="flex justify-end pt-4 pb-4 border-t bg-muted/30 rounded-b-2xl">
