@@ -184,6 +184,36 @@ export const PropertiesPanel = ({
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
             </div>
+            
+            {/* Auxiliary Actions Configuration */}
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 mt-4">
+              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Quyền thao tác phụ trợ</h4>
+              <div className="space-y-2">
+                {[
+                  { name: 'allowAddSubtask', label: 'Cho phép phân rã công việc' },
+                  { name: 'allowCoordinate', label: 'Cho phép xin phối hợp' },
+                  { name: 'allowEdit', label: 'Cho phép chỉnh sửa nội dung' },
+                  { name: 'allowDelete', label: 'Cho phép xóa công việc' },
+                  { name: 'allowChat', label: 'Cho phép thảo luận (Chat)', defaultChecked: true },
+                ].map((action) => (
+                  <div key={action.name} className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      {action.label}
+                    </label>
+                    <input
+                      type="checkbox"
+                      name={action.name}
+                      checked={data[action.name] !== undefined ? data[action.name] : !!action.defaultChecked}
+                      onChange={(e) => handleChange({ target: { name: action.name, value: e.target.checked } } as any)}
+                      className="h-3.5 w-3.5 rounded border-slate-300 text-violet-500 focus:ring-violet-500"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                Khi được cấp quyền, người xử lý tại bước này sẽ thấy các nút thao tác tương ứng (chỉ khả dụng nếu họ thỏa mãn biểu thức xác thực của Node).
+              </p>
+            </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Hoặc chỉ định Mã nhân sự cụ thể

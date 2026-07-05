@@ -138,7 +138,16 @@ export class WorkflowEngine {
     userContext?: any,
     currentContext?: WorkflowContext
   ): string[] {
-    const possibleActions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'APPROVE', 'RETURN', 'CHAT', 'COORDINATE'];
+    const node = this.getNode(currentNodeId);
+    const possibleActions = ['ASSIGN', 'COMPLETE', 'APPROVE', 'RETURN'];
+    
+    // Auxiliary Actions based on node configuration
+    if (node?.data?.allowAddSubtask) possibleActions.push('ADD_SUBTASK');
+    if (node?.data?.allowCoordinate) possibleActions.push('COORDINATE');
+    if (node?.data?.allowEdit) possibleActions.push('EDIT');
+    if (node?.data?.allowDelete) possibleActions.push('DELETE');
+    if (node?.data?.allowChat !== false) possibleActions.push('CHAT'); // Default to true if not explicitly false
+
     const allowed: string[] = [];
 
     for (const action of possibleActions) {

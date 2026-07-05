@@ -391,11 +391,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         this.logger.error('Failed to calculate allowed actions from local engine for task ' + t.id, err);
       }
 
-      // Vẫn giữ lại các action nội bộ không thuộc quy trình workflow như EDIT, DELETE, CHAT
-      const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
-      if (access.isOwner && !actions.includes('EDIT')) actions.push('EDIT', 'ADD_SUBTASK');
-      if (access.isOwner && isUnassigned && !hasChildren && !actions.includes('DELETE')) actions.push('DELETE');
-      if (!actions.includes('CHAT')) actions.push('CHAT');
     } else {
       // Fallback cho task cũ không có workflow
       const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
