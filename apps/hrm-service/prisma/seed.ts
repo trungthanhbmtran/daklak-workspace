@@ -21,7 +21,7 @@ async function main() {
   console.log('🔹 Cleaning old seed data...');
   await prisma.kpiEvaluationDetail.deleteMany({});
   await prisma.kpiEvaluation.deleteMany({});
-  await prisma.employeeKpiTarget.deleteMany({});
+
   await prisma.taskKpiSetting.deleteMany({});
   await prisma.kpiCriteria.deleteMany({});
   await prisma.kpiPeriod.deleteMany({});
