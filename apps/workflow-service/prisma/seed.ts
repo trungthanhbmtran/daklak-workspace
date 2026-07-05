@@ -10,81 +10,75 @@ async function main() {
 
   const taskWorkflowDef = {
     nodes: [
-      {
-        id: 'node_start',
-        type: 'start',
-        position: { x: 250, y: 50 },
-        data: { label: 'Bắt đầu' },
+      { id: 'node_start', type: 'start', position: { x: 50, y: 150 }, data: { label: 'Bắt đầu' } },
+      { 
+        id: 'node_assign', 
+        type: 'user_task', 
+        position: { x: 250, y: 150 }, 
+        data: { label: 'Giao việc', actionName: 'ASSIGN', role: 'MANAGER' } 
       },
-      {
-        id: 'node_processing',
-        type: 'user_task',
-        position: { x: 250, y: 150 },
-        data: {
-          label: 'Đang xử lý nghiệp vụ Giao việc',
-          description: 'Quản lý các trạng thái: Giao việc, Tiếp nhận, Báo cáo, Duyệt/Trả lại',
-          role: '', // Không dùng hardcode PBAC cơ bản nữa
-          validationExpression: `
-            (function() {
-              if (actionName === 'CHAT') return true;
-              
-              if (typeof isOwner !== 'undefined' && isOwner) {
-                if (['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE'].includes(actionName)) return true;
-                if (status === 'PENDING_APPROVAL' && ['APPROVE', 'RETURN'].includes(actionName)) return true;
-              }
-              
-              if (typeof isAssignee !== 'undefined' && isAssignee) {
-                if (actionName === 'ADD_SUBTASK') return true;
-                if (!hasChildren && status !== 'PENDING_APPROVAL' && ['COMPLETE', 'COORDINATE'].includes(actionName)) return true;
-              }
-              
-              if ((typeof isSupervisor !== 'undefined' && isSupervisor) || (typeof isDeptLeader !== 'undefined' && isDeptLeader)) {
-                if (!hasChildren && status !== 'PENDING_APPROVAL' && ['RETURN'].includes(actionName)) return true;
-                if (status === 'PENDING_APPROVAL' && ['APPROVE', 'RETURN'].includes(actionName)) return true;
-              }
-              
-              return false;
-            })()
-          `
-        },
+      { 
+        id: 'node_in_progress', 
+        type: 'user_task', 
+        position: { x: 500, y: 150 }, 
+        data: { label: 'Tiếp nhận & Xử lý', actionName: 'IN_PROGRESS', role: 'ASSIGNEE' } 
       },
-      {
-        id: 'node_end',
-        type: 'end',
-        position: { x: 250, y: 300 },
-        data: { label: 'Kết thúc' },
-      }
+      { 
+        id: 'node_coordinate', 
+        type: 'user_task', 
+        position: { x: 500, y: 300 }, 
+        data: { label: 'Phối hợp thực hiện', actionName: 'COORDINATE', role: 'COORDINATOR' } 
+      },
+      { 
+        id: 'node_monitor', 
+        type: 'user_task', 
+        position: { x: 500, y: 0 }, 
+        data: { label: 'Lãnh đạo theo dõi', actionName: 'MONITOR', role: 'OBSERVER' } 
+      },
+      { 
+        id: 'node_report', 
+        type: 'user_task', 
+        position: { x: 750, y: 150 }, 
+        data: { label: 'Báo cáo kết quả', actionName: 'DONE', role: 'ASSIGNEE' } 
+      },
+      { 
+        id: 'node_approve', 
+        type: 'user_task', 
+        position: { x: 1000, y: 150 }, 
+        data: { label: 'Phê duyệt / Trả lại', actionName: 'APPROVED', role: 'MANAGER' } 
+      },
+      { id: 'node_end', type: 'end', position: { x: 1250, y: 150 }, data: { label: 'Kết thúc' } }
     ],
     edges: [
-      {
-        id: 'edge_1',
-        source: 'node_start',
-        target: 'node_processing',
-      },
-      {
-        id: 'edge_2',
-        source: 'node_processing',
-        target: 'node_end',
-      }
+      { id: 'edge_start', source: 'node_start', target: 'node_assign', type: 'smoothstep', animated: true },
+      { id: 'edge_assign', source: 'node_assign', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Giao chính' },
+      { id: 'edge_assign_coord', source: 'node_assign', target: 'node_coordinate', type: 'smoothstep', animated: true, label: 'Giao phối hợp' },
+      { id: 'edge_assign_monitor', source: 'node_assign', target: 'node_monitor', type: 'smoothstep', animated: true, label: 'Báo cáo theo dõi' },
+      { id: 'edge_progress', source: 'node_in_progress', target: 'node_report', type: 'smoothstep', animated: true },
+      { id: 'edge_coord_report', source: 'node_coordinate', target: 'node_report', type: 'smoothstep', animated: true, label: 'Hoàn thành' },
+      { id: 'edge_monitor_instruct', source: 'node_monitor', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Chỉ đạo/Nhắc nhở' },
+      { id: 'edge_report', source: 'node_report', target: 'node_approve', type: 'smoothstep', animated: true },
+      { id: 'edge_approve', source: 'node_approve', target: 'node_end', type: 'smoothstep', animated: true, label: 'Duyệt' },
+      { id: 'edge_return', source: 'node_approve', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Trả lại' }
     ],
   };
 
   const workflow = await prisma.workflow.upsert({
     where: { id: 'TASK_PROCESSING_ID' }, // Provide a fixed UUID or use findFirst
     update: {
-      name: 'Quy trình xử lý công việc (Động)',
-      description: 'Luồng nghiệp vụ xử lý giao việc: Lãnh đạo giao, nhân viên thụ lý. Áp dụng luật kiểm tra động qua Expression.',
+      name: 'Quy trình xử lý công việc (Tách luồng) v3',
+      description: 'Luồng nghiệp vụ xử lý giao việc đã được tách riêng thành các bước: Giao, Tiếp nhận, Báo cáo, Duyệt.',
       definition: taskWorkflowDef,
       trigger: 'MANUAL',
-      version: 2
+      version: 3
     },
     create: {
       id: 'TASK_PROCESSING_ID',
-      name: 'Quy trình xử lý công việc (Động)',
-      description: 'Luồng nghiệp vụ xử lý giao việc: Lãnh đạo giao, nhân viên thụ lý. Áp dụng luật kiểm tra động qua Expression.',
+      name: 'Quy trình xử lý công việc (Tách luồng) v3',
+      description: 'Luồng nghiệp vụ xử lý giao việc đã được tách riêng thành các bước: Giao, Tiếp nhận, Báo cáo, Duyệt.',
       definition: taskWorkflowDef,
       trigger: 'MANUAL',
-      version: 1
+      version: 3
     },
   });
 
