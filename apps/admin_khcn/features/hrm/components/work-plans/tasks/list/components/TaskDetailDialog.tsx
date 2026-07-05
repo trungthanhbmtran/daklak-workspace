@@ -15,6 +15,7 @@ import { TaskDelegationTree } from './TaskDelegationTree';
 import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
 import { useTaskChat } from '../hooks/useTaskChat';
+import { useTaskDelegation } from '../hooks/useTaskDelegation';
 
 function TaskChatBadge({ activeTaskId }: { activeTaskId: number | undefined }) {
   const { taskComments } = useTaskChat(activeTaskId);
@@ -61,6 +62,8 @@ export function TaskDetailDialog({
   const [isAiBreakdownModalOpen, setIsAiBreakdownModalOpen] = useState(false);
   const [isCoordinationModalOpen, setIsCoordinationModalOpen] = useState(false);
   const [isAssignCoordinationModalOpen, setIsAssignCoordinationModalOpen] = useState(false);
+
+  const { delegationChain, isLoadingChain } = useTaskDelegation(task?.rootTaskId || task?.id);
   
   const qc = useQueryClient();
   const fetchComments = () => {
@@ -163,6 +166,7 @@ export function TaskDetailDialog({
                       <TaskChatContainer
                         activeTask={activeTask}
                         allowedActions={allowedActions}
+                        delegationChain={delegationChain}
                       />
                     )}
                   </div>
@@ -185,6 +189,8 @@ export function TaskDetailDialog({
               <TaskDelegationTree
                 rootTaskId={task?.rootTaskId || task?.id}
                 activeTaskId={activeTask?.id}
+                delegationChain={delegationChain}
+                isLoadingChain={isLoadingChain}
                 onSelectTask={setActiveTask}
               />
             </div>

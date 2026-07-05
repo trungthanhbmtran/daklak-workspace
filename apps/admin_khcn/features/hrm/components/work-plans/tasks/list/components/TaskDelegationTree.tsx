@@ -7,11 +7,12 @@ import { useTaskDelegation } from '../hooks/useTaskDelegation';
 interface TaskDelegationTreeProps {
   rootTaskId: number | undefined;
   activeTaskId: number | undefined;
+  delegationChain: any[];
+  isLoadingChain: boolean;
   onSelectTask: (task: any) => void;
 }
 
-export function TaskDelegationTree({ rootTaskId, activeTaskId, onSelectTask }: TaskDelegationTreeProps) {
-  const { delegationChain, isLoadingChain } = useTaskDelegation(rootTaskId);
+export function TaskDelegationTree({ rootTaskId, activeTaskId, delegationChain, isLoadingChain, onSelectTask }: TaskDelegationTreeProps) {
 
   return (
     <div className="flex flex-col min-h-0 bg-slate-50/60 dark:bg-slate-900/50 overflow-y-auto border-t xl:border-t-0 border-slate-200 dark:border-slate-800">
