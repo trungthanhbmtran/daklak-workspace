@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
+import { PageSizeSelector } from "@/components/ui/page-size-selector";
 import {
   Pagination,
   PaginationContent,
@@ -60,11 +61,11 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
-  const pageSize = 15;
+  const [pageSize, setPageSize] = useState(15);
 
   useEffect(() => {
     setPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, pageSize]);
 
   const { data: categoriesData, isLoading } = useQuery({
     queryKey: ["posts-categories", page, searchTerm],
@@ -112,164 +113,180 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
   return (
     <>
       <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Chuyên mục bài viết</h1>
-          <p className="text-muted-foreground">Quản lý cấu trúc phân cấp các bài viết trên hệ thống.</p>
-        </div>
-        <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="mr-2 h-4 w-4" /> Thêm chuyên mục
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-3 px-6 border-b bg-slate-50/50">
-          <div className="flex items-center gap-3">
-            <Search 
-              placeholder="Tìm tên chuyên mục..." 
-              className="flex-1 max-w-sm" 
-            />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Chuyên mục bài viết</h1>
+            <p className="text-muted-foreground">Quản lý cấu trúc phân cấp các bài viết trên hệ thống.</p>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50/30">
-                <TableHead className="w-[80px] pl-6 text-xs font-bold uppercase tracking-wider">Ảnh</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider">Tên chuyên mục</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider">Slug</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider">Văn bản</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider">Thứ tự</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider">Bài viết</TableHead>
-                <TableHead className="w-[100px] text-right pr-6"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.length > 0 ? (
-                categories.map((cat: Category) => (
-                  <TableRow key={cat.id} className="group hover:bg-slate-50/50 transition-colors">
-                    <TableCell className="pl-6">
-                      <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">
-                        {cat.thumbnail ? (
-                          <img
-                            src={`/api/v1/admin/media/download/${cat.thumbnail}`}
-                            alt={cat.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              if (!target.src.includes('/api/v1/media/download/')) {
-                                target.src = `/api/v1/media/download/${cat.thumbnail}`;
-                              }
-                            }}
-                          />
-                        ) : (
-                          <Folder className="h-5 w-5 text-slate-400" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-semibold text-slate-700">
-                      <div className="flex items-center gap-2">
-                        {cat.name}
-                        {cat.parentId && <Badge variant="outline" className="text-[10px] py-0">Con</Badge>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-xs text-slate-500">{cat.slug}</TableCell>
-                    <TableCell>
-                      {cat.attachmentId ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2"
-                          onClick={() => window.open(`/api/v1/admin/media/download/${cat.attachmentId}`, '_blank')}
-                        >
-                          <FileText className="h-4 w-4 mr-1" /> Xem
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic">N/A</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm font-medium text-slate-600">{cat.orderIndex}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 border-blue-100">
-                        {cat._count?.posts || 0} bài
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right pr-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="group-hover:bg-white border-transparent">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem onClick={() => onNavigateToEdit(cat.id)}>
-                            <Edit2 className="mr-2 h-3.5 w-3.5" /> Chỉnh sửa
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => handleDelete(cat.id)}
+          <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="mr-2 h-4 w-4" /> Thêm chuyên mục
+          </Button>
+        </div>
+
+        <Card>
+          <CardHeader className="pb-3 px-6 border-b bg-slate-50/50">
+            <div className="flex items-center gap-3">
+              <Search
+                placeholder="Tìm tên chuyên mục..."
+                className="flex-1 max-w-sm"
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50/30">
+                  <TableHead className="w-[80px] pl-6 text-xs font-bold uppercase tracking-wider">Ảnh</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-wider">Tên chuyên mục</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-wider">Slug</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-wider">Văn bản</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-wider">Thứ tự</TableHead>
+                  <TableHead className="text-xs font-bold uppercase tracking-wider">Bài viết</TableHead>
+                  <TableHead className="w-[100px] text-right pr-6"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.length > 0 ? (
+                  categories.map((cat: Category) => (
+                    <TableRow key={cat.id} className="group hover:bg-slate-50/50 transition-colors">
+                      <TableCell className="pl-6">
+                        <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">
+                          {cat.thumbnail ? (
+                            <img
+                              src={`/api/v1/admin/media/download/${cat.thumbnail}`}
+                              alt={cat.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (!target.src.includes('/api/v1/media/download/')) {
+                                  target.src = `/api/v1/media/download/${cat.thumbnail}`;
+                                }
+                              }}
+                            />
+                          ) : (
+                            <Folder className="h-5 w-5 text-slate-400" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-semibold text-slate-700">
+                        <div className="flex items-center gap-2">
+                          {cat.name}
+                          {cat.parentId && <Badge variant="outline" className="text-[10px] py-0">Con</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">{cat.slug}</TableCell>
+                      <TableCell>
+                        {cat.attachmentId ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2"
+                            onClick={() => window.open(`/api/v1/admin/media/download/${cat.attachmentId}`, '_blank')}
                           >
-                            <Trash2 className="mr-2 h-3.5 w-3.5" /> Xóa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <FileText className="h-4 w-4 mr-1" /> Xem
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm font-medium text-slate-600">{cat.orderIndex}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 border-blue-100">
+                          {cat._count?.posts || 0} bài
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="group-hover:bg-white border-transparent">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem onClick={() => onNavigateToEdit(cat.id)}>
+                              <Edit2 className="mr-2 h-3.5 w-3.5" /> Chỉnh sửa
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDelete(cat.id)}
+                            >
+                              <Trash2 className="mr-2 h-3.5 w-3.5" /> Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground italic">
+                      Chưa có chuyên mục nào được tạo.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground italic">
-                    Chưa có chuyên mục nào được tạo.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-      {totalPages > 1 && (
-        <div className="py-4 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 dark:bg-slate-950/20 rounded-b-xl">
+          <div className="text-xs font-bold text-slate-400 dark:text-slate-500">
+            Hiển thị từ{" "}
+            <span className="text-slate-700 dark:text-slate-300">
+              {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
+            </span>{" "}
+            đến{" "}
+            <span className="text-slate-700 dark:text-slate-300">
+              {Math.min(page * pageSize, totalItems)}
+            </span>{" "}
+            trong tổng số{" "}
+            <span className="text-slate-700 dark:text-slate-300">{totalItems}</span>{" "}
+            chuyên mục
+          </div>
 
-              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-                let pageNum = i + 1;
-                if (totalPages > 5 && page > 3) {
-                  pageNum = page - 2 + i;
-                  if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                }
-                return (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      isActive={page === pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className="cursor-pointer"
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
+          <div className="flex flex-wrap items-center gap-4.5">
+            <PageSizeSelector value={pageSize} onValueChange={setPageSize} options={[5, 10, 15, 20, 50]} />
 
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+            <Pagination className="w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    className={page === 1 ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+
+                {Array.from({ length: Math.min(5, totalPages || 1) }).map((_, i) => {
+                  let pageNum = i + 1;
+                  if (totalPages > 5 && page > 3) {
+                    pageNum = page - 2 + i;
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        isActive={page === pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                    className={page >= totalPages || totalPages === 0 ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
-      )}
-    </div>
-    
+      </div>
+
       <AlertDialog open={!!deletingCategoryId} onOpenChange={(open) => !open && setDeletingCategoryId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
