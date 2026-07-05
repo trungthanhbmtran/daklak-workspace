@@ -13,7 +13,7 @@ const UserTaskNode = ({ data, selected }: { data: any; selected: boolean }) => {
     >
       <div className="flex flex-col gap-1">
         <div className="text-sm font-medium">{data.role || "Unassigned"}</div>
-        <div className="text-[10px] text-muted-foreground italic truncate">
+        <div className="text-[10px] text-muted-foreground italic whitespace-normal wrap-break-words">
           {data.description || "Assign to user role"}
         </div>
       </div>

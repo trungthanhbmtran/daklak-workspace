@@ -22,7 +22,7 @@ export const BaseNode = ({
   return (
     <div
       className={cn(
-        "min-w-[180px] rounded-xl border-2 bg-card p-0 shadow-lg transition-all duration-200",
+        "min-w-[180px] max-w-[280px] rounded-xl border-2 bg-card p-0 shadow-lg transition-all duration-200",
         selected ? "border-primary ring-2 ring-primary/20" : "border-border/60 hover:border-border-foreground/40",
         className
       )}
