@@ -925,6 +925,25 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
+    let baseScore = data.baseScore;
+    let weight = data.weight;
+    let scoringMethod = data.scoringMethod || 'MANUAL';
+    let bonusPerDay = data.bonusPerDay;
+    let penaltyPerDay = data.penaltyPerDay;
+
+    if (autoKpiCriteriaId) {
+      const criteriaSettings = await this.prisma.kpiCriteriaSetting.findUnique({
+        where: { criteriaId: autoKpiCriteriaId }
+      });
+      if (criteriaSettings) {
+        if (baseScore === undefined || baseScore === null) baseScore = criteriaSettings.baseScore ?? 100;
+        if (weight === undefined || weight === null) weight = criteriaSettings.weight ?? 1.0;
+        if (data.scoringMethod === undefined || data.scoringMethod === null) scoringMethod = criteriaSettings.scoringMethod ?? 'MANUAL';
+        if (bonusPerDay === undefined || bonusPerDay === null) bonusPerDay = criteriaSettings.bonusPerDay ?? 0;
+        if (penaltyPerDay === undefined || penaltyPerDay === null) penaltyPerDay = criteriaSettings.penaltyPerDay ?? 0;
+      }
+    }
+
     const assigneeCode = data.assigneeCode || 'UNASSIGNED';
     if (assigneeCode !== 'UNASSIGNED' && data.domainId) {
       const assigneeEmp = await this.prisma.employee.findUnique({
@@ -962,11 +981,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
           kpiSettings: {
             create: {
-              baseScore: data.baseScore,
-              weight: data.weight,
-              scoringMethod: data.scoringMethod || 'MANUAL',
-              bonusPerDay: data.bonusPerDay,
-              penaltyPerDay: data.penaltyPerDay,
+              baseScore,
+              weight,
+              scoringMethod,
+              bonusPerDay,
+              penaltyPerDay,
               kpiCriteriaId: autoKpiCriteriaId,
               isCrossDomain,
               crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0

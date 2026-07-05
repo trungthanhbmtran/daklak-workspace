@@ -243,6 +243,63 @@ export class KpiEvaluationsService {
     };
   }
 
+  async getEvaluationStats(query: any) {
+    const where: any = {};
+    if (query.periodId) {
+      where.periodId = Number(query.periodId);
+    }
+    where.status = { in: ['SUBMITTED', 'APPROVED'] }; // Chỉ lấy phiếu đã nộp hoặc đã chốt
+
+    if (query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
+      const descendantIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
+      where.employee = { departmentId: { in: descendantIds } };
+    } else if (!query.isAdmin) {
+      // Nếu không phải admin và không có quyền xem cấp dưới -> Không trả về gì hoặc trả về của chính mình
+      // Ở dashboard tổng quan, chúng ta thường yêu cầu quyền quản lý.
+    }
+
+    const evaluations = await this.prisma.kpiEvaluation.findMany({
+      where,
+      include: { employee: true }
+    });
+
+    // Gom nhóm theo departmentId
+    const statsMap = new Map<number, { count: number; totalScore: number }>();
+    let totalCompanyScore = 0;
+    let totalCompanyCount = 0;
+
+    for (const ev of evaluations) {
+      if (!ev.employee || ev.employee.departmentId === null) continue;
+      const depId = ev.employee.departmentId;
+      const score = ev.totalScore || 0;
+
+      if (!statsMap.has(depId)) {
+        statsMap.set(depId, { count: 0, totalScore: 0 });
+      }
+      const st = statsMap.get(depId)!;
+      st.count += 1;
+      st.totalScore += score;
+
+      totalCompanyScore += score;
+      totalCompanyCount += 1;
+    }
+
+    const statsByUnit = Array.from(statsMap.entries()).map(([departmentId, data]) => ({
+      departmentId,
+      totalEvaluations: data.count,
+      avgScore: data.count > 0 ? parseFloat((data.totalScore / data.count).toFixed(2)) : 0
+    }));
+
+    return {
+      success: true,
+      data: {
+        statsByUnit,
+        companyAvgScore: totalCompanyCount > 0 ? parseFloat((totalCompanyScore / totalCompanyCount).toFixed(2)) : 0,
+        totalEvaluations: totalCompanyCount
+      }
+    };
+  }
+
   async calculatePersonalKpi(data: { periodId: number, employeeCode: string }) {
     const { periodId, employeeCode } = data;
 

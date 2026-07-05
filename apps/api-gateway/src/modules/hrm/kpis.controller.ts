@@ -63,6 +63,7 @@ export class KpisController implements OnModuleInit {
           if (nId) {
             unitMap[nId] = {
               id: nId,
+              name: n.name || n.title || `Đơn vị #${nId}`,
               parentId: n.parentId ? parseInt(n.parentId, 10) : null,
               isLeaf: n.isLeaf ?? !n.children?.length,
               directChildIds: (n.children || [])
@@ -198,6 +199,53 @@ export class KpisController implements OnModuleInit {
         callerDescendantUnitIds,
       }),
     );
+  }
+
+  @Get('dashboard-stats')
+  async getDashboardStats(@Req() req: any, @Query('periodId') periodId: string) {
+    const user = req.user;
+    const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE') || user?.roles?.some((r: any) => r === Role.ADMIN || r?.code === Role.ADMIN);
+
+    let callerDescendantUnitIds: number[] = [];
+    let unitMap: Record<number, any> = {};
+
+    try {
+      unitMap = await this.getUnitMap();
+    } catch (e) {
+      console.error('Failed to get unit map', e);
+    }
+
+    if (!isAdmin && user?.unitId) {
+      const callerUnitId = parseInt(user.unitId, 10);
+      callerDescendantUnitIds = Array.from(
+        this.getDescendantUnitIds(unitMap, callerUnitId),
+      );
+    }
+
+    const res: any = await firstValueFrom(
+      this.kpiService.GetEvaluationStats({
+        periodId,
+        isAdmin,
+        callerDescendantUnitIds,
+      }),
+    );
+
+    if (res?.success && res.data?.statsByUnit) {
+      // Map departmentId to departmentName
+      const mappedStats = res.data.statsByUnit.map((s: any) => {
+        let name = 'Chưa xác định';
+        if (s.departmentId && unitMap[s.departmentId]) {
+          name = unitMap[s.departmentId].name;
+        }
+        return {
+          ...s,
+          departmentName: name,
+        };
+      });
+      res.data.statsByUnit = mappedStats;
+    }
+
+    return res;
   }
 
   @Post('evaluations/calculate-personal')

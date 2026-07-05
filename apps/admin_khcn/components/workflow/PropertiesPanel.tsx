@@ -42,7 +42,6 @@ export const PropertiesPanel = ({
   workflowTrigger,
   setWorkflowTrigger
 }: PropertiesPanelProps) => {
-
   const data = selectedNode ? (selectedNode.data || {}) as any : {};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
