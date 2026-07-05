@@ -62,7 +62,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         message,
         type: 'SYSTEM',
         recipients,
-        metadata: { 
+        metadata: {
           module: (taskData.metadata && (taskData.metadata as any).module) ? (taskData.metadata as any).module : 'hrm',
           type: (taskData.metadata && (taskData.metadata as any).type) ? (taskData.metadata as any).type : 'work-plans/tasks',
           id: taskData.id
@@ -93,14 +93,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
    */
   private buildParticipantsData(taskId: number, data: any): any[] {
     const participantsData: any[] = [];
-    
+
     // Assignee
     const assigneeCode = data.assigneeCode || 'UNASSIGNED';
     const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
     if (assigneeCode) {
-      participantsData.push({ 
-        taskId, 
-        employeeCode: assigneeCode, 
+      participantsData.push({
+        taskId,
+        employeeCode: assigneeCode,
         participantRole: TaskRole.ASSIGNEE,
         contributionPercentage: assigneePct
       });
@@ -363,7 +363,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     // Tích hợp Workflow chuẩn (Decentralized Engine)
     const metadata = (t.metadata as any) || {};
     const activeWorkflowId = metadata.workflowId || t.workflowInstId; // Dùng workflowId hoặc InstId làm ID tạm
-    
+
     if (activeWorkflowId && metadata.currentNodeId) {
       try {
         const definition = await this.getWorkflowDefinition(activeWorkflowId);
@@ -390,7 +390,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       } catch (err) {
         this.logger.error('Failed to calculate allowed actions from local engine for task ' + t.id, err);
       }
-      
+
       // Vẫn giữ lại các action nội bộ không thuộc quy trình workflow như EDIT, DELETE, CHAT
       const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
       if (access.isOwner && !actions.includes('EDIT')) actions.push('EDIT', 'ADD_SUBTASK');
@@ -517,7 +517,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     // Optimized status filter using positive conditions (IN) instead of negative (NOT IN) for index performance
     const activeStatuses = ['TODO', 'IN_PROGRESS', 'REVIEWING', 'OVERDUE', 'RETURNED'];
-    
+
     if (query.status && query.status !== 'ALL') {
       where.status = query.status;
     } else if (!query.statsFilter) {
@@ -601,7 +601,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         // Only calculate dates if the filter actually needs them
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        
+
         if (query.statsFilter === 'overdue') {
           where.status = { in: activeStatuses };
           where.dueDate = { lt: now };
@@ -744,7 +744,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (!query.role || query.role === 'ALL') {
       const perms = query.currentUserPermissions || [];
       const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
-      
+
       if (!isAdmin) {
         const scopingConditions: any[] = [];
 
@@ -790,11 +790,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const allStatsTasks = await this.prisma.task.findMany({
       where,
-      select: { 
-        status: true, 
+      select: {
+        status: true,
         progress: true,
-        dueDate: true, 
-        completedAt: true, 
+        dueDate: true,
+        completedAt: true,
         updatedAt: true,
         participants: {
           where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } },
@@ -846,7 +846,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         inTime++;
       } else {
         const diffDays = Math.ceil((dueTime - nowTime) / 86_400_000);
-        
+
         // Use early evaluation/ternary to eliminate deeply nested if-else
         diffDays < 0 ? overdue++ : (diffDays <= 3 ? warning++ : inTime++);
       }
@@ -1031,15 +1031,15 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     try {
       const workflowId = 'TASK_PROCESSING_ID';
       const definition = await this.getWorkflowDefinition(workflowId);
-      
+
       if (definition) {
         const engine = new WorkflowEngine(definition);
         const initialNodeId = engine.getInitialNodeId();
-        
+
         if (initialNodeId) {
           await this.prisma.task.update({
             where: { id: t.id },
-            data: { 
+            data: {
               metadata: {
                 ...((t.metadata as any) || {}),
                 workflowId,
@@ -1068,14 +1068,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const enriched = await this.enrichTasks([createdTask]);
     const enrichedTask = enriched[0];
-    
+
     // Add allowed actions for the newly created task so the frontend can render buttons immediately
     const allowedActions = await this.computeAllowedActions(enrichedTask, {
       currentEmployeeCode: creatorCode,
       currentUserPermissions: data.currentUserPermissions || [],
     });
     enrichedTask.allowedActions = allowedActions;
-    
+
     const enrichedTaskResponse = this.toTaskResponse(enrichedTask);
 
     const metadata = (enrichedTask.metadata as any) || {};
@@ -1148,7 +1148,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (context) await this.populateQueryHierarchy(context);
     const rawTask = await this.prisma.task.findUnique({ where: { id } });
     if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
-    
+
     const tCheckArr = [rawTask];
     await this.enrichTasks(tCheckArr);
     const tCheck: any = tCheckArr[0];
@@ -1161,11 +1161,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (activeWorkflowId && metadata.currentNodeId) {
       try {
         let actionName = actionNameForWorkflow || status;
-        
+
         let hasChildren = false;
         const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: rawTask.id, depth: 1 } });
         hasChildren = childrenCount > 0;
-        
+
         const queryContext = { ...context, currentEmployeeCode: actorCode, currentUserId: context?.currentUserId };
         const access = await this.checkTaskAccess(tCheck, queryContext);
 
@@ -1190,7 +1190,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             actorCode,
             businessData
           );
-          
+
           if (!validateRes.allowed) {
             throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}.`);
           }
@@ -1207,9 +1207,26 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    const dataToUpdate: any = { status };
+    let targetStatus = status;
+    let nextNodeData: any = null;
+    
+    if (nextNodeIdToSave && activeWorkflowId) {
+      const definition = await this.getWorkflowDefinition(activeWorkflowId);
+      if (definition) {
+        const engine = new WorkflowEngine(definition);
+        const nextNode = engine.getNode(nextNodeIdToSave);
+        if (nextNode && nextNode.data) {
+          nextNodeData = nextNode.data;
+          if (nextNodeData.targetStatus) {
+            targetStatus = nextNodeData.targetStatus;
+          }
+        }
+      }
+    }
+
+    const dataToUpdate: any = { status: targetStatus };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
-    if (status === 'DONE') dataToUpdate.completedAt = new Date();
+    if (targetStatus === 'DONE') dataToUpdate.completedAt = new Date();
     if (nextNodeIdToSave) {
       dataToUpdate.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: nextNodeIdToSave };
     }
@@ -1220,7 +1237,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       include: { participants: true }
     });
 
-    if (rejectReason && status === 'RETURNED') {
+    if (rejectReason && (targetStatus === 'RETURNED' || (nextNodeData && nextNodeData.sideEffects?.includes('RETURN_TASK')))) {
       await this.prisma.taskComment.create({
         data: {
           taskId: id,
@@ -1231,9 +1248,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    if (status === 'DONE') await this.updateTaskProgress(id, 100, actorCode);
-
-    if (status === 'DONE') await this.updateTaskProgress(id, 100, actorCode);
+    if (nextNodeData?.autoProgress !== undefined) {
+      await this.updateTaskProgress(id, nextNodeData.autoProgress, actorCode);
+    } else if (targetStatus === 'DONE') {
+      await this.updateTaskProgress(id, 100, actorCode);
+    }
 
     // Xử lý gửi thông báo tự động dựa trên cấu hình Workflow Engine (Node tiếp theo)
     if (nextNodeIdToSave && activeWorkflowId) {
@@ -1242,30 +1261,59 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         if (definition) {
           const engine = new WorkflowEngine(definition);
           const nextNode = engine.getNode(nextNodeIdToSave);
-          
+
           // Chỉ gửi nếu Node đích được cấu hình tick chọn Gửi thông báo
           if (nextNode && nextNode.data && nextNode.data.sendNotification) {
             let title = `Có cập nhật: ${nextNode.data.label}`;
             let message = `Công việc "${tCheck.title}" đã chuyển sang bước: ${nextNode.data.label}. ${nextNode.data.description || ''}`;
             let recipientCodes: string[] = [];
 
-            // Template thông báo chuyên biệt
-            if (status === 'RETURNED' || rejectReason) {
-              title = 'Công việc bị trả lại';
-              message = `Công việc "${tCheck.title}" của bạn đã bị trả lại.\nLý do: ${rejectReason}`;
-            } else if (nextNode.data.actionName === 'APPROVE') {
-              title = 'Yêu cầu nghiệm thu công việc';
-              message = `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`;
-            } else if (status === 'DONE' || nextNode.type === 'end') {
-              title = 'Công việc đã được nghiệm thu';
-              message = `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`;
-            }
-
-            // Đối soát người nhận dựa vào Vai trò
-            if (nextNode.data.role === 'MANAGER' || status === 'PENDING_APPROVAL') {
-              recipientCodes.push(tCheck.supervisorCode, tCheck.assignerCode, tCheck.creatorEmployeeCode);
+            // Ưu tiên sử dụng cấu hình Notification từ Workflow Node
+            if (nextNode.data.notification) {
+              const notifCfg = nextNode.data.notification;
+              title = notifCfg.title || title;
+              message = notifCfg.template ? notifCfg.template.replace('{{taskTitle}}', `"${tCheck.title}"`) : message;
+              
+              if (notifCfg.recipientExpression) {
+                // Đánh giá biểu thức tìm danh sách người nhận (ví dụ: "[assigneeCode, supervisorCode]")
+                try {
+                  const evalContext = {
+                     assignerCode: tCheck.assignerCode,
+                     assigneeCode: tCheck.assigneeCode,
+                     creatorEmployeeCode: tCheck.creatorEmployeeCode,
+                     supervisorCode: tCheck.supervisorCode,
+                     coordinatorCodes: tCheck.coassigneeCodes || []
+                  };
+                  const getRecipients = new Function('context', `
+                    with (context) { return ${notifCfg.recipientExpression}; }
+                  `);
+                  const computedRecipients = getRecipients(evalContext);
+                  if (Array.isArray(computedRecipients)) {
+                    recipientCodes = computedRecipients.filter(Boolean);
+                  }
+                } catch(e) {
+                   this.logger.error('Failed to parse recipientExpression', e);
+                }
+              }
             } else {
-              recipientCodes.push(tCheck.assigneeCode);
+              // Template fallback (Hardcode cũ)
+              if (targetStatus === 'RETURNED' || rejectReason) {
+                title = 'Công việc bị trả lại';
+                message = `Công việc "${tCheck.title}" của bạn đã bị trả lại.\nLý do: ${rejectReason}`;
+              } else if (nextNode.data.actionName === 'APPROVE') {
+                title = 'Yêu cầu nghiệm thu công việc';
+                message = `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`;
+              } else if (targetStatus === 'DONE' || nextNode.type === 'end') {
+                title = 'Công việc đã được nghiệm thu';
+                message = `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`;
+              }
+
+              // Đối soát fallback cũ
+              if (nextNode.data.role === 'MANAGER' || targetStatus === 'PENDING_APPROVAL') {
+                recipientCodes.push(tCheck.supervisorCode, tCheck.assignerCode, tCheck.creatorEmployeeCode);
+              } else {
+                recipientCodes.push(tCheck.assigneeCode);
+              }
             }
 
             // Lọc danh sách và loại trừ người đang thao tác
@@ -1279,7 +1327,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
                   message,
                   type: 'SYSTEM',
                   recipients: [emp.userId],
-                  metadata: { 
+                  metadata: {
                     module: (tCheck.metadata as any)?.module || 'hrm',
                     type: (tCheck.metadata as any)?.type || 'work-plans/tasks',
                     id: id
@@ -1309,7 +1357,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   async assignTask(data: any) {
     const id = data.id;
     const context = data;
-    const rawTaskForCheck = await this.prisma.task.findUnique({ 
+    const rawTaskForCheck = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true }
     });
@@ -1340,12 +1388,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
               allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
             }
           );
-          
+
           if (!validateRes.allowed) {
             this.logger.error(`Validate Action blocked ASSIGN: ${validateRes.reason}, businessData: ${JSON.stringify({ isOwner: access.isOwner, creator: tCheckArr[0]?.creatorEmployeeCode, current: context?.currentEmployeeCode })}`);
             throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
           }
-          
+
           // Chú ý: action ASSIGN thường không làm nhảy bước workflow (không đổi trạng thái task)
           // nên ở đây ta không cần tìm getNextNodeId và update currentNodeId
         }
@@ -1372,9 +1420,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
       // Delete old participants for assignee, owner, coordinator
       await tx.taskParticipant.deleteMany({
-        where: { 
-          taskId: id, 
-          participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] } 
+        where: {
+          taskId: id,
+          participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] }
         }
       });
 
@@ -1471,7 +1519,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const childIds = closureData.map(c => c.descendantId);
 
     const where: any = { id: { in: childIds }, status: { not: 'TEMPLATE' } };
-    
+
     // Apply scoping constraints to children to ensure unrelated people don't see others' subtasks
     const scopeWhere = await this.buildScopingWhereClause(query);
     if (scopeWhere) {
@@ -1584,7 +1632,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const assigneeP = rawTask.participants.find(p => p.participantRole === TaskRole.ASSIGNEE);
     const isUnassigned = !assigneeP || assigneeP.employeeCode === 'UNASSIGNED';
-    
+
     if (!isUnassigned) {
       throw new RpcException('Không thể xóa công việc đã được giao cho người khác');
     }
@@ -1594,12 +1642,12 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       where: { ancestorId: id },
       select: { descendantId: true, depth: true }
     });
-    
+
     const hasChildren = descendants.some(d => d.depth > 0);
     if (hasChildren) {
       throw new RpcException('Không thể xóa công việc đã có công việc con');
     }
-    
+
     const idsToDelete = descendants.map(d => d.descendantId);
 
     if (idsToDelete.length > 0) {
@@ -1728,7 +1776,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         if (targetJobTitleId && emp.jobTitleId === targetJobTitleId) {
           matchScore += 50; // Ưu tiên tuyệt đối nếu đúng Vị trí chức danh yêu cầu
         }
-        
+
         // Ưu tiên nếu nhân viên phụ trách Lĩnh vực hoặc Phòng ban tương ứng
         if (scopeEmployeeCodes.includes(emp.employeeCode)) {
           matchScore += 30;
@@ -1946,11 +1994,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
             message: `${actorName} đã nhắc đến bạn trong bình luận của công việc "${t.title}"`,
             type: 'SYSTEM',
             recipients: userIds,
-            metadata: { 
-            module: (t.metadata && (t.metadata as any).module) ? (t.metadata as any).module : 'hrm',
-            type: (t.metadata && (t.metadata as any).type) ? (t.metadata as any).type : 'work-plans/tasks',
-            id: t.id
-          },
+            metadata: {
+              module: (t.metadata && (t.metadata as any).module) ? (t.metadata as any).module : 'hrm',
+              type: (t.metadata && (t.metadata as any).type) ? (t.metadata as any).type : 'work-plans/tasks',
+              id: t.id
+            },
           }).subscribe();
         }
       }

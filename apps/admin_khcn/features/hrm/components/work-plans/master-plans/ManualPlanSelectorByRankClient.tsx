@@ -178,7 +178,7 @@ export function ManualPlanSelectorByRankClient() {
                                     <SelectValue placeholder="Chọn chức danh..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {activeRanks.map((rank: any) => (
+                                    {activeRanksList.map((rank: any) => (
                                         <SelectItem key={rank.code} value={rank.code}>
                                             {rank.nameVi || rank.name} ({rank.code})
                                         </SelectItem>
