@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { AppCacheService } from '../../core/cache/app-cache.service';
 
 @Injectable()
 export class KpiEvaluationsService {
-  private cache = new Map<string, { data: any, expiresAt: number }>();
-  private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
-
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private cache: AppCacheService) { }
 
   // Giả lập gọi RPC sang Integration Service
   private async fetchMetricFromIntegration(integrationCode: string, employeeCode: string): Promise<number> {
@@ -17,10 +15,8 @@ export class KpiEvaluationsService {
   }
 
   async findPeriods() {
-    const cached = this.cache.get('periods');
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.data;
-    }
+    const cached = await this.cache.get<any>('periods');
+    if (cached) return cached;
 
     const periods = await this.prisma.kpiPeriod.findMany({
       orderBy: { startDate: 'desc' },
@@ -46,7 +42,7 @@ export class KpiEvaluationsService {
       }
     };
 
-    this.cache.set('periods', { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    await this.cache.set('periods', result);
     return result;
   }
 
@@ -60,7 +56,7 @@ export class KpiEvaluationsService {
     });
 
     // Invalidate cache when data changes
-    this.cache.delete('periods');
+    await this.cache.delete('periods');
 
     return {
       ...p,
@@ -71,11 +67,11 @@ export class KpiEvaluationsService {
 
   async findCriteria(query: any = {}) {
     const isAdmin = query?.isAdmin || false;
-    const cached = this.cache.get('criteria');
+    const cached = await this.cache.get<any>('criteria');
     let dataToReturn: any;
 
-    if (cached && cached.expiresAt > Date.now()) {
-      dataToReturn = cached.data;
+    if (cached) {
+      dataToReturn = cached;
     } else {
       const criteria = await this.prisma.kpiCriteria.findMany();
       dataToReturn = {
@@ -93,7 +89,7 @@ export class KpiEvaluationsService {
           }
         }
       };
-      this.cache.set('criteria', { data: dataToReturn, expiresAt: Date.now() + this.CACHE_TTL_MS });
+      await this.cache.set('criteria', dataToReturn);
     }
 
     const allowedActions: string[] = [];
@@ -132,7 +128,7 @@ export class KpiEvaluationsService {
     });
 
     // Invalidate cache
-    this.cache.delete('criteria');
+    await this.cache.delete('criteria');
     return c;
   }
 
@@ -168,13 +164,13 @@ export class KpiEvaluationsService {
     });
 
     // Invalidate cache
-    this.cache.delete('criteria');
+    await this.cache.delete('criteria');
     return c;
   }
 
   async deleteCriterion(id: number) {
     await this.prisma.kpiCriteria.delete({ where: { id } });
-    this.cache.delete('criteria'); // Invalidate cache
+    await this.cache.delete('criteria'); // Invalidate cache
     return { success: true };
   }
 

@@ -4,6 +4,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
+import { TaskSharedService } from '../task-shared/task-shared.service';
 
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
@@ -44,6 +45,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
     @Inject('USER_PACKAGE') private userClient: any,
     @Inject('WORKFLOW_PACKAGE') private workflowClient: any,
+    private taskSharedService: TaskSharedService,
   ) { }
 
   onModuleInit() {
@@ -73,445 +75,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private parseParticipants(participants: any[]) {
-    if (!participants) return { owner: null, assignee: null, approver: null, coordinators: [] };
-
-    const owner = participants.find(p => p.participantRole === TaskRole.OWNER)?.employeeCode || null;
-    const assignee = participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || null;
-    const approver = participants.find(p => p.participantRole === TaskRole.APPROVER)?.employeeCode || null;
-
-    const coordinators = participants
-      .filter(p => p.participantRole === TaskRole.COORDINATOR)
-      .map(p => p.employeeCode)
-      .filter(Boolean);
-
-    return { owner, assignee, approver, coordinators };
-  }
-
-  /**
-   * Helper function to extract common participant logic for createTask and assignTask
-   */
-  private buildParticipantsData(taskId: number, data: any): any[] {
-    const participantsData: any[] = [];
-
-    // Assignee
-    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
-    const assigneePct = typeof data.assigneePercentage === 'number' ? data.assigneePercentage : 100.0;
-    if (assigneeCode) {
-      participantsData.push({
-        taskId,
-        employeeCode: assigneeCode,
-        participantRole: TaskRole.ASSIGNEE,
-        contributionPercentage: assigneePct
-      });
-    }
-
-    // Owner (Assigner)
-    const assignerCode = data.assignerCode || 'UNASSIGNED';
-    if (assignerCode) {
-      participantsData.push({ taskId, employeeCode: assignerCode, participantRole: TaskRole.OWNER });
-    }
-
-    // Supervisor (Approver)
-    if (data.supervisorCode) {
-      participantsData.push({ taskId, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
-    }
-
-    // Co-assignees (Coordinators)
-    const coassigneeCodes = data.coassigneeCodes || [];
-    const coassigneePcts = data.coassigneePercentages || {};
-    for (const coCode of coassigneeCodes) {
-      if (coCode) {
-        const coPct = typeof coassigneePcts[coCode] === 'number' ? coassigneePcts[coCode] : 0;
-        participantsData.push({
-          taskId,
-          employeeCode: coCode,
-          participantRole: TaskRole.COORDINATOR,
-          contributionPercentage: coPct
-        });
-      }
-    }
-
-    return participantsData;
-  }
-
-
-  private async enrichTasks(tasks: any[]) {
-    if (!tasks || tasks.length === 0) return tasks;
-
-    const empCodes = new Set<string>();
-    const collectCodes = (t: any) => {
-      if (t.participants) {
-        t.participants.forEach((p: any) => {
-          if (p.employeeCode) empCodes.add(p.employeeCode);
-        });
-      }
-      if (t.creatorEmployeeCode) {
-        empCodes.add(t.creatorEmployeeCode);
-      }
-      if (t.children) t.children.forEach(collectCodes);
-    };
-    tasks.forEach(collectCodes);
-
-    const empCodesArray = Array.from(empCodes).filter(Boolean);
-    const employeeMap = new Map<string, string>(); // employeeCode -> fullName
-
-    if (empCodesArray.length > 0) {
-      const employees = await this.prisma.employee.findMany({
-        where: { employeeCode: { in: empCodesArray } },
-        select: { employeeCode: true, fullName: true }
-      });
-      employees.forEach(emp => {
-        employeeMap.set(emp.employeeCode, emp.fullName);
-      });
-    }
-
-    const mapNames = (t: any) => {
-      let creatorCode = t.creatorEmployeeCode;
-
-      if (creatorCode) {
-        t.creatorEmployeeCode = creatorCode; // ensure it is set
-        t.creatorName = employeeMap.get(creatorCode) || creatorCode;
-      } else {
-        t.creatorEmployeeCode = 'SYSTEM';
-        t.creatorName = 'SYSTEM';
-      }
-
-      if (t.participants) {
-        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
-        t.assigneeCode = assignee || 'UNASSIGNED';
-        t.assigneeName = assignee && assignee !== 'UNASSIGNED' ? (employeeMap.get(assignee) || assignee) : 'Chưa phân công';
-        t.assignerCode = owner || '';
-        t.assignerName = owner ? (employeeMap.get(owner) || owner) : (t.creatorName || '');
-        t.supervisorCode = approver || '';
-        t.supervisorName = approver ? (employeeMap.get(approver) || approver) : '';
-        t.coassigneeCodes = coordinators;
-        t.coassigneeNames = (coordinators || []).map((code: string) => employeeMap.get(code) || code);
-      } else {
-        t.assignerName = t.creatorName || '';
-      }
-      if (t.children) t.children.forEach(mapNames);
-    };
-    tasks.forEach(mapNames);
-
-    return tasks;
-  }
-
-
-
-
-  private async populateQueryHierarchy(query: any) {
-
-    // Lấy sơ đồ thẩm quyền trực tiếp từ user-service
-    if (!query.isAdmin && query.currentUserId) {
-      try {
-        const subordinatesRes: any = await firstValueFrom(
-          this.userService.GetSubordinates({ userId: query.currentUserId })
-        );
-        query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
-        query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
-      } catch (e) {
-      }
-    }
-  }
-
-  private async checkTaskAccess(t: any, query: any): Promise<{
-    hasAccess: boolean;
-    isAdmin: boolean;
-    isOwner: boolean;
-    isAssignee: boolean;
-    isSupervisor: boolean;
-    isCoordinator: boolean;
-    isDeptLeader: boolean;
-    isLowestLevel: boolean;
-  }> {
-    if (!query) {
-      return {
-        hasAccess: true,
-        isAdmin: true,
-        isOwner: true,
-        isAssignee: true,
-        isSupervisor: true,
-        isCoordinator: true,
-        isDeptLeader: true,
-        isLowestLevel: false,
-      };
-    }
-
-    const perms = query.currentUserPermissions || [];
-    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
-    const currentEmployeeCode = query.currentEmployeeCode;
-
-    if (!currentEmployeeCode) {
-      return {
-        hasAccess: isAdmin, // If they are admin, they have access, but no direct roles
-        isAdmin,
-        isOwner: false,
-        isAssignee: false,
-        isSupervisor: false,
-        isCoordinator: false,
-        isDeptLeader: false,
-        isLowestLevel: false,
-      };
-    }
-
-    const isOwner = t.assignerCode === currentEmployeeCode || t.creatorEmployeeCode === currentEmployeeCode;
-    const isAssignee = t.assigneeCode === currentEmployeeCode;
-    const isSupervisor = t.supervisorCode === currentEmployeeCode;
-    const isCoordinator = Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(currentEmployeeCode);
-
-    let isDeptLeader = false;
-    const isLeader = query.isLeader || perms.includes('TASK.ASSIGN') || perms.includes('TASK.*');
-
-    if (query.allowedDomainIds?.length > 0) {
-      const allowedDomains = query.allowedDomainIds.map(Number).filter(Boolean);
-      if (t.domainId && allowedDomains.includes(Number(t.domainId))) {
-        isDeptLeader = true;
-      }
-    }
-
-    if (query.allowedDepartmentIds?.length > 0 || query.allowedEmployeeCodes?.length > 0) {
-      const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
-      const allowedCodes = query.allowedEmployeeCodes || [];
-
-      if (t.plan?.departmentId && allowedDepts.includes(Number(t.plan.departmentId))) {
-        isDeptLeader = true;
-      } else if (t.monitoredUnitId && allowedDepts.includes(Number(t.monitoredUnitId))) {
-        isDeptLeader = true;
-      } else {
-        const assigneeCode = t.assigneeCode;
-        if (assigneeCode && allowedCodes.includes(assigneeCode)) {
-          isDeptLeader = true;
-        } else if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
-          const assigneeEmp = await this.prisma.employee.findUnique({
-            where: { employeeCode: assigneeCode },
-            select: { departmentId: true }
-          });
-          if (assigneeEmp?.departmentId && allowedDepts.includes(Number(assigneeEmp.departmentId))) {
-            isDeptLeader = true;
-          }
-        }
-      }
-    }
-    const allowedCodesForLowestLevel = query.allowedEmployeeCodes || [];
-    const allowedDeptsForLowestLevel = query.allowedDepartmentIds || [];
-    const hasSubordinates = allowedCodesForLowestLevel.filter((c: string) => c !== currentEmployeeCode).length > 0 || allowedDeptsForLowestLevel.length > 0;
-    const isLowestLevel = !isAdmin && !hasSubordinates;
-
-    const hasAccess = isAdmin || isOwner || isAssignee || isSupervisor || isCoordinator || isDeptLeader;
-
-    return {
-      hasAccess,
-      isAdmin,
-      isOwner,
-      isAssignee,
-      isSupervisor,
-      isCoordinator,
-      isDeptLeader,
-      isLowestLevel,
-    };
-  }
-
-  private async computeAllowedActions(t: any, query: any): Promise<string[]> {
-    const access = await this.checkTaskAccess(t, query);
-    if (!access.hasAccess) {
-      return [];
-    }
-
-    let hasChildren = false;
-    if (t.children && t.children.length > 0) {
-      hasChildren = true;
-    } else if (t._count && typeof t._count.children === 'number') {
-      hasChildren = t._count.children > 0;
-    } else {
-      const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: t.id, depth: 1 } });
-      hasChildren = childrenCount > 0;
-    }
-
-    let isTreeParticipant = access.isOwner || access.isAssignee || access.isSupervisor || access.isCoordinator;
-
-    if (!isTreeParticipant && access.isDeptLeader) {
-      const closures = await this.prisma.taskClosure.findMany({
-        where: {
-          OR: [
-            { descendantId: t.id },
-            { ancestorId: t.id }
-          ]
-        },
-        select: { ancestorId: true, descendantId: true }
-      });
-      const relatedTaskIds = new Set<number>();
-      closures.forEach(c => {
-        if (c.ancestorId !== t.id) relatedTaskIds.add(c.ancestorId);
-        if (c.descendantId !== t.id) relatedTaskIds.add(c.descendantId);
-      });
-
-      if (relatedTaskIds.size > 0) {
-        const relatedTasks = await this.prisma.task.findMany({
-          where: { id: { in: Array.from(relatedTaskIds) } },
-          include: { participants: true }
-        });
-        await this.enrichTasks(relatedTasks);
-        for (const relT of relatedTasks as any[]) {
-          if (
-            relT.assignerCode === query.currentEmployeeCode ||
-            relT.creatorEmployeeCode === query.currentEmployeeCode ||
-            relT.assigneeCode === query.currentEmployeeCode ||
-            relT.supervisorCode === query.currentEmployeeCode ||
-            (Array.isArray(relT.coassigneeCodes) && relT.coassigneeCodes.includes(query.currentEmployeeCode))
-          ) {
-            isTreeParticipant = true;
-            break;
-          }
-        }
-      }
-    }
-
-    let actions: string[] = [];
-
-    // Tích hợp Workflow chuẩn (Decentralized Engine)
-    const metadata = (t.metadata as any) || {};
-    const activeWorkflowId = metadata.workflowId || t.workflowInstId; // Dùng workflowId hoặc InstId làm ID tạm
-
-    if (activeWorkflowId && metadata.currentNodeId) {
-      try {
-        const definition = await this.getWorkflowDefinition(activeWorkflowId);
-        if (definition) {
-          const engine = new WorkflowEngine(definition);
-          const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
-          actions = engine.getAllowedActions(
-            metadata.currentNodeId,
-            query.currentUserPermissions || [],
-            query.currentEmployeeCode,
-            {
-              status: t.status,
-              hasChildren,
-              isOwner: access.isOwner,
-              isAssignee: access.isAssignee,
-              isSupervisor: access.isSupervisor,
-              isCoordinator: access.isCoordinator,
-              isDeptLeader: access.isDeptLeader,
-              isLowestLevel: access.isLowestLevel,
-              allowedEmployeeCodes: query.allowedEmployeeCodes || [],
-              isUnassigned,
-            }
-          );
-        }
-      } catch (err) {
-        this.logger.error('Failed to calculate allowed actions from local engine for task ' + t.id, err);
-      }
-
-    } else {
-      // Fallback cho task cũ không có workflow
-      const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
-      if (access.isOwner) {
-        actions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK', 'CHAT');
-        if (isUnassigned && !hasChildren) actions.push('DELETE');
-        if (t.status === 'PENDING_APPROVAL') {
-          actions.push('APPROVE', 'RETURN');
-        }
-      }
-
-      if (access.isAssignee) {
-        actions.push('ADD_SUBTASK', 'CHAT');
-        if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('COMPLETE', 'COORDINATE');
-      }
-
-      if (access.isSupervisor || access.isDeptLeader) {
-        actions.push('CHAT');
-        if (!hasChildren && t.status !== 'PENDING_APPROVAL') actions.push('RETURN');
-        if (t.status === 'PENDING_APPROVAL') actions.push('APPROVE', 'RETURN');
-      }
-
-      if (access.isCoordinator) {
-        actions.push('CHAT');
-      }
-
-      if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
-        actions.push('CHAT');
-      }
-    }
-
-    if (actions.length === 0) {
-      this.logger.error(`[DEBUG] actions is empty! access: ${JSON.stringify(access)}, query: ${query.currentEmployeeCode}`);
-    } else if (!actions.includes('ASSIGN')) {
-      this.logger.error(`[DEBUG] ASSIGN is missing! actions: ${actions.join(',')}, access: ${JSON.stringify(access)}`);
-    }
-
-    return Array.from(new Set(actions));
-  }
-
-  private toTaskResponse(t: any): any {
-    if (!t) return null;
-    return {
-      id: t.id ?? 0,
-      title: t.title ?? '',
-      description: t.description ?? '',
-      assigneeCode: t.assigneeCode ?? '',
-      assignerCode: t.assignerCode ?? '',
-      status: t.status ?? '',
-      dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || ''),
-      startDate: t.startDate instanceof Date ? t.startDate.toISOString() : (t.startDate || ''),
-      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
-      updatedAt: t.updatedAt instanceof Date ? t.updatedAt.toISOString() : (t.updatedAt || ''),
-      baseScore: t.kpiSettings?.baseScore ?? 0,
-      weight: t.kpiSettings?.weight ?? 0,
-      scoringMethod: t.kpiSettings?.scoringMethod ?? '',
-      bonusPerDay: t.kpiSettings?.bonusPerDay ?? 0,
-      penaltyPerDay: t.kpiSettings?.penaltyPerDay ?? 0,
-      supervisorCode: t.supervisorCode ?? '',
-      planId: t.planId ?? 0,
-      assigneeName: t.assigneeName ?? '',
-      departmentId: t.departmentId ?? 0,
-      parentId: t.parentId ?? 0,
-      rejectReason: t.rejectReason ?? '',
-      assignerName: t.assignerName ?? '',
-      priority: t.priority ?? '',
-      supervisorName: t.supervisorName ?? '',
-      coassigneeCodes: t.coassigneeCodes || [],
-      allowedActions: t.allowedActions || [],
-      plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
-      rootTaskId: t.rootTaskId ?? 0,
-      progress: t.progress ?? 0,
-      coassigneeNames: t.coassigneeNames || [],
-      children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
-      kpiCriteriaId: t.kpiSettings?.kpiCriteriaId || undefined
-    };
-  }
-
-  private toDelegationNode(t: any): any {
-    if (!t) return null;
-    return {
-      id: t.id ?? 0,
-      title: t.title ?? '',
-      status: t.status ?? '',
-      priority: t.priority ?? '',
-      assigneeCode: t.assigneeCode ?? '',
-      assigneeName: t.assigneeName ?? '',
-      assignerCode: t.assignerCode ?? '',
-      assignerName: t.assignerName ?? '',
-      departmentId: t.departmentId ?? 0,
-      parentId: t.parentId ?? 0,
-      dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || ''),
-      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
-      isParent: t.isParent ?? false,
-      isCurrent: t.isCurrent ?? false,
-      isChild: t.isChild ?? false,
-      isGrandChild: t.isGrandChild ?? false,
-      level: t.level ?? 0,
-      allowedActions: t.allowedActions || [],
-      description: t.description ?? '',
-      supervisorCode: t.supervisorCode ?? '',
-      supervisorName: t.supervisorName ?? '',
-      coassigneeCodes: t.coassigneeCodes || [],
-      planId: t.planId ?? 0,
-      plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
-      rootTaskId: t.rootTaskId ?? 0,
-    };
-  }
-
   async listTasks(query: any) {
-    await this.populateQueryHierarchy(query);
+    await this.taskSharedService.populateQueryHierarchy(query);
     const where: any = {};
 
     if (query.id) {
@@ -573,7 +138,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     // Security Data Scoping constraints
-    const scopeWhere = await this.buildScopingWhereClause(query);
+    const scopeWhere = await this.taskSharedService.buildScopingWhereClause(query);
     if (scopeWhere) {
       conditions.push(scopeWhere);
     }
@@ -657,10 +222,10 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
 
-    const enrichedTasks = await this.enrichTasks(finalTasks);
+    const enrichedTasks = await this.taskSharedService.enrichTasks(finalTasks);
 
     const mappedTasks = await Promise.all(enrichedTasks.map(async (t: any) => {
-      const allowedActions = await this.computeAllowedActions(t, query);
+      const allowedActions = await this.taskSharedService.computeAllowedActions(t, query);
 
       return {
         ...t,
@@ -687,7 +252,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
     });
 
-    const finalData = roots.map(t => this.toTaskResponse(t));
+    const finalData = roots.map(t => this.taskSharedService.toTaskResponse(t));
 
     return {
       success: true,
@@ -1000,7 +565,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       });
 
       // Tạo participants using helper
-      const participantsData = this.buildParticipantsData(newTask.id, data);
+      const participantsData = this.taskSharedService.buildParticipantsData(newTask.id, data);
 
       if (participantsData.length > 0) {
         await tx.taskParticipant.createMany({ data: participantsData, skipDuplicates: true });
@@ -1071,17 +636,17 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
     });
 
-    const enriched = await this.enrichTasks([createdTask]);
+    const enriched = await this.taskSharedService.enrichTasks([createdTask]);
     const enrichedTask = enriched[0];
 
     // Add allowed actions for the newly created task so the frontend can render buttons immediately
-    const allowedActions = await this.computeAllowedActions(enrichedTask, {
+    const allowedActions = await this.taskSharedService.computeAllowedActions(enrichedTask, {
       currentEmployeeCode: creatorCode,
       currentUserPermissions: data.currentUserPermissions || [],
     });
     enrichedTask.allowedActions = allowedActions;
 
-    const enrichedTaskResponse = this.toTaskResponse(enrichedTask);
+    const enrichedTaskResponse = this.taskSharedService.toTaskResponse(enrichedTask);
 
     const metadata = (enrichedTask.metadata as any) || {};
     const workflowId = metadata.workflowId;
@@ -1150,14 +715,14 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   }
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionNameForWorkflow?: string) {
-    if (context) await this.populateQueryHierarchy(context);
+    if (context) await this.taskSharedService.populateQueryHierarchy(context);
     const rawTask = await this.prisma.task.findUnique({ where: { id } });
     if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
 
     const actualActorCode = actorCode || context?.currentEmployeeCode;
 
     const tCheckArr = [rawTask];
-    await this.enrichTasks(tCheckArr);
+    await this.taskSharedService.enrichTasks(tCheckArr);
     const tCheck: any = tCheckArr[0];
 
     // GỌI WORKFLOW ĐỂ VALIDATE VÀ NHẢY BƯỚC
@@ -1174,7 +739,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         hasChildren = childrenCount > 0;
 
         const queryContext = { ...context, currentEmployeeCode: actualActorCode, currentUserId: context?.currentUserId };
-        const access = await this.checkTaskAccess(tCheck, queryContext);
+        const access = await this.taskSharedService.checkTaskAccess(tCheck, queryContext);
 
         const businessData = {
           status: rawTask.status,
@@ -1359,8 +924,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         kpiSettings: true
       }
     });
-    const enriched = await this.enrichTasks([updatedTask]);
-    return this.toTaskResponse(enriched[0]);
+    const enriched = await this.taskSharedService.enrichTasks([updatedTask]);
+    return this.taskSharedService.toTaskResponse(enriched[0]);
   }
 
   async assignTask(data: any) {
@@ -1375,9 +940,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (activeWorkflowId && metadataForCheck.currentNodeId) {
       try {
         const tCheckArr = [rawTaskForCheck];
-        await this.enrichTasks(tCheckArr);
+        await this.taskSharedService.enrichTasks(tCheckArr);
         const queryContext = { ...context, currentEmployeeCode: context?.currentEmployeeCode, currentUserId: context?.currentUserId };
-        const access = await this.checkTaskAccess(tCheckArr[0], queryContext);
+        const access = await this.taskSharedService.checkTaskAccess(tCheckArr[0], queryContext);
 
         const definition = await this.getWorkflowDefinition(activeWorkflowId);
         if (definition) {
@@ -1437,7 +1002,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       });
 
       // Re-create participants using helper
-      const participantsData = this.buildParticipantsData(id, data);
+      const participantsData = this.taskSharedService.buildParticipantsData(id, data);
       if (participantsData.length > 0) {
         await tx.taskParticipant.createMany({ data: participantsData, skipDuplicates: true });
       }
@@ -1450,8 +1015,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       return tx.task.findUnique({ where: { id }, include: { participants: true, kpiSettings: true } });
     });
 
-    const enriched = await this.enrichTasks([t]);
-    const enrichedTaskResponse = this.toTaskResponse(enriched[0]);
+    const enriched = await this.taskSharedService.enrichTasks([t]);
+    const enrichedTaskResponse = this.taskSharedService.toTaskResponse(enriched[0]);
 
     if (data.assigneeCode) {
       this.sendTaskNotification(
@@ -1478,7 +1043,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
 
   async getTask(id: number, query: any) {
-    await this.populateQueryHierarchy(query);
+    await this.taskSharedService.populateQueryHierarchy(query);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: {
@@ -1489,23 +1054,23 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     });
     if (!t) throw new RpcException('Không tìm thấy nhiệm vụ');
 
-    const enriched = await this.enrichTasks([t]);
+    const enriched = await this.taskSharedService.enrichTasks([t]);
 
-    const access = await this.checkTaskAccess(t, query);
+    const access = await this.taskSharedService.checkTaskAccess(t, query);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
     }
 
-    const allowedActions = await this.computeAllowedActions(t, query);
+    const allowedActions = await this.taskSharedService.computeAllowedActions(t, query);
 
-    return this.toTaskResponse({
+    return this.taskSharedService.toTaskResponse({
       ...enriched[0],
       allowedActions
     });
   }
 
   async getSubTasks(id: number, query: any) {
-    await this.populateQueryHierarchy(query);
+    await this.taskSharedService.populateQueryHierarchy(query);
     const parentTask = await this.prisma.task.findUnique({
       where: { id },
       include: {
@@ -1514,8 +1079,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
     });
     if (!parentTask) throw new RpcException('Nhiệm vụ không tồn tại');
-    await this.enrichTasks([parentTask]);
-    const parentAccess = await this.checkTaskAccess(parentTask, query);
+    await this.taskSharedService.enrichTasks([parentTask]);
+    const parentAccess = await this.taskSharedService.checkTaskAccess(parentTask, query);
     if (!parentAccess.hasAccess) {
       throw new RpcException('Bạn không có quyền xem nhiệm vụ con của công việc này.');
     }
@@ -1531,7 +1096,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const where: any = { id: { in: childIds }, status: { not: 'TEMPLATE' } };
 
     // Apply scoping constraints to children to ensure unrelated people don't see others' subtasks
-    const scopeWhere = await this.buildScopingWhereClause(query);
+    const scopeWhere = await this.taskSharedService.buildScopingWhereClause(query);
     if (scopeWhere) {
       where.AND = [scopeWhere];
     }
@@ -1541,11 +1106,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
 
-    const enriched = await this.enrichTasks(tasks);
+    const enriched = await this.taskSharedService.enrichTasks(tasks);
 
     const data = await Promise.all(enriched.map(async (t: any) => {
-      const allowedActions = await this.computeAllowedActions(t, query);
-      return this.toDelegationNode({
+      const allowedActions = await this.taskSharedService.computeAllowedActions(t, query);
+      return this.taskSharedService.toDelegationNode({
         ...t,
         allowedActions
       });
@@ -1567,7 +1132,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     });
 
     // Apply scoping constraints to the tree
-    const scopeWhere = await this.buildScopingWhereClause(query);
+    const scopeWhere = await this.taskSharedService.buildScopingWhereClause(query);
     let validIds: Set<number> | null = null;
     if (scopeWhere) {
       const validTasks = await this.prisma.task.findMany({
@@ -1584,7 +1149,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         depth: c.depth
       }));
 
-    const enriched = await this.enrichTasks(descendants);
+    const enriched = await this.taskSharedService.enrichTasks(descendants);
 
     // Build tree
     const map = new Map<number, any>();
@@ -1695,8 +1260,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       const avg = tasks.reduce((sum, t) => sum + t.progress, 0) / tasks.length;
       await this.updateTaskProgress(closure.ancestorId, avg, actorCode);
     }
-    const enriched = await this.enrichTasks([updatedTask]);
-    return this.toTaskResponse(enriched[0]);
+    const enriched = await this.taskSharedService.enrichTasks([updatedTask]);
+    return this.taskSharedService.toTaskResponse(enriched[0]);
   }
 
   async recommendAssignees(query: any) {
@@ -1874,7 +1439,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (action === 'COMPLETE') {
       const raw = await this.prisma.task.findUnique({ where: { id } });
       const tArr = [raw];
-      await this.enrichTasks(tArr);
+      await this.taskSharedService.enrichTasks(tArr);
       const t: any = tArr[0];
       const requiresApproval = t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED';
       const nextStatus = requiresApproval ? 'PENDING_APPROVAL' : 'DONE';
@@ -1924,24 +1489,24 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         kpiSettings: true
       }
     });
-    const enriched = await this.enrichTasks([t]);
-    return this.toTaskResponse(enriched[0]);
+    const enriched = await this.taskSharedService.enrichTasks([t]);
+    return this.taskSharedService.toTaskResponse(enriched[0]);
   }
   async breakdownTask(id: number, data: any) {
-    await this.populateQueryHierarchy(data);
+    await this.taskSharedService.populateQueryHierarchy(data);
     const parentTask = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
     if (!parentTask) throw new RpcException('Nhiệm vụ không tồn tại.');
 
-    await this.enrichTasks([parentTask]);
-    const access = await this.checkTaskAccess(parentTask, data);
+    await this.taskSharedService.enrichTasks([parentTask]);
+    const access = await this.taskSharedService.checkTaskAccess(parentTask, data);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
     }
 
-    const allowedActions = await this.computeAllowedActions(parentTask, data);
+    const allowedActions = await this.taskSharedService.computeAllowedActions(parentTask, data);
     if (!allowedActions.includes('ADD_SUBTASK')) {
       throw new RpcException('Bạn không có quyền phân rã nhiệm vụ này.');
     }
@@ -1949,20 +1514,20 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     return this.createSubTask(id, data);
   }
   async addComment(id: number, data: any) {
-    await this.populateQueryHierarchy(data);
+    await this.taskSharedService.populateQueryHierarchy(data);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
 
-    await this.enrichTasks([t]);
-    const access = await this.checkTaskAccess(t, data);
+    await this.taskSharedService.enrichTasks([t]);
+    const access = await this.taskSharedService.checkTaskAccess(t, data);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
     }
 
-    const allowedActions = await this.computeAllowedActions(t, data);
+    const allowedActions = await this.taskSharedService.computeAllowedActions(t, data);
     if (!allowedActions.includes('CHAT')) {
       throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
     }
@@ -2029,20 +1594,20 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     };
   }
   async getComments(id: number, query: any) {
-    await this.populateQueryHierarchy(query);
+    await this.taskSharedService.populateQueryHierarchy(query);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
 
-    await this.enrichTasks([t]);
-    const access = await this.checkTaskAccess(t, query);
+    await this.taskSharedService.enrichTasks([t]);
+    const access = await this.taskSharedService.checkTaskAccess(t, query);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
     }
 
-    const allowedActions = await this.computeAllowedActions(t, query);
+    const allowedActions = await this.taskSharedService.computeAllowedActions(t, query);
     if (!allowedActions.includes('CHAT')) {
       throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
     }
@@ -2089,20 +1654,20 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     return { success: true, data };
   }
   async requestCoordination(id: number, data: any) {
-    await this.populateQueryHierarchy(data);
+    await this.taskSharedService.populateQueryHierarchy(data);
     const t = await this.prisma.task.findUnique({
       where: { id },
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } }
     });
     if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
 
-    await this.enrichTasks([t]);
-    const access = await this.checkTaskAccess(t, data);
+    await this.taskSharedService.enrichTasks([t]);
+    const access = await this.taskSharedService.checkTaskAccess(t, data);
     if (!access.hasAccess) {
       throw new RpcException('Bạn không có quyền xem thông tin nhiệm vụ này.');
     }
 
-    const allowedActions = await this.computeAllowedActions(t, data);
+    const allowedActions = await this.taskSharedService.computeAllowedActions(t, data);
     if (!allowedActions.includes('COORDINATE')) {
       throw new RpcException('Bạn không có quyền yêu cầu phối hợp trong công việc này.');
     }

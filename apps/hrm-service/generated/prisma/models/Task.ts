@@ -365,6 +365,7 @@ export type TaskWhereInput = {
   participants?: Prisma.TaskParticipantListRelationFilter
   attachments?: Prisma.TaskAttachmentListRelationFilter
   comments?: Prisma.TaskCommentListRelationFilter
+  histories?: Prisma.TaskHistoryListRelationFilter
   ancestors?: Prisma.TaskClosureListRelationFilter
   descendants?: Prisma.TaskClosureListRelationFilter
 }
@@ -396,6 +397,7 @@ export type TaskOrderByWithRelationInput = {
   participants?: Prisma.TaskParticipantOrderByRelationAggregateInput
   attachments?: Prisma.TaskAttachmentOrderByRelationAggregateInput
   comments?: Prisma.TaskCommentOrderByRelationAggregateInput
+  histories?: Prisma.TaskHistoryOrderByRelationAggregateInput
   ancestors?: Prisma.TaskClosureOrderByRelationAggregateInput
   descendants?: Prisma.TaskClosureOrderByRelationAggregateInput
   _relevance?: Prisma.TaskOrderByRelevanceInput
@@ -431,6 +433,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   participants?: Prisma.TaskParticipantListRelationFilter
   attachments?: Prisma.TaskAttachmentListRelationFilter
   comments?: Prisma.TaskCommentListRelationFilter
+  histories?: Prisma.TaskHistoryListRelationFilter
   ancestors?: Prisma.TaskClosureListRelationFilter
   descendants?: Prisma.TaskClosureListRelationFilter
 }, "id">
@@ -516,6 +519,7 @@ export type TaskCreateInput = {
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -546,6 +550,7 @@ export type TaskUncheckedCreateInput = {
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -575,6 +580,7 @@ export type TaskUpdateInput = {
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -605,6 +611,7 @@ export type TaskUncheckedUpdateInput = {
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -677,6 +684,21 @@ export type TaskUncheckedUpdateManyInput = {
   creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TaskScalarRelationFilter = {
+  is?: Prisma.TaskWhereInput
+  isNot?: Prisma.TaskWhereInput
+}
+
+export type TaskListRelationFilter = {
+  every?: Prisma.TaskWhereInput
+  some?: Prisma.TaskWhereInput
+  none?: Prisma.TaskWhereInput
+}
+
+export type TaskOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type TaskOrderByRelevanceInput = {
@@ -773,33 +795,6 @@ export type TaskSumOrderByAggregateInput = {
   planId?: Prisma.SortOrder
 }
 
-export type TaskScalarRelationFilter = {
-  is?: Prisma.TaskWhereInput
-  isNot?: Prisma.TaskWhereInput
-}
-
-export type TaskListRelationFilter = {
-  every?: Prisma.TaskWhereInput
-  some?: Prisma.TaskWhereInput
-  none?: Prisma.TaskWhereInput
-}
-
-export type TaskOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TaskCreateNestedOneWithoutKpiSettingsInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutKpiSettingsInput, Prisma.TaskUncheckedCreateWithoutKpiSettingsInput>
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutKpiSettingsInput
@@ -812,6 +807,48 @@ export type TaskUpdateOneRequiredWithoutKpiSettingsNestedInput = {
   upsert?: Prisma.TaskUpsertWithoutKpiSettingsInput
   connect?: Prisma.TaskWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutKpiSettingsInput, Prisma.TaskUpdateWithoutKpiSettingsInput>, Prisma.TaskUncheckedUpdateWithoutKpiSettingsInput>
+}
+
+export type TaskCreateNestedManyWithoutPlanInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
+  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUncheckedCreateNestedManyWithoutPlanInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
+  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUpdateManyWithoutPlanNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput | Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput[]
+  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput | Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutPlanInput | Prisma.TaskUpdateManyWithWhereWithoutPlanInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type TaskUncheckedUpdateManyWithoutPlanNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput | Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput[]
+  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput | Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutPlanInput | Prisma.TaskUpdateManyWithWhereWithoutPlanInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
 }
 
 export type TaskCreateNestedOneWithoutAttachmentsInput = {
@@ -884,46 +921,18 @@ export type TaskUpdateOneRequiredWithoutCommentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutCommentsInput, Prisma.TaskUpdateWithoutCommentsInput>, Prisma.TaskUncheckedUpdateWithoutCommentsInput>
 }
 
-export type TaskCreateNestedManyWithoutPlanInput = {
-  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
-  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
-  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
-  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+export type TaskCreateNestedOneWithoutHistoriesInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutHistoriesInput, Prisma.TaskUncheckedCreateWithoutHistoriesInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutHistoriesInput
+  connect?: Prisma.TaskWhereUniqueInput
 }
 
-export type TaskUncheckedCreateNestedManyWithoutPlanInput = {
-  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
-  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
-  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
-  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-}
-
-export type TaskUpdateManyWithoutPlanNestedInput = {
-  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
-  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
-  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput | Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput[]
-  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
-  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  update?: Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput | Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput[]
-  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutPlanInput | Prisma.TaskUpdateManyWithWhereWithoutPlanInput[]
-  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
-}
-
-export type TaskUncheckedUpdateManyWithoutPlanNestedInput = {
-  create?: Prisma.XOR<Prisma.TaskCreateWithoutPlanInput, Prisma.TaskUncheckedCreateWithoutPlanInput> | Prisma.TaskCreateWithoutPlanInput[] | Prisma.TaskUncheckedCreateWithoutPlanInput[]
-  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutPlanInput | Prisma.TaskCreateOrConnectWithoutPlanInput[]
-  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput | Prisma.TaskUpsertWithWhereUniqueWithoutPlanInput[]
-  createMany?: Prisma.TaskCreateManyPlanInputEnvelope
-  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
-  update?: Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput | Prisma.TaskUpdateWithWhereUniqueWithoutPlanInput[]
-  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutPlanInput | Prisma.TaskUpdateManyWithWhereWithoutPlanInput[]
-  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+export type TaskUpdateOneRequiredWithoutHistoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutHistoriesInput, Prisma.TaskUncheckedCreateWithoutHistoriesInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutHistoriesInput
+  upsert?: Prisma.TaskUpsertWithoutHistoriesInput
+  connect?: Prisma.TaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutHistoriesInput, Prisma.TaskUpdateWithoutHistoriesInput>, Prisma.TaskUncheckedUpdateWithoutHistoriesInput>
 }
 
 export type TaskCreateWithoutKpiSettingsInput = {
@@ -950,6 +959,7 @@ export type TaskCreateWithoutKpiSettingsInput = {
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -979,6 +989,7 @@ export type TaskUncheckedCreateWithoutKpiSettingsInput = {
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1023,6 +1034,7 @@ export type TaskUpdateWithoutKpiSettingsInput = {
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1052,656 +1064,7 @@ export type TaskUncheckedUpdateWithoutKpiSettingsInput = {
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
-  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskCreateWithoutAttachmentsInput = {
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
-  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
-  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskUncheckedCreateWithoutAttachmentsInput = {
-  id?: number
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  planId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
-  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskCreateOrConnectWithoutAttachmentsInput = {
-  where: Prisma.TaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.TaskCreateWithoutAttachmentsInput, Prisma.TaskUncheckedCreateWithoutAttachmentsInput>
-}
-
-export type TaskUpsertWithoutAttachmentsInput = {
-  update: Prisma.XOR<Prisma.TaskUpdateWithoutAttachmentsInput, Prisma.TaskUncheckedUpdateWithoutAttachmentsInput>
-  create: Prisma.XOR<Prisma.TaskCreateWithoutAttachmentsInput, Prisma.TaskUncheckedCreateWithoutAttachmentsInput>
-  where?: Prisma.TaskWhereInput
-}
-
-export type TaskUpdateToOneWithWhereWithoutAttachmentsInput = {
-  where?: Prisma.TaskWhereInput
-  data: Prisma.XOR<Prisma.TaskUpdateWithoutAttachmentsInput, Prisma.TaskUncheckedUpdateWithoutAttachmentsInput>
-}
-
-export type TaskUpdateWithoutAttachmentsInput = {
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
-  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
-  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskUncheckedUpdateWithoutAttachmentsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
-  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskCreateWithoutParticipantsInput = {
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
-  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
-  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskUncheckedCreateWithoutParticipantsInput = {
-  id?: number
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  planId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
-  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskCreateOrConnectWithoutParticipantsInput = {
-  where: Prisma.TaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.TaskCreateWithoutParticipantsInput, Prisma.TaskUncheckedCreateWithoutParticipantsInput>
-}
-
-export type TaskUpsertWithoutParticipantsInput = {
-  update: Prisma.XOR<Prisma.TaskUpdateWithoutParticipantsInput, Prisma.TaskUncheckedUpdateWithoutParticipantsInput>
-  create: Prisma.XOR<Prisma.TaskCreateWithoutParticipantsInput, Prisma.TaskUncheckedCreateWithoutParticipantsInput>
-  where?: Prisma.TaskWhereInput
-}
-
-export type TaskUpdateToOneWithWhereWithoutParticipantsInput = {
-  where?: Prisma.TaskWhereInput
-  data: Prisma.XOR<Prisma.TaskUpdateWithoutParticipantsInput, Prisma.TaskUncheckedUpdateWithoutParticipantsInput>
-}
-
-export type TaskUpdateWithoutParticipantsInput = {
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
-  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
-  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskUncheckedUpdateWithoutParticipantsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
-  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskCreateWithoutDescendantsInput = {
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
-  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
-}
-
-export type TaskUncheckedCreateWithoutDescendantsInput = {
-  id?: number
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  planId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
-}
-
-export type TaskCreateOrConnectWithoutDescendantsInput = {
-  where: Prisma.TaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.TaskCreateWithoutDescendantsInput, Prisma.TaskUncheckedCreateWithoutDescendantsInput>
-}
-
-export type TaskCreateWithoutAncestorsInput = {
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
-  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
-  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskUncheckedCreateWithoutAncestorsInput = {
-  id?: number
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  planId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
-  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
-  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskCreateOrConnectWithoutAncestorsInput = {
-  where: Prisma.TaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.TaskCreateWithoutAncestorsInput, Prisma.TaskUncheckedCreateWithoutAncestorsInput>
-}
-
-export type TaskUpsertWithoutDescendantsInput = {
-  update: Prisma.XOR<Prisma.TaskUpdateWithoutDescendantsInput, Prisma.TaskUncheckedUpdateWithoutDescendantsInput>
-  create: Prisma.XOR<Prisma.TaskCreateWithoutDescendantsInput, Prisma.TaskUncheckedCreateWithoutDescendantsInput>
-  where?: Prisma.TaskWhereInput
-}
-
-export type TaskUpdateToOneWithWhereWithoutDescendantsInput = {
-  where?: Prisma.TaskWhereInput
-  data: Prisma.XOR<Prisma.TaskUpdateWithoutDescendantsInput, Prisma.TaskUncheckedUpdateWithoutDescendantsInput>
-}
-
-export type TaskUpdateWithoutDescendantsInput = {
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
-  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
-}
-
-export type TaskUncheckedUpdateWithoutDescendantsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
-}
-
-export type TaskUpsertWithoutAncestorsInput = {
-  update: Prisma.XOR<Prisma.TaskUpdateWithoutAncestorsInput, Prisma.TaskUncheckedUpdateWithoutAncestorsInput>
-  create: Prisma.XOR<Prisma.TaskCreateWithoutAncestorsInput, Prisma.TaskUncheckedCreateWithoutAncestorsInput>
-  where?: Prisma.TaskWhereInput
-}
-
-export type TaskUpdateToOneWithWhereWithoutAncestorsInput = {
-  where?: Prisma.TaskWhereInput
-  data: Prisma.XOR<Prisma.TaskUpdateWithoutAncestorsInput, Prisma.TaskUncheckedUpdateWithoutAncestorsInput>
-}
-
-export type TaskUpdateWithoutAncestorsInput = {
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
-  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
-  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskUncheckedUpdateWithoutAncestorsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
-  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
-  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskCreateWithoutCommentsInput = {
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
-  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
-  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskUncheckedCreateWithoutCommentsInput = {
-  id?: number
-  parentId?: number | null
-  title: string
-  description?: string | null
-  status?: string
-  priority?: string
-  progress?: number
-  rejectReason?: string | null
-  startDate?: Date | string | null
-  dueDate?: Date | string | null
-  completedAt?: Date | string | null
-  isDeadlineWarned?: boolean
-  isRiskWarned?: boolean
-  domainId?: number | null
-  monitoredUnitId?: number | null
-  planId?: number | null
-  workflowInstId?: string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
-  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
-  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
-  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
-  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
-}
-
-export type TaskCreateOrConnectWithoutCommentsInput = {
-  where: Prisma.TaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.TaskCreateWithoutCommentsInput, Prisma.TaskUncheckedCreateWithoutCommentsInput>
-}
-
-export type TaskUpsertWithoutCommentsInput = {
-  update: Prisma.XOR<Prisma.TaskUpdateWithoutCommentsInput, Prisma.TaskUncheckedUpdateWithoutCommentsInput>
-  create: Prisma.XOR<Prisma.TaskCreateWithoutCommentsInput, Prisma.TaskUncheckedCreateWithoutCommentsInput>
-  where?: Prisma.TaskWhereInput
-}
-
-export type TaskUpdateToOneWithWhereWithoutCommentsInput = {
-  where?: Prisma.TaskWhereInput
-  data: Prisma.XOR<Prisma.TaskUpdateWithoutCommentsInput, Prisma.TaskUncheckedUpdateWithoutCommentsInput>
-}
-
-export type TaskUpdateWithoutCommentsInput = {
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
-  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
-  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
-  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
-}
-
-export type TaskUncheckedUpdateWithoutCommentsInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  priority?: Prisma.StringFieldUpdateOperationsInput | string
-  progress?: Prisma.FloatFieldUpdateOperationsInput | number
-  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
-  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
-  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -1730,6 +1093,7 @@ export type TaskCreateWithoutPlanInput = {
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -1759,6 +1123,7 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1816,6 +1181,810 @@ export type TaskScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
 }
 
+export type TaskCreateWithoutAttachmentsInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskUncheckedCreateWithoutAttachmentsInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskCreateOrConnectWithoutAttachmentsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutAttachmentsInput, Prisma.TaskUncheckedCreateWithoutAttachmentsInput>
+}
+
+export type TaskUpsertWithoutAttachmentsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutAttachmentsInput, Prisma.TaskUncheckedUpdateWithoutAttachmentsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutAttachmentsInput, Prisma.TaskUncheckedCreateWithoutAttachmentsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutAttachmentsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutAttachmentsInput, Prisma.TaskUncheckedUpdateWithoutAttachmentsInput>
+}
+
+export type TaskUpdateWithoutAttachmentsInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutAttachmentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskCreateWithoutParticipantsInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskUncheckedCreateWithoutParticipantsInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskCreateOrConnectWithoutParticipantsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutParticipantsInput, Prisma.TaskUncheckedCreateWithoutParticipantsInput>
+}
+
+export type TaskUpsertWithoutParticipantsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutParticipantsInput, Prisma.TaskUncheckedUpdateWithoutParticipantsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutParticipantsInput, Prisma.TaskUncheckedCreateWithoutParticipantsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutParticipantsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutParticipantsInput, Prisma.TaskUncheckedUpdateWithoutParticipantsInput>
+}
+
+export type TaskUpdateWithoutParticipantsInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutParticipantsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskCreateWithoutDescendantsInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+}
+
+export type TaskUncheckedCreateWithoutDescendantsInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+}
+
+export type TaskCreateOrConnectWithoutDescendantsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutDescendantsInput, Prisma.TaskUncheckedCreateWithoutDescendantsInput>
+}
+
+export type TaskCreateWithoutAncestorsInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskUncheckedCreateWithoutAncestorsInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskCreateOrConnectWithoutAncestorsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutAncestorsInput, Prisma.TaskUncheckedCreateWithoutAncestorsInput>
+}
+
+export type TaskUpsertWithoutDescendantsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutDescendantsInput, Prisma.TaskUncheckedUpdateWithoutDescendantsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutDescendantsInput, Prisma.TaskUncheckedCreateWithoutDescendantsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutDescendantsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutDescendantsInput, Prisma.TaskUncheckedUpdateWithoutDescendantsInput>
+}
+
+export type TaskUpdateWithoutDescendantsInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutDescendantsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+}
+
+export type TaskUpsertWithoutAncestorsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutAncestorsInput, Prisma.TaskUncheckedUpdateWithoutAncestorsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutAncestorsInput, Prisma.TaskUncheckedCreateWithoutAncestorsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutAncestorsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutAncestorsInput, Prisma.TaskUncheckedUpdateWithoutAncestorsInput>
+}
+
+export type TaskUpdateWithoutAncestorsInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutAncestorsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskCreateWithoutCommentsInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskUncheckedCreateWithoutCommentsInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskCreateOrConnectWithoutCommentsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutCommentsInput, Prisma.TaskUncheckedCreateWithoutCommentsInput>
+}
+
+export type TaskUpsertWithoutCommentsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutCommentsInput, Prisma.TaskUncheckedUpdateWithoutCommentsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutCommentsInput, Prisma.TaskUncheckedCreateWithoutCommentsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutCommentsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutCommentsInput, Prisma.TaskUncheckedUpdateWithoutCommentsInput>
+}
+
+export type TaskUpdateWithoutCommentsInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutCommentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskCreateWithoutHistoriesInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskUncheckedCreateWithoutHistoriesInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskCreateOrConnectWithoutHistoriesInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutHistoriesInput, Prisma.TaskUncheckedCreateWithoutHistoriesInput>
+}
+
+export type TaskUpsertWithoutHistoriesInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutHistoriesInput, Prisma.TaskUncheckedUpdateWithoutHistoriesInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutHistoriesInput, Prisma.TaskUncheckedCreateWithoutHistoriesInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutHistoriesInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutHistoriesInput, Prisma.TaskUncheckedUpdateWithoutHistoriesInput>
+}
+
+export type TaskUpdateWithoutHistoriesInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutHistoriesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+}
+
 export type TaskCreateManyPlanInput = {
   id?: number
   parentId?: number | null
@@ -1863,6 +2032,7 @@ export type TaskUpdateWithoutPlanInput = {
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1892,6 +2062,7 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -1928,6 +2099,7 @@ export type TaskCountOutputType = {
   participants: number
   attachments: number
   comments: number
+  histories: number
   ancestors: number
   descendants: number
 }
@@ -1936,6 +2108,7 @@ export type TaskCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   participants?: boolean | TaskCountOutputTypeCountParticipantsArgs
   attachments?: boolean | TaskCountOutputTypeCountAttachmentsArgs
   comments?: boolean | TaskCountOutputTypeCountCommentsArgs
+  histories?: boolean | TaskCountOutputTypeCountHistoriesArgs
   ancestors?: boolean | TaskCountOutputTypeCountAncestorsArgs
   descendants?: boolean | TaskCountOutputTypeCountDescendantsArgs
 }
@@ -1969,6 +2142,13 @@ export type TaskCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime.Type
  */
 export type TaskCountOutputTypeCountCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TaskCommentWhereInput
+}
+
+/**
+ * TaskCountOutputType without action
+ */
+export type TaskCountOutputTypeCountHistoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskHistoryWhereInput
 }
 
 /**
@@ -2013,6 +2193,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   participants?: boolean | Prisma.Task$participantsArgs<ExtArgs>
   attachments?: boolean | Prisma.Task$attachmentsArgs<ExtArgs>
   comments?: boolean | Prisma.Task$commentsArgs<ExtArgs>
+  histories?: boolean | Prisma.Task$historiesArgs<ExtArgs>
   ancestors?: boolean | Prisma.Task$ancestorsArgs<ExtArgs>
   descendants?: boolean | Prisma.Task$descendantsArgs<ExtArgs>
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -2051,6 +2232,7 @@ export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   participants?: boolean | Prisma.Task$participantsArgs<ExtArgs>
   attachments?: boolean | Prisma.Task$attachmentsArgs<ExtArgs>
   comments?: boolean | Prisma.Task$commentsArgs<ExtArgs>
+  histories?: boolean | Prisma.Task$historiesArgs<ExtArgs>
   ancestors?: boolean | Prisma.Task$ancestorsArgs<ExtArgs>
   descendants?: boolean | Prisma.Task$descendantsArgs<ExtArgs>
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -2064,6 +2246,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     participants: Prisma.$TaskParticipantPayload<ExtArgs>[]
     attachments: Prisma.$TaskAttachmentPayload<ExtArgs>[]
     comments: Prisma.$TaskCommentPayload<ExtArgs>[]
+    histories: Prisma.$TaskHistoryPayload<ExtArgs>[]
     ancestors: Prisma.$TaskClosurePayload<ExtArgs>[]
     descendants: Prisma.$TaskClosurePayload<ExtArgs>[]
   }
@@ -2434,6 +2617,7 @@ export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Typ
   participants<T extends Prisma.Task$participantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attachments<T extends Prisma.Task$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Task$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  histories<T extends Prisma.Task$historiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$historiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ancestors<T extends Prisma.Task$ancestorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$ancestorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   descendants<T extends Prisma.Task$descendantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$descendantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2941,6 +3125,30 @@ export type Task$commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.TaskCommentScalarFieldEnum | Prisma.TaskCommentScalarFieldEnum[]
+}
+
+/**
+ * Task.histories
+ */
+export type Task$historiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskHistory
+   */
+  select?: Prisma.TaskHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskHistory
+   */
+  omit?: Prisma.TaskHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskHistoryInclude<ExtArgs> | null
+  where?: Prisma.TaskHistoryWhereInput
+  orderBy?: Prisma.TaskHistoryOrderByWithRelationInput | Prisma.TaskHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.TaskHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskHistoryScalarFieldEnum | Prisma.TaskHistoryScalarFieldEnum[]
 }
 
 /**

@@ -45,40 +45,10 @@ export { Prisma }
  */
 export type Employee = Prisma.EmployeeModel
 /**
- * Model Task
- * 
- */
-export type Task = Prisma.TaskModel
-/**
  * Model TaskKpiSetting
  * 
  */
 export type TaskKpiSetting = Prisma.TaskKpiSettingModel
-/**
- * Model TaskAttachment
- * 
- */
-export type TaskAttachment = Prisma.TaskAttachmentModel
-/**
- * Model TaskParticipant
- * 
- */
-export type TaskParticipant = Prisma.TaskParticipantModel
-/**
- * Model TaskClosure
- * 
- */
-export type TaskClosure = Prisma.TaskClosureModel
-/**
- * Model TaskComment
- * 
- */
-export type TaskComment = Prisma.TaskCommentModel
-/**
- * Model MasterPlan
- * 
- */
-export type MasterPlan = Prisma.MasterPlanModel
 /**
  * Model KpiPeriod
  * 
@@ -109,6 +79,41 @@ export type KpiEvaluation = Prisma.KpiEvaluationModel
  * 
  */
 export type KpiEvaluationDetail = Prisma.KpiEvaluationDetailModel
+/**
+ * Model MasterPlan
+ * 
+ */
+export type MasterPlan = Prisma.MasterPlanModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
+ * Model TaskAttachment
+ * 
+ */
+export type TaskAttachment = Prisma.TaskAttachmentModel
+/**
+ * Model TaskParticipant
+ * 
+ */
+export type TaskParticipant = Prisma.TaskParticipantModel
+/**
+ * Model TaskClosure
+ * 
+ */
+export type TaskClosure = Prisma.TaskClosureModel
+/**
+ * Model TaskComment
+ * 
+ */
+export type TaskComment = Prisma.TaskCommentModel
+/**
+ * Model TaskHistory
+ * 
+ */
+export type TaskHistory = Prisma.TaskHistoryModel
 /**
  * Model TaskRankTemplate
  * 

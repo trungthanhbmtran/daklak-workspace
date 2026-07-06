@@ -4,11 +4,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { TasksCronService } from './tasks.cron';
+import { TaskSharedModule } from '../task-shared/task-shared.module';
 
 const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(), '../../shared/protos');
 
 @Module({
   imports: [
+    TaskSharedModule,
     ClientsModule.registerAsync([
       {
         name: 'NOTIFICATION_SERVICE',

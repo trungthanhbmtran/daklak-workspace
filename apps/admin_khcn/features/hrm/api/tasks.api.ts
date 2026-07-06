@@ -79,4 +79,16 @@ export const hrmTasksApi = {
   updateProgress(id: number, progress: number): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/progress`, { progress }) as any;
   },
+
+  getHistory(id: number): Promise<ApiResponse<any[]>> {
+    return apiClient.get(`/hrm/tasks/${id}/history`) as any;
+  },
+
+  getKpiSetting(id: number): Promise<ApiResponse<any>> {
+    return apiClient.get(`/hrm/tasks/${id}/kpi-setting`) as any;
+  },
+
+  upsertKpiSetting(id: number, payload: any): Promise<ApiResponse<any>> {
+    return apiClient.put(`/hrm/tasks/${id}/kpi-setting`, payload) as any;
+  },
 };

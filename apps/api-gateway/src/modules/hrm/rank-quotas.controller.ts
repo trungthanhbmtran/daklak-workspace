@@ -7,7 +7,7 @@ export class RankQuotasController {
   private rankQuotaService: any;
 
   constructor(
-    @Inject(MICROSERVICES.RANK_QUOTA.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
   ) {}
 
   onModuleInit() {

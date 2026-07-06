@@ -15,7 +15,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@generated/*": ["generated/*"]
+      "@generated/*": ["generated/*"],
+      "@shared/*": ["../../shared/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

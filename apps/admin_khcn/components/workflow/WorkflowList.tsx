@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { 
-  Plus, 
-  MoreHorizontal, 
-  Play, 
-  Edit2, 
-  Trash2, 
+import {
+  Plus,
+  MoreHorizontal,
+  Play,
+  Edit2,
+  Trash2,
   Activity,
   Calendar,
   Layers,
@@ -135,7 +135,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       toast.error("Dữ liệu đầu vào (JSON) không hợp lệ");
       return;
     }
-    
+
     setIsTestRunning(true);
     try {
       await workflowApi.start(testRunWorkflow.id, parsedContext);
@@ -169,12 +169,12 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       <div className="flex items-center gap-4">
         <Search placeholder="Tìm kiếm quy trình..." className="flex-1 max-w-sm" />
         <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10">
-                {totalItems} Tổng số
-            </Badge>
-            <Badge variant="outline" className="rounded-lg py-1 px-3 bg-emerald-50 text-emerald-600 border-emerald-100">
-                Hiển thị trang {page}/{Math.max(1, totalPages)}
-            </Badge>
+          <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10">
+            {totalItems} Tổng số
+          </Badge>
+          <Badge variant="outline" className="rounded-lg py-1 px-3 bg-emerald-50 text-emerald-600 border-emerald-100">
+            Hiển thị trang {page}/{Math.max(1, totalPages)}
+          </Badge>
         </div>
       </div>
 
@@ -185,16 +185,16 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
           ))
         ) : workflows.length === 0 ? (
           <div className="col-span-full py-20 text-center space-y-3">
-             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Layers className="h-8 w-8 text-muted-foreground/40" />
-             </div>
-             <h3 className="text-lg font-semibold">Chưa có quy trình nào</h3>
-             <p className="text-muted-foreground">Bắt đầu bằng cách tạo quy trình đầu tiên của bạn.</p>
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Layers className="h-8 w-8 text-muted-foreground/40" />
+            </div>
+            <h3 className="text-lg font-semibold">Chưa có quy trình nào</h3>
+            <p className="text-muted-foreground">Bắt đầu bằng cách tạo quy trình đầu tiên của bạn.</p>
           </div>
         ) : (
           workflows.map((workflow: any) => (
-            <div 
-              key={workflow.id} 
+            <div
+              key={workflow.id}
               className="group relative bg-card border border-border/60 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300"
             >
               <div className="flex items-start justify-between mb-4">
@@ -215,7 +215,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                       <Play className="mr-2 h-4 w-4" /> Chạy thử
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => handleDelete(workflow.id)}
                       className="text-red-600 focus:text-red-600 rounded-lg"
                     >
@@ -227,39 +227,39 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
 
               <div className="space-y-2 min-w-0">
                 <div className="flex items-start gap-2">
-                    <h3 className="font-bold text-lg leading-tight break-words whitespace-normal flex-1 min-w-0">{workflow.name}</h3>
-                    {workflow.active ? (
-                        <Badge className="shrink-0 bg-emerald-500/10 text-emerald-600 border-none text-[10px] h-5 px-1.5 font-bold uppercase tracking-wider">
-                            Active
-                        </Badge>
-                    ) : (
-                        <Badge variant="secondary" className="shrink-0 text-[10px] h-5 px-1.5 font-bold uppercase tracking-wider">
-                            Draft
-                        </Badge>
-                    )}
+                  <h3 className="font-bold text-lg leading-tight wrap-break-words whitespace-normal flex-1 min-w-0">{workflow.name}</h3>
+                  {workflow.active ? (
+                    <Badge className="shrink-0 bg-emerald-500/10 text-emerald-600 border-none text-[10px] h-5 px-1.5 font-bold uppercase tracking-wider">
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="shrink-0 text-[10px] h-5 px-1.5 font-bold uppercase tracking-wider">
+                      Draft
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px] break-words">
+                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px] wrap-break-words">
                   {workflow.description || "Chưa có mô tả cho quy trình này."}
                 </p>
               </div>
 
               <div className="mt-6 pt-5 border-t border-border/40 flex items-center justify-between">
                 <div className="flex flex-col gap-1">
-                    <div className="flex items-center text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {workflow.createdAt ? format(new Date(workflow.createdAt), "dd MMM yyyy", { locale: vi }) : "N/A"}
-                    </div>
-                    <div className="text-[10px] font-mono text-muted-foreground/60 uppercase">
-                        v{workflow.version}.0
-                    </div>
+                  <div className="flex items-center text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+                    <Calendar className="mr-1 h-3 w-3" />
+                    {workflow.createdAt ? format(new Date(workflow.createdAt), "dd MMM yyyy", { locale: vi }) : "N/A"}
+                  </div>
+                  <div className="text-[10px] font-mono text-muted-foreground/60 uppercase">
+                    v{workflow.version}.0
+                  </div>
                 </div>
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="rounded-xl hover:bg-primary/5 hover:text-primary group/btn shrink-0"
-                    onClick={() => setSelectedWorkflow(workflow)}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl hover:bg-primary/5 hover:text-primary group/btn shrink-0"
+                  onClick={() => setSelectedWorkflow(workflow)}
                 >
-                    Chi tiết <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-0.5" />
+                  Chi tiết <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-0.5" />
                 </Button>
               </div>
             </div>
@@ -272,12 +272,12 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious 
+                <PaginationPrevious
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
-              
+
               {/* Hiển thị một số trang (đơn giản) */}
               {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
                 // Logic hiển thị trang thông minh: luôn hiện xung quanh page hiện tại
@@ -288,7 +288,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                 }
                 return (
                   <PaginationItem key={pageNum}>
-                    <PaginationLink 
+                    <PaginationLink
                       isActive={page === pageNum}
                       onClick={() => setPage(pageNum)}
                       className="cursor-pointer"
@@ -300,7 +300,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
               })}
 
               <PaginationItem>
-                <PaginationNext 
+                <PaginationNext
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
@@ -321,86 +321,86 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
 
       <Sheet open={!!selectedWorkflow} onOpenChange={(open) => !open && setSelectedWorkflow(null)}>
         <SheetContent className="sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto border-border/60 shadow-2xl p-0 flex flex-col">
-            {selectedWorkflow && (
-                <>
-                    <div className="p-6 border-b border-border/60 bg-muted/20">
-                        <SheetHeader className="text-left space-y-3">
-                            <div className="flex items-center justify-between">
-                                <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10 uppercase tracking-wider text-[10px] font-bold">
-                                    Quy trình động (BPMN)
-                                </Badge>
-                                {selectedWorkflow.active ? (
-                                    <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[10px] h-6 px-2 font-bold uppercase tracking-wider">
-                                        Active
-                                    </Badge>
-                                ) : (
-                                    <Badge variant="secondary" className="text-[10px] h-6 px-2 font-bold uppercase tracking-wider">
-                                        Draft
-                                    </Badge>
-                                )}
-                            </div>
-                            <SheetTitle className="text-2xl font-bold leading-tight break-words">{selectedWorkflow.name}</SheetTitle>
-                            <SheetDescription className="text-sm">
-                                Phiên bản: <span className="font-mono font-medium text-foreground">v{selectedWorkflow.version}.0</span>
-                            </SheetDescription>
-                        </SheetHeader>
+          {selectedWorkflow && (
+            <>
+              <div className="p-6 border-b border-border/60 bg-muted/20">
+                <SheetHeader className="text-left space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10 uppercase tracking-wider text-[10px] font-bold">
+                      Quy trình động (BPMN)
+                    </Badge>
+                    {selectedWorkflow.active ? (
+                      <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[10px] h-6 px-2 font-bold uppercase tracking-wider">
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px] h-6 px-2 font-bold uppercase tracking-wider">
+                        Draft
+                      </Badge>
+                    )}
+                  </div>
+                  <SheetTitle className="text-2xl font-bold leading-tight wrap-break-words">{selectedWorkflow.name}</SheetTitle>
+                  <SheetDescription className="text-sm">
+                    Phiên bản: <span className="font-mono font-medium text-foreground">v{selectedWorkflow.version}.0</span>
+                  </SheetDescription>
+                </SheetHeader>
+              </div>
+
+              <div className="p-6 flex-1 space-y-6">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Mô tả quy trình</h4>
+                  <div className="p-4 bg-muted/30 rounded-xl border border-border/40 text-sm text-muted-foreground whitespace-pre-wrap wrap-break-words leading-relaxed min-h-[100px]">
+                    {selectedWorkflow.description || "Chưa có mô tả chi tiết cho quy trình này."}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border border-border/40 bg-card space-y-1">
+                    <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Ngày tạo</div>
+                    <div className="text-sm font-medium">
+                      {selectedWorkflow.createdAt ? format(new Date(selectedWorkflow.createdAt), "dd/MM/yyyy HH:mm", { locale: vi }) : "N/A"}
                     </div>
-
-                    <div className="p-6 flex-1 space-y-6">
-                        <div className="space-y-2">
-                            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Mô tả quy trình</h4>
-                            <div className="p-4 bg-muted/30 rounded-xl border border-border/40 text-sm text-muted-foreground whitespace-pre-wrap break-words leading-relaxed min-h-[100px]">
-                                {selectedWorkflow.description || "Chưa có mô tả chi tiết cho quy trình này."}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 rounded-xl border border-border/40 bg-card space-y-1">
-                                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Ngày tạo</div>
-                                <div className="text-sm font-medium">
-                                    {selectedWorkflow.createdAt ? format(new Date(selectedWorkflow.createdAt), "dd/MM/yyyy HH:mm", { locale: vi }) : "N/A"}
-                                </div>
-                            </div>
-                            <div className="p-4 rounded-xl border border-border/40 bg-card space-y-1">
-                                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Cập nhật lần cuối</div>
-                                <div className="text-sm font-medium">
-                                    {selectedWorkflow.updatedAt ? format(new Date(selectedWorkflow.updatedAt), "dd/MM/yyyy HH:mm", { locale: vi }) : "N/A"}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Thống kê cơ bản</h4>
-                            <div className="p-4 rounded-xl border border-border/40 bg-card flex flex-col gap-3">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Tổng số lượt chạy (Instances):</span>
-                                    <span className="font-semibold">—</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Tỷ lệ hoàn thành:</span>
-                                    <span className="font-semibold text-emerald-600">—</span>
-                                </div>
-                                <p className="text-[10px] text-muted-foreground italic mt-2">* Tính năng thống kê đang được cập nhật</p>
-                            </div>
-                        </div>
+                  </div>
+                  <div className="p-4 rounded-xl border border-border/40 bg-card space-y-1">
+                    <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Cập nhật lần cuối</div>
+                    <div className="text-sm font-medium">
+                      {selectedWorkflow.updatedAt ? format(new Date(selectedWorkflow.updatedAt), "dd/MM/yyyy HH:mm", { locale: vi }) : "N/A"}
                     </div>
+                  </div>
+                </div>
 
-                    <div className="p-6 border-t border-border/60 bg-background flex flex-col sm:flex-row gap-3">
-                        <Button 
-                            className="flex-1 rounded-xl"
-                            onClick={() => {
-                                onEdit(selectedWorkflow.id);
-                                setSelectedWorkflow(null);
-                            }}
-                        >
-                            <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa luồng (BPMN Editor)
-                        </Button>
-                        <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { setTestContext("{\n  \n}"); setTestRunWorkflow(selectedWorkflow); }}>
-                            <Play className="mr-2 h-4 w-4" /> Chạy thử quy trình
-                        </Button>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Thống kê cơ bản</h4>
+                  <div className="p-4 rounded-xl border border-border/40 bg-card flex flex-col gap-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Tổng số lượt chạy (Instances):</span>
+                      <span className="font-semibold">—</span>
                     </div>
-                </>
-            )}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Tỷ lệ hoàn thành:</span>
+                      <span className="font-semibold text-emerald-600">—</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground italic mt-2">* Tính năng thống kê đang được cập nhật</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-border/60 bg-background flex flex-col sm:flex-row gap-3">
+                <Button
+                  className="flex-1 rounded-xl"
+                  onClick={() => {
+                    onEdit(selectedWorkflow.id);
+                    setSelectedWorkflow(null);
+                  }}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa luồng (BPMN Editor)
+                </Button>
+                <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { setTestContext("{\n  \n}"); setTestRunWorkflow(selectedWorkflow); }}>
+                  <Play className="mr-2 h-4 w-4" /> Chạy thử quy trình
+                </Button>
+              </div>
+            </>
+          )}
         </SheetContent>
       </Sheet>
 

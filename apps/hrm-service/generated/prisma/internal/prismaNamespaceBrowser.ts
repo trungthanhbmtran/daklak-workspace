@@ -52,19 +52,20 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Employee: 'Employee',
-  Task: 'Task',
   TaskKpiSetting: 'TaskKpiSetting',
-  TaskAttachment: 'TaskAttachment',
-  TaskParticipant: 'TaskParticipant',
-  TaskClosure: 'TaskClosure',
-  TaskComment: 'TaskComment',
-  MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
   KpiCriteriaSetting: 'KpiCriteriaSetting',
   EmployeeKpiTarget: 'EmployeeKpiTarget',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
+  MasterPlan: 'MasterPlan',
+  Task: 'Task',
+  TaskAttachment: 'TaskAttachment',
+  TaskParticipant: 'TaskParticipant',
+  TaskClosure: 'TaskClosure',
+  TaskComment: 'TaskComment',
+  TaskHistory: 'TaskHistory',
   TaskRankTemplate: 'TaskRankTemplate',
   RankQuota: 'RankQuota'
 } as const
@@ -114,33 +115,6 @@ export const EmployeeScalarFieldEnum = {
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
 
 
-export const TaskScalarFieldEnum = {
-  id: 'id',
-  parentId: 'parentId',
-  title: 'title',
-  description: 'description',
-  status: 'status',
-  priority: 'priority',
-  progress: 'progress',
-  rejectReason: 'rejectReason',
-  startDate: 'startDate',
-  dueDate: 'dueDate',
-  completedAt: 'completedAt',
-  isDeadlineWarned: 'isDeadlineWarned',
-  isRiskWarned: 'isRiskWarned',
-  domainId: 'domainId',
-  monitoredUnitId: 'monitoredUnitId',
-  planId: 'planId',
-  workflowInstId: 'workflowInstId',
-  metadata: 'metadata',
-  creatorEmployeeCode: 'creatorEmployeeCode',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
-
-
 export const TaskKpiSettingScalarFieldEnum = {
   taskId: 'taskId',
   baseScore: 'baseScore',
@@ -150,72 +124,11 @@ export const TaskKpiSettingScalarFieldEnum = {
   crossDomainMultiplier: 'crossDomainMultiplier',
   bonusPerDay: 'bonusPerDay',
   penaltyPerDay: 'penaltyPerDay',
+  standardDurationDays: 'standardDurationDays',
   kpiCriteriaId: 'kpiCriteriaId'
 } as const
 
 export type TaskKpiSettingScalarFieldEnum = (typeof TaskKpiSettingScalarFieldEnum)[keyof typeof TaskKpiSettingScalarFieldEnum]
-
-
-export const TaskAttachmentScalarFieldEnum = {
-  id: 'id',
-  taskId: 'taskId',
-  documentId: 'documentId',
-  type: 'type',
-  createdAt: 'createdAt'
-} as const
-
-export type TaskAttachmentScalarFieldEnum = (typeof TaskAttachmentScalarFieldEnum)[keyof typeof TaskAttachmentScalarFieldEnum]
-
-
-export const TaskParticipantScalarFieldEnum = {
-  taskId: 'taskId',
-  employeeCode: 'employeeCode',
-  participantRole: 'participantRole',
-  assignedAt: 'assignedAt',
-  contributionPercentage: 'contributionPercentage'
-} as const
-
-export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]
-
-
-export const TaskClosureScalarFieldEnum = {
-  ancestorId: 'ancestorId',
-  descendantId: 'descendantId',
-  depth: 'depth'
-} as const
-
-export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[keyof typeof TaskClosureScalarFieldEnum]
-
-
-export const TaskCommentScalarFieldEnum = {
-  id: 'id',
-  taskId: 'taskId',
-  authorCode: 'authorCode',
-  content: 'content',
-  isSystemMessage: 'isSystemMessage',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
-
-
-export const MasterPlanScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  type: 'type',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  status: 'status',
-  departmentId: 'departmentId',
-  createdByCode: 'createdByCode',
-  documentId: 'documentId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type MasterPlanScalarFieldEnum = (typeof MasterPlanScalarFieldEnum)[keyof typeof MasterPlanScalarFieldEnum]
 
 
 export const KpiPeriodScalarFieldEnum = {
@@ -300,6 +213,108 @@ export const KpiEvaluationDetailScalarFieldEnum = {
 export type KpiEvaluationDetailScalarFieldEnum = (typeof KpiEvaluationDetailScalarFieldEnum)[keyof typeof KpiEvaluationDetailScalarFieldEnum]
 
 
+export const MasterPlanScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  status: 'status',
+  departmentId: 'departmentId',
+  createdByCode: 'createdByCode',
+  documentId: 'documentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MasterPlanScalarFieldEnum = (typeof MasterPlanScalarFieldEnum)[keyof typeof MasterPlanScalarFieldEnum]
+
+
+export const TaskScalarFieldEnum = {
+  id: 'id',
+  parentId: 'parentId',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  priority: 'priority',
+  progress: 'progress',
+  rejectReason: 'rejectReason',
+  startDate: 'startDate',
+  dueDate: 'dueDate',
+  completedAt: 'completedAt',
+  isDeadlineWarned: 'isDeadlineWarned',
+  isRiskWarned: 'isRiskWarned',
+  domainId: 'domainId',
+  monitoredUnitId: 'monitoredUnitId',
+  planId: 'planId',
+  workflowInstId: 'workflowInstId',
+  metadata: 'metadata',
+  creatorEmployeeCode: 'creatorEmployeeCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskAttachmentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  documentId: 'documentId',
+  type: 'type',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskAttachmentScalarFieldEnum = (typeof TaskAttachmentScalarFieldEnum)[keyof typeof TaskAttachmentScalarFieldEnum]
+
+
+export const TaskParticipantScalarFieldEnum = {
+  taskId: 'taskId',
+  employeeCode: 'employeeCode',
+  participantRole: 'participantRole',
+  assignedAt: 'assignedAt',
+  contributionPercentage: 'contributionPercentage'
+} as const
+
+export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]
+
+
+export const TaskClosureScalarFieldEnum = {
+  ancestorId: 'ancestorId',
+  descendantId: 'descendantId',
+  depth: 'depth'
+} as const
+
+export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[keyof typeof TaskClosureScalarFieldEnum]
+
+
+export const TaskCommentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  authorCode: 'authorCode',
+  content: 'content',
+  isSystemMessage: 'isSystemMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
+
+
+export const TaskHistoryScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  action: 'action',
+  actorCode: 'actorCode',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  createdAt: 'createdAt'
+} as const
+
+export type TaskHistoryScalarFieldEnum = (typeof TaskHistoryScalarFieldEnum)[keyof typeof TaskHistoryScalarFieldEnum]
+
+
 export const TaskRankTemplateScalarFieldEnum = {
   id: 'id',
   classification: 'classification',
@@ -308,8 +323,10 @@ export const TaskRankTemplateScalarFieldEnum = {
   taskName: 'taskName',
   defaultUnit: 'defaultUnit',
   defaultWeight: 'defaultWeight',
+  standardDurationDays: 'standardDurationDays',
   rankNameVN: 'rankNameVN',
   legalBasis: 'legalBasis',
+  workflowId: 'workflowId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -392,59 +409,11 @@ export const EmployeeOrderByRelevanceFieldEnum = {
 export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
 
 
-export const TaskOrderByRelevanceFieldEnum = {
-  title: 'title',
-  description: 'description',
-  status: 'status',
-  priority: 'priority',
-  rejectReason: 'rejectReason',
-  workflowInstId: 'workflowInstId',
-  creatorEmployeeCode: 'creatorEmployeeCode'
-} as const
-
-export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
-
-
 export const TaskKpiSettingOrderByRelevanceFieldEnum = {
   scoringMethod: 'scoringMethod'
 } as const
 
 export type TaskKpiSettingOrderByRelevanceFieldEnum = (typeof TaskKpiSettingOrderByRelevanceFieldEnum)[keyof typeof TaskKpiSettingOrderByRelevanceFieldEnum]
-
-
-export const TaskAttachmentOrderByRelevanceFieldEnum = {
-  documentId: 'documentId',
-  type: 'type'
-} as const
-
-export type TaskAttachmentOrderByRelevanceFieldEnum = (typeof TaskAttachmentOrderByRelevanceFieldEnum)[keyof typeof TaskAttachmentOrderByRelevanceFieldEnum]
-
-
-export const TaskParticipantOrderByRelevanceFieldEnum = {
-  employeeCode: 'employeeCode'
-} as const
-
-export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
-
-
-export const TaskCommentOrderByRelevanceFieldEnum = {
-  authorCode: 'authorCode',
-  content: 'content'
-} as const
-
-export type TaskCommentOrderByRelevanceFieldEnum = (typeof TaskCommentOrderByRelevanceFieldEnum)[keyof typeof TaskCommentOrderByRelevanceFieldEnum]
-
-
-export const MasterPlanOrderByRelevanceFieldEnum = {
-  title: 'title',
-  description: 'description',
-  type: 'type',
-  status: 'status',
-  createdByCode: 'createdByCode',
-  documentId: 'documentId'
-} as const
-
-export type MasterPlanOrderByRelevanceFieldEnum = (typeof MasterPlanOrderByRelevanceFieldEnum)[keyof typeof MasterPlanOrderByRelevanceFieldEnum]
 
 
 export const KpiPeriodOrderByRelevanceFieldEnum = {
@@ -495,6 +464,62 @@ export const KpiEvaluationDetailOrderByRelevanceFieldEnum = {
 export type KpiEvaluationDetailOrderByRelevanceFieldEnum = (typeof KpiEvaluationDetailOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationDetailOrderByRelevanceFieldEnum]
 
 
+export const MasterPlanOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  status: 'status',
+  createdByCode: 'createdByCode',
+  documentId: 'documentId'
+} as const
+
+export type MasterPlanOrderByRelevanceFieldEnum = (typeof MasterPlanOrderByRelevanceFieldEnum)[keyof typeof MasterPlanOrderByRelevanceFieldEnum]
+
+
+export const TaskOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  priority: 'priority',
+  rejectReason: 'rejectReason',
+  workflowInstId: 'workflowInstId',
+  creatorEmployeeCode: 'creatorEmployeeCode'
+} as const
+
+export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskAttachmentOrderByRelevanceFieldEnum = {
+  documentId: 'documentId',
+  type: 'type'
+} as const
+
+export type TaskAttachmentOrderByRelevanceFieldEnum = (typeof TaskAttachmentOrderByRelevanceFieldEnum)[keyof typeof TaskAttachmentOrderByRelevanceFieldEnum]
+
+
+export const TaskParticipantOrderByRelevanceFieldEnum = {
+  employeeCode: 'employeeCode'
+} as const
+
+export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
+
+
+export const TaskCommentOrderByRelevanceFieldEnum = {
+  authorCode: 'authorCode',
+  content: 'content'
+} as const
+
+export type TaskCommentOrderByRelevanceFieldEnum = (typeof TaskCommentOrderByRelevanceFieldEnum)[keyof typeof TaskCommentOrderByRelevanceFieldEnum]
+
+
+export const TaskHistoryOrderByRelevanceFieldEnum = {
+  action: 'action',
+  actorCode: 'actorCode'
+} as const
+
+export type TaskHistoryOrderByRelevanceFieldEnum = (typeof TaskHistoryOrderByRelevanceFieldEnum)[keyof typeof TaskHistoryOrderByRelevanceFieldEnum]
+
+
 export const TaskRankTemplateOrderByRelevanceFieldEnum = {
   classification: 'classification',
   rank: 'rank',
@@ -502,7 +527,8 @@ export const TaskRankTemplateOrderByRelevanceFieldEnum = {
   taskName: 'taskName',
   defaultUnit: 'defaultUnit',
   rankNameVN: 'rankNameVN',
-  legalBasis: 'legalBasis'
+  legalBasis: 'legalBasis',
+  workflowId: 'workflowId'
 } as const
 
 export type TaskRankTemplateOrderByRelevanceFieldEnum = (typeof TaskRankTemplateOrderByRelevanceFieldEnum)[keyof typeof TaskRankTemplateOrderByRelevanceFieldEnum]

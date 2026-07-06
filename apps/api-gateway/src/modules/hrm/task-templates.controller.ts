@@ -29,7 +29,7 @@ export class TaskTemplatesController implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.taskTemplateService = this.client.getService('TaskTemplateService');
+    this.taskTemplateService = this.client.getService('TaskService');
   }
 
   @Get()
@@ -38,31 +38,31 @@ export class TaskTemplatesController implements OnModuleInit {
     @Query('rank') rank?: string,
   ) {
     return firstValueFrom(
-      this.taskTemplateService.FindAll({ classification, rank }),
+      this.taskTemplateService.FindTaskTemplates({ classification, rank }),
     );
   }
 
   @Post()
   async create(@Body() body: any) {
-    return firstValueFrom(this.taskTemplateService.Create(body));
+    return firstValueFrom(this.taskTemplateService.CreateTaskTemplate(body));
   }
 
   @Post('bulk')
   async bulkUpdate(@Body() body: any) {
     return firstValueFrom(
-      this.taskTemplateService.BulkUpdate({ templates: body.templates }),
+      this.taskTemplateService.BulkUpdateTaskTemplates({ templates: body.templates }),
     );
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(
-      this.taskTemplateService.Update({ id: Number(id), ...body }),
+      this.taskTemplateService.UpdateTaskTemplate({ id: Number(id), ...body }),
     );
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return firstValueFrom(this.taskTemplateService.Delete({ id: Number(id) }));
+    return firstValueFrom(this.taskTemplateService.DeleteTaskTemplate({ id: Number(id) }));
   }
 }

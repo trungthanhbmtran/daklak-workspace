@@ -640,4 +640,20 @@ export class TasksController implements OnModuleInit {
       ),
     );
   }
+
+  @Get(':id/history')
+  async getTaskHistory(@Param('id', ParseIntPipe) id: number) {
+    return firstValueFrom(this.taskService.GetTaskHistory({ taskId: id }));
+  }
+
+  @Put(':id/kpi-setting')
+  async upsertTaskKpiSetting(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
+    return firstValueFrom(this.taskService.UpsertTaskKpiSetting({ taskId: id, ...body }));
+  }
+
+  @Get(':id/kpi-setting')
+  async getTaskKpiSetting(@Param('id', ParseIntPipe) id: number) {
+    return firstValueFrom(this.taskService.GetTaskKpiSetting({ taskId: id }));
+  }
+
 }

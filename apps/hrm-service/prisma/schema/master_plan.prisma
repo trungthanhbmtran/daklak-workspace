@@ -1,0 +1,22 @@
+model MasterPlan {
+  id          Int     @id @default(autoincrement())
+  title       String  @map("title")
+  description String? @db.Text
+  type        String  @default("SMART_GOAL")
+
+  startDate DateTime? @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+  status    String    @default("ACTIVE")
+
+  departmentId  Int?    @map("department_id")
+  createdByCode String? @map("created_by_code")
+
+  documentId String? @map("document_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tasks Task[]
+
+  @@map("master_plans")
+}

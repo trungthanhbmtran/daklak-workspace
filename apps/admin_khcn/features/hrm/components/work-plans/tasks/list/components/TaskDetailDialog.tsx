@@ -13,6 +13,7 @@ import { WorkflowTimeline } from '@/features/workflow/components/WorkflowTimelin
 import { TaskChatContainer } from './TaskChatContainer';
 import { TaskActionPanel } from './TaskActionPanel';
 import { TaskDelegationTree } from './TaskDelegationTree';
+import { TaskHistoryList } from './TaskHistoryList';
 import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
 import { useTaskChat } from '../hooks/useTaskChat';
@@ -157,6 +158,7 @@ export function TaskDetailDialog({
                   {activeTab === 'HISTORY' ? (
                     <div className="flex-1 overflow-y-auto px-6 bg-slate-50/20 dark:bg-slate-900/10 max-h-[465px]">
                       <WorkflowTimeline instanceId={activeTask.workflowInstId} />
+                      <TaskHistoryList taskId={activeTask.id} />
                     </div>
                   ) : (
                     <TaskChatContainer

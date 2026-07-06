@@ -3,8 +3,22 @@ syntax = "proto3";
 package task;
 
 import "common/common.proto";
+import "hrm/rank_quota.proto";
 service TaskService {
-  rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {}
+  rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {
+  rpc SaveRankQuotas (hrm.SaveRankQuotasRequest) returns (hrm.SaveRankQuotasResponse) {}
+  rpc GetRankQuotasByRank (hrm.GetRankQuotasByRankRequest) returns (hrm.RankQuotaList) {}
+  
+  rpc FindTaskTemplates (FindAllTemplatesRequest) returns (FindAllTemplatesResponse) {}
+  rpc CreateTaskTemplate (CreateTemplateRequest) returns (TaskTemplateDataResponse) {}
+  rpc UpdateTaskTemplate (UpdateTemplateRequest) returns (TaskTemplateDataResponse) {}
+  rpc DeleteTaskTemplate (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}
+  rpc BulkUpdateTaskTemplates (BulkUpdateTemplatesRequest) returns (BulkUpdateTemplatesResponse) {}
+
+  rpc UpsertTaskKpiSetting (UpsertTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
+  rpc GetTaskKpiSetting (GetTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
+  rpc GetTaskHistory (GetTaskHistoryRequest) returns (TaskHistoryResponse) {}
+}
   rpc ListTasks (ListTasksRequest) returns (ListTasksResponse) {}
   rpc GetTaskStats (ListTasksRequest) returns (GetTaskStatsResponse) {}
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
@@ -68,8 +82,7 @@ message RecommendAssigneesResponse {
   RecommendAssigneesData data = 3;
 }
 
-service TaskTemplateService {
-  rpc FindAll (FindAllTemplatesRequest) returns (FindAllTemplatesResponse) {}
+
   rpc Create (CreateTemplateRequest) returns (TaskTemplateDataResponse) {}
   rpc Update (UpdateTemplateRequest) returns (TaskTemplateDataResponse) {}
   rpc Delete (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}

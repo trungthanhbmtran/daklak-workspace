@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { TaskSharedService } from '../task-shared/task-shared.service';
 
 @Injectable()
 export class MasterPlansService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private shared: TaskSharedService) { }
 
   async findAll(query: any) {
     const where: any = {};

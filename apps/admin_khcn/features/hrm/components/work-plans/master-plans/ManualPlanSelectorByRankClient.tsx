@@ -30,6 +30,7 @@ interface SelectedPlanItem {
     rankType: string;
     targetValue: number;
     unit: string;
+    weight: number;
 }
 
 export function ManualPlanSelectorByRankClient() {
@@ -72,6 +73,7 @@ export function ManualPlanSelectorByRankClient() {
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
+    const [weight, setWeight] = useState<number>(1);
 
     const { isPending } = useCreateMasterPlan();
 
@@ -97,7 +99,8 @@ export function ManualPlanSelectorByRankClient() {
                 title: q.taskName,
                 rankType: q.rankCode,
                 targetValue: q.targetValue,
-                unit: q.unit
+                unit: q.unit,
+                weight: q.weight || 1
             })));
         } else {
             setAddedPlans([]);
@@ -190,6 +193,18 @@ export function ManualPlanSelectorByRankClient() {
                                     ))}
                                 </SelectContent>
                             </Select>
+
+                            <div className="flex w-full sm:w-auto items-center bg-white border rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
+                                <div className="px-3 text-xs font-medium text-muted-foreground border-r bg-muted/10 h-full flex items-center">Trọng số</div>
+                                <Input
+                                    type="number"
+                                    value={weight}
+                                    onChange={e => setWeight(Math.max(0.1, Number(e.target.value)))}
+                                    className="w-20 h-full border-0 focus-visible:ring-0 text-center font-semibold text-sm bg-transparent"
+                                    step="0.1"
+                                />
+                            </div>
+
                         </div>
                     </div>
 
@@ -248,6 +263,7 @@ export function ManualPlanSelectorByRankClient() {
                                         <TableHead className="font-semibold text-muted-foreground">Tên nhiệm vụ</TableHead>
                                         <TableHead className="w-[120px] font-semibold text-muted-foreground text-center">Đơn vị</TableHead>
                                         <TableHead className="w-[150px] font-semibold text-muted-foreground text-center">Chỉ tiêu (Lần/Lượt)</TableHead>
+<TableHead className="w-[120px] font-semibold text-muted-foreground text-center">Trọng số</TableHead>
                                         <TableHead className="w-[80px]"></TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -275,6 +291,21 @@ export function ManualPlanSelectorByRankClient() {
                                                             setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
                                                         }}
                                                         className="w-24 h-8 text-center font-bold text-sm bg-white border-muted-foreground/20 focus-visible:ring-primary/30 transition-shadow rounded-lg"
+                                                    />
+                                                </div>
+                                            </TableCell>
+
+                                            <TableCell>
+                                                <div className="flex justify-center">
+                                                    <Input
+                                                        type="number"
+                                                        value={plan.weight || 1}
+                                                        onChange={e => {
+                                                            const val = Number(e.target.value);
+                                                            setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, weight: val } : p));
+                                                        }}
+                                                        className="w-24 h-8 text-center font-bold text-sm bg-white border-muted-foreground/20 focus-visible:ring-primary/30 transition-shadow rounded-lg"
+                                                        step="0.1"
                                                     />
                                                 </div>
                                             </TableCell>

@@ -23,10 +23,7 @@ export class TasksController {
     return this.tasksService.getTaskStats(data);
   }
 
-  @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string; currentUserPermissions?: string[]; currentUserId?: number; currentEmployeeCode?: string }) {
-    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode, data);
-  }
+
 
   @GrpcMethod('TaskService', 'UpdateTask')
   updateTask(data: { id: number; weight?: number; startDate?: string; dueDate?: string; priority?: string; baseScore?: number; title?: string; description?: string; domainId?: number; monitoredUnitId?: number; kpiCriteriaId?: number }) {
@@ -43,43 +40,14 @@ export class TasksController {
     return this.tasksService.breakdownTask(data.parentId, data);
   }
 
-  @GrpcMethod('TaskService', 'UpdateTaskProgress')
-  updateTaskProgress(data: { id: number; progress: number; actorCode?: string }) {
-    return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode);
-  }
-
-  @GrpcMethod('TaskService', 'RecommendAssignees')
-  recommendAssignees(data: { rankCode: string; strategy: string; currentUserId?: number; currentEmployeeCode?: string; currentUserPermissions?: string[] }) {
-    return this.tasksService.recommendAssignees(data);
-  }
-
-  @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: any) {
-    return this.tasksService.assignTask(data);
-  }
-
-  @GrpcMethod('TaskService', 'AddComment')
-  addComment(data: any) {
-    return this.tasksService.addComment(data.taskId, data);
-  }
-
-  @GrpcMethod('TaskService', 'GetComments')
-  getComments(data: any) {
-    return this.tasksService.getComments(data.taskId, data);
-  }
-
   @GrpcMethod('TaskService', 'GetSubTasks')
   getSubTasks(data: any) {
     return this.tasksService.getSubTasks(data.taskId, data);
   }
 
-  @GrpcMethod('TaskService', 'RequestCoordination')
-  requestCoordination(data: { taskId: number; requesterCode: string; message?: string; leadCode?: string; coordinatorCodes?: string[] }) {
-    return this.tasksService.requestCoordination(data.taskId, data);
+  @GrpcMethod('TaskService', 'UpdateTaskProgress')
+  updateTaskProgress(data: any) {
+    return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode);
   }
 
-  @EventPattern('WORKFLOW_UPDATED')
-  handleWorkflowUpdated(data: { workflowId: string; definition: any }) {
-    return this.tasksService.invalidateWorkflowCache(data.workflowId, data.definition);
-  }
 }

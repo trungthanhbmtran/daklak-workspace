@@ -1,0 +1,33 @@
+model TaskRankTemplate {
+  id             Int     @id @default(autoincrement())
+  classification String  @map("classification")
+  rank           String  @map("rank")
+  domainCode     String  @default("GENERIC") @map("domain_code")
+  taskName       String  @map("task_name")
+  defaultUnit    String  @map("default_unit")
+  defaultWeight  Float?  @map("default_weight")
+  standardDurationDays Float? @map("standard_duration_days") // Thêm trường thời gian chuẩn
+  rankNameVN     String? @map("rank_name_vn")
+  legalBasis     String? @map("legal_basis")
+  workflowId     String? @map("workflow_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("task_rank_templates")
+}
+
+model RankQuota {
+  id          Int    @id @default(autoincrement())
+  rankCode    String @map("rank_code")
+  domainCode  String @default("GENERIC") @map("domain_code")
+  taskName    String @map("task_name")
+  unit        String @map("unit")
+  targetValue Float  @map("target_value")
+  weight      Float? @map("weight")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("rank_quotas")
+}

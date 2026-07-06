@@ -459,11 +459,6 @@ export type MasterPlanUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type MasterPlanNullableScalarRelationFilter = {
-  is?: Prisma.MasterPlanWhereInput | null
-  isNot?: Prisma.MasterPlanWhereInput | null
-}
-
 export type MasterPlanOrderByRelevanceInput = {
   fields: Prisma.MasterPlanOrderByRelevanceFieldEnum | Prisma.MasterPlanOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
@@ -523,6 +518,11 @@ export type MasterPlanMinOrderByAggregateInput = {
 export type MasterPlanSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
+}
+
+export type MasterPlanNullableScalarRelationFilter = {
+  is?: Prisma.MasterPlanWhereInput | null
+  isNot?: Prisma.MasterPlanWhereInput | null
 }
 
 export type MasterPlanCreateNestedOneWithoutTasksInput = {

@@ -1,0 +1,51 @@
+{
+  "id": "default-task-workflow",
+  "name": "Default Task Workflow",
+  "nodes": [
+    {
+      "id": "IN_PROGRESS",
+      "type": "state",
+      "data": {
+        "allowAddSubtask": true,
+        "allowCoordinate": true,
+        "allowEdit": true,
+        "allowDelete": true,
+        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; if (actionName === 'EDIT' || actionName === 'ASSIGN') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); } if (actionName === 'DELETE') { return isOwner && isUnassigned && !hasChildren && userRoles.includes('TASK:DELETE'); } if (actionName === 'ADD_SUBTASK') { return (isOwner || isAssignee) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:EXECUTE')); } if (actionName === 'COMPLETE' || actionName === 'COORDINATE') { return isAssignee && !hasChildren && userRoles.includes('TASK:EXECUTE'); } if (actionName === 'RETURN') { return (isSupervisor || isDeptLeader) && !hasChildren && userRoles.includes('TASK:APPROVE'); } return false;"
+      }
+    },
+    {
+      "id": "PENDING_APPROVAL",
+      "type": "state",
+      "data": {
+        "allowAddSubtask": false,
+        "allowCoordinate": false,
+        "allowEdit": false,
+        "allowDelete": false,
+        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; if (actionName === 'APPROVE' || actionName === 'RETURN') { return (isSupervisor || isDeptLeader || isOwner) && userRoles.includes('TASK:APPROVE'); } return false;"
+      }
+    },
+    {
+      "id": "COMPLETED",
+      "type": "state",
+      "data": {
+        "allowAddSubtask": false,
+        "allowCoordinate": false,
+        "allowEdit": false,
+        "allowDelete": false,
+        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; return false;"
+      }
+    },
+    {
+      "id": "CANCELLED",
+      "type": "state",
+      "data": {
+        "allowAddSubtask": false,
+        "allowCoordinate": false,
+        "allowEdit": false,
+        "allowDelete": false,
+        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; return false;"
+      }
+    }
+  ],
+  "edges": []
+}

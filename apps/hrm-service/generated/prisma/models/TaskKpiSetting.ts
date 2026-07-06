@@ -33,6 +33,7 @@ export type TaskKpiSettingAvgAggregateOutputType = {
   crossDomainMultiplier: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  standardDurationDays: number | null
   kpiCriteriaId: number | null
 }
 
@@ -43,6 +44,7 @@ export type TaskKpiSettingSumAggregateOutputType = {
   crossDomainMultiplier: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  standardDurationDays: number | null
   kpiCriteriaId: number | null
 }
 
@@ -55,6 +57,7 @@ export type TaskKpiSettingMinAggregateOutputType = {
   crossDomainMultiplier: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  standardDurationDays: number | null
   kpiCriteriaId: number | null
 }
 
@@ -67,6 +70,7 @@ export type TaskKpiSettingMaxAggregateOutputType = {
   crossDomainMultiplier: number | null
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  standardDurationDays: number | null
   kpiCriteriaId: number | null
 }
 
@@ -79,6 +83,7 @@ export type TaskKpiSettingCountAggregateOutputType = {
   crossDomainMultiplier: number
   bonusPerDay: number
   penaltyPerDay: number
+  standardDurationDays: number
   kpiCriteriaId: number
   _all: number
 }
@@ -91,6 +96,7 @@ export type TaskKpiSettingAvgAggregateInputType = {
   crossDomainMultiplier?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  standardDurationDays?: true
   kpiCriteriaId?: true
 }
 
@@ -101,6 +107,7 @@ export type TaskKpiSettingSumAggregateInputType = {
   crossDomainMultiplier?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  standardDurationDays?: true
   kpiCriteriaId?: true
 }
 
@@ -113,6 +120,7 @@ export type TaskKpiSettingMinAggregateInputType = {
   crossDomainMultiplier?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  standardDurationDays?: true
   kpiCriteriaId?: true
 }
 
@@ -125,6 +133,7 @@ export type TaskKpiSettingMaxAggregateInputType = {
   crossDomainMultiplier?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  standardDurationDays?: true
   kpiCriteriaId?: true
 }
 
@@ -137,6 +146,7 @@ export type TaskKpiSettingCountAggregateInputType = {
   crossDomainMultiplier?: true
   bonusPerDay?: true
   penaltyPerDay?: true
+  standardDurationDays?: true
   kpiCriteriaId?: true
   _all?: true
 }
@@ -236,6 +246,7 @@ export type TaskKpiSettingGroupByOutputType = {
   crossDomainMultiplier: number
   bonusPerDay: number | null
   penaltyPerDay: number | null
+  standardDurationDays: number | null
   kpiCriteriaId: number | null
   _count: TaskKpiSettingCountAggregateOutputType | null
   _avg: TaskKpiSettingAvgAggregateOutputType | null
@@ -271,6 +282,7 @@ export type TaskKpiSettingWhereInput = {
   crossDomainMultiplier?: Prisma.FloatFilter<"TaskKpiSetting"> | number
   bonusPerDay?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
   penaltyPerDay?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
+  standardDurationDays?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
   kpiCriteriaId?: Prisma.IntNullableFilter<"TaskKpiSetting"> | number | null
   kpiCriteria?: Prisma.XOR<Prisma.KpiCriteriaNullableScalarRelationFilter, Prisma.KpiCriteriaWhereInput> | null
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
@@ -285,6 +297,7 @@ export type TaskKpiSettingOrderByWithRelationInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrderInput | Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrderInput | Prisma.SortOrder
   kpiCriteria?: Prisma.KpiCriteriaOrderByWithRelationInput
   task?: Prisma.TaskOrderByWithRelationInput
@@ -303,6 +316,7 @@ export type TaskKpiSettingWhereUniqueInput = Prisma.AtLeast<{
   crossDomainMultiplier?: Prisma.FloatFilter<"TaskKpiSetting"> | number
   bonusPerDay?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
   penaltyPerDay?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
+  standardDurationDays?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
   kpiCriteriaId?: Prisma.IntNullableFilter<"TaskKpiSetting"> | number | null
   kpiCriteria?: Prisma.XOR<Prisma.KpiCriteriaNullableScalarRelationFilter, Prisma.KpiCriteriaWhereInput> | null
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
@@ -317,6 +331,7 @@ export type TaskKpiSettingOrderByWithAggregationInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrderInput | Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TaskKpiSettingCountOrderByAggregateInput
   _avg?: Prisma.TaskKpiSettingAvgOrderByAggregateInput
@@ -337,6 +352,7 @@ export type TaskKpiSettingScalarWhereWithAggregatesInput = {
   crossDomainMultiplier?: Prisma.FloatWithAggregatesFilter<"TaskKpiSetting"> | number
   bonusPerDay?: Prisma.FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
   penaltyPerDay?: Prisma.FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
+  standardDurationDays?: Prisma.FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
   kpiCriteriaId?: Prisma.IntNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
 }
 
@@ -348,6 +364,7 @@ export type TaskKpiSettingCreateInput = {
   crossDomainMultiplier?: number
   bonusPerDay?: number | null
   penaltyPerDay?: number | null
+  standardDurationDays?: number | null
   kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
   task: Prisma.TaskCreateNestedOneWithoutKpiSettingsInput
 }
@@ -361,6 +378,7 @@ export type TaskKpiSettingUncheckedCreateInput = {
   crossDomainMultiplier?: number
   bonusPerDay?: number | null
   penaltyPerDay?: number | null
+  standardDurationDays?: number | null
   kpiCriteriaId?: number | null
 }
 
@@ -372,6 +390,7 @@ export type TaskKpiSettingUpdateInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
   task?: Prisma.TaskUpdateOneRequiredWithoutKpiSettingsNestedInput
 }
@@ -385,6 +404,7 @@ export type TaskKpiSettingUncheckedUpdateInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -397,6 +417,7 @@ export type TaskKpiSettingCreateManyInput = {
   crossDomainMultiplier?: number
   bonusPerDay?: number | null
   penaltyPerDay?: number | null
+  standardDurationDays?: number | null
   kpiCriteriaId?: number | null
 }
 
@@ -408,6 +429,7 @@ export type TaskKpiSettingUpdateManyMutationInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type TaskKpiSettingUncheckedUpdateManyInput = {
@@ -419,12 +441,8 @@ export type TaskKpiSettingUncheckedUpdateManyInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-}
-
-export type TaskKpiSettingNullableScalarRelationFilter = {
-  is?: Prisma.TaskKpiSettingWhereInput | null
-  isNot?: Prisma.TaskKpiSettingWhereInput | null
 }
 
 export type TaskKpiSettingOrderByRelevanceInput = {
@@ -442,6 +460,7 @@ export type TaskKpiSettingCountOrderByAggregateInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrder
 }
 
@@ -452,6 +471,7 @@ export type TaskKpiSettingAvgOrderByAggregateInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrder
 }
 
@@ -464,6 +484,7 @@ export type TaskKpiSettingMaxOrderByAggregateInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrder
 }
 
@@ -476,6 +497,7 @@ export type TaskKpiSettingMinOrderByAggregateInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrder
 }
 
@@ -486,6 +508,7 @@ export type TaskKpiSettingSumOrderByAggregateInput = {
   crossDomainMultiplier?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
   penaltyPerDay?: Prisma.SortOrder
+  standardDurationDays?: Prisma.SortOrder
   kpiCriteriaId?: Prisma.SortOrder
 }
 
@@ -499,40 +522,25 @@ export type TaskKpiSettingOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type TaskKpiSettingCreateNestedOneWithoutTaskInput = {
-  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
-  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
-  connect?: Prisma.TaskKpiSettingWhereUniqueInput
-}
-
-export type TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput = {
-  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
-  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
-  connect?: Prisma.TaskKpiSettingWhereUniqueInput
-}
-
-export type TaskKpiSettingUpdateOneWithoutTaskNestedInput = {
-  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
-  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
-  upsert?: Prisma.TaskKpiSettingUpsertWithoutTaskInput
-  disconnect?: Prisma.TaskKpiSettingWhereInput | boolean
-  delete?: Prisma.TaskKpiSettingWhereInput | boolean
-  connect?: Prisma.TaskKpiSettingWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput, Prisma.TaskKpiSettingUpdateWithoutTaskInput>, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
-}
-
-export type TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput = {
-  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
-  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
-  upsert?: Prisma.TaskKpiSettingUpsertWithoutTaskInput
-  disconnect?: Prisma.TaskKpiSettingWhereInput | boolean
-  delete?: Prisma.TaskKpiSettingWhereInput | boolean
-  connect?: Prisma.TaskKpiSettingWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput, Prisma.TaskKpiSettingUpdateWithoutTaskInput>, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
+export type TaskKpiSettingNullableScalarRelationFilter = {
+  is?: Prisma.TaskKpiSettingWhereInput | null
+  isNot?: Prisma.TaskKpiSettingWhereInput | null
 }
 
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
   increment?: number
   decrement?: number
   multiply?: number
@@ -581,64 +589,36 @@ export type TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput = {
   deleteMany?: Prisma.TaskKpiSettingScalarWhereInput | Prisma.TaskKpiSettingScalarWhereInput[]
 }
 
-export type TaskKpiSettingCreateWithoutTaskInput = {
-  baseScore?: number | null
-  weight?: number | null
-  scoringMethod?: string
-  isCrossDomain?: boolean
-  crossDomainMultiplier?: number
-  bonusPerDay?: number | null
-  penaltyPerDay?: number | null
-  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
+export type TaskKpiSettingCreateNestedOneWithoutTaskInput = {
+  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
+  connect?: Prisma.TaskKpiSettingWhereUniqueInput
 }
 
-export type TaskKpiSettingUncheckedCreateWithoutTaskInput = {
-  baseScore?: number | null
-  weight?: number | null
-  scoringMethod?: string
-  isCrossDomain?: boolean
-  crossDomainMultiplier?: number
-  bonusPerDay?: number | null
-  penaltyPerDay?: number | null
-  kpiCriteriaId?: number | null
+export type TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput = {
+  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
+  connect?: Prisma.TaskKpiSettingWhereUniqueInput
 }
 
-export type TaskKpiSettingCreateOrConnectWithoutTaskInput = {
-  where: Prisma.TaskKpiSettingWhereUniqueInput
-  create: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+export type TaskKpiSettingUpdateOneWithoutTaskNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
+  upsert?: Prisma.TaskKpiSettingUpsertWithoutTaskInput
+  disconnect?: Prisma.TaskKpiSettingWhereInput | boolean
+  delete?: Prisma.TaskKpiSettingWhereInput | boolean
+  connect?: Prisma.TaskKpiSettingWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput, Prisma.TaskKpiSettingUpdateWithoutTaskInput>, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
 }
 
-export type TaskKpiSettingUpsertWithoutTaskInput = {
-  update: Prisma.XOR<Prisma.TaskKpiSettingUpdateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
-  create: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
-  where?: Prisma.TaskKpiSettingWhereInput
-}
-
-export type TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput = {
-  where?: Prisma.TaskKpiSettingWhereInput
-  data: Prisma.XOR<Prisma.TaskKpiSettingUpdateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
-}
-
-export type TaskKpiSettingUpdateWithoutTaskInput = {
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
-  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
-}
-
-export type TaskKpiSettingUncheckedUpdateWithoutTaskInput = {
-  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
-  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
-  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+export type TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+  connectOrCreate?: Prisma.TaskKpiSettingCreateOrConnectWithoutTaskInput
+  upsert?: Prisma.TaskKpiSettingUpsertWithoutTaskInput
+  disconnect?: Prisma.TaskKpiSettingWhereInput | boolean
+  delete?: Prisma.TaskKpiSettingWhereInput | boolean
+  connect?: Prisma.TaskKpiSettingWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput, Prisma.TaskKpiSettingUpdateWithoutTaskInput>, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
 }
 
 export type TaskKpiSettingCreateWithoutKpiCriteriaInput = {
@@ -649,6 +629,7 @@ export type TaskKpiSettingCreateWithoutKpiCriteriaInput = {
   crossDomainMultiplier?: number
   bonusPerDay?: number | null
   penaltyPerDay?: number | null
+  standardDurationDays?: number | null
   task: Prisma.TaskCreateNestedOneWithoutKpiSettingsInput
 }
 
@@ -661,6 +642,7 @@ export type TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput = {
   crossDomainMultiplier?: number
   bonusPerDay?: number | null
   penaltyPerDay?: number | null
+  standardDurationDays?: number | null
 }
 
 export type TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput = {
@@ -701,7 +683,72 @@ export type TaskKpiSettingScalarWhereInput = {
   crossDomainMultiplier?: Prisma.FloatFilter<"TaskKpiSetting"> | number
   bonusPerDay?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
   penaltyPerDay?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
+  standardDurationDays?: Prisma.FloatNullableFilter<"TaskKpiSetting"> | number | null
   kpiCriteriaId?: Prisma.IntNullableFilter<"TaskKpiSetting"> | number | null
+}
+
+export type TaskKpiSettingCreateWithoutTaskInput = {
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  standardDurationDays?: number | null
+  kpiCriteria?: Prisma.KpiCriteriaCreateNestedOneWithoutTasksInput
+}
+
+export type TaskKpiSettingUncheckedCreateWithoutTaskInput = {
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  isCrossDomain?: boolean
+  crossDomainMultiplier?: number
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  standardDurationDays?: number | null
+  kpiCriteriaId?: number | null
+}
+
+export type TaskKpiSettingCreateOrConnectWithoutTaskInput = {
+  where: Prisma.TaskKpiSettingWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+}
+
+export type TaskKpiSettingUpsertWithoutTaskInput = {
+  update: Prisma.XOR<Prisma.TaskKpiSettingUpdateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
+  create: Prisma.XOR<Prisma.TaskKpiSettingCreateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedCreateWithoutTaskInput>
+  where?: Prisma.TaskKpiSettingWhereInput
+}
+
+export type TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput = {
+  where?: Prisma.TaskKpiSettingWhereInput
+  data: Prisma.XOR<Prisma.TaskKpiSettingUpdateWithoutTaskInput, Prisma.TaskKpiSettingUncheckedUpdateWithoutTaskInput>
+}
+
+export type TaskKpiSettingUpdateWithoutTaskInput = {
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kpiCriteria?: Prisma.KpiCriteriaUpdateOneWithoutTasksNestedInput
+}
+
+export type TaskKpiSettingUncheckedUpdateWithoutTaskInput = {
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  isCrossDomain?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  kpiCriteriaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type TaskKpiSettingCreateManyKpiCriteriaInput = {
@@ -713,6 +760,7 @@ export type TaskKpiSettingCreateManyKpiCriteriaInput = {
   crossDomainMultiplier?: number
   bonusPerDay?: number | null
   penaltyPerDay?: number | null
+  standardDurationDays?: number | null
 }
 
 export type TaskKpiSettingUpdateWithoutKpiCriteriaInput = {
@@ -723,6 +771,7 @@ export type TaskKpiSettingUpdateWithoutKpiCriteriaInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   task?: Prisma.TaskUpdateOneRequiredWithoutKpiSettingsNestedInput
 }
 
@@ -735,6 +784,7 @@ export type TaskKpiSettingUncheckedUpdateWithoutKpiCriteriaInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 export type TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaInput = {
@@ -746,6 +796,7 @@ export type TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaInput = {
   crossDomainMultiplier?: Prisma.FloatFieldUpdateOperationsInput | number
   bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  standardDurationDays?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
 }
 
 
@@ -759,6 +810,7 @@ export type TaskKpiSettingSelect<ExtArgs extends runtime.Types.Extensions.Intern
   crossDomainMultiplier?: boolean
   bonusPerDay?: boolean
   penaltyPerDay?: boolean
+  standardDurationDays?: boolean
   kpiCriteriaId?: boolean
   kpiCriteria?: boolean | Prisma.TaskKpiSetting$kpiCriteriaArgs<ExtArgs>
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
@@ -775,10 +827,11 @@ export type TaskKpiSettingSelectScalar = {
   crossDomainMultiplier?: boolean
   bonusPerDay?: boolean
   penaltyPerDay?: boolean
+  standardDurationDays?: boolean
   kpiCriteriaId?: boolean
 }
 
-export type TaskKpiSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "baseScore" | "weight" | "scoringMethod" | "isCrossDomain" | "crossDomainMultiplier" | "bonusPerDay" | "penaltyPerDay" | "kpiCriteriaId", ExtArgs["result"]["taskKpiSetting"]>
+export type TaskKpiSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "baseScore" | "weight" | "scoringMethod" | "isCrossDomain" | "crossDomainMultiplier" | "bonusPerDay" | "penaltyPerDay" | "standardDurationDays" | "kpiCriteriaId", ExtArgs["result"]["taskKpiSetting"]>
 export type TaskKpiSettingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   kpiCriteria?: boolean | Prisma.TaskKpiSetting$kpiCriteriaArgs<ExtArgs>
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
@@ -799,6 +852,7 @@ export type $TaskKpiSettingPayload<ExtArgs extends runtime.Types.Extensions.Inte
     crossDomainMultiplier: number
     bonusPerDay: number | null
     penaltyPerDay: number | null
+    standardDurationDays: number | null
     kpiCriteriaId: number | null
   }, ExtArgs["result"]["taskKpiSetting"]>
   composites: {}
@@ -1179,6 +1233,7 @@ export interface TaskKpiSettingFieldRefs {
   readonly crossDomainMultiplier: Prisma.FieldRef<"TaskKpiSetting", 'Float'>
   readonly bonusPerDay: Prisma.FieldRef<"TaskKpiSetting", 'Float'>
   readonly penaltyPerDay: Prisma.FieldRef<"TaskKpiSetting", 'Float'>
+  readonly standardDurationDays: Prisma.FieldRef<"TaskKpiSetting", 'Float'>
   readonly kpiCriteriaId: Prisma.FieldRef<"TaskKpiSetting", 'Int'>
 }
     
