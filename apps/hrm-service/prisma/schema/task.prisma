@@ -4,9 +4,9 @@ model Task {
   title       String  @map("title")
   description String? @db.Text
 
-  status      String  @default("TODO")
-  priority    String  @default("MEDIUM")
-  progress    Float   @default(0) @map("progress")
+  status       String  @default("TODO")
+  priority     String  @default("MEDIUM")
+  progress     Float   @default(0) @map("progress")
   rejectReason String? @map("reject_reason") @db.Text
 
   startDate   DateTime? @map("start_date") @db.Date
@@ -23,20 +23,20 @@ model Task {
   workflowInstId String? @map("workflow_instance_id")
   metadata       Json?   @map("metadata")
 
-  creatorEmployeeCode String? @map("creator_employee_code")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  creatorEmployeeCode String?  @map("creator_employee_code")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
-  plan         MasterPlan?      @relation(fields: [planId], references: [id])
-  kpiSettings  TaskKpiSetting?
-  
+  plan        MasterPlan?     @relation(fields: [planId], references: [id])
+  kpiSettings TaskKpiSetting?
+
   participants TaskParticipant[]
   attachments  TaskAttachment[]
   comments     TaskComment[]
   histories    TaskHistory[]
-  
-  ancestors    TaskClosure[]    @relation("TaskClosureDescendant")
-  descendants  TaskClosure[]    @relation("TaskClosureAncestor")
+
+  ancestors   TaskClosure[] @relation("TaskClosureDescendant")
+  descendants TaskClosure[] @relation("TaskClosureAncestor")
 
   @@index([dueDate])
   @@index([status, dueDate])
@@ -54,7 +54,7 @@ model TaskAttachment {
   createdAt  DateTime @default(now()) @map("created_at")
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  
+
   @@index([taskId])
   @@map("task_attachments")
 }
@@ -107,7 +107,6 @@ model TaskComment {
 
   @@map("task_comments")
 }
-
 
 model TaskHistory {
   id        Int      @id @default(autoincrement())

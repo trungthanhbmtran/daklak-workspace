@@ -6,6 +6,13 @@ import { AppCacheService } from '../../core/cache/app-cache.service';
 export class KpiEvaluationsService {
   constructor(private prisma: PrismaService, private cache: AppCacheService) { }
 
+  // Giả lập lấy danh sách Domain của VTVL từ user-service
+  private async fetchStaffingSlotDomains(staffingSlotId: number): Promise<number[]> {
+    console.log(`[Integration] Fetching domains for StaffingSlot: ${staffingSlotId}`);
+    return [1, 2, 3]; // Mock data
+  }
+
+
   // Giả lập gọi RPC sang Integration Service
   private async fetchMetricFromIntegration(integrationCode: string, employeeCode: string): Promise<number> {
     // TODO: Triển khai gọi gRPC hoặc HTTP sang Integration Service (api-gateway)
@@ -296,8 +303,8 @@ export class KpiEvaluationsService {
     };
   }
 
-  async calculatePersonalKpi(data: { periodId: number, employeeCode: string }) {
-    const { periodId, employeeCode } = data;
+  async calculatePersonalKpi(data: { periodId: number, employeeCode: string, staffingSlotId?: number }) {
+    const { periodId, employeeCode, staffingSlotId } = data;
 
 
 
@@ -525,7 +532,7 @@ export class KpiEvaluationsService {
     });
     
     // Auto-calculate tasks if status is DRAFT or COMPUTING
-    const calcResult = await this.calculatePersonalKpi({ periodId: evaluation.periodId, employeeCode: evaluation.employeeCode });
+    const calcResult = await this.calculatePersonalKpi({ periodId: evaluation.periodId, employeeCode: evaluation.employeeCode, staffingSlotId: evaluation.staffingSlotId || undefined });
 
     const finalDetails = allCriteria.map(crit => {
       const existingDetail = evaluation.details.find(d => d.criteriaId === crit.id);

@@ -57,6 +57,8 @@ export const ModelName = {
   KpiCriteria: 'KpiCriteria',
   KpiCriteriaSetting: 'KpiCriteriaSetting',
   EmployeeKpiTarget: 'EmployeeKpiTarget',
+  JobTitleKpiTarget: 'JobTitleKpiTarget',
+  StaffingSlotKpiTarget: 'StaffingSlotKpiTarget',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   MasterPlan: 'MasterPlan',
@@ -185,10 +187,39 @@ export const EmployeeKpiTargetScalarFieldEnum = {
 export type EmployeeKpiTargetScalarFieldEnum = (typeof EmployeeKpiTargetScalarFieldEnum)[keyof typeof EmployeeKpiTargetScalarFieldEnum]
 
 
+export const JobTitleKpiTargetScalarFieldEnum = {
+  id: 'id',
+  jobTitleId: 'jobTitleId',
+  periodId: 'periodId',
+  criteriaId: 'criteriaId',
+  targetValue: 'targetValue',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobTitleKpiTargetScalarFieldEnum = (typeof JobTitleKpiTargetScalarFieldEnum)[keyof typeof JobTitleKpiTargetScalarFieldEnum]
+
+
+export const StaffingSlotKpiTargetScalarFieldEnum = {
+  id: 'id',
+  staffingSlotId: 'staffingSlotId',
+  periodId: 'periodId',
+  criteriaId: 'criteriaId',
+  targetValue: 'targetValue',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffingSlotKpiTargetScalarFieldEnum = (typeof StaffingSlotKpiTargetScalarFieldEnum)[keyof typeof StaffingSlotKpiTargetScalarFieldEnum]
+
+
 export const KpiEvaluationScalarFieldEnum = {
   id: 'id',
   employeeCode: 'employeeCode',
   periodId: 'periodId',
+  staffingSlotId: 'staffingSlotId',
   totalScore: 'totalScore',
   status: 'status',
   reviewerCode: 'reviewerCode',

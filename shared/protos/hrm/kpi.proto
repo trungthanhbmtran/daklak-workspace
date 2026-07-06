@@ -144,6 +144,7 @@ message EvaluationsResponse {
 message CalculatePersonalKpiRequest {
   int32 periodId = 1;
   string employeeCode = 2;
+  optional int32 staffingSlotId = 3;
 }
 
 message CalculatedTaskScore {

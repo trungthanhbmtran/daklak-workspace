@@ -249,14 +249,15 @@ export class KpisController implements OnModuleInit {
   }
 
   @Post('evaluations/calculate-personal')
-  async calculatePersonalKpi(@Req() req: any, @Body() body: { periodId: number, employeeCode?: string }) {
+  async calculatePersonalKpi(@Req() req: any, @Body() body: { periodId: number, employeeCode?: string, staffingSlotId?: number }) {
     const user = req.user;
     const targetCode = body.employeeCode || user?.employeeCode || user?.username;
     
     return firstValueFrom(
       this.kpiService.CalculatePersonalKpi({
         periodId: Number(body.periodId),
-        employeeCode: targetCode
+        employeeCode: targetCode,
+        staffingSlotId: body.staffingSlotId ? Number(body.staffingSlotId) : undefined
       })
     );
   }

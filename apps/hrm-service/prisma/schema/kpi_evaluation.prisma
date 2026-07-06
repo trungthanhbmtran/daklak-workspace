@@ -7,24 +7,27 @@ model TaskKpiSetting {
   isCrossDomain         Boolean @default(false) @map("is_cross_domain")
   crossDomainMultiplier Float   @default(1.0) @map("cross_domain_multiplier")
 
-  bonusPerDay   Float? @map("bonus_per_day")
-  penaltyPerDay Float? @map("penalty_per_day")
+  bonusPerDay          Float? @map("bonus_per_day")
+  penaltyPerDay        Float? @map("penalty_per_day")
   standardDurationDays Float? @map("standard_duration_days") // Lưu lịch sử chuẩn thời gian ở bảng phụ
 
   kpiCriteriaId Int?         @map("kpi_criteria_id")
   kpiCriteria   KpiCriteria? @relation(fields: [kpiCriteriaId], references: [id])
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
   @@map("task_kpi_settings")
 }
 
 model KpiPeriod {
-  id          Int             @id @default(autoincrement())
-  name        String          @map("name")
-  startDate   DateTime        @map("start_date") @db.Date
-  endDate     DateTime        @map("end_date") @db.Date
-  evaluations KpiEvaluation[]
-  targets     EmployeeKpiTarget[]
+  id                  Int                     @id @default(autoincrement())
+  name                String                  @map("name")
+  startDate           DateTime                @map("start_date") @db.Date
+  endDate             DateTime                @map("end_date") @db.Date
+  evaluations         KpiEvaluation[]
+  targets             EmployeeKpiTarget[]
+  jobTitleTargets     JobTitleKpiTarget[]
+  staffingSlotTargets StaffingSlotKpiTarget[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -33,27 +36,30 @@ model KpiPeriod {
 }
 
 model KpiCriteria {
-  id            Int     @id @default(autoincrement())
-  name          String  @map("name")
-  description   String? @db.Text
-  categoryId    Int?    @map("category_id")
+  id          Int     @id @default(autoincrement())
+  name        String  @map("name")
+  description String? @db.Text
+  categoryId  Int?    @map("category_id")
 
   settings KpiCriteriaSetting?
-  
-  details KpiEvaluationDetail[]
-  tasks   TaskKpiSetting[]
-  targets EmployeeKpiTarget[]
+
+  details             KpiEvaluationDetail[]
+  tasks               TaskKpiSetting[]
+  targets             EmployeeKpiTarget[]
+  jobTitleTargets     JobTitleKpiTarget[]
+  staffingSlotTargets StaffingSlotKpiTarget[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
   @@map("kpi_criteria")
 }
 
 model KpiCriteriaSetting {
-  criteriaId    Int     @id @map("criteria_id")
-  weight        Float   @default(1.0) @map("weight")
-  baseScore     Float?  @map("base_score")
-  scoringMethod String  @default("MANUAL") @map("scoring_method")
+  criteriaId    Int    @id @map("criteria_id")
+  weight        Float  @default(1.0) @map("weight")
+  baseScore     Float? @map("base_score")
+  scoringMethod String @default("MANUAL") @map("scoring_method")
 
   difficulty           String @default("NORMAL") @map("difficulty")
   difficultyMultiplier Float  @default(1.0) @map("difficulty_multiplier")
@@ -61,19 +67,20 @@ model KpiCriteriaSetting {
   bonusPerDay          Float  @default(0) @map("bonus_per_day")
   penaltyPerDay        Float  @default(0) @map("penalty_per_day")
 
-  integrationCode      String? @map("integration_code")
-  formula              String? @map("formula")
+  integrationCode String? @map("integration_code")
+  formula         String? @map("formula")
 
   criteria KpiCriteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+
   @@map("kpi_criteria_settings")
 }
 
 model EmployeeKpiTarget {
-  id           Int      @id @default(autoincrement())
-  employeeCode String   @map("employee_code")
-  periodId     Int      @map("period_id")
-  criteriaId   Int      @map("criteria_id")
-  targetValue  Float    @map("target_value")
+  id           Int    @id @default(autoincrement())
+  employeeCode String @map("employee_code")
+  periodId     Int    @map("period_id")
+  criteriaId   Int    @map("criteria_id")
+  targetValue  Float  @map("target_value")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -86,13 +93,50 @@ model EmployeeKpiTarget {
   @@map("employee_kpi_targets")
 }
 
+model JobTitleKpiTarget {
+  id          Int   @id @default(autoincrement())
+  jobTitleId  Int   @map("job_title_id") // ID từ user-service
+  periodId    Int   @map("period_id")
+  criteriaId  Int   @map("criteria_id")
+  targetValue Float @map("target_value")
+  weight      Float @default(1.0) @map("weight")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  period   KpiPeriod   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  criteria KpiCriteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+
+  @@unique([jobTitleId, periodId, criteriaId])
+  @@map("job_title_kpi_targets")
+}
+
+model StaffingSlotKpiTarget {
+  id             Int   @id @default(autoincrement())
+  staffingSlotId Int   @map("staffing_slot_id") // ID từ user-service
+  periodId       Int   @map("period_id")
+  criteriaId     Int   @map("criteria_id")
+  targetValue    Float @map("target_value")
+  weight         Float @default(1.0) @map("weight")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  period   KpiPeriod   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  criteria KpiCriteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+
+  @@unique([staffingSlotId, periodId, criteriaId])
+  @@map("staffing_slot_kpi_targets")
+}
+
 model KpiEvaluation {
-  id           Int     @id @default(autoincrement())
-  employeeCode String  @map("employee_code")
-  periodId     Int     @map("period_id")
-  totalScore   Float?  @map("total_score")
-  status       String  @default("DRAFT")
-  reviewerCode String? @map("reviewer_code")
+  id             Int     @id @default(autoincrement())
+  employeeCode   String  @map("employee_code")
+  periodId       Int     @map("period_id")
+  staffingSlotId Int?    @map("staffing_slot_id") // Vị trí việc làm / Định biên khi được đánh giá
+  totalScore     Float?  @map("total_score")
+  status         String  @default("DRAFT")
+  reviewerCode   String? @map("reviewer_code")
 
   employee Employee              @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
   reviewer Employee?             @relation("KpiReviewer", fields: [reviewerCode], references: [employeeCode])

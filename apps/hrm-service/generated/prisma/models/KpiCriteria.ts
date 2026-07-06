@@ -232,6 +232,8 @@ export type KpiCriteriaWhereInput = {
   details?: Prisma.KpiEvaluationDetailListRelationFilter
   tasks?: Prisma.TaskKpiSettingListRelationFilter
   targets?: Prisma.EmployeeKpiTargetListRelationFilter
+  jobTitleTargets?: Prisma.JobTitleKpiTargetListRelationFilter
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetListRelationFilter
 }
 
 export type KpiCriteriaOrderByWithRelationInput = {
@@ -245,6 +247,8 @@ export type KpiCriteriaOrderByWithRelationInput = {
   details?: Prisma.KpiEvaluationDetailOrderByRelationAggregateInput
   tasks?: Prisma.TaskKpiSettingOrderByRelationAggregateInput
   targets?: Prisma.EmployeeKpiTargetOrderByRelationAggregateInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetOrderByRelationAggregateInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetOrderByRelationAggregateInput
   _relevance?: Prisma.KpiCriteriaOrderByRelevanceInput
 }
 
@@ -262,6 +266,8 @@ export type KpiCriteriaWhereUniqueInput = Prisma.AtLeast<{
   details?: Prisma.KpiEvaluationDetailListRelationFilter
   tasks?: Prisma.TaskKpiSettingListRelationFilter
   targets?: Prisma.EmployeeKpiTargetListRelationFilter
+  jobTitleTargets?: Prisma.JobTitleKpiTargetListRelationFilter
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetListRelationFilter
 }, "id">
 
 export type KpiCriteriaOrderByWithAggregationInput = {
@@ -300,6 +306,8 @@ export type KpiCriteriaCreateInput = {
   details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
   targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateInput = {
@@ -313,6 +321,8 @@ export type KpiCriteriaUncheckedCreateInput = {
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
   targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaUpdateInput = {
@@ -325,6 +335,8 @@ export type KpiCriteriaUpdateInput = {
   details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateInput = {
@@ -338,6 +350,8 @@ export type KpiCriteriaUncheckedUpdateInput = {
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaCreateManyInput = {
@@ -463,6 +477,34 @@ export type KpiCriteriaUpdateOneRequiredWithoutTargetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.KpiCriteriaUpdateToOneWithWhereWithoutTargetsInput, Prisma.KpiCriteriaUpdateWithoutTargetsInput>, Prisma.KpiCriteriaUncheckedUpdateWithoutTargetsInput>
 }
 
+export type KpiCriteriaCreateNestedOneWithoutJobTitleTargetsInput = {
+  create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
+  connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutJobTitleTargetsInput
+  connect?: Prisma.KpiCriteriaWhereUniqueInput
+}
+
+export type KpiCriteriaUpdateOneRequiredWithoutJobTitleTargetsNestedInput = {
+  create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
+  connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutJobTitleTargetsInput
+  upsert?: Prisma.KpiCriteriaUpsertWithoutJobTitleTargetsInput
+  connect?: Prisma.KpiCriteriaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.KpiCriteriaUpdateToOneWithWhereWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUpdateWithoutJobTitleTargetsInput>, Prisma.KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput>
+}
+
+export type KpiCriteriaCreateNestedOneWithoutStaffingSlotTargetsInput = {
+  create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
+  connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutStaffingSlotTargetsInput
+  connect?: Prisma.KpiCriteriaWhereUniqueInput
+}
+
+export type KpiCriteriaUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput = {
+  create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
+  connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutStaffingSlotTargetsInput
+  upsert?: Prisma.KpiCriteriaUpsertWithoutStaffingSlotTargetsInput
+  connect?: Prisma.KpiCriteriaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.KpiCriteriaUpdateToOneWithWhereWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUpdateWithoutStaffingSlotTargetsInput>, Prisma.KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput>
+}
+
 export type KpiCriteriaCreateNestedOneWithoutDetailsInput = {
   create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutDetailsInput, Prisma.KpiCriteriaUncheckedCreateWithoutDetailsInput>
   connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutDetailsInput
@@ -486,6 +528,8 @@ export type KpiCriteriaCreateWithoutTasksInput = {
   settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
   targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateWithoutTasksInput = {
@@ -498,6 +542,8 @@ export type KpiCriteriaUncheckedCreateWithoutTasksInput = {
   settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
   targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaCreateOrConnectWithoutTasksInput = {
@@ -525,6 +571,8 @@ export type KpiCriteriaUpdateWithoutTasksInput = {
   settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateWithoutTasksInput = {
@@ -537,6 +585,8 @@ export type KpiCriteriaUncheckedUpdateWithoutTasksInput = {
   settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaCreateWithoutSettingsInput = {
@@ -548,6 +598,8 @@ export type KpiCriteriaCreateWithoutSettingsInput = {
   details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
   targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateWithoutSettingsInput = {
@@ -560,6 +612,8 @@ export type KpiCriteriaUncheckedCreateWithoutSettingsInput = {
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
   targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaCreateOrConnectWithoutSettingsInput = {
@@ -587,6 +641,8 @@ export type KpiCriteriaUpdateWithoutSettingsInput = {
   details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateWithoutSettingsInput = {
@@ -599,6 +655,8 @@ export type KpiCriteriaUncheckedUpdateWithoutSettingsInput = {
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaCreateWithoutTargetsInput = {
@@ -610,6 +668,8 @@ export type KpiCriteriaCreateWithoutTargetsInput = {
   settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateWithoutTargetsInput = {
@@ -622,6 +682,8 @@ export type KpiCriteriaUncheckedCreateWithoutTargetsInput = {
   settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaCreateOrConnectWithoutTargetsInput = {
@@ -649,6 +711,8 @@ export type KpiCriteriaUpdateWithoutTargetsInput = {
   settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateWithoutTargetsInput = {
@@ -661,6 +725,148 @@ export type KpiCriteriaUncheckedUpdateWithoutTargetsInput = {
   settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+}
+
+export type KpiCriteriaCreateWithoutJobTitleTargetsInput = {
+  name: string
+  description?: string | null
+  categoryId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
+  details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
+  targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
+}
+
+export type KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput = {
+  id?: number
+  name: string
+  description?: string | null
+  categoryId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
+  details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
+  targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+}
+
+export type KpiCriteriaCreateOrConnectWithoutJobTitleTargetsInput = {
+  where: Prisma.KpiCriteriaWhereUniqueInput
+  create: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
+}
+
+export type KpiCriteriaUpsertWithoutJobTitleTargetsInput = {
+  update: Prisma.XOR<Prisma.KpiCriteriaUpdateWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput>
+  create: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
+  where?: Prisma.KpiCriteriaWhereInput
+}
+
+export type KpiCriteriaUpdateToOneWithWhereWithoutJobTitleTargetsInput = {
+  where?: Prisma.KpiCriteriaWhereInput
+  data: Prisma.XOR<Prisma.KpiCriteriaUpdateWithoutJobTitleTargetsInput, Prisma.KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput>
+}
+
+export type KpiCriteriaUpdateWithoutJobTitleTargetsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
+  details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
+  targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
+}
+
+export type KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
+  details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
+  targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+}
+
+export type KpiCriteriaCreateWithoutStaffingSlotTargetsInput = {
+  name: string
+  description?: string | null
+  categoryId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
+  details?: Prisma.KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
+  targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
+}
+
+export type KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput = {
+  id?: number
+  name: string
+  description?: string | null
+  categoryId?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
+  details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
+  tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
+  targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+}
+
+export type KpiCriteriaCreateOrConnectWithoutStaffingSlotTargetsInput = {
+  where: Prisma.KpiCriteriaWhereUniqueInput
+  create: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
+}
+
+export type KpiCriteriaUpsertWithoutStaffingSlotTargetsInput = {
+  update: Prisma.XOR<Prisma.KpiCriteriaUpdateWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput>
+  create: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
+  where?: Prisma.KpiCriteriaWhereInput
+}
+
+export type KpiCriteriaUpdateToOneWithWhereWithoutStaffingSlotTargetsInput = {
+  where?: Prisma.KpiCriteriaWhereInput
+  data: Prisma.XOR<Prisma.KpiCriteriaUpdateWithoutStaffingSlotTargetsInput, Prisma.KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput>
+}
+
+export type KpiCriteriaUpdateWithoutStaffingSlotTargetsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
+  details?: Prisma.KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
+  targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
+}
+
+export type KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
+  details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
+  tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
+  targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaCreateWithoutDetailsInput = {
@@ -672,6 +878,8 @@ export type KpiCriteriaCreateWithoutDetailsInput = {
   settings?: Prisma.KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
   targets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaUncheckedCreateWithoutDetailsInput = {
@@ -684,6 +892,8 @@ export type KpiCriteriaUncheckedCreateWithoutDetailsInput = {
   settings?: Prisma.KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
   tasks?: Prisma.TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
   targets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
 }
 
 export type KpiCriteriaCreateOrConnectWithoutDetailsInput = {
@@ -711,6 +921,8 @@ export type KpiCriteriaUpdateWithoutDetailsInput = {
   settings?: Prisma.KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
 }
 
 export type KpiCriteriaUncheckedUpdateWithoutDetailsInput = {
@@ -723,6 +935,8 @@ export type KpiCriteriaUncheckedUpdateWithoutDetailsInput = {
   settings?: Prisma.KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
   tasks?: Prisma.TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
   targets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  jobTitleTargets?: Prisma.JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
+  staffingSlotTargets?: Prisma.StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
 }
 
 
@@ -734,12 +948,16 @@ export type KpiCriteriaCountOutputType = {
   details: number
   tasks: number
   targets: number
+  jobTitleTargets: number
+  staffingSlotTargets: number
 }
 
 export type KpiCriteriaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   details?: boolean | KpiCriteriaCountOutputTypeCountDetailsArgs
   tasks?: boolean | KpiCriteriaCountOutputTypeCountTasksArgs
   targets?: boolean | KpiCriteriaCountOutputTypeCountTargetsArgs
+  jobTitleTargets?: boolean | KpiCriteriaCountOutputTypeCountJobTitleTargetsArgs
+  staffingSlotTargets?: boolean | KpiCriteriaCountOutputTypeCountStaffingSlotTargetsArgs
 }
 
 /**
@@ -773,6 +991,20 @@ export type KpiCriteriaCountOutputTypeCountTargetsArgs<ExtArgs extends runtime.T
   where?: Prisma.EmployeeKpiTargetWhereInput
 }
 
+/**
+ * KpiCriteriaCountOutputType without action
+ */
+export type KpiCriteriaCountOutputTypeCountJobTitleTargetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JobTitleKpiTargetWhereInput
+}
+
+/**
+ * KpiCriteriaCountOutputType without action
+ */
+export type KpiCriteriaCountOutputTypeCountStaffingSlotTargetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffingSlotKpiTargetWhereInput
+}
+
 
 export type KpiCriteriaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -785,6 +1017,8 @@ export type KpiCriteriaSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   details?: boolean | Prisma.KpiCriteria$detailsArgs<ExtArgs>
   tasks?: boolean | Prisma.KpiCriteria$tasksArgs<ExtArgs>
   targets?: boolean | Prisma.KpiCriteria$targetsArgs<ExtArgs>
+  jobTitleTargets?: boolean | Prisma.KpiCriteria$jobTitleTargetsArgs<ExtArgs>
+  staffingSlotTargets?: boolean | Prisma.KpiCriteria$staffingSlotTargetsArgs<ExtArgs>
   _count?: boolean | Prisma.KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["kpiCriteria"]>
 
@@ -805,6 +1039,8 @@ export type KpiCriteriaInclude<ExtArgs extends runtime.Types.Extensions.Internal
   details?: boolean | Prisma.KpiCriteria$detailsArgs<ExtArgs>
   tasks?: boolean | Prisma.KpiCriteria$tasksArgs<ExtArgs>
   targets?: boolean | Prisma.KpiCriteria$targetsArgs<ExtArgs>
+  jobTitleTargets?: boolean | Prisma.KpiCriteria$jobTitleTargetsArgs<ExtArgs>
+  staffingSlotTargets?: boolean | Prisma.KpiCriteria$staffingSlotTargetsArgs<ExtArgs>
   _count?: boolean | Prisma.KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -815,6 +1051,8 @@ export type $KpiCriteriaPayload<ExtArgs extends runtime.Types.Extensions.Interna
     details: Prisma.$KpiEvaluationDetailPayload<ExtArgs>[]
     tasks: Prisma.$TaskKpiSettingPayload<ExtArgs>[]
     targets: Prisma.$EmployeeKpiTargetPayload<ExtArgs>[]
+    jobTitleTargets: Prisma.$JobTitleKpiTargetPayload<ExtArgs>[]
+    staffingSlotTargets: Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1167,6 +1405,8 @@ export interface Prisma__KpiCriteriaClient<T, Null = never, ExtArgs extends runt
   details<T extends Prisma.KpiCriteria$detailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$detailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tasks<T extends Prisma.KpiCriteria$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   targets<T extends Prisma.KpiCriteria$targetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$targetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  jobTitleTargets<T extends Prisma.KpiCriteria$jobTitleTargetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$jobTitleTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  staffingSlotTargets<T extends Prisma.KpiCriteria$staffingSlotTargetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.KpiCriteria$staffingSlotTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1638,6 +1878,54 @@ export type KpiCriteria$targetsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.EmployeeKpiTargetScalarFieldEnum | Prisma.EmployeeKpiTargetScalarFieldEnum[]
+}
+
+/**
+ * KpiCriteria.jobTitleTargets
+ */
+export type KpiCriteria$jobTitleTargetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JobTitleKpiTarget
+   */
+  select?: Prisma.JobTitleKpiTargetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JobTitleKpiTarget
+   */
+  omit?: Prisma.JobTitleKpiTargetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JobTitleKpiTargetInclude<ExtArgs> | null
+  where?: Prisma.JobTitleKpiTargetWhereInput
+  orderBy?: Prisma.JobTitleKpiTargetOrderByWithRelationInput | Prisma.JobTitleKpiTargetOrderByWithRelationInput[]
+  cursor?: Prisma.JobTitleKpiTargetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JobTitleKpiTargetScalarFieldEnum | Prisma.JobTitleKpiTargetScalarFieldEnum[]
+}
+
+/**
+ * KpiCriteria.staffingSlotTargets
+ */
+export type KpiCriteria$staffingSlotTargetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffingSlotKpiTarget
+   */
+  select?: Prisma.StaffingSlotKpiTargetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffingSlotKpiTarget
+   */
+  omit?: Prisma.StaffingSlotKpiTargetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffingSlotKpiTargetInclude<ExtArgs> | null
+  where?: Prisma.StaffingSlotKpiTargetWhereInput
+  orderBy?: Prisma.StaffingSlotKpiTargetOrderByWithRelationInput | Prisma.StaffingSlotKpiTargetOrderByWithRelationInput[]
+  cursor?: Prisma.StaffingSlotKpiTargetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffingSlotKpiTargetScalarFieldEnum | Prisma.StaffingSlotKpiTargetScalarFieldEnum[]
 }
 
 /**

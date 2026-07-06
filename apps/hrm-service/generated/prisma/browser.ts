@@ -48,6 +48,16 @@ export type KpiCriteriaSetting = Prisma.KpiCriteriaSettingModel
  */
 export type EmployeeKpiTarget = Prisma.EmployeeKpiTargetModel
 /**
+ * Model JobTitleKpiTarget
+ * 
+ */
+export type JobTitleKpiTarget = Prisma.JobTitleKpiTargetModel
+/**
+ * Model StaffingSlotKpiTarget
+ * 
+ */
+export type StaffingSlotKpiTarget = Prisma.StaffingSlotKpiTargetModel
+/**
  * Model KpiEvaluation
  * 
  */

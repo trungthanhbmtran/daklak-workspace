@@ -390,6 +390,8 @@ export const ModelName = {
   KpiCriteria: 'KpiCriteria',
   KpiCriteriaSetting: 'KpiCriteriaSetting',
   EmployeeKpiTarget: 'EmployeeKpiTarget',
+  JobTitleKpiTarget: 'JobTitleKpiTarget',
+  StaffingSlotKpiTarget: 'StaffingSlotKpiTarget',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   MasterPlan: 'MasterPlan',
@@ -416,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "masterPlan" | "task" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "taskHistory" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "jobTitleKpiTarget" | "staffingSlotKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "masterPlan" | "task" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "taskHistory" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -813,6 +815,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.EmployeeKpiTargetCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.EmployeeKpiTargetCountAggregateOutputType> | number
+        }
+      }
+    }
+    JobTitleKpiTarget: {
+      payload: Prisma.$JobTitleKpiTargetPayload<ExtArgs>
+      fields: Prisma.JobTitleKpiTargetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JobTitleKpiTargetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JobTitleKpiTargetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
+        }
+        findFirst: {
+          args: Prisma.JobTitleKpiTargetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JobTitleKpiTargetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
+        }
+        findMany: {
+          args: Prisma.JobTitleKpiTargetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>[]
+        }
+        create: {
+          args: Prisma.JobTitleKpiTargetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
+        }
+        createMany: {
+          args: Prisma.JobTitleKpiTargetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.JobTitleKpiTargetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
+        }
+        update: {
+          args: Prisma.JobTitleKpiTargetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
+        }
+        deleteMany: {
+          args: Prisma.JobTitleKpiTargetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JobTitleKpiTargetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.JobTitleKpiTargetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
+        }
+        aggregate: {
+          args: Prisma.JobTitleKpiTargetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJobTitleKpiTarget>
+        }
+        groupBy: {
+          args: Prisma.JobTitleKpiTargetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JobTitleKpiTargetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JobTitleKpiTargetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JobTitleKpiTargetCountAggregateOutputType> | number
+        }
+      }
+    }
+    StaffingSlotKpiTarget: {
+      payload: Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>
+      fields: Prisma.StaffingSlotKpiTargetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StaffingSlotKpiTargetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StaffingSlotKpiTargetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
+        }
+        findFirst: {
+          args: Prisma.StaffingSlotKpiTargetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StaffingSlotKpiTargetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
+        }
+        findMany: {
+          args: Prisma.StaffingSlotKpiTargetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>[]
+        }
+        create: {
+          args: Prisma.StaffingSlotKpiTargetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
+        }
+        createMany: {
+          args: Prisma.StaffingSlotKpiTargetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.StaffingSlotKpiTargetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
+        }
+        update: {
+          args: Prisma.StaffingSlotKpiTargetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
+        }
+        deleteMany: {
+          args: Prisma.StaffingSlotKpiTargetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StaffingSlotKpiTargetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.StaffingSlotKpiTargetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
+        }
+        aggregate: {
+          args: Prisma.StaffingSlotKpiTargetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStaffingSlotKpiTarget>
+        }
+        groupBy: {
+          args: Prisma.StaffingSlotKpiTargetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StaffingSlotKpiTargetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StaffingSlotKpiTargetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StaffingSlotKpiTargetCountAggregateOutputType> | number
         }
       }
     }
@@ -1680,10 +1814,39 @@ export const EmployeeKpiTargetScalarFieldEnum = {
 export type EmployeeKpiTargetScalarFieldEnum = (typeof EmployeeKpiTargetScalarFieldEnum)[keyof typeof EmployeeKpiTargetScalarFieldEnum]
 
 
+export const JobTitleKpiTargetScalarFieldEnum = {
+  id: 'id',
+  jobTitleId: 'jobTitleId',
+  periodId: 'periodId',
+  criteriaId: 'criteriaId',
+  targetValue: 'targetValue',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobTitleKpiTargetScalarFieldEnum = (typeof JobTitleKpiTargetScalarFieldEnum)[keyof typeof JobTitleKpiTargetScalarFieldEnum]
+
+
+export const StaffingSlotKpiTargetScalarFieldEnum = {
+  id: 'id',
+  staffingSlotId: 'staffingSlotId',
+  periodId: 'periodId',
+  criteriaId: 'criteriaId',
+  targetValue: 'targetValue',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffingSlotKpiTargetScalarFieldEnum = (typeof StaffingSlotKpiTargetScalarFieldEnum)[keyof typeof StaffingSlotKpiTargetScalarFieldEnum]
+
+
 export const KpiEvaluationScalarFieldEnum = {
   id: 'id',
   employeeCode: 'employeeCode',
   periodId: 'periodId',
+  staffingSlotId: 'staffingSlotId',
   totalScore: 'totalScore',
   status: 'status',
   reviewerCode: 'reviewerCode',
@@ -2201,6 +2364,8 @@ export type GlobalOmitConfig = {
   kpiCriteria?: Prisma.KpiCriteriaOmit
   kpiCriteriaSetting?: Prisma.KpiCriteriaSettingOmit
   employeeKpiTarget?: Prisma.EmployeeKpiTargetOmit
+  jobTitleKpiTarget?: Prisma.JobTitleKpiTargetOmit
+  staffingSlotKpiTarget?: Prisma.StaffingSlotKpiTargetOmit
   kpiEvaluation?: Prisma.KpiEvaluationOmit
   kpiEvaluationDetail?: Prisma.KpiEvaluationDetailOmit
   masterPlan?: Prisma.MasterPlanOmit
