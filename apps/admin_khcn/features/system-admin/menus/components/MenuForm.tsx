@@ -57,7 +57,7 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
 
   if (mode === "idle") {
     return (
-      <Card className="flex-1 w-full min-h-0 shadow-none border-border flex items-center justify-center bg-muted/5 border-dashed rounded-xl transition-all">
+      <Card className="flex-1 w-full min-h-0 shadow-none border-border flex items-center justify-center bg-muted/5 border-dashed rounded-xl transition-all p-0 gap-0">
         <div className="flex flex-col items-center">
           <div className="p-4 bg-background rounded-full shadow-sm mb-4">
             <LayoutDashboard className="h-10 w-10 text-muted-foreground/30" />
@@ -220,7 +220,7 @@ function MenuFormInner(props: any) {
   };
 
   return (
-    <Card className="flex-1 w-full min-h-0 shadow-none border-border rounded-xl overflow-hidden flex flex-col bg-background">
+    <Card className="flex-1 w-full min-h-0 shadow-none border-border rounded-xl overflow-hidden flex flex-col bg-background p-0 gap-0">
       {/* HEADER */}
       <CardHeader className="p-5 border-b bg-linear-to-r from-background to-muted/20 shrink-0 flex-row items-center justify-between">
         <CardTitle className="text-base font-bold flex items-center gap-2">
