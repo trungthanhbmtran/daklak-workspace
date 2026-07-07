@@ -36,33 +36,65 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
   const endpoints: ParsedEndpoint[] = [];
   const validMethods: Record<string, boolean> = { get: true, post: true, put: true, delete: true, patch: true };
 
+  const resolveParam = (p: any) => {
+    if (p.$ref && typeof p.$ref === 'string') {
+      const parts = p.$ref.split('/');
+      if (parts[1] === 'components' && parts[2] === 'parameters') return data.components?.parameters?.[parts[3]] || p;
+      if (parts[1] === 'parameters') return data.parameters?.[parts[2]] || p;
+    }
+    return p;
+  };
+
   const extractParams = (parameters: any[] | undefined, type: 'query' | 'header') => {
     if (!parameters?.length) return [];
     const result: any[] = [];
     for (let i = 0; i < parameters.length; i++) {
-      const p = parameters[i];
+      const p = resolveParam(parameters[i]);
       if (p.in === type) result.push({ key: p.name, value: "" });
     }
     return result;
   };
 
+  const extractBody = (details: any) => {
+    if (details.requestBody?.content?.['application/json']) {
+      const content = details.requestBody.content['application/json'];
+      if (content.example) return typeof content.example === 'string' ? content.example : JSON.stringify(content.example, null, 2);
+      if (content.schema?.example) return typeof content.schema.example === 'string' ? content.schema.example : JSON.stringify(content.schema.example, null, 2);
+      return "{\n  \n}";
+    }
+    const params = Array.isArray(details.parameters) ? details.parameters : [];
+    for (let i = 0; i < params.length; i++) {
+      const p = resolveParam(params[i]);
+      if (p.in === 'body') {
+        if (p.schema?.example) return typeof p.schema.example === 'string' ? p.schema.example : JSON.stringify(p.schema.example, null, 2);
+        return "{\n  \n}";
+      }
+    }
+    return "";
+  };
+
   if (data.paths) {
     for (const pathKey in data.paths) {
       const pathMethods = data.paths[pathKey];
+      const pathParams = Array.isArray(pathMethods.parameters) ? pathMethods.parameters : [];
+
       for (const method in pathMethods) {
         const lowerMethod = method.toLowerCase();
         if (!validMethods[lowerMethod]) continue;
 
         const details = pathMethods[method];
+        const methodParams = Array.isArray(details.parameters) ? details.parameters : [];
+        const allParams = [...pathParams, ...methodParams];
+
         endpoints.push({
           id: Math.random().toString(36).substring(2, 11),
-          name: details.summary || details.operationId || pathKey,
+          name: details.summary || details.description || details.operationId || pathKey,
           folder: details.tags?.[0] || "",
           method: lowerMethod.toUpperCase(),
           path: pathKey,
-          headers: extractParams(details.parameters, 'header'),
-          params: extractParams(details.parameters, 'query'),
-          body: ""
+          headers: extractParams(allParams, 'header'),
+          params: extractParams(allParams, 'query'),
+          body: extractBody(details)
         });
       }
     }
