@@ -5,7 +5,7 @@ package task;
 import "common/common.proto";
 import "hrm/rank_quota.proto";
 service TaskService {
-  rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {
+  rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {}
   rpc SaveRankQuotas (hrm.SaveRankQuotasRequest) returns (hrm.SaveRankQuotasResponse) {}
   rpc GetRankQuotasByRank (hrm.GetRankQuotasByRankRequest) returns (hrm.RankQuotaList) {}
   
@@ -18,7 +18,6 @@ service TaskService {
   rpc UpsertTaskKpiSetting (UpsertTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
   rpc GetTaskKpiSetting (GetTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
   rpc GetTaskHistory (GetTaskHistoryRequest) returns (TaskHistoryResponse) {}
-}
   rpc ListTasks (ListTasksRequest) returns (ListTasksResponse) {}
   rpc GetTaskStats (ListTasksRequest) returns (GetTaskStatsResponse) {}
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
@@ -80,13 +79,6 @@ message RecommendAssigneesResponse {
   bool success = 1;
   string message = 2;
   RecommendAssigneesData data = 3;
-}
-
-
-  rpc Create (CreateTemplateRequest) returns (TaskTemplateDataResponse) {}
-  rpc Update (UpdateTemplateRequest) returns (TaskTemplateDataResponse) {}
-  rpc Delete (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}
-  rpc BulkUpdate (BulkUpdateTemplatesRequest) returns (BulkUpdateTemplatesResponse) {}
 }
 
 message TaskTemplateDataResponse {
@@ -406,4 +398,61 @@ message RequestCoordinationRequest {
 message CoordinationResponse {
   bool success = 1;
   string message = 2;
+}
+
+message UpsertTaskKpiSettingRequest {
+  int32 taskId = 1;
+  float weight = 2;
+  float baseScore = 3;
+  string scoringMethod = 4;
+  string difficulty = 5;
+  float difficultyMultiplier = 6;
+  int32 bonusThresholdDays = 7;
+  float bonusPerDay = 8;
+  float penaltyPerDay = 9;
+  float standardDurationDays = 10;
+  int32 kpiCriteriaId = 11;
+}
+
+message TaskKpiSettingData {
+  int32 taskId = 1;
+  float baseScore = 2;
+  float weight = 3;
+  string scoringMethod = 4;
+  bool isCrossDomain = 5;
+  float crossDomainMultiplier = 6;
+  float bonusPerDay = 7;
+  float penaltyPerDay = 8;
+  float standardDurationDays = 9;
+  int32 kpiCriteriaId = 10;
+}
+
+message TaskKpiSettingResponse {
+  bool success = 1;
+  string message = 2;
+  TaskKpiSettingData data = 3;
+}
+
+message GetTaskKpiSettingRequest {
+  int32 taskId = 1;
+}
+
+message GetTaskHistoryRequest {
+  int32 taskId = 1;
+}
+
+message TaskHistoryData {
+  int32 id = 1;
+  int32 taskId = 2;
+  string action = 3;
+  string actorCode = 4;
+  string oldValue = 5;
+  string newValue = 6;
+  string createdAt = 7;
+}
+
+message TaskHistoryResponse {
+  bool success = 1;
+  string message = 2;
+  repeated TaskHistoryData data = 3;
 }

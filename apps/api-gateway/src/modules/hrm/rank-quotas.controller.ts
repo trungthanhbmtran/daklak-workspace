@@ -11,9 +11,7 @@ export class RankQuotasController {
   ) {}
 
   onModuleInit() {
-    this.rankQuotaService = this.client.getService(
-      MICROSERVICES.RANK_QUOTA.SERVICE,
-    );
+    this.rankQuotaService = this.client.getService('TaskService');
   }
 
   @Post()
