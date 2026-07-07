@@ -5,6 +5,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 import { TaskSharedService } from '../task-shared/task-shared.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {
@@ -161,7 +162,6 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const page = query.page ? parseInt(query.page, 10) : 1;
     const limit = query.limit ? parseInt(query.limit, 10) : 20;
-    const skip = (page - 1) * limit;
 
     // Apply statsFilter range conditions (Optimized: Lazy evaluation to avoid redundant Date allocations and unused objects)
     if (query.statsFilter) {
@@ -192,21 +192,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     let finalWhere = { ...where };
 
-    const [total, tasks] = await Promise.all([
-      this.prisma.task.count({ where: finalWhere }),
-      this.prisma.task.findMany({
-        where: finalWhere,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        include: {
-          participants: true,
-          plan: { select: { id: true, title: true, createdByCode: true } },
-          _count: { select: { descendants: true } },
-          kpiSettings: true
-        }
-      })
-    ]);
+    let tasks = await this.prisma.task.findMany({
+      where: finalWhere,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        participants: true,
+        plan: { select: { id: true, title: true, createdByCode: true } },
+        _count: { select: { descendants: true } },
+        kpiSettings: true
+      }
+    });
 
     // Apply strict column-vs-column filter in JS if required
     let finalTasks = tasks;
@@ -221,8 +216,9 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
+    const paginated = paginateArray(finalTasks, page, limit);
 
-    const enrichedTasks = await this.taskSharedService.enrichTasks(finalTasks);
+    const enrichedTasks = await this.taskSharedService.enrichTasks(paginated.data);
 
     const mappedTasks = await Promise.all(enrichedTasks.map(async (t: any) => {
       const allowedActions = await this.taskSharedService.computeAllowedActions(t, query);
@@ -259,12 +255,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       message: 'Lấy danh sách nhiệm vụ thành công',
       data: finalData,
       meta: {
-        pagination: {
-          total,
-          page,
-          pageSize: limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        ...paginated.meta
       }
     };
   }

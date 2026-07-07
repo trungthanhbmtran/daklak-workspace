@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class KpiEvaluationsService {
@@ -78,15 +79,10 @@ export class KpiEvaluationsService {
     const limit = query?.limit ? Number(query.limit) : 0;
 
     let criteria = await this.prisma.kpiCriteria.findMany({ orderBy: { createdAt: 'desc' }, include: { settings: true } });
-    let total = criteria.length;
 
-    if (limit > 0) {
-      const start = (page - 1) * limit;
-      const end = page * limit;
-      criteria = criteria.slice(start, end);
-    }
+    const paginated = paginateArray(criteria, page, limit);
 
-    const mappedCriteria = criteria.map((c: any) => ({
+    const mappedCriteria = paginated.data.map((c: any) => ({
       ...c,
       weight: c.settings?.weight || 1.0,
       baseScore: c.settings?.baseScore || 0,
@@ -100,9 +96,6 @@ export class KpiEvaluationsService {
       formula: c.settings?.formula || '',
     }));
 
-    const pageSize = limit > 0 ? limit : total;
-    const totalPages = pageSize > 0 ? Math.ceil(total / pageSize) : 1;
-
     const allowedActions: string[] = [];
     if (isAdmin) {
       allowedActions.push('CREATE', 'EDIT', 'DELETE');
@@ -113,14 +106,7 @@ export class KpiEvaluationsService {
       message: 'Lấy danh sách tiêu chí thành công',
       data: mappedCriteria,
       meta: {
-        pagination: {
-          total,
-          page,
-          pageSize,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        },
+        ...paginated.meta,
         allowedActions
       }
     };

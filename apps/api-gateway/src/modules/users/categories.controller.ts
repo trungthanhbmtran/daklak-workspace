@@ -73,6 +73,31 @@ export class CategoriesController implements OnModuleInit {
     }
   }
 
+  @Put('groups/:code')
+  @ApiOperation({ summary: 'Cập nhật tên và thứ tự của nhóm danh mục' })
+  @ApiBody({ description: 'name, order?' })
+  @ApiResponse({ status: 200, description: 'Nhóm danh mục đã cập nhật' })
+  async updateGroup(
+    @Param('code') code: string,
+    @Body() body: { name: string; order?: number },
+  ) {
+    try {
+      const res: any = await firstValueFrom(
+        this.categoryService.UpdateGroup({
+          code,
+          name: body.name,
+          order: body.order ?? 0,
+        }),
+      );
+      return { success: true, data: res };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Lỗi cập nhật nhóm danh mục',
+      };
+    }
+  }
+
   @Get()
   @ApiOperation({
     summary:

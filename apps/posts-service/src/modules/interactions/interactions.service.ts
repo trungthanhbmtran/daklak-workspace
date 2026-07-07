@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class InteractionsService {
@@ -23,24 +24,19 @@ export class InteractionsService {
 
   async listComments(query: any) {
     const { postId, status, page = 1, limit = 10 } = query;
-    const skip = (page - 1) * limit;
     const where = {
       ...(postId && { postId }),
       ...(status && { status }),
     };
+    const allItems = await this.prisma.comment.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: { replies: true },
+    });
 
-    const [items, total] = await Promise.all([
-      this.prisma.comment.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        include: { replies: true },
-      }),
-      this.prisma.comment.count({ where }),
-    ]);
+    const paginated = paginateArray(allItems, page, limit);
 
-    return { items, total };
+    return { items: paginated.data, total: paginated.meta.pagination.total };
   }
 
   async updateCommentStatus(id: string, status: string) {
@@ -73,24 +69,19 @@ export class InteractionsService {
 
   async listQuestions(query: any) {
     const { status, onlyPublic, categoryId, page = 1, limit = 10 } = query;
-    const skip = (page - 1) * limit;
     const where = {
       ...(status && { status }),
       ...(onlyPublic && { isPublic: true }),
       ...(categoryId && { categoryId }),
     };
+    const allItems = await this.prisma.citizenQuestion.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
-    const [items, total] = await Promise.all([
-      this.prisma.citizenQuestion.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.citizenQuestion.count({ where }),
-    ]);
+    const paginated = paginateArray(allItems, page, limit);
 
-    return { items, total };
+    return { items: paginated.data, total: paginated.meta.pagination.total };
   }
 
   async answerQuestion(data: any) {
@@ -128,23 +119,18 @@ export class InteractionsService {
 
   async listFeedbacks(query: any) {
     const { feedbackType, status, page = 1, limit = 10 } = query;
-    const skip = (page - 1) * limit;
     const where = {
       ...(feedbackType && { feedbackType }),
       ...(status && { status }),
     };
+    const allItems = await this.prisma.citizenFeedback.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
-    const [items, total] = await Promise.all([
-      this.prisma.citizenFeedback.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.citizenFeedback.count({ where }),
-    ]);
+    const paginated = paginateArray(allItems, page, limit);
 
-    return { items, total };
+    return { items: paginated.data, total: paginated.meta.pagination.total };
   }
 
   async updateFeedbackStatus(id: string, status: string) {

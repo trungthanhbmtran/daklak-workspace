@@ -9,6 +9,7 @@ import { randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 const GRPC = {
   INVALID_ARGUMENT: 3,
@@ -550,45 +551,33 @@ export class UsersService implements OnModuleInit {
       ];
     }
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where: whereCondition,
-        skip,
-        take,
-        orderBy: { id: 'asc' },
-        select: { id: true },
-      }),
-      this.prisma.user.count({ where: whereCondition }),
-    ]);
-
-    const ids = idsResult.map((u) => u.id);
-    const users =
-      ids.length > 0
-        ? await this.prisma.user.findMany({
-            where: { id: { in: ids } },
-            orderBy: { id: 'asc' },
-            include: {
-              roles: { select: { id: true, code: true, name: true } },
-              jobPositions: {
-                where: { endDate: null },
-                include: {
-                  unit: { select: { id: true, code: true, name: true } },
-                  jobTitle: {
-                    select: { id: true, code: true, name: true, rank: true },
-                  },
-                },
-              },
+    const allUsers = await this.prisma.user.findMany({
+      where: whereCondition,
+      orderBy: { id: 'asc' },
+      include: {
+        roles: { select: { id: true, code: true, name: true } },
+        jobPositions: {
+          where: { endDate: null },
+          include: {
+            unit: { select: { id: true, code: true, name: true } },
+            jobTitle: {
+              select: { id: true, code: true, name: true, rank: true },
             },
-          })
-        : [];
+          },
+        },
+      },
+    });
+
+    const page = Math.floor(skip / take) + 1;
+    const paginated = paginateArray(allUsers, page, take);
 
     return {
-      data: users.map((u) => this.toUserResponse(u)),
+      data: paginated.data.map((u) => this.toUserResponse(u)),
       meta: {
-        total,
+        total: paginated.meta.pagination.total,
         skip,
         take,
+        ...paginated.meta
       },
     };
   }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class MinutesService {
@@ -37,35 +38,17 @@ export class MinutesService {
     }
     if (status) where.status = status;
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.minutes.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { startTime: 'desc' },
-        select: { id: true },
-      }),
-      this.prisma.minutes.count({ where }),
-    ]);
+    const allItems = await this.prisma.minutes.findMany({
+      where,
+      orderBy: { startTime: 'desc' },
+    });
 
-    const ids = idsResult.map((item) => item.id);
-    const items = ids.length > 0
-      ? await this.prisma.minutes.findMany({
-          where: { id: { in: ids } },
-          orderBy: { startTime: 'desc' },
-        })
-      : [];
+    const paginated = paginateArray(allItems, page, limit);
 
     return {
-      data: items.map(item => this.mapToProto(item)),
+      data: paginated.data.map(item => this.mapToProto(item)),
       meta: {
-        pagination: {
-          total,
-          page,
-          pageSize: limit,
-          totalPages: Math.ceil(total / limit),
-        },
+        ...paginated.meta
       },
     };
   }

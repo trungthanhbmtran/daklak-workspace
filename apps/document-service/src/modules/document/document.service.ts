@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class DocumentService {
@@ -89,33 +90,17 @@ export class DocumentService {
       if (endDate) where.issueDate.lte = new Date(endDate);
     }
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.document.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: { id: true },
-      }),
-      this.prisma.document.count({ where }),
-    ]);
+    const allItems = await this.prisma.document.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
-    const ids = idsResult.map((item) => item.id);
-    const items = ids.length > 0
-      ? await this.prisma.document.findMany({
-          where: { id: { in: ids } },
-          orderBy: { createdAt: 'desc' },
-        })
-      : [];
+    const paginated = paginateArray(allItems, page, limit);
 
     return {
-      data: items.map(item => this.mapToProto(item)),
+      data: paginated.data.map(item => this.mapToProto(item)),
       meta: {
-        total,
-        page,
-        pageSize: limit,
-        totalPages: Math.ceil(total / limit),
+        ...paginated.meta
       },
     };
   }
@@ -402,33 +387,17 @@ export class DocumentService {
       where.category = query.category;
     }
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.administrativeProcedure.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { code: 'asc' },
-        select: { id: true },
-      }),
-      this.prisma.administrativeProcedure.count({ where }),
-    ]);
+    const allItems = await this.prisma.administrativeProcedure.findMany({
+      where,
+      orderBy: { code: 'asc' },
+    });
 
-    const ids = idsResult.map((item) => item.id);
-    const items = ids.length > 0
-      ? await this.prisma.administrativeProcedure.findMany({
-          where: { id: { in: ids } },
-          orderBy: { code: 'asc' },
-        })
-      : [];
+    const paginated = paginateArray(allItems, page, limit);
 
     return {
-      data: items.map(item => this.mapProcedureToProto(item)),
+      data: paginated.data.map(item => this.mapProcedureToProto(item)),
       meta: {
-        total,
-        page,
-        pageSize: limit,
-        totalPages: Math.ceil(total / limit),
+        ...paginated.meta
       },
     };
   }
@@ -547,33 +516,17 @@ export class DocumentService {
       where.status = query.status;
     }
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.oneStopDossier.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: { id: true },
-      }),
-      this.prisma.oneStopDossier.count({ where }),
-    ]);
+    const allItems = await this.prisma.oneStopDossier.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
-    const ids = idsResult.map((item) => item.id);
-    const items = ids.length > 0
-      ? await this.prisma.oneStopDossier.findMany({
-          where: { id: { in: ids } },
-          orderBy: { createdAt: 'desc' },
-        })
-      : [];
+    const paginated = paginateArray(allItems, page, limit);
 
     return {
-      data: items.map(item => this.mapDossierToProto(item)),
+      data: paginated.data.map(item => this.mapDossierToProto(item)),
       meta: {
-        total,
-        page,
-        pageSize: limit,
-        totalPages: Math.ceil(total / limit),
+        ...paginated.meta
       },
     };
   }

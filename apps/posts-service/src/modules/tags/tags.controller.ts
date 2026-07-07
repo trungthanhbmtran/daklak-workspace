@@ -14,7 +14,6 @@ export class TagsController {
 
   @GrpcMethod('TagService', 'ListTags')
   async listTags(data: { page?: number; limit?: number }) {
-    const result = await this.tagsService.findAll(data.page, data.limit);
-    return { data: result };
+    return await this.tagsService.findAll(data.page, data.limit);
   }
 }

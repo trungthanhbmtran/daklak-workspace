@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class BannersService {
@@ -35,17 +36,14 @@ export class BannersService {
     if (status === true) where.status = true;
     // Note: We skip status = false default from gRPC to show all banners unless explicitly filtered
 
-    const [items, total] = await Promise.all([
-      this.prisma.banner.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { orderIndex: 'asc' },
-      }),
-      this.prisma.banner.count({ where }),
-    ]);
+    const allItems = await this.prisma.banner.findMany({
+      where,
+      orderBy: { orderIndex: 'asc' },
+    });
 
-    return { items, total };
+    const paginated = paginateArray(allItems, page, limit);
+
+    return { items: paginated.data, total: paginated.meta.pagination.total };
   }
 
   async update(id: string, data: any) {

@@ -2,6 +2,7 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { firstValueFrom } from 'rxjs';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class EmployeesService implements OnModuleInit {
@@ -228,7 +229,6 @@ export class EmployeesService implements OnModuleInit {
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
-    const skip = (page - 1) * pageSize;
     const where: Record<string, unknown> = {};
 
     if (params.assignableOnly && params.callerUserId) {
@@ -277,35 +277,21 @@ export class EmployeesService implements OnModuleInit {
     if (params.employmentStatus) where.employmentStatus = params.employmentStatus;
     if (params.departmentId != null && params.departmentId > 0) where.departmentId = params.departmentId;
 
-    // Query DB - Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.employee.findMany({
-        where,
-        orderBy: [{ id: 'asc' }],
-        skip,
-        take: pageSize,
-        select: { id: true },
-      }),
-      this.prisma.employee.count({ where }),
-    ]);
+    const allItems = await this.prisma.employee.findMany({
+      where,
+      orderBy: [{ id: 'asc' }],
+    });
 
-    const ids = idsResult.map((e) => e.id);
-    const items = ids.length > 0
-      ? await this.prisma.employee.findMany({
-          where: { id: { in: ids } },
-          orderBy: [{ id: 'asc' }],
-        })
-      : [];
+    const paginated = paginateArray(allItems, page, pageSize);
 
-    const totalPages = Math.ceil(total / pageSize);
     return {
       success: true,
       message: 'OK',
-      data: items.map((e) => this.toEmployee(e)),
+      data: paginated.data.map(e => this.toEmployee(e)),
       meta: {
-        pagination: { total, page, pageSize, totalPages, hasNext: page < totalPages, hasPrev: page > 1 },
+        ...paginated.meta,
         sort: { sortBy: 'id', sortOrder: 'asc' },
-        filters: {},
+        filters: params,
         extra: {},
       },
     };

@@ -55,6 +55,12 @@ export class CategoriesController {
     return { groups };
   }
 
+  @GrpcMethod('CategoryService', 'UpdateGroup')
+  async updateGroup(data: { code: string; name: string; order?: number }) {
+    const group = await this.catService.updateGroup(data);
+    return group;
+  }
+
   @GrpcMethod('CategoryService', 'Create')
   async create(data: {
     group: string;

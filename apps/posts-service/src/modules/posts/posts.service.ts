@@ -5,6 +5,7 @@ import { WorkflowService, PostStatus } from '../workflow/workflow.service';
 import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { generateSlug } from '../../utils/slug.util';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class PostsService implements OnModuleInit {
@@ -471,7 +472,6 @@ export class PostsService implements OnModuleInit {
     const { authorId, categoryId, search, status, lang, isFeatured, sortBy, sortOrder } = query;
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
-    const skip = (page - 1) * limit;
 
     const where: any = { isDeleted: false };
     if (search) {
@@ -493,35 +493,23 @@ export class PostsService implements OnModuleInit {
       orderBy = { [sortBy]: sortOrder || 'desc' };
     }
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.post.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-        select: { id: true },
-      }),
-      this.prisma.post.count({ where }),
-    ]);
+    const allPosts = await this.prisma.post.findMany({
+      where,
+      orderBy,
+      include: {
+        tags: true,
+        category: true,
+        translations_rel: {
+          // Nếu có lang, ưu tiên lấy bản dịch của ngôn ngữ đó
+          where: lang ? { langCode: lang, isPublished: true } : undefined,
+          orderBy: { version: 'desc' },
+          take: 1
+        }
+      },
+    });
 
-    const ids = idsResult.map((r) => r.id);
-    const items = ids.length > 0
-      ? await this.prisma.post.findMany({
-          where: { id: { in: ids } },
-          orderBy,
-          include: {
-            tags: true,
-            category: true,
-            translations_rel: {
-              // Nếu có lang, ưu tiên lấy bản dịch của ngôn ngữ đó
-              where: lang ? { langCode: lang, isPublished: true } : undefined,
-              orderBy: { version: 'desc' },
-              take: 1
-            }
-          },
-        })
-      : [];
+    const paginated = paginateArray(allPosts, page, limit);
+    const items = paginated.data;
 
     // Format và Merge bản dịch nếu được yêu cầu
     const formattedItems = items.map(post => {
@@ -551,10 +539,7 @@ export class PostsService implements OnModuleInit {
     return {
       data: formattedItems,
       meta: {
-        total,
-        page,
-        pageSize: limit,
-        totalPages: Math.ceil(total / limit),
+        ...paginated.meta
       },
     };
   }

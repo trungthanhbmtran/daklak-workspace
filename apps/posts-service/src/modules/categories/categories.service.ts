@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class CategoriesService {
@@ -43,17 +44,15 @@ export class CategoriesService {
       where.name = { contains: search, mode: 'insensitive' };
     }
 
-    const [data, total] = await Promise.all([
-      this.prisma.category.findMany({
-        where,
-        orderBy: { orderIndex: 'asc' },
-        skip: skip ? Number(skip) : undefined,
-        take: take ? Number(take) : undefined,
-      }),
-      this.prisma.category.count({ where }),
-    ]);
+    const items = await this.prisma.category.findMany({
+      where,
+      orderBy: { orderIndex: 'asc' },
+    });
 
-    return { data, total };
+    const page = take && skip ? Math.floor(Number(skip) / Number(take)) + 1 : 1;
+    const paginated = paginateArray(items, page, take ? Number(take) : 0);
+
+    return { data: paginated.data, total: paginated.meta.pagination.total };
   }
 
   async update(id: string, data: any) {

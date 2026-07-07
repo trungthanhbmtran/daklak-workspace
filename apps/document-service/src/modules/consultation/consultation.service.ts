@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class ConsultationService {
@@ -63,48 +64,30 @@ export class ConsultationService {
     }
     if (status) where.status = status;
 
-    // Optimized via ID-Indexed Deferred Join
-    const [idsResult, total] = await Promise.all([
-      this.prisma.consultation.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: { id: true },
-      }),
-      this.prisma.consultation.count({ where }),
-    ]);
+    const allItems = await this.prisma.consultation.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: { responses: true }
+        },
+        responses: {
+          where: { status: 'RESPONDED' },
+          select: { id: true }
+        }
+      },
+    });
 
-    const ids = idsResult.map((item) => item.id);
-    const items = ids.length > 0
-      ? await this.prisma.consultation.findMany({
-          where: { id: { in: ids } },
-          orderBy: { createdAt: 'desc' },
-          include: {
-            _count: {
-              select: { responses: true }
-            },
-            responses: {
-              where: { status: 'RESPONDED' },
-              select: { id: true }
-            }
-          },
-        })
-      : [];
+    const paginated = paginateArray(allItems, page, limit);
 
     return {
-      data: items.map(item => ({
+      data: paginated.data.map(item => ({
         ...this.mapToProto(item),
         totalResponses: item.responses.length,
         totalUnits: item._count.responses,
       })),
       meta: {
-        pagination: {
-          total,
-          page,
-          pageSize: limit,
-          totalPages: Math.ceil(total / limit),
-        },
+        ...paginated.meta
       },
     };
   }

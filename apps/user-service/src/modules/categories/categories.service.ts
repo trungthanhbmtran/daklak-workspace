@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { paginateArray } from '../../../../../shared/utils/pagination.util';
 
 @Injectable()
 export class CategoriesService {
@@ -76,19 +77,18 @@ export class CategoriesService {
         : {}),
     };
 
-    const [searchItems, totalCount] = await Promise.all([
-      this.prisma.category.findMany({
-        where,
-        orderBy: { order: 'asc' },
-        take:
-          limit && limit > 0
-            ? Math.max(limit - selectedItems.length, 0)
-            : undefined,
-        skip: skip && skip > 0 ? skip : undefined,
-        include: { translations: { where: { langCode: targetLang } } },
-      }),
-      this.prisma.category.count({ where }),
-    ]);
+    const allSearchItems = await this.prisma.category.findMany({
+      where,
+      orderBy: { order: 'asc' },
+      include: { translations: { where: { langCode: targetLang } } },
+    });
+
+    const actualLimit = limit && limit > 0 ? Math.max(limit - selectedItems.length, 0) : 0;
+    const page = actualLimit > 0 && skip ? Math.floor(skip / actualLimit) + 1 : 1;
+    
+    const paginated = paginateArray(allSearchItems, page, actualLimit);
+    const searchItems = paginated.data;
+    const totalCount = paginated.meta.pagination.total;
 
     // 3. Merge: selected first, rồi search results
     const mapItem = (item: any, selected: boolean) => {
@@ -150,6 +150,23 @@ export class CategoriesService {
     return result.sort((a, b) => a.order - b.order);
   }
 
+  // Cập nhật tên và order của Nhóm danh mục
+  async updateGroup(data: { code: string; name: string; order?: number }) {
+    const upserted = await this.prisma.categoryGroup.upsert({
+      where: { code: data.code },
+      update: {
+        name: data.name,
+        ...(data.order !== undefined && { order: data.order }),
+      },
+      create: {
+        code: data.code,
+        name: data.name,
+        order: data.order ?? 0,
+      },
+    });
+    return upserted;
+  }
+
   // Tạo mới (Tạo danh mục + Bản dịch mặc định Tiếng Việt 'vi')
   async create(data: {
     group: string;
@@ -158,6 +175,18 @@ export class CategoriesService {
     description?: string;
     order?: number;
   }) {
+    // Đảm bảo nhóm cha luôn tồn tại
+    await this.prisma.categoryGroup.upsert({
+      where: { code: data.group },
+      update: {},
+      create: { code: data.group, name: data.group, order: 999 },
+    });
+
+    // Nếu đang thao tác trong nhóm đặc biệt "CATEGORY_GROUPS"
+    if (data.group === 'CATEGORY_GROUPS') {
+      await this.updateGroup({ code: data.code, name: data.name, order: data.order ?? 0 });
+    }
+
     const created = await this.prisma.category.create({
       data: {
         groupCode: data.group,
@@ -201,8 +230,15 @@ export class CategoriesService {
       isActive?: boolean;
     },
   ) {
-    const category = await this.prisma.category.findUnique({ where: { id } });
+    const category = await this.prisma.category.findUnique({ where: { id }, include: { translations: true } });
     if (!category) return null;
+
+    if (category.groupCode === 'CATEGORY_GROUPS') {
+      const code = data.code ?? category.code;
+      const name = data.name ?? category.translations.find((t) => t.langCode === 'vi')?.name ?? code;
+      const order = data.order ?? category.order;
+      await this.updateGroup({ code, name, order });
+    }
 
     // 1. Cập nhật các trường chung của Category
     await this.prisma.category.update({
@@ -260,6 +296,15 @@ export class CategoriesService {
   async delete(id: number) {
     const category = await this.prisma.category.findUnique({ where: { id } });
     if (!category) return false;
+
+    if (category.groupCode === 'CATEGORY_GROUPS') {
+      try {
+        await this.prisma.categoryGroup.delete({ where: { code: category.code } });
+      } catch (e) {
+        console.error('Cannot delete category group (might have child categories):', e);
+      }
+    }
+
     await this.prisma.category.delete({ where: { id } });
     return true;
   }
