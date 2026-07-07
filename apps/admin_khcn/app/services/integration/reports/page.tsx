@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function ReportDashboardPage() {
   return (
-    <div className="container mx-auto p-6 max-w-7xl flex-1 min-h-0 flex flex-col overflow-hidden">
+    <div className="container mx-auto p-6 max-w-7xl flex-1 min-h-0 flex flex-col overflow-y-auto">
       <ReportDashboard />
     </div>
   );
