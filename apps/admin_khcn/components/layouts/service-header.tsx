@@ -8,6 +8,8 @@ import { useServiceMenus } from "@/hooks/useServiceMenus";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { HeaderUserProfile } from "./header-user-profile";
 
+import { ThemeToggle } from "./theme-toggle";
+
 export function ServiceHeader() {
   const pathname = usePathname();
   const { menuItems, serviceName, serviceCode } = useServiceMenus();
@@ -28,6 +30,7 @@ export function ServiceHeader() {
 
       {/* PHẢI: Công cụ & User Profile */}
       <div className="flex items-center gap-2 md:gap-4">
+        <ThemeToggle />
         <NotificationBell />
         <HeaderUserProfile showName={true} />
       </div>
