@@ -182,9 +182,9 @@ export class CategoriesService {
       create: { code: data.group, name: data.group, order: 999 },
     });
 
-    // Nếu đang thao tác trong nhóm đặc biệt "CATEGORY_GROUPS"
+    // Cấm thêm mới vào nhóm danh mục dùng chung từ giao diện
     if (data.group === 'CATEGORY_GROUPS') {
-      await this.updateGroup({ code: data.code, name: data.name, order: data.order ?? 0 });
+      throw new Error('Không được phép thêm mới nhóm danh mục dùng chung hệ thống');
     }
 
     const created = await this.prisma.category.create({
@@ -298,11 +298,7 @@ export class CategoriesService {
     if (!category) return false;
 
     if (category.groupCode === 'CATEGORY_GROUPS') {
-      try {
-        await this.prisma.categoryGroup.delete({ where: { code: category.code } });
-      } catch (e) {
-        console.error('Cannot delete category group (might have child categories):', e);
-      }
+      throw new Error('Không được phép xóa nhóm danh mục dùng chung hệ thống');
     }
 
     await this.prisma.category.delete({ where: { id } });

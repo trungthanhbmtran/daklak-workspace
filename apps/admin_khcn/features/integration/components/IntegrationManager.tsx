@@ -8,7 +8,8 @@ import { useIntegrationList, IntegrationConfig } from "../api";
 import { IntegrationCard } from "./manager/IntegrationCard";
 import { IntegrationFormModal, IntegrationFormModalRef } from "./manager/IntegrationFormModal";
 import { EndpointExplorerModal, EndpointExplorerModalRef } from "./manager/EndpointExplorerModal";
-import { useApiParser } from "../hooks/useApiParser";
+import { PostmanImportButton } from "./PostmanImportButton";
+import { SwaggerImportButton } from "./SwaggerImportButton";
 import {
   Pagination,
   PaginationContent,
@@ -46,9 +47,9 @@ export function IntegrationManager() {
     modalRef.current?.openCreate();
   };
 
-  const { fileInputRef, handleFileUpload, triggerUpload } = useApiParser((initialData: any) => {
+  const handleImportSuccess = (initialData: any) => {
     modalRef.current?.openCreate(initialData);
-  });
+  };
 
   const handleOpenEdit = (item: IntegrationConfig) => {
     modalRef.current?.openEdit(item);
@@ -72,21 +73,8 @@ export function IntegrationManager() {
           />
         </div>
         <div className="flex gap-2">
-          <input
-            type="file"
-            accept=".json"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-          />
-          <Button
-            onClick={triggerUpload}
-            variant="outline"
-            className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 h-10 px-4"
-          >
-            <Upload className="w-4 h-4 mr-2 text-slate-500" />
-            Nhập file
-          </Button>
+          <PostmanImportButton onSuccess={handleImportSuccess} />
+          <SwaggerImportButton onSuccess={handleImportSuccess} />
           <Button
             onClick={handleOpenCreate}
             className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 px-6 h-10"
