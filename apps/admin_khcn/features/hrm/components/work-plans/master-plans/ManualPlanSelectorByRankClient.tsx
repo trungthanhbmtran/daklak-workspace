@@ -354,26 +354,28 @@ export function ManualPlanSelectorByRankClient() {
                     </div>
 
                     <div className="space-y-3 flex-1 flex flex-col min-h-0">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Ngạch / Hạng</Label>
-                        <ScrollArea className="flex-1 pr-4">
-                            <div className="space-y-2 pb-4">
-                                {activeRanksList.map((rank: any) => (
-                                    <div
-                                        key={rank.code}
-                                        onClick={() => setActiveRankFilter(rank.code)}
-                                        className={`p-3 rounded-xl border cursor-pointer transition-all ${activeRankFilter === rank.code
-                                            ? 'bg-primary/5 border-primary shadow-sm'
-                                            : 'bg-white border-transparent hover:bg-muted/50 hover:border-muted'
-                                            }`}
-                                    >
-                                        <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-slate-700'}`}>
-                                            {rank.nameVi || rank.name}
-                                        </h4>
-                                        <p className="text-[11px] text-muted-foreground font-mono mt-1">{rank.code}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider shrink-0">Danh mục Ngạch / Hạng</Label>
+                        <div className="flex-1 min-h-0 overflow-hidden">
+                            <ScrollArea className="h-full pr-4">
+                                <div className="space-y-2 pb-4">
+                                    {activeRanksList.map((rank: any) => (
+                                        <div
+                                            key={rank.code}
+                                            onClick={() => setActiveRankFilter(rank.code)}
+                                            className={`p-3 rounded-xl border cursor-pointer transition-all ${activeRankFilter === rank.code
+                                                ? 'bg-primary/5 border-primary shadow-sm'
+                                                : 'bg-white border-transparent hover:bg-muted/50 hover:border-muted'
+                                                }`}
+                                        >
+                                            <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-slate-700'}`}>
+                                                {rank.nameVi || rank.name}
+                                            </h4>
+                                            <p className="text-[11px] text-muted-foreground font-mono mt-1">{rank.code}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </ScrollArea>
+                        </div>
                     </div>
                 </div>
             </CardContent>
