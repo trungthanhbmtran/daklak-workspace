@@ -20,7 +20,7 @@ export function ServiceLayout({ children }: ServiceLayoutProps) {
         <ServiceHeader />
 
         {/* Content area — scroll nội bộ do các page tự quản lý */}
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:p-8 bg-muted/20 overflow-hidden min-h-0">
+        <div className="flex flex-1 flex-col bg-muted/20 overflow-hidden min-h-0">
           {children}
         </div>
 

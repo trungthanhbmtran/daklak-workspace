@@ -57,7 +57,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
   };
 
   return (
-    <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center rounded-2xl">
+    <Card className="p-4 bg-card border-border shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center rounded-2xl">
       <div className="flex flex-1 w-full flex-col sm:flex-row flex-wrap gap-3">
         <Search
           placeholder="Tìm theo tiêu đề bài viết..."
@@ -65,7 +65,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
         />
 
         <Select value={statusFilter} onValueChange={(val) => updateParams('status', val)}>
-          <SelectTrigger className="w-full sm:w-[160px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">
+          <SelectTrigger className="w-full sm:w-[160px] h-10 bg-background border-border rounded-xl text-xs font-semibold">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -79,7 +79,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
         </Select>
 
         <Select value={categoryFilter} onValueChange={(val) => updateParams('categoryId', val)}>
-          <SelectTrigger className="w-full sm:w-[180px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">
+          <SelectTrigger className="w-full sm:w-[180px] h-10 bg-background border-border rounded-xl text-xs font-semibold">
             <SelectValue placeholder="Chuyên mục" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -98,7 +98,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
           params.set('page', '1');
           router.replace(`?${params.toString()}`, { scroll: false });
         }}>
-          <SelectTrigger className="w-full sm:w-[200px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">
+          <SelectTrigger className="w-full sm:w-[200px] h-10 bg-background border-border rounded-xl text-xs font-semibold">
             <SelectValue placeholder="Sắp xếp theo" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
@@ -112,7 +112,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
 
       <Button
         onClick={onNavigateToCreate}
-        className="w-full lg:w-auto h-10 px-6 shadow-sm bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold uppercase text-[11px] tracking-wide rounded-xl transition-all duration-300 hover:shadow-indigo-500/10 hover:shadow-lg"
+        className="w-full lg:w-auto h-10 px-6 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold uppercase text-[11px] tracking-wide rounded-xl transition-all duration-300"
       >
         <Plus className="h-4 w-4 mr-2 stroke-[3px]" /> Viết bài mới
       </Button>

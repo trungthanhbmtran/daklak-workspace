@@ -207,24 +207,24 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
 
   return (
     <>
-      <Card className="border border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+      <Card className="border-border bg-card shadow-sm rounded-2xl overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50/50 dark:bg-slate-950/40">
-            <TableRow className="border-b border-slate-100 dark:border-slate-850">
-              <TableHead className="px-6 py-4 font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest w-[45%]">Bài viết</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Chuyên mục</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Trạng thái & Phiên bản</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest">Tác giả & Ngày đăng</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">Thao tác</TableHead>
+          <TableHeader className="bg-muted/50">
+            <TableRow className="border-b border-border">
+              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest w-[45%]">Bài viết</TableHead>
+              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Chuyên mục</TableHead>
+              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Trạng thái & Phiên bản</TableHead>
+              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Tác giả & Ngày đăng</TableHead>
+              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-slate-100 dark:divide-slate-850">
+          <TableBody className="divide-y divide-border/50">
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="px-6 py-24 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-                    <p className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider">Đang tải danh sách bài viết...</p>
+                    <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Đang tải danh sách bài viết...</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -234,13 +234,13 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                   <div className="flex flex-col items-center gap-3 text-rose-600 dark:text-rose-400">
                     <AlertCircle className="h-10 w-10" />
                     <p className="font-black uppercase tracking-wider text-sm">Không thể tải dữ liệu</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">{(error as Error)?.message || "Vui lòng thử lại sau"}</p>
+                    <p className="text-xs text-muted-foreground">{(error as Error)?.message || "Vui lòng thử lại sau"}</p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : posts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="px-6 py-24 text-center text-slate-400 dark:text-slate-500 italic font-medium text-xs">
+                <TableCell colSpan={5} className="px-6 py-24 text-center text-muted-foreground italic font-medium text-xs">
                   Không tìm thấy bài viết nào thỏa mãn bộ lọc.
                 </TableCell>
               </TableRow>
@@ -253,7 +253,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                   <TableRow key={post.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-950/20 transition-colors group">
                     <TableCell className="px-6 py-4.5 align-middle">
                       <div className="flex items-center gap-4.5">
-                        <div className="h-14 w-20 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-800 overflow-hidden flex items-center justify-center shrink-0 shadow-inner group-hover:scale-[1.03] transition-transform duration-300">
+                        <div className="h-14 w-20 bg-muted/50 rounded-xl border border-border overflow-hidden flex items-center justify-center shrink-0 shadow-inner group-hover:scale-[1.03] transition-transform duration-300">
                           {post.thumbnail ? (
                             <img
                               src={`/api/v1/admin/media/download/${post.thumbnail}`}
@@ -268,7 +268,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                               }}
                             />
                           ) : (
-                            <ImageIcon className="h-5 w-5 text-slate-300 dark:text-slate-700" />
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
                           )}
                         </div>
 
@@ -276,7 +276,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span
                               onClick={() => onNavigateToEdit(post.id)}
-                              className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm line-clamp-2 leading-snug hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                              className="font-bold text-foreground text-xs sm:text-sm line-clamp-2 leading-snug hover:text-primary transition-colors cursor-pointer"
                             >
                               {post.title}
                             </span>
@@ -287,13 +287,13 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2.5 text-[10px] text-slate-400 dark:text-slate-500 font-bold flex-wrap">
-                            <span className="font-mono bg-slate-50 dark:bg-slate-950 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-850">
+                          <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold flex-wrap">
+                            <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border">
                               ID: {post.id?.substring(0, 8)}
                             </span>
 
-                            <span className="flex items-center gap-1 font-sans text-slate-500 bg-slate-100 dark:bg-slate-950 dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
-                              <Eye className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            <span className="flex items-center gap-1 font-sans text-slate-500 bg-muted dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
+                              <Eye className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                               {post.viewCount || 0} lượt xem
                             </span>
 
@@ -314,7 +314,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                     </TableCell>
 
                     <TableCell className="px-6 py-4.5 align-middle">
-                      <Badge variant="secondary" className="font-bold text-[10px] bg-slate-100 dark:bg-slate-950 border border-slate-200/50 dark:border-slate-850 text-slate-600 dark:text-slate-400 py-1 px-2.5 rounded-lg">
+                      <Badge variant="secondary" className="font-bold text-[10px] bg-muted border border-border dark:border-slate-850 text-muted-foreground py-1 px-2.5 rounded-lg">
                         {post.category?.name || 'Chưa phân loại'}
                       </Badge>
                     </TableCell>
@@ -327,7 +327,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                           {getStatusLabel(post.status)}
                         </span>
 
-                        <span className="inline-flex items-center gap-1 text-[9px] font-mono text-slate-400 dark:text-slate-500 font-extrabold uppercase px-2">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-mono text-muted-foreground font-extrabold uppercase px-2">
                           Phiên bản v{post.currentVersion || 1}
                         </span>
 
@@ -345,12 +345,12 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
 
                     <TableCell className="px-6 py-4.5 align-middle">
                       <div className="space-y-1">
-                        <p className="font-extrabold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-1">
-                          <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <p className="font-extrabold text-foreground text-xs flex items-center gap-1">
+                          <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           {post.authorId?.substring(0, 8) || 'Ẩn danh'}
                         </p>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5 text-slate-300 dark:text-slate-700 shrink-0" />
+                        <p className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           {formatDate(post.publishedAt || post.createdAt)}
                         </p>
                       </div>
@@ -415,12 +415,12 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                           </Button>
                         )}
 
-                        <div className="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1.5" />
+                        <div className="w-px h-4 bg-border mx-1.5" />
 
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8.5 w-8.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors"
+                          className="h-8.5 w-8.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                           onClick={() => onNavigateToEdit(post.id)}
                           title="Sửa bài viết"
                         >
@@ -429,7 +429,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8.5 w-8.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
+                          className="h-8.5 w-8.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                           title="Xóa"
                           onClick={() => {
                             setDeletingPostId(post.id);
@@ -446,18 +446,18 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
           </TableBody>
         </Table>
 
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 dark:bg-slate-950/20">
-          <div className="text-xs font-bold text-slate-400 dark:text-slate-500">
+        <div className="px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-muted/50">
+          <div className="text-xs font-bold text-muted-foreground">
             Hiển thị từ{" "}
-            <span className="text-slate-700 dark:text-slate-300">
+            <span className="text-foreground">
               {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
             </span>{" "}
             đến{" "}
-            <span className="text-slate-700 dark:text-slate-300">
+            <span className="text-foreground">
               {Math.min(page * pageSize, totalItems)}
             </span>{" "}
             trong tổng số{" "}
-            <span className="text-slate-700 dark:text-slate-300">{totalItems}</span>{" "}
+            <span className="text-foreground">{totalItems}</span>{" "}
             bài viết
           </div>
 
@@ -534,7 +534,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-800 dark:text-white">Từ chối bài viết</DialogTitle>
-            <DialogDescription className="text-slate-500 dark:text-slate-400 text-xs">
+            <DialogDescription className="text-slate-500 dark:text-muted-foreground text-xs">
               Vui lòng nhập lý do từ chối phê duyệt bài viết này. Thông tin này sẽ được lưu lại trong lịch sử duyệt bài.
             </DialogDescription>
           </DialogHeader>
@@ -545,7 +545,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                 placeholder="Nhập lý do từ chối..."
                 value={rejectionNote}
                 onChange={(e) => setRejectionNote(e.target.value)}
-                className="w-full h-10 border border-slate-200 dark:border-slate-800 rounded-xl text-xs bg-slate-50/50 focus:bg-white text-slate-900 dark:text-slate-100"
+                className="w-full h-10 border border-slate-200 dark:border-slate-800 rounded-xl text-xs bg-muted/50 focus:bg-white text-slate-900 dark:text-slate-100"
               />
             </div>
           </div>

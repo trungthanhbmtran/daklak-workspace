@@ -268,7 +268,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1400px] mx-auto space-y-6 pb-20">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1400px] mx-auto space-y-6 pb-20 p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-background/80 backdrop-blur-md py-4 border-b">
           <div className="flex items-center gap-4">
             <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm">
@@ -324,7 +324,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
           <div className="lg:col-span-8 space-y-6">
             <Card className="shadow-sm border-none bg-card">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2 font-bold uppercase text-slate-700 tracking-tight">
+                <CardTitle className="text-lg flex items-center gap-2 font-bold uppercase text-foreground tracking-tight">
                   <FileText className="h-5 w-5 text-blue-500" /> Thông tin bài viết
                 </CardTitle>
               </CardHeader>
@@ -365,7 +365,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         <FormControl>
                           <Input
                             placeholder="VD: Bí quyết học lập trình hiệu quả..."
-                            className="text-lg py-6 focus-visible:ring-blue-500 bg-slate-50/50"
+                            className="text-lg py-6 focus-visible:ring-blue-500 bg-muted/50"
                             {...field}
                             onChange={(e) => handleTitleChange(e, field.onChange)}
                           />
@@ -379,7 +379,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         <FormItem>
                           <FormLabel className="font-semibold">Chuyên mục</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl><SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="bg-muted/50"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
                             <SelectContent>
                               {categories?.map((cat: Category) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
                             </SelectContent>
@@ -393,7 +393,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute left-3 top-2.5 text-slate-400 text-sm font-mono">/</span>
+                              <span className="absolute left-3 top-2.5 text-muted-foreground text-sm font-mono">/</span>
                               <Input className="font-mono text-sm bg-muted/30 pl-6" {...field} />
                             </div>
                           </FormControl>
@@ -405,7 +405,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     <FormField control={form.control} name="description" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-semibold">Tóm tắt ngắn (Description)</FormLabel>
-                        <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
+                        <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-muted/50" {...field} /></FormControl>
                         <FormDescription className="text-[11px]">Sẽ hiển thị trên kết quả tìm kiếm Google và danh sách bài viết.</FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -524,7 +524,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
           <div className="lg:col-span-4 space-y-6">
             <Card className="shadow-sm overflow-hidden">
-              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+              <CardHeader className="py-3 px-5 border-b bg-muted/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><ImagePlus className="h-4 w-4 text-blue-600" /> Ảnh bài viết</CardTitle>
               </CardHeader>
               <CardContent className="p-5">
@@ -545,18 +545,18 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     </div>
                   </div>
                 ) : (
-                  <div onClick={() => fileInputRef.current?.click()} className="aspect-video border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group">
+                  <div onClick={() => fileInputRef.current?.click()} className="aspect-video border-2 border-dashed border-border hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group">
                     <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
-                      <ImagePlus className="h-6 w-6 text-slate-400" />
+                      <ImagePlus className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <span className="text-[13px] font-semibold text-slate-500">Tải lên ảnh tiêu đề</span>
+                    <span className="text-[13px] font-semibold text-muted-foreground">Tải lên ảnh tiêu đề</span>
                   </div>
                 )}
               </CardContent>
             </Card>
 
             <Card className="shadow-sm">
-              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+              <CardHeader className="py-3 px-5 border-b bg-muted/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Globe className="h-4 w-4 text-blue-600" /> Cấu hình hiển thị</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-6">
@@ -566,14 +566,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger className="font-medium"><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="DRAFT" className="text-slate-500">Lưu bản nháp</SelectItem>
+                        <SelectItem value="DRAFT" className="text-muted-foreground">Lưu bản nháp</SelectItem>
                         <SelectItem value="SUBMITTED" className="text-orange-600 font-medium">Chờ phê duyệt</SelectItem>
                         <SelectItem value="UNDER_REVIEW" className="text-blue-600 font-medium">Đang thẩm định</SelectItem>
                         <SelectItem value="APPROVED" className="text-indigo-600 font-medium">Đã phê duyệt</SelectItem>
                         <SelectItem value="PUBLISHED" className="text-emerald-600 font-medium">Đã xuất bản</SelectItem>
                         <SelectItem value="REJECTED" className="text-rose-600">Bị từ chối</SelectItem>
-                        <SelectItem value="UNPUBLISHED" className="text-slate-600">Đã gỡ bài</SelectItem>
-                        <SelectItem value="ARCHIVED" className="text-slate-400">Lưu trữ</SelectItem>
+                        <SelectItem value="UNPUBLISHED" className="text-muted-foreground">Đã gỡ bài</SelectItem>
+                        <SelectItem value="ARCHIVED" className="text-muted-foreground">Lưu trữ</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -583,7 +583,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
                 <div className="space-y-4">
                   <FormField name="isFeatured" render={({ field }) => (
-                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="f-mode"><Star className={`h-3.5 w-3.5 ${field.value ? 'fill-yellow-400 text-yellow-500' : ''}`} /> Tin nổi bật</Label>
                         <p className="text-[10px] text-muted-foreground italic">Ghim lên đầu trang chủ</p>
@@ -593,7 +593,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   )} />
 
                   <FormField name="isNotification" render={({ field }) => (
-                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="n-mode"><Bell className={`h-3.5 w-3.5 ${field.value ? 'fill-blue-400 text-blue-500' : ''}`} /> Gửi thông báo</Label>
                         <p className="text-[10px] text-muted-foreground italic">Gửi Notify cho khách hàng</p>
@@ -606,7 +606,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             </Card>
 
             <Card className="shadow-sm">
-              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+              <CardHeader className="py-3 px-5 border-b bg-muted/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                   <Link2 className="h-4 w-4 text-blue-600" /> Đường dẫn cấu hình Menu
                 </CardTitle>
@@ -624,15 +624,15 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           1. Dạng Trang tĩnh CMS (Giới thiệu, Liên hệ...)
                         </span>
                         <div className="space-y-2">
-                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-slate-700">Tiếng Việt</span>
+                          <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-foreground">Tiếng Việt</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/trang/{currentSlug}</code>
+                              <code className="text-[11px] font-mono text-muted-foreground break-all">/trang/{currentSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                className="h-6 w-6 text-muted-foreground hover:text-blue-600 shrink-0"
                                 onClick={() => {
                                   void navigator.clipboard.writeText(`/trang/${currentSlug}`);
                                   toast.success("Đã sao chép đường dẫn trang tĩnh tiếng Việt!");
@@ -643,15 +643,15 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-slate-700">Tiếng Anh (English)</span>
+                          <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-foreground">Tiếng Anh (English)</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/page/{currentEnSlug}</code>
+                              <code className="text-[11px] font-mono text-muted-foreground break-all">/en/page/{currentEnSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                className="h-6 w-6 text-muted-foreground hover:text-blue-600 shrink-0"
                                 onClick={() => {
                                   void navigator.clipboard.writeText(`/en/page/${currentEnSlug}`);
                                   toast.success("Đã sao chép đường dẫn trang tĩnh tiếng Anh!");
@@ -665,19 +665,19 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       </div>
 
                       <div className="border-t pt-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
                           2. Dạng Tin tức / Bài viết thông thường
                         </span>
                         <div className="space-y-2">
-                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-slate-700">Tiếng Việt</span>
+                          <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-foreground">Tiếng Việt</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/tin-tuc/{currentSlug}</code>
+                              <code className="text-[11px] font-mono text-muted-foreground break-all">/tin-tuc/{currentSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                className="h-6 w-6 text-muted-foreground hover:text-blue-600 shrink-0"
                                 onClick={() => {
                                   void navigator.clipboard.writeText(`/tin-tuc/${currentSlug}`);
                                   toast.success("Đã sao chép đường dẫn tin tức tiếng Việt!");
@@ -688,15 +688,15 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-slate-700">Tiếng Anh (English)</span>
+                          <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-foreground">Tiếng Anh (English)</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/news/{currentEnSlug}</code>
+                              <code className="text-[11px] font-mono text-muted-foreground break-all">/en/news/{currentEnSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                className="h-6 w-6 text-muted-foreground hover:text-blue-600 shrink-0"
                                 onClick={() => {
                                   void navigator.clipboard.writeText(`/en/news/${currentEnSlug}`);
                                   toast.success("Đã sao chép đường dẫn tin tức tiếng Anh!");
@@ -719,7 +719,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             </Card>
 
             <Card className="shadow-sm">
-              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+              <CardHeader className="py-3 px-5 border-b bg-muted/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Tag className="h-4 w-4 text-blue-600" /> Nhãn gắn (Tags)</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
