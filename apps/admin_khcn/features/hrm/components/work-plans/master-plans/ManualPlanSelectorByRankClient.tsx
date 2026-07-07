@@ -37,21 +37,22 @@ interface SelectedPlanItem {
     weight: number;
 }
 
-const VIEN_CHUC_GROUPS = [
-    { id: 'ALL', name: 'Tất cả các ngành' },
-    { id: 'V.08', name: 'Ngành Y tế (Bác sĩ, Y sĩ, Điều dưỡng)' },
-    { id: 'V.07', name: 'Ngành Giáo dục (Giảng viên, Giáo viên)' },
-    { id: 'V.05', name: 'Khoa học & Công nghệ (Nghiên cứu, Kỹ sư)' },
-    { id: 'V.11', name: 'Thông tin & Truyền thông (Biên tập, Phóng viên)' },
-    { id: 'V.10', name: 'Văn hóa, Thể thao (Huấn luyện, Thư viện)' },
-    { id: 'V.09', name: 'Ngành Lưu trữ' },
-    { id: '01.', name: 'Hành chính / Dùng chung (Chuyên viên, Cán sự)' },
-    { id: '06.', name: 'Ngành Kế toán' }
-];
-
-const CONG_CHUC_GROUPS = [
-    { id: 'ALL', name: 'Tất cả các ngạch' }
-];
+const PREFIX_NAMES: Record<string, string> = {
+    'V.04': 'Kiến trúc, Xây dựng',
+    'V.05': 'Khoa học & Công nghệ',
+    'V.06': 'Y tế dự phòng',
+    'V.07': 'Ngành Giáo dục',
+    'V.08': 'Ngành Y tế',
+    'V.09': 'Ngành Lưu trữ',
+    'V.10': 'Văn hóa, Thể thao',
+    'V.11': 'Thông tin & Truyền thông',
+    '01.': 'Hành chính / Dùng chung',
+    '02.': 'Ngành Thanh tra',
+    '03.': 'Ngành Hải quan',
+    '04.': 'Ngành Thuế',
+    '06.': 'Ngành Kế toán',
+    'STAFF': 'Nhân viên'
+};
 
 export function ManualPlanSelectorByRankClient() {
     const DOMAINS = [
@@ -95,18 +96,38 @@ export function ManualPlanSelectorByRankClient() {
     const [targetValue, setTargetValue] = useState<number>(1);
     const [weight, setWeight] = useState<number>(1);
     const [searchRankText, setSearchRankText] = useState<string>('');
-    const [activeGroup, setActiveGroup] = useState<string>('V.08');
+    const [activeGroup, setActiveGroup] = useState<string>('ALL');
     const [isGroupOpen, setIsGroupOpen] = useState(false);
 
     const { isPending } = useCreateMasterPlan();
 
+    const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
+
+    const currentGroups = React.useMemo(() => {
+        const groupsMap = new Map<string, string>();
+        activeRanksList.forEach((r: any) => {
+            let prefix = r.code;
+            if (r.code.startsWith('V.')) {
+                prefix = r.code.substring(0, 4);
+            } else if (r.code.match(/^\d{2}\./)) {
+                prefix = r.code.substring(0, 3);
+            }
+            if (!groupsMap.has(prefix)) {
+                groupsMap.set(prefix, PREFIX_NAMES[prefix] || `Nhóm ${prefix}`);
+            }
+        });
+        const groups = Array.from(groupsMap.entries()).map(([id, name]) => ({ id, name }));
+        groups.unshift({ id: 'ALL', name: 'Tất cả các ngành/ngạch' });
+        return groups;
+    }, [activeRanksList]);
+
+    // Auto select first group correctly
     useEffect(() => {
-        if (classification === 'CONG_CHUC') {
+        if (currentGroups.length > 1 && !currentGroups.find(g => g.id === activeGroup)) {
+            // Default to ALL if changing classification
             setActiveGroup('ALL');
-        } else if (classification === 'VIEN_CHUC' && activeGroup === 'ALL') {
-            setActiveGroup('V.08'); // Auto-load Y tế for VIEN_CHUC
         }
-    }, [classification]);
+    }, [classification, currentGroups, activeGroup]);
 
     const { data: existingQuotasData, isLoading: isLoadingQuotas } = useQuery({
         queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter],
@@ -136,13 +157,10 @@ export function ManualPlanSelectorByRankClient() {
     console.log("DEBUG_TASKS: activeDomainFilter =", activeDomainFilter);
     console.log("DEBUG_TASKS: availableTasks =", availableTasks);
 
-    const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
-    const currentGroups = classification === 'CONG_CHUC' ? CONG_CHUC_GROUPS : VIEN_CHUC_GROUPS;
-
     // Filter ranks by activeGroup
     const groupedRanksList = activeGroup === 'ALL' 
         ? activeRanksList 
-        : activeRanksList.filter((r: any) => r.code.startsWith(activeGroup));
+        : activeRanksList.filter((r: any) => r.code.startsWith(activeGroup) || r.code === activeGroup);
 
     const filteredRanksList = groupedRanksList.filter((r: any) => 
         (r.nameVi || r.name).toLowerCase().includes(searchRankText.toLowerCase()) || 
