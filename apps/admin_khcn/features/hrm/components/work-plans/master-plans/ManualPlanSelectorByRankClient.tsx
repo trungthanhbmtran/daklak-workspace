@@ -175,7 +175,7 @@ export function ManualPlanSelectorByRankClient() {
 
             <CardContent className="flex-1 flex flex-col lg:flex-row min-h-0 p-6 gap-6">
                 {/* LEFT COLUMN: MAIN CONTENT AREA */}
-                <div className="flex-3 flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden h-full">
+                <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden h-full">
                     <div className="p-4 border-b bg-muted/5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-6 bg-primary rounded-full" />
@@ -342,7 +342,7 @@ export function ManualPlanSelectorByRankClient() {
                 </div>
 
                 {/* RIGHT COLUMN: FILTER SECTION */}
-                <div className="flex-1 shrink-0 flex flex-col gap-4 bg-white rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
+                <div className="w-full lg:w-[350px] xl:w-[400px] shrink-0 flex flex-col gap-4 bg-white rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
                     <div className="space-y-3 shrink-0">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại Ngạch</Label>
                         <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
