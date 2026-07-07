@@ -65,8 +65,8 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                         <>
                           <span className={`text-[8px] ${isSelected ? "text-primary-foreground/30" : "text-muted-foreground/30"}`}>•</span>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${menu.type === 'SERVICE_ITEM'
-                              ? (isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
-                              : (isSelected ? 'bg-white/10 text-white' : 'bg-muted text-muted-foreground')
+                            ? (isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
+                            : (isSelected ? 'bg-white/10 text-white' : 'bg-muted text-muted-foreground')
                             }`}>
                             {menu.type === 'SERVICE_ITEM' ? 'SERVICE_ITEM' : 'MENU'}
                           </span>
@@ -98,7 +98,7 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
 
   return (
     <Card className="w-full lg:w-[350px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0 rounded-xl bg-background">
-      <div className="p-4 border-b bg-muted/30 space-y-4 shrink-0">
+      <div className="border-b bg-muted/30 space-y-4 shrink-0">
         <div className="flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <Layers className="h-3.5 w-3.5 text-primary" /> Quản lý Menu
