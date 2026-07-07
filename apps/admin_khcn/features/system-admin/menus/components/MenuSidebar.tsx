@@ -98,7 +98,7 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
 
   return (
     <Card className="w-full lg:w-[350px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0 rounded-xl bg-background">
-      <div className="border-b bg-muted/30 space-y-4 shrink-0">
+      <div className="p-4 border-b bg-muted/30 shrink-0">
         <div className="flex items-center justify-between">
           <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <Layers className="h-3.5 w-3.5 text-primary" /> Quản lý Menu
