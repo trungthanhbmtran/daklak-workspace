@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Target, Trash2, Save, Plus, Search } from 'lucide-react';
+import { Target, Trash2, Save, Plus, Search, Check, ChevronsUpDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { hrmRankQuotasApi } from '@/features/hrm/api';
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
+
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +36,22 @@ interface SelectedPlanItem {
     unit: string;
     weight: number;
 }
+
+const VIEN_CHUC_GROUPS = [
+    { id: 'ALL', name: 'Tất cả các ngành' },
+    { id: 'V.08', name: 'Ngành Y tế (Bác sĩ, Y sĩ, Điều dưỡng)' },
+    { id: 'V.07', name: 'Ngành Giáo dục (Giảng viên, Giáo viên)' },
+    { id: 'V.05', name: 'Khoa học & Công nghệ (Nghiên cứu, Kỹ sư)' },
+    { id: 'V.11', name: 'Thông tin & Truyền thông (Biên tập, Phóng viên)' },
+    { id: 'V.10', name: 'Văn hóa, Thể thao (Huấn luyện, Thư viện)' },
+    { id: 'V.09', name: 'Ngành Lưu trữ' },
+    { id: '01.', name: 'Hành chính / Dùng chung (Chuyên viên, Cán sự)' },
+    { id: '06.', name: 'Ngành Kế toán' }
+];
+
+const CONG_CHUC_GROUPS = [
+    { id: 'ALL', name: 'Tất cả các ngạch' }
+];
 
 export function ManualPlanSelectorByRankClient() {
     const DOMAINS = [
@@ -75,16 +95,18 @@ export function ManualPlanSelectorByRankClient() {
     const [targetValue, setTargetValue] = useState<number>(1);
     const [weight, setWeight] = useState<number>(1);
     const [searchRankText, setSearchRankText] = useState<string>('');
+    const [activeGroup, setActiveGroup] = useState<string>('V.08');
+    const [isGroupOpen, setIsGroupOpen] = useState(false);
 
     const { isPending } = useCreateMasterPlan();
 
     useEffect(() => {
-        if (classification === 'CONG_CHUC' && congChucRanks.length > 0 && !congChucRanks.find(r => r.code === activeRankFilter)) {
-            setActiveRankFilter(congChucRanks[0].code);
-        } else if (classification === 'VIEN_CHUC' && vienChucRanks.length > 0 && !vienChucRanks.find(r => r.code === activeRankFilter)) {
-            setActiveRankFilter(vienChucRanks[0].code);
+        if (classification === 'CONG_CHUC') {
+            setActiveGroup('ALL');
+        } else if (classification === 'VIEN_CHUC' && activeGroup === 'ALL') {
+            setActiveGroup('V.08'); // Auto-load Y tế for VIEN_CHUC
         }
-    }, [classification, congChucRanks, vienChucRanks]);
+    }, [classification]);
 
     const { data: existingQuotasData, isLoading: isLoadingQuotas } = useQuery({
         queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter],
@@ -115,11 +137,23 @@ export function ManualPlanSelectorByRankClient() {
     console.log("DEBUG_TASKS: availableTasks =", availableTasks);
 
     const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
+    const currentGroups = classification === 'CONG_CHUC' ? CONG_CHUC_GROUPS : VIEN_CHUC_GROUPS;
 
-    const filteredRanksList = activeRanksList.filter((r: any) => 
+    // Filter ranks by activeGroup
+    const groupedRanksList = activeGroup === 'ALL' 
+        ? activeRanksList 
+        : activeRanksList.filter((r: any) => r.code.startsWith(activeGroup));
+
+    const filteredRanksList = groupedRanksList.filter((r: any) => 
         (r.nameVi || r.name).toLowerCase().includes(searchRankText.toLowerCase()) || 
         r.code.toLowerCase().includes(searchRankText.toLowerCase())
     );
+
+    useEffect(() => {
+        if (groupedRanksList.length > 0 && !groupedRanksList.find((r: any) => r.code === activeRankFilter)) {
+            setActiveRankFilter(groupedRanksList[0].code);
+        }
+    }, [classification, activeGroup, groupedRanksList, activeRankFilter]);
 
     const handleAssignTask = () => {
         const task = availableTasks.find(t => t.id === selectedTaskId);
@@ -360,7 +394,47 @@ export function ManualPlanSelectorByRankClient() {
                     </div>
 
                     <div className="space-y-3 flex-1 flex flex-col min-h-0">
-                        <div className="flex items-center justify-between shrink-0">
+                        <div className="flex flex-col gap-2 shrink-0">
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhóm Ngành / Vị trí</Label>
+                            <Popover open={isGroupOpen} onOpenChange={setIsGroupOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={isGroupOpen}
+                                        className="w-full justify-between h-10 rounded-xl bg-white shadow-sm border-muted-foreground/20 font-normal"
+                                    >
+                                        <span className="truncate">{activeGroup === 'ALL' ? 'Tất cả các ngành' : currentGroups.find(g => g.id === activeGroup)?.name || 'Chọn nhóm ngành...'}</span>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[350px] lg:w-[300px] xl:w-[350px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput placeholder="Tìm nhanh nhóm ngành..." className="h-9" />
+                                        <CommandList>
+                                            <CommandEmpty>Không tìm thấy nhóm.</CommandEmpty>
+                                            <CommandGroup>
+                                                {currentGroups.map(group => (
+                                                    <CommandItem
+                                                        key={group.id}
+                                                        value={group.name}
+                                                        onSelect={() => {
+                                                            setActiveGroup(group.id);
+                                                            setIsGroupOpen(false);
+                                                        }}
+                                                    >
+                                                        {group.name}
+                                                        <Check className={cn("ml-auto h-4 w-4", activeGroup === group.id ? "opacity-100" : "opacity-0")} />
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
+                        <div className="flex items-center justify-between shrink-0 mt-1">
                             <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Ngạch / Hạng</Label>
                         </div>
                         <div className="relative shrink-0">
