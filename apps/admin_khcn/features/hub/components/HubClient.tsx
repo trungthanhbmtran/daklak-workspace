@@ -1,47 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ShieldCheck,
-  ArrowRight,
-  Loader2,
-  LucideIcon,
-} from "lucide-react";
-
+import { ArrowRight, Loader2, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { useUser } from "@/hooks/useUser";
-import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
-import { NotificationBell } from "@/features/notifications/NotificationBell";
-
-// 2. TÁCH HEADER COMPONENT: Cho code gọn gàng
-export function PortalHeader() {
-
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-sm">
-      <div className="flex h-16 w-full items-center justify-between px-4 lg:px-8">
-
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold leading-tight tracking-tight">Cổng Ứng dụng Nội bộ</span>
-            <span className="text-xs text-muted-foreground hidden sm:inline-block">Sở Khoa học và Công nghệ tỉnh Đắk Lắk</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-4">
-          <NotificationBell />
-          <HeaderUserProfile showName />
-        </div>
-
-      </div>
-    </header>
-  );
-}
 
 type AppItem = {
   id: string;
@@ -95,30 +60,27 @@ export function HubClient() {
   const displayName = user?.fullName?.trim() || 'Bạn';
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <PortalHeader />
-      <main className="container mx-auto py-12 px-4 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {displayName}!</h1>
-          <p className="text-muted-foreground mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
+    <main className="container mx-auto py-12 px-4 max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {displayName}!</h1>
+        <p className="text-muted-foreground mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
+      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin mr-2" /> Đang tải danh sách phân hệ...
         </div>
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="h-8 w-8 animate-spin mr-2" /> Đang tải danh sách phân hệ...
-          </div>
-        ) : apps.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-border bg-muted/20 p-12 text-center">
-            <p className="text-muted-foreground font-medium">Bạn chưa được gán quyền truy cập phân hệ nào.</p>
-            <p className="text-sm text-muted-foreground/80 mt-1">Vui lòng liên hệ quản trị viên hệ thống.</p>
-          </div>
-        ) : (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {apps.map((app: any) => (
-              <AppCard key={app.id} app={app} />
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+      ) : apps.length === 0 ? (
+        <div className="rounded-2xl border-2 border-dashed border-border bg-muted/20 p-12 text-center">
+          <p className="text-muted-foreground font-medium">Bạn chưa được gán quyền truy cập phân hệ nào.</p>
+          <p className="text-sm text-muted-foreground/80 mt-1">Vui lòng liên hệ quản trị viên hệ thống.</p>
+        </div>
+      ) : (
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {apps.map((app: any) => (
+            <AppCard key={app.id} app={app} />
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
