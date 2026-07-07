@@ -19,27 +19,27 @@ export interface AiProviderConfig {
 export function SystemSettingsClient() {
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-20 animate-in fade-in">
-      <div className="border-b border-slate-200 pb-6">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-3">
-          <Settings2 className="w-8 h-8 text-indigo-600" />
+      <div className="border-b border-border pb-6">
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
+          <Settings2 className="w-8 h-8 text-primary" />
           Cấu hình Hệ thống & Dịch vụ Nền tảng
         </h1>
-        <p className="text-slate-500 mt-2 font-medium">
+        <p className="text-muted-foreground mt-2 font-medium">
           Quản lý các thông số cốt lõi, dịch vụ AI, dịch thuật và định tuyến thông minh.
         </p>
       </div>
 
       <Tabs defaultValue="ai-router" className="w-full">
-        <TabsList className="w-full h-auto flex-col sm:flex-row bg-slate-100 p-1.5 mb-6 rounded-2xl sm:rounded-full shadow-inner border border-slate-200/50">
-          <TabsTrigger value="ai-router" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 text-slate-600 transition-all">
+        <TabsList className="w-full h-auto flex-col sm:flex-row bg-muted p-1.5 mb-6 rounded-2xl sm:rounded-full shadow-inner border border-border">
+          <TabsTrigger value="ai-router" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary text-muted-foreground transition-all">
             <Bot className="w-4 h-4" />
             AI Router & Models
           </TabsTrigger>
-          <TabsTrigger value="translation" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 text-slate-600 transition-all">
+          <TabsTrigger value="translation" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary text-muted-foreground transition-all">
             <Languages className="w-4 h-4" />
             Dịch thuật
           </TabsTrigger>
-          <TabsTrigger value="prompts" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 text-slate-600 transition-all">
+          <TabsTrigger value="prompts" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary text-muted-foreground transition-all">
             <MessageSquareCode className="w-4 h-4" />
             Mẫu Prompts
           </TabsTrigger>

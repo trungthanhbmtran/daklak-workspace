@@ -54,7 +54,7 @@ export const PortalIdentitySection = ({ activeLangTab, isCompareMode, languages 
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md transition-all"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2.5 px-6 rounded-lg shadow-md transition-all"
         >
           {isSaving ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang lưu...</>

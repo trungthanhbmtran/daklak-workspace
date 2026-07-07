@@ -21,21 +21,21 @@ export const PortalPreviewSimulator = ({ activeLangTab, setActiveLangTab, langua
   };
 
   return (
-    <Card className="border border-emerald-150 bg-emerald-50/5 shadow-sm rounded-xl overflow-hidden">
-      <CardHeader className="bg-emerald-50/20 border-b border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4">
+    <Card className="border border-border bg-card shadow-sm rounded-xl overflow-hidden">
+      <CardHeader className="bg-muted/30 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4">
         <div className="flex items-center gap-2">
-          <Eye className="w-4 h-4 text-emerald-600" />
-          <CardTitle className="text-xs font-black text-emerald-800 uppercase tracking-wider">
+          <Eye className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
             Mô phỏng hiển thị Portal
           </CardTitle>
         </div>
         <Tabs value={activeLangTab} onValueChange={setActiveLangTab} className="w-auto">
-          <TabsList className="bg-emerald-100/50 p-0.5 flex gap-0.5 rounded-lg border border-emerald-100">
+          <TabsList className="bg-muted p-0.5 flex gap-0.5 rounded-lg border border-border">
             {activeLangs.map((lang: any) => (
               <TabsTrigger
                 key={lang.code}
                 value={lang.code}
-                className="px-2 py-1 font-extrabold uppercase text-[9px] rounded-md transition-all data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+                className="px-2 py-1 font-extrabold uppercase text-[9px] rounded-md transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm"
               >
                 {lang.code.toUpperCase()}
               </TabsTrigger>

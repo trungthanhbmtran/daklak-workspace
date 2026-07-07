@@ -215,17 +215,17 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <Card className="w-full max-w-[1400px] mx-auto mt-6 shadow-xl border-0 ring-1 ring-black/5 overflow-hidden h-[calc(100vh-100px)] min-h-[700px] flex flex-col bg-linear-to-b from-muted/20 to-background rounded-2xl shrink-0">
-            <CardHeader className="shrink-0 bg-white/50 backdrop-blur-md border-b pb-4 pt-6 px-6 relative overflow-hidden">
+        <Card className="w-full max-w-[1400px] mx-auto mt-6 shadow-xl border overflow-hidden h-[calc(100vh-100px)] min-h-[700px] flex flex-col bg-card rounded-2xl shrink-0">
+            <CardHeader className="shrink-0 bg-card border-b pb-4 pt-6 px-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-transparent pointer-events-none" />
                 <div className="relative z-10">
-                    <CardTitle className="flex items-center gap-3 text-2xl font-black text-foreground tracking-tight">
+                    <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl font-black text-foreground tracking-tight">
                         <div className="p-2.5 bg-primary/10 rounded-xl">
                             <Target className="w-6 h-6 text-primary" />
                         </div>
                         Cấu Hình Chỉ Tiêu Định Biên Theo Ngạch
                     </CardTitle>
-                    <CardDescription className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                    <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
                         Thiết lập và phân bổ danh mục công việc bắt buộc cho từng ngạch chức danh. Giúp tự động hóa việc giao việc và đánh giá KPI một cách khoa học.
                     </CardDescription>
                 </div>
@@ -233,15 +233,15 @@ export function ManualPlanSelectorByRankClient() {
 
             <CardContent className="flex-1 flex flex-col lg:flex-row min-h-0 p-6 gap-6">
                 {/* LEFT COLUMN: MAIN CONTENT AREA */}
-                <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-white rounded-2xl border shadow-sm overflow-hidden h-full">
-                    <div className="p-4 border-b bg-muted/5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-card rounded-2xl border shadow-sm overflow-hidden h-full">
+                    <div className="p-4 border-b bg-muted/30 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-6 bg-primary rounded-full" />
                             <h3 className="font-bold text-sm tracking-tight text-foreground">Danh sách chỉ tiêu bắt buộc</h3>
                         </div>
                         <div className="w-full sm:w-[300px]">
                             <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
-                                <SelectTrigger className="h-10 rounded-xl bg-white border-muted shadow-sm">
+                                <SelectTrigger className="h-10 rounded-xl bg-background border-input shadow-sm">
                                     <SelectValue placeholder="Chọn lĩnh vực..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -253,8 +253,8 @@ export function ManualPlanSelectorByRankClient() {
                                 </SelectContent>
                             </Select>
 
-                            <div className="flex w-full sm:w-auto items-center bg-white border rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
-                                <div className="px-3 text-xs font-medium text-muted-foreground border-r bg-muted/10 h-full flex items-center">Trọng số</div>
+                            <div className="flex w-full sm:w-auto items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
+                                <div className="px-3 text-xs font-medium text-muted-foreground border-r border-input bg-muted/50 h-full flex items-center">Trọng số</div>
                                 <Input
                                     type="number"
                                     value={weight}
@@ -267,7 +267,7 @@ export function ManualPlanSelectorByRankClient() {
                         </div>
                     </div>
 
-                    <div className="p-4 border-b bg-white flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
+                    <div className="p-4 border-b bg-background flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full flex-1 min-w-0">
                             <Select
                                 value={selectedTaskId}
@@ -277,7 +277,7 @@ export function ManualPlanSelectorByRankClient() {
                                     if (task) setTargetValue(task.defaultWeight);
                                 }}
                             >
-                                <SelectTrigger className="w-full flex-1 min-w-0 h-10 rounded-xl bg-white shadow-sm border-muted-foreground/20">
+                                <SelectTrigger className="w-full flex-1 min-w-0 h-10 rounded-xl bg-background shadow-sm border-input">
                                     <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ thư viện --" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -294,8 +294,8 @@ export function ManualPlanSelectorByRankClient() {
                                 </SelectContent>
                             </Select>
 
-                            <div className="flex w-full sm:w-auto items-center bg-white border rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
-                                <div className="px-3 text-xs font-medium text-muted-foreground border-r bg-muted/10 h-full flex items-center">Chỉ tiêu</div>
+                            <div className="flex w-full sm:w-auto items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
+                                <div className="px-3 text-xs font-medium text-muted-foreground border-r border-input bg-muted/50 h-full flex items-center">Chỉ tiêu</div>
                                 <Input
                                     type="number"
                                     value={targetValue}
@@ -314,10 +314,10 @@ export function ManualPlanSelectorByRankClient() {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-hidden bg-white relative">
+                    <div className="flex-1 overflow-hidden bg-background relative">
                         <ScrollArea className="h-full">
                             <Table className="w-full table-fixed">
-                                <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-sm z-10">
+                                <TableHeader className="bg-muted/50 sticky top-0 backdrop-blur-sm z-10">
                                     <TableRow className="hover:bg-transparent">
                                         <TableHead className="font-semibold text-muted-foreground">Tên nhiệm vụ</TableHead>
                                         <TableHead className="w-[100px] font-semibold text-muted-foreground text-center">Đơn vị</TableHead>
@@ -349,7 +349,7 @@ export function ManualPlanSelectorByRankClient() {
                                                             const val = Number(e.target.value);
                                                             setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
                                                         }}
-                                                        className="w-24 h-8 text-center font-bold text-sm bg-white border-muted-foreground/20 focus-visible:ring-primary/30 transition-shadow rounded-lg"
+                                                        className="w-24 h-8 text-center font-bold text-sm bg-background border-input focus-visible:ring-primary/30 transition-shadow rounded-lg"
                                                     />
                                                 </div>
                                             </TableCell>
@@ -363,7 +363,7 @@ export function ManualPlanSelectorByRankClient() {
                                                             const val = Number(e.target.value);
                                                             setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, weight: val } : p));
                                                         }}
-                                                        className="w-24 h-8 text-center font-bold text-sm bg-white border-muted-foreground/20 focus-visible:ring-primary/30 transition-shadow rounded-lg"
+                                                        className="w-24 h-8 text-center font-bold text-sm bg-background border-input focus-visible:ring-primary/30 transition-shadow rounded-lg"
                                                         step="0.1"
                                                     />
                                                 </div>
@@ -400,13 +400,13 @@ export function ManualPlanSelectorByRankClient() {
                 </div>
 
                 {/* RIGHT COLUMN: FILTER SECTION */}
-                <div className="w-full lg:w-[350px] xl:w-[400px] shrink-0 flex flex-col gap-4 bg-white rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
+                <div className="w-full lg:w-[350px] xl:w-[400px] shrink-0 flex flex-col gap-4 bg-card text-card-foreground rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
                     <div className="space-y-3 shrink-0">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại Ngạch</Label>
                         <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted/50 rounded-xl">
-                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Khối Công chức</TabsTrigger>
-                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">Khối Viên chức</TabsTrigger>
+                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted rounded-xl">
+                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Khối Công chức</TabsTrigger>
+                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Khối Viên chức</TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
@@ -420,7 +420,7 @@ export function ManualPlanSelectorByRankClient() {
                                         variant="outline"
                                         role="combobox"
                                         aria-expanded={isGroupOpen}
-                                        className="w-full justify-between h-10 rounded-xl bg-white shadow-sm border-muted-foreground/20 font-normal"
+                                        className="w-full justify-between h-10 rounded-xl bg-background shadow-sm border-input font-normal"
                                     >
                                         <span className="truncate">{activeGroup === 'ALL' ? 'Tất cả các ngành' : currentGroups.find(g => g.id === activeGroup)?.name || 'Chọn nhóm ngành...'}</span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -472,11 +472,11 @@ export function ManualPlanSelectorByRankClient() {
                                             key={rank.code}
                                             onClick={() => setActiveRankFilter(rank.code)}
                                             className={`p-3 rounded-xl border cursor-pointer transition-all ${activeRankFilter === rank.code
-                                                ? 'bg-primary/5 border-primary shadow-sm'
-                                                : 'bg-white border-transparent hover:bg-muted/50 hover:border-muted'
+                                                ? 'bg-primary/10 border-primary shadow-sm'
+                                                : 'bg-background border-transparent hover:bg-muted/50 hover:border-muted'
                                                 }`}
                                         >
-                                            <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-slate-700'}`}>
+                                            <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-foreground'}`}>
                                                 {rank.nameVi || rank.name}
                                             </h4>
                                             <p className="text-[11px] text-muted-foreground font-mono mt-1">{rank.code}</p>
@@ -489,7 +489,7 @@ export function ManualPlanSelectorByRankClient() {
                 </div>
             </CardContent>
 
-            <CardFooter className="flex justify-between items-center px-6 py-4 border-t bg-white relative z-10 shrink-0">
+            <CardFooter className="flex justify-between items-center px-6 py-4 border-t bg-card relative z-10 shrink-0">
                 <div className="text-xs text-muted-foreground">
                     Tổng số nhiệm vụ định biên: <strong className="text-foreground">{addedPlans.length}</strong>
                 </div>

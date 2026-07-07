@@ -130,13 +130,13 @@ export function KpiCriteriaClient() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 p-4 md:p-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 flex items-center gap-2">
-            <Library className="w-6 h-6 text-slate-600" />
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Library className="w-6 h-6 text-primary" />
             Khung Tiêu chí & KPI
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Quản lý tập trung các bộ tiêu chí đánh giá KPI để áp dụng thống nhất cho toàn bộ hệ thống.
           </p>
         </div>
@@ -147,46 +147,46 @@ export function KpiCriteriaClient() {
 
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[300px]">
-          <div className="animate-spin w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full"></div>
+          <div className="animate-spin w-8 h-8 border-4 border-border border-t-primary rounded-full"></div>
         </div>
       ) : (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px]">
             {criteriaList.map((item: any) => (
-              <Card key={item.id} className="shadow-none border border-slate-200 hover:border-slate-300 transition-colors h-[240px]">
+              <Card key={item.id} className="shadow-sm border border-border bg-card hover:border-primary/50 transition-colors h-[240px]">
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-slate-800 line-clamp-2 leading-snug flex-1 mr-3">
+                    <h3 className="font-semibold text-foreground line-clamp-2 leading-snug flex-1 mr-3">
                       {item.name}
                     </h3>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700" onClick={() => openModal(item)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openModal(item)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDelete(item.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(item.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
 
-                  <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
                     {item.description || "Chưa có mô tả."}
                   </p>
 
-                  <div className="space-y-3 pt-4 border-t border-slate-100 mt-auto">
+                  <div className="space-y-3 pt-4 border-t border-border mt-auto">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-500">Điểm chuẩn:</span>
-                      <span className="font-medium text-slate-900">{item.baseScore}</span>
+                      <span className="text-muted-foreground">Điểm chuẩn:</span>
+                      <span className="font-medium text-foreground">{item.baseScore}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-500">Độ khó:</span>
-                      <span className="font-medium text-slate-900">
+                      <span className="text-muted-foreground">Độ khó:</span>
+                      <span className="font-medium text-foreground">
                         {item.difficulty} (x{item.difficultyMultiplier})
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-500">Phương pháp:</span>
-                      <span className="font-medium text-slate-900 text-[11px] px-2 py-0.5 bg-slate-100 rounded-md">
+                      <span className="text-muted-foreground">Phương pháp:</span>
+                      <span className="font-medium text-foreground text-[11px] px-2 py-0.5 bg-muted rounded-md">
                         {item.scoringMethod}
                       </span>
                     </div>
@@ -197,15 +197,15 @@ export function KpiCriteriaClient() {
           </div>
 
           {criteriaList.length === 0 && (
-            <div className="text-center py-16 border rounded-lg bg-slate-50/50">
-              <p className="text-slate-500">Chưa có tiêu chí nào.</p>
+            <div className="text-center py-16 border border-border rounded-lg bg-muted/10">
+              <p className="text-muted-foreground">Chưa có tiêu chí nào.</p>
             </div>
           )}
 
           {/* Pagination Controls */}
           <div className="flex items-center justify-between pt-4">
-            <p className="text-sm text-slate-500">
-              Hiển thị <span className="font-medium text-slate-900">{meta?.total ? Math.min((meta.page - 1) * meta.pageSize + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * meta.pageSize, meta.total) : 0}</span> trong tổng số <span className="font-medium text-slate-900">{meta?.total || 0}</span> bản ghi
+            <p className="text-sm text-muted-foreground">
+              Hiển thị <span className="font-medium text-foreground">{meta?.total ? Math.min((meta.page - 1) * meta.pageSize + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * meta.pageSize, meta.total) : 0}</span> trong tổng số <span className="font-medium text-foreground">{meta?.total || 0}</span> bản ghi
             </p>
             <div className="flex items-center gap-2 text-sm">
               <Button
@@ -217,7 +217,7 @@ export function KpiCriteriaClient() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="px-3 py-1 font-medium text-slate-700">
+              <span className="px-3 py-1 font-medium text-foreground">
                 Trang {meta?.page || 1} / {meta?.totalPages || 1}
               </span>
               <Button
@@ -340,7 +340,7 @@ export function KpiCriteriaClient() {
             </div>
           </div>
           
-          <DialogFooter className="px-6 py-4 border-t bg-slate-50">
+          <DialogFooter className="px-6 py-4 border-t bg-muted/30">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               Hủy
             </Button>

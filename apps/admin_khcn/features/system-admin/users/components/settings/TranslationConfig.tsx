@@ -35,20 +35,20 @@ export function TranslationConfig() {
   };
 
   return (
-    <Card className="border-0 shadow-lg bg-white rounded-2xl ring-1 ring-slate-100 overflow-hidden">
-      <CardHeader className="border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold text-slate-800">
+    <Card className="border border-border shadow-lg bg-card rounded-2xl overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
           🌐 Cấu hình Dịch thuật Tiêu chuẩn
         </CardTitle>
-        <Button onClick={handleSaveTranslation} disabled={updateConfig.isPending} className="bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-lg px-6 h-11">
+        <Button onClick={handleSaveTranslation} disabled={updateConfig.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg px-6 h-11 w-full sm:w-auto">
           {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4 mr-2" /> Lưu thay đổi</>}
         </Button>
       </CardHeader>
       <CardContent className="p-6">
         <div className="max-w-md space-y-2">
-          <label className="text-sm font-bold text-slate-700">Dịch vụ Dịch thuật mặc định</label>
+          <label className="text-sm font-bold text-muted-foreground">Dịch vụ Dịch thuật mặc định</label>
           <select
-            className="w-full h-12 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-500 outline-none text-sm font-medium"
+            className="w-full h-12 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium"
             value={translateService}
             onChange={(e) => setTranslateService(e.target.value)}
           >

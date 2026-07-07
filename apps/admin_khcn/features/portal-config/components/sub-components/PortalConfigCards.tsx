@@ -18,33 +18,33 @@ interface CardProps {
 }
 
 const cardClass = (langCode: string, isCompareMode: boolean) =>
-  `border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`;
+  `border border-border shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md bg-card ${langCode === 'vi' && isCompareMode ? 'bg-muted/50 border-r-2 border-r-primary' : ''}`;
 
 const LangBadge = ({ langCode, activeLangs, labelPrefix }: { langCode: string; activeLangs: any[]; labelPrefix?: string }) => {
   const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
   return (
-    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-primary/10 text-primary' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
       {lang.name} {labelPrefix}
     </span>
   );
 };
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-  <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">{children}</Label>
+  <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider block">{children}</Label>
 );
 
-const fieldClass = "rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold";
+const fieldClass = "rounded-lg border-input bg-background focus:border-primary focus:ring-primary/20 text-xs font-semibold";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // 1. BrandingCard — Nhận diện & Bản quyền
 // ──────────────────────────────────────────────────────────────────────────────
 export const BrandingCard = memo(({ langCode, activeLangs, trans, isCompareMode, onUpdate }: CardProps) => (
   <Card className={cardClass(langCode, isCompareMode)}>
-    <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+    <CardHeader className="bg-muted/30 border-b border-border py-4 px-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Building className="w-4 h-4 text-indigo-600" />
-          <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+          <Building className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
             Nhận diện &amp; Bản quyền Đơn vị (2 Cấp)
           </CardTitle>
         </div>
@@ -78,11 +78,11 @@ BrandingCard.displayName = "BrandingCard";
 // ──────────────────────────────────────────────────────────────────────────────
 export const ScheduleCard = memo(({ langCode, activeLangs, trans, isCompareMode, onUpdate }: CardProps) => (
   <Card className={cardClass(langCode, isCompareMode)}>
-    <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+    <CardHeader className="bg-muted/30 border-b border-border py-4 px-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-indigo-600" />
-          <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+          <Calendar className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
             Lịch tiếp công dân định kỳ
           </CardTitle>
         </div>
@@ -110,11 +110,11 @@ ScheduleCard.displayName = "ScheduleCard";
 // ──────────────────────────────────────────────────────────────────────────────
 export const AddressLicenseCard = memo(({ langCode, activeLangs, trans, isCompareMode, onUpdate }: CardProps) => (
   <Card className={cardClass(langCode, isCompareMode)}>
-    <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+    <CardHeader className="bg-muted/30 border-b border-border py-4 px-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-indigo-600" />
-          <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+          <FileText className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
             Địa chỉ &amp; Giấy phép hoạt động
           </CardTitle>
         </div>
@@ -151,11 +151,11 @@ AddressLicenseCard.displayName = "AddressLicenseCard";
 // ──────────────────────────────────────────────────────────────────────────────
 export const CustomLabelsCard = memo(({ langCode, activeLangs, trans, isCompareMode, onUpdate }: CardProps) => (
   <Card className={cardClass(langCode, isCompareMode)}>
-    <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+    <CardHeader className="bg-muted/30 border-b border-border py-4 px-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-indigo-600" />
-          <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
             Các tiêu đề và Nhãn hiển thị phụ
           </CardTitle>
         </div>
@@ -215,11 +215,11 @@ CustomLabelsCard.displayName = "CustomLabelsCard";
 // ──────────────────────────────────────────────────────────────────────────────
 export const ContactDetailsCard = memo(({ langCode, activeLangs, trans, isCompareMode, onUpdate }: CardProps) => (
   <Card className={cardClass(langCode, isCompareMode)}>
-    <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+    <CardHeader className="bg-muted/30 border-b border-border py-4 px-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Phone className="w-4 h-4 text-indigo-600" />
-          <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+          <Phone className="w-4 h-4 text-primary" />
+          <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
             Thông tin liên hệ
           </CardTitle>
         </div>

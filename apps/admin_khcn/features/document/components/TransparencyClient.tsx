@@ -57,10 +57,10 @@ export function TransparencyClient() {
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <PieChart className="h-6 w-6 text-primary" /> Công khai &amp; Minh bạch
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">Quản lý và đăng tải các báo cáo tài chính, dự toán ngân sách theo quy định của Pháp luật.</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Quản lý và đăng tải các báo cáo tài chính, dự toán ngân sách theo quy định của Pháp luật.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="shadow-sm"><TrendingUp className="h-4 w-4 mr-2" /> Thống kê báo cáo</Button>
@@ -73,30 +73,30 @@ export function TransparencyClient() {
       <DocumentUploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-none shadow-sm bg-blue-50/50">
+        <Card className="border border-border shadow-sm bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><FileText className="h-5 w-5" /></div>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary"><FileText className="h-5 w-5" /></div>
             <div>
-              <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Tổng số báo cáo</p>
-              <p className="text-2xl font-black text-blue-900">{totalReports || 0}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Tổng số báo cáo</p>
+              <p className="text-2xl font-black text-foreground">{totalReports || 0}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-emerald-50/50">
+        <Card className="border border-border shadow-sm bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><ShieldCheck className="h-5 w-5" /></div>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary"><ShieldCheck className="h-5 w-5" /></div>
             <div>
-              <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Đã công khai</p>
-              <p className="text-2xl font-black text-emerald-900">{publicCount || 0}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Đã công khai</p>
+              <p className="text-2xl font-black text-foreground">{publicCount || 0}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-amber-50/50">
+        <Card className="border border-border shadow-sm bg-card">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><Calendar className="h-5 w-5" /></div>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary"><Calendar className="h-5 w-5" /></div>
             <div>
-              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Hạn báo cáo</p>
-              <p className="text-2xl font-black text-amber-900">Q1/2026</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Hạn báo cáo</p>
+              <p className="text-2xl font-black text-foreground">Q1/2026</p>
             </div>
           </CardContent>
         </Card>
@@ -161,14 +161,14 @@ export function TransparencyClient() {
                     <Badge variant="outline" className="font-mono font-black text-primary border-primary/20 bg-primary/5 px-2 py-0.5">{report.fiscalYear || fiscalYear}</Badge>
                   </td>
                   <td className="px-6 py-5">
-                    <Badge className={`shadow-none font-bold text-[10px] ${report.transparencyCategory === 'ESTIMATE' ? 'bg-blue-100 text-blue-700' : report.transparencyCategory === 'SETTLEMENT' ? 'bg-emerald-100 text-emerald-700' : report.transparencyCategory === 'EXECUTION' ? 'bg-amber-100 text-amber-700' : report.transparencyCategory === 'GENERAL' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-700'}`}>
+                    <Badge className={`shadow-none font-bold text-[10px] ${report.transparencyCategory === 'ESTIMATE' ? 'bg-primary/10 text-primary' : report.transparencyCategory === 'SETTLEMENT' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : report.transparencyCategory === 'EXECUTION' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : report.transparencyCategory === 'GENERAL' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-muted text-muted-foreground'}`}>
                       {report.transparencyCategory === 'ESTIMATE' ? 'Dự toán' : report.transparencyCategory === 'SETTLEMENT' ? 'Quyết toán' : report.transparencyCategory === 'EXECUTION' ? 'Thực hiện' : report.transparencyCategory === 'GENERAL' ? 'Thông tin chung' : 'Khác'}
                     </Badge>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-0.5">
                       <span className="text-foreground font-medium">{formatDate(report.createdAt)}</span>
-                      {report.status === 'DRAFT' && <span className="text-[10px] text-amber-600 font-bold uppercase tracking-tighter">Đang soạn thảo</span>}
+                      {report.status === 'DRAFT' && <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-tighter">Đang soạn thảo</span>}
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">

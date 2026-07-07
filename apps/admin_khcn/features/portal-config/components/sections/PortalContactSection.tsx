@@ -59,7 +59,7 @@ export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }
   };
 
   if (isLoading) {
-    return <div className="p-8 text-center text-slate-500">Đang tải dữ liệu liên hệ...</div>;
+    return <div className="p-8 text-center text-muted-foreground">Đang tải dữ liệu liên hệ...</div>;
   }
 
   return (
@@ -100,22 +100,22 @@ export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }
         <CustomLabelsCard {...cardProps(activeLangTab)} />
       )}
 
-      <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+      <Card className="border border-border shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md bg-card">
+        <CardHeader className="bg-muted/30 border-b border-border py-4 px-5">
           <div className="flex items-center gap-2">
-            <MapIcon className="w-4 h-4 text-indigo-650" />
-            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+            <MapIcon className="w-4 h-4 text-primary" />
+            <CardTitle className="text-xs font-black text-foreground uppercase tracking-wider">
               Bản đồ Hành chính Đơn vị
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="p-5 space-y-4">
           <div className="space-y-2">
-            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+            <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider block">
               Hình ảnh Bản đồ hành chính
             </Label>
             <div className="flex items-start gap-4">
-              <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col items-center justify-center text-center shrink-0 w-44 h-28 relative overflow-hidden group">
+              <div className="border border-dashed border-border rounded-xl p-4 bg-muted/50 flex flex-col items-center justify-center text-center shrink-0 w-44 h-28 relative overflow-hidden group">
                 {activeMap ? (
                   <>
                     <img
@@ -134,18 +134,18 @@ export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center gap-1.5 text-slate-400">
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
                     {isUploadingMap ? (
-                      <Loader2 className="w-6 h-6 animate-spin text-indigo-650" />
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
                     ) : (
-                      <UploadCloud className="w-6 h-6 text-slate-400" />
+                      <UploadCloud className="w-6 h-6 text-muted-foreground" />
                     )}
                     <span className="text-[9px] font-bold uppercase tracking-wider">Chưa có ảnh</span>
                   </div>
                 )}
               </div>
               <div className="space-y-2 flex-1 pt-1">
-                <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                <p className="text-[10px] text-muted-foreground font-semibold leading-relaxed">
                   Tải lên hình ảnh ranh giới phân vùng hành chính hoặc bản đồ địa giới của đơn vị. Hình ảnh này sẽ hiển thị trực quan trên Trang Liên hệ ở Cổng Dân Cư.
                 </p>
                 <input
@@ -162,7 +162,7 @@ export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }
                     size="sm"
                     disabled={isUploadingMap}
                     onClick={() => mapInputRef.current?.click()}
-                    className="text-[10px] font-black uppercase tracking-wider border-slate-250 rounded-lg hover:bg-slate-50 h-8"
+                    className="text-[10px] font-black uppercase tracking-wider border-input bg-background hover:bg-muted rounded-lg h-8"
                   >
                     Tải ảnh lên
                   </Button>

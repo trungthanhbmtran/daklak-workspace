@@ -59,8 +59,8 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
         className={cn(
           'relative flex items-stretch gap-3 transition-all duration-300 rounded-lg cursor-pointer',
           isRoot
-            ? 'bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 my-4 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] hover:border-indigo-300 dark:hover:border-indigo-500/50'
-            : 'bg-slate-50/50 dark:bg-slate-800/40 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800 p-3 my-2 shadow-sm'
+            ? 'bg-card border border-border shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 my-4 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] hover:border-primary/50'
+            : 'bg-muted/50 border border-transparent hover:border-border hover:bg-card p-3 my-2 shadow-sm'
         )}
         onClick={() => onSelectTask(task)}
       >

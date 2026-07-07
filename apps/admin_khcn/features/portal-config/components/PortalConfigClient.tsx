@@ -19,20 +19,20 @@ export function PortalConfigClient() {
   const activeLangs = rawLanguages.length > 0 ? rawLanguages : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
   return (
-    <div className="h-full w-full overflow-y-auto custom-scrollbar bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div className="h-full w-full overflow-y-auto custom-scrollbar bg-background rounded-xl border border-border shadow-sm">
       <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
         {/* HEADER SECTION */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6 border-border">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-indigo-600 rounded-lg text-white shadow-md shadow-indigo-500/20">
+              <div className="p-2 bg-primary rounded-lg text-primary-foreground shadow-md shadow-primary/20">
                 <Settings className="w-5 h-5 animate-spin-slow" />
               </div>
-              <h1 className="text-2xl font-extrabold tracking-tight bg-linear-to-br from-slate-900 to-indigo-950 bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
                 Cấu hình chung đơn vị & Portal
               </h1>
             </div>
-            <p className="text-sm text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium">
               Quản lý thông tin nhận diện cơ quan, bản quyền, đường dây nóng, trang giới thiệu, cơ cấu tổ chức và sơ đồ ranh giới rập khuôn đa ngôn ngữ.
             </p>
           </div>
@@ -42,23 +42,23 @@ export function PortalConfigClient() {
           {/* LEFT COLUMN: EDITOR FORM */}
           <div className="lg:col-span-2 space-y-6">
             {/* EDITOR VIEW MODE CONTROLLER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 border border-slate-150 p-3 rounded-xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30 border border-border p-3 rounded-xl shadow-sm">
               <div className="flex items-center gap-2">
-                <Languages className="w-4 h-4 text-indigo-600 animate-pulse" />
-                <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                <Languages className="w-4 h-4 text-primary animate-pulse" />
+                <span className="text-xs font-extrabold text-foreground uppercase tracking-wider">
                   Ngôn ngữ soạn thảo:
                 </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <Tabs value={activeLangTab} onValueChange={setActiveLangTab} className="w-auto">
-                  <TabsList className="bg-slate-200/60 p-0.5 flex gap-0.5 rounded-lg border border-slate-200/50">
+                  <TabsList className="bg-muted p-0.5 flex gap-0.5 rounded-lg border border-border">
                     {activeLangs.map((lang: any) => (
                       <TabsTrigger
                         key={lang.code}
                         value={lang.code}
                         disabled={isCompareMode}
-                        className="px-3 py-1.5 font-extrabold uppercase text-[10px] rounded-md transition-all data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm disabled:opacity-50"
+                        className="px-3 py-1.5 font-extrabold uppercase text-[10px] rounded-md transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm disabled:opacity-50"
                       >
                         {lang.name}
                       </TabsTrigger>
@@ -72,8 +72,8 @@ export function PortalConfigClient() {
                   size="sm"
                   onClick={() => setIsCompareMode(!isCompareMode)}
                   className={`rounded-lg text-xs font-bold uppercase py-1.5 px-3 flex items-center gap-1.5 transition-all ${isCompareMode
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
-                    : "border-slate-250 text-slate-600 hover:bg-slate-100"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                    : "border-border text-muted-foreground hover:bg-muted"
                     }`}
                 >
                   <Columns className="w-3.5 h-3.5" />
@@ -83,7 +83,7 @@ export function PortalConfigClient() {
             </div>
 
             {/* CONFIGURATION SECTIONS TABS */}
-            <div className="flex border-b border-slate-200 gap-1.5 overflow-x-auto pb-px">
+            <div className="flex border-b border-border gap-1.5 overflow-x-auto pb-px">
               {[
                 { id: "identity", label: "Cấu hình đơn vị", icon: Building },
                 { id: "contact", label: "Thông tin liên hệ", icon: Phone }
@@ -96,8 +96,8 @@ export function PortalConfigClient() {
                     type="button"
                     onClick={() => setActiveConfigTab(tab.id)}
                     className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 select-none ${isActive
-                      ? "border-indigo-600 text-indigo-600 font-extrabold"
-                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-350"
+                      ? "border-primary text-primary font-extrabold"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                       }`}
                   >
                     <TabIcon className="w-4 h-4" />

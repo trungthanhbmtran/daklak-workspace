@@ -33,16 +33,16 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
   );
 
   return (
-    <div className={`p-5 bg-white rounded-2xl border ${provider.enabled ? 'border-blue-200 shadow-md shadow-blue-900/5' : 'border-slate-200 opacity-60'} relative transition-all`}>
+    <div className={`p-5 bg-card rounded-2xl border ${provider.enabled ? 'border-primary/50 shadow-md' : 'border-border opacity-60'} relative transition-all`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${provider.enabled ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${provider.enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
             #{provider.priority}
           </div>
-          <h4 className="font-bold text-slate-800 text-lg">Ưu tiên {provider.priority} {provider.enabled ? '' : '(Đã tắt)'}</h4>
+          <h4 className="font-bold text-foreground text-lg">Ưu tiên {provider.priority} {provider.enabled ? '' : '(Đã tắt)'}</h4>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onChange('enabled', !provider.enabled)} className={provider.enabled ? 'text-blue-600 bg-blue-50' : 'text-slate-500 bg-slate-100'}>
+          <Button variant="ghost" size="sm" onClick={() => onChange('enabled', !provider.enabled)} className={provider.enabled ? 'text-primary bg-primary/10' : 'text-muted-foreground bg-muted'}>
             {provider.enabled ? 'Đang Bật' : 'Đang Tắt'}
           </Button>
           <Button variant="ghost" size="icon" onClick={onRemove} className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg">
@@ -53,9 +53,9 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nhà Cung cấp</label>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhà Cung cấp</label>
           <select
-            className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-slate-700"
+            className="w-full h-11 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium text-foreground"
             value={provider.provider}
             onChange={(e) => onChange('provider', e.target.value)}
           >
@@ -65,12 +65,12 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           </select>
         </div>
         <div className="space-y-1.5 flex flex-col justify-end">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center justify-between">
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
             <span>Tên Model</span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-5 px-2 text-[10px] text-blue-600 hover:text-blue-700 bg-blue-50"
+              className="h-5 px-2 text-[10px] text-primary hover:text-primary/80 bg-primary/10"
               onClick={handleFetchModels}
               disabled={isFetching[provider.id]}
             >
@@ -84,7 +84,7 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           >
             <ComboboxInput
               placeholder="Chọn hoặc nhập model..."
-              className="h-11 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl"
+              className="h-11 border-input bg-background focus:ring-2 focus:ring-primary rounded-xl"
               onChange={(e: any) => onChange('model', e.target.value)}
             />
             <ComboboxContent>
@@ -97,7 +97,7 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
                     <ComboboxItem key={mId} value={mId}>
                       <div className="flex justify-between w-full items-center gap-2">
                         <span>{mName}</span>
-                        {mCtx && <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{(mCtx / 1000).toFixed(0)}k</span>}
+                        {mCtx && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{(mCtx / 1000).toFixed(0)}k</span>}
                       </div>
                     </ComboboxItem>
                   );
@@ -107,20 +107,20 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           </Combobox>
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Mức ưu tiên</label>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Mức ưu tiên</label>
           <input
             type="number"
-            className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
+            className="w-full h-11 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium"
             value={provider.priority}
             onChange={(e) => onChange('priority', parseInt(e.target.value) || 1)}
             min="1"
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">API Key (Token)</label>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">API Key (Token)</label>
           <input
             type="password"
-            className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
+            className="w-full h-11 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium"
             value={provider.apiKey}
             onChange={(e) => onChange('apiKey', e.target.value)}
             placeholder="Nhập API Key bảo mật..."

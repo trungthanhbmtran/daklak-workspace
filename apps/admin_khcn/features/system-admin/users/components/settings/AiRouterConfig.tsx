@@ -69,26 +69,26 @@ export function AiRouterConfig() {
   };
 
   return (
-    <Card className="border-0 shadow-xl bg-white rounded-2xl overflow-hidden ring-1 ring-slate-100">
-      <CardHeader className="border-b border-slate-100 bg-linear-to-r from-blue-50 to-indigo-50/30 p-6 flex flex-row items-center justify-between">
+    <Card className="border border-border shadow-xl bg-card rounded-2xl overflow-hidden">
+      <CardHeader className="border-b border-border bg-muted/30 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <Activity className="w-6 h-6 text-blue-600" />
+          <CardTitle className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <Activity className="w-6 h-6 text-primary" />
             Smart AI Router (Hệ thống Định tuyến AI & Dự phòng)
           </CardTitle>
-          <p className="text-sm text-slate-500 mt-1">Cấu hình nhiều LLM. Hệ thống sẽ tự động chuyển sang mô hình có mức ưu tiên thấp hơn nếu mô hình chính bị lỗi.</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Cấu hình nhiều LLM. Hệ thống sẽ tự động chuyển sang mô hình có mức ưu tiên thấp hơn nếu mô hình chính bị lỗi.</p>
         </div>
-        <Button onClick={handleSaveAiConfigs} disabled={updateConfig.isPending} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/20 px-6 h-11">
+        <Button onClick={handleSaveAiConfigs} disabled={updateConfig.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg px-6 h-11 w-full sm:w-auto">
           {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4 mr-2" /> Lưu cấu hình AI</>}
         </Button>
       </CardHeader>
 
-      <CardContent className="p-6 bg-slate-50/50">
+      <CardContent className="p-6 bg-muted/10">
         {aiProviders.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
-            <ShieldCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-700">Chưa có Cấu hình AI nào</h3>
-            <p className="text-slate-500 mb-4 text-sm">Hệ thống AI đang tắt. Hãy thêm nhà cung cấp để kích hoạt Smart Router.</p>
+          <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl bg-card">
+            <ShieldCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-foreground">Chưa có Cấu hình AI nào</h3>
+            <p className="text-muted-foreground mb-4 text-sm">Hệ thống AI đang tắt. Hãy thêm nhà cung cấp để kích hoạt Smart Router.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -104,11 +104,11 @@ export function AiRouterConfig() {
           </div>
         )}
 
-        <Button onClick={handleAddAiProvider} variant="outline" className="w-full mt-4 h-12 border-dashed border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:border-blue-300 hover:text-blue-700 rounded-xl transition-colors">
+        <Button onClick={handleAddAiProvider} variant="outline" className="w-full mt-4 h-12 border-dashed border-2 border-input text-muted-foreground font-bold hover:bg-muted hover:border-primary/50 hover:text-primary rounded-xl transition-colors">
           <Plus className="w-5 h-5 mr-2" /> Thêm Cấu hình AI Dự phòng
         </Button>
 
-        <div className="mt-6 flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-sm font-medium">
+        <div className="mt-6 flex items-start gap-3 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs sm:text-sm font-medium">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <p><strong>Lưu ý về định tuyến:</strong> Hệ thống sẽ gọi API Key theo mức độ ưu tiên (nhỏ đến lớn). Nếu hệ thống gặp mã lỗi HTTP 429 hoặc 401, bộ định tuyến sẽ tự động thử ngay mô hình tiếp theo trong danh sách.</p>
         </div>

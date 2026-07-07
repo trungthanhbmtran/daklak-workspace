@@ -116,7 +116,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Quản lý Banner/Quảng cáo</h2>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Quản lý Banner/Quảng cáo</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Phân phối banner hình ảnh và thiết kế khẩu hiệu tuyên truyền đồng bộ</p>
           </div>
           <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-xl px-5 font-bold transition-all transform hover:scale-[1.02]">
@@ -125,10 +125,10 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         </div>
 
         {/* Elegant Slideshow Configuration Panel */}
-        <Card className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all">
+        <Card className="border border-border rounded-2xl overflow-hidden bg-card shadow-sm hover:shadow-md transition-all">
           <div
             onClick={() => setShowConfig(!showConfig)}
-            className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors"
+            className="p-5 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
           >
             <div className="flex items-center gap-3.5">
               <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl shadow-inner">
@@ -147,7 +147,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
           </div>
 
           {showConfig && (
-            <div className="border-t border-slate-100 dark:border-slate-800 p-6 bg-slate-50/40 dark:bg-slate-950/10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
+            <div className="border-t border-border p-6 bg-muted/30 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
               {positionCategories.length === 0 ? (
                 <div className="col-span-full text-center py-4 text-xs text-muted-foreground">
                   Đang tải danh sách vị trí hiển thị từ hệ thống...
@@ -158,7 +158,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                   return (
                     <div
                       key={cat.id}
-                      className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow transition-shadow"
+                      className="flex items-center justify-between p-4 bg-card border border-border rounded-2xl shadow-sm hover:shadow transition-shadow"
                     >
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{cat.name}</p>
@@ -195,7 +195,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           {/* Modern Tabs Category Selector */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
-            <TabsList className="bg-slate-100/75 p-1 rounded-xl flex flex-wrap gap-1">
+            <TabsList className="bg-muted p-1 rounded-xl flex flex-wrap gap-1">
               <TabsTrigger value="all" className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
                 <Grid className="h-3.5 w-3.5" /> Tất cả
               </TabsTrigger>
@@ -214,8 +214,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         {/* Grid of Banners */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBanners.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-muted-foreground bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200">
-              <div className="bg-slate-100 p-3.5 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 text-slate-400">
+            <div className="col-span-full py-16 text-center text-muted-foreground bg-muted/50 rounded-2xl border-2 border-dashed border-border">
+              <div className="bg-muted p-3.5 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 text-muted-foreground">
                 <Layers className="h-5 w-5" />
               </div>
               <p className="font-bold text-slate-700">Không tìm thấy banner nào</p>
@@ -239,9 +239,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
               const isPositionSlideshow = posCat?.description === "slideshow";
 
               return (
-                <Card key={banner.id} className="group overflow-hidden border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200/80 transition-all flex flex-col bg-card rounded-2xl relative">
+                <Card key={banner.id} className="group overflow-hidden border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col bg-card rounded-2xl relative">
                   {/* Visual Thumbnail */}
-                  <div className="relative aspect-21/9 overflow-hidden bg-slate-50 border-b border-slate-100/80 flex items-center justify-center">
+                  <div className="relative aspect-21/9 overflow-hidden bg-muted/30 border-b border-border flex items-center justify-center">
                     {isSlogan && sloganStyles ? (
                       <div
                         className="w-full h-full flex flex-col justify-center items-center p-3 text-center relative overflow-hidden"
@@ -372,7 +372,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full rounded-xl text-xs font-bold border-slate-200 bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 shadow-sm transition-all duration-200 py-4"
+                        className="w-full rounded-xl text-xs font-bold border-input bg-background hover:bg-primary/10 hover:text-primary hover:border-primary/30 shadow-sm transition-all duration-200 py-4"
                         onClick={() => onNavigateToEdit(banner.id)}
                       >
                         <Edit className="h-3.5 w-3.5 mr-1.5 text-slate-500 group-hover:text-blue-600" /> Chỉnh sửa & Cấu hình
