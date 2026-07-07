@@ -36,7 +36,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     clientSecret: "",
     rawConfig: "{}"
   });
-  const [endpoints, setEndpoints] = useState<Array<{ path: string, method: string, description: string }>>([]);
   const [isRawMode, setIsRawMode] = useState(false);
 
   useImperativeHandle(ref, () => ({
@@ -54,7 +53,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         clientSecret: initialData?.clientSecret || "",
         rawConfig: initialData?.rawConfig || "{}"
       });
-      setEndpoints(initialData?.endpoints || []);
       setIsRawMode(!!initialData?.isRawMode);
       setIsOpen(true);
     },
@@ -78,7 +76,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         clientSecret: parsedConfig.keys?.clientSecret || "",
         rawConfig: item.configData || "{}"
       });
-      setEndpoints(parsedConfig.endpoints || []);
       setIsRawMode(false);
       setIsOpen(true);
     }
@@ -117,8 +114,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         keys: {
           clientId: formData.clientId,
           clientSecret: formData.clientSecret
-        },
-        endpoints: endpoints
+        }
       });
     }
 
@@ -269,88 +265,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
                   </div>
                 </div>
 
-                <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl">
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                    <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold">
-                      <LinkIcon className="w-4 h-4" />
-                      Danh sách Endpoints
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEndpoints([...endpoints, { path: '', method: 'GET', description: '' }])}
-                      className="h-8"
-                    >
-                      <Plus className="w-4 h-4 mr-1" /> Thêm Endpoint
-                    </Button>
-                  </div>
 
-                  {endpoints.length === 0 ? (
-                    <div className="text-center py-6 text-sm text-slate-500 italic">Chưa có endpoint nào. Hãy thêm các endpoint sẽ sử dụng chung bộ key xác thực này.</div>
-                  ) : (
-                    <div className="space-y-3">
-                      {endpoints.map((ep, idx) => (
-                        <div key={idx} className="flex items-start gap-3">
-                          <Select
-                            value={ep.method}
-                            onValueChange={(val) => {
-                              const newEps = [...endpoints];
-                              newEps[idx].method = val;
-                              setEndpoints(newEps);
-                            }}
-                          >
-                            <SelectTrigger className="w-[100px] shrink-0 font-mono bg-white dark:bg-slate-950">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="GET">GET</SelectItem>
-                              <SelectItem value="POST">POST</SelectItem>
-                              <SelectItem value="PUT">PUT</SelectItem>
-                              <SelectItem value="DELETE">DELETE</SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Input
-                            value={ep.path}
-                            onChange={(e) => {
-                              const newEps = [...endpoints];
-                              newEps[idx].path = e.target.value;
-                              setEndpoints(newEps);
-                            }}
-                            placeholder="/api/v1/resource..."
-                            className="flex-1 font-mono bg-white dark:bg-slate-950"
-                          />
-
-                          <Input
-                            value={ep.description}
-                            onChange={(e) => {
-                              const newEps = [...endpoints];
-                              newEps[idx].description = e.target.value;
-                              setEndpoints(newEps);
-                            }}
-                            placeholder="Mô tả endpoint..."
-                            className="flex-1 bg-white dark:bg-slate-950"
-                          />
-
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              const newEps = [...endpoints];
-                              newEps.splice(idx, 1);
-                              setEndpoints(newEps);
-                            }}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
             ) : (
               <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200 h-64">

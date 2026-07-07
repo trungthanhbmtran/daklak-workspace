@@ -20,3 +20,141 @@ export const toValidCode = (str: string) => {
     .replace(/_+/g, '_')
     .replace(/^_|_$/g, '');
 };
+
+function extractSwaggerBaseUrl(data: any): string {
+  if (data.servers && data.servers.length > 0) {
+    return data.servers[0].url;
+  }
+  if (data.host) {
+    const scheme = data.schemes?.[0] || 'https';
+    return `${scheme}://${data.host}${data.basePath || ''}`;
+  }
+  return "";
+}
+
+function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
+  const endpoints: ParsedEndpoint[] = [];
+  const validMethods: Record<string, boolean> = { get: true, post: true, put: true, delete: true, patch: true };
+
+  const extractParams = (parameters: any[] | undefined, type: 'query' | 'header') => {
+    if (!parameters?.length) return [];
+    const result: any[] = [];
+    for (let i = 0; i < parameters.length; i++) {
+      const p = parameters[i];
+      if (p.in === type) result.push({ key: p.name, value: "" });
+    }
+    return result;
+  };
+
+  if (data.paths) {
+    for (const pathKey in data.paths) {
+      const pathMethods = data.paths[pathKey];
+      for (const method in pathMethods) {
+        const lowerMethod = method.toLowerCase();
+        if (!validMethods[lowerMethod]) continue;
+
+        const details = pathMethods[method];
+        endpoints.push({
+          id: Math.random().toString(36).substring(2, 11),
+          name: details.summary || details.operationId || pathKey,
+          folder: details.tags?.[0] || "",
+          method: lowerMethod.toUpperCase(),
+          path: pathKey,
+          headers: extractParams(details.parameters, 'header'),
+          params: extractParams(details.parameters, 'query'),
+          body: ""
+        });
+      }
+    }
+  }
+  return endpoints;
+}
+
+export function processSwaggerData(data: any): any {
+  const initialData: any = {
+    isRawMode: false,
+    rawConfig: JSON.stringify(data, null, 2),
+    type: "LGSP",
+    systemName: data.info?.title || "Swagger API",
+    integrationCode: toValidCode(data.info?.title || "SWAGGER"),
+    apiUrl: extractSwaggerBaseUrl(data)
+  };
+
+  const endpoints = extractSwaggerEndpoints(data);
+
+  const finalConfig = {
+    ...JSON.parse(initialData.rawConfig),
+    _parsedEndpoints: endpoints
+  };
+  initialData.rawConfig = JSON.stringify(finalConfig, null, 2);
+
+  return initialData;
+}
+
+function extractPostmanBaseUrl(data: any): string {
+  if (data.variable && Array.isArray(data.variable)) {
+    const baseUrlVar = data.variable.find((v: any) => v.key.toLowerCase().includes("url"));
+    if (baseUrlVar) return baseUrlVar.value;
+  }
+  if (data.item?.[0]?.request?.url?.raw) {
+    try {
+      const rawUrl = data.item[0].request.url.raw as string;
+      const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
+      if (match) return match[1];
+    } catch (e) { }
+  }
+  return "";
+}
+
+function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
+  const endpoints: ParsedEndpoint[] = [];
+  
+  const parsePostmanItems = (items: any[], parentPath = "") => {
+    items?.forEach((item: any) => {
+      if (item.item) {
+        parsePostmanItems(item.item, parentPath ? `${parentPath} / ${item.name}` : item.name);
+      } else if (item.request) {
+        const req = item.request;
+        const rawUrl = req.url?.raw || (typeof req.url === 'string' ? req.url : "");
+
+        const queryParams = req.url?.query?.map((q: any) => ({ key: q.key, value: q.value || "" })) || [];
+        const headers = req.header?.map((h: any) => ({ key: h.key, value: h.value })) || [];
+
+        endpoints.push({
+          id: Math.random().toString(36).substring(2, 11),
+          name: item.name || "Unnamed Request",
+          folder: parentPath,
+          method: req.method || "GET",
+          path: rawUrl,
+          headers,
+          params: queryParams,
+          body: req.body?.raw || ""
+        });
+      }
+    });
+  };
+
+  parsePostmanItems(data.item);
+  return endpoints;
+}
+
+export function processPostmanData(data: any): any {
+  const initialData: any = {
+    isRawMode: true,
+    rawConfig: JSON.stringify(data, null, 2),
+    type: "POSTMAN",
+    systemName: data.info.name || "Postman API",
+    integrationCode: toValidCode(data.info.name || "POSTMAN"),
+    apiUrl: extractPostmanBaseUrl(data)
+  };
+
+  const endpoints = extractPostmanEndpoints(data);
+
+  const finalConfig = {
+    ...JSON.parse(initialData.rawConfig),
+    _parsedEndpoints: endpoints
+  };
+  initialData.rawConfig = JSON.stringify(finalConfig, null, 2);
+
+  return initialData;
+}
