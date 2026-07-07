@@ -31,7 +31,7 @@ export class IntegrationsController {
     const { data } = await firstValueFrom(
       this.httpService.get(this.notificationServiceUrl, { params: { search } })
     );
-    return data.data || [];
+    return data;
   }
 
   @Post()

@@ -2,6 +2,7 @@ import React from "react";
 import { ShieldCheck } from "lucide-react";
 import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
+import { ThemeToggle } from "@/components/layouts/theme-toggle";
 
 export function PortalHeader() {
   return (
@@ -19,6 +20,7 @@ export function PortalHeader() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
+          <ThemeToggle />
           <NotificationBell />
           <HeaderUserProfile showName />
         </div>
