@@ -77,20 +77,13 @@ export class KpiEvaluationsService {
     const page = query?.page ? Number(query.page) : 1;
     const limit = query?.limit ? Number(query.limit) : 0;
 
-    let criteria: any = [];
-    let total = 0;
+    let criteria = await this.prisma.kpiCriteria.findMany({ orderBy: { createdAt: 'desc' }, include: { settings: true } });
+    let total = criteria.length;
 
     if (limit > 0) {
-      const skip = (page - 1) * limit;
-      const [data, count] = await Promise.all([
-        this.prisma.kpiCriteria.findMany({ skip, take: limit, orderBy: { createdAt: 'desc' }, include: { settings: true } }),
-        this.prisma.kpiCriteria.count()
-      ]);
-      criteria = data;
-      total = count;
-    } else {
-      criteria = await this.prisma.kpiCriteria.findMany({ orderBy: { createdAt: 'desc' }, include: { settings: true } });
-      total = criteria.length;
+      const start = (page - 1) * limit;
+      const end = page * limit;
+      criteria = criteria.slice(start, end);
     }
 
     const mappedCriteria = criteria.map((c: any) => ({

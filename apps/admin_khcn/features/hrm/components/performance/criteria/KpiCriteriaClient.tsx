@@ -205,7 +205,7 @@ export function KpiCriteriaClient() {
           {/* Pagination Controls */}
           <div className="flex items-center justify-between pt-4">
             <p className="text-sm text-slate-500">
-              Tổng số bản ghi: <span className="font-medium text-slate-900">{meta?.total || 0}</span>
+              Hiển thị <span className="font-medium text-slate-900">{meta?.total ? Math.min((meta.page - 1) * meta.pageSize + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * meta.pageSize, meta.total) : 0}</span> trong tổng số <span className="font-medium text-slate-900">{meta?.total || 0}</span> bản ghi
             </p>
             <div className="flex items-center gap-2 text-sm">
               <Button
