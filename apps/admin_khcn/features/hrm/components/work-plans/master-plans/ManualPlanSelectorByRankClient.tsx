@@ -157,7 +157,7 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <Card className="max-w-6xl mx-auto mt-6 shadow-xl border-0 ring-1 ring-black/5 overflow-hidden h-[calc(100vh-100px)] flex flex-col bg-linear-to-b from-muted/20 to-background rounded-2xl">
+        <Card className="w-full max-w-[1400px] mx-auto mt-6 shadow-xl border-0 ring-1 ring-black/5 overflow-hidden h-[calc(100vh-100px)] min-h-[700px] flex flex-col bg-linear-to-b from-muted/20 to-background rounded-2xl shrink-0">
             <CardHeader className="shrink-0 bg-white/50 backdrop-blur-md border-b pb-4 pt-6 px-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-transparent pointer-events-none" />
                 <div className="relative z-10">
@@ -210,7 +210,7 @@ export function ManualPlanSelectorByRankClient() {
                     </div>
 
                     <div className="p-4 border-b bg-white flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full flex-1 min-w-0">
                             <Select
                                 value={selectedTaskId}
                                 onValueChange={val => {
@@ -219,15 +219,15 @@ export function ManualPlanSelectorByRankClient() {
                                     if (task) setTargetValue(task.defaultWeight);
                                 }}
                             >
-                                <SelectTrigger className="w-full flex-1 h-10 rounded-xl bg-white shadow-sm border-muted-foreground/20">
+                                <SelectTrigger className="w-full flex-1 min-w-0 h-10 rounded-xl bg-white shadow-sm border-muted-foreground/20">
                                     <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ thư viện --" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {availableTasks.map(task => {
                                         const isAdded = addedPlans.some(p => p.title === task.taskName);
                                         return (
-                                            <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm whitespace-normal">
-                                                <div className="wrap-break-words max-w-[300px] sm:max-w-[400px] md:max-w-[500px] leading-relaxed">
+                                            <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm">
+                                                <div className="truncate max-w-[300px] sm:max-w-[400px] md:max-w-[600px]">
                                                     {task.taskName} {isAdded ? <span className="text-muted-foreground ml-1 italic">(Đã thêm)</span> : ''}
                                                 </div>
                                             </SelectItem>
@@ -258,25 +258,25 @@ export function ManualPlanSelectorByRankClient() {
 
                     <div className="flex-1 overflow-hidden bg-white relative">
                         <ScrollArea className="h-full">
-                            <Table>
+                            <Table className="w-full table-fixed">
                                 <TableHeader className="bg-muted/30 sticky top-0 backdrop-blur-sm z-10">
                                     <TableRow className="hover:bg-transparent">
                                         <TableHead className="font-semibold text-muted-foreground">Tên nhiệm vụ</TableHead>
-                                        <TableHead className="w-[120px] font-semibold text-muted-foreground text-center">Đơn vị</TableHead>
-                                        <TableHead className="w-[150px] font-semibold text-muted-foreground text-center">Chỉ tiêu (Lần/Lượt)</TableHead>
-<TableHead className="w-[120px] font-semibold text-muted-foreground text-center">Trọng số</TableHead>
+                                        <TableHead className="w-[100px] font-semibold text-muted-foreground text-center">Đơn vị</TableHead>
+                                        <TableHead className="w-[120px] font-semibold text-muted-foreground text-center">Chỉ tiêu</TableHead>
+                                        <TableHead className="w-[100px] font-semibold text-muted-foreground text-center">Trọng số</TableHead>
                                         <TableHead className="w-[80px]"></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {addedPlans.map((plan, idx) => (
                                         <TableRow key={plan.id} className="group transition-colors hover:bg-muted/10">
-                                            <TableCell className="font-medium text-foreground py-3">
+                                            <TableCell className="font-medium text-foreground py-3 pr-4">
                                                 <div className="flex items-start gap-3">
                                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-semibold text-muted-foreground shrink-0 mt-0.5">
                                                         {idx + 1}
                                                     </span>
-                                                    <span className="mt-0.5 leading-relaxed wrap-break-words whitespace-normal min-w-[200px] max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">{plan.title}</span>
+                                                    <span className="mt-0.5 leading-relaxed line-clamp-3 overflow-hidden text-ellipsis break-words">{plan.title}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center text-muted-foreground">

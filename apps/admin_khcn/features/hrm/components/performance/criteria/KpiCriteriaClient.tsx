@@ -146,14 +146,14 @@ export function KpiCriteriaClient() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center p-12">
+        <div className="flex justify-center items-center min-h-[300px]">
           <div className="animate-spin w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full"></div>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px]">
             {criteriaList.map((item: any) => (
-              <Card key={item.id} className="shadow-none border border-slate-200 hover:border-slate-300 transition-colors">
+              <Card key={item.id} className="shadow-none border border-slate-200 hover:border-slate-300 transition-colors h-[240px]">
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="font-semibold text-slate-800 line-clamp-2 leading-snug flex-1 mr-3">
