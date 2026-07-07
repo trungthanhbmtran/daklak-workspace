@@ -46,6 +46,8 @@ message CreatePeriodRequest {
 
 message FindCriteriaRequest {
   bool isAdmin = 1;
+  int32 page = 2;
+  int32 limit = 3;
 }
 
 message CriterionResponse {

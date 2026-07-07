@@ -6,8 +6,21 @@ import { hrmKeys } from "../keys";
 
 export function useKpiCriteriaList(params?: any) {
   return useQuery({
-    queryKey: hrmKeys.kpis(),
-    queryFn: () => hrmKpiCriteriaApi.list(params).then(res => res.data || []),
+    queryKey: [...hrmKeys.kpis(), params],
+    queryFn: async () => {
+      const res = await hrmKpiCriteriaApi.list(params);
+      return res.data || [];
+    },
+  });
+}
+
+export function useKpiCriteriaListPaginated(params?: any) {
+  return useQuery({
+    queryKey: ['kpiCriteriaPaginated', params?.page, params?.limit],
+    queryFn: async () => {
+      const res = await hrmKpiCriteriaApi.list(params);
+      return res;
+    },
   });
 }
 
@@ -16,7 +29,8 @@ export function useCreateKpiCriterion() {
   return useMutation({
     mutationFn: (payload: any) => hrmKpiCriteriaApi.create(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: hrmKeys.kpis() });
+      queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
+      queryClient.invalidateQueries({ queryKey: ['kpiCriteriaPaginated'] });
     },
   });
 }
@@ -26,7 +40,8 @@ export function useUpdateKpiCriterion() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmKpiCriteriaApi.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: hrmKeys.kpis() });
+      queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
+      queryClient.invalidateQueries({ queryKey: ['kpiCriteriaPaginated'] });
     },
   });
 }
@@ -36,7 +51,8 @@ export function useDeleteKpiCriterion() {
   return useMutation({
     mutationFn: (id: number) => hrmKpiCriteriaApi.deleteOne(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: hrmKeys.kpis() });
+      queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
+      queryClient.invalidateQueries({ queryKey: ['kpiCriteriaPaginated'] });
     },
   });
 }

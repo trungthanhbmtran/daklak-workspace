@@ -28,7 +28,7 @@ export class KpiEvaluationsService {
     const periods = await this.prisma.kpiPeriod.findMany({
       orderBy: { startDate: 'desc' },
     });
-    
+
     const result = {
       success: true,
       message: 'Lấy danh sách kỳ đánh giá thành công',
@@ -74,30 +74,41 @@ export class KpiEvaluationsService {
 
   async findCriteria(query: any = {}) {
     const isAdmin = query?.isAdmin || false;
-    const cached = await this.cache.get<any>('criteria');
-    let dataToReturn: any;
+    const page = query?.page ? Number(query.page) : 1;
+    const limit = query?.limit ? Number(query.limit) : 0;
 
-    if (cached) {
-      dataToReturn = cached;
+    let criteria: any = [];
+    let total = 0;
+
+    if (limit > 0) {
+      const skip = (page - 1) * limit;
+      const [data, count] = await Promise.all([
+        this.prisma.kpiCriteria.findMany({ skip, take: limit, orderBy: { createdAt: 'desc' }, include: { settings: true } }),
+        this.prisma.kpiCriteria.count()
+      ]);
+      criteria = data;
+      total = count;
     } else {
-      const criteria = await this.prisma.kpiCriteria.findMany();
-      dataToReturn = {
-        success: true,
-        message: 'Lấy danh sách tiêu chí thành công',
-        data: criteria,
-        meta: {
-          pagination: {
-            total: criteria.length,
-            page: 1,
-            pageSize: criteria.length,
-            totalPages: 1,
-            hasNext: false,
-            hasPrev: false
-          }
-        }
-      };
-      await this.cache.set('criteria', dataToReturn);
+      criteria = await this.prisma.kpiCriteria.findMany({ orderBy: { createdAt: 'desc' }, include: { settings: true } });
+      total = criteria.length;
     }
+
+    const mappedCriteria = criteria.map((c: any) => ({
+      ...c,
+      weight: c.settings?.weight || 1.0,
+      baseScore: c.settings?.baseScore || 0,
+      scoringMethod: c.settings?.scoringMethod || 'MANUAL',
+      difficulty: c.settings?.difficulty || 'NORMAL',
+      difficultyMultiplier: c.settings?.difficultyMultiplier || 1.0,
+      bonusThresholdDays: c.settings?.bonusThresholdDays || 0,
+      bonusPerDay: c.settings?.bonusPerDay || 0,
+      penaltyPerDay: c.settings?.penaltyPerDay || 0,
+      integrationCode: c.settings?.integrationCode || '',
+      formula: c.settings?.formula || '',
+    }));
+
+    const pageSize = limit > 0 ? limit : total;
+    const totalPages = pageSize > 0 ? Math.ceil(total / pageSize) : 1;
 
     const allowedActions: string[] = [];
     if (isAdmin) {
@@ -105,9 +116,18 @@ export class KpiEvaluationsService {
     }
 
     return {
-      ...dataToReturn,
+      success: true,
+      message: 'Lấy danh sách tiêu chí thành công',
+      data: mappedCriteria,
       meta: {
-        ...dataToReturn.meta,
+        pagination: {
+          total,
+          page,
+          pageSize,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        },
         allowedActions
       }
     };
@@ -211,7 +231,7 @@ export class KpiEvaluationsService {
         const descendantIds = Array.isArray(query.callerDescendantUnitIds)
           ? query.callerDescendantUnitIds.map(Number).filter(Boolean)
           : [];
-          
+
         if (descendantIds.length > 0) {
           where.employee = { departmentId: { in: descendantIds } };
         } else {
@@ -428,9 +448,9 @@ export class KpiEvaluationsService {
 
         // Gọi sang Integration Module để lấy dữ liệu thực tế
         const actualValue = await this.fetchMetricFromIntegration(settings.integrationCode, employeeCode);
-        
+
         // Lấy chỉ tiêu, mặc định 1 nếu chưa đăng ký để tránh lỗi chia 0 (tuỳ nghiệp vụ)
-        const targetValue = targetMap.get(criteria.id) || 1; 
+        const targetValue = targetMap.get(criteria.id) || 1;
 
         // Tính điểm bằng công thức linh hoạt (evaluate string formula)
         let formulaScore = 0;
@@ -447,7 +467,7 @@ export class KpiEvaluationsService {
               .replace(/target/g, targetValue.toString())
               .replace(/weight/g, weight.toString())
               .replace(/baseScore/g, baseScore.toString());
-            
+
             // eslint-disable-next-line no-new-func
             formulaScore = new Function('return ' + evalStr)();
           } catch (err) {
@@ -530,28 +550,28 @@ export class KpiEvaluationsService {
       orderBy: { id: 'asc' },
       include: { settings: true }
     });
-    
+
     // Auto-calculate tasks if status is DRAFT or COMPUTING
     const calcResult = await this.calculatePersonalKpi({ periodId: evaluation.periodId, employeeCode: evaluation.employeeCode, staffingSlotId: evaluation.staffingSlotId || undefined });
 
     const finalDetails = allCriteria.map(crit => {
       const existingDetail = evaluation.details.find(d => d.criteriaId === crit.id);
-      
+
       let autoScore: number | null = null;
       let notes = existingDetail?.notes || '';
-      
+
       if (crit.settings?.scoringMethod === 'AUTOMATIC') {
-         autoScore = calcResult.groupedScores?.[crit.id] || 0;
-         const count = calcResult.groupedTasksCount?.[crit.id] || 0;
-         notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
+        autoScore = calcResult.groupedScores?.[crit.id] || 0;
+        const count = calcResult.groupedTasksCount?.[crit.id] || 0;
+        notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
       } else if (crit.settings?.scoringMethod === 'INTEGRATION_API') {
-         autoScore = calcResult.groupedScores?.[crit.id] || 0;
-         const data = calcResult.groupedIntegrationData?.[crit.id];
-         if (data) {
-           notes = `Dữ liệu liên thông: Đạt ${data.actual} / Chỉ tiêu ${data.target}`;
-         } else {
-           notes = `Đang chờ số liệu liên thông.`;
-         }
+        autoScore = calcResult.groupedScores?.[crit.id] || 0;
+        const data = calcResult.groupedIntegrationData?.[crit.id];
+        if (data) {
+          notes = `Dữ liệu liên thông: Đạt ${data.actual} / Chỉ tiêu ${data.target}`;
+        } else {
+          notes = `Đang chờ số liệu liên thông.`;
+        }
       }
 
       return {
@@ -649,10 +669,10 @@ export class KpiEvaluationsService {
 
     await this.prisma.kpiEvaluation.update({
       where: { id },
-      data: { 
-        status: 'APPROVED', 
+      data: {
+        status: 'APPROVED',
         reviewerCode: reviewerCode,
-        totalScore: finalTotalScore 
+        totalScore: finalTotalScore
       }
     });
 

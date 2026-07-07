@@ -112,14 +112,22 @@ export class KpisController implements OnModuleInit {
   }
 
   @Get('criteria')
-  async findCriteria(@Req() req: any) {
+  async findCriteria(
+    @Req() req: any,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     const userRoles = req.user?.roles || [];
     const checkRole = (roleCode: string) =>
       userRoles.some((r: any) => r === roleCode || r?.code === roleCode);
     const hasGlobalAccess =
       checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
     const res: any = await firstValueFrom(
-      this.kpiService.FindCriteria({ isAdmin: hasGlobalAccess }),
+      this.kpiService.FindCriteria({ 
+        isAdmin: hasGlobalAccess,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 0,
+      }),
     );
 
     if (res) {
