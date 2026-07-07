@@ -84,15 +84,6 @@ export interface HrmLeaveRequest {
   employee?: HrmEmployee;
 }
 
-export interface HrmAttendanceLog {
-  id: number;
-  employeeId: number;
-  checkInTime: string;
-  checkOutTime?: string;
-  date: string;
-  status: "PRESENT" | "LATE" | "ABSENT" | "LEAVE";
-  employee?: HrmEmployee;
-}
 
 export interface HrmLaborContract {
   id: number;

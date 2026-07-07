@@ -19,7 +19,6 @@ export { TaskListClient } from "./components/work-plans/tasks/list/TaskListClien
 export {
   hrmDepartmentsApi,
   hrmLeaveApi,
-  hrmAttendanceApi,
   hrmContractsApi,
   hrmPayrollApi
 } from "./api";

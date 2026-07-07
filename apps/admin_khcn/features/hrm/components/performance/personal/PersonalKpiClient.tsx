@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 
 export function PersonalKpiClient() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  const [staffingSlotId, setStaffingSlotId] = useState<string>("");
   const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const [evalDetail, setEvalDetail] = useState<any>(null);
   const [formDetails, setFormDetails] = useState<any[]>([]);
@@ -44,7 +45,7 @@ export function PersonalKpiClient() {
   });
 
   const calculateMutation = useMutation({
-    mutationFn: (periodId: number) => hrmKpiEvaluationsApi.calculatePersonal({ periodId }),
+    mutationFn: (payload: { periodId: number, staffingSlotId?: number }) => hrmKpiEvaluationsApi.calculatePersonal(payload),
     onSuccess: (res: any) => {
       const evalId = res?.evaluationId || res?.data?.evaluationId;
       if (res?.success && evalId) {
@@ -75,7 +76,10 @@ export function PersonalKpiClient() {
     }
     setEvaluationId(null);
     setEvalDetail(null);
-    calculateMutation.mutate(parseInt(selectedPeriod));
+    calculateMutation.mutate({ 
+      periodId: parseInt(selectedPeriod),
+      staffingSlotId: staffingSlotId ? parseInt(staffingSlotId) : undefined
+    });
   };
 
   const handleUpdateDetail = (criteriaId: number, field: string, value: any) => {
@@ -130,6 +134,17 @@ export function PersonalKpiClient() {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="space-y-2 flex-1 max-w-[200px]">
+              <label className="text-sm font-medium">Vị trí (Slot ID)</label>
+              <Input 
+                type="number" 
+                placeholder="Để trống = Mặc định" 
+                value={staffingSlotId}
+                onChange={(e) => setStaffingSlotId(e.target.value)}
+              />
+            </div>
+
             <Button
               onClick={handleCalculate}
               disabled={calculateMutation.isPending}

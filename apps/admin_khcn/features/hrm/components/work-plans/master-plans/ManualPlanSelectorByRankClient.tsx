@@ -124,7 +124,8 @@ export function ManualPlanSelectorByRankClient() {
             title: task.taskName,
             rankType: activeRankFilter,
             targetValue: targetValue,
-            unit: task.defaultUnit
+            unit: task.defaultUnit,
+            weight: 1
         }]);
 
         setSelectedTaskId('');

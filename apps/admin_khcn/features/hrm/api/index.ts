@@ -30,15 +30,6 @@ export const hrmLeaveApi = {
   }
 };
 
-export const hrmAttendanceApi = {
-  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return apiClient.get("/hrm/attendance", { params }).then((res: any) => ({
-      data: res.data || [],
-      meta: res.meta || { total: 0 },
-    }));
-  }
-};
-
 export const hrmContractsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/contracts", { params }).then((res: any) => ({
