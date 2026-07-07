@@ -60,12 +60,24 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
           });
         };
 
+        // Helper to normalize string for codes
+        const toValidCode = (str: string) => {
+          return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Remove accents
+            .replace(/đ/g, "d").replace(/Đ/g, "D") // Handle 'đ'
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/g, '');
+        };
+
         // Detect Postman Collection
         if (data.info && data.item) {
           initialData.isRawMode = true;
           initialData.type = "POSTMAN";
           initialData.systemName = data.info.name || "Postman API";
-          initialData.integrationCode = (data.info.name || "POSTMAN").toUpperCase().replace(/[^A-Z0-9]/g, '_');
+          initialData.integrationCode = toValidCode(data.info.name || "POSTMAN");
           
           let url = "";
           if (data.variable && Array.isArray(data.variable)) {
@@ -87,7 +99,7 @@ export function useApiParser(onSuccess: (initialData: any) => void) {
         else if (data.openapi || data.swagger) {
           initialData.type = "LGSP";
           initialData.systemName = data.info?.title || "Swagger API";
-          initialData.integrationCode = (data.info?.title || "SWAGGER").toUpperCase().replace(/[^A-Z0-9]/g, '_');
+          initialData.integrationCode = toValidCode(data.info?.title || "SWAGGER");
           
           let baseUrl = "";
           if (data.servers && data.servers.length > 0) {
