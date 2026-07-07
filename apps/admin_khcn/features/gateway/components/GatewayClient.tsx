@@ -24,8 +24,8 @@ export function GatewayClient() {
       {/* Header & Dashboard Stats */}
       <div className="shrink-0 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-card text-card-foreground border border-border p-6 rounded-xl shadow-sm relative overflow-hidden">
         {/* Decorative elements */}
-          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-primary rounded-full blur-3xl opacity-20 dark:opacity-10"></div>
-          <div className="absolute bottom-0 left-20 -mb-10 w-32 h-32 bg-emerald-500 rounded-full blur-3xl opacity-20 dark:opacity-10"></div>
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl opacity-50 dark:opacity-20"></div>
+          <div className="absolute bottom-0 left-20 -mb-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl opacity-50 dark:opacity-20"></div>
 
           <div className="relative z-10 space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-2">
@@ -58,7 +58,7 @@ export function GatewayClient() {
 
       <Tabs defaultValue="services" className="flex flex-col flex-1 min-h-0">
         <div className="shrink-0 flex justify-start mb-4 overflow-x-auto pb-1">
-          <TabsList className="h-10 bg-muted/80 backdrop-blur">
+          <TabsList className="h-10 bg-muted/50 border border-border/50 backdrop-blur">
               <TabsTrigger value="services" className="rounded-sm px-4">
                 <Network className="w-4 h-4 mr-2" />
                 Services

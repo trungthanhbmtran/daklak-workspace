@@ -61,7 +61,7 @@ export const MenuTableRow = React.memo(function MenuTableRow({
 
   return (
     <Fragment>
-      <TableRow className={`${depth > 0 ? "bg-slate-50/30" : ""} hover:bg-slate-50 transition-colors`}>
+      <TableRow className={`${depth > 0 ? "bg-muted/10" : ""} hover:bg-muted/30 transition-colors`}>
         <TableCell className="font-medium p-0">
           <div
             className="flex items-center min-h-[52px]"
@@ -72,7 +72,7 @@ export const MenuTableRow = React.memo(function MenuTableRow({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6 p-0 hover:bg-blue-100 text-blue-600 transition-transform duration-200"
+                  className="h-6 w-6 p-0 hover:bg-primary/20 text-primary transition-transform duration-200"
                   onClick={() => toggleExpand(menu.id)}
                   style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
                 >
@@ -82,10 +82,10 @@ export const MenuTableRow = React.memo(function MenuTableRow({
                 <div className="w-6" /> // Spacer for alignment
               )}
 
-              {depth > 0 && <div className="w-4 h-[2px] bg-slate-200 -ml-2 mr-1" />}
+              {depth > 0 && <div className="w-4 h-[2px] bg-border -ml-2 mr-1" />}
 
               <div
-                className={`p-1.5 rounded ${!menu.isActive ? "bg-slate-100 text-slate-400" : "bg-blue-50 text-blue-600"
+                className={`p-1.5 rounded ${!menu.isActive ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
                   }`}
               >
                 {menu.type === "CATEGORY" && <Layers className="w-3.5 h-3.5" />}
@@ -96,8 +96,8 @@ export const MenuTableRow = React.memo(function MenuTableRow({
 
               <div className="flex flex-col">
                 <span
-                  className={`text-sm ${!menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"
-                    } ${!isTranslated ? "italic text-slate-400 font-medium" : ""}`}
+                  className={`text-sm ${!menu.isActive ? "text-muted-foreground line-through" : "text-foreground font-semibold"
+                    } ${!isTranslated ? "italic text-muted-foreground font-medium" : ""}`}
                 >
                   {displayName}
                   {!isTranslated && (
@@ -110,7 +110,7 @@ export const MenuTableRow = React.memo(function MenuTableRow({
                   )}
                 </span>
                 {displayDescription && (
-                  <span className="text-[10px] text-slate-400 truncate max-w-[200px] italic">
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[200px] italic">
                     {displayDescription}
                   </span>
                 )}
@@ -121,7 +121,7 @@ export const MenuTableRow = React.memo(function MenuTableRow({
         <TableCell>
           <div className="flex items-center gap-1">
             <span
-              className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 cursor-default"
+              className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-primary/10 text-primary border border-primary/20 cursor-default"
               title="Tiếng Việt (Gốc)"
             >
               VI
@@ -141,7 +141,7 @@ export const MenuTableRow = React.memo(function MenuTableRow({
                 ) : (
                   <span
                     key={lang.code}
-                    className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full border border-dashed border-slate-300 bg-slate-50 text-slate-400 cursor-default"
+                    className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full border border-dashed border-border bg-muted/50 text-muted-foreground cursor-default"
                     title={`Chưa dịch sang ${lang.name}`}
                   >
                     {lang.code.toUpperCase()}
@@ -154,10 +154,10 @@ export const MenuTableRow = React.memo(function MenuTableRow({
           <Badge
             variant="secondary"
             className={`text-[10px] uppercase font-bold py-0 h-5 ${menu.position === "HORIZONTAL"
-                ? "bg-indigo-50 text-indigo-700 border-indigo-100"
+                ? "bg-primary/10 text-primary border-primary/20"
                 : menu.position === "VERTICAL"
-                  ? "bg-amber-50 text-amber-700 border-amber-100"
-                  : "bg-slate-100 text-slate-600 border-slate-200"
+                  ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                  : "bg-muted text-muted-foreground border-border"
               }`}
           >
             {menu.position === "HORIZONTAL"
@@ -170,27 +170,27 @@ export const MenuTableRow = React.memo(function MenuTableRow({
         <TableCell>
           <Badge
             variant="outline"
-            className="flex items-center w-fit gap-1 uppercase text-[9px] font-bold px-1.5 h-5 bg-white shadow-sm"
+            className="flex items-center w-fit gap-1 uppercase text-[9px] font-bold px-1.5 h-5 bg-background shadow-sm border-border text-muted-foreground"
           >
             {menu.type}
           </Badge>
         </TableCell>
         <TableCell className="max-w-[180px]">
-          <div className="flex items-center gap-1.5 text-slate-500 group">
-            <span className="text-[11px] font-mono truncate bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">
+          <div className="flex items-center gap-1.5 text-muted-foreground group">
+            <span className="text-[11px] font-mono truncate bg-muted px-1.5 py-0.5 rounded border border-border group-hover:border-primary/50 group-hover:bg-primary/10 transition-colors">
               {menu.link || "—"}
             </span>
           </div>
         </TableCell>
         <TableCell className="text-center">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-[11px] font-bold text-slate-600 border border-slate-200">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted/50 text-[11px] font-bold text-muted-foreground border border-border">
             {menu.order}
           </span>
         </TableCell>
         <TableCell>
           <Switch
             checked={menu.isActive}
-            className="data-[state=checked]:bg-blue-600 scale-90"
+            className="data-[state=checked]:bg-primary scale-90"
             onCheckedChange={() => onToggleActive(menu.id, menu.isActive)}
           />
         </TableCell>

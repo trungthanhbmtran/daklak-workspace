@@ -37,14 +37,14 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl p-0 overflow-hidden rounded-xl border">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+        <div className="bg-primary p-6 text-primary-foreground">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-lg text-white">
+            <div className="p-2 bg-background/20 rounded-lg text-primary-foreground">
               <Zap className="w-6 h-6 text-amber-300 fill-amber-300 animate-pulse" />
             </div>
             <DialogTitle className="text-2xl font-bold">Thiết lập Menu nhanh</DialogTitle>
           </div>
-          <DialogDescription className="text-blue-100">
+          <DialogDescription className="text-primary-foreground/80">
             Chọn các cấu trúc có sẵn để tự động tạo hệ thống menu một cách nhanh chóng.
           </DialogDescription>
         </div>
@@ -67,7 +67,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
             </TabsList>
 
             <TabsContent value="categories" className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800 flex gap-3 mb-4 items-center justify-between">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-sm text-amber-600 dark:text-amber-400 flex gap-3 mb-4 items-center justify-between">
                 <div className="flex gap-3">
                   <Sparkles className="w-5 h-5 flex-shrink-0 text-amber-500" />
                   <p>Chọn một hoặc nhiều chuyên mục. Hệ thống sẽ tự động tạo menu cho chuyên mục đó và toàn bộ các chuyên mục con.</p>
@@ -88,16 +88,16 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                 {categories.filter(c => !c.parentId).map(cat => (
                   <div
                     key={cat.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all group cursor-pointer ${selectedCategories.includes(cat.id)
-                      ? 'border-blue-500 bg-blue-50 shadow-sm'
-                      : 'hover:border-blue-300 hover:bg-slate-50'
+                    className={`flex items-center justify-between p-3 rounded-lg border border-border transition-all group cursor-pointer ${selectedCategories.includes(cat.id)
+                      ? 'border-primary/50 bg-primary/10 shadow-sm'
+                      : 'hover:border-primary/30 hover:bg-muted/50'
                       }`}
                     onClick={() => toggleCategorySelection(cat.id)}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedCategories.includes(cat.id)
-                        ? 'bg-blue-600 border-blue-600 text-white'
-                        : 'border-slate-300 bg-white'
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : 'border-border bg-background'
                         }`}>
                         {selectedCategories.includes(cat.id) && <Plus className="w-3.5 h-3.5" />}
                       </div>

@@ -130,64 +130,64 @@ export function ProcedureConfigClient() {
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Cấu hình Mẫu hồ sơ (TTHC)</h2>
-          <p className="text-slate-500 mt-2">Định nghĩa danh sách các thủ tục và biểu mẫu, thành phần file yêu cầu.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Cấu hình Mẫu hồ sơ (TTHC)</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">Định nghĩa danh sách các thủ tục và biểu mẫu, thành phần file yêu cầu.</p>
         </div>
-        <Button onClick={openCreateModal} className="bg-indigo-600 hover:bg-indigo-700">
+        <Button onClick={openCreateModal} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="mr-2 h-4 w-4" /> Thêm Mẫu mới
         </Button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-slate-400" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
       ) : (
         <div className="grid gap-6">
           {procedures.length === 0 ? (
-            <p className="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">Chưa có Mẫu hồ sơ nào được định nghĩa.</p>
+            <p className="text-center text-muted-foreground py-10 bg-muted/30 rounded-xl border border-dashed border-border">Chưa có Mẫu hồ sơ nào được định nghĩa.</p>
           ) : procedures.map((proc) => (
-            <Card key={proc.id} className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+            <Card key={proc.id} className="border-border bg-card shadow-sm hover:shadow-md hover:border-primary/50 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="text-slate-500 bg-white">{proc.code}</Badge>
-                    <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">
+                    <Badge variant="outline" className="text-muted-foreground bg-background border-border">{proc.code}</Badge>
+                    <Badge variant="outline" className="text-primary border-primary/20 bg-primary/10">
                       {proc.category}
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl font-bold text-slate-800">{proc.name}</CardTitle>
+                  <CardTitle className="text-xl font-bold text-foreground">{proc.name}</CardTitle>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" className="text-slate-500 hover:text-indigo-600">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button onClick={() => handleDelete(proc.id)} variant="ghost" size="icon" className="text-slate-500 hover:text-rose-600">
+                  <Button onClick={() => handleDelete(proc.id)} variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="mt-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                <div className="mt-4 bg-muted/30 rounded-xl p-4 border border-border">
                   <div className="flex justify-between items-center mb-4">
-                    <h4 className="font-semibold text-slate-700 flex items-center">
-                      <FileText className="mr-2 h-4 w-4 text-slate-400" />
+                    <h4 className="font-semibold text-foreground flex items-center">
+                      <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
                       Thành phần hồ sơ yêu cầu ({proc.requiredDocs?.length || 0})
                     </h4>
                   </div>
                   <ul className="space-y-2">
                     {proc.requiredDocs?.map((comp: any, idx: number) => (
-                      <li key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                      <li key={idx} className="flex justify-between items-center bg-background p-3 rounded-lg border border-border">
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm font-medium text-slate-700">{comp.name}</span>
+                          <span className="text-sm font-medium text-foreground">{comp.name}</span>
                           {comp.sampleFileUrl && (
-                            <span className="text-xs text-indigo-600 flex items-center gap-1">
+                            <span className="text-xs text-primary flex items-center gap-1">
                               <Paperclip className="h-3 w-3" /> Đã đính kèm file mẫu
                             </span>
                           )}
                         </div>
                         {comp.isRequired ? (
-                          <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Bắt buộc</Badge>
+                          <Badge variant="outline" className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">Bắt buộc</Badge>
                         ) : (
-                          <Badge variant="outline" className="text-slate-500">Tùy chọn</Badge>
+                          <Badge variant="outline" className="text-muted-foreground">Tùy chọn</Badge>
                         )}
                       </li>
                     ))}
@@ -209,39 +209,39 @@ export function ProcedureConfigClient() {
           <div className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Mã TTHC *</label>
+                <label className="text-sm font-medium text-foreground">Mã TTHC *</label>
                 <Input value={newProcCode} onChange={e => setNewProcCode(e.target.value)} placeholder="VD: TTHC-001" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Lĩnh vực</label>
+                <label className="text-sm font-medium text-foreground">Lĩnh vực</label>
                 <Input value={newProcCategory} onChange={e => setNewProcCategory(e.target.value)} placeholder="Khoa học công nghệ" />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Tên Mẫu hồ sơ / Thủ tục *</label>
+              <label className="text-sm font-medium text-foreground">Tên Mẫu hồ sơ / Thủ tục *</label>
               <Input value={newProcName} onChange={e => setNewProcName(e.target.value)} placeholder="VD: Đăng ký đề tài KHCN" />
             </div>
 
             <div className="mt-6">
               <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-slate-700">Các thành phần hồ sơ yêu cầu</label>
+                <label className="text-sm font-medium text-foreground">Các thành phần hồ sơ yêu cầu</label>
                 <Button onClick={handleAddComponent} variant="outline" size="sm" className="h-8 text-xs">
                   <Plus className="mr-1 h-3 w-3" /> Thêm tệp
                 </Button>
               </div>
-              <div className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div className="space-y-2 bg-muted/30 p-4 rounded-xl border border-border">
                 {components.map((c, index) => (
                   <div key={c.id} className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-slate-400 w-4">{index + 1}.</span>
+                    <span className="text-xs font-mono text-muted-foreground w-4">{index + 1}.</span>
                     <div className="flex-1 flex flex-col gap-2">
                       <Input
                         value={c.name}
                         onChange={e => handleUpdateComponent(c.id, e.target.value)}
                         placeholder="Tên tài liệu (VD: Đơn đăng ký)"
-                        className="bg-white"
+                        className="bg-background"
                       />
                       {c.sampleFileUrl && (
-                        <span className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded w-fit">
+                        <span className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded w-fit">
                           <Paperclip className="h-3 w-3" /> Mẫu: {c.sampleFileUrl.split('/').pop()}
                         </span>
                       )}
@@ -252,19 +252,19 @@ export function ProcedureConfigClient() {
                       variant="outline"
                       size="sm"
                       title="Upload biểu mẫu"
-                      className="text-slate-500 shrink-0"
+                      className="text-muted-foreground shrink-0"
                     >
                       {isUploading && uploadingCompId === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     </Button>
                     <Button
                       onClick={() => handleToggleRequired(c.id)}
-                      variant={c.isRequired ? "default" : "outline"}
+                      variant={c.isRequired ? "outline" : "outline"}
                       size="sm"
-                      className={`shrink-0 ${c.isRequired ? "bg-rose-100 text-rose-700 hover:bg-rose-200" : "text-slate-500"}`}
+                      className={`shrink-0 ${c.isRequired ? "bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20" : "text-muted-foreground"}`}
                     >
                       {c.isRequired ? "Bắt buộc" : "Tùy chọn"}
                     </Button>
-                    <Button onClick={() => handleRemoveComponent(c.id)} variant="ghost" size="icon" className="shrink-0 text-slate-400 hover:text-rose-600">
+                    <Button onClick={() => handleRemoveComponent(c.id)} variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -274,7 +274,7 @@ export function ProcedureConfigClient() {
           </div>
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
-            <Button onClick={handleSubmit} disabled={createProcedure.isPending} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleSubmit} disabled={createProcedure.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               {createProcedure.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Lưu Mẫu hồ sơ
             </Button>
           </DialogFooter>

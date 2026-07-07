@@ -33,15 +33,15 @@ export function MenuTable({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-        <p className="text-sm text-slate-500 font-semibold">Đang tải danh sách menu...</p>
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground font-semibold">Đang tải danh sách menu...</p>
       </div>
     );
   }
 
   if (menus.length === 0) {
     return (
-      <div className="text-center py-16 text-slate-400 font-medium">
+      <div className="text-center py-16 text-muted-foreground font-medium">
         Không có menu nào được định nghĩa cho vị trí này.
       </div>
     );
@@ -50,16 +50,16 @@ export function MenuTable({
   return (
     <div className="overflow-x-auto">
       <Table>
-        <TableHeader className="bg-slate-50/70 border-b">
+        <TableHeader className="bg-muted/30 border-b border-border">
           <TableRow>
-            <TableHead className="w-[350px] font-bold text-slate-700">Tên Menu / Mô tả</TableHead>
-            <TableHead className="w-[120px] font-bold text-slate-700">Bản dịch</TableHead>
-            <TableHead className="w-[120px] font-bold text-slate-700">Vị trí</TableHead>
-            <TableHead className="w-[110px] font-bold text-slate-700">Loại</TableHead>
-            <TableHead className="font-bold text-slate-700">Liên kết</TableHead>
-            <TableHead className="w-[80px] text-center font-bold text-slate-700">Thứ tự</TableHead>
-            <TableHead className="w-[100px] font-bold text-slate-700">Hiển thị</TableHead>
-            <TableHead className="w-[100px] text-right font-bold text-slate-700">Thao tác</TableHead>
+            <TableHead className="w-[350px] font-bold text-foreground">Tên Menu / Mô tả</TableHead>
+            <TableHead className="w-[120px] font-bold text-foreground">Bản dịch</TableHead>
+            <TableHead className="w-[120px] font-bold text-foreground">Vị trí</TableHead>
+            <TableHead className="w-[110px] font-bold text-foreground">Loại</TableHead>
+            <TableHead className="font-bold text-foreground">Liên kết</TableHead>
+            <TableHead className="w-[80px] text-center font-bold text-foreground">Thứ tự</TableHead>
+            <TableHead className="w-[100px] font-bold text-foreground">Hiển thị</TableHead>
+            <TableHead className="w-[100px] text-right font-bold text-foreground">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

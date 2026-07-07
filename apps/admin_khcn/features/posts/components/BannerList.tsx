@@ -131,17 +131,17 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
             className="p-5 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
           >
             <div className="flex items-center gap-3.5">
-              <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl shadow-inner">
+              <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-inner">
                 <Sliders className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100">Cấu hình chế độ Trình chiếu (Slideshow) theo Vị trí</h3>
+                <h3 className="font-bold text-sm text-foreground">Cấu hình chế độ Trình chiếu (Slideshow) theo Vị trí</h3>
                 <p className="text-xs text-muted-foreground/90 mt-0.5">
                   Bật để tự động xoay vòng (slideshow) các banner hoạt động tại vị trí, tắt để hiển thị cố định theo chiến dịch (banner ưu tiên cao nhất)
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="rounded-xl font-bold text-xs text-blue-600 hover:text-blue-700 bg-blue-50/20 hover:bg-blue-50/60 dark:bg-slate-900">
+            <Button variant="ghost" size="sm" className="rounded-xl font-bold text-xs text-primary hover:text-primary bg-primary/10 hover:bg-primary/20">
               {showConfig ? "Thu gọn" : "Thiết lập"}
             </Button>
           </div>
@@ -161,13 +161,13 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       className="flex items-center justify-between p-4 bg-card border border-border rounded-2xl shadow-sm hover:shadow transition-shadow"
                     >
                       <div className="space-y-1">
-                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{cat.name}</p>
-                        <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">{cat.code}</p>
+                        <p className="text-xs font-bold text-foreground">{cat.name}</p>
+                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider">{cat.code}</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${isSlideshow
-                          ? "text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/50"
-                          : "text-slate-400 bg-slate-100 dark:text-slate-300 dark:bg-slate-800"
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground bg-muted"
                           }`}>
                           {isSlideshow ? "Slideshow" : "Chiến dịch"}
                         </span>
@@ -215,11 +215,11 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBanners.length === 0 ? (
             <div className="col-span-full py-16 text-center text-muted-foreground bg-muted/50 rounded-2xl border-2 border-dashed border-border">
-              <div className="bg-muted p-3.5 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 text-muted-foreground">
+              <div className="bg-background border border-border shadow-sm p-3.5 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 text-muted-foreground">
                 <Layers className="h-5 w-5" />
               </div>
-              <p className="font-bold text-slate-700">Không tìm thấy banner nào</p>
-              <p className="text-xs text-slate-400 mt-1">Vui lòng thử đổi từ khóa tìm kiếm hoặc đổi danh mục phân loại</p>
+              <p className="font-bold text-foreground">Không tìm thấy banner nào</p>
+              <p className="text-xs text-muted-foreground mt-1">Vui lòng thử đổi từ khóa tìm kiếm hoặc đổi danh mục phân loại</p>
             </div>
           ) : (
             filteredBanners.map((banner: Banner) => {
@@ -239,9 +239,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
               const isPositionSlideshow = posCat?.description === "slideshow";
 
               return (
-                <Card key={banner.id} className="group overflow-hidden border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col bg-card rounded-2xl relative">
+                <Card key={banner.id} className="group overflow-hidden border border-border shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col bg-card rounded-2xl relative p-0">
                   {/* Visual Thumbnail */}
-                  <div className="relative aspect-21/9 overflow-hidden bg-muted/30 border-b border-border flex items-center justify-center">
+                  <div className="relative aspect-[21/9] overflow-hidden bg-muted/30 border-b border-border flex items-center justify-center w-full">
                     {isSlogan && sloganStyles ? (
                       <div
                         className="w-full h-full flex flex-col justify-center items-center p-3 text-center relative overflow-hidden"
@@ -286,7 +286,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       <Button
                         variant="secondary"
                         size="icon"
-                        className="h-7 w-7 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 border border-slate-100 hover:scale-105 shadow-sm transition-all duration-200"
+                        className="h-7 w-7 rounded-full bg-background/80 hover:bg-destructive/10 hover:text-destructive border border-border hover:scale-105 shadow-sm transition-all duration-200"
                         onClick={() => {
                           setDeletingBannerId(banner.id);
                         }}
@@ -317,50 +317,50 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                   <div className="p-5 flex-1 flex flex-col space-y-4">
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-[14px] text-slate-800 dark:text-slate-200 leading-snug line-clamp-1">{banner.name}</h3>
-                        <Badge variant="outline" className="text-[10px] font-mono font-bold text-slate-500 bg-slate-50/50 px-1.5 py-0">
+                        <h3 className="font-bold text-[14px] text-foreground leading-snug line-clamp-1">{banner.name}</h3>
+                        <Badge variant="outline" className="text-[10px] font-mono font-bold text-muted-foreground bg-muted/50 px-1.5 py-0 border-border">
                           Thứ tự: {banner.orderIndex}
                         </Badge>
                       </div>
                       {banner.description && (
-                        <p className="text-xs text-slate-400 line-clamp-1">{banner.description}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{banner.description}</p>
                       )}
                     </div>
 
                     {/* Type Category and Slideshow features */}
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {isSlogan ? (
-                        <Badge variant="outline" className="bg-red-50 text-[#cc0000] border-red-100 text-[10px] font-extrabold px-2 py-0.5">
+                        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] font-extrabold px-2 py-0.5">
                           🏵️ Khẩu hiệu Tuyên truyền
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 text-[10px] font-extrabold px-2 py-0.5">
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] font-extrabold px-2 py-0.5">
                           🖼️ Đồ họa Thiết kế
                         </Badge>
                       )}
                       {isPositionSlideshow ? (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 text-[10px] font-extrabold px-2.5 py-0.5 flex items-center gap-1">
-                          <PlayCircle className="w-3 h-3 text-blue-600 animate-spin" /> Trình chiếu Slideshow
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] font-extrabold px-2.5 py-0.5 flex items-center gap-1">
+                          <PlayCircle className="w-3 h-3 text-primary animate-spin" /> Trình chiếu Slideshow
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-200 text-[10px] font-extrabold px-2.5 py-0.5 flex items-center gap-1">
-                          <Layers className="w-3 h-3 text-slate-500" /> Chiến dịch
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-[10px] font-extrabold px-2.5 py-0.5 flex items-center gap-1">
+                          <Layers className="w-3 h-3 text-muted-foreground" /> Chiến dịch
                         </Badge>
                       )}
                     </div>
 
                     {/* Date and link info row */}
-                    <div className="flex flex-col gap-1.5 text-xs text-slate-500 flex-1 border-t border-slate-50 pt-3.5">
+                    <div className="flex flex-col gap-1.5 text-xs text-muted-foreground flex-1 border-t border-border pt-3.5">
                       <div className="flex items-center gap-2">
-                        {banner.linkType === "external" ? <ExternalLink className="h-3.5 w-3.5 text-slate-400" /> : <LinkIcon className="h-3.5 w-3.5 text-slate-400" />}
-                        <span className="truncate text-[11px] font-mono text-slate-400" title={banner.customUrl || "/" + banner.slug}>
+                        {banner.linkType === "external" ? <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/70" /> : <LinkIcon className="h-3.5 w-3.5 text-muted-foreground/70" />}
+                        <span className="truncate text-[11px] font-mono text-muted-foreground/70" title={banner.customUrl || "/" + banner.slug}>
                           {banner.customUrl || "/" + banner.slug}
                         </span>
                       </div>
                       {(banner.startAt || banner.endAt) && (
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                          <span className="text-[11px] text-slate-400">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+                          <span className="text-[11px] text-muted-foreground/70">
                             {banner.startAt ? new Date(banner.startAt).toLocaleDateString("vi-VN") : "—"} → {banner.endAt ? new Date(banner.endAt).toLocaleDateString("vi-VN") : "—"}
                           </span>
                         </div>

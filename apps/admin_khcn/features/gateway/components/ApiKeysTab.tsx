@@ -70,31 +70,31 @@ export function ApiKeysTab() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-10"><Loader2 className="h-8 w-8 animate-spin text-emerald-500" /></div>;
+    return <div className="flex justify-center p-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
   return (
     <div className="flex-1 min-h-0 flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
-      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-white border border-slate-200">
-        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-6 relative overflow-hidden">
-          <CardTitle className="flex items-center gap-2 text-xl relative z-10 text-slate-800">
-            <ShieldAlert className="w-5 h-5 text-emerald-500" /> Khởi tạo Khóa bảo mật (API Key)
+      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-card border border-border">
+        <CardHeader className="bg-muted/30 border-b border-border pb-6 relative overflow-hidden">
+          <CardTitle className="flex items-center gap-2 text-xl relative z-10 text-foreground">
+            <ShieldAlert className="w-5 h-5 text-primary" /> Khởi tạo Khóa bảo mật (API Key)
           </CardTitle>
-          <CardDescription className="text-slate-500 relative z-10">
+          <CardDescription className="text-muted-foreground relative z-10">
             Khóa bí mật được dùng để xác thực các hệ thống thứ 3 khi gọi vào Gateway. Vui lòng bảo mật tuyệt đối.
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 pb-8 bg-white">
+        <CardContent className="pt-6 pb-8 bg-card">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
             <div className="space-y-2 md:col-span-4">
-              <Label className="text-slate-600">Đơn vị / Tên hệ thống</Label>
-              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-emerald-500" placeholder="Hệ thống LGSP Tỉnh..." value={newApiKey.name} onChange={e => setNewApiKey({...newApiKey, name: e.target.value})} />
+              <Label className="text-foreground">Đơn vị / Tên hệ thống</Label>
+              <Input className="h-10 rounded-md bg-background border-input focus-visible:ring-primary" placeholder="Hệ thống LGSP Tỉnh..." value={newApiKey.name} onChange={e => setNewApiKey({...newApiKey, name: e.target.value})} />
             </div>
             <div className="space-y-2 md:col-span-5">
-              <Label className="text-slate-600">Mục đích sử dụng (Mô tả)</Label>
-              <Input className="h-10 rounded-md bg-white border-slate-200 focus-visible:ring-emerald-500" placeholder="Tích hợp lấy số liệu báo cáo..." value={newApiKey.description} onChange={e => setNewApiKey({...newApiKey, description: e.target.value})} />
+              <Label className="text-foreground">Mục đích sử dụng (Mô tả)</Label>
+              <Input className="h-10 rounded-md bg-background border-input focus-visible:ring-primary" placeholder="Tích hợp lấy số liệu báo cáo..." value={newApiKey.description} onChange={e => setNewApiKey({...newApiKey, description: e.target.value})} />
             </div>
-            <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-emerald-600 hover:bg-emerald-700 shadow-sm text-white w-full">
+            <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-primary hover:bg-primary/90 shadow-sm text-primary-foreground w-full">
               {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Key className="w-5 h-5 mr-1.5" />}
               Tạo Key Mới
             </Button>
@@ -106,24 +106,24 @@ export function ApiKeysTab() {
         <div className="flex-1 overflow-y-auto custom-scrollbar px-2 pb-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         {apiKeys.map(k => (
-          <Card key={k.id} className="relative overflow-hidden group border border-slate-200 rounded-md shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300 bg-white">
-            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors duration-300 ${k.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+          <Card key={k.id} className="relative overflow-hidden group border border-border rounded-md shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-300 bg-card">
+            <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors duration-300 ${k.isActive ? 'bg-primary' : 'bg-muted'}`}></div>
             
             <CardHeader className="pb-4 pt-5 pl-7 pr-5">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-xl text-slate-800">{k.name}</CardTitle>
-                  <CardDescription className="mt-1.5 text-sm">{k.description}</CardDescription>
+                  <CardTitle className="text-xl text-foreground">{k.name}</CardTitle>
+                  <CardDescription className="mt-1.5 text-sm text-muted-foreground">{k.description}</CardDescription>
                 </div>
-                <div className="flex items-center gap-4 bg-slate-50 px-3 py-2 rounded-md border border-slate-100">
+                <div className="flex items-center gap-4 bg-muted/30 px-3 py-2 rounded-md border border-border">
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs font-semibold ${k.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-semibold ${k.isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                       {k.isActive ? 'BẬT' : 'TẮT'}
                     </span>
                     <Switch checked={k.isActive} onCheckedChange={(v) => toggleStatus(k, v)} disabled={updateMutation.isPending} />
                   </div>
-                  <div className="w-px h-6 bg-slate-200"></div>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(k.id)} disabled={deleteMutation.isPending} className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded-full">
+                  <div className="w-px h-6 bg-border"></div>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(k.id)} disabled={deleteMutation.isPending} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full">
                     {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -132,18 +132,18 @@ export function ApiKeysTab() {
             
             <CardContent className="pl-7 pr-5 pb-6">
               <div className="mt-2">
-                <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">X-API-KEY Token</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">X-API-KEY Token</Label>
                 <div className="relative group/copy">
-                  <div className="bg-slate-50 text-slate-800 p-4 pr-14 rounded-md font-mono text-sm break-all leading-relaxed border border-slate-200">
-                    {k.isActive ? k.key : <span className="text-slate-500 italic">Key đã bị vô hiệu hóa</span>}
+                  <div className="bg-muted/30 text-foreground p-4 pr-14 rounded-md font-mono text-sm break-all leading-relaxed border border-border">
+                    {k.isActive ? k.key : <span className="text-muted-foreground italic">Key đã bị vô hiệu hóa</span>}
                   </div>
                   {k.isActive && (
                     <Button 
                       variant="secondary"
                       onClick={() => copyToClipboard(k.key)} 
-                      className="absolute right-2 top-2 h-auto py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-md shadow-sm"
+                      className="absolute right-2 top-2 h-auto py-2 bg-background hover:bg-muted text-muted-foreground border border-border rounded-md shadow-sm"
                     >
-                      {copiedKey === k.key ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      {copiedKey === k.key ? <CheckCircle2 className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                     </Button>
                   )}
                 </div>
@@ -153,8 +153,8 @@ export function ApiKeysTab() {
         ))}
         
         {apiKeys.length === 0 && (
-           <div className="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 bg-slate-50 rounded-md border border-dashed border-slate-200">
-             <ShieldAlert className="w-12 h-12 mb-3 text-slate-300" />
+           <div className="col-span-full py-16 flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-md border border-dashed border-border">
+             <ShieldAlert className="w-12 h-12 mb-3 text-muted-foreground/50" />
              <p className="font-medium">Chưa có API Key nào được cấp phát</p>
              <p className="text-sm mt-1">Sử dụng form bên trên để tạo mới</p>
             </div>
