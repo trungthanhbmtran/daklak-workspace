@@ -546,20 +546,78 @@ async function main() {
     },
 
     // --- PUBLIC_EMPLOYEE_RANK (VIÊN CHỨC THEO ĐỀ ÁN VTVL) ---
-    // 1. Chức danh nghề nghiệp chuyên ngành (Y tế, Giáo dục, KHCN, CNTT...)
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_1', order: 1, nameVi: 'Viên chức Chuyên ngành Hạng I', nameEn: 'Specialized Public Employee Grade I' },
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_2', order: 2, nameVi: 'Viên chức Chuyên ngành Hạng II', nameEn: 'Specialized Public Employee Grade II' },
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_3', order: 3, nameVi: 'Viên chức Chuyên ngành Hạng III', nameEn: 'Specialized Public Employee Grade III' },
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_CN_HANG_4', order: 4, nameVi: 'Viên chức Chuyên ngành Hạng IV', nameEn: 'Specialized Public Employee Grade IV' },
-    
-    // 2. Chức danh nghề nghiệp chuyên môn dùng chung (Hành chính, Tổ chức, Kế toán...)
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_1', order: 5, nameVi: 'Viên chức Dùng chung Hạng I (Chuyên viên cao cấp)', nameEn: 'Common Public Employee Grade I' },
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_2', order: 6, nameVi: 'Viên chức Dùng chung Hạng II (Chuyên viên chính)', nameEn: 'Common Public Employee Grade II' },
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_3', order: 7, nameVi: 'Viên chức Dùng chung Hạng III (Chuyên viên)', nameEn: 'Common Public Employee Grade III' },
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_DC_HANG_4', order: 8, nameVi: 'Viên chức Dùng chung Hạng IV (Cán sự)', nameEn: 'Common Public Employee Grade IV' },
-    
-    // 3. Chức danh nghề nghiệp hỗ trợ, phục vụ (Lễ tân, bảo vệ, tạp vụ, lái xe...)
-    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'VC_HT_HANG_5', order: 9, nameVi: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', nameEn: 'Support Public Employee Grade V' },
+    // 1. NGÀNH Y TẾ (HEALTHCARE)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.01.01', order: 1, nameVi: 'Bác sĩ cao cấp (hạng I)', nameEn: 'Senior Doctor (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.01.02', order: 2, nameVi: 'Bác sĩ chính (hạng II)', nameEn: 'Principal Doctor (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.01.03', order: 3, nameVi: 'Bác sĩ (hạng III)', nameEn: 'Doctor (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.03.07', order: 4, nameVi: 'Y sĩ (hạng IV)', nameEn: 'Medical Assistant (Grade IV)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.05.11', order: 5, nameVi: 'Điều dưỡng hạng II', nameEn: 'Nurse Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.05.12', order: 6, nameVi: 'Điều dưỡng hạng III', nameEn: 'Nurse Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.05.13', order: 7, nameVi: 'Điều dưỡng hạng IV', nameEn: 'Nurse Grade IV' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.07.17', order: 8, nameVi: 'Dược sĩ cao cấp (hạng I)', nameEn: 'Senior Pharmacist (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.07.18', order: 9, nameVi: 'Dược sĩ chính (hạng II)', nameEn: 'Principal Pharmacist (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.08.07.19', order: 10, nameVi: 'Dược sĩ (hạng III)', nameEn: 'Pharmacist (Grade III)' },
+
+    // 2. NGÀNH GIÁO DỤC VÀ ĐÀO TẠO (EDUCATION)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.01.01', order: 11, nameVi: 'Giảng viên cao cấp (hạng I)', nameEn: 'Senior Lecturer (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.01.02', order: 12, nameVi: 'Giảng viên chính (hạng II)', nameEn: 'Principal Lecturer (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.01.03', order: 13, nameVi: 'Giảng viên (hạng III)', nameEn: 'Lecturer (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.05.13', order: 14, nameVi: 'Giáo viên THPT hạng I', nameEn: 'High School Teacher Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.05.14', order: 15, nameVi: 'Giáo viên THPT hạng II', nameEn: 'High School Teacher Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.05.15', order: 16, nameVi: 'Giáo viên THPT hạng III', nameEn: 'High School Teacher Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.04.30', order: 17, nameVi: 'Giáo viên THCS hạng I', nameEn: 'Secondary School Teacher Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.04.31', order: 18, nameVi: 'Giáo viên THCS hạng II', nameEn: 'Secondary School Teacher Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.04.32', order: 19, nameVi: 'Giáo viên THCS hạng III', nameEn: 'Secondary School Teacher Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.03.27', order: 20, nameVi: 'Giáo viên Tiểu học hạng I', nameEn: 'Primary School Teacher Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.03.28', order: 21, nameVi: 'Giáo viên Tiểu học hạng II', nameEn: 'Primary School Teacher Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.03.29', order: 22, nameVi: 'Giáo viên Tiểu học hạng III', nameEn: 'Primary School Teacher Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.02.24', order: 23, nameVi: 'Giáo viên Mầm non hạng I', nameEn: 'Preschool Teacher Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.02.25', order: 24, nameVi: 'Giáo viên Mầm non hạng II', nameEn: 'Preschool Teacher Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.07.02.26', order: 25, nameVi: 'Giáo viên Mầm non hạng III', nameEn: 'Preschool Teacher Grade III' },
+
+    // 3. NGÀNH KHOA HỌC VÀ CÔNG NGHỆ (SCIENCE & TECHNOLOGY)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.01.01', order: 26, nameVi: 'Nghiên cứu viên cao cấp (hạng I)', nameEn: 'Senior Researcher (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.01.02', order: 27, nameVi: 'Nghiên cứu viên chính (hạng II)', nameEn: 'Principal Researcher (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.01.03', order: 28, nameVi: 'Nghiên cứu viên (hạng III)', nameEn: 'Researcher (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.02.05', order: 29, nameVi: 'Kỹ sư cao cấp (hạng I)', nameEn: 'Senior Engineer (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.02.06', order: 30, nameVi: 'Kỹ sư chính (hạng II)', nameEn: 'Principal Engineer (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.02.07', order: 31, nameVi: 'Kỹ sư (hạng III)', nameEn: 'Engineer (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.05.02.08', order: 32, nameVi: 'Kỹ thuật viên (hạng IV)', nameEn: 'Technician (Grade IV)' },
+
+    // 4. NGÀNH THÔNG TIN VÀ TRUYỀN THÔNG (INFO & COMMUNICATION)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.01.01', order: 33, nameVi: 'Biên tập viên hạng I', nameEn: 'Editor Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.01.02', order: 34, nameVi: 'Biên tập viên hạng II', nameEn: 'Editor Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.01.03', order: 35, nameVi: 'Biên tập viên hạng III', nameEn: 'Editor Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.02.04', order: 36, nameVi: 'Phóng viên hạng I', nameEn: 'Reporter Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.02.05', order: 37, nameVi: 'Phóng viên hạng II', nameEn: 'Reporter Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.02.06', order: 38, nameVi: 'Phóng viên hạng III', nameEn: 'Reporter Grade III' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.06.12', order: 39, nameVi: 'Đạo diễn truyền hình hạng I', nameEn: 'TV Director Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.06.13', order: 40, nameVi: 'Đạo diễn truyền hình hạng II', nameEn: 'TV Director Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.11.06.14', order: 41, nameVi: 'Đạo diễn truyền hình hạng III', nameEn: 'TV Director Grade III' },
+
+    // 5. NGÀNH VĂN HÓA, THỂ THAO VÀ DU LỊCH (CULTURE, SPORTS & TOURISM)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.10.01.01', order: 42, nameVi: 'Huấn luyện viên cao cấp (hạng I)', nameEn: 'Senior Coach (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.10.01.02', order: 43, nameVi: 'Huấn luyện viên chính (hạng II)', nameEn: 'Principal Coach (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.10.01.03', order: 44, nameVi: 'Huấn luyện viên (hạng III)', nameEn: 'Coach (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.10.02.04', order: 45, nameVi: 'Thư viện viên hạng I', nameEn: 'Librarian Grade I' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.10.02.05', order: 46, nameVi: 'Thư viện viên hạng II', nameEn: 'Librarian Grade II' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.10.02.06', order: 47, nameVi: 'Thư viện viên hạng III', nameEn: 'Librarian Grade III' },
+
+    // 6. NGÀNH LƯU TRỮ (ARCHIVES)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.09.02.01', order: 48, nameVi: 'Lưu trữ viên cao cấp (hạng I)', nameEn: 'Senior Archivist (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.09.02.02', order: 49, nameVi: 'Lưu trữ viên chính (hạng II)', nameEn: 'Principal Archivist (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: 'V.09.02.03', order: 50, nameVi: 'Lưu trữ viên (hạng III)', nameEn: 'Archivist (Grade III)' },
+
+    // 7. VIÊN CHỨC DÙNG CHUNG / HÀNH CHÍNH (ADMINISTRATIVE/COMMON)
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '01.001', order: 51, nameVi: 'Chuyên viên cao cấp (hạng I)', nameEn: 'Senior Specialist (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '01.002', order: 52, nameVi: 'Chuyên viên chính (hạng II)', nameEn: 'Principal Specialist (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '01.003', order: 53, nameVi: 'Chuyên viên (hạng III)', nameEn: 'Specialist (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '01.004', order: 54, nameVi: 'Cán sự (hạng IV)', nameEn: 'Administrative Staff (Grade IV)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '01.005', order: 55, nameVi: 'Nhân viên (hạng V)', nameEn: 'Staff (Grade V)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '06.029', order: 56, nameVi: 'Kế toán viên cao cấp (hạng I)', nameEn: 'Senior Accountant (Grade I)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '06.030', order: 57, nameVi: 'Kế toán viên chính (hạng II)', nameEn: 'Principal Accountant (Grade II)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '06.031', order: 58, nameVi: 'Kế toán viên (hạng III)', nameEn: 'Accountant (Grade III)' },
+    { group: 'PUBLIC_EMPLOYEE_RANK', code: '06.032', order: 59, nameVi: 'Kế toán viên trung cấp (hạng IV)', nameEn: 'Intermediate Accountant (Grade IV)' },
 
     // =========================
     // ĐIỀU HÀNH - HÀNH CHÍNH
