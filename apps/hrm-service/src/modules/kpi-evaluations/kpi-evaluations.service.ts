@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
-import { paginateArray } from '../../../../../shared/utils/pagination.util';
+import { paginateArray } from '@/utils/pagination.util';
 
 @Injectable()
 export class KpiEvaluationsService {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
-import { paginateArray } from '../../../../../shared/utils/pagination.util';
+import { paginateArray } from '@/utils/pagination.util';
 
 @Injectable()
 export class ConsultationService {

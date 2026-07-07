@@ -5,7 +5,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 import { TaskSharedService } from '../task-shared/task-shared.service';
-import { paginateArray } from '../../../../../shared/utils/pagination.util';
+import { paginateArray } from '@/utils/pagination.util';
 
 @Injectable()
 export class TasksService implements OnModuleInit, OnModuleDestroy {

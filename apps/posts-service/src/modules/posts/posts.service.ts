@@ -5,7 +5,7 @@ import { WorkflowService, PostStatus } from '../workflow/workflow.service';
 import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { generateSlug } from '../../utils/slug.util';
-import { paginateArray } from '../../../../../shared/utils/pagination.util';
+import { paginateArray } from '@/utils/pagination.util';
 
 @Injectable()
 export class PostsService implements OnModuleInit {

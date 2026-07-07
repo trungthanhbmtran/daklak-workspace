@@ -9,7 +9,7 @@ import { randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { paginateArray } from '../../../../../shared/utils/pagination.util';
+import { paginateArray } from '@/utils/pagination.util';
 
 const GRPC = {
   INVALID_ARGUMENT: 3,
