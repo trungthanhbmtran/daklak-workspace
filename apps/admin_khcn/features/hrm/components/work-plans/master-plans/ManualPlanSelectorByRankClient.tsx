@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Target, Trash2, Save, Plus } from 'lucide-react';
+import { Target, Trash2, Save, Plus, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { hrmRankQuotasApi } from '@/features/hrm/api';
 import { categoryApi } from "@/features/system-admin/categories/api";
@@ -74,6 +74,7 @@ export function ManualPlanSelectorByRankClient() {
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
     const [weight, setWeight] = useState<number>(1);
+    const [searchRankText, setSearchRankText] = useState<string>('');
 
     const { isPending } = useCreateMasterPlan();
 
@@ -114,6 +115,10 @@ export function ManualPlanSelectorByRankClient() {
     console.log("DEBUG_TASKS: availableTasks =", availableTasks);
 
     const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
+    const filteredRanksList = activeRanksList.filter((r: any) => 
+        (r.nameVi || r.name).toLowerCase().includes(searchRankText.toLowerCase()) || 
+        r.code.toLowerCase().includes(searchRankText.toLowerCase())
+    );
 
     const handleAssignTask = () => {
         const task = availableTasks.find(t => t.id === selectedTaskId);
@@ -354,11 +359,22 @@ export function ManualPlanSelectorByRankClient() {
                     </div>
 
                     <div className="space-y-3 flex-1 flex flex-col min-h-0">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider shrink-0">Danh mục Ngạch / Hạng</Label>
+                        <div className="flex items-center justify-between shrink-0">
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Ngạch / Hạng</Label>
+                        </div>
+                        <div className="relative shrink-0">
+                            <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
+                            <Input 
+                                placeholder="Lọc theo tên ngành hoặc mã..." 
+                                value={searchRankText}
+                                onChange={e => setSearchRankText(e.target.value)}
+                                className="pl-9 h-9 text-sm rounded-lg border-muted/60 bg-muted/20 focus-visible:bg-white"
+                            />
+                        </div>
                         <div className="flex-1 min-h-0 overflow-hidden">
                             <ScrollArea className="h-full pr-4">
                                 <div className="space-y-2 pb-4">
-                                    {activeRanksList.map((rank: any) => (
+                                    {filteredRanksList.map((rank: any) => (
                                         <div
                                             key={rank.code}
                                             onClick={() => setActiveRankFilter(rank.code)}
