@@ -128,6 +128,7 @@ export class MasterPlansService {
       }
     };
   }
+  async findById(id: number, query: any = {}) {
     const mp = await this.prisma.masterPlan.findUnique({
       where: { id },
       include: {

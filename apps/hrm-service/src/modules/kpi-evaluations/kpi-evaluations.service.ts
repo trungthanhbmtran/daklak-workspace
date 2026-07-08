@@ -27,7 +27,7 @@ export class KpiEvaluationsService {
     const limit = query?.limit ? Number(query.limit) : 0;
 
     const cached = await this.cache.get<any>('periods');
-    let periods = [];
+    let periods: any[] = [];
     if (cached) {
       periods = cached;
     } else {
@@ -52,10 +52,6 @@ export class KpiEvaluationsService {
       }
     };
   }
-
-
-  }
-
   async createPeriod(data: any) {
     const p = await this.prisma.kpiPeriod.create({
       data: {
