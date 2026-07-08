@@ -47,6 +47,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [workflowId, setWorkflowId] = useState<string | null>(id || null);
   const [workflowName, setWorkflowName] = useState("Quy trình mới");
   const [workflowDesc, setWorkflowDesc] = useState("Mô tả quy trình...");
@@ -202,12 +203,20 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   );
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    setSelectedEdgeId(null);
     setSelectedNodeId(node.id);
+    setIsPropertiesOpen(true);
+  }, []);
+
+  const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    setSelectedNodeId(null);
+    setSelectedEdgeId(edge.id);
     setIsPropertiesOpen(true);
   }, []);
 
   const onPaneClick = useCallback(() => {
     setSelectedNodeId(null);
+    setSelectedEdgeId(null);
   }, []);
 
   const onUpdateNodeData = useCallback((id: string, data: any) => {
@@ -221,12 +230,29 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     );
   }, [setNodes]);
 
+  const onUpdateEdgeData = useCallback((id: string, edgeUpdates: any) => {
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.id === id) {
+          return { ...edge, ...edgeUpdates };
+        }
+        return edge;
+      })
+    );
+  }, [setEdges]);
+
   const onDeleteNode = useCallback((id: string) => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
     setEdges((eds: Edge[]) => eds.filter((edge) => edge.source !== id && edge.target !== id));
     setSelectedNodeId(null);
     setIsPropertiesOpen(false);
   }, [setNodes, setEdges]);
+
+  const onDeleteEdge = useCallback((id: string) => {
+    setEdges((eds: Edge[]) => eds.filter((edge) => edge.id !== id));
+    setSelectedEdgeId(null);
+    setIsPropertiesOpen(false);
+  }, [setEdges]);
 
   const onSave = useCallback(async () => {
     setIsSaving(true);
@@ -270,6 +296,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   }, [workflowId]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || null;
+  const selectedEdge = edges.find((e) => e.id === selectedEdgeId) || null;
 
   if (isLoading) {
     return (
@@ -291,6 +318,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         isSaving={isSaving}
         onOpenSettings={() => {
           setSelectedNodeId(null);
+          setSelectedEdgeId(null);
           setIsPropertiesOpen(true);
         }}
         onOpenPalette={() => setIsPaletteOpen(!isPaletteOpen)}
@@ -309,6 +337,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             onDrop={onDrop}
             onDragOver={onDragOver}
             onNodeClick={onNodeClick}
+            onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
             nodeTypes={nodeTypes}
             onInit={onInit}
@@ -345,11 +374,14 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
           isOpen={isPropertiesOpen}
           onOpenChange={setIsPropertiesOpen}
           selectedNode={selectedNode}
+          selectedEdge={selectedEdge}
           availableServices={dynamicServices.length > 0 ? dynamicServices : availableServices}
           availableTriggers={dynamicTriggers}
           taskRoles={taskRoles}
           onUpdate={onUpdateNodeData}
+          onUpdateEdge={onUpdateEdgeData}
           onDelete={onDeleteNode}
+          onDeleteEdge={onDeleteEdge}
           onClose={() => setIsPropertiesOpen(false)}
           workflowDesc={workflowDesc}
           setWorkflowDesc={setWorkflowDesc}

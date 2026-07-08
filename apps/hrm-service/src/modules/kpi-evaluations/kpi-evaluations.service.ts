@@ -314,7 +314,7 @@ export class KpiEvaluationsService {
         employeeCode: employeeCode,
         participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] },
         task: {
-          status: 'DONE',
+          status: { in: ['DONE', 'COMPLETED'] },
           completedAt: {
             gte: period.startDate,
             lte: period.endDate

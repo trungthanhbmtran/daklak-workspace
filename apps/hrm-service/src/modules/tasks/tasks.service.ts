@@ -791,7 +791,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     const dataToUpdate: any = { status: targetStatus };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
-    if (targetStatus === 'DONE') dataToUpdate.completedAt = new Date();
+    if (targetStatus === 'DONE' || targetStatus === 'COMPLETED') dataToUpdate.completedAt = new Date();
     if (nextNodeIdToSave) {
       dataToUpdate.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: nextNodeIdToSave };
     }
