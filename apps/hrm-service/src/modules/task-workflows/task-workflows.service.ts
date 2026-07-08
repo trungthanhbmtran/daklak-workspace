@@ -8,8 +8,6 @@ import { TaskSharedService } from '../task-shared/task-shared.service';
 @Injectable()
 export class TaskWorkflowsService {
   private readonly logger = new Logger(TaskWorkflowsService.name);
-  private workflowCache: Map<string, any> = new Map();
-
   constructor(
     public prisma: PrismaService,
     private shared: TaskSharedService,
@@ -21,28 +19,10 @@ export class TaskWorkflowsService {
   }
 
   public async getWorkflowDefinition(workflowId: string): Promise<any> {
-    if (this.workflowCache.has(workflowId)) {
-      return this.workflowCache.get(workflowId);
-    }
-    try {
-      const res = await firstValueFrom<any>(this.workflowService.FindOneWorkflow({ id: workflowId }));
-      if (res && res.definition) {
-        this.workflowCache.set(workflowId, res.definition);
-        return res.definition;
-      }
-    } catch (e) {
-      this.logger.error(`Failed to fetch workflow definition for ${workflowId}`, e);
-    }
-    return null;
+    return this.shared.getWorkflowDefinition(workflowId);
   }
   public invalidateWorkflowCache(workflowId: string, newDefinition?: any) {
-    if (newDefinition) {
-      this.workflowCache.set(workflowId, newDefinition);
-      this.logger.log(`Workflow ${workflowId} cache updated directly from event`);
-    } else {
-      this.workflowCache.delete(workflowId);
-      this.logger.log(`Workflow ${workflowId} cache invalidated`);
-    }
+    this.shared.invalidateWorkflowCache(workflowId, newDefinition);
   }
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionNameForWorkflow?: string) {
     if (context) await this.shared.populateQueryHierarchy(context);

@@ -301,6 +301,57 @@ async function main() {
       nameEn: 'API Gateway Service',
     },
 
+    // --- WORKFLOW TRIGGERS ---
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'MANUAL',
+      order: 1,
+      nameVi: 'Kích hoạt thủ công',
+      nameEn: 'Manual trigger',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'TASK_ASSIGNMENT',
+      order: 2,
+      nameVi: 'Luồng Giao Việc (HRM)',
+      nameEn: 'Task Assignment Workflow',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'TASK_CHAT',
+      order: 3,
+      nameVi: 'Luồng Chat/Thảo luận (HRM)',
+      nameEn: 'Task Chat Workflow',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'TASK_TRACKING',
+      order: 4,
+      nameVi: 'Luồng Theo dõi KPI (HRM)',
+      nameEn: 'Task KPI Tracking Workflow',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'POST_SUBMIT',
+      order: 5,
+      nameVi: 'Khi gửi duyệt bài viết (Posts)',
+      nameEn: 'On Post Submit',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'DOC_RECEIVED',
+      order: 6,
+      nameVi: 'Khi nhận văn bản mới (Documents)',
+      nameEn: 'On Document Received',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'USER_CREATED',
+      order: 7,
+      nameVi: 'Khi tạo tài khoản mới (Users)',
+      nameEn: 'On User Created',
+    },
+
     // --- AI & TRANSLATION ---
     {
       group: 'AI_PROVIDER_TYPE',

@@ -305,4 +305,51 @@ export class WorkflowEngine {
 
     return null;
   }
+
+  /**
+   * Evaluate the assignment script to determine dynamic assignees.
+   * Returns an array of assignee codes or null if no script is defined.
+   */
+  public resolveAssignments(currentNodeId: string, context: WorkflowContext): string[] | null {
+    const node = this.getNode(currentNodeId);
+    if (!node || !node.data || !node.data.assignmentExpression) return null;
+
+    try {
+      const script = node.data.assignmentExpression;
+      const evaluator = new Function('context', `
+        with (context || {}) {
+          ${script}
+        }
+      `);
+      
+      const result = evaluator(context);
+      
+      if (!result) return [];
+      if (Array.isArray(result)) return result;
+      return [String(result)];
+    } catch (e: any) {
+      console.error('[WorkflowEngine] Error evaluating assignmentExpression:', e);
+      return []; // Return empty array on failure to prevent falling back to undefined behavior
+    }
+  }
+
+  /**
+   * Evaluate Side Effects (e.g. Webhooks) attached to a node.
+   */
+  public evaluateSideEffects(currentNodeId: string): any[] {
+    const node = this.getNode(currentNodeId);
+    if (!node || !node.data || !node.data.sideEffects) return [];
+
+    let sideEffects = node.data.sideEffects;
+    if (typeof sideEffects === 'string') {
+      try {
+        sideEffects = JSON.parse(sideEffects);
+      } catch (e) {
+        return [];
+      }
+    }
+
+    if (!Array.isArray(sideEffects)) return [];
+    return sideEffects;
+  }
 }

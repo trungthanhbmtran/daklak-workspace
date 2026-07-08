@@ -129,6 +129,21 @@ export class WorkflowGrpcController {
     return this.mapWorkflow(workflow);
   }
 
+  @GrpcMethod('WorkflowService', 'FindWorkflowByTrigger')
+  async findWorkflowByTrigger(data: { trigger: string }) {
+    const workflow = await this.prisma.workflow.findFirst({
+      where: { trigger: data.trigger, active: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    if (!workflow) {
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Workflow not found for trigger',
+      });
+    }
+    return this.mapWorkflow(workflow);
+  }
+
   @GrpcMethod('WorkflowService', 'ListWorkflows')
   async listWorkflows(data: { skip?: number; take?: number; search?: string }) {
     const skip = data.skip || 0;

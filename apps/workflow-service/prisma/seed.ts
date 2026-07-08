@@ -12,68 +12,67 @@ async function main() {
     nodes: [
       { id: 'node_start', type: 'start', position: { x: 50, y: 150 }, data: { label: 'Bắt đầu' } },
       {
-        id: 'node_assign',
+        id: 'node_plan_assignment',
         type: 'user_task',
         position: { x: 250, y: 150 },
+        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
+if (actionName === 'PLAN_ASSIGNMENT' || actionName === 'EDIT') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); }
+return false;`, allowChat: true, allowAddSubtask: false, allowCoordinate: false, allowEdit: true, allowDelete: true, label: 'Phương án phân công', description: 'Lãnh đạo xác định định biên và cơ cấu phòng ban chịu trách nhiệm', actionName: 'PLAN_ASSIGNMENT', sendNotification: false, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'TODO' }
+      },
+      {
+        id: 'node_assign',
+        type: 'user_task',
+        position: { x: 500, y: 150 },
         data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
 if (actionName === 'ASSIGN' || actionName === 'EDIT') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); }
 if (actionName === 'DELETE') { return isOwner && isUnassigned && !hasChildren && userRoles.includes('TASK:DELETE'); }
 if (actionName === 'ADD_SUBTASK') { return (isOwner || isAssignee) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:EXECUTE')); }
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY' }
+return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Chính thức Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'TODO' }
       },
-      { id: 'gw_split', type: 'parallel_gateway', position: { x: 500, y: 150 }, data: { label: 'Tách luồng' } },
+      { id: 'gw_split', type: 'parallel_gateway', position: { x: 750, y: 150 }, data: { label: 'Tách luồng' } },
       {
         id: 'node_in_progress',
         type: 'user_task',
-        position: { x: 700, y: 150 },
+        position: { x: 1000, y: 150 },
         data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
 if (actionName === 'IN_PROGRESS') return isAssignee && userRoles.includes('TASK:EXECUTE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Xử lý', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT' }
-      },
-      {
-        id: 'node_coordinate',
-        type: 'user_task',
-        position: { x: 700, y: 300 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'COORDINATE' || actionName === 'DONE') return isAssignee && userRoles.includes('TASK:EXECUTE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Phối hợp thực hiện', targetStatus: 'IN_PROGRESS', description: 'Người phối hợp tham gia cùng xử lý', actionName: 'COORDINATE', sendNotification: true, assignmentStrategy: 'ANY' }
+return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Thực hiện', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính, bao gồm trao đổi chat', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'ANY' }
       },
       {
         id: 'node_monitor',
         type: 'user_task',
-        position: { x: 700, y: 0 },
+        position: { x: 1000, y: 300 },
         data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
 if (actionName === 'MONITOR') return (isSupervisor || isDeptLeader) && userRoles.includes('TASK:APPROVE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER' }
+return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER', targetStatus: 'IN_PROGRESS' }
       },
-      { id: 'gw_join', type: 'parallel_gateway', position: { x: 950, y: 150 }, data: { label: 'Gộp luồng' } },
+      { id: 'gw_join', type: 'parallel_gateway', position: { x: 1250, y: 150 }, data: { label: 'Gộp luồng' } },
       {
         id: 'node_report',
         type: 'user_task',
-        position: { x: 1100, y: 150 },
+        position: { x: 1500, y: 150 },
         data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
 if (actionName === 'DONE' || actionName === 'COMPLETE') return isAssignee && !hasChildren && userRoles.includes('TASK:EXECUTE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Báo cáo kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'DONE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' } }
+return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tổng hợp kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'COMPLETE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' } }
       },
       {
         id: 'node_approve',
         type: 'user_task',
-        position: { x: 1350, y: 150 },
+        position: { x: 1750, y: 150 },
         data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
 if (actionName === 'APPROVE' || actionName === 'RETURN' || actionName === 'RETURNED') return (isSupervisor || isDeptLeader || isOwner) && userRoles.includes('TASK:APPROVE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Phê duyệt / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' }
+return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Nghiệm thu / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' }
       },
-      { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 1600, y: 150 }, data: { label: 'Quyết định' } },
-      { id: 'node_end', type: 'end', position: { x: 1800, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Công việc đã được nghiệm thu', template: 'Công việc của bạn đã được duyệt hoàn thành.', recipientExpression: '[assigneeCode]' } } }
+      { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 2000, y: 150 }, data: { label: 'Quyết định' } },
+      { id: 'node_end', type: 'end', position: { x: 2250, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Công việc đã được nghiệm thu', template: 'Công việc của bạn đã được duyệt hoàn thành.', recipientExpression: '[assigneeCode]' } } }
     ],
     edges: [
-      { id: 'edge_start', source: 'node_start', target: 'node_assign', type: 'smoothstep', animated: true },
+      { id: 'edge_start', source: 'node_start', target: 'node_plan_assignment', type: 'smoothstep', animated: true },
+      { id: 'edge_plan_assign', source: 'node_plan_assignment', target: 'node_assign', type: 'smoothstep', animated: true },
       { id: 'edge_assign_gw', source: 'node_assign', target: 'gw_split', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_main', source: 'gw_split', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Giao chính' },
-      { id: 'edge_gw_coord', source: 'gw_split', target: 'node_coordinate', type: 'smoothstep', animated: true, label: 'Giao phối hợp' },
+      { id: 'edge_gw_main', source: 'gw_split', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Thực hiện/Chat' },
       { id: 'edge_gw_monitor', source: 'gw_split', target: 'node_monitor', type: 'smoothstep', animated: true, label: 'Theo dõi' },
       { id: 'edge_progress_gw', source: 'node_in_progress', target: 'gw_join', type: 'smoothstep', animated: true },
-      { id: 'edge_coord_gw', source: 'node_coordinate', target: 'gw_join', type: 'smoothstep', animated: true, label: 'Hoàn thành' },
       { id: 'edge_monitor_instruct', source: 'node_monitor', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Chỉ đạo' },
       { id: 'edge_gw_report', source: 'gw_join', target: 'node_report', type: 'smoothstep', animated: true },
       { id: 'edge_report_approve', source: 'node_report', target: 'node_approve', type: 'smoothstep', animated: true },

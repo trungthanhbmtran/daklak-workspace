@@ -85,12 +85,7 @@ export const PropertiesPanel = ({
                   <NativeSelectOption key={t.code} value={t.code}>{t.name}</NativeSelectOption>
                 ))
               ) : (
-                <>
-                  <NativeSelectOption value="MANUAL">Kích hoạt thủ công</NativeSelectOption>
-                  <NativeSelectOption value="POST_SUBMIT">Khi gửi duyệt bài viết (Posts)</NativeSelectOption>
-                  <NativeSelectOption value="DOC_RECEIVED">Khi nhận văn bản mới (Documents)</NativeSelectOption>
-                  <NativeSelectOption value="USER_CREATED">Khi tạo tài khoản mới (Users)</NativeSelectOption>
-                </>
+                <NativeSelectOption value="" disabled>Đang tải danh sách Trigger...</NativeSelectOption>
               )}
             </NativeSelect>
             <p className="text-[10px] text-muted-foreground mt-2 italic">
@@ -188,6 +183,21 @@ export const PropertiesPanel = ({
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Trạng thái mục tiêu (Target Status)
+              </label>
+              <Input type="text"
+                name="targetStatus"
+                value={data.targetStatus || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+                placeholder="VD: PENDING_APPROVAL, IN_PROGRESS"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Trạng thái của công việc sẽ đổi thành mã này khi đi vào bước này. Bỏ trống sẽ giữ nguyên trạng thái cũ.
+              </p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Vai trò xử lý (PBAC)
               </label>
               <NativeSelect
@@ -229,6 +239,25 @@ export const PropertiesPanel = ({
               </NativeSelect>
               <p className="text-[10px] text-muted-foreground mt-1.5">
                 Backend sẽ dựa vào chiến lược này để đối chiếu với cấu trúc PBAC.
+              </p>
+            </div>
+            
+            {/* Advanced Customization: Assignment Script */}
+            <div className="p-3 bg-violet-50/50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900 rounded-xl space-y-3">
+              <label className="text-xs font-bold text-violet-700 dark:text-violet-400 flex items-center gap-1.5">
+                <span className="font-mono bg-violet-100 dark:bg-violet-900 px-1 py-0.5 rounded text-[10px]">fx</span>
+                Kịch bản giao việc tự động (Assignment Script)
+              </label>
+              <Textarea
+                name="assignmentExpression"
+                value={data.assignmentExpression || ""}
+                onChange={handleChange}
+                className="w-full bg-white dark:bg-slate-950 border border-violet-200 dark:border-violet-800 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[80px] resize-y"
+                placeholder={`// Ví dụ: Giao cho cấp trên của người tạo\nreturn context.creator.managerId;`}
+                spellCheck={false}
+              />
+              <p className="text-[10px] text-violet-600/70 dark:text-violet-400/70 leading-relaxed">
+                Biểu thức kịch bản nâng cao ghi đè lên chiến lược phân công cứng. Có thể trả về 1 hoặc mảng các mã nhân sự (Code).
               </p>
             </div>
             <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/10 mt-2">
@@ -313,6 +342,42 @@ export const PropertiesPanel = ({
                   spellCheck={false}
                 />
               </div>
+            </div>
+
+            {/* Advanced Customization: Dynamic Forms */}
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Biểu mẫu động (Form Schema)
+              </label>
+              <Textarea
+                name="formSchema"
+                value={data.formSchema || ""}
+                onChange={handleChange}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-y"
+                placeholder={`[\n  { "name": "lyDo", "label": "Lý do", "type": "textarea", "required": true }\n]`}
+                spellCheck={false}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Cấu hình mảng JSON các trường thông tin bắt buộc/tùy chọn xuất hiện ở bước này.
+              </p>
+            </div>
+
+            {/* Advanced Customization: Side Effects */}
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Hành động phụ (Side Effects / Webhooks)
+              </label>
+              <Textarea
+                name="sideEffects"
+                value={data.sideEffects || ""}
+                onChange={handleChange}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[80px] resize-y"
+                placeholder={`[\n  { "type": "WEBHOOK", "url": "https://..." }\n]`}
+                spellCheck={false}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Mảng JSON mô tả các hệ thống cần gọi (Trigger API, Gửi email ngoại,...) khi bước này xử lý.
+              </p>
             </div>
           </div>
         );

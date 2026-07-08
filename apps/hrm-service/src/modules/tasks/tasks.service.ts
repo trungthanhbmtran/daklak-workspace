@@ -11,34 +11,12 @@ import { paginateArray } from '@/utils/pagination.util';
 export class TasksService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TasksService.name);
   private userService: any;
-  private workflowService: any;
-
-  private workflowCache: Map<string, any> = new Map();
-
-  private async getWorkflowDefinition(workflowId: string): Promise<any> {
-    if (this.workflowCache.has(workflowId)) {
-      return this.workflowCache.get(workflowId);
-    }
-    try {
-      const res = await firstValueFrom<any>(this.workflowService.FindOneWorkflow({ id: workflowId }));
-      if (res && res.definition) {
-        this.workflowCache.set(workflowId, res.definition);
-        return res.definition;
-      }
-    } catch (e) {
-      this.logger.error(`Failed to fetch workflow definition for ${workflowId}`, e);
-    }
-    return null;
+  private workflowService: any;  private async getWorkflowDefinition(workflowId: string): Promise<any> {
+    return this.taskSharedService.getWorkflowDefinition(workflowId);
   }
 
   public invalidateWorkflowCache(workflowId: string, newDefinition?: any) {
-    if (newDefinition) {
-      this.workflowCache.set(workflowId, newDefinition);
-      this.logger.log(`Workflow ${workflowId} cache updated directly from event`);
-    } else {
-      this.workflowCache.delete(workflowId);
-      this.logger.log(`Workflow ${workflowId} cache invalidated`);
-    }
+    this.taskSharedService.invalidateWorkflowCache(workflowId, newDefinition);
   }
 
   constructor(
@@ -506,6 +484,28 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     const assigneeCode = data.assigneeCode || 'UNASSIGNED';
+
+    if (assigneeCode !== 'UNASSIGNED') {
+      const assigneeEmp = await this.prisma.employee.findUnique({
+        where: { employeeCode: assigneeCode }
+      });
+      if (!assigneeEmp) {
+        throw new RpcException('Người được giao không tồn tại trong hệ thống HRM.');
+      }
+      
+      if (data.departmentId) {
+        if (assigneeEmp.departmentId !== parseInt(data.departmentId, 10)) {
+          throw new RpcException('Logic định biên: Người được giao không thuộc phòng ban được chỉ định.');
+        }
+      }
+      
+      if (data.jobTitleId) {
+        if (assigneeEmp.jobTitleId !== parseInt(data.jobTitleId, 10)) {
+          throw new RpcException('Logic định biên: Người được giao không có chức danh phù hợp.');
+        }
+      }
+    }
+
     if (assigneeCode !== 'UNASSIGNED' && data.domainId) {
       const assigneeEmp = await this.prisma.employee.findUnique({
         where: { employeeCode: assigneeCode },
@@ -590,7 +590,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     // Bắt đầu workflow chuẩn cho Task (Decentralized)
     try {
-      const workflowId = 'TASK_PROCESSING_ID';
+      const workflowId = await this.taskSharedService.getWorkflowIdByTrigger('TASK_ASSIGNMENT') || 'TASK_PROCESSING_ID';
       const definition = await this.getWorkflowDefinition(workflowId);
 
       if (definition) {
@@ -788,12 +788,45 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         }
       }
     }
-
+    
     const dataToUpdate: any = { status: targetStatus };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
     if (targetStatus === 'DONE' || targetStatus === 'COMPLETED') dataToUpdate.completedAt = new Date();
     if (nextNodeIdToSave) {
       dataToUpdate.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: nextNodeIdToSave };
+      
+      // 1. Dynamic Assignment via Script
+      if (activeWorkflowId && nextNodeData) {
+        try {
+          const definition = await this.getWorkflowDefinition(activeWorkflowId);
+          if (definition) {
+            const engine = new WorkflowEngine(definition);
+            const currentAssignee = (rawTask as any).participants?.find((p: any) => p.participantRole === 'ASSIGNEE')?.employeeCode;
+            const currentOwner = (rawTask as any).participants?.find((p: any) => p.participantRole === 'OWNER')?.employeeCode;
+
+            const wfContext = {
+               creatorCode: rawTask.creatorEmployeeCode,
+               assignerCode: currentOwner,
+               assigneeCode: currentAssignee,
+               currentActorCode: actualActorCode,
+               status: rawTask.status,
+               targetStatus: targetStatus,
+               taskContext: context
+            };
+            const newAssignees = engine.resolveAssignments(nextNodeIdToSave, wfContext);
+            if (newAssignees && newAssignees.length > 0) {
+              await this.prisma.taskParticipant.upsert({
+                where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: newAssignees[0], participantRole: 'ASSIGNEE' } },
+                update: {},
+                create: { taskId: id, employeeCode: newAssignees[0], participantRole: 'ASSIGNEE' }
+              });
+              this.logger.log(`Workflow dynamically assigned task ${id} to ${newAssignees[0]}`);
+            }
+          }
+        } catch (e) {
+          this.logger.error('Error resolving dynamic assignments', e);
+        }
+      }
     }
 
     const t = await this.prisma.task.update({
@@ -817,6 +850,29 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       await this.updateTaskProgress(id, nextNodeData.autoProgress, actualActorCode);
     } else if (targetStatus === 'DONE') {
       await this.updateTaskProgress(id, 100, actualActorCode);
+    }
+
+    // 2. Evaluate Side Effects
+    if (nextNodeIdToSave && activeWorkflowId) {
+      try {
+        const definition = await this.getWorkflowDefinition(activeWorkflowId);
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          const sideEffects = engine.evaluateSideEffects(nextNodeIdToSave);
+          if (sideEffects && sideEffects.length > 0) {
+            for (const effect of sideEffects) {
+              this.logger.log(`Executing side effect ${effect.type} on task ${id}`);
+              // In the future: call external webhooks, etc.
+              if (effect.type === 'WEBHOOK' && effect.url) {
+                // await axios.post(effect.url, { taskId: id, status: targetStatus });
+                this.logger.log(`Simulating Webhook to ${effect.url}`);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        this.logger.error('Error executing side effects', e);
+      }
     }
 
     // Xử lý gửi thông báo tự động dựa trên cấu hình Workflow Engine (Node tiếp theo)
@@ -861,20 +917,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
                 }
               }
             } else {
-              // Template fallback (Hardcode cũ)
-              if (targetStatus === 'RETURNED' || rejectReason) {
-                title = 'Công việc bị trả lại';
-                message = `Công việc "${tCheck.title}" của bạn đã bị trả lại.\nLý do: ${rejectReason}`;
-              } else if (nextNode.data.actionName === 'APPROVE') {
-                title = 'Yêu cầu nghiệm thu công việc';
-                message = `Nhân sự đã báo cáo hoàn thành công việc "${tCheck.title}". Vui lòng kiểm tra và nghiệm thu.`;
-              } else if (targetStatus === 'DONE' || nextNode.type === 'end') {
-                title = 'Công việc đã được nghiệm thu';
-                message = `Công việc "${tCheck.title}" của bạn đã được duyệt hoàn thành.`;
-              }
-
-              // Đối soát fallback cũ
-              if (nextNode.data.role === 'MANAGER' || targetStatus === 'PENDING_APPROVAL') {
+              // Generic fallback (No hardcoded workflow logic)
+              title = `Có công việc cần xử lý: ${nextNode.data.label || ''}`;
+              message = `Công việc "${tCheck.title}" vừa được chuyển đến bước: ${nextNode.data.label || ''}. Vui lòng kiểm tra và xử lý.`;
+              
+              if (nextNode.data.role === 'MANAGER') {
                 recipientCodes.push(tCheck.supervisorCode, tCheck.assignerCode, tCheck.creatorEmployeeCode);
               } else {
                 recipientCodes.push(tCheck.assigneeCode);
@@ -1427,17 +1474,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
   async importTasks(data: any[]) { return { success: true }; }
   async exportTasks(query: any) { return { success: true }; }
   async resolveTask(id: number, action: string, body: any) {
-    if (action === 'COMPLETE') {
-      const raw = await this.prisma.task.findUnique({ where: { id } });
-      const tArr = [raw];
-      await this.taskSharedService.enrichTasks(tArr);
-      const t: any = tArr[0];
-      const requiresApproval = t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED';
-      const nextStatus = requiresApproval ? 'PENDING_APPROVAL' : 'DONE';
-      return this.updateTaskStatus(id, nextStatus, undefined, body?.currentEmployeeCode, body, action);
-    }
-    if (action === 'APPROVE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode, body, action);
-    if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentEmployeeCode, body, action);
+    let fallbackStatus = 'TODO';
+    if (action === 'COMPLETE') fallbackStatus = 'DONE';
+    if (action === 'APPROVE') fallbackStatus = 'DONE';
+    if (action === 'RETURN') fallbackStatus = 'RETURNED';
+    return this.updateTaskStatus(id, fallbackStatus, body?.rejectReason, body?.currentEmployeeCode, body, action);
   }
   async updateTask(id: number, data: any) {
     const updateData = { ...data };

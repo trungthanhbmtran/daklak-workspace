@@ -8,6 +8,7 @@ service WorkflowService {
   rpc CreateWorkflow (CreateWorkflowRequest) returns (WorkflowResponse);
   rpc UpdateWorkflow (UpdateWorkflowRequest) returns (WorkflowResponse);
   rpc FindOneWorkflow (FindOneWorkflowRequest) returns (WorkflowResponse);
+  rpc FindWorkflowByTrigger (FindWorkflowByTriggerRequest) returns (WorkflowResponse);
   rpc ListWorkflows (ListWorkflowsRequest) returns (ListWorkflowsResponse);
   rpc DeleteWorkflow (DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
 
@@ -39,6 +40,10 @@ message UpdateWorkflowRequest {
 
 message FindOneWorkflowRequest {
   string id = 1;
+}
+
+message FindWorkflowByTriggerRequest {
+  string trigger = 1;
 }
 
 message ListWorkflowsRequest {

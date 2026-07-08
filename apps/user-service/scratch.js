@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const menus = await prisma.menu.findMany({ where: { OR: [{ code: 'HUB_NOTIF_GROUP' }, { code: 'SYS_GROUP' }] } }); console.log(menus); } main().finally(() => prisma.$disconnect());

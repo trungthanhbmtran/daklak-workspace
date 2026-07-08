@@ -49,6 +49,32 @@ export class TaskSharedService {
     return userToCodeMap;
   }
 
+  public async invalidateWorkflowCache(workflowId: string, newDefinition?: any) {
+    const cacheKey = `workflow:def:${workflowId}`;
+    if (newDefinition) {
+      await this.cache.set(cacheKey, newDefinition, 3600 * 1000 * 24);
+    } else {
+      await this.cache.delete(cacheKey);
+    }
+  }
+
+  public async getWorkflowIdByTrigger(trigger: string): Promise<string | null> {
+    const cacheKey = `workflow:trigger:${trigger}`;
+    const cachedId = await this.cache.get<string>(cacheKey);
+    if (cachedId) return cachedId;
+
+    try {
+      const res = await firstValueFrom<any>(this.workflowService.FindWorkflowByTrigger({ trigger }));
+      if (res && res.id) {
+        await this.cache.set(cacheKey, res.id, 3600 * 1000 * 24); // Cache 24h
+        return res.id;
+      }
+    } catch (e) {
+      this.logger.error(`Failed to fetch workflow id for trigger ${trigger}`, e);
+    }
+    return null;
+  }
+
   public async getWorkflowDefinition(workflowId: string): Promise<any> {
     const cacheKey = `workflow:def:${workflowId}`;
     const cached = await this.cache.get<any>(cacheKey);
