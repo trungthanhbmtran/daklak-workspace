@@ -1,5 +1,4 @@
 import React from 'react';
-import { PortalHeader } from '@/features/hub/components/HubClient';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -9,8 +8,7 @@ export default function NotificationsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen flex flex-col bg-slate-50/50 overflow-hidden">
-      <PortalHeader />
+    <div className="h-full flex flex-col bg-slate-50/50 overflow-hidden">
       
       <main className="container mx-auto p-4 md:p-8 max-w-6xl flex-1 min-h-0 flex flex-col overflow-hidden">
         <div className="shrink-0 mb-6">

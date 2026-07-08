@@ -154,24 +154,24 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="w-full h-full flex flex-col p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 bg-background">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Quản lý Quy trình</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">Quản lý Quy trình</h1>
+          <p className="text-muted-foreground text-sm md:text-base lg:text-lg mt-1 md:mt-2">
             Thiết kế và giám sát các quy trình nghiệp vụ tự động trong hệ thống.
           </p>
         </div>
-        <Button onClick={onCreate} className="rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+        <Button onClick={onCreate} className="rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto">
           <Plus className="mr-2 h-4 w-4" /> Tạo quy trình mới
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <Search placeholder="Tìm kiếm quy trình..." className="w-full sm:max-w-sm" />
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+        <Search placeholder="Tìm kiếm quy trình..." className="w-full sm:max-w-sm bg-background" />
+        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
           <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
-            <SelectTrigger className="w-[110px] h-9 bg-background border-border">
+            <SelectTrigger className="w-[110px] h-9 bg-background border-border shrink-0">
               <SelectValue placeholder="Hiển thị" />
             </SelectTrigger>
             <SelectContent>
@@ -181,10 +181,10 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
               <SelectItem value="100">100 dòng</SelectItem>
             </SelectContent>
           </Select>
-          <Badge variant="outline" className="rounded-lg py-1.5 px-3 bg-primary/5 text-primary border-primary/10">
+          <Badge variant="outline" className="rounded-lg py-1.5 px-3 bg-primary/10 text-primary border-primary/20 shrink-0">
             {totalItems} Tổng số
           </Badge>
-          <Badge variant="outline" className="rounded-lg py-1.5 px-3 bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+          <Badge variant="outline" className="rounded-lg py-1.5 px-3 bg-secondary text-secondary-foreground border-border shrink-0">
             Trang {page}/{Math.max(1, totalPages)}
           </Badge>
         </div>
@@ -239,9 +239,9 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
 
               <div className="space-y-2 min-w-0">
                 <div className="flex items-start gap-2">
-                  <h3 className="font-bold text-lg leading-tight wrap-break-words whitespace-normal flex-1 min-w-0">{workflow.name}</h3>
+                  <h3 className="font-bold text-base md:text-lg leading-tight wrap-break-words whitespace-normal flex-1 min-w-0">{workflow.name}</h3>
                   {workflow.active ? (
-                    <Badge className="shrink-0 bg-emerald-500/10 text-emerald-600 border-none text-[10px] h-5 px-1.5 font-bold uppercase tracking-wider">
+                    <Badge className="shrink-0 bg-primary/10 text-primary border-none text-[10px] h-5 px-1.5 font-bold uppercase tracking-wider">
                       Active
                     </Badge>
                   ) : (

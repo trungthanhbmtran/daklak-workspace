@@ -113,8 +113,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="w-full h-full flex flex-col p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 bg-background">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Quản lý Banner/Quảng cáo</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Phân phối banner hình ảnh và thiết kế khẩu hiệu tuyên truyền đồng bộ</p>

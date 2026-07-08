@@ -42,7 +42,8 @@ export function PortalPageBuilderInner() {
 
   return (
     <ThemeProvider>
-      <div className="h-full w-full flex flex-col overflow-hidden bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="w-full h-full flex flex-col p-4 md:p-6 lg:p-8 bg-background">
+        <div className="h-full w-full flex flex-col overflow-hidden bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         {/* 1. HEADER */}
         <BuilderHeader />
 
@@ -73,6 +74,7 @@ export function PortalPageBuilderInner() {
           activeLangs={activeLangs}
           onSaveSuccess={handleSavePageMeta}
         />
+      </div>
       </div>
     </ThemeProvider>
   );
