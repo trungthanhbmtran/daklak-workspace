@@ -19,6 +19,7 @@ import { workflowApi, Workflow } from "@/features/workflow/api";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,7 +74,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   const [page, setPage] = useState(1);
-  const pageSize = 9;
+  const [pageSize, setPageSize] = useState(9);
   const [totalItems, setTotalItems] = useState(0);
 
   const loadWorkflows = async () => {
@@ -101,7 +102,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
 
   useEffect(() => {
     loadWorkflows();
-  }, [page, searchTerm]);
+  }, [page, pageSize, searchTerm]);
 
   const handleDelete = (id: string) => {
     setItemToDelete(id);
@@ -166,14 +167,25 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Search placeholder="Tìm kiếm quy trình..." className="flex-1 max-w-sm" />
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <Search placeholder="Tìm kiếm quy trình..." className="w-full sm:max-w-sm" />
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+            <SelectTrigger className="w-[110px] h-9 bg-background border-border">
+              <SelectValue placeholder="Hiển thị" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="9">9 dòng</SelectItem>
+              <SelectItem value="18">18 dòng</SelectItem>
+              <SelectItem value="50">50 dòng</SelectItem>
+              <SelectItem value="100">100 dòng</SelectItem>
+            </SelectContent>
+          </Select>
+          <Badge variant="outline" className="rounded-lg py-1.5 px-3 bg-primary/5 text-primary border-primary/10">
             {totalItems} Tổng số
           </Badge>
-          <Badge variant="outline" className="rounded-lg py-1 px-3 bg-emerald-50 text-emerald-600 border-emerald-100">
-            Hiển thị trang {page}/{Math.max(1, totalPages)}
+          <Badge variant="outline" className="rounded-lg py-1.5 px-3 bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+            Trang {page}/{Math.max(1, totalPages)}
           </Badge>
         </div>
       </div>

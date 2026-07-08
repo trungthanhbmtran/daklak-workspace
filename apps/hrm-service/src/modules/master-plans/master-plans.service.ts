@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { TaskSharedService } from '../task-shared/task-shared.service';
+import { paginateArray } from '@/utils/pagination.util';
 
 @Injectable()
 export class MasterPlansService {
   constructor(private prisma: PrismaService, private shared: TaskSharedService) { }
 
   async findAll(query: any) {
+    const page = query?.page ? Number(query.page) : 1;
+    const limit = query?.limit ? Number(query.limit) : 0;
     const where: any = {};
     if (query.type) where.type = query.type;
     if (query.status) where.status = query.status;
@@ -16,7 +19,6 @@ export class MasterPlansService {
     if (!query.isAdmin && query.currentEmployeeCode) {
       const authConditions: any[] = [];
 
-      // QUY TẮC 1: Kế hoạch thuộc đơn vị của user hoặc đơn vị CẤP TRÊN
       const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
         ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
         : (query.currentUserDept ? [query.currentUserDept] : []);
@@ -25,7 +27,6 @@ export class MasterPlansService {
         authConditions.push({ departmentId: { in: ancestorIds } });
       }
 
-      // QUY TẮC 2: User là người được giao hoặc người giao của bất kỳ task nào trong kế hoạch
       const currentEmp = await this.prisma.employee.findUnique({
         where: { employeeCode: query.currentEmployeeCode },
         select: { userId: true }
@@ -52,7 +53,7 @@ export class MasterPlansService {
       where.AND = [{ OR: authConditions }];
     }
 
-    const masterPlans = await this.prisma.masterPlan.findMany({
+    const allMasterPlans = await this.prisma.masterPlan.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -62,10 +63,12 @@ export class MasterPlansService {
       }
     });
 
-    // Collect all userIds from all participants across all fetched master plans
+    const paginated = paginateArray(allMasterPlans, page, limit);
+    const masterPlans = paginated.data;
+
     const userIds = new Set<number>();
-    masterPlans.forEach(mp => {
-      mp.tasks.forEach(t => {
+    masterPlans.forEach((mp: any) => {
+      mp.tasks.forEach((t: any) => {
         t.participants?.forEach((p: any) => {
           if (p.userId) userIds.add(p.userId);
         });
@@ -86,7 +89,7 @@ export class MasterPlansService {
     return {
       success: true,
       message: 'Lấy danh sách Kế hoạch thành công',
-      data: masterPlans.map(mp => {
+      data: masterPlans.map((mp: any) => {
         let completedTasks = 0;
         const tasks = mp.tasks.map((t: any) => {
           if (t.status === 'DONE') completedTasks++;
@@ -121,20 +124,10 @@ export class MasterPlansService {
         };
       }),
       meta: {
-        pagination: {
-          total: masterPlans.length,
-          page: 1,
-          pageSize: masterPlans.length,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false
-        }
+        ...paginated.meta
       }
     };
   }
-
-  async findById(query: any) {
-    const id = typeof query === 'object' ? query.id : query;
     const mp = await this.prisma.masterPlan.findUnique({
       where: { id },
       include: {

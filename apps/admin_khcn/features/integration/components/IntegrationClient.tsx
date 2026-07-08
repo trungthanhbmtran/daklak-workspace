@@ -23,7 +23,7 @@ const ReportDashboard = dynamic(() => import("./reports/ReportDashboard").then(m
 
 function CardContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+    <div className="bg-background border border-border rounded-3xl p-6 shadow-sm">
       {children}
     </div>
   );
@@ -37,7 +37,7 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
 
   if (editingId || isCreating) {
     return (
-      <div className="w-full h-full min-h-[calc(100vh-120px)] flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl animate-in fade-in zoom-in-95 duration-300">
+      <div className="w-full h-full min-h-[calc(100vh-120px)] flex flex-col overflow-hidden bg-background rounded-2xl border border-border shadow-xl animate-in fade-in zoom-in-95 duration-300">
         <WorkflowEditor
           id={editingId || undefined}
           onBack={() => {
@@ -58,11 +58,11 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
             variant="outline"
             size="sm"
             onClick={() => setActiveView('dashboard')}
-            className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-xl border-border hover:bg-muted"
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Trở về
           </Button>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+          <h2 className="text-xl font-bold text-foreground">
             {activeView === 'definitions' && "Định nghĩa Quy trình (BPMN)"}
             {activeView === 'instances' && "Theo dõi Quy trình Đang chạy"}
             {activeView === 'gateway' && "Cấu hình API Gateway"}
@@ -147,10 +147,10 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
           <Sparkles className="w-4 h-4" />
           <span>Hệ thống quản trị BPMN & Microservices</span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-          Trung tâm <span className="text-violet-600 dark:text-violet-400">Tích hợp & Quy trình</span>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
+          Trung tâm <span className="text-primary">Tích hợp & Quy trình</span>
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg max-w-3xl leading-relaxed">
+        <p className="text-muted-foreground text-base md:text-lg max-w-3xl leading-relaxed">
           Nơi hợp nhất sức mạnh của việc thiết kế luồng tự động hóa (Workflow) và quản trị giao tiếp dữ liệu (Gateway) giữa các phân hệ cốt lõi.
         </p>
       </div>
@@ -165,20 +165,20 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
               onClick={() => setActiveView(module.id as any)}
               className="text-left group block outline-none w-full"
             >
-              <div className={`h-full rounded-2xl bg-white dark:bg-slate-900 border ${style.border} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm flex flex-col`}>
+              <div className={`h-full rounded-2xl bg-card border ${style.border} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm flex flex-col`}>
                 <div className={`w-14 h-14 rounded-xl ${style.light} ${style.dark} border ${style.border} flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
                   <module.icon className={`w-7 h-7 ${style.icon}`} />
                 </div>
                 
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
                   {module.title}
                 </h3>
                 
-                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 flex-1">
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1">
                   {module.description}
                 </p>
                 
-                <div className="flex items-center text-sm font-bold text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mt-auto uppercase tracking-wide">
+                <div className="flex items-center text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors mt-auto uppercase tracking-wide">
                   Truy cập phân hệ
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </div>

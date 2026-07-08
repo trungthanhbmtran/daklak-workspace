@@ -14,7 +14,7 @@ import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 export function KpiCriteriaClient() {
   const [page, setPage] = useState(1);
-  const limit = 3;
+  const [limit, setLimit] = useState(10);
 
   const { data: response, isLoading } = useKpiCriteriaListPaginated({ page, limit });
   const criteriaList = response?.data || [];
@@ -121,11 +121,11 @@ export function KpiCriteriaClient() {
   };
 
   const handleNextPage = () => {
-    if (meta?.hasNext) setPage(p => p + 1);
+    if (meta?.page < meta?.totalPages) setPage(p => p + 1);
   };
 
   const handlePrevPage = () => {
-    if (meta?.hasPrev) setPage(p => p - 1);
+    if (meta?.page > 1) setPage(p => p - 1);
   };
 
   return (
@@ -203,17 +203,39 @@ export function KpiCriteriaClient() {
           )}
 
           {/* Pagination Controls */}
-          <div className="flex items-center justify-between pt-4">
-            <p className="text-sm text-muted-foreground">
-              Hiển thị <span className="font-medium text-foreground">{meta?.total ? Math.min((meta.page - 1) * meta.pageSize + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * meta.pageSize, meta.total) : 0}</span> trong tổng số <span className="font-medium text-foreground">{meta?.total || 0}</span> bản ghi
-            </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <p>
+                Hiển thị <span className="font-medium text-foreground">{meta?.total ? Math.min((meta.page - 1) * limit + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * limit, meta.total) : 0}</span> trong tổng số <span className="font-medium text-foreground">{meta?.total || 0}</span> bản ghi
+              </p>
+              <div className="flex items-center gap-2">
+                <span>Số dòng:</span>
+                <Select
+                  value={limit.toString()}
+                  onValueChange={(val) => {
+                    setLimit(Number(val));
+                    setPage(1); // Reset page when changing limit
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="flex items-center gap-2 text-sm">
               <Button
                 variant="outline"
                 size="icon"
                 className="w-8 h-8"
                 onClick={handlePrevPage}
-                disabled={!meta?.hasPrev}
+                disabled={!(meta?.page > 1)}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -225,7 +247,7 @@ export function KpiCriteriaClient() {
                 size="icon"
                 className="w-8 h-8"
                 onClick={handleNextPage}
-                disabled={!meta?.hasNext}
+                disabled={!(meta?.page < meta?.totalPages)}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>

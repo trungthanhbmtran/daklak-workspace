@@ -58,62 +58,62 @@ export function NotificationListClient() {
     <div className="flex-1 min-h-0 flex flex-col space-y-6 animate-in fade-in duration-500 overflow-hidden pb-4">
       <div className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Trung tâm Thông báo</h2>
-          <p className="text-slate-500 mt-2">Quản lý và theo dõi toàn bộ thông báo từ tất cả các phân hệ trong hệ thống.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Trung tâm Thông báo</h2>
+          <p className="text-muted-foreground mt-2">Quản lý và theo dõi toàn bộ thông báo từ tất cả các phân hệ trong hệ thống.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="bg-white" onClick={() => list.filter(n => !n.read).forEach(n => markRead.mutate(n.id))}>
+          <Button variant="outline" className="bg-background" onClick={() => list.filter(n => !n.read).forEach(n => markRead.mutate(n.id))}>
             <Check className="mr-2 h-4 w-4" /> Đánh dấu tất cả đã đọc
           </Button>
         </div>
       </div>
 
-      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+      <div className="shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 bg-card p-4 rounded-xl shadow-sm border border-border">
         <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input placeholder="Tìm kiếm thông báo..." className="pl-10 bg-slate-50 border-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Tìm kiếm thông báo..." className="pl-10 bg-background border-none" />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button variant="outline" size="sm" className="rounded-full"><Filter className="h-4 w-4 mr-2"/> Lọc</Button>
-          <Button variant="secondary" size="sm" className="rounded-full bg-slate-100">Chưa đọc</Button>
+          <Button variant="secondary" size="sm" className="rounded-full bg-muted">Chưa đọc</Button>
           <Button variant="ghost" size="sm" className="rounded-full">Tất cả</Button>
         </div>
       </div>
 
-      <Card className="flex-1 min-h-0 flex flex-col border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+      <Card className="flex-1 min-h-0 flex flex-col border-border shadow-sm rounded-2xl overflow-hidden">
         <CardContent className="flex-1 overflow-y-auto custom-scrollbar p-0">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
             </div>
           ) : list.length === 0 ? (
-            <div className="text-center py-20 text-slate-500">
+            <div className="text-center py-20 text-muted-foreground">
               Không có thông báo nào.
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-border/50">
               {list.map((item) => {
                 const href = resolveHref(item);
                 const isLink = href !== "#";
 
                 const content = (
-                  <div className={`p-5 flex gap-4 hover:bg-slate-50 transition-colors ${!item.read ? 'bg-blue-50/50' : 'bg-white'}`}>
+                  <div className={`p-5 flex gap-4 transition-colors ${!item.read ? 'bg-primary/5 hover:bg-primary/10' : 'bg-card hover:bg-muted/50'}`}>
                     <div className="mt-1 flex-shrink-0">
                       {getIcon(item.type)}
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">
-                          <h4 className={`text-base font-semibold ${!item.read ? 'text-slate-900' : 'text-slate-700'}`}>{item.title}</h4>
+                          <h4 className={`text-base font-semibold ${!item.read ? 'text-foreground' : 'text-muted-foreground'}`}>{item.title}</h4>
                           {getPriorityBadge(item.type)}
-                          {!item.read && <span className="h-2 w-2 rounded-full bg-blue-600"></span>}
+                          {!item.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0"></span>}
                         </div>
-                        <div className="flex items-center text-xs text-slate-500 gap-1">
+                        <div className="flex items-center text-xs text-muted-foreground gap-1 shrink-0">
                           <Clock className="h-3 w-3" />
                           {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi }) : ""}
                         </div>
                       </div>
-                      <p className="text-sm text-slate-600">{item.body}</p>
+                      <p className="text-sm text-foreground/80">{item.body}</p>
                     </div>
                     <div className="flex-shrink-0 flex items-center justify-center pl-4">
                       {!item.read ? (
@@ -125,7 +125,7 @@ export function NotificationListClient() {
                           Đánh dấu đã đọc
                         </Button>
                       ) : (
-                        <span className="text-xs text-slate-400">Đã đọc</span>
+                        <span className="text-xs text-muted-foreground">Đã đọc</span>
                       )}
                     </div>
                   </div>

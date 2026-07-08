@@ -22,36 +22,38 @@ export class KpiEvaluationsService {
     return Math.floor(Math.random() * 100) + 50; // Trả về số giả lập (50 - 150)
   }
 
-  async findPeriods() {
+  async findPeriods(query?: any) {
+    const page = query?.page ? Number(query.page) : 1;
+    const limit = query?.limit ? Number(query.limit) : 0;
+
     const cached = await this.cache.get<any>('periods');
-    if (cached) return cached;
+    let periods = [];
+    if (cached) {
+      periods = cached;
+    } else {
+      periods = await this.prisma.kpiPeriod.findMany({
+        orderBy: { startDate: 'desc' },
+      });
+      await this.cache.set('periods', periods);
+    }
 
-    const periods = await this.prisma.kpiPeriod.findMany({
-      orderBy: { startDate: 'desc' },
-    });
+    const paginated = paginateArray(periods, page, limit);
 
-    const result = {
+    return {
       success: true,
       message: 'Lấy danh sách kỳ đánh giá thành công',
-      data: periods.map(p => ({
+      data: paginated.data.map((p: any) => ({
         ...p,
-        startDate: p.startDate?.toISOString() || '',
-        endDate: p.endDate?.toISOString() || '',
+        startDate: p.startDate ? new Date(p.startDate).toISOString() : '',
+        endDate: p.endDate ? new Date(p.endDate).toISOString() : '',
       })),
       meta: {
-        pagination: {
-          total: periods.length,
-          page: 1,
-          pageSize: periods.length,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false
-        }
+        ...paginated.meta
       }
     };
+  }
 
-    await this.cache.set('periods', result);
-    return result;
+
   }
 
   async createPeriod(data: any) {
@@ -199,6 +201,8 @@ export class KpiEvaluationsService {
   }
 
   async findEvaluations(query: any) {
+    const page = query?.page ? Number(query.page) : 1;
+    const limit = query?.limit ? Number(query.limit) : 0;
     const where: any = {};
     const employeeCode = typeof query === 'object' ? query.employeeCode : query;
 
@@ -220,27 +224,23 @@ export class KpiEvaluationsService {
       }
     }
 
-    const evaluations = await this.prisma.kpiEvaluation.findMany({
+    const allEvaluations = await this.prisma.kpiEvaluation.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       include: { employee: true }
     });
+    
+    const paginated = paginateArray(allEvaluations, page, limit);
+
     return {
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
-      data: evaluations.map(e => ({
+      data: paginated.data.map((e: any) => ({
         ...e,
         employeeName: e.employee ? e.employee.fullName : e.employeeCode
       })),
       meta: {
-        pagination: {
-          total: evaluations.length,
-          page: 1,
-          pageSize: evaluations.length,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false
-        }
+        ...paginated.meta
       }
     };
   }

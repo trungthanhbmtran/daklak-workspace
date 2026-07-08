@@ -8,18 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useHrmEmployee } from "@/features/hrm";
-import { organizationApi } from "@/features/system-admin/organization/api";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-
-function flattenUnits(nodes: unknown[], acc: { id: number; name: string }[] = []): { id: number; name: string }[] {
-  for (const n of nodes || []) {
-    const node = n as { id?: number; name?: string; children?: unknown[] };
-    if (node.id != null) acc.push({ id: node.id, name: node.name ?? "" });
-    flattenUnits(node.children ?? [], acc);
-  }
-  return acc;
-}
+import { EmployeeInfoTab } from "./employee-tabs/EmployeeInfoTab";
+import { EmployeeContractsTab } from "./employee-tabs/EmployeeContractsTab";
+import { EmployeeHistoryTab } from "./employee-tabs/EmployeeHistoryTab";
+import { useEmployeeTitles } from "./employee-tabs/useEmployeeTitles";
 
 export function EmployeeDetailClient({ params }: { params: Promise<{ id: string }> | { id: string } }) {
   const resolvedParams = typeof (params as Promise<{ id: string }>).then === "function" ? use(params as Promise<{ id: string }>) : (params as { id: string });
@@ -27,62 +19,14 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
   const [activeTab, setActiveTab] = useState("info");
 
   const { data: employee, isLoading, isError } = useHrmEmployee(Number.isNaN(id) ? null : id);
-  const { data: treeNodes } = useQuery({
-    queryKey: ["organizations", "tree"],
-    queryFn: () => organizationApi.getTree(),
-  });
-  const { data: jobTitlesRes } = useQuery({
-    queryKey: ["organizations", "job-titles"],
-    queryFn: () => organizationApi.getJobTitles(),
-  });
-
-  const unitName = useMemo(() => {
-    if (!employee?.departmentId) return employee?.department?.name ?? "—";
-    if (!Array.isArray(treeNodes)) return employee?.department?.name ?? "—";
-    const flat = flattenUnits(treeNodes);
-    const found = flat.find((u) => u.id === employee.departmentId);
-    return found?.name ?? employee?.department?.name ?? "—";
-  }, [employee, treeNodes]);
-
-  const govtTitleName = useMemo(() => {
-    const title = employee?.jobTitle;
-    if (title) return title.name;
-    if (!employee?.jobTitleId) return "—";
-    const items = jobTitlesRes?.items ?? [];
-    const found = items.find((j: { id: number }) => j.id === employee.jobTitleId);
-    return found?.name ?? "—";
-  }, [employee, jobTitlesRes]);
-
-  const rankTitleName = useMemo(() => {
-    const rank = employee?.civilServantRank;
-    if (rank) return rank.name;
-    if (!employee?.civilServantRankId) return "—";
-    const items = jobTitlesRes?.items ?? [];
-    const found = items.find((j: { id: number }) => j.id === employee.civilServantRankId);
-    return found?.name ?? "—";
-  }, [employee, jobTitlesRes]);
-
-  const partyTitleName = useMemo(() => {
-    const party = employee?.partyTitle;
-    if (party) return party.name;
-    if (!employee?.partyTitleId) return "—";
-    const items = jobTitlesRes?.items ?? [];
-    const found = items.find((j: { id: number }) => j.id === employee.partyTitleId);
-    return found?.name ?? "—";
-  }, [employee, jobTitlesRes]);
-
-  const mainTitleName = useMemo(() => {
-    if (govtTitleName !== "—") return govtTitleName;
-    if (rankTitleName !== "—") return rankTitleName;
-    return "Nhân sự";
-  }, [govtTitleName, rankTitleName]);
+  const { unitName, mainTitleName } = useEmployeeTitles(employee);
 
   const fullName = employee ? (employee.fullName || [employee.firstname, employee.lastname].filter(Boolean).join(" ")) : "—";
 
   if (Number.isNaN(id)) {
     return (
-      <div className="flex flex-col min-h-screen bg-slate-50/50 p-6 md:p-10 items-center justify-center">
-        <p className="text-slate-500">ID không hợp lệ.</p>
+      <div className="flex flex-col min-h-screen bg-background p-6 md:p-10 items-center justify-center">
+        <p className="text-muted-foreground mb-4">ID không hợp lệ.</p>
         <Link href="/services/hrm/employees">
           <Button variant="link">Quay lại danh sách</Button>
         </Link>
@@ -92,17 +36,17 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-slate-50/50 p-6 md:p-10 items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-600 mb-4" />
-        <p className="text-slate-500">Đang tải hồ sơ...</p>
+      <div className="flex flex-col min-h-screen bg-background p-6 md:p-10 items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Đang tải hồ sơ...</p>
       </div>
     );
   }
 
   if (isError || !employee) {
     return (
-      <div className="flex flex-col min-h-screen bg-slate-50/50 p-6 md:p-10 items-center justify-center">
-        <p className="text-red-600 mb-4">Không tìm thấy nhân viên hoặc lỗi tải dữ liệu.</p>
+      <div className="flex flex-col min-h-screen bg-background p-6 md:p-10 items-center justify-center">
+        <p className="text-destructive mb-4">Không tìm thấy nhân viên hoặc lỗi tải dữ liệu.</p>
         <Link href="/services/hrm/employees">
           <Button variant="outline">Quay lại danh sách</Button>
         </Link>
@@ -111,51 +55,51 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 p-6 md:p-10 space-y-6">
+    <div className="flex flex-col min-h-screen bg-background p-4 md:p-8 space-y-6">
       <div className="max-w-[1200px] mx-auto w-full flex flex-col gap-6">
         <div>
           <Link href="/services/hrm/employees">
-            <Button variant="ghost" className="text-slate-500 hover:text-slate-900 -ml-4">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground -ml-4">
               <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
             </Button>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
           <div className="lg:col-span-4">
-            <Card className="rounded-2xl border-slate-200/60 shadow-sm overflow-hidden bg-white sticky top-6">
-              <div className="h-28 bg-linear-to-br from-blue-500 to-indigo-600"></div>
+            <Card className="rounded-2xl shadow-sm overflow-hidden sticky top-6">
+              <div className="h-28 bg-gradient-to-br from-primary/80 to-primary"></div>
               <CardContent className="px-6 pb-6 pt-0 flex flex-col items-center text-center relative">
-                <Avatar className="h-24 w-24 border-4 border-white shadow-sm -mt-12 bg-white">
+                <Avatar className="h-24 w-24 border-4 border-background shadow-sm -mt-12 bg-background">
                   <AvatarImage src={undefined} />
-                  <AvatarFallback className="text-2xl font-semibold text-blue-700 bg-blue-50">
+                  <AvatarFallback className="text-2xl font-semibold text-primary bg-primary/10">
                     {fullName.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
-                <h3 className="text-xl font-bold text-slate-900 mt-3">{fullName}</h3>
-                <p className="text-slate-500 font-medium text-sm mt-1">{mainTitleName}</p>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground mt-3">{fullName}</h3>
+                <p className="text-muted-foreground font-medium text-sm md:text-base mt-1">{mainTitleName}</p>
                 <div className="mt-3">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200/50">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                     <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Đang làm việc
                   </span>
                 </div>
-                <div className="w-full h-px bg-slate-100 my-6"></div>
-                <div className="w-full space-y-4 text-sm text-left">
-                  <div className="flex items-center text-slate-600">
-                    <Briefcase className="h-4 w-4 mr-3 text-slate-400" />
-                    <span className="font-medium text-slate-900">{unitName}</span>
+                <div className="w-full h-px bg-border my-6"></div>
+                <div className="w-full space-y-4 text-sm md:text-base text-left">
+                  <div className="flex items-center text-muted-foreground">
+                    <Briefcase className="h-4 w-4 mr-3 shrink-0" />
+                    <span className="font-medium text-foreground">{unitName}</span>
                   </div>
-                  <div className="flex items-center text-slate-600">
-                    <Mail className="h-4 w-4 mr-3 text-slate-400" />
-                    <span className="font-medium text-slate-900 truncate">{employee.email || "—"}</span>
+                  <div className="flex items-center text-muted-foreground">
+                    <Mail className="h-4 w-4 mr-3 shrink-0" />
+                    <span className="font-medium text-foreground truncate">{employee.email || "—"}</span>
                   </div>
-                  <div className="flex items-center text-slate-600">
-                    <Phone className="h-4 w-4 mr-3 text-slate-400" />
-                    <span className="font-medium text-slate-900">{employee.phone || "—"}</span>
+                  <div className="flex items-center text-muted-foreground">
+                    <Phone className="h-4 w-4 mr-3 shrink-0" />
+                    <span className="font-medium text-foreground">{employee.phone || "—"}</span>
                   </div>
-                  <div className="flex items-center text-slate-600">
-                    <Calendar className="h-4 w-4 mr-3 text-slate-400" />
-                    <span className="font-medium text-slate-900">Mã NV: {employee.employeeCode || employee.id}</span>
+                  <div className="flex items-center text-muted-foreground">
+                    <Calendar className="h-4 w-4 mr-3 shrink-0" />
+                    <span className="font-medium text-foreground">Mã NV: {employee.employeeCode || employee.id}</span>
                   </div>
                 </div>
               </CardContent>
@@ -164,73 +108,21 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
 
           <div className="lg:col-span-8">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-              <TabsList className="bg-slate-200/50 p-1.5 rounded-xl h-auto inline-flex">
-                <TabsTrigger value="info" className="rounded-lg px-6 py-2.5 text-sm font-medium text-slate-600 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">
+              <TabsList className="bg-muted p-1 rounded-xl h-auto inline-flex flex-wrap">
+                <TabsTrigger value="info" className="rounded-lg px-4 sm:px-6 py-2 md:py-2.5 text-sm font-medium transition-all">
                   Sơ yếu lý lịch
                 </TabsTrigger>
-                <TabsTrigger value="contracts" className="rounded-lg px-6 py-2.5 text-sm font-medium text-slate-600 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all">
+                <TabsTrigger value="contracts" className="rounded-lg px-4 sm:px-6 py-2 md:py-2.5 text-sm font-medium transition-all">
                   Hợp đồng
+                </TabsTrigger>
+                <TabsTrigger value="history" className="rounded-lg px-4 sm:px-6 py-2 md:py-2.5 text-sm font-medium transition-all">
+                  Lịch sử công tác
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="info" className="outline-none">
-                <Card className="rounded-2xl border-slate-200/60 shadow-sm overflow-hidden bg-white">
-                  <div className="p-6">
-                    <h4 className="text-lg font-semibold text-slate-900 mb-6">Thông tin định danh</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 text-sm">
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Mã nhân viên</span>
-                        <span className="font-semibold text-slate-900 text-base">{employee.employeeCode || employee.id}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Số CCCD</span>
-                        <span className="font-semibold text-slate-900 text-base">{employee.identityCard || "—"}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Email</span>
-                        <span className="font-semibold text-slate-900 text-base">{employee.email || "—"}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Số điện thoại</span>
-                        <span className="font-semibold text-slate-900 text-base">{employee.phone || "—"}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Đơn vị</span>
-                        <span className="font-semibold text-slate-900 text-base">{unitName}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Chức vụ chính quyền</span>
-                        <span className="font-semibold text-slate-900 text-base">{govtTitleName}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Ngạch công chức</span>
-                        <span className="font-semibold text-slate-900 text-base">{rankTitleName}</span>
-                      </div>
-                      <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Chức vụ Đảng</span>
-                        <span className="font-semibold text-slate-900 text-base">{partyTitleName}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="contracts" className="outline-none">
-                <Card className="rounded-2xl border-slate-200/60 shadow-sm overflow-hidden bg-white">
-                  <div className="p-12 flex flex-col items-center justify-center text-center">
-                    <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                      <FileText className="h-8 w-8 text-slate-300" />
-                    </div>
-                    <h4 className="text-slate-700 font-medium">Chưa có dữ liệu hợp đồng</h4>
-                    <p className="text-sm text-slate-400 mt-1 max-w-sm">
-                      Nhân viên này chưa được gắn hợp đồng lao động nào. Bạn có thể thêm hợp đồng từ hệ thống.
-                    </p>
-                    <Button variant="outline" className="mt-6 rounded-full border-slate-200 text-slate-600" disabled>
-                      Thêm hợp đồng
-                    </Button>
-                  </div>
-                </Card>
-              </TabsContent>
+              <EmployeeInfoTab employee={employee} />
+              <EmployeeContractsTab />
+              <EmployeeHistoryTab employee={employee} />
             </Tabs>
           </div>
         </div>

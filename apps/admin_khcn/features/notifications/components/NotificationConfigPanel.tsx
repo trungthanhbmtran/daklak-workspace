@@ -44,33 +44,35 @@ export function NotificationConfigPanel() {
         NOTIFY_SMTP: false,
       };
       
-      res.forEach((item: any) => {
-        ids[item.integrationCode] = item.id;
-        states[item.integrationCode] = item.isActive;
-        const config = item.configData || {};
-        
-        switch (item.integrationCode) {
-          case "NOTIFY_INAPP":
-            setInApp(item.isActive);
-            break;
-          case "NOTIFY_TELEGRAM":
-            setTelegram({ botToken: config.botToken || "" });
-            break;
-          case "NOTIFY_ZALO":
-            setZalo({ accessToken: config.accessToken || "", apiUrl: config.apiUrl || "" });
-            break;
-          case "NOTIFY_SMTP":
-            setSmtp({
-              host: config.host || "",
-              port: config.port || "",
-              secure: config.secure || false,
-              user: config.user || "",
-              password: config.password || "",
-              from: config.from || "",
-            });
-            break;
-        }
-      });
+      if (Array.isArray(res)) {
+        res.forEach((item: any) => {
+          ids[item.integrationCode] = item.id;
+          states[item.integrationCode] = item.isActive;
+          const config = item.configData || {};
+          
+          switch (item.integrationCode) {
+            case "NOTIFY_INAPP":
+              setInApp(item.isActive);
+              break;
+            case "NOTIFY_TELEGRAM":
+              setTelegram({ botToken: config.botToken || "" });
+              break;
+            case "NOTIFY_ZALO":
+              setZalo({ accessToken: config.accessToken || "", apiUrl: config.apiUrl || "" });
+              break;
+            case "NOTIFY_SMTP":
+              setSmtp({
+                host: config.host || "",
+                port: config.port || "",
+                secure: config.secure || false,
+                user: config.user || "",
+                password: config.password || "",
+                from: config.from || "",
+              });
+              break;
+          }
+        });
+      }
       setIntegrationIds(ids);
       setActiveStates(states);
     } catch (error) {
@@ -167,7 +169,7 @@ export function NotificationConfigPanel() {
               placeholder="Ví dụ: 123456789:ABCDefghIJKLmnopQRSTuvwxyz" 
               value={telegram.botToken}
               onChange={(e) => setTelegram({...telegram, botToken: e.target.value})}
-              className="bg-white/50 dark:bg-slate-900/50"
+              className="bg-background"
             />
           </div>
           <div className="flex justify-end pt-2">
@@ -191,25 +193,25 @@ export function NotificationConfigPanel() {
         <div className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="space-y-2">
             <Label htmlFor="smtp-host">Máy chủ SMTP (Host)</Label>
-            <Input id="smtp-host" placeholder="smtp.gmail.com" value={smtp.host} onChange={(e) => setSmtp({...smtp, host: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="smtp-host" placeholder="smtp.gmail.com" value={smtp.host} onChange={(e) => setSmtp({...smtp, host: e.target.value})} className="bg-background" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="smtp-port">Cổng (Port)</Label>
-            <Input id="smtp-port" placeholder="465" value={smtp.port} onChange={(e) => setSmtp({...smtp, port: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="smtp-port" placeholder="465" value={smtp.port} onChange={(e) => setSmtp({...smtp, port: e.target.value})} className="bg-background" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="smtp-user">Tài khoản (Username)</Label>
-            <Input id="smtp-user" placeholder="email@example.com" value={smtp.user} onChange={(e) => setSmtp({...smtp, user: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="smtp-user" placeholder="email@example.com" value={smtp.user} onChange={(e) => setSmtp({...smtp, user: e.target.value})} className="bg-background" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="smtp-pass">Mật khẩu (App Password)</Label>
-            <Input id="smtp-pass" type="password" value={smtp.password} onChange={(e) => setSmtp({...smtp, password: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="smtp-pass" type="password" value={smtp.password} onChange={(e) => setSmtp({...smtp, password: e.target.value})} className="bg-background" />
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="smtp-from">Gửi từ (From Email)</Label>
-            <Input id="smtp-from" placeholder="Hệ thống HRM <noreply@example.com>" value={smtp.from} onChange={(e) => setSmtp({...smtp, from: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="smtp-from" placeholder="Hệ thống HRM <noreply@example.com>" value={smtp.from} onChange={(e) => setSmtp({...smtp, from: e.target.value})} className="bg-background" />
           </div>
-          <div className="flex items-center space-x-2 md:col-span-2 mt-2 bg-white/50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center space-x-2 md:col-span-2 mt-2 bg-background p-3 rounded-lg border border-border">
             <Switch id="smtp-secure" checked={smtp.secure} onCheckedChange={(v) => setSmtp({...smtp, secure: v})} />
             <Label htmlFor="smtp-secure" className="cursor-pointer">Bật mã hóa SSL/TLS (Secure Connection)</Label>
           </div>
@@ -234,11 +236,11 @@ export function NotificationConfigPanel() {
         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="space-y-2">
             <Label htmlFor="zalo-token">Access Token Zalo OA</Label>
-            <Input id="zalo-token" placeholder="Zalo OA Access Token..." value={zalo.accessToken} onChange={(e) => setZalo({...zalo, accessToken: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="zalo-token" placeholder="Zalo OA Access Token..." value={zalo.accessToken} onChange={(e) => setZalo({...zalo, accessToken: e.target.value})} className="bg-background" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="zalo-api">API URL (Tùy chọn)</Label>
-            <Input id="zalo-api" placeholder="https://openapi.zalo.me/v2.0/oa/message" value={zalo.apiUrl} onChange={(e) => setZalo({...zalo, apiUrl: e.target.value})} className="bg-white/50 dark:bg-slate-900/50" />
+            <Input id="zalo-api" placeholder="https://openapi.zalo.me/v2.0/oa/message" value={zalo.apiUrl} onChange={(e) => setZalo({...zalo, apiUrl: e.target.value})} className="bg-background" />
           </div>
           <div className="flex justify-end pt-2">
             <Button onClick={() => handleSave("NOTIFY_ZALO", "Zalo ZNS / OA", zalo, activeStates["NOTIFY_ZALO"])} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -255,7 +257,7 @@ export function NotificationConfigPanel() {
       <div className="max-w-5xl mx-auto pb-10">
         <div className="w-full">
           {/* Channels List */}
-        <div className="p-6 md:p-8 space-y-6 bg-slate-50 dark:bg-slate-900/50">
+        <div className="p-6 md:p-8 space-y-6 bg-background rounded-xl">
           {channels.map((channel) => {
             const isExpanded = expandedId === channel.id;
             const isActive = activeStates[channel.id];
@@ -264,8 +266,8 @@ export function NotificationConfigPanel() {
               <div 
                 key={channel.id} 
                 className={cn(
-                  "bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-300 shadow-sm",
-                  isActive ? "border-violet-200 dark:border-violet-800" : "border-slate-200 dark:border-slate-800",
+                  "bg-card rounded-2xl border transition-all duration-300 shadow-sm",
+                  isActive ? "border-violet-200 dark:border-violet-800" : "border-border",
                   isExpanded ? "ring-2 ring-violet-500/20 shadow-md" : "hover:border-slate-300 dark:hover:border-slate-700"
                 )}
               >
@@ -277,7 +279,7 @@ export function NotificationConfigPanel() {
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">{channel.name}</h3>
+                      <h3 className="text-xl font-bold text-foreground">{channel.name}</h3>
                       {isActive ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
                           Đã Bật
@@ -288,14 +290,14 @@ export function NotificationConfigPanel() {
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-3xl">
+                    <p className="text-muted-foreground text-sm leading-relaxed max-w-3xl">
                       {channel.description}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-6 mt-4 sm:mt-0" onClick={e => e.stopPropagation()}>
                     <div className="flex items-center gap-3">
-                      <Label htmlFor={`switch-${channel.id}`} className="text-sm font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
+                      <Label htmlFor={`switch-${channel.id}`} className="text-sm font-medium text-muted-foreground cursor-pointer">
                         {isActive ? 'Kích hoạt' : 'Vô hiệu hóa'}
                       </Label>
                       <Switch 
@@ -323,7 +325,7 @@ export function NotificationConfigPanel() {
 
                 {/* Expandable Configuration Area */}
                 {isExpanded && channel.config && (
-                  <div className="border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-6 md:p-8 rounded-b-2xl">
+                  <div className="border-t border-border bg-muted/20 p-6 md:p-8 rounded-b-2xl">
                     {channel.config}
                   </div>
                 )}
