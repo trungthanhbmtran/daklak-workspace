@@ -257,7 +257,7 @@ export function NotificationConfigPanel() {
       <div className="max-w-5xl mx-auto pb-10">
         <div className="w-full">
           {/* Channels List */}
-        <div className="p-6 md:p-8 space-y-6 bg-background rounded-xl">
+        <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 bg-background rounded-xl">
           {channels.map((channel) => {
             const isExpanded = expandedId === channel.id;
             const isActive = activeStates[channel.id];
@@ -267,57 +267,57 @@ export function NotificationConfigPanel() {
                 key={channel.id} 
                 className={cn(
                   "bg-card rounded-2xl border transition-all duration-300 shadow-sm",
-                  isActive ? "border-violet-200 dark:border-violet-800" : "border-border",
-                  isExpanded ? "ring-2 ring-violet-500/20 shadow-md" : "hover:border-slate-300 dark:hover:border-slate-700"
+                  isActive ? "border-primary/30" : "border-border",
+                  isExpanded ? "ring-2 ring-primary/20 shadow-md" : "hover:border-primary/20"
                 )}
               >
                 {/* Card Header (Always visible) */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 md:p-6 cursor-pointer" onClick={() => channel.config && setExpandedId(isExpanded ? null : channel.id)}>
-                  <div className={cn("w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center border shadow-inner transition-colors", channel.bg, isActive ? "border-transparent" : "border-slate-100 dark:border-slate-800 opacity-50")}>
-                    <channel.icon className={cn("w-7 h-7", isActive ? channel.color : "text-slate-400")} />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 p-4 md:p-6 cursor-pointer" onClick={() => channel.config && setExpandedId(isExpanded ? null : channel.id)}>
+                  <div className={cn("w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-2xl flex items-center justify-center border shadow-inner transition-colors", channel.bg, isActive ? "border-transparent" : "border-border opacity-50")}>
+                    <channel.icon className={cn("w-6 h-6 md:w-7 md:h-7", isActive ? channel.color : "text-muted-foreground")} />
                   </div>
                   
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-xl font-bold text-foreground">{channel.name}</h3>
+                    <div className="flex items-center gap-2 md:gap-3 mb-1">
+                      <h3 className="text-lg md:text-xl font-bold text-foreground line-clamp-1">{channel.name}</h3>
                       {isActive ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-primary/10 text-primary">
                           Đã Bật
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-muted text-muted-foreground">
                           Đã Tắt
                         </span>
                       )}
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed max-w-3xl">
+                    <p className="text-muted-foreground text-xs md:text-sm leading-relaxed max-w-3xl line-clamp-2">
                       {channel.description}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-6 mt-4 sm:mt-0" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-between sm:justify-end gap-4 mt-3 sm:mt-0 w-full sm:w-auto" onClick={e => e.stopPropagation()}>
                     <div className="flex items-center gap-3">
-                      <Label htmlFor={`switch-${channel.id}`} className="text-sm font-medium text-muted-foreground cursor-pointer">
+                      <Label htmlFor={`switch-${channel.id}`} className="text-xs md:text-sm font-medium text-muted-foreground cursor-pointer">
                         {isActive ? 'Kích hoạt' : 'Vô hiệu hóa'}
                       </Label>
                       <Switch 
                         id={`switch-${channel.id}`} 
                         checked={isActive} 
                         onCheckedChange={() => toggleActive(channel.id, channel.name, channel.stateData, isActive)} 
-                        className="data-[state=checked]:bg-violet-600"
+                        className="data-[state=checked]:bg-primary"
                       />
                     </div>
                     {channel.config && (
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className={cn("rounded-full w-8 h-8 transition-transform duration-200", isExpanded ? "rotate-180 bg-slate-100 dark:bg-slate-800" : "")}
+                        className={cn("rounded-full w-8 h-8 transition-transform duration-200 shrink-0", isExpanded ? "rotate-180 bg-muted" : "")}
                         onClick={(e) => {
                           e.stopPropagation();
                           setExpandedId(isExpanded ? null : channel.id);
                         }}
                       >
-                        <ChevronDown className="w-5 h-5 text-slate-500" />
+                        <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
                       </Button>
                     )}
                   </div>
@@ -325,7 +325,7 @@ export function NotificationConfigPanel() {
 
                 {/* Expandable Configuration Area */}
                 {isExpanded && channel.config && (
-                  <div className="border-t border-border bg-muted/20 p-6 md:p-8 rounded-b-2xl">
+                  <div className="border-t border-border bg-muted/20 p-4 md:p-6 lg:p-8 rounded-b-2xl">
                     {channel.config}
                   </div>
                 )}
