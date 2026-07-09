@@ -9,6 +9,7 @@ import {
   Panel,
   BackgroundVariant,
   MiniMap,
+  MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -121,6 +122,21 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     );
   }
 
+  const defaultEdgeOptions = {
+    type: "smoothstep",
+    animated: true,
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      width: 20,
+      height: 20,
+      color: "#64748b",
+    },
+    style: {
+      strokeWidth: 2,
+      stroke: "#64748b",
+    },
+  };
+
   return (
     <div className="flex flex-col w-full h-full overflow-hidden bg-background">
       <Topbar 
@@ -156,6 +172,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             nodeTypes={nodeTypes}
             onInit={onInit}
             fitView
+            defaultEdgeOptions={defaultEdgeOptions}
             className="transition-opacity duration-300"
           >
             <Background 

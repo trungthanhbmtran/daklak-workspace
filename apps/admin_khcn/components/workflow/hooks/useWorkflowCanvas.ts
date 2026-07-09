@@ -7,6 +7,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  MarkerType,
 } from "@xyflow/react";
 
 export const initialNodes: Node[] = [
@@ -28,7 +29,21 @@ export function useWorkflowCanvas() {
   const { screenToFlowPosition } = useReactFlow();
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({
+      ...params,
+      type: 'smoothstep',
+      animated: true,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: '#64748b',
+      },
+      style: {
+        strokeWidth: 2,
+        stroke: '#64748b',
+      }
+    }, eds)),
     [setEdges]
   );
 
