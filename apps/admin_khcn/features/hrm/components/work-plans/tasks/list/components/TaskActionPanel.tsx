@@ -30,19 +30,33 @@ export function TaskActionPanel({
 }: TaskActionPanelProps) {
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
 
-  const { handleCompleteTask, handleApproveTask, handleRejectTask } = useTaskActions(activeTask?.id);
+  const { handleProcessTask, translateAction } = useTaskActions(activeTask?.id);
   const { delegationChain } = useTaskDelegation(activeTask?.rootTaskId || activeTask?.id);
   const hasSubtasks = delegationChain.some((t: any) => t.parentId === activeTask?.id);
 
-  const handleComplete = () => handleCompleteTask(onCloseDialog);
-  const handleApprove = () => handleApproveTask(onCloseDialog);
-  const handleReject = () => {
-    handleRejectTask(rejectReason, () => {
-      setIsRejectOpen(false);
-      setRejectReason('');
-      onCloseDialog();
-    });
+  const systemActions = ['ASSIGN', 'ADD_SUBTASK', 'COORDINATE', 'EDIT', 'DELETE', 'CHAT'];
+  const dynamicActions = allowedActions.filter((a: string) => !systemActions.includes(a));
+
+  const handleActionClick = (actionName: string) => {
+    if (actionName === 'RETURN' || actionName.includes('REJECT')) {
+      setPendingAction(actionName);
+      setIsRejectOpen(true);
+    } else {
+      handleProcessTask(actionName, undefined, onCloseDialog);
+    }
+  };
+
+  const handleConfirmReject = () => {
+    if (pendingAction) {
+      handleProcessTask(pendingAction, rejectReason, () => {
+        setIsRejectOpen(false);
+        setRejectReason('');
+        setPendingAction(null);
+        onCloseDialog();
+      });
+    }
   };
 
   return (
@@ -184,26 +198,39 @@ export function TaskActionPanel({
                     ℹ️ Tạo các mục tiêu cụ thể để thực hiện: <b className="text-slate-700">{activeTask.title}</b>
                   </div>
                 )}
-                {allowedActions.includes('COMPLETE') && !hasSubtasks && (
-                  <Button className="w-full h-10 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm" onClick={handleComplete}>
-                    <CheckCircle2 className="w-4 h-4 mr-2" /> Báo cáo hoàn thành
-                  </Button>
-                )}
-                {allowedActions.includes('APPROVE') && (
-                  <Button className="w-full h-10 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm" onClick={handleApprove}>
-                    <CheckCircle2 className="w-4 h-4 mr-2" /> Nghiệm thu (Duyệt)
-                  </Button>
-                )}
-                {allowedActions.includes('COORDINATE') && (
-                  <Button variant="outline" className="w-full h-10 rounded-lg font-medium text-sm" onClick={onOpenCoordinationModal}>
-                    <Users className="w-4 h-4 mr-2" /> Xin phối hợp
-                  </Button>
-                )}
-                {allowedActions.includes('RETURN') && (
-                  <Button variant="outline" className="w-full h-10 rounded-lg border-rose-200 text-rose-600 hover:bg-rose-50 font-medium text-sm" onClick={() => setIsRejectOpen(true)}>
-                    <Reply className="w-4 h-4 mr-2" /> Trả lại công việc
-                  </Button>
-                )}
+                {/* Render Dynamic Workflow Actions */}
+                {dynamicActions.map((actionName: string) => {
+                  const isPrimary = ['COMPLETE', 'APPROVE', 'ACCEPT', 'SUBMIT'].includes(actionName);
+                  const isDanger = ['RETURN', 'REJECT'].some(a => actionName.includes(a));
+                  const isCoordination = actionName === 'COORDINATE';
+
+                  if (isCoordination) {
+                    return (
+                      <Button key={actionName} variant="outline" className="w-full h-10 rounded-lg font-medium text-sm" onClick={onOpenCoordinationModal}>
+                        <Users className="w-4 h-4 mr-2" /> Xin phối hợp
+                      </Button>
+                    );
+                  }
+
+                  if (actionName === 'COMPLETE' && hasSubtasks) return null; // Logic hide complete if has subtasks
+
+                  return (
+                    <Button 
+                      key={actionName}
+                      variant={isPrimary ? 'default' : isDanger ? 'outline' : 'secondary'}
+                      className={`w-full h-10 rounded-lg font-medium text-sm ${
+                        isPrimary ? 'bg-indigo-500 hover:bg-indigo-600 text-white' : 
+                        isDanger ? 'border-rose-200 text-rose-600 hover:bg-rose-50' : ''
+                      }`}
+                      onClick={() => handleActionClick(actionName)}
+                    >
+                      {isPrimary && <CheckCircle2 className="w-4 h-4 mr-2" />}
+                      {isDanger && <Reply className="w-4 h-4 mr-2" />}
+                      {!isPrimary && !isDanger && <BarChart3 className="w-4 h-4 mr-2" />}
+                      {translateAction(actionName)}
+                    </Button>
+                  );
+                })}
               </>
             )}
 
@@ -248,7 +275,7 @@ export function TaskActionPanel({
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setIsRejectOpen(false)} className="rounded-full">Hủy</Button>
-            <Button onClick={handleReject} disabled={!rejectReason.trim()} className="rounded-full bg-rose-600 hover:bg-rose-700 text-white">
+            <Button className="rounded-full bg-rose-500 hover:bg-rose-600 text-white" onClick={handleConfirmReject}>
               Xác nhận trả lại
             </Button>
           </div>

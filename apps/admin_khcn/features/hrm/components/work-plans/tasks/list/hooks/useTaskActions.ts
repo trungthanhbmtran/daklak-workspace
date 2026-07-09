@@ -5,63 +5,51 @@ import { useUpdateStatus } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
 
 /**
- * Hook quản lý các thao tác hoàn thành, từ chối, nghiệm thu công việc.
+ * Hook quản lý các thao tác thực thi quy trình (workflow actions).
  */
 export function useTaskActions(activeTaskId: number | undefined) {
   const qc = useQueryClient();
   const updateStatus = useUpdateStatus(activeTaskId);
 
-  const handleCompleteTask = useCallback(async (onClose: () => void) => {
-    if (!activeTaskId) return;
-    updateStatus.mutate(
-      { status: 'DONE' },
-      {
-        onSuccess: () => {
-          toast.success('Đã hoàn thành công việc!');
-          qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
-          onClose();
-        },
-        onError: () => toast.error('Lỗi khi hoàn thành công việc'),
-      },
-    );
-  }, [activeTaskId, updateStatus, qc]);
+  // Fallback map for translation, ideally this should come from i18n or backend label
+  const translateAction = (action: string) => {
+    const dict: Record<string, string> = {
+      'COMPLETE': 'Báo cáo hoàn thành',
+      'APPROVE': 'Nghiệm thu (Duyệt)',
+      'RETURN': 'Trả lại công việc',
+      'ASSIGN': 'Giao việc',
+      'REJECT': 'Từ chối',
+      'ACCEPT': 'Tiếp nhận',
+      'SUBMIT': 'Trình duyệt',
+    };
+    return dict[action] || action;
+  };
 
-  const handleRejectTask = useCallback(async (
-    reason: string,
-    onClose: () => void,
-  ) => {
-    if (!reason.trim() || !activeTaskId) return;
-    updateStatus.mutate(
-      { status: 'RETURNED', rejectReason: reason },
-      {
-        onSuccess: () => {
-          toast.success('Đã trả lại công việc');
-          qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
-          onClose();
-        },
-        onError: () => toast.error('Lỗi khi trả lại công việc'),
-      },
-    );
-  }, [activeTaskId, updateStatus, qc]);
-
-  const handleApproveTask = useCallback(async (onClose: () => void) => {
+  const handleProcessTask = useCallback(async (actionName: string, reason?: string, onClose?: () => void) => {
     if (!activeTaskId) return;
+    
+    // We pass both status (for legacy compatibility) and actionName (for WorkflowEngine)
+    // The backend's task-shared.service.ts calls getWorkflowActionContext using actionName
+    let payload: any = { actionName };
+    if (actionName === 'COMPLETE' || actionName === 'APPROVE') payload.status = 'DONE';
+    if (actionName === 'RETURN') payload.status = 'RETURNED';
+    if (reason) payload.rejectReason = reason;
+
     updateStatus.mutate(
-      { status: 'DONE' },
+      payload,
       {
         onSuccess: () => {
-          toast.success('Đã nghiệm thu công việc');
+          toast.success(`Đã thực hiện: ${translateAction(actionName)}`);
           qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
-          onClose();
+          onClose?.();
         },
-        onError: () => toast.error('Lỗi khi nghiệm thu công việc'),
+        onError: () => toast.error('Lỗi hệ thống khi xử lý công việc'),
       },
     );
   }, [activeTaskId, updateStatus, qc]);
 
   return {
-    handleCompleteTask,
-    handleRejectTask,
-    handleApproveTask,
+    handleProcessTask,
+    translateAction
   };
 }

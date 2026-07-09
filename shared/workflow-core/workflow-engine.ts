@@ -144,8 +144,7 @@ export class WorkflowEngine {
       }
       return { allowed: true };
     }
-
-    return this.evaluateSmartPbacDefaults(node, actionName, contextInfo, userId);
+    return { allowed: true };
   }
 
   private checkSystemActions(actionName: string, contextInfo: ContextInfo): { isSystemAction: boolean; allowed: boolean; reason?: string } {
@@ -167,60 +166,7 @@ export class WorkflowEngine {
     return { allowed: true };
   }
 
-  private evaluateSmartPbacDefaults(
-    node: CompiledNode,
-    actionName: string,
-    contextInfo: ContextInfo,
-    userId?: string
-  ): { allowed: boolean; reason?: string } {
-    if (node.type !== 'user_task') return { allowed: true };
 
-    const isManager = contextInfo.isSupervisor || contextInfo.isDeptLeader;
-    const currentEmpCode = userId || '';
-    const hasSubordinates = contextInfo.allowedEmployeeCodes.filter((c: string) => c !== currentEmpCode).length > 0;
-
-    switch (actionName) {
-      case 'ASSIGN':
-      case 'ASSIGN_STAFF':
-        if (!hasSubordinates && !contextInfo.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân công/giao việc.' };
-        if (!contextInfo.isAssignee && !contextInfo.isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
-        break;
-      case 'COMPLETE':
-      case 'PROCESS':
-      case 'IN_PROGRESS':
-      case 'DONE':
-      case 'SUBMIT_DRAFT':
-      case 'EDIT_ARTICLE':
-      case 'PUBLISH':
-      case 'ISSUE':
-        if (contextInfo.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể báo cáo hoàn thành/xử lý.' };
-        if (!contextInfo.isAssignee && !contextInfo.isOwner) return { allowed: false, reason: 'Chỉ người được phân công hoặc người tạo mới có quyền thực hiện.' };
-        break;
-      case 'APPROVE':
-      case 'REJECT':
-      case 'ROUTE':
-        if (contextInfo.status !== 'PENDING_APPROVAL' && contextInfo.status !== 'REVIEWING') return { allowed: false, reason: 'Công việc chưa được báo cáo hoàn thành để duyệt.' };
-        if (!contextInfo.isOwner) return { allowed: false, reason: 'Chỉ người giao việc mới có quyền nghiệm thu (duyệt).' };
-        break;
-      case 'RETURN':
-        if (contextInfo.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể trả lại.' };
-        if (!isManager && !contextInfo.isOwner && !contextInfo.isAssignee) return { allowed: false, reason: 'Không có quyền trả lại công việc.' };
-        break;
-      case 'ADD_SUBTASK':
-        if (!hasSubordinates && !contextInfo.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân rã công việc.' };
-        if (!contextInfo.isAssignee && !contextInfo.isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân rã.' };
-        break;
-      case 'EDIT':
-      case 'DELETE':
-        if (!contextInfo.isOwner) return { allowed: false, reason: 'Chỉ người tạo mới có quyền sửa/xóa.' };
-        break;
-      case 'COORDINATE':
-        if (contextInfo.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể xin phối hợp.' };
-        if (!contextInfo.isParticipant) return { allowed: false, reason: 'Bạn không có quyền xin phối hợp.' };
-        break;
-    }
-    return { allowed: true };
-  }
 
   public getAllowedActions(
     currentNodeId: string,
@@ -311,8 +257,9 @@ export class WorkflowEngine {
       }
     }
 
-    if (edge.label && evalContext?.status) {
-      return edge.label === evalContext.status;
+    const edgeAction = edge.data?.actionName || edge.label;
+    if (edgeAction && evalContext?.status) {
+      return edgeAction === evalContext.status;
     }
     return false;
   }
@@ -322,7 +269,8 @@ export class WorkflowEngine {
   }
 
   private isTargetNodeActionMatch(targetNode: CompiledNode, edge: EdgeData, actionName: string): boolean {
-    return edge.label === actionName || targetNode.data?.actionName === actionName;
+    const edgeAction = edge.data?.actionName || edge.label;
+    return edgeAction === actionName || targetNode.data?.actionName === actionName;
   }
 
   private findLegacyFallbackNode(currentNodeId: string): string | null {
@@ -330,7 +278,7 @@ export class WorkflowEngine {
     if (!sourceNode || sourceNode.outEdges.length !== 1) return null;
 
     const outEdge = sourceNode.outEdges[0];
-    if (!outEdge.label) {
+    if (!outEdge.label && !outEdge.data?.actionName) {
       const targetNode = this.compiled.nodes.get(outEdge.target);
       if (targetNode && !['parallel_gateway', 'exclusive_gateway'].includes(targetNode.type || '')) {
         return outEdge.target;

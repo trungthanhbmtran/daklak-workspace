@@ -124,7 +124,22 @@ export const PropertiesPanel = ({
               placeholder="VD: APPROVE, REJECT, KÝ DUYỆT"
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              Hành động của người dùng khớp với tên này sẽ đi theo đường nối này.
+              Tên hiển thị trên sơ đồ quy trình.
+            </p>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+              Mã rẽ nhánh (Action Code)
+            </label>
+            <Input type="text"
+              name="actionName"
+              value={(edgeData.actionName as string) || ""}
+              onChange={handleChange}
+              className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+              placeholder="VD: APPROVE, REJECT, SUBMIT"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1.5">
+              Mã tiếng Anh dùng trong xử lý logic (VD: APPROVE). Nếu để trống, sẽ dùng Tên thao tác (Label).
             </p>
           </div>
           <div>
@@ -139,8 +154,8 @@ export const PropertiesPanel = ({
                 onClick={() => {
                   onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
                     ...selectedEdge, 
-                    label: "APPROVED",
-                    data: { ...(selectedEdge.data || {}), expression: "status === 'APPROVED'" } 
+                    label: "Phê duyệt",
+                    data: { ...(selectedEdge.data || {}), actionName: "APPROVE", expression: "status === 'APPROVED'" } 
                   });
                 }}
               >
@@ -153,8 +168,8 @@ export const PropertiesPanel = ({
                 onClick={() => {
                   onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
                     ...selectedEdge, 
-                    label: "REJECTED",
-                    data: { ...(selectedEdge.data || {}), expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } 
+                    label: "Từ chối",
+                    data: { ...(selectedEdge.data || {}), actionName: "REJECT", expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } 
                   });
                 }}
               >

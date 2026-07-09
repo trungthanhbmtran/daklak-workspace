@@ -165,7 +165,8 @@ export class WorkflowCompiler {
     }
 
     outEdges.forEach((edge) => {
-      if (edge.label) possibleActions.add(edge.label);
+      if (edge.data?.actionName) possibleActions.add(edge.data.actionName);
+      else if (edge.label) possibleActions.add(edge.label);
     });
 
     if (possibleActions.size === 0) {

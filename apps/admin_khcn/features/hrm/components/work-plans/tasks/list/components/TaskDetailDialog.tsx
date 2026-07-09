@@ -10,6 +10,7 @@ import {
 import { getDueDateDisplay } from '../utils';
 import { TaskStatusBadge, TaskPriorityBadge } from '@/components/shared/badges/TaskBadges';
 import { WorkflowTimeline } from '@/features/workflow/components/WorkflowTimeline';
+import { WorkflowStatusBadge } from '@/components/workflow/shared/WorkflowStatusBadge';
 import { TaskChatContainer } from './TaskChatContainer';
 import { TaskActionPanel } from './TaskActionPanel';
 import { TaskDelegationTree } from './TaskDelegationTree';
@@ -86,7 +87,11 @@ export function TaskDetailDialog({
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="scale-90 origin-left shrink-0">
-                  <TaskStatusBadge code={activeTask.status || 'TODO'} showIcon />
+                  {activeTask.workflowInstId ? (
+                    <WorkflowStatusBadge status={activeTask.status || 'TODO'} showIcon={true} />
+                  ) : (
+                    <TaskStatusBadge code={activeTask.status || 'TODO'} showIcon={true} />
+                  )}
                 </div>
                 <div className="hidden sm:block">
                   <TaskPriorityBadge code={activeTask.priority || 'NORMAL'} className="px-3 py-1 text-[11px]" />

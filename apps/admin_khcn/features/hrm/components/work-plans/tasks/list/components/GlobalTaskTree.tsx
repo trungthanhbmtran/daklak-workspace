@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useTaskSubtasks } from '@/features/hrm/hooks/useTasks';
 import { TaskStatusBadge, TaskPriorityBadge, TaskRoleBadge, TASK_STATUS_CONFIG } from '@/components/shared/badges/TaskBadges';
+import { WorkflowStatusBadge } from '@/components/workflow/shared/WorkflowStatusBadge';
 
 interface TaskRowProps {
   task: any;
@@ -120,7 +121,11 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
               </h4>
 
               <div className="flex flex-wrap items-center gap-3 mt-2.5">
-                <TaskStatusBadge code={task.status} showIcon />
+                {task.workflowInstId ? (
+                  <WorkflowStatusBadge status={task.status} showIcon={true} />
+                ) : (
+                  <TaskStatusBadge code={task.status} showIcon={true} />
+                )}
 
                 {!isUnassigned ? (
                   <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 pl-1 pr-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
