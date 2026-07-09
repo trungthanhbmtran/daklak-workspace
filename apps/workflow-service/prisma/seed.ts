@@ -77,8 +77,8 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
       { id: 'edge_gw_report', source: 'gw_join', target: 'node_report', type: 'smoothstep', animated: true },
       { id: 'edge_report_approve', source: 'node_report', target: 'node_approve', type: 'smoothstep', animated: true },
       { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', type: 'smoothstep', animated: true, label: 'Duyệt', data: { expression: "status === 'APPROVED'" } },
-      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'Trả lại', data: { expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } }
+      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', type: 'smoothstep', animated: true, label: 'APPROVED' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } }
     ],
   };
 
@@ -134,8 +134,8 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
       { id: 'edge_assign_process', source: 'node_assign_staff', target: 'node_process', type: 'smoothstep', animated: true },
       { id: 'edge_process_approve', source: 'node_process', target: 'node_approve', type: 'smoothstep', animated: true },
       { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_end_issue', source: 'gw_approve', target: 'node_issue', type: 'smoothstep', animated: true, label: 'Duyệt', data: { expression: "status === 'APPROVED'" } },
-      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_process', type: 'smoothstep', animated: true, label: 'Trả lại', data: { expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } },
+      { id: 'edge_gw_end_issue', source: 'gw_approve', target: 'node_issue', type: 'smoothstep', animated: true, label: 'APPROVED' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_process', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } },
       { id: 'edge_issue_end', source: 'node_issue', target: 'node_end', type: 'smoothstep', animated: true }
     ],
   };
@@ -175,11 +175,11 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
       { id: 'edge_start', source: 'node_start', target: 'node_draft', type: 'smoothstep', animated: true },
       { id: 'edge_draft_edit', source: 'node_draft', target: 'node_edit', type: 'smoothstep', animated: true },
       { id: 'edge_edit_gw', source: 'node_edit', target: 'gw_edit', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_approve', source: 'gw_edit', target: 'node_approve', type: 'smoothstep', animated: true, label: 'Đạt', data: { expression: "status === 'APPROVED'" } },
-      { id: 'edge_gw_return_draft', source: 'gw_edit', target: 'node_draft', type: 'smoothstep', animated: true, label: 'Viết lại', data: { expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } },
+      { id: 'edge_gw_approve', source: 'gw_edit', target: 'node_approve', type: 'smoothstep', animated: true, label: 'APPROVED' },
+      { id: 'edge_gw_return_draft', source: 'gw_edit', target: 'node_draft', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } },
       { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_publish', source: 'gw_approve', target: 'node_publish', type: 'smoothstep', animated: true, label: 'Duyệt xuất bản', data: { expression: "status === 'APPROVED'" } },
-      { id: 'edge_gw_return_edit', source: 'gw_approve', target: 'node_edit', type: 'smoothstep', animated: true, label: 'Y/c biên tập lại', data: { expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } },
+      { id: 'edge_gw_publish', source: 'gw_approve', target: 'node_publish', type: 'smoothstep', animated: true, label: 'APPROVED' },
+      { id: 'edge_gw_return_edit', source: 'gw_approve', target: 'node_edit', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } },
       { id: 'edge_publish_end', source: 'node_publish', target: 'node_end', type: 'smoothstep', animated: true }
     ],
   };

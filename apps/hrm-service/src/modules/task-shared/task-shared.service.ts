@@ -451,7 +451,8 @@ export class TaskSharedService {
 
     if (definition && currentNodeId) {
       try {
-        const engine = new WorkflowEngine(definition);
+        const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'default-task-workflow';
+        const engine = new WorkflowEngine(definition, cacheKey);
         actions = engine.getAllowedActions(
           currentNodeId,
           query.currentUserPermissions || [],
@@ -499,7 +500,8 @@ export class TaskSharedService {
 
     if (definition) {
       try {
-        const engine = new WorkflowEngine(definition);
+        const cacheKey = workflowId ? String(workflowId) : 'default-task-workflow';
+        const engine = new WorkflowEngine(definition, cacheKey);
         const initialNodeId = engine.getInitialNodeId();
         if (initialNodeId) {
           const node = engine.getNode(initialNodeId);
@@ -555,7 +557,8 @@ export class TaskSharedService {
     }
 
     try {
-      const engine = new WorkflowEngine(definition);
+      const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'default-task-workflow';
+      const engine = new WorkflowEngine(definition, cacheKey);
       const businessData = {
         status: t.status,
         hasChildren,

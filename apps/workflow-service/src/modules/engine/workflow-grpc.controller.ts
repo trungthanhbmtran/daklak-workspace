@@ -348,7 +348,7 @@ export class WorkflowGrpcController {
     }
 
     const definitionForEngine = this.buildEngineDefinition(workflow);
-    const engine = new WorkflowEngine(definitionForEngine);
+    const engine = new WorkflowEngine(definitionForEngine, workflow.id);
     const initialNodeId = engine.getInitialNodeId();
 
     if (!initialNodeId) {
@@ -408,7 +408,7 @@ export class WorkflowGrpcController {
     }
 
     const definitionForEngine = this.buildEngineDefinition(instance.workflow);
-    const engine = new WorkflowEngine(definitionForEngine);
+    const engine = new WorkflowEngine(definitionForEngine, instance.workflow.id);
     const result = engine.validateAction(
       instance.currentNodeId,
       data.actionName,
@@ -443,7 +443,7 @@ export class WorkflowGrpcController {
     }
 
     const definitionForEngine = this.buildEngineDefinition(instance.workflow);
-    const engine = new WorkflowEngine(definitionForEngine);
+    const engine = new WorkflowEngine(definitionForEngine, instance.workflow.id);
     
     const actionName = data.actionData?.actionName;
     const nextNodeId = engine.getNextNodeId(data.nodeId, actionName, data.actionData || {});

@@ -1,3 +1,5 @@
+import { CompiledWorkflow, CompiledNode, WorkflowCompiler } from './workflow-compiler';
+
 export interface WorkflowContext {
   [key: string]: any;
 }
@@ -13,6 +15,7 @@ export interface NodeData {
 }
 
 export interface EdgeData {
+  id?: string;
   source: string;
   target: string;
   label?: string;
@@ -36,45 +39,74 @@ export interface ValidationContext {
   [key: string]: any;
 }
 
-export class WorkflowEngine {
-  private definition: WorkflowDefinition;
+interface ContextInfo {
+  isAdmin: boolean;
+  isOwner: boolean;
+  isAssignee: boolean;
+  isSupervisor: boolean;
+  isDeptLeader: boolean;
+  isCoordinator: boolean;
+  isParticipant: boolean;
+  isUnassigned: boolean;
+  status: string;
+  allowedEmployeeCodes: string[];
+}
 
-  constructor(definition: any) {
-    if (typeof definition === 'string') {
-      try {
-        this.definition = JSON.parse(definition);
-      } catch (e) {
-        this.definition = { nodes: [], edges: [] };
-      }
+export class WorkflowEngine {
+  private compiled: CompiledWorkflow;
+
+  /**
+   * Initializes the engine with either a compiled workflow (fastest) 
+   * or a raw definition (will be compiled immediately).
+   * If cacheKey is provided, it will cache the compiled result for future use.
+   */
+  constructor(definitionOrCompiled: any, cacheKey?: string) {
+    if (definitionOrCompiled && definitionOrCompiled.nodes instanceof Map) {
+      this.compiled = definitionOrCompiled as CompiledWorkflow;
     } else {
-      this.definition = definition || { nodes: [], edges: [] };
+      let definition: WorkflowDefinition;
+      if (typeof definitionOrCompiled === 'string') {
+        try {
+          definition = JSON.parse(definitionOrCompiled);
+        } catch (e) {
+          definition = { nodes: [], edges: [] };
+        }
+      } else {
+        definition = definitionOrCompiled || { nodes: [], edges: [] };
+      }
+      this.compiled = WorkflowCompiler.compile(definition, cacheKey);
     }
   }
 
-  /**
-   * Get the initial node ID to start the workflow.
-   * It finds the 'start' node and returns the ID of the node it points to.
-   */
   public getInitialNodeId(): string | null {
-    const nodes = this.definition.nodes || [];
-    const startNode = nodes.find((n) => n.type === 'start');
-    if (!startNode) return null;
-
-    const edges = this.definition.edges || [];
-    const outEdge = edges.find((e) => e.source === startNode.id);
-    return outEdge ? outEdge.target : startNode.id;
+    return this.compiled.initialNodeId;
   }
 
-  /**
-   * Get a node by its ID
-   */
-  public getNode(nodeId: string): NodeData | undefined {
-    return (this.definition.nodes || []).find(n => n.id === nodeId);
+  public getNode(nodeId: string): CompiledNode | undefined {
+    return this.compiled.nodes.get(nodeId);
   }
 
-  /**
-   * Validate if a user can perform an action on the current node
-   */
+  private parseContextInfo(ctx: any): ContextInfo {
+    const isOwner = !!ctx.isOwner;
+    const isAssignee = !!ctx.isAssignee;
+    const isSupervisor = !!ctx.isSupervisor;
+    const isDeptLeader = !!ctx.isDeptLeader;
+    const isCoordinator = !!ctx.isCoordinator;
+
+    return {
+      isAdmin: !!ctx.isAdmin,
+      isOwner,
+      isAssignee,
+      isSupervisor,
+      isDeptLeader,
+      isCoordinator,
+      isParticipant: isOwner || isAssignee || isSupervisor || isDeptLeader || isCoordinator,
+      isUnassigned: !!ctx.isUnassigned,
+      status: ctx.status || '',
+      allowedEmployeeCodes: ctx.allowedEmployeeCodes || [],
+    };
+  }
+
   public validateAction(
     currentNodeId: string,
     actionName: string,
@@ -84,128 +116,112 @@ export class WorkflowEngine {
     userContext?: any,
     currentContext?: WorkflowContext
   ): { allowed: boolean; reason?: string } {
-    const nodes = this.definition.nodes || [];
-    const node = nodes.find((n) => n.id === currentNodeId);
-
-    // System/Global Actions that bypass strict business rules (collaboration/monitoring)
-    const systemActions = ['CHAT', 'MONITOR'];
-    const ctx = currentContext || businessData || {};
-    const isOwner = !!ctx.isOwner;
-    const isAssignee = !!ctx.isAssignee;
-    const isSupervisor = !!ctx.isSupervisor;
-    const isDeptLeader = !!ctx.isDeptLeader;
-    const isCoordinator = !!ctx.isCoordinator;
-    const isParticipant = isOwner || isAssignee || isSupervisor || isDeptLeader || isCoordinator;
-    
-    if (systemActions.includes(actionName)) {
-        if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
-        return { allowed: true };
-    }
-
+    const node = this.getNode(currentNodeId);
     if (!node) return { allowed: false, reason: 'Current node not found in workflow definition' };
 
-    // Check PBAC required role on node
-    const requiredRole = node?.data?.role;
+    const ctx = currentContext || businessData || {};
+    const contextInfo = this.parseContextInfo(ctx);
+
+    const systemCheck = this.checkSystemActions(actionName, contextInfo);
+    if (systemCheck.isSystemAction) {
+      return { allowed: systemCheck.allowed, reason: systemCheck.reason };
+    }
+
+    const roleCheck = this.checkRequiredRole(node, userRoles);
+    if (!roleCheck.allowed) return roleCheck;
+
+    if (node.validateFn) {
+      const evalContext: ValidationContext = {
+        ...ctx,
+        actionName,
+        userId,
+        userRoles,
+        userContext: userContext || {},
+      };
+      const isAllowed = node.validateFn(evalContext);
+      if (!isAllowed) {
+        return { allowed: false, reason: 'Không thỏa mãn điều kiện quy trình chặn.' };
+      }
+      return { allowed: true };
+    }
+
+    return this.evaluateSmartPbacDefaults(node, actionName, contextInfo, userId);
+  }
+
+  private checkSystemActions(actionName: string, contextInfo: ContextInfo): { isSystemAction: boolean; allowed: boolean; reason?: string } {
+    const systemActions = ['CHAT', 'MONITOR'];
+    if (systemActions.includes(actionName)) {
+      if (!contextInfo.isParticipant) {
+        return { isSystemAction: true, allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
+      }
+      return { isSystemAction: true, allowed: true };
+    }
+    return { isSystemAction: false, allowed: true };
+  }
+
+  private checkRequiredRole(node: CompiledNode, userRoles: string[]): { allowed: boolean; reason?: string } {
+    const requiredRole = node.data?.role;
     if (requiredRole && !userRoles.includes(requiredRole)) {
       return { allowed: false, reason: `Requires role: ${requiredRole}` };
     }
-
-    // Evaluate dynamic validation expression if present
-    if (node?.data?.validationExpression) {
-      try {
-        const evalContext: ValidationContext = {
-          ...ctx,
-          actionName,
-          userId,
-          userRoles,
-          userContext: userContext || {},
-        };
-
-        const validator = new Function(
-          'context',
-          `
-             with (context) {
-                return (${node.data.validationExpression});
-             }
-          `
-        );
-        const isAllowed = !!validator(evalContext);
-        if (!isAllowed) {
-          return { allowed: false, reason: `Không thỏa mãn điều kiện quy trình chặn.` };
-        }
-      } catch (e: any) {
-        return { allowed: false, reason: `Lỗi tính toán biểu thức phân quyền: ${e.message}` };
-      }
-    } else {
-      // Smart PBAC Defaults if no validationExpression is provided
-      if (node.type === 'user_task') {
-        const isManager = isSupervisor || isDeptLeader;
-
-        // Suy luận từ danh sách nhân viên cấp dưới (Cây tổ chức)
-        const allowedCodes = ctx.allowedEmployeeCodes || [];
-        const currentEmpCode = userId || '';
-        const hasSubordinates = allowedCodes.filter((c: string) => c !== currentEmpCode).length > 0;
-
-        switch (actionName) {
-          case 'ASSIGN':
-          case 'ASSIGN_STAFF':
-            if (!hasSubordinates && !ctx.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân công/giao việc.' };
-            if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
-            break;
-
-          case 'COMPLETE':
-          case 'PROCESS':
-          case 'IN_PROGRESS':
-          case 'DONE':
-          case 'SUBMIT_DRAFT':
-          case 'EDIT_ARTICLE':
-          case 'PUBLISH':
-          case 'ISSUE':
-            if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể báo cáo hoàn thành/xử lý.' };
-            if (!isAssignee && !isOwner) return { allowed: false, reason: 'Chỉ người được phân công hoặc người tạo mới có quyền thực hiện.' };
-            break;
-
-          case 'APPROVE':
-          case 'REJECT':
-          case 'ROUTE':
-            if (ctx.status !== 'PENDING_APPROVAL' && ctx.status !== 'REVIEWING') return { allowed: false, reason: 'Công việc chưa được báo cáo hoàn thành để duyệt.' };
-            if (!isOwner) return { allowed: false, reason: 'Chỉ người giao việc mới có quyền nghiệm thu (duyệt).' };
-            break;
-
-          case 'RETURN':
-            if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể trả lại.' };
-            if (!isManager && !isOwner && !isAssignee) return { allowed: false, reason: 'Không có quyền trả lại công việc.' };
-            break;
-
-          case 'ADD_SUBTASK':
-            if (!hasSubordinates && !ctx.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân rã công việc.' };
-            if (!isAssignee && !isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân rã.' };
-            break;
-
-          case 'EDIT':
-          case 'DELETE':
-            if (!isOwner) return { allowed: false, reason: 'Chỉ người tạo mới có quyền sửa/xóa.' };
-            break;
-
-          case 'CHAT':
-          case 'MONITOR':
-             // Already handled above
-             break;
-
-          case 'COORDINATE':
-            if (ctx.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể xin phối hợp.' };
-            if (!isParticipant) return { allowed: false, reason: 'Bạn không có quyền xin phối hợp.' };
-            break;
-        }
-      }
-    }
-
     return { allowed: true };
   }
 
-  /**
-   * Get all allowed actions for a user
-   */
+  private evaluateSmartPbacDefaults(
+    node: CompiledNode,
+    actionName: string,
+    contextInfo: ContextInfo,
+    userId?: string
+  ): { allowed: boolean; reason?: string } {
+    if (node.type !== 'user_task') return { allowed: true };
+
+    const isManager = contextInfo.isSupervisor || contextInfo.isDeptLeader;
+    const currentEmpCode = userId || '';
+    const hasSubordinates = contextInfo.allowedEmployeeCodes.filter((c: string) => c !== currentEmpCode).length > 0;
+
+    switch (actionName) {
+      case 'ASSIGN':
+      case 'ASSIGN_STAFF':
+        if (!hasSubordinates && !contextInfo.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân công/giao việc.' };
+        if (!contextInfo.isAssignee && !contextInfo.isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân công/phân rã.' };
+        break;
+      case 'COMPLETE':
+      case 'PROCESS':
+      case 'IN_PROGRESS':
+      case 'DONE':
+      case 'SUBMIT_DRAFT':
+      case 'EDIT_ARTICLE':
+      case 'PUBLISH':
+      case 'ISSUE':
+        if (contextInfo.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể báo cáo hoàn thành/xử lý.' };
+        if (!contextInfo.isAssignee && !contextInfo.isOwner) return { allowed: false, reason: 'Chỉ người được phân công hoặc người tạo mới có quyền thực hiện.' };
+        break;
+      case 'APPROVE':
+      case 'REJECT':
+      case 'ROUTE':
+        if (contextInfo.status !== 'PENDING_APPROVAL' && contextInfo.status !== 'REVIEWING') return { allowed: false, reason: 'Công việc chưa được báo cáo hoàn thành để duyệt.' };
+        if (!contextInfo.isOwner) return { allowed: false, reason: 'Chỉ người giao việc mới có quyền nghiệm thu (duyệt).' };
+        break;
+      case 'RETURN':
+        if (contextInfo.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể trả lại.' };
+        if (!isManager && !contextInfo.isOwner && !contextInfo.isAssignee) return { allowed: false, reason: 'Không có quyền trả lại công việc.' };
+        break;
+      case 'ADD_SUBTASK':
+        if (!hasSubordinates && !contextInfo.isAdmin) return { allowed: false, reason: 'Bạn không có nhân viên cấp dưới để phân rã công việc.' };
+        if (!contextInfo.isAssignee && !contextInfo.isOwner && !isManager) return { allowed: false, reason: 'Chỉ người phụ trách hoặc quản lý mới có quyền phân rã.' };
+        break;
+      case 'EDIT':
+      case 'DELETE':
+        if (!contextInfo.isOwner) return { allowed: false, reason: 'Chỉ người tạo mới có quyền sửa/xóa.' };
+        break;
+      case 'COORDINATE':
+        if (contextInfo.isUnassigned) return { allowed: false, reason: 'Công việc chưa có người nhận nên không thể xin phối hợp.' };
+        if (!contextInfo.isParticipant) return { allowed: false, reason: 'Bạn không có quyền xin phối hợp.' };
+        break;
+    }
+    return { allowed: true };
+  }
+
   public getAllowedActions(
     currentNodeId: string,
     userRoles: string[] = [],
@@ -215,127 +231,129 @@ export class WorkflowEngine {
     currentContext?: WorkflowContext
   ): string[] {
     const node = this.getNode(currentNodeId);
-    const possibleActions = ['ASSIGN', 'COMPLETE', 'APPROVE', 'RETURN'];
-
-    // Auxiliary Actions based on node configuration
-    if (node?.data?.allowAddSubtask) possibleActions.push('ADD_SUBTASK');
-    if (node?.data?.allowCoordinate) possibleActions.push('COORDINATE');
-    if (node?.data?.allowEdit) possibleActions.push('EDIT');
-    if (node?.data?.allowDelete) possibleActions.push('DELETE');
-    if (node?.data?.allowChat !== false) possibleActions.push('CHAT'); // Default to true if not explicitly false
+    if (!node) return [];
 
     const allowed: string[] = [];
-
-    for (const action of possibleActions) {
-      const res = this.validateAction(
-        currentNodeId,
-        action,
-        userRoles,
-        userId,
-        businessData,
-        userContext,
-        currentContext
-      );
+    for (const action of node.allowedActions) {
+      const res = this.validateAction(currentNodeId, action, userRoles, userId, businessData, userContext, currentContext);
       if (res.allowed) allowed.push(action);
     }
-
     return allowed;
   }
 
-  /**
-   * Find the next node based on action/edge label
-   */
   public getNextNodeId(currentNodeId: string, actionName: string, evalContext?: any): string | null {
-    const nodes = this.definition.nodes || [];
-    const edges = this.definition.edges || [];
     const visited = new Set<string>();
     const queue = [currentNodeId];
-
     visited.add(currentNodeId);
 
     while (queue.length > 0) {
       const curr = queue.shift()!;
-      const outEdges = edges.filter((e) => e.source === curr);
-      const sourceNode = nodes.find((n) => n.id === curr);
+      const sourceNode = this.compiled.nodes.get(curr);
+      if (!sourceNode) continue;
 
-      for (const edge of outEdges) {
-        // If coming from an exclusive_gateway with an expression, evaluate it
-        if (sourceNode?.type === 'exclusive_gateway' && edge.data?.expression) {
-          try {
-            const validator = new Function('context', `
-               with (context || {}) {
-                  return (${edge.data.expression});
-               }
-            `);
-            if (!validator(evalContext || {})) {
-              continue;
-            }
-          } catch (e) {
-            continue;
-          }
-        }
-
-        const targetNode = nodes.find((n) => n.id === edge.target);
-        if (!targetNode) continue;
-
-        // Concrete step (user_task, end, or empty type)
-        if (targetNode.type === 'user_task' || targetNode.type === 'end' || !targetNode.type) {
-          if (edge.label === actionName || targetNode.data?.actionName === actionName) {
-            return targetNode.id;
-          }
-        }
-        // Gateway: keep traversing
-        else if (targetNode.type === 'parallel_gateway' || targetNode.type === 'exclusive_gateway') {
-          if (!visited.has(targetNode.id)) {
-            visited.add(targetNode.id);
-            queue.push(targetNode.id);
-          }
+      for (const edge of sourceNode.outEdges) {
+        const nextNodeId = this.handleEdgeTraversal(sourceNode, edge, evalContext, actionName, visited, queue);
+        if (nextNodeId) {
+          return nextNodeId;
         }
       }
     }
 
-    // Legacy fallback: if exactly 1 edge out and no label, and target is a concrete node
-    const outEdges = edges.filter((e) => e.source === currentNodeId);
-    if (outEdges.length === 1 && !outEdges[0].label) {
-      const targetNode = nodes.find(n => n.id === outEdges[0].target);
-      if (targetNode && targetNode.type !== 'parallel_gateway' && targetNode.type !== 'exclusive_gateway') {
-        return outEdges[0].target;
+    return this.findLegacyFallbackNode(currentNodeId);
+  }
+
+  private handleEdgeTraversal(
+    sourceNode: CompiledNode,
+    edge: EdgeData,
+    evalContext: any,
+    actionName: string,
+    visited: Set<string>,
+    queue: string[]
+  ): string | null {
+    let isGatewayMatch = false;
+
+    if (sourceNode.type === 'exclusive_gateway') {
+      if (!this.evaluateGatewayCondition(sourceNode.id, edge, evalContext)) {
+        return null;
+      }
+      isGatewayMatch = true;
+    }
+
+    const targetNode = this.compiled.nodes.get(edge.target);
+    if (!targetNode) return null;
+
+    if (this.isConcreteNode(targetNode)) {
+      if (isGatewayMatch) {
+        return targetNode.id;
+      }
+      if (this.isTargetNodeActionMatch(targetNode, edge, actionName)) {
+        return targetNode.id;
+      }
+    } else if (targetNode.type === 'parallel_gateway' || targetNode.type === 'exclusive_gateway') {
+      if (!visited.has(targetNode.id)) {
+        visited.add(targetNode.id);
+        queue.push(targetNode.id);
       }
     }
 
     return null;
   }
 
-  /**
-   * Evaluate the assignment script to determine dynamic assignees.
-   * Returns an array of assignee codes or null if no script is defined.
-   */
+  private evaluateGatewayCondition(sourceNodeId: string, edge: EdgeData, evalContext: any): boolean {
+    const gatewayEdges = this.compiled.gatewayEdges.get(sourceNodeId);
+    if (gatewayEdges) {
+      const compiledEdge = gatewayEdges.find(ge => 
+        (ge.edge.id && ge.edge.id === edge.id) || 
+        (ge.edge.source === edge.source && ge.edge.target === edge.target)
+      );
+      if (compiledEdge?.conditionFn) {
+        return compiledEdge.conditionFn(evalContext || {});
+      }
+    }
+
+    if (edge.label && evalContext?.status) {
+      return edge.label === evalContext.status;
+    }
+    return false;
+  }
+
+  private isConcreteNode(node: CompiledNode): boolean {
+    return node.type === 'user_task' || node.type === 'end' || !node.type;
+  }
+
+  private isTargetNodeActionMatch(targetNode: CompiledNode, edge: EdgeData, actionName: string): boolean {
+    return edge.label === actionName || targetNode.data?.actionName === actionName;
+  }
+
+  private findLegacyFallbackNode(currentNodeId: string): string | null {
+    const sourceNode = this.compiled.nodes.get(currentNodeId);
+    if (!sourceNode || sourceNode.outEdges.length !== 1) return null;
+
+    const outEdge = sourceNode.outEdges[0];
+    if (!outEdge.label) {
+      const targetNode = this.compiled.nodes.get(outEdge.target);
+      if (targetNode && !['parallel_gateway', 'exclusive_gateway'].includes(targetNode.type || '')) {
+        return outEdge.target;
+      }
+    }
+    return null;
+  }
+
   public resolveAssignments(currentNodeId: string, context: WorkflowContext): string[] | null {
     const node = this.getNode(currentNodeId);
-    if (!node || !node.data || !node.data.assignmentExpression) return null;
+    if (!node || !node.assignmentFn) return null;
 
     try {
-      const script = node.data.assignmentExpression;
-      const evaluator = new Function('context', `
-        with (context || {}) {
-          ${script}
-        }
-      `);
-      
-      const result = evaluator(context);
-      
+      const result = node.assignmentFn(context);
       if (!result) return [];
       if (Array.isArray(result)) return result;
       return [String(result)];
     } catch (e: any) {
       console.error('[WorkflowEngine] Error evaluating assignmentExpression:', e);
-      return []; // Return empty array on failure to prevent falling back to undefined behavior
+      return []; 
     }
   }
 
-  /**
-   * Evaluate Side Effects (e.g. Webhooks) attached to a node.
-   */
   public evaluateSideEffects(currentNodeId: string): any[] {
     const node = this.getNode(currentNodeId);
     if (!node || !node.data || !node.data.sideEffects) return [];
