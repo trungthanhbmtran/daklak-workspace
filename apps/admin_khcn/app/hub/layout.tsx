@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { ShieldCheck } from "lucide-react";
 import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
@@ -34,7 +34,13 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-screen overflow-y-auto bg-muted/30">
       <PortalHeader />
-      {children}
+      <Suspense fallback={
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        </div>
+      }>
+        {children}
+      </Suspense>
     </div>
   );
 }

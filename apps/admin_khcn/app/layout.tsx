@@ -4,9 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
-
-export const dynamic = "force-dynamic";
-
+import { Suspense } from "react";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -34,7 +32,9 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased overflow-hidden`}>
         <Providers>
           <TooltipProvider delayDuration={200} skipDelayDuration={100}>
-            {children}
+            <Suspense fallback={null}>
+              {children}
+            </Suspense>
           </TooltipProvider>
 
           <Toaster
