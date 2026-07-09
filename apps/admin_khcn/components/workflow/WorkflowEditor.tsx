@@ -14,6 +14,7 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import { nodeTypes } from "./nodes";
+import { edgeTypes } from "./edges";
 import NodePalette from "./NodePalette";
 import PropertiesPanel from "./PropertiesPanel";
 import Topbar from "./Topbar";
@@ -123,7 +124,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   }
 
   const defaultEdgeOptions = {
-    type: "smoothstep",
+    type: "custom",
     animated: true,
     markerEnd: {
       type: MarkerType.ArrowClosed,
@@ -158,7 +159,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         <NodePalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} />
         
         <div className="flex-1 relative bg-muted/20 min-h-[500px]">
-          <ReactFlow
+            <ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -170,6 +171,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             onInit={onInit}
             fitView
             defaultEdgeOptions={defaultEdgeOptions}

@@ -73,6 +73,7 @@ export function useWorkflowData({
           const loadedEdges = (definition.edges || []).map(
             (edge: any, index: number) => ({
               ...edge,
+              type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
               id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
             })
           );

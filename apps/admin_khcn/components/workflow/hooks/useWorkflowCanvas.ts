@@ -31,7 +31,7 @@ export function useWorkflowCanvas() {
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({
       ...params,
-      type: 'smoothstep',
+      type: 'custom',
       animated: true,
       markerEnd: {
         type: MarkerType.ArrowClosed,

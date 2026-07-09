@@ -11,6 +11,7 @@ import { workflowApi, WorkflowInstance } from "@/features/workflow/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { WorkflowStatusBadge } from "./shared/WorkflowStatusBadge";
 
 interface WorkflowExecutionHistoryProps {
   instance: WorkflowInstance | null;
@@ -65,7 +66,9 @@ export const WorkflowExecutionHistory = ({ instance, onClose }: WorkflowExecutio
                 </div>
                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 bg-white shadow-sm">
                   <div className="flex items-center justify-between space-x-2 mb-1">
-                    <div className="font-bold text-slate-900 text-sm">{log.action || log.nodeLabel || "Hành động"}</div>
+                    <div className="flex items-center gap-2">
+                      <WorkflowStatusBadge status={log.action || log.nodeLabel || "Hành động"} />
+                    </div>
                     <time className="font-mono text-xs text-indigo-500">
                       {log.createdAt ? format(new Date(log.createdAt), "HH:mm dd/MM", { locale: vi }) : ""}
                     </time>
