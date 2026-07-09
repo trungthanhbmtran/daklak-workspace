@@ -47,4 +47,4 @@ ENV PROTO_PATH=/app/protos
 
 EXPOSE 3004
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
