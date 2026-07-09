@@ -62,6 +62,31 @@ export class WorkflowController implements OnModuleInit {
 
   // --- Workflow Definitions ---
 
+  private mapEdges(edges: any[], id: string, code: string) {
+    return (edges || []).map((e: any, i: number) => {
+      let source = e.sourceNodeId;
+      let target = e.targetNodeId;
+
+      if (source) {
+        if (source.startsWith(`${id}_`)) source = source.replace(`${id}_`, '');
+        else if (source.startsWith(`${code}_`)) source = source.replace(`${code}_`, '');
+      }
+
+      if (target) {
+        if (target.startsWith(`${id}_`)) target = target.replace(`${id}_`, '');
+        else if (target.startsWith(`${code}_`)) target = target.replace(`${code}_`, '');
+      }
+
+      return {
+        id: e.id || `edge-${i}`,
+        source,
+        target,
+        label: e.condition || '',
+        data: { expression: e.condition }
+      };
+    });
+  }
+
   @Post()
   @ApiOperation({ summary: 'Tạo quy trình mới/phiên bản mới' })
   async create(@Body() body: any) {
@@ -98,21 +123,7 @@ export class WorkflowController implements OnModuleInit {
           position: { x: n.x || 0, y: n.y || 0 },
           data: { ...n.properties, label: n.name }
         })),
-        edges: (result.edges || []).map((e: any, i: number) => {
-          const source = e.sourceNodeId.startsWith(`${result.id}_`) 
-            ? e.sourceNodeId.replace(`${result.id}_`, '') 
-            : e.sourceNodeId;
-          const target = e.targetNodeId.startsWith(`${result.id}_`) 
-            ? e.targetNodeId.replace(`${result.id}_`, '') 
-            : e.targetNodeId;
-          return {
-            id: e.id || `edge-${i}`,
-            source: source,
-            target: target,
-            label: e.condition || '',
-            data: { expression: e.condition }
-          };
-        }),
+        edges: this.mapEdges(result.edges, result.id, result.code),
         variables: result.variables || [],
       };
       delete result.nodes;
@@ -160,21 +171,7 @@ export class WorkflowController implements OnModuleInit {
           position: { x: n.x || 0, y: n.y || 0 },
           data: { ...n.properties, label: n.name }
         })),
-        edges: (result.edges || []).map((e: any, i: number) => {
-          const source = e.sourceNodeId.startsWith(`${result.id}_`) 
-            ? e.sourceNodeId.replace(`${result.id}_`, '') 
-            : e.sourceNodeId;
-          const target = e.targetNodeId.startsWith(`${result.id}_`) 
-            ? e.targetNodeId.replace(`${result.id}_`, '') 
-            : e.targetNodeId;
-          return {
-            id: e.id || `edge-${i}`,
-            source: source,
-            target: target,
-            label: e.condition || '',
-            data: { expression: e.condition }
-          };
-        }),
+        edges: this.mapEdges(result.edges, result.id, result.code),
         variables: result.variables || [],
       };
       delete result.nodes;
@@ -203,13 +200,7 @@ export class WorkflowController implements OnModuleInit {
           position: { x: n.x || 0, y: n.y || 0 },
           data: { ...n.properties, label: n.name }
         })),
-        edges: (item.edges || []).map((e: any, i: number) => ({
-          id: e.id || `edge-${i}`,
-          source: e.sourceNodeId,
-          target: e.targetNodeId,
-          label: e.condition || '',
-          data: { expression: e.condition }
-        })),
+        edges: this.mapEdges(item.edges, item.id, item.code),
         variables: item.variables || [],
       };
       delete item.nodes;
@@ -239,13 +230,7 @@ export class WorkflowController implements OnModuleInit {
           position: { x: n.x || 0, y: n.y || 0 },
           data: { ...n.properties, label: n.name }
         })),
-        edges: (result.edges || []).map((e: any, i: number) => ({
-          id: e.id || `edge-${i}`,
-          source: e.sourceNodeId,
-          target: e.targetNodeId,
-          label: e.condition || '',
-          data: { expression: e.condition }
-        })),
+        edges: this.mapEdges(result.edges, result.id, result.code),
         variables: result.variables || [],
       };
       delete result.nodes;
