@@ -10,7 +10,7 @@ COPY apps/workflow-service/package*.json ./
 RUN npm config set fetch-retries 5 && npm config set fetch-retry-mintimeout 20000 && npm config set fetch-retry-maxtimeout 120000 && npm ci
 
 COPY apps/workflow-service/ ./
-COPY shared/protos ./shared/protos
+COPY shared/ ./shared/
 
 # Generate Prisma client and build the NestJS app
 # Provide a dummy DATABASE_URL for Prisma generate during build
@@ -47,4 +47,4 @@ ENV PROTO_PATH=/app/protos
 
 EXPOSE 3004
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
