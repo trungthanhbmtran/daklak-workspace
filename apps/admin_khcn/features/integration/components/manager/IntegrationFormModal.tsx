@@ -146,7 +146,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-3xl rounded-3xl p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
+      <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 h-full max-h-[85vh] flex flex-col">
 
           <DialogHeader className="p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950">
@@ -268,7 +268,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
               </div>
             ) : (
-              <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200 h-64">
+              <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200 h-[400px]">
                 <Label>JSON Configuration Data</Label>
                 <Textarea
                   className="h-full font-mono text-sm p-4 bg-slate-900 text-slate-300 rounded-xl resize-none"
