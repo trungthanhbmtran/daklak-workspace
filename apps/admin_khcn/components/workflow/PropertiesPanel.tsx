@@ -182,6 +182,8 @@ export const PropertiesPanel = ({
       );
     }
 
+    if (!selectedNode) return null;
+    
     const { type } = selectedNode;
 
     switch (type) {
