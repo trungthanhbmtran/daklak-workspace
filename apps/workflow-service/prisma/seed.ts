@@ -239,7 +239,29 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
     articleWorkflowDef
   );
 
-  console.log('✅ Upserted Workflows');
+  console.log('Seeding Workflow Statuses...');
+  const defaultStatuses = [
+    { code: 'RUNNING', label: 'Đang chạy', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: 'Play' },
+    { code: 'COMPLETED', label: 'Hoàn thành', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: 'CheckCircle2' },
+    { code: 'FAILED', label: 'Lỗi', color: 'bg-rose-100 text-rose-700 border-rose-200', icon: 'AlertCircle' },
+    { code: 'WAITING', label: 'Đang chờ', color: 'bg-amber-100 text-amber-700 border-amber-200', icon: 'Clock' },
+    { code: 'TODO', label: 'Cần làm', color: 'bg-slate-100 text-slate-700 border-slate-200', icon: 'FileText' },
+    { code: 'IN_PROGRESS', label: 'Đang xử lý', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: 'Activity' },
+    { code: 'PENDING_APPROVAL', label: 'Chờ duyệt', color: 'bg-amber-100 text-amber-700 border-amber-200', icon: 'Clock' },
+    { code: 'APPROVED', label: 'Đã duyệt', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: 'CheckCircle2' },
+    { code: 'REJECTED', label: 'Từ chối', color: 'bg-rose-100 text-rose-700 border-rose-200', icon: 'XCircle' },
+    { code: 'RETURNED', label: 'Trả lại', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: 'PauseCircle' },
+    { code: 'DONE', label: 'Hoàn tất', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: 'CheckCircle2' }
+  ];
+
+  for (const s of defaultStatuses) {
+    await prisma.workflowStatus.upsert({
+      where: { code: s.code },
+      update: s,
+      create: s,
+    });
+  }
+  console.log('✅ Upserted Workflows and Statuses');
   await app.close();
 }
 

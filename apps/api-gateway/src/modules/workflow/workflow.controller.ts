@@ -60,6 +60,15 @@ export class WorkflowController implements OnModuleInit {
     return { data: result.data || [] };
   }
 
+  @Get('statuses')
+  @ApiOperation({ summary: 'Lấy danh sách các cấu hình trạng thái workflow' })
+  async getStatuses() {
+    const result = (await firstValueFrom(
+      this.workflowService.GetStatuses({}),
+    )) as any;
+    return { data: result?.data || [] };
+  }
+
   // --- Workflow Definitions ---
 
   private mapEdges(edges: any[], id: string, code: string) {

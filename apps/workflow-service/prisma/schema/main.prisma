@@ -149,3 +149,16 @@ model IntegrationConnection {
 
   @@map("integration_connections")
 }
+
+model WorkflowStatus {
+  id        String   @id @default(uuid())
+  code      String   @unique // VD: APPROVED, IN_PROGRESS
+  label     String   // VD: Đã duyệt, Đang xử lý
+  color     String   // VD: bg-emerald-100 text-emerald-700 border-emerald-200
+  icon      String   // VD: CheckCircle2, Activity
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workflow_statuses")
+}

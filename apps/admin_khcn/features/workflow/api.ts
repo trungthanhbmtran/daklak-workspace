@@ -87,4 +87,7 @@ export const workflowApi = {
 
   getTaskRoles: () =>
     apiClient.get('/categories', { params: { group: 'TASK_ROLE' } }).then((res: any) => unwrapData<any[]>(res)),
+
+  getStatuses: () =>
+    apiClient.get('/workflow/statuses').then((res: any) => unwrapData<any[]>(res)),
 };

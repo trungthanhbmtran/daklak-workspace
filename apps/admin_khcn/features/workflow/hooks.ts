@@ -8,3 +8,11 @@ export function useWorkflowLogs(instanceId?: string) {
     enabled: !!instanceId,
   });
 }
+
+export function useWorkflowStatuses() {
+  return useQuery({
+    queryKey: ['workflow', 'statuses'],
+    queryFn: () => workflowApi.getStatuses(),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+}
