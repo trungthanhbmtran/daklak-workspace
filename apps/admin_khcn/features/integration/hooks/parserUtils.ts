@@ -172,7 +172,7 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
 
 export function processPostmanData(data: any): any {
   const initialData: any = {
-    isRawMode: true,
+    isRawMode: false,
     rawConfig: JSON.stringify(data, null, 2),
     type: "POSTMAN",
     systemName: data.info.name || "Postman API",
