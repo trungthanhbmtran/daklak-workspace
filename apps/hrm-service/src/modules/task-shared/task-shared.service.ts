@@ -460,6 +460,8 @@ export class TaskSharedService {
           {
             status: t.status,
             hasChildren,
+            isAdmin: access.isAdmin,
+            isCreator: t.creatorEmployeeCode === query.currentEmployeeCode,
             isOwner: access.isOwner,
             isAssignee: access.isAssignee,
             isSupervisor: access.isSupervisor,
@@ -475,7 +477,7 @@ export class TaskSharedService {
       }
     }
 
-    if (actions.length === 0 && (access.isAdmin || (access.isDeptLeader && isTreeParticipant))) {
+    if (actions.length === 0 && (isTreeParticipant || t.creatorEmployeeCode === query.currentEmployeeCode)) {
       actions.push('CHAT');
     }
 

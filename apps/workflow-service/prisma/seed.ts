@@ -25,8 +25,6 @@ return false;`, allowChat: true, allowAddSubtask: false, allowCoordinate: false,
         position: { x: 500, y: 150 },
         data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
 if (actionName === 'ASSIGN' || actionName === 'EDIT') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); }
-if (actionName === 'DELETE') { return isOwner && isUnassigned && !hasChildren && userRoles.includes('TASK:DELETE'); }
-if (actionName === 'ADD_SUBTASK') { return (isOwner || isAssignee) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:EXECUTE')); }
 return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Chính thức Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'TODO' }
       },
       { id: 'gw_split', type: 'parallel_gateway', position: { x: 750, y: 150 }, data: { label: 'Tách luồng' } },

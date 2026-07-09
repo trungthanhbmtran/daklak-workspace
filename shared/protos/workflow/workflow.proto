@@ -107,6 +107,7 @@ message WorkflowEdge {
   string condition = 4;
   int32 priority = 5;
   bool defaultFlow = 6;
+  google.protobuf.Struct properties = 7;
 }
 
 message AssignmentRule {

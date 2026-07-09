@@ -68,6 +68,7 @@ export class WorkflowGrpcController {
               sourceNodeId: `${data.code}_${e.sourceNodeId}`,
               targetNodeId: `${data.code}_${e.targetNodeId}`,
               condition: e.condition,
+              properties: e.properties || {},
               priority: e.priority || 0,
               defaultFlow: e.defaultFlow || false
             }))
@@ -158,6 +159,7 @@ export class WorkflowGrpcController {
                 sourceNodeId: `${data.id}_${e.sourceNodeId}`,
                 targetNodeId: `${data.id}_${e.targetNodeId}`,
                 condition: e.condition,
+                properties: e.properties || {},
                 priority: e.priority || 0,
                 defaultFlow: e.defaultFlow || false
               }))
@@ -499,7 +501,8 @@ export class WorkflowGrpcController {
       edges: (workflow.edges || []).map((e: any) => ({
         source: e.sourceNodeId,
         target: e.targetNodeId,
-        label: e.condition || '' // map condition to label for simplicity if engine uses it
+        label: e.condition || '', // map condition to label for simplicity if engine uses it
+        data: e.properties || {}
       }))
     };
   }
@@ -532,6 +535,7 @@ export class WorkflowGrpcController {
         sourceNodeId: e.sourceNodeId,
         targetNodeId: e.targetNodeId,
         condition: e.condition || '',
+        properties: e.properties || {},
         priority: e.priority,
         defaultFlow: e.defaultFlow
       })),

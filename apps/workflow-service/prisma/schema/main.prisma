@@ -55,6 +55,7 @@ model WorkflowEdge {
   sourceNodeId String
   targetNodeId String
   condition    String? @db.Text
+  properties   Json?
   priority     Int     @default(0)
   defaultFlow  Boolean @default(false)
 

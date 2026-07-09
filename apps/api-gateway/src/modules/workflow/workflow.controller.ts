@@ -82,7 +82,7 @@ export class WorkflowController implements OnModuleInit {
         source,
         target,
         label: e.condition || '',
-        data: { expression: e.condition }
+        data: { ...(e.properties || {}), expression: e.condition }
       };
     });
   }
@@ -105,7 +105,8 @@ export class WorkflowController implements OnModuleInit {
       edges: (body.definition?.edges || []).map((e: any) => ({
         sourceNodeId: e.source,
         targetNodeId: e.target,
-        condition: e.data?.expression || e.label || ''
+        condition: e.data?.expression || e.label || '',
+        properties: e.data || {}
       })),
       variables: body.definition?.variables || [],
     };
@@ -153,7 +154,8 @@ export class WorkflowController implements OnModuleInit {
       edges: (body.definition?.edges || []).map((e: any) => ({
         sourceNodeId: e.source,
         targetNodeId: e.target,
-        condition: e.data?.expression || e.label || ''
+        condition: e.data?.expression || e.label || '',
+        properties: e.data || {}
       })),
       variables: body.definition?.variables || [],
     };

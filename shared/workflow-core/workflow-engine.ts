@@ -100,7 +100,7 @@ export class WorkflowEngine {
       isSupervisor,
       isDeptLeader,
       isCoordinator,
-      isParticipant: isOwner || isAssignee || isSupervisor || isDeptLeader || isCoordinator,
+      isParticipant: isOwner || isAssignee || isSupervisor || isDeptLeader || isCoordinator || !!ctx.isCreator,
       isUnassigned: !!ctx.isUnassigned,
       status: ctx.status || '',
       allowedEmployeeCodes: ctx.allowedEmployeeCodes || [],
@@ -122,7 +122,7 @@ export class WorkflowEngine {
     const ctx = currentContext || businessData || {};
     const contextInfo = this.parseContextInfo(ctx);
 
-    const systemCheck = this.checkSystemActions(actionName, contextInfo);
+    const systemCheck = this.checkSystemActions(node, actionName, contextInfo, userRoles);
     if (systemCheck.isSystemAction) {
       return { allowed: systemCheck.allowed, reason: systemCheck.reason };
     }
@@ -147,14 +147,50 @@ export class WorkflowEngine {
     return { allowed: true };
   }
 
-  private checkSystemActions(actionName: string, contextInfo: ContextInfo): { isSystemAction: boolean; allowed: boolean; reason?: string } {
-    const systemActions = ['CHAT', 'MONITOR'];
-    if (systemActions.includes(actionName)) {
+  private checkSystemActions(node: CompiledNode, actionName: string, contextInfo: ContextInfo, userRoles: string[]): { isSystemAction: boolean; allowed: boolean; reason?: string } {
+    if (actionName === 'CHAT') {
+      // Bắt buộc phải có thuộc tính allowChat=true từ workflow mới được phép
+      if (!node.data?.allowChat) {
+        return { isSystemAction: true, allowed: false, reason: 'Chức năng thảo luận không được cấu hình cho bước này.' };
+      }
       if (!contextInfo.isParticipant) {
-        return { isSystemAction: true, allowed: false, reason: 'Bạn không có quyền tham gia vào công việc này.' };
+        return { isSystemAction: true, allowed: false, reason: 'Bạn không có quyền tham gia thảo luận trong công việc này.' };
       }
       return { isSystemAction: true, allowed: true };
     }
+
+    if (actionName === 'MONITOR') {
+      // MONITOR/Read là quyền xem. Mặc định chỉ cho phép Participant hoặc Admin/Manage role.
+      if (!contextInfo.isParticipant && !contextInfo.isAdmin && !userRoles.includes('TASK:APPROVE') && !userRoles.includes('TASK:*') && !userRoles.includes('TASK:MANAGE')) {
+        return { isSystemAction: true, allowed: false, reason: 'Bạn không có quyền theo dõi công việc này.' };
+      }
+      return { isSystemAction: true, allowed: true };
+    }
+
+    if (actionName === 'EDIT') {
+      if (!node.data?.allowEdit) return { isSystemAction: true, allowed: false, reason: 'Chức năng chỉnh sửa không được cấu hình cho bước này.' };
+      const allowed = (contextInfo.isOwner || contextInfo.isDeptLeader) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:*'));
+      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền chỉnh sửa nội dung.' };
+    }
+
+    if (actionName === 'DELETE') {
+      if (!node.data?.allowDelete) return { isSystemAction: true, allowed: false, reason: 'Chức năng xóa không được cấu hình cho bước này.' };
+      const allowed = contextInfo.isOwner && (userRoles.includes('TASK:DELETE') || userRoles.includes('TASK:*'));
+      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền xóa công việc.' };
+    }
+
+    if (actionName === 'ADD_SUBTASK') {
+      if (!node.data?.allowAddSubtask) return { isSystemAction: true, allowed: false, reason: 'Chức năng phân rã công việc phụ không được cấu hình.' };
+      const allowed = (contextInfo.isOwner || contextInfo.isAssignee) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:EXECUTE') || userRoles.includes('TASK:*'));
+      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền tạo công việc phụ.' };
+    }
+
+    if (actionName === 'COORDINATE') {
+      if (!node.data?.allowCoordinate) return { isSystemAction: true, allowed: false, reason: 'Chức năng phối hợp không được cấu hình.' };
+      const allowed = contextInfo.isOwner || contextInfo.isAssignee;
+      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền xin phối hợp.' };
+    }
+
     return { isSystemAction: false, allowed: true };
   }
 
@@ -248,8 +284,8 @@ export class WorkflowEngine {
   private evaluateGatewayCondition(sourceNodeId: string, edge: EdgeData, evalContext: any): boolean {
     const gatewayEdges = this.compiled.gatewayEdges.get(sourceNodeId);
     if (gatewayEdges) {
-      const compiledEdge = gatewayEdges.find(ge => 
-        (ge.edge.id && ge.edge.id === edge.id) || 
+      const compiledEdge = gatewayEdges.find(ge =>
+        (ge.edge.id && ge.edge.id === edge.id) ||
         (ge.edge.source === edge.source && ge.edge.target === edge.target)
       );
       if (compiledEdge?.conditionFn) {
@@ -298,7 +334,7 @@ export class WorkflowEngine {
       return [String(result)];
     } catch (e: any) {
       console.error('[WorkflowEngine] Error evaluating assignmentExpression:', e);
-      return []; 
+      return [];
     }
   }
 
