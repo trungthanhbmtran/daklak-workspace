@@ -131,6 +131,36 @@ export const PropertiesPanel = ({
             <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
               Biểu thức rẽ nhánh (Expression)
             </label>
+            <div className="flex gap-2 mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-[10px] h-7 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                onClick={() => {
+                  onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
+                    ...selectedEdge, 
+                    label: "Duyệt",
+                    data: { ...(selectedEdge.data || {}), expression: "status === 'APPROVED'" } 
+                  });
+                }}
+              >
+                Phê duyệt (Approved)
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-[10px] h-7 bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                onClick={() => {
+                  onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
+                    ...selectedEdge, 
+                    label: "Từ chối / Trả lại",
+                    data: { ...(selectedEdge.data || {}), expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } 
+                  });
+                }}
+              >
+                Từ chối (Rejected)
+              </Button>
+            </div>
             <div className="relative group">
               <div className="absolute left-3 top-3.5 text-slate-400 group-focus-within:text-violet-500 transition-colors">
                 <span className="font-mono text-xs font-bold bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">fx</span>
@@ -140,7 +170,7 @@ export const PropertiesPanel = ({
                 value={(edgeData.expression as string) || ""}
                 onChange={handleChange}
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 pl-12 text-sm font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[100px] resize-y leading-relaxed"
-                placeholder={`// Viết biểu thức JavaScript (dành cho Gateway)\ne.g. amount > 1000000`}
+                placeholder={`// Viết biểu thức JavaScript (dành cho Gateway)\ne.g. status === 'APPROVED'`}
                 spellCheck={false}
               />
             </div>

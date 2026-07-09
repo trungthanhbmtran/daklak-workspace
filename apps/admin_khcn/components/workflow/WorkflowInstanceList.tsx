@@ -33,13 +33,7 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
 import { WorkflowExecutionHistory } from "./WorkflowExecutionHistory";
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  RUNNING: { label: "Đang chạy", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Play },
-  COMPLETED: { label: "Hoàn thành", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-  FAILED: { label: "Lỗi", color: "bg-rose-100 text-rose-700 border-rose-200", icon: AlertCircle },
-  WAITING: { label: "Đang chờ", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
-};
+import { WorkflowStatusBadge } from "./shared/WorkflowStatusBadge";
 
 const WorkflowInstanceList = () => {
   const [instances, setInstances] = useState<WorkflowInstance[]>([]);
@@ -122,9 +116,6 @@ const WorkflowInstanceList = () => {
               </tr>
             ) : (
               instances.map((instance) => {
-                const status = STATUS_CONFIG[instance.status] || { label: instance.status, color: "bg-muted text-muted-foreground", icon: Activity };
-                const StatusIcon = status.icon;
-
                 return (
                   <tr key={instance.id} className="hover:bg-muted/20 transition-colors group">
                     <td className="px-4 py-4 font-mono text-xs text-muted-foreground whitespace-normal wrap-break-words">
@@ -134,10 +125,7 @@ const WorkflowInstanceList = () => {
                       {instance.workflowName || "Quy trình không xác định"}
                     </td>
                     <td className="px-4 py-4">
-                      <Badge className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-1 w-fit ${status.color}`}>
-                        <StatusIcon className="h-3 w-3" />
-                        {status.label}
-                      </Badge>
+                      <WorkflowStatusBadge status={instance.status} />
                     </td>
                     <td className="px-4 py-4 text-xs text-muted-foreground">
                       {instance.createdAt ? format(new Date(instance.createdAt), "HH:mm dd/MM/yyyy", { locale: vi }) : "N/A"}

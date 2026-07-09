@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import BaseNode from "./BaseNode";
 import { CircleStop } from "lucide-react";
+import { WorkflowStatusBadge } from "../shared/WorkflowStatusBadge";
 
 const EndNode = ({ data, selected }: { data: any; selected: boolean }) => {
   return (
@@ -11,7 +12,14 @@ const EndNode = ({ data, selected }: { data: any; selected: boolean }) => {
       selected={selected}
       className="border-rose-500/30"
     >
-      <div className="text-sm font-medium">Terminate</div>
+      <div className="flex flex-col gap-1">
+        <div className="text-sm font-medium">{data.label || "Terminate"}</div>
+        {data.targetStatus && (
+          <div className="mt-2">
+            <WorkflowStatusBadge status={data.targetStatus} />
+          </div>
+        )}
+      </div>
     </BaseNode>
   );
 };
