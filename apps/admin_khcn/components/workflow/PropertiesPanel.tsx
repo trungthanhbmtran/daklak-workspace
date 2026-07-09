@@ -139,7 +139,7 @@ export const PropertiesPanel = ({
                 onClick={() => {
                   onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
                     ...selectedEdge, 
-                    label: "Duyệt",
+                    label: "APPROVED",
                     data: { ...(selectedEdge.data || {}), expression: "status === 'APPROVED'" } 
                   });
                 }}
@@ -153,7 +153,7 @@ export const PropertiesPanel = ({
                 onClick={() => {
                   onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
                     ...selectedEdge, 
-                    label: "Từ chối / Trả lại",
+                    label: "REJECTED",
                     data: { ...(selectedEdge.data || {}), expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } 
                   });
                 }}
