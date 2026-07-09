@@ -67,7 +67,7 @@ export const PropertiesPanel = ({
   };
 
   const renderFields = () => {
-    if (!selectedNode) {
+    if (!selectedNode && !selectedEdge) {
       return (
         <div className="space-y-6">
           <div>
