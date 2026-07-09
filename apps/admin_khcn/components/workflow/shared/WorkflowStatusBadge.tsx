@@ -35,7 +35,15 @@ interface WorkflowStatusBadgeProps {
 }
 
 export const WorkflowStatusBadge = ({ status, className = "", showIcon = true }: WorkflowStatusBadgeProps) => {
-  const normalizedStatus = status?.toUpperCase() || "UNKNOWN";
+  let normalizedStatus = status?.toUpperCase() || "UNKNOWN";
+
+  // Map legacy labels or expressions to standard statuses
+  if (normalizedStatus === "STATUS === 'APPROVED'" || normalizedStatus === "DUYỆT" || normalizedStatus === "PHÊ DUYỆT") {
+    normalizedStatus = "APPROVED";
+  } else if (normalizedStatus === "STATUS === 'REJECTED'" || normalizedStatus === "TỪ CHỐI" || normalizedStatus === "TỪ CHỐI / TRẢ LẠI") {
+    normalizedStatus = "REJECTED";
+  }
+
   const config = STATUS_CONFIG[normalizedStatus] || { 
     label: status || "Không xác định", 
     color: "bg-muted text-muted-foreground border-border", 
