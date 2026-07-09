@@ -120,6 +120,96 @@ async function main() {
       nameEn: 'Locked',
     },
 
+    // --- WORKFLOW STATUSES ---
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'RUNNING',
+      order: 1,
+      nameVi: 'Đang chạy',
+      nameEn: 'Running',
+      description: '{"color": "bg-blue-100 text-blue-700 border-blue-200", "icon": "Play"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'COMPLETED',
+      order: 2,
+      nameVi: 'Hoàn thành',
+      nameEn: 'Completed',
+      description: '{"color": "bg-emerald-100 text-emerald-700 border-emerald-200", "icon": "CheckCircle2"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'FAILED',
+      order: 3,
+      nameVi: 'Lỗi',
+      nameEn: 'Failed',
+      description: '{"color": "bg-rose-100 text-rose-700 border-rose-200", "icon": "AlertCircle"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'WAITING',
+      order: 4,
+      nameVi: 'Đang chờ',
+      nameEn: 'Waiting',
+      description: '{"color": "bg-amber-100 text-amber-700 border-amber-200", "icon": "Clock"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'TODO',
+      order: 5,
+      nameVi: 'Cần làm',
+      nameEn: 'Todo',
+      description: '{"color": "bg-slate-100 text-slate-700 border-slate-200", "icon": "FileText"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'IN_PROGRESS',
+      order: 6,
+      nameVi: 'Đang xử lý',
+      nameEn: 'In Progress',
+      description: '{"color": "bg-blue-100 text-blue-700 border-blue-200", "icon": "Activity"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'PENDING_APPROVAL',
+      order: 7,
+      nameVi: 'Chờ duyệt',
+      nameEn: 'Pending Approval',
+      description: '{"color": "bg-amber-100 text-amber-700 border-amber-200", "icon": "Clock"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'APPROVED',
+      order: 8,
+      nameVi: 'Đã duyệt',
+      nameEn: 'Approved',
+      description: '{"color": "bg-emerald-100 text-emerald-700 border-emerald-200", "icon": "CheckCircle2"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'REJECTED',
+      order: 9,
+      nameVi: 'Từ chối',
+      nameEn: 'Rejected',
+      description: '{"color": "bg-rose-100 text-rose-700 border-rose-200", "icon": "XCircle"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'RETURNED',
+      order: 10,
+      nameVi: 'Trả lại',
+      nameEn: 'Returned',
+      description: '{"color": "bg-orange-100 text-orange-700 border-orange-200", "icon": "PauseCircle"}'
+    },
+    {
+      group: 'WORKFLOW_STATUS',
+      code: 'DONE',
+      order: 11,
+      nameVi: 'Hoàn tất',
+      nameEn: 'Done',
+      description: '{"color": "bg-emerald-100 text-emerald-700 border-emerald-200", "icon": "CheckCircle2"}'
+    },
+
     // --- TASK ROLES ---
     {
       group: 'TASK_ROLE',
@@ -2296,6 +2386,7 @@ async function main() {
     { code: 'TRANSLATION_SERVICE_TYPE', name: 'Dịch vụ Dịch thuật', order: 35 },
     { code: 'UNIT_TYPE_CATEGORY', name: 'Phân loại tổ chức đơn vị', order: 36 },
     { code: 'CATEGORY_GROUPS', name: 'Nhóm danh mục dùng chung', order: 37 },
+    { code: 'WORKFLOW_STATUS', name: 'Trạng thái quy trình', order: 38 },
   ];
 
   console.log('📦 Seeding Category Groups FIRST (FK dependency)...');
@@ -2338,11 +2429,12 @@ async function main() {
       where: {
         categoryId_langCode: { categoryId: category.id, langCode: 'vi' },
       },
-      update: { name: cat.nameVi },
+      update: { name: cat.nameVi, description: (cat as any).description },
       create: {
         categoryId: category.id,
         langCode: 'vi',
         name: cat.nameVi,
+        description: (cat as any).description
       },
     });
 
@@ -2351,11 +2443,12 @@ async function main() {
       where: {
         categoryId_langCode: { categoryId: category.id, langCode: 'en' },
       },
-      update: { name: cat.nameEn || cat.nameVi },
+      update: { name: cat.nameEn || cat.nameVi, description: (cat as any).description },
       create: {
         categoryId: category.id,
         langCode: 'en',
         name: cat.nameEn || cat.nameVi,
+        description: (cat as any).description
       },
     });
   }

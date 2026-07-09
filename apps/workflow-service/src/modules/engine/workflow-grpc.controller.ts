@@ -543,22 +543,4 @@ export class WorkflowGrpcController {
       }))
     };
   }
-
-  // --- Status Management ---
-  @GrpcMethod('WorkflowService', 'GetStatuses')
-  async getStatuses() {
-    try {
-      const statuses = await this.prisma.workflowStatus.findMany({
-        where: { isActive: true },
-        orderBy: { createdAt: 'asc' }
-      });
-      return { data: statuses };
-    } catch (error) {
-      console.error('[WorkflowService] Failed to get statuses:', error);
-      throw new RpcException({
-        code: GrpcStatus.INTERNAL,
-        message: 'Failed to fetch workflow statuses',
-      });
-    }
-  }
 }

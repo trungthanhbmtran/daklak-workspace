@@ -2,23 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Activity,
   Clock,
-  CheckCircle2,
-  AlertCircle,
-  Play,
   RefreshCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+
 import {
   Pagination,
   PaginationContent,
@@ -28,7 +17,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { workflowApi, WorkflowInstance } from "@/features/workflow/api";
-import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
@@ -190,7 +178,7 @@ const WorkflowInstanceList = () => {
         </div>
       )}
 
-      <WorkflowExecutionHistory 
+      <WorkflowExecutionHistory
         instance={selectedInstance}
         onClose={() => setSelectedInstance(null)}
       />

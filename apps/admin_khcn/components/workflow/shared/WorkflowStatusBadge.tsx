@@ -15,31 +15,28 @@ export const WorkflowStatusBadge = ({ status, className = "", showIcon = true }:
 
   let normalizedStatus = status?.toUpperCase() || "UNKNOWN";
 
-  // Relaxed mapping to handle various spacings, quotes, and legacy aliases
-  if (
-    normalizedStatus.includes("APPROVED") || 
-    normalizedStatus === "DUYỆT" || 
-    normalizedStatus === "PHÊ DUYỆT"
-  ) {
-    if (normalizedStatus !== "PENDING_APPROVAL") {
-      normalizedStatus = "APPROVED";
-    }
-  } else if (
-    normalizedStatus.includes("REJECTED") || 
-    normalizedStatus.includes("TỪ CHỐI") || 
-    normalizedStatus.includes("TRẢ LẠI")
-  ) {
-    normalizedStatus = "REJECTED";
-  }
 
   const config = useMemo(() => {
     if (statuses && statuses.length > 0) {
       const found = statuses.find((s) => s.code === normalizedStatus);
       if (found) {
+        let color = "bg-muted text-muted-foreground border-border";
+        let iconName = "Activity";
+        
+        try {
+          if (found.description) {
+            const parsed = JSON.parse(found.description);
+            color = parsed.color || color;
+            iconName = parsed.icon || iconName;
+          }
+        } catch (e) {
+          // ignore parsing error
+        }
+
         return {
-          label: found.label,
-          color: found.color,
-          icon: (LucideIcons as any)[found.icon] || Activity
+          label: found.name || found.label || status, // fallback for legacy data just in case
+          color: color,
+          icon: (LucideIcons as any)[iconName] || Activity
         };
       }
     }

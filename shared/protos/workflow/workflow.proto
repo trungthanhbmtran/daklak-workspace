@@ -19,24 +19,6 @@ service WorkflowService {
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
-  
-  // Status Management
-  rpc GetStatuses (GetStatusesRequest) returns (GetStatusesResponse);
-}
-
-message GetStatusesRequest {}
-
-message WorkflowStatusConfig {
-  string id = 1;
-  string code = 2;
-  string label = 3;
-  string color = 4;
-  string icon = 5;
-  bool isActive = 6;
-}
-
-message GetStatusesResponse {
-  repeated WorkflowStatusConfig data = 1;
 }
 
 message CreateWorkflowRequest {
