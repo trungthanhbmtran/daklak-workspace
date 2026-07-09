@@ -12,6 +12,7 @@ export interface Workflow {
   definition: WorkflowDefinition;
   active: boolean;
   trigger: string;
+  code?: string;
   version: number;
   createdAt: string;
   updatedAt: string;

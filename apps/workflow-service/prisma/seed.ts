@@ -82,25 +82,6 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
     ],
   };
 
-  const workflow = await prisma.workflow.upsert({
-    where: { id: 'TASK_PROCESSING_ID' }, // Provide a fixed UUID or use findFirst
-    update: {
-      name: 'Quy trình xử lý công việc (Tách luồng) v3',
-      description: 'Luồng nghiệp vụ xử lý giao việc đã được tách riêng thành các bước: Giao, Tiếp nhận, Báo cáo, Duyệt.',
-      definition: taskWorkflowDef,
-      trigger: 'MANUAL',
-      version: 3
-    },
-    create: {
-      id: 'TASK_PROCESSING_ID',
-      name: 'Quy trình xử lý công việc (Tách luồng) v3',
-      description: 'Luồng nghiệp vụ xử lý giao việc đã được tách riêng thành các bước: Giao, Tiếp nhận, Báo cáo, Duyệt.',
-      definition: taskWorkflowDef,
-      trigger: 'MANUAL',
-      version: 3
-    },
-  });
-
   const docTransferWorkflowDef = {
     nodes: [
       { id: 'node_start', type: 'start', position: { x: 50, y: 150 }, data: { label: 'Bắt đầu' } },
@@ -159,25 +140,6 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
     ],
   };
 
-  await prisma.workflow.upsert({
-    where: { id: 'DOCUMENT_TRANSFER_ID' },
-    update: {
-      name: 'Quy trình Điều chuyển & Xử lý Văn bản',
-      description: 'Quy trình dành riêng cho việc tiếp nhận, bút phê, xử lý và ban hành văn bản.',
-      definition: docTransferWorkflowDef,
-      trigger: 'MANUAL',
-      version: 1
-    },
-    create: {
-      id: 'DOCUMENT_TRANSFER_ID',
-      name: 'Quy trình Điều chuyển & Xử lý Văn bản',
-      description: 'Quy trình dành riêng cho việc tiếp nhận, bút phê, xử lý và ban hành văn bản.',
-      definition: docTransferWorkflowDef,
-      trigger: 'MANUAL',
-      version: 1
-    },
-  });
-
   const articleWorkflowDef = {
     nodes: [
       { id: 'node_start', type: 'start', position: { x: 50, y: 150 }, data: { label: 'Bắt đầu' } },
@@ -222,24 +184,61 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
     ],
   };
 
-  await prisma.workflow.upsert({
-    where: { id: 'ARTICLE_MANAGEMENT_ID' },
-    update: {
-      name: 'Quy trình Biên tập & Xuất bản',
-      description: 'Quy trình kiểm duyệt và xuất bản bài viết, tin tức cho cổng thông tin.',
-      definition: articleWorkflowDef,
-      trigger: 'MANUAL',
-      version: 1
-    },
-    create: {
-      id: 'ARTICLE_MANAGEMENT_ID',
-      name: 'Quy trình Biên tập & Xuất bản',
-      description: 'Quy trình kiểm duyệt và xuất bản bài viết, tin tức cho cổng thông tin.',
-      definition: articleWorkflowDef,
-      trigger: 'MANUAL',
-      version: 1
-    },
-  });
+  async function seedWorkflow(code: string, name: string, description: string, definition: any) {
+    // Delete existing instances to avoid relation conflicts
+    await prisma.workflowInstance.deleteMany({ where: { workflow: { code } } });
+    await prisma.workflowDefinition.deleteMany({ where: { code } });
+
+    await prisma.workflowDefinition.create({
+      data: {
+        code,
+        name,
+        description,
+        version: 1,
+        status: 'Published',
+        nodes: {
+          create: definition.nodes.map((n: any) => ({
+            id: code + '_' + n.id,
+            nodeKey: n.id,
+            type: n.type,
+            name: n.data?.label || n.id,
+            x: n.position?.x || 0,
+            y: n.position?.y || 0,
+            properties: n.data || {}
+          }))
+        },
+        edges: {
+          create: definition.edges.map((e: any) => ({
+            id: code + '_' + e.id,
+            sourceNodeId: code + '_' + e.source,
+            targetNodeId: code + '_' + e.target,
+            condition: e.data?.expression || e.label || ''
+          }))
+        }
+      }
+    });
+  }
+
+  await seedWorkflow(
+    'TASK_PROCESSING_ID',
+    'Quy trình xử lý công việc (Tách luồng) v3',
+    'Luồng nghiệp vụ xử lý giao việc đã được tách riêng thành các bước: Giao, Tiếp nhận, Báo cáo, Duyệt.',
+    taskWorkflowDef
+  );
+
+  await seedWorkflow(
+    'DOCUMENT_TRANSFER_ID',
+    'Quy trình Điều chuyển & Xử lý Văn bản',
+    'Quy trình dành riêng cho việc tiếp nhận, bút phê, xử lý và ban hành văn bản.',
+    docTransferWorkflowDef
+  );
+
+  await seedWorkflow(
+    'ARTICLE_MANAGEMENT_ID',
+    'Quy trình Biên tập & Xuất bản',
+    'Quy trình kiểm duyệt và xuất bản bài viết, tin tức cho cổng thông tin.',
+    articleWorkflowDef
+  );
 
   console.log('✅ Upserted Workflows');
   await app.close();

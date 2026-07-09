@@ -4,23 +4,6 @@ import { status as GrpcStatus } from '@grpc/grpc-js';
 import { PrismaService } from '@/database/prisma.service';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 
-export interface WorkflowDefinition {
-  nodes: any[];
-  edges: any[];
-}
-
-export interface WorkflowItem {
-  id: string;
-  name: string;
-  description: string;
-  definition: WorkflowDefinition;
-  trigger: string;
-  active: boolean;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 @Controller()
 export class WorkflowGrpcController {
   constructor(
@@ -28,47 +11,82 @@ export class WorkflowGrpcController {
     @Inject('REDIS_SERVICE') private readonly redisClient: ClientProxy,
   ) {}
 
-  private ensureValidDefinition(def: any): any {
-    if (!def) return { nodes: [], edges: [] };
-
-    let result = def;
-    if (typeof def === 'string') {
-      try {
-        result = JSON.parse(def);
-      } catch (e) {
-        return { nodes: [], edges: [] };
-      }
-    }
-
-    return {
-      nodes: Array.isArray(result.nodes) ? result.nodes : [],
-      edges: Array.isArray(result.edges) ? result.edges : [],
-    };
-  }
-
   // --- CRUD Operations ---
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
   async createWorkflow(data: {
+    code: string;
     name: string;
     description?: string;
-    definition?: string;
-    trigger?: string;
+    version?: number;
+    status?: string;
+    createdBy?: string;
+    nodes?: any[];
+    edges?: any[];
+    variables?: any[];
   }) {
     try {
-      console.log('[WorkflowService] Creating workflow:', data.name);
-      const definition = this.ensureValidDefinition(data.definition);
+      console.log('[WorkflowService] Creating workflow:', data.code);
 
-      const workflow = await this.prisma.workflow.create({
+      const workflow = await this.prisma.workflowDefinition.create({
         data: {
+          code: data.code,
           name: data.name,
           description: data.description,
-          definition: definition,
-          trigger: data.trigger || 'MANUAL',
+          version: data.version || 1,
+          status: data.status || 'Draft',
+          createdBy: data.createdBy,
+          nodes: {
+            create: (data.nodes || []).map(n => ({
+              nodeKey: n.nodeKey,
+              type: n.type,
+              name: n.name,
+              x: n.x || 0,
+              y: n.y || 0,
+              properties: n.properties || {},
+              order: n.order || 0,
+              assignments: {
+                create: (n.assignments || []).map(a => ({
+                  type: a.type,
+                  value: a.value
+                }))
+              },
+              actions: {
+                create: (n.actions || []).map(a => ({
+                  actionType: a.actionType,
+                  service: a.service,
+                  action: a.action,
+                  payloadTemplate: a.payloadTemplate || {},
+                  order: a.order || 0
+                }))
+              }
+            }))
+          },
+          edges: {
+            create: (data.edges || []).map(e => ({
+              sourceNodeId: e.sourceNodeId,
+              targetNodeId: e.targetNodeId,
+              condition: e.condition,
+              priority: e.priority || 0,
+              defaultFlow: e.defaultFlow || false
+            }))
+          },
+          variables: {
+            create: (data.variables || []).map(v => ({
+              key: v.key,
+              type: v.type,
+              defaultValue: v.defaultValue || {}
+            }))
+          }
         },
+        include: {
+          nodes: { include: { assignments: true, actions: true } },
+          edges: true,
+          variables: true
+        }
       });
       return this.mapWorkflow(workflow);
-    } catch (e) {
+    } catch (e: any) {
       console.error('[WorkflowService] Create error:', e);
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -77,39 +95,98 @@ export class WorkflowGrpcController {
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
   async updateWorkflow(data: {
     id: string;
+    code?: string;
     name?: string;
     description?: string;
-    definition?: string;
-    trigger?: string;
+    version?: number;
+    status?: string;
+    nodes?: any[];
+    edges?: any[];
+    variables?: any[];
   }) {
     try {
       console.log('[WorkflowService] Updating workflow:', data.id);
 
-      const updateData: any = {
-        name: data.name,
-        description: data.description,
-        trigger: data.trigger,
-      };
-
-      if (data.definition) {
-        updateData.definition = this.ensureValidDefinition(data.definition);
+      // Simple implementation: delete related and recreate if nodes/edges provided
+      if (data.nodes || data.edges) {
+        await this.prisma.workflowNode.deleteMany({ where: { workflowId: data.id } });
+        await this.prisma.workflowEdge.deleteMany({ where: { workflowId: data.id } });
+        await this.prisma.workflowVariable.deleteMany({ where: { workflowId: data.id } });
       }
 
-      const workflow = await this.prisma.workflow.update({
+      const workflow = await this.prisma.workflowDefinition.update({
         where: { id: data.id },
-        data: updateData,
+        data: {
+          code: data.code,
+          name: data.name,
+          description: data.description,
+          version: data.version,
+          status: data.status,
+          ...(data.nodes ? {
+            nodes: {
+              create: data.nodes.map(n => ({
+                nodeKey: n.nodeKey,
+                type: n.type,
+                name: n.name,
+                x: n.x || 0,
+                y: n.y || 0,
+                properties: n.properties || {},
+                order: n.order || 0,
+                assignments: {
+                  create: (n.assignments || []).map(a => ({
+                    type: a.type,
+                    value: a.value
+                  }))
+                },
+                actions: {
+                  create: (n.actions || []).map(a => ({
+                    actionType: a.actionType,
+                    service: a.service,
+                    action: a.action,
+                    payloadTemplate: a.payloadTemplate || {},
+                    order: a.order || 0
+                  }))
+                }
+              }))
+            }
+          } : {}),
+          ...(data.edges ? {
+            edges: {
+              create: data.edges.map(e => ({
+                sourceNodeId: e.sourceNodeId,
+                targetNodeId: e.targetNodeId,
+                condition: e.condition,
+                priority: e.priority || 0,
+                defaultFlow: e.defaultFlow || false
+              }))
+            }
+          } : {}),
+          ...(data.variables ? {
+            variables: {
+              create: data.variables.map(v => ({
+                key: v.key,
+                type: v.type,
+                defaultValue: v.defaultValue || {}
+              }))
+            }
+          } : {})
+        },
+        include: {
+          nodes: { include: { assignments: true, actions: true } },
+          edges: true,
+          variables: true
+        }
       });
 
       const mappedWorkflow = this.mapWorkflow(workflow);
       
-      // Phát event qua Redis Pub/Sub để các service khác biết và invalidate cache
       this.redisClient.emit('WORKFLOW_UPDATED', {
         workflowId: mappedWorkflow.id,
-        definition: JSON.parse(mappedWorkflow.definition)
+        code: mappedWorkflow.code
       });
 
       return mappedWorkflow;
-    } catch (e) {
+    } catch (e: any) {
       console.error('[WorkflowService] Update error:', e);
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -117,8 +194,13 @@ export class WorkflowGrpcController {
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
   async findOneWorkflow(data: { id: string }) {
-    const workflow = await this.prisma.workflow.findUnique({
+    const workflow = await this.prisma.workflowDefinition.findUnique({
       where: { id: data.id },
+      include: {
+        nodes: { include: { assignments: true, actions: true } },
+        edges: true,
+        variables: true
+      }
     });
     if (!workflow) {
       throw new RpcException({
@@ -129,16 +211,21 @@ export class WorkflowGrpcController {
     return this.mapWorkflow(workflow);
   }
 
-  @GrpcMethod('WorkflowService', 'FindWorkflowByTrigger')
-  async findWorkflowByTrigger(data: { trigger: string }) {
-    const workflow = await this.prisma.workflow.findFirst({
-      where: { trigger: data.trigger, active: true },
-      orderBy: { createdAt: 'desc' }
+  @GrpcMethod('WorkflowService', 'FindWorkflowByCode')
+  async findWorkflowByCode(data: { code: string }) {
+    const workflow = await this.prisma.workflowDefinition.findFirst({
+      where: { code: data.code, status: 'Published' },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        nodes: { include: { assignments: true, actions: true } },
+        edges: true,
+        variables: true
+      }
     });
     if (!workflow) {
       throw new RpcException({
         code: GrpcStatus.NOT_FOUND,
-        message: 'Workflow not found for trigger',
+        message: 'Workflow not found for code',
       });
     }
     return this.mapWorkflow(workflow);
@@ -153,28 +240,33 @@ export class WorkflowGrpcController {
     if (data.search) {
       where.OR = [
         { name: { contains: data.search } },
-        { description: { contains: data.search } }
+        { description: { contains: data.search } },
+        { code: { contains: data.search } }
       ];
     }
 
-    // Optimized via ID-Indexed Deferred Join
     const [idsResult, total] = await Promise.all([
-      this.prisma.workflow.findMany({
+      this.prisma.workflowDefinition.findMany({
         where,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
         select: { id: true },
       }),
-      this.prisma.workflow.count({ where }),
+      this.prisma.workflowDefinition.count({ where }),
     ]);
 
     const ids = idsResult.map((w) => w.id);
     const workflows =
       ids.length > 0
-        ? await this.prisma.workflow.findMany({
+        ? await this.prisma.workflowDefinition.findMany({
             where: { id: { in: ids } },
             orderBy: { createdAt: 'desc' },
+            include: {
+              nodes: { include: { assignments: true, actions: true } },
+              edges: true,
+              variables: true
+            }
           })
         : [];
 
@@ -186,7 +278,7 @@ export class WorkflowGrpcController {
 
   @GrpcMethod('WorkflowService', 'DeleteWorkflow')
   async deleteWorkflow(data: { id: string }) {
-    await this.prisma.workflow.delete({ where: { id: data.id } });
+    await this.prisma.workflowDefinition.delete({ where: { id: data.id } });
     return { success: true };
   }
 
@@ -210,7 +302,7 @@ export class WorkflowGrpcController {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { startedAt: 'desc' },
         include: { workflow: { select: { name: true } } },
       }),
       this.prisma.workflowInstance.count({ where }),
@@ -223,9 +315,9 @@ export class WorkflowGrpcController {
         workflowName: i.workflow?.name || '',
         status: i.status,
         currentNodeId: i.currentNodeId || '',
-        context: i.context || {},
-        createdAt: i.createdAt.toISOString(),
-        updatedAt: i.updatedAt.toISOString(),
+        context: i.variables || {},
+        createdAt: i.startedAt.toISOString(),
+        updatedAt: i.finishedAt?.toISOString() || i.startedAt.toISOString(),
       })),
       total
     };
@@ -242,45 +334,42 @@ export class WorkflowGrpcController {
     businessId?: string;
     businessType?: string;
   }) {
-    const workflow = await this.prisma.workflow.findUnique({
+    const workflow = await this.prisma.workflowDefinition.findUnique({
       where: { id: data.workflowId },
+      include: {
+        nodes: { include: { assignments: true, actions: true } },
+        edges: true
+      }
     });
     if (!workflow) {
       throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Workflow not found' });
     }
 
-    const definition = typeof workflow.definition === 'string' ? JSON.parse(workflow.definition) : workflow.definition;
-    const engine = new WorkflowEngine(definition);
+    const definitionForEngine = this.buildEngineDefinition(workflow);
+    const engine = new WorkflowEngine(definitionForEngine);
     const initialNodeId = engine.getInitialNodeId();
 
     if (!initialNodeId) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: 'Workflow definition has no initial node' });
     }
 
+    const initialNode = engine.getNode(initialNodeId);
+
     const instance = await this.prisma.workflowInstance.create({
       data: {
         workflowId: workflow.id,
         status: 'RUNNING',
         currentNodeId: initialNodeId,
-        context: data.initialContext || {},
-        businessId: data.businessId,
-        businessType: data.businessType,
-        initiatorId: data.initiatorId,
+        variables: data.initialContext || {},
+        tasks: {
+          create: [{
+            nodeId: initialNodeId,
+            assigneeId: data.initiatorId,
+            status: 'Pending'
+          }]
+        }
       },
       include: { workflow: { select: { name: true } } }
-    });
-
-    const initialNode = engine.getNode(initialNodeId);
-
-    await this.prisma.executionLog.create({
-      data: {
-        instanceId: instance.id,
-        nodeId: initialNodeId,
-        nodeType: initialNode?.type || 'START',
-        nodeLabel: initialNode?.data?.label || 'Bắt đầu',
-        action: 'START',
-        data: data.initialContext || {},
-      }
     });
 
     return {
@@ -288,7 +377,7 @@ export class WorkflowGrpcController {
       workflowId: instance.workflowId,
       status: instance.status,
       currentNodeId: instance.currentNodeId,
-      context: instance.context,
+      context: instance.variables,
       workflowName: instance.workflow.name,
     };
   }
@@ -303,7 +392,11 @@ export class WorkflowGrpcController {
   }) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: data.instanceId },
-      include: { workflow: true }
+      include: { 
+        workflow: {
+          include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
+        } 
+      }
     });
     if (!instance) {
       throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
@@ -312,8 +405,8 @@ export class WorkflowGrpcController {
       return { allowed: false, reason: 'Instance has no active node' };
     }
 
-    const definition = typeof instance.workflow.definition === 'string' ? JSON.parse(instance.workflow.definition) : instance.workflow.definition;
-    const engine = new WorkflowEngine(definition);
+    const definitionForEngine = this.buildEngineDefinition(instance.workflow);
+    const engine = new WorkflowEngine(definitionForEngine);
     const result = engine.validateAction(
       instance.currentNodeId,
       data.actionName,
@@ -337,14 +430,18 @@ export class WorkflowGrpcController {
   }) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: data.instanceId },
-      include: { workflow: true }
+      include: { 
+        workflow: {
+          include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
+        } 
+      }
     });
     if (!instance) {
       throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
     }
 
-    const definition = typeof instance.workflow.definition === 'string' ? JSON.parse(instance.workflow.definition) : instance.workflow.definition;
-    const engine = new WorkflowEngine(definition);
+    const definitionForEngine = this.buildEngineDefinition(instance.workflow);
+    const engine = new WorkflowEngine(definitionForEngine);
     
     const actionName = data.actionData?.actionName;
     const nextNodeId = engine.getNextNodeId(data.nodeId, actionName, data.actionData || {});
@@ -356,7 +453,7 @@ export class WorkflowGrpcController {
     const nextNode = engine.getNode(nextNodeId);
     let targetStatus = 'RUNNING';
     if (nextNode && nextNode.data && nextNode.data.targetStatus) {
-      targetStatus = nextNode.data.targetStatus; // Mapping status manually or using the one configured in definition
+      targetStatus = nextNode.data.targetStatus;
     } else if (nextNode && nextNode.type === 'END') {
       targetStatus = 'COMPLETED';
     }
@@ -366,20 +463,16 @@ export class WorkflowGrpcController {
       data: {
         currentNodeId: nextNodeId,
         status: targetStatus,
-        context: { ...(typeof instance.context === 'object' && instance.context ? instance.context : {}), ...(data.actionData || {}) }
+        variables: { ...(typeof instance.variables === 'object' && instance.variables ? instance.variables : {}), ...(data.actionData || {}) },
+        finishedAt: targetStatus === 'COMPLETED' ? new Date() : null,
+        tasks: {
+          create: [{
+            nodeId: nextNodeId,
+            status: targetStatus === 'COMPLETED' ? 'Completed' : 'Pending'
+          }]
+        }
       },
       include: { workflow: { select: { name: true } } }
-    });
-
-    await this.prisma.executionLog.create({
-      data: {
-        instanceId: instance.id,
-        nodeId: nextNodeId,
-        nodeType: nextNode?.type || 'UNKNOWN',
-        nodeLabel: nextNode?.data?.label || '',
-        action: actionName || 'RESUME',
-        data: data.actionData || {},
-      }
     });
 
     return {
@@ -387,25 +480,65 @@ export class WorkflowGrpcController {
       workflowId: updatedInstance.workflowId,
       status: updatedInstance.status,
       currentNodeId: updatedInstance.currentNodeId,
-      context: updatedInstance.context,
+      context: updatedInstance.variables,
       workflowName: updatedInstance.workflow.name,
     };
   }
 
   // --- Helpers ---
 
-  private mapWorkflow(w: any): any {
+  private buildEngineDefinition(workflow: any): any {
     return {
-      id: w.id,
-      name: w.name,
-      description: w.description || '',
-      definition: JSON.stringify(w.definition || { nodes: [], edges: [] }),
-      trigger: w.trigger || 'MANUAL',
-      active: !!w.active,
-      version: w.version || 1,
-      createdAt: w.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: w.updatedAt?.toISOString() || new Date().toISOString(),
+      nodes: (workflow.nodes || []).map((n: any) => ({
+        id: n.id,
+        type: n.type,
+        data: n.properties || {}
+      })),
+      edges: (workflow.edges || []).map((e: any) => ({
+        source: e.sourceNodeId,
+        target: e.targetNodeId,
+        label: e.condition || '' // map condition to label for simplicity if engine uses it
+      }))
     };
   }
 
+  private mapWorkflow(w: any): any {
+    return {
+      id: w.id,
+      code: w.code,
+      name: w.name,
+      description: w.description || '',
+      version: w.version || 1,
+      status: w.status,
+      createdBy: w.createdBy || '',
+      createdAt: w.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: w.updatedAt?.toISOString() || new Date().toISOString(),
+      nodes: (w.nodes || []).map((n: any) => ({
+        id: n.id,
+        nodeKey: n.nodeKey,
+        type: n.type,
+        name: n.name,
+        x: n.x,
+        y: n.y,
+        properties: n.properties || {},
+        order: n.order,
+        assignments: (n.assignments || []).map((a: any) => ({ id: a.id, type: a.type, value: a.value })),
+        actions: (n.actions || []).map((a: any) => ({ id: a.id, actionType: a.actionType, service: a.service, action: a.action, payloadTemplate: a.payloadTemplate || {}, order: a.order }))
+      })),
+      edges: (w.edges || []).map((e: any) => ({
+        id: e.id,
+        sourceNodeId: e.sourceNodeId,
+        targetNodeId: e.targetNodeId,
+        condition: e.condition || '',
+        priority: e.priority,
+        defaultFlow: e.defaultFlow
+      })),
+      variables: (w.variables || []).map((v: any) => ({
+        id: v.id,
+        key: v.key,
+        type: v.type,
+        defaultValue: v.defaultValue || {}
+      }))
+    };
+  }
 }

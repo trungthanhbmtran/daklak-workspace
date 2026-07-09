@@ -1,0 +1,159 @@
+import { useState, useCallback, useEffect } from "react";
+import { workflowApi } from "@/features/workflow/api";
+import { toast } from "sonner";
+import { Node, Edge } from "@xyflow/react";
+
+interface UseWorkflowDataProps {
+  id?: string;
+  nodes: Node[];
+  edges: Edge[];
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
+  initialNodes: Node[];
+}
+
+export function useWorkflowData({
+  id,
+  nodes,
+  edges,
+  setNodes,
+  setEdges,
+  initialNodes,
+}: UseWorkflowDataProps) {
+  const [workflowId, setWorkflowId] = useState<string | null>(id || null);
+  const [workflowName, setWorkflowName] = useState("Quy trình mới");
+  const [workflowDesc, setWorkflowDesc] = useState("Mô tả quy trình...");
+  const [workflowCode, setWorkflowCode] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!id);
+
+  const loadWorkflow = useCallback(async (loadId: string) => {
+    setIsLoading(true);
+    try {
+      console.log(`Loading workflow: ${loadId}`);
+      const data = await workflowApi.getOne(loadId);
+      console.log("Loaded data:", data);
+
+      if (data) {
+        setWorkflowName(data.name);
+        setWorkflowDesc(data.description || "");
+        setWorkflowCode(data.code || data.trigger || "");
+
+        // Handle definition which might be stringified JSON or already an object
+        let definition = data.definition;
+
+        // Handle cases where the definition might be wrapped or named differently
+        if (!definition && (data as any).workflowDefinition) {
+          definition = (data as any).workflowDefinition;
+        }
+
+        if (typeof definition === "string") {
+          try {
+            definition = JSON.parse(definition);
+          } catch (e) {
+            console.error("Failed to parse definition string:", e);
+            definition = { nodes: [], edges: [] };
+          }
+        }
+
+        if (definition) {
+          console.log("Definition found:", definition);
+          const loadedNodes = (definition.nodes || []).map((node: any) => ({
+            ...node,
+            // Ensure position exists for ReactFlow
+            position: node.position || {
+              x: Math.random() * 400,
+              y: Math.random() * 400,
+            },
+          }));
+
+          console.log(`Setting ${loadedNodes.length} nodes`);
+          setNodes(loadedNodes.length > 0 ? loadedNodes : initialNodes);
+
+          const loadedEdges = (definition.edges || []).map(
+            (edge: any, index: number) => ({
+              ...edge,
+              id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
+            })
+          );
+
+          console.log(`Setting ${loadedEdges.length} edges`);
+          setEdges(loadedEdges);
+        } else {
+          console.warn("No definition found in workflow data");
+          setNodes(initialNodes);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load workflow:", error);
+      toast.error("Không thể tải quy trình");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [setNodes, setEdges, initialNodes]);
+
+  useEffect(() => {
+    if (id) {
+      loadWorkflow(id);
+    }
+  }, [id, loadWorkflow]);
+
+  const onSave = useCallback(async () => {
+    setIsSaving(true);
+    const workflowData = {
+      name: workflowName,
+      description: workflowDesc,
+      code: workflowCode,
+      definition: { nodes, edges },
+    };
+
+    try {
+      if (workflowId) {
+        await workflowApi.update(workflowId, workflowData);
+        toast.success("Đã cập nhật quy trình!");
+      } else {
+        const response = await workflowApi.create(workflowData);
+        if (response && response.id) {
+          setWorkflowId(response.id);
+        }
+        toast.success("Đã lưu quy trình mới!");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Lỗi khi lưu quy trình");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [nodes, edges, workflowId, workflowName, workflowDesc, workflowCode]);
+
+  const onPublish = useCallback(async () => {
+    if (!workflowId) {
+      toast.error("Vui lòng lưu bản nháp trước khi chạy thử!");
+      return;
+    }
+
+    try {
+      await workflowApi.start(workflowId, {
+        startedAt: new Date().toISOString(),
+      });
+      toast.success("Đã kích hoạt và chạy thử nghiệm quy trình!");
+    } catch (error) {
+      console.error("Publish error:", error);
+      toast.error("Lỗi khi kích hoạt quy trình");
+    }
+  }, [workflowId]);
+
+  return {
+    workflowId,
+    workflowName,
+    setWorkflowName,
+    workflowDesc,
+    setWorkflowDesc,
+    workflowCode,
+    setWorkflowCode,
+    isSaving,
+    isLoading,
+    onSave,
+    onPublish,
+  };
+}

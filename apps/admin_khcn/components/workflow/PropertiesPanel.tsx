@@ -29,8 +29,8 @@ interface PropertiesPanelProps {
   onClose: () => void;
   workflowDesc: string;
   setWorkflowDesc: (desc: string) => void;
-  workflowTrigger: string;
-  setWorkflowTrigger: (trigger: string) => void;
+  workflowCode: string;
+  setWorkflowCode: (code: string) => void;
 }
 
 export const PropertiesPanel = ({
@@ -48,8 +48,8 @@ export const PropertiesPanel = ({
   onClose,
   workflowDesc,
   setWorkflowDesc,
-  workflowTrigger,
-  setWorkflowTrigger
+  workflowCode,
+  setWorkflowCode
 }: PropertiesPanelProps) => {
   const data = selectedNode ? (selectedNode.data || {}) as any : (selectedEdge ? selectedEdge : {} as any);
 
@@ -71,25 +71,17 @@ export const PropertiesPanel = ({
       return (
         <div className="space-y-6">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5  flex items-center gap-2">
-              <Activity className="h-3.5 w-3.5" /> Kích hoạt tự động (Trigger)
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 flex items-center gap-2">
+              <Activity className="h-3.5 w-3.5" /> Mã quy trình (Code)
             </label>
-            <NativeSelect
-              value={workflowTrigger || ""}
-              onChange={(e) => setWorkflowTrigger(e.target.value)}
-              className="w-full bg-muted/30 border border-border/40 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-            >
-              <NativeSelectOption value="">Chọn sự kiện kích hoạt...</NativeSelectOption>
-              {availableTriggers.length > 0 ? (
-                availableTriggers.map((t: any) => (
-                  <NativeSelectOption key={t.code} value={t.code}>{t.name}</NativeSelectOption>
-                ))
-              ) : (
-                <NativeSelectOption value="" disabled>Đang tải danh sách Trigger...</NativeSelectOption>
-              )}
-            </NativeSelect>
+            <Input
+              value={workflowCode || ""}
+              onChange={(e) => setWorkflowCode(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              placeholder="Nhập mã quy trình (VD: TASK_PROCESSING)..."
+            />
             <p className="text-[10px] text-muted-foreground mt-2 italic">
-              Quy trình sẽ tự động bắt đầu khi sự kiện này xảy ra.
+              Mã định danh duy nhất của quy trình.
             </p>
           </div>
           <div>

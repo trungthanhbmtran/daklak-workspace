@@ -18,32 +18,40 @@ service WorkflowService {
   rpc ResumeWorkflow (ResumeWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc ValidateAction (ValidateActionRequest) returns (ValidateActionResponse);
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
-  rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
   rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
 }
 
 message CreateWorkflowRequest {
-  string name = 1;
-  string description = 2;
-  string definition = 3;
-  string trigger = 4;
+  string code = 1;
+  string name = 2;
+  string description = 3;
+  int32 version = 4;
+  string status = 5;
+  string createdBy = 6;
+  repeated WorkflowNode nodes = 7;
+  repeated WorkflowEdge edges = 8;
+  repeated WorkflowVariable variables = 9;
 }
 
 message UpdateWorkflowRequest {
   string id = 1;
-  string name = 2;
-  string description = 3;
-  string definition = 4;
-  string trigger = 5;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  int32 version = 5;
+  string status = 6;
+  repeated WorkflowNode nodes = 7;
+  repeated WorkflowEdge edges = 8;
+  repeated WorkflowVariable variables = 9;
 }
 
 message FindOneWorkflowRequest {
   string id = 1;
 }
 
-message FindWorkflowByTriggerRequest {
-  string trigger = 1;
+message FindWorkflowByCodeRequest {
+  string code = 1;
 }
 
 message ListWorkflowsRequest {
@@ -67,14 +75,61 @@ message DeleteWorkflowResponse {
 
 message WorkflowResponse {
   string id = 1;
-  string name = 2;
-  string description = 3;
-  string definition = 4;
-  string trigger = 5;
-  bool active = 6;
-  int32 version = 7;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  int32 version = 5;
+  string status = 6;
+  string createdBy = 7;
   string createdAt = 8;
   string updatedAt = 9;
+  repeated WorkflowNode nodes = 10;
+  repeated WorkflowEdge edges = 11;
+  repeated WorkflowVariable variables = 12;
+}
+
+message WorkflowNode {
+  string id = 1;
+  string nodeKey = 2;
+  string type = 3;
+  string name = 4;
+  float x = 5;
+  float y = 6;
+  google.protobuf.Struct properties = 7;
+  int32 order = 8;
+  repeated AssignmentRule assignments = 9;
+  repeated NodeAction actions = 10;
+}
+
+message WorkflowEdge {
+  string id = 1;
+  string sourceNodeId = 2;
+  string targetNodeId = 3;
+  string condition = 4;
+  int32 priority = 5;
+  bool defaultFlow = 6;
+}
+
+message AssignmentRule {
+  string id = 1;
+  string type = 2;
+  string value = 3;
+}
+
+message NodeAction {
+  string id = 1;
+  string actionType = 2;
+  string service = 3;
+  string action = 4;
+  google.protobuf.Struct payloadTemplate = 5;
+  int32 order = 6;
+}
+
+message WorkflowVariable {
+  string id = 1;
+  string key = 2;
+  string type = 3;
+  google.protobuf.Struct defaultValue = 4;
 }
 
 message StartWorkflowRequest {
@@ -128,10 +183,6 @@ message GetInstanceRequest {
   string id = 1;
 }
 
-message GetLogsRequest {
-  string instanceId = 1;
-}
-
 message WorkflowInstanceResponse {
   string id = 1;
   string workflowId = 2;
@@ -141,11 +192,7 @@ message WorkflowInstanceResponse {
   string createdAt = 6;
   string updatedAt = 7;
   string workflowName = 8;
-  repeated ExecutionLog logs = 9;
-}
-
-message GetLogsResponse {
-  repeated ExecutionLog logs = 1;
+  repeated WorkflowTask tasks = 9;
 }
 
 message ListInstancesRequest {
@@ -161,13 +208,12 @@ message ListInstancesResponse {
   int32 total = 2;
 }
 
-message ExecutionLog {
+message WorkflowTask {
   string id = 1;
-  string nodeId = 2;
-  string nodeType = 3;
-  string nodeLabel = 4;
-  string action = 5;
-  google.protobuf.Struct data = 6;
-  string error = 7;
-  string createdAt = 8;
+  string instanceId = 2;
+  string nodeId = 3;
+  string assigneeId = 4;
+  string status = 5;
+  string startedAt = 6;
+  string completedAt = 7;
 }

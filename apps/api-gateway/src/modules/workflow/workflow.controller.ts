@@ -68,16 +68,38 @@ export class WorkflowController implements OnModuleInit {
     const payload = {
       name: body.name,
       description: body.description,
-      definition: JSON.stringify(body.definition || { nodes: [], edges: [] }),
-      trigger: body.trigger,
+      code: body.trigger || body.code,
+      nodes: (body.definition?.nodes || []).map((n: any) => ({
+        nodeKey: n.id,
+        type: n.type,
+        name: n.data?.label || '',
+        x: Math.round(n.position?.x || 0),
+        y: Math.round(n.position?.y || 0),
+        properties: n.data || {}
+      })),
+      edges: (body.definition?.edges || []).map((e: any) => ({
+        sourceNodeId: e.source,
+        targetNodeId: e.target,
+        condition: e.data?.expression || e.label || ''
+      })),
+      variables: body.definition?.variables || [],
     };
     const result = (await firstValueFrom(
       this.workflowService.CreateWorkflow(payload),
     )) as any;
-    if (result && typeof result.definition === 'string') {
-      try {
-        result.definition = JSON.parse(result.definition);
-      } catch (_e) {}
+    
+    // Map response back to frontend expected format
+    if (result) {
+      result.trigger = result.code;
+      result.definition = {
+        nodes: result.nodes || [],
+        edges: result.edges || [],
+        variables: result.variables || [],
+      };
+      delete result.nodes;
+      delete result.edges;
+      delete result.variables;
+      delete result.code;
     }
     return { data: result };
   }
@@ -89,16 +111,49 @@ export class WorkflowController implements OnModuleInit {
       id,
       name: body.name,
       description: body.description,
-      definition: JSON.stringify(body.definition),
-      trigger: body.trigger,
+      code: body.trigger || body.code,
+      nodes: (body.definition?.nodes || []).map((n: any) => ({
+        nodeKey: n.id,
+        type: n.type,
+        name: n.data?.label || '',
+        x: Math.round(n.position?.x || 0),
+        y: Math.round(n.position?.y || 0),
+        properties: n.data || {}
+      })),
+      edges: (body.definition?.edges || []).map((e: any) => ({
+        sourceNodeId: e.source,
+        targetNodeId: e.target,
+        condition: e.data?.expression || e.label || ''
+      })),
+      variables: body.definition?.variables || [],
     };
     const result = (await firstValueFrom(
       this.workflowService.UpdateWorkflow(payload),
     )) as any;
-    if (result && typeof result.definition === 'string') {
-      try {
-        result.definition = JSON.parse(result.definition);
-      } catch (_e) {}
+    
+    // Map response back to frontend expected format
+    if (result) {
+      result.trigger = result.code;
+      result.definition = {
+        nodes: (result.nodes || []).map((n: any) => ({
+          id: n.nodeKey || n.id,
+          type: n.type,
+          position: { x: n.x || 0, y: n.y || 0 },
+          data: { ...n.properties, label: n.name }
+        })),
+        edges: (result.edges || []).map((e: any, i: number) => ({
+          id: e.id || `edge-${i}`,
+          source: e.sourceNodeId,
+          target: e.targetNodeId,
+          label: e.condition || '',
+          data: { expression: e.condition }
+        })),
+        variables: result.variables || [],
+      };
+      delete result.nodes;
+      delete result.edges;
+      delete result.variables;
+      delete result.code;
     }
     return { data: result };
   }
@@ -113,11 +168,27 @@ export class WorkflowController implements OnModuleInit {
       this.workflowService.ListWorkflows({ skip, take, search }),
     )) as any;
     const items = (result.items || []).map((item: any) => {
-      if (typeof item.definition === 'string') {
-        try {
-          item.definition = JSON.parse(item.definition);
-        } catch (_e) {}
-      }
+      item.trigger = item.code;
+      item.definition = {
+        nodes: (item.nodes || []).map((n: any) => ({
+          id: n.nodeKey || n.id,
+          type: n.type,
+          position: { x: n.x || 0, y: n.y || 0 },
+          data: { ...n.properties, label: n.name }
+        })),
+        edges: (item.edges || []).map((e: any, i: number) => ({
+          id: e.id || `edge-${i}`,
+          source: e.sourceNodeId,
+          target: e.targetNodeId,
+          label: e.condition || '',
+          data: { expression: e.condition }
+        })),
+        variables: item.variables || [],
+      };
+      delete item.nodes;
+      delete item.edges;
+      delete item.variables;
+      delete item.code;
       return item;
     });
     return {
@@ -132,10 +203,28 @@ export class WorkflowController implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowService.FindOneWorkflow({ id }),
     )) as any;
-    if (result && typeof result.definition === 'string') {
-      try {
-        result.definition = JSON.parse(result.definition);
-      } catch (_e) {}
+    if (result) {
+      result.trigger = result.code;
+      result.definition = {
+        nodes: (result.nodes || []).map((n: any) => ({
+          id: n.nodeKey || n.id,
+          type: n.type,
+          position: { x: n.x || 0, y: n.y || 0 },
+          data: { ...n.properties, label: n.name }
+        })),
+        edges: (result.edges || []).map((e: any, i: number) => ({
+          id: e.id || `edge-${i}`,
+          source: e.sourceNodeId,
+          target: e.targetNodeId,
+          label: e.condition || '',
+          data: { expression: e.condition }
+        })),
+        variables: result.variables || [],
+      };
+      delete result.nodes;
+      delete result.edges;
+      delete result.variables;
+      delete result.code;
     }
     return { data: result };
   }

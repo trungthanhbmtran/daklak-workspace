@@ -1,7 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { RpcException } from '@nestjs/microservices';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 
@@ -133,9 +132,9 @@ export class TaskWorkflowsService {
     }
 
     if (nextNodeData?.autoProgress !== undefined) {
-      // await this.updateTaskProgress(id, nextNodeData.autoProgress, actualActorCode);
+      
     } else if (targetStatus === 'DONE') {
-      // await this.updateTaskProgress(id, 100, actualActorCode);
+      
     }
 
     // Xử lý gửi thông báo tự động dựa trên cấu hình Workflow Engine (Node tiếp theo)

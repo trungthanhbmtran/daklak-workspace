@@ -8,51 +8,129 @@ datasource db {
   provider = "mysql"
 }
 
-model Workflow {
-  id          String             @id @default(uuid())
+model WorkflowDefinition {
+  id          String   @id @default(uuid())
+  code        String   @unique
   name        String
-  description String?            @db.Text
-  definition  Json // { nodes: [], edges: [] }
-  trigger     String? // e.g., "POST_SUBMIT", "DOC_RECEIVED"
-  active      Boolean            @default(true)
-  version     Int                @default(1)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  instances   WorkflowInstance[]
+  version     Int      @default(1)
+  status      String   @default("Draft") // Draft | Published | Archived
+  description String?  @db.Text
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@map("workflows")
+  nodes     WorkflowNode[]
+  edges     WorkflowEdge[]
+  variables WorkflowVariable[]
+  instances WorkflowInstance[]
+
+  @@map("workflow_definitions")
+}
+
+model WorkflowNode {
+  id         String @id @default(uuid())
+  workflowId String
+  nodeKey    String // Unique key inside the workflow (e.g. node_1)
+  type       String // StartEvent, UserTask, ServiceTask, etc.
+  name       String
+  x          Float
+  y          Float
+  properties Json?
+  order      Int    @default(0)
+
+  workflow   WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  assignments AssignmentRule[]
+  actions     NodeAction[]
+
+  // For WorkflowEdge relations
+  sourceEdges WorkflowEdge[] @relation("SourceNode")
+  targetEdges WorkflowEdge[] @relation("TargetNode")
+
+  @@map("workflow_nodes")
+}
+
+model WorkflowEdge {
+  id           String  @id @default(uuid())
+  workflowId   String
+  sourceNodeId String
+  targetNodeId String
+  condition    String? @db.Text
+  priority     Int     @default(0)
+  defaultFlow  Boolean @default(false)
+
+  workflow   WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  sourceNode WorkflowNode       @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNode WorkflowNode       @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_edges")
+}
+
+model AssignmentRule {
+  id     String @id @default(uuid())
+  nodeId String
+  type   String // creator, role, position, user, etc.
+  value  String
+
+  node WorkflowNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@map("assignment_rules")
+}
+
+model NodeAction {
+  id              String @id @default(uuid())
+  nodeId          String
+  actionType      String // Command, Event
+  service         String
+  action          String
+  payloadTemplate Json?
+  order           Int    @default(0)
+
+  node WorkflowNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@map("node_actions")
+}
+
+model WorkflowVariable {
+  id           String @id @default(uuid())
+  workflowId   String
+  key          String
+  type         String
+  defaultValue Json?
+
+  workflow WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, key])
+  @@map("workflow_variables")
 }
 
 model WorkflowInstance {
-  id            String         @id @default(uuid())
+  id            String   @id @default(uuid())
   workflowId    String
-  workflow      Workflow       @relation(fields: [workflowId], references: [id])
-  status        String // PENDING, RUNNING, COMPLETED, FAILED, WAITING
+  version       Int      @default(1)
   currentNodeId String?
-  context       Json // Data/Variables processed during the workflow
-  businessId    String? // ID của business entity liên kết (Task, Document, v.v.)
-  businessType  String? // Tên loại entity (ví dụ: 'TASK', 'DOCUMENT')
-  logs          ExecutionLog[]
-  initiatorId   String? // User ID who started the workflow
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  status        String   // Running, Completed, Failed, Pending
+  variables     Json?
+  startedAt     DateTime @default(now())
+  finishedAt    DateTime?
+
+  workflow WorkflowDefinition @relation(fields: [workflowId], references: [id])
+  tasks    WorkflowTask[]
 
   @@map("workflow_instances")
 }
 
-model ExecutionLog {
-  id         String           @id @default(uuid())
-  instanceId String
-  instance   WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
-  nodeId     String
-  nodeType   String
-  nodeLabel  String?
-  action     String // e.g., "ENTER", "EXECUTE", "EXIT", "ERROR"
-  data       Json? // Input/Output data for this node
-  error      String?          @db.Text
-  createdAt  DateTime         @default(now())
+model WorkflowTask {
+  id          String    @id @default(uuid())
+  instanceId  String
+  nodeId      String
+  assigneeId  String?
+  status      String    // Pending, Completed, Canceled
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
 
-  @@map("execution_logs")
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_tasks")
 }
 
 model IntegrationConnection {

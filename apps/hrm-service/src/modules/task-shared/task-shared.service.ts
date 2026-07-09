@@ -64,13 +64,13 @@ export class TaskSharedService {
     if (cachedId) return cachedId;
 
     try {
-      const res = await firstValueFrom<any>(this.workflowService.FindWorkflowByTrigger({ trigger }));
+      const res = await firstValueFrom<any>(this.workflowService.FindWorkflowByCode({ code: trigger }));
       if (res && res.id) {
         await this.cache.set(cacheKey, res.id, 3600 * 1000 * 24); // Cache 24h
         return res.id;
       }
     } catch (e) {
-      this.logger.error(`Failed to fetch workflow id for trigger ${trigger}`, e);
+      this.logger.error(`Failed to fetch workflow id for code ${trigger}`, e);
     }
     return null;
   }
@@ -82,9 +82,21 @@ export class TaskSharedService {
 
     try {
       const res = await firstValueFrom<any>(this.workflowService.FindOneWorkflow({ id: workflowId }));
-      if (res && res.definition) {
-        await this.cache.set(cacheKey, res.definition, 3600 * 1000 * 24); // Cache 24h
-        return res.definition;
+      if (res) {
+        const definition = {
+          nodes: (res.nodes || []).map((n: any) => ({
+             id: n.id,
+             type: n.type,
+             data: n.properties || {}
+          })),
+          edges: (res.edges || []).map((e: any) => ({
+             source: e.sourceNodeId,
+             target: e.targetNodeId,
+             label: e.condition || ''
+          }))
+        };
+        await this.cache.set(cacheKey, definition, 3600 * 1000 * 24); // Cache 24h
+        return definition;
       }
     } catch (e) {
       this.logger.error(`Failed to fetch workflow definition for ${workflowId}`, e);

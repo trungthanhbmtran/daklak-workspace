@@ -22,19 +22,19 @@ export class WorkflowController {
    */
   @Post()
   async createWorkflow(
-    @Body() body: { name: string; definition: any; description?: string },
+    @Body() body: { code: string; name: string; description?: string },
   ) {
-    const workflow = await this.prisma.workflow.create({
+    const workflow = await this.prisma.workflowDefinition.create({
       data: {
+        code: body.code,
         name: body.name,
-        definition: body.definition,
         description: body.description,
       },
     });
 
     this.redisClient.emit('WORKFLOW_UPDATED', {
       workflowId: workflow.id,
-      definition: workflow.definition,
+      code: workflow.code,
     });
 
     return workflow;
