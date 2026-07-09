@@ -35,7 +35,7 @@ export const EndpointSidebar = memo(({ endpoints, selectedId, onSelect, onAdd, s
   );
 
   return (
-    <div className="w-1/3 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900/20">
+    <div className="w-full sm:w-1/3 h-[35vh] sm:h-auto border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900/20 shrink-0">
       <div className="p-3 border-b border-slate-200 dark:border-slate-800 shrink-0 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

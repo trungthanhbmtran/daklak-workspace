@@ -146,8 +146,8 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-4xl rounded-3xl p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 h-full max-h-[85vh] flex flex-col">
+      <DialogContent className="w-full h-[100dvh] max-w-4xl sm:w-[95vw] sm:h-auto rounded-none sm:rounded-3xl p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 h-full max-h-[100dvh] sm:max-h-[85vh] flex flex-col">
 
           <DialogHeader className="p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950">
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">

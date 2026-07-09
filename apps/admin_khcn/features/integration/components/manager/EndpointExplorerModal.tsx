@@ -116,8 +116,8 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-[1200px] w-[95vw] h-[85vh] p-0 overflow-hidden border-0 bg-transparent shadow-2xl flex flex-col">
-        <div className="bg-white dark:bg-slate-950 flex flex-col h-full rounded-2xl border border-slate-200 dark:border-slate-800">
+      <DialogContent className="max-w-[1200px] w-full h-[100dvh] sm:w-[95vw] sm:h-[85vh] p-0 overflow-hidden border-0 bg-transparent shadow-2xl flex flex-col rounded-none sm:rounded-2xl">
+        <div className="bg-white dark:bg-slate-950 flex flex-col h-full rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 dark:border-slate-800">
           
           <DialogHeader className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900/50">
             <div>
@@ -139,7 +139,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
             </Button>
           </DialogHeader>
 
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
             <EndpointSidebar 
               endpoints={endpoints}
               selectedId={selectedId}
