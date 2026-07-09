@@ -38,6 +38,7 @@ export class WorkflowGrpcController {
           createdBy: data.createdBy,
           nodes: {
             create: (data.nodes || []).map(n => ({
+              id: `${data.code}_${n.nodeKey}`,
               nodeKey: n.nodeKey,
               type: n.type,
               name: n.name,
@@ -64,8 +65,8 @@ export class WorkflowGrpcController {
           },
           edges: {
             create: (data.edges || []).map(e => ({
-              sourceNodeId: e.sourceNodeId,
-              targetNodeId: e.targetNodeId,
+              sourceNodeId: `${data.code}_${e.sourceNodeId}`,
+              targetNodeId: `${data.code}_${e.targetNodeId}`,
               condition: e.condition,
               priority: e.priority || 0,
               defaultFlow: e.defaultFlow || false
@@ -125,6 +126,7 @@ export class WorkflowGrpcController {
           ...(data.nodes ? {
             nodes: {
               create: data.nodes.map(n => ({
+                id: `${data.id}_${n.nodeKey}`,
                 nodeKey: n.nodeKey,
                 type: n.type,
                 name: n.name,
@@ -153,8 +155,8 @@ export class WorkflowGrpcController {
           ...(data.edges ? {
             edges: {
               create: data.edges.map(e => ({
-                sourceNodeId: e.sourceNodeId,
-                targetNodeId: e.targetNodeId,
+                sourceNodeId: `${data.id}_${e.sourceNodeId}`,
+                targetNodeId: `${data.id}_${e.targetNodeId}`,
                 condition: e.condition,
                 priority: e.priority || 0,
                 defaultFlow: e.defaultFlow || false

@@ -198,7 +198,7 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
         status: 'Published',
         nodes: {
           create: definition.nodes.map((n: any) => ({
-            id: code + '_' + n.id,
+            id: `${code}_${n.id}`,
             nodeKey: n.id,
             type: n.type,
             name: n.data?.label || n.id,
@@ -209,9 +209,8 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
         },
         edges: {
           create: definition.edges.map((e: any) => ({
-            id: code + '_' + e.id,
-            sourceNodeId: code + '_' + e.source,
-            targetNodeId: code + '_' + e.target,
+            sourceNodeId: `${code}_${e.source}`,
+            targetNodeId: `${code}_${e.target}`,
             condition: e.data?.expression || e.label || ''
           }))
         }

@@ -92,8 +92,27 @@ export class WorkflowController implements OnModuleInit {
     if (result) {
       result.trigger = result.code;
       result.definition = {
-        nodes: result.nodes || [],
-        edges: result.edges || [],
+        nodes: (result.nodes || []).map((n: any) => ({
+          id: n.nodeKey || n.id,
+          type: n.type,
+          position: { x: n.x || 0, y: n.y || 0 },
+          data: { ...n.properties, label: n.name }
+        })),
+        edges: (result.edges || []).map((e: any, i: number) => {
+          const source = e.sourceNodeId.startsWith(`${result.id}_`) 
+            ? e.sourceNodeId.replace(`${result.id}_`, '') 
+            : e.sourceNodeId;
+          const target = e.targetNodeId.startsWith(`${result.id}_`) 
+            ? e.targetNodeId.replace(`${result.id}_`, '') 
+            : e.targetNodeId;
+          return {
+            id: e.id || `edge-${i}`,
+            source: source,
+            target: target,
+            label: e.condition || '',
+            data: { expression: e.condition }
+          };
+        }),
         variables: result.variables || [],
       };
       delete result.nodes;
@@ -141,13 +160,21 @@ export class WorkflowController implements OnModuleInit {
           position: { x: n.x || 0, y: n.y || 0 },
           data: { ...n.properties, label: n.name }
         })),
-        edges: (result.edges || []).map((e: any, i: number) => ({
-          id: e.id || `edge-${i}`,
-          source: e.sourceNodeId,
-          target: e.targetNodeId,
-          label: e.condition || '',
-          data: { expression: e.condition }
-        })),
+        edges: (result.edges || []).map((e: any, i: number) => {
+          const source = e.sourceNodeId.startsWith(`${result.id}_`) 
+            ? e.sourceNodeId.replace(`${result.id}_`, '') 
+            : e.sourceNodeId;
+          const target = e.targetNodeId.startsWith(`${result.id}_`) 
+            ? e.targetNodeId.replace(`${result.id}_`, '') 
+            : e.targetNodeId;
+          return {
+            id: e.id || `edge-${i}`,
+            source: source,
+            target: target,
+            label: e.condition || '',
+            data: { expression: e.condition }
+          };
+        }),
         variables: result.variables || [],
       };
       delete result.nodes;
