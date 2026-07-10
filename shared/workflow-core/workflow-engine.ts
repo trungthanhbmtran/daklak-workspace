@@ -39,18 +39,7 @@ export interface ValidationContext {
   [key: string]: any;
 }
 
-interface ContextInfo {
-  isAdmin: boolean;
-  isOwner: boolean;
-  isAssignee: boolean;
-  isSupervisor: boolean;
-  isDeptLeader: boolean;
-  isCoordinator: boolean;
-  isParticipant: boolean;
-  isUnassigned: boolean;
-  status: string;
-  allowedEmployeeCodes: string[];
-}
+
 
 export class WorkflowEngine {
   private compiled: CompiledWorkflow;
@@ -86,27 +75,6 @@ export class WorkflowEngine {
     return this.compiled.nodes.get(nodeId);
   }
 
-  private parseContextInfo(ctx: any): ContextInfo {
-    const isOwner = !!ctx.isOwner;
-    const isAssignee = !!ctx.isAssignee;
-    const isSupervisor = !!ctx.isSupervisor;
-    const isDeptLeader = !!ctx.isDeptLeader;
-    const isCoordinator = !!ctx.isCoordinator;
-
-    return {
-      isAdmin: !!ctx.isAdmin,
-      isOwner,
-      isAssignee,
-      isSupervisor,
-      isDeptLeader,
-      isCoordinator,
-      isParticipant: isOwner || isAssignee || isSupervisor || isDeptLeader || isCoordinator || !!ctx.isCreator,
-      isUnassigned: !!ctx.isUnassigned,
-      status: ctx.status || '',
-      allowedEmployeeCodes: ctx.allowedEmployeeCodes || [],
-    };
-  }
-
   public validateAction(
     currentNodeId: string,
     actionName: string,
@@ -120,15 +88,6 @@ export class WorkflowEngine {
     if (!node) return { allowed: false, reason: 'Current node not found in workflow definition' };
 
     const ctx = currentContext || businessData || {};
-    const contextInfo = this.parseContextInfo(ctx);
-
-    const systemCheck = this.checkSystemActions(node, actionName, contextInfo, userRoles);
-    if (systemCheck.isSystemAction) {
-      return { allowed: systemCheck.allowed, reason: systemCheck.reason };
-    }
-
-    const roleCheck = this.checkRequiredRole(node, userRoles);
-    if (!roleCheck.allowed) return roleCheck;
 
     if (node.validateFn) {
       const evalContext: ValidationContext = {
@@ -143,61 +102,6 @@ export class WorkflowEngine {
         return { allowed: false, reason: 'Không thỏa mãn điều kiện quy trình chặn.' };
       }
       return { allowed: true };
-    }
-    return { allowed: true };
-  }
-
-  private checkSystemActions(node: CompiledNode, actionName: string, contextInfo: ContextInfo, userRoles: string[]): { isSystemAction: boolean; allowed: boolean; reason?: string } {
-    if (actionName === 'CHAT') {
-      // Bắt buộc phải có thuộc tính allowChat=true từ workflow mới được phép
-      if (!node.data?.allowChat) {
-        return { isSystemAction: true, allowed: false, reason: 'Chức năng thảo luận không được cấu hình cho bước này.' };
-      }
-      if (!contextInfo.isParticipant) {
-        return { isSystemAction: true, allowed: false, reason: 'Bạn không có quyền tham gia thảo luận trong công việc này.' };
-      }
-      return { isSystemAction: true, allowed: true };
-    }
-
-    if (actionName === 'MONITOR') {
-      // MONITOR/Read là quyền xem. Mặc định chỉ cho phép Participant hoặc Admin/Manage role.
-      if (!contextInfo.isParticipant && !contextInfo.isAdmin && !userRoles.includes('TASK:APPROVE') && !userRoles.includes('TASK:*') && !userRoles.includes('TASK:MANAGE')) {
-        return { isSystemAction: true, allowed: false, reason: 'Bạn không có quyền theo dõi công việc này.' };
-      }
-      return { isSystemAction: true, allowed: true };
-    }
-
-    if (actionName === 'EDIT') {
-      if (!node.data?.allowEdit) return { isSystemAction: true, allowed: false, reason: 'Chức năng chỉnh sửa không được cấu hình cho bước này.' };
-      const allowed = (contextInfo.isOwner || contextInfo.isDeptLeader) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:*'));
-      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền chỉnh sửa nội dung.' };
-    }
-
-    if (actionName === 'DELETE') {
-      if (!node.data?.allowDelete) return { isSystemAction: true, allowed: false, reason: 'Chức năng xóa không được cấu hình cho bước này.' };
-      const allowed = contextInfo.isOwner && (userRoles.includes('TASK:DELETE') || userRoles.includes('TASK:*'));
-      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền xóa công việc.' };
-    }
-
-    if (actionName === 'ADD_SUBTASK') {
-      if (!node.data?.allowAddSubtask) return { isSystemAction: true, allowed: false, reason: 'Chức năng phân rã công việc phụ không được cấu hình.' };
-      const allowed = (contextInfo.isOwner || contextInfo.isAssignee) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:EXECUTE') || userRoles.includes('TASK:*'));
-      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền tạo công việc phụ.' };
-    }
-
-    if (actionName === 'COORDINATE') {
-      if (!node.data?.allowCoordinate) return { isSystemAction: true, allowed: false, reason: 'Chức năng phối hợp không được cấu hình.' };
-      const allowed = contextInfo.isOwner || contextInfo.isAssignee;
-      return { isSystemAction: true, allowed, reason: allowed ? undefined : 'Không đủ quyền xin phối hợp.' };
-    }
-
-    return { isSystemAction: false, allowed: true };
-  }
-
-  private checkRequiredRole(node: CompiledNode, userRoles: string[]): { allowed: boolean; reason?: string } {
-    const requiredRole = node.data?.role;
-    if (requiredRole && !userRoles.includes(requiredRole)) {
-      return { allowed: false, reason: `Requires role: ${requiredRole}` };
     }
     return { allowed: true };
   }

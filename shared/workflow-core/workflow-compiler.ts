@@ -79,13 +79,13 @@ export class WorkflowCompiler {
       // Compile validation expression
       try {
         let body = `with (context || {}) {\n`;
-        
+
         if (node.data?.validationExpression) {
-           body += `  return (function() {\n    ${node.data.validationExpression}\n  })();\n}`;
+          body += `  return (function() {\n    ${node.data.validationExpression}\n  })();\n}`;
         } else {
-           body += `  return true;\n}`;
+          body += `  return true;\n}`;
         }
-        
+
         compiledNode.validateFn = new Function('context', body) as (context: ValidationContext) => boolean;
       } catch (e) {
         console.error(`[WorkflowCompiler] Failed to compile validationExpression for node ${node.id}`, e);
@@ -179,7 +179,7 @@ export class WorkflowCompiler {
     if (node.data?.allowCoordinate) possibleActions.add('COORDINATE');
     if (node.data?.allowEdit) possibleActions.add('EDIT');
     if (node.data?.allowDelete) possibleActions.add('DELETE');
-    if (node.data?.allowChat !== false) possibleActions.add('CHAT'); 
+    if (node.data?.allowChat !== false) possibleActions.add('CHAT');
     if (node.type === 'user_task' && node.data?.allowAssign !== false) possibleActions.add('ASSIGN');
 
     return Array.from(possibleActions);

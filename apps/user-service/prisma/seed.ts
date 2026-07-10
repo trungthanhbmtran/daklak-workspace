@@ -2588,6 +2588,45 @@ async function main() {
     },
   ];
 
+  const workflowAppRoles = [
+    {
+      code: 'TASK:MANAGE',
+      name: 'Quản lý toàn bộ công việc',
+      resource: 'TASK',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE'],
+    },
+    {
+      code: 'TASK:APPROVE',
+      name: 'Phê duyệt công việc',
+      resource: 'TASK',
+      permissions: ['READ', 'UPDATE', 'VIEW', 'APPROVE'],
+    },
+    {
+      code: 'TASK:EDIT',
+      name: 'Chỉnh sửa công việc',
+      resource: 'TASK',
+      permissions: ['READ', 'UPDATE', 'VIEW'],
+    },
+    {
+      code: 'TASK:DELETE',
+      name: 'Xóa công việc',
+      resource: 'TASK',
+      permissions: ['READ', 'DELETE'],
+    },
+    {
+      code: 'TASK:EXECUTE',
+      name: 'Thực thi công việc',
+      resource: 'TASK',
+      permissions: ['READ', 'UPDATE', 'VIEW'],
+    },
+    {
+      code: 'TASK:*',
+      name: 'Toàn quyền công việc (Wildcard)',
+      resource: 'TASK',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE'],
+    }
+  ];
+
   const roleMap: Record<string, any> = {
     SUPER_ADMIN: superAdminRole,
     ADMIN: adminRole,
@@ -2613,6 +2652,32 @@ async function main() {
           action: action === 'REJECT' ? 'UPDATE' : action,
           effect: 'ALLOW',
           conditions: conditionString ? { expression: conditionString } : null
+        });
+      }
+    }
+
+    const createdRole = await prisma.role.upsert({
+      where: { code: r.code },
+      update: { name: r.name },
+      create: {
+        code: r.code,
+        name: r.name,
+        policies: { create: rolePoliciesData },
+      },
+    });
+    roleMap[r.code] = createdRole;
+  }
+
+  // --- Seed Workflow App Roles ---
+  for (const r of workflowAppRoles) {
+    const rolePoliciesData: { resourceId: number; action: string; effect: string }[] = [];
+    const resId = resources[r.resource]?.id;
+    if (resId) {
+      for (const action of r.permissions) {
+        rolePoliciesData.push({
+          resourceId: resId,
+          action: action,
+          effect: 'ALLOW'
         });
       }
     }

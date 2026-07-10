@@ -5,8 +5,21 @@ import { PrismaService } from '../src/database/prisma.service';
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const prisma = app.get(PrismaService);
-
   console.log('Seeding Workflow definition for Task Processing...');
+
+
+  const basePermissions = {
+    CHAT: ['PARTICIPANT'],
+    MONITOR: ['PARTICIPANT', 'ADMIN', 'ROLE:TASK:APPROVE', 'ROLE:TASK:*', 'ROLE:TASK:MANAGE'],
+    EDIT: ['OWNER', 'DEPT_LEADER', 'ROLE:TASK:EDIT', 'ROLE:TASK:*'],
+    DELETE: ['OWNER', 'ROLE:TASK:DELETE', 'ROLE:TASK:*'],
+  };
+
+  const fullPermissions = {
+    ...basePermissions,
+    ADD_SUBTASK: ['OWNER', 'ASSIGNEE', 'ROLE:TASK:EDIT', 'ROLE:TASK:EXECUTE', 'ROLE:TASK:*'],
+    COORDINATE: ['OWNER', 'ASSIGNEE'],
+  };
 
   const taskWorkflowDef = {
     nodes: [
@@ -15,51 +28,86 @@ async function main() {
         id: 'node_plan_assignment',
         type: 'user_task',
         position: { x: 250, y: 150 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'PLAN_ASSIGNMENT' || actionName === 'EDIT') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); }
-return false;`, allowChat: true, allowAddSubtask: false, allowCoordinate: false, allowEdit: true, allowDelete: true, label: 'Phương án phân công', description: 'Lãnh đạo xác định định biên và cơ cấu phòng ban chịu trách nhiệm', actionName: 'PLAN_ASSIGNMENT', sendNotification: false, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'TODO' }
+        data: { 
+          validationExpression: 'return false;',
+          permissions: {
+            ...basePermissions,
+            PLAN_ASSIGNMENT: ['OWNER', 'DEPT_LEADER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+          },
+          label: 'Phương án phân công', description: 'Lãnh đạo xác định định biên và cơ cấu phòng ban chịu trách nhiệm', actionName: 'PLAN_ASSIGNMENT', sendNotification: false, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'TODO' 
+        }
       },
       {
         id: 'node_assign',
         type: 'user_task',
         position: { x: 500, y: 150 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'ASSIGN' || actionName === 'EDIT') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); }
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Chính thức Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'TODO' }
+        data: { 
+          validationExpression: 'return false;',
+          permissions: {
+            ...fullPermissions,
+            ASSIGN: ['OWNER', 'DEPT_LEADER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+          },
+          label: 'Chính thức Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'TODO' 
+        }
       },
       { id: 'gw_split', type: 'parallel_gateway', position: { x: 750, y: 150 }, data: { label: 'Tách luồng' } },
       {
         id: 'node_in_progress',
         type: 'user_task',
         position: { x: 1000, y: 150 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'IN_PROGRESS') return isAssignee && userRoles.includes('TASK:EXECUTE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tiếp nhận & Thực hiện', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính, bao gồm trao đổi chat', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'ANY' }
+        data: { 
+          validationExpression: 'return false;',
+          permissions: {
+            ...fullPermissions,
+            IN_PROGRESS: ['ASSIGNEE', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+          },
+          label: 'Tiếp nhận & Thực hiện', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính, bao gồm trao đổi chat', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'ANY' 
+        }
       },
       {
         id: 'node_monitor',
         type: 'user_task',
         position: { x: 1000, y: 300 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'MONITOR') return (isSupervisor || isDeptLeader) && userRoles.includes('TASK:APPROVE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER', targetStatus: 'IN_PROGRESS' }
+        data: { 
+          validationExpression: 'return false;',
+          permissions: {
+            ...fullPermissions,
+          },
+          label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER', targetStatus: 'IN_PROGRESS' 
+        }
       },
       { id: 'gw_join', type: 'parallel_gateway', position: { x: 1250, y: 150 }, data: { label: 'Gộp luồng' } },
       {
         id: 'node_report',
         type: 'user_task',
         position: { x: 1500, y: 150 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'DONE' || actionName === 'COMPLETE') return isAssignee && !hasChildren && userRoles.includes('TASK:EXECUTE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Tổng hợp kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'COMPLETE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' } }
+        data: { 
+          validationExpression: `
+            if (actionName === 'DONE' || actionName === 'COMPLETE') return (typeof isAssignee !== 'undefined' ? isAssignee : false) && !(typeof hasChildren !== 'undefined' ? hasChildren : false) && userRoles.includes('TASK:EXECUTE');
+            return false;
+          `,
+          permissions: {
+            ...fullPermissions,
+            COMPLETE: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
+            DONE: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+          },
+          label: 'Tổng hợp kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'COMPLETE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' } 
+        }
       },
       {
         id: 'node_approve',
         type: 'user_task',
         position: { x: 1750, y: 150 },
-        data: { validationExpression: `if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true;
-if (actionName === 'APPROVE' || actionName === 'RETURN' || actionName === 'RETURNED') return (isSupervisor || isDeptLeader || isOwner) && userRoles.includes('TASK:APPROVE');
-return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, allowEdit: true, allowDelete: true, label: 'Nghiệm thu / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' }
+        data: { 
+          validationExpression: 'return false;',
+          permissions: {
+            ...fullPermissions,
+            APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
+            RETURN: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
+            RETURNED: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+          },
+          label: 'Nghiệm thu / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' 
+        }
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 2000, y: 150 }, data: { label: 'Quyết định' } },
       { id: 'node_end', type: 'end', position: { x: 2250, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Công việc đã được nghiệm thu', template: 'Công việc của bạn đã được duyệt hoàn thành.', recipientExpression: '[assigneeCode]' } } }
@@ -215,6 +263,7 @@ return false;`, allowChat: true, allowAddSubtask: true, allowCoordinate: true, a
       }
     });
   }
+
 
   await seedWorkflow(
     'TASK_PROCESSING_ID',

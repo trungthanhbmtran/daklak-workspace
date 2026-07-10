@@ -5,7 +5,9 @@ import {
   Trash2,
   Info,
   FileText,
-  Activity
+  Activity,
+  Plus,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +34,17 @@ interface PropertiesPanelProps {
   workflowCode: string;
   setWorkflowCode: (code: string) => void;
 }
+
+const SYSTEM_ROLES = [
+  { code: 'OWNER', name: 'Người tạo/Sở hữu' },
+  { code: 'ASSIGNEE', name: 'Người được giao (Xử lý chính)' },
+  { code: 'PARTICIPANT', name: 'Người tham gia (Bất kỳ)' },
+  { code: 'SUPERVISOR', name: 'Người theo dõi/Chỉ đạo' },
+  { code: 'DEPT_LEADER', name: 'Trưởng phòng' },
+  { code: 'COORDINATOR', name: 'Người phối hợp' },
+  { code: 'CREATOR', name: 'Người tạo' },
+  { code: 'ADMIN', name: 'Quản trị viên HT' },
+];
 
 export const PropertiesPanel = ({
   isOpen,
@@ -310,31 +323,133 @@ export const PropertiesPanel = ({
               />
             </div>
 
-            {/* Auxiliary Actions Configuration */}
+            {/* Dynamic Permissions Configuration */}
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 mt-4">
-              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Quyền thao tác phụ trợ</h4>
-              <div className="space-y-2">
-                {[
-                  { name: 'allowAddSubtask', label: 'Cho phép phân rã công việc' },
-                  { name: 'allowCoordinate', label: 'Cho phép xin phối hợp' },
-                  { name: 'allowEdit', label: 'Cho phép chỉnh sửa nội dung' },
-                  { name: 'allowDelete', label: 'Cho phép xóa công việc' },
-                  { name: 'allowChat', label: 'Cho phép thảo luận (Chat)', defaultChecked: true },
-                ].map((action) => (
-                  <div key={action.name} className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      {action.label}
-                    </label>
-                    <Switch
-                      name={action.name}
-                      checked={data[action.name] !== undefined ? data[action.name] : !!action.defaultChecked}
-                      onCheckedChange={(checked) => handleChange({ target: { name: action.name, value: checked } } as any)}
-                    />
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình Quyền (Permissions)</h4>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 px-2 text-[10px] text-violet-600 hover:text-violet-700 hover:bg-violet-100"
+                  onClick={() => {
+                    const currentPerms = data.permissions || {};
+                    // Generate a unique action name if NEW_ACTION exists
+                    let newActionName = 'NEW_ACTION';
+                    let counter = 1;
+                    while (currentPerms[newActionName]) {
+                      newActionName = `NEW_ACTION_${counter}`;
+                      counter++;
+                    }
+                    onUpdate(selectedNode!.id, { 
+                      ...data, 
+                      permissions: { ...currentPerms, [newActionName]: ['PARTICIPANT'] } 
+                    });
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Thêm quyền
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {Object.entries(data.permissions || {}).map(([action, roles]) => (
+                  <div key={action} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 flex flex-col gap-2">
+                        <Input 
+                          value={action} 
+                          onChange={(e) => {
+                            const newAction = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
+                            const newPerms = { ...data.permissions };
+                            const oldRoles = newPerms[action];
+                            // Preserve the key order by recreating the object
+                            const updatedPerms: any = {};
+                            for (const key of Object.keys(newPerms)) {
+                              if (key === action) {
+                                updatedPerms[newAction] = oldRoles;
+                              } else {
+                                updatedPerms[key] = newPerms[key];
+                              }
+                            }
+                            onUpdate(selectedNode!.id, { ...data, permissions: updatedPerms });
+                          }}
+                          className="h-7 text-xs font-bold font-mono w-[130px] bg-slate-100 dark:bg-slate-900 border-none px-2"
+                          placeholder="ACTION"
+                        />
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {Array.isArray(roles) && roles.map((role: string) => (
+                            <span key={role} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                              {role}
+                              <button
+                                type="button"
+                                className="ml-1 text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
+                                onClick={() => {
+                                  const newRoles = roles.filter(r => r !== role);
+                                  onUpdate(selectedNode!.id, { 
+                                    ...data, 
+                                    permissions: { ...data.permissions, [action]: newRoles } 
+                                  });
+                                }}
+                              >
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </span>
+                          ))}
+                          <select
+                            className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                            onChange={(e) => {
+                              const role = e.target.value;
+                              if (!role) return;
+                              const currentRoles = Array.isArray(roles) ? roles : [];
+                              const newRoles = [...currentRoles, role].filter((v, i, a) => a.indexOf(v) === i);
+                              onUpdate(selectedNode!.id, { 
+                                ...data, 
+                                permissions: { ...data.permissions, [action]: newRoles } 
+                              });
+                              e.target.value = ''; // reset after selection
+                            }}
+                            defaultValue=""
+                          >
+                            <option value="" disabled>+ Chọn quyền</option>
+                            <optgroup label="Quyền Workflow">
+                              {SYSTEM_ROLES.map(r => <option key={r.code} value={r.code}>{r.code}</option>)}
+                            </optgroup>
+                            {taskRoles && taskRoles.length > 0 && (
+                              <optgroup label="Quyền Hệ thống (PBAC)">
+                                {taskRoles.map((r: any) => <option key={r.code} value={r.code}>{r.code}</option>)}
+                              </optgroup>
+                            )}
+                          </select>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"
+                        onClick={() => {
+                          const newPerms = { ...data.permissions };
+                          delete newPerms[action];
+                          // If empty, we might want to delete the permissions object entirely to fallback to default
+                          if (Object.keys(newPerms).length === 0) {
+                            const newData = { ...data };
+                            delete newData.permissions;
+                            onUpdate(selectedNode!.id, newData);
+                          } else {
+                            onUpdate(selectedNode!.id, { ...data, permissions: newPerms });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
+                {(!data.permissions || Object.keys(data.permissions).length === 0) && (
+                  <p className="text-[10px] text-slate-400 text-center py-2">
+                    Chưa có cấu hình quyền. Nút này sẽ sử dụng quyền mặc định của hệ thống.
+                  </p>
+                )}
               </div>
               <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
-                Khi được cấp quyền, người xử lý tại bước này sẽ thấy các nút thao tác tương ứng (chỉ khả dụng nếu họ thỏa mãn biểu thức xác thực của Node).
+                Người xử lý tại bước này sẽ tự động sở hữu các vai trò được cấp trong hệ thống. Hệ thống hợp nhất quyền mặc định và phân quyền tự động để duyệt tính năng hiển thị cho từng cá nhân cụ thể.
               </p>
             </div>
             <div>
