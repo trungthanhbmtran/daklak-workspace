@@ -100,8 +100,7 @@ async function main() {
           permissions: {
             ...fullPermissions,
             APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
-            RETURN: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
-            RETURNED: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+            REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
           },
           label: 'Nghiệm thu / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER' 
         }
@@ -120,8 +119,8 @@ async function main() {
       { id: 'edge_gw_report', source: 'gw_join', target: 'node_report', type: 'smoothstep', animated: true },
       { id: 'edge_report_approve', source: 'node_report', target: 'node_approve', type: 'smoothstep', animated: true },
       { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', type: 'smoothstep', animated: true, label: 'APPROVED' },
-      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } }
+      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', type: 'smoothstep', animated: true, label: 'APPROVE' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_in_progress', type: 'smoothstep', animated: true, label: 'REJECT' }
     ],
   };
 
@@ -152,7 +151,9 @@ async function main() {
         data: { 
           permissions: { 
             ...fullPermissions, 
-            ROUTE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'] 
+            ROUTE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
+            ASSIGN_DEPT: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
+            ARCHIVE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
           }, 
           label: 'Lãnh đạo Bút phê', 
           description: 'Lãnh đạo cơ quan điều chuyển văn bản', 
@@ -206,8 +207,7 @@ async function main() {
           permissions: { 
             ...fullPermissions, 
             APPROVE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
-            RETURN: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
-            RETURNED: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            REJECT: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
           }, 
           label: 'Duyệt kết quả', 
           targetStatus: 'PENDING_APPROVAL', 
@@ -243,13 +243,13 @@ async function main() {
       { id: 'edge_start', source: 'node_start', target: 'node_receive', type: 'smoothstep', animated: true },
       { id: 'edge_recv_route', source: 'node_receive', target: 'node_route', type: 'smoothstep', animated: true },
       { id: 'edge_route_gw', source: 'node_route', target: 'gw_route', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_assign', source: 'gw_route', target: 'node_assign_staff', type: 'smoothstep', animated: true, label: 'Giao Phòng ban' },
-      { id: 'edge_gw_issue', source: 'gw_route', target: 'node_issue', type: 'smoothstep', animated: true, label: 'Lưu trữ biết' }, // Lãnh đạo chỉ đạo lưu trữ không cần xử lý
+      { id: 'edge_gw_assign', source: 'gw_route', target: 'node_assign_staff', type: 'smoothstep', animated: true, label: 'ASSIGN_DEPT' },
+      { id: 'edge_gw_issue', source: 'gw_route', target: 'node_issue', type: 'smoothstep', animated: true, label: 'ARCHIVE' }, // Lãnh đạo chỉ đạo lưu trữ không cần xử lý
       { id: 'edge_assign_process', source: 'node_assign_staff', target: 'node_process', type: 'smoothstep', animated: true },
       { id: 'edge_process_approve', source: 'node_process', target: 'node_approve', type: 'smoothstep', animated: true },
       { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_end_issue', source: 'gw_approve', target: 'node_issue', type: 'smoothstep', animated: true, label: 'APPROVED' },
-      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_process', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } },
+      { id: 'edge_gw_end_issue', source: 'gw_approve', target: 'node_issue', type: 'smoothstep', animated: true, label: 'APPROVE' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_process', type: 'smoothstep', animated: true, label: 'REJECT' },
       { id: 'edge_issue_end', source: 'node_issue', target: 'node_end', type: 'smoothstep', animated: true }
     ],
   };
@@ -282,7 +282,9 @@ async function main() {
         data: { 
           permissions: { 
             ...fullPermissions, 
-            EDIT_ARTICLE: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*'] 
+            EDIT_ARTICLE: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
+            APPROVE: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
+            REJECT: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
           }, 
           label: 'Biên tập', 
           description: 'Biên tập viên chỉnh sửa nội dung bài viết', 
@@ -302,8 +304,7 @@ async function main() {
           permissions: { 
             ...fullPermissions, 
             APPROVE: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
-            RETURN: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
-            RETURNED: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
+            REJECT: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
           }, 
           label: 'Lãnh đạo duyệt', 
           targetStatus: 'PENDING_APPROVAL', 
@@ -339,11 +340,11 @@ async function main() {
       { id: 'edge_start', source: 'node_start', target: 'node_draft', type: 'smoothstep', animated: true },
       { id: 'edge_draft_edit', source: 'node_draft', target: 'node_edit', type: 'smoothstep', animated: true },
       { id: 'edge_edit_gw', source: 'node_edit', target: 'gw_edit', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_approve', source: 'gw_edit', target: 'node_approve', type: 'smoothstep', animated: true, label: 'APPROVED' },
-      { id: 'edge_gw_return_draft', source: 'gw_edit', target: 'node_draft', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } },
+      { id: 'edge_gw_approve', source: 'gw_edit', target: 'node_approve', type: 'smoothstep', animated: true, label: 'APPROVE' },
+      { id: 'edge_gw_return_draft', source: 'gw_edit', target: 'node_draft', type: 'smoothstep', animated: true, label: 'REJECT' },
       { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', type: 'smoothstep', animated: true },
-      { id: 'edge_gw_publish', source: 'gw_approve', target: 'node_publish', type: 'smoothstep', animated: true, label: 'APPROVED' },
-      { id: 'edge_gw_return_edit', source: 'gw_approve', target: 'node_edit', type: 'smoothstep', animated: true, label: 'REJECTED', data: { sideEffects: ['RETURN_TASK'] } },
+      { id: 'edge_gw_publish', source: 'gw_approve', target: 'node_publish', type: 'smoothstep', animated: true, label: 'APPROVE' },
+      { id: 'edge_gw_return_edit', source: 'gw_approve', target: 'node_edit', type: 'smoothstep', animated: true, label: 'REJECT' },
       { id: 'edge_publish_end', source: 'node_publish', target: 'node_end', type: 'smoothstep', animated: true }
     ],
   };
