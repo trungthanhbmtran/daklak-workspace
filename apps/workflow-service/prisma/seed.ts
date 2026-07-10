@@ -9,16 +9,17 @@ async function main() {
 
 
   const basePermissions = {
-    CHAT: ['PARTICIPANT'],
-    MONITOR: ['PARTICIPANT', 'ADMIN', 'ROLE:TASK:APPROVE', 'ROLE:TASK:*', 'ROLE:TASK:MANAGE'],
-    EDIT: ['OWNER', 'DEPT_LEADER', 'ROLE:TASK:EDIT', 'ROLE:TASK:*'],
-    DELETE: ['OWNER', 'ROLE:TASK:DELETE', 'ROLE:TASK:*'],
+    CHAT: ['PARTICIPANT', 'ADMIN'],
+    MONITOR: ['PARTICIPANT', 'ADMIN'],
+    EDIT: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
+    DELETE: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
   };
 
   const fullPermissions = {
     ...basePermissions,
-    ADD_SUBTASK: ['OWNER', 'ASSIGNEE', 'ROLE:TASK:EDIT', 'ROLE:TASK:EXECUTE', 'ROLE:TASK:*'],
-    COORDINATE: ['OWNER', 'ASSIGNEE'],
+    ADD_SUBTASK: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
+    COORDINATE: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
+    FORWARD: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
   };
 
   const taskWorkflowDef = {
@@ -32,7 +33,7 @@ async function main() {
 
           permissions: {
             ...basePermissions,
-            PLAN_ASSIGNMENT: ['OWNER', 'DEPT_LEADER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+            PLAN_ASSIGNMENT: ['OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Phương án phân công', description: 'Lãnh đạo xác định định biên và cơ cấu phòng ban chịu trách nhiệm', actionName: 'PLAN_ASSIGNMENT', sendNotification: false, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'TODO'
         }
@@ -45,7 +46,7 @@ async function main() {
 
           permissions: {
             ...fullPermissions,
-            ASSIGN: ['OWNER', 'DEPT_LEADER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+            ASSIGN: ['OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Chính thức Giao việc', description: 'Lãnh đạo/Quản lý thực hiện giao việc', actionName: 'ASSIGN', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'TODO'
         }
@@ -59,7 +60,7 @@ async function main() {
 
           permissions: {
             ...fullPermissions,
-            IN_PROGRESS: ['ASSIGNEE', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+            IN_PROGRESS: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Tiếp nhận & Thực hiện', targetStatus: 'IN_PROGRESS', description: 'Nhân viên thụ lý và thực hiện công việc chính, bao gồm trao đổi chat', actionName: 'IN_PROGRESS', sendNotification: true, assignmentStrategy: 'ANY'
         }
@@ -85,8 +86,8 @@ async function main() {
 
           permissions: {
             ...fullPermissions,
-            COMPLETE: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
-            DONE: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+            COMPLETE: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN'],
+            DONE: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Tổng hợp kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'COMPLETE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' }
         }
@@ -99,8 +100,8 @@ async function main() {
 
           permissions: {
             ...fullPermissions,
-            APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'],
-            REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*']
+            APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ADMIN'],
+            REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ADMIN']
           },
           label: 'Nghiệm thu / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER'
         }
@@ -134,7 +135,7 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            RECEIVE: ['ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            RECEIVE: ['OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Tiếp nhận & Vào sổ',
           description: 'Văn thư tiếp nhận văn bản',
@@ -151,9 +152,9 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            ROUTE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
-            ASSIGN_DEPT: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
-            ARCHIVE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            ROUTE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'],
+            ASSIGN_DEPT: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'],
+            ARCHIVE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Lãnh đạo Bút phê',
           description: 'Lãnh đạo cơ quan điều chuyển văn bản',
@@ -171,7 +172,7 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            ASSIGN_STAFF: ['DEPT_LEADER', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            ASSIGN_STAFF: ['DEPT_LEADER', 'ADMIN']
           },
           label: 'Trưởng phòng phân công',
           description: 'Lãnh đạo phòng ban giao việc cho chuyên viên',
@@ -188,7 +189,7 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            PROCESS: ['ASSIGNEE', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            PROCESS: ['ASSIGNEE', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Chuyên viên xử lý',
           targetStatus: 'IN_PROGRESS',
@@ -206,8 +207,8 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            APPROVE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
-            REJECT: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'],
+            REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Duyệt kết quả',
           targetStatus: 'PENDING_APPROVAL',
@@ -227,7 +228,7 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            ISSUE: ['ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+            ISSUE: ['OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Ban hành / Lưu trữ',
           description: 'Văn thư ban hành văn bản đi hoặc lưu trữ',
@@ -264,7 +265,7 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            SUBMIT_DRAFT: ['ASSIGNEE', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
+            SUBMIT_DRAFT: ['ASSIGNEE', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Soạn thảo',
           description: 'Tác giả soạn thảo bản thảo bài viết',
@@ -282,9 +283,9 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            EDIT_ARTICLE: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
-            APPROVE: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
-            REJECT: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
+            EDIT_ARTICLE: ['DEPT_LEADER', 'ADMIN'],
+            APPROVE: ['DEPT_LEADER', 'ADMIN'],
+            REJECT: ['DEPT_LEADER', 'ADMIN']
           },
           label: 'Biên tập',
           description: 'Biên tập viên chỉnh sửa nội dung bài viết',
@@ -303,8 +304,8 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            APPROVE: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
-            REJECT: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
+            APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'],
+            REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Lãnh đạo duyệt',
           targetStatus: 'PENDING_APPROVAL',
@@ -324,7 +325,7 @@ async function main() {
         data: {
           permissions: {
             ...fullPermissions,
-            PUBLISH: ['ROLE:POST:MANAGE', 'ROLE:POST:*']
+            PUBLISH: ['OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Xuất bản',
           description: 'Xuất bản bài viết lên cổng thông tin',
