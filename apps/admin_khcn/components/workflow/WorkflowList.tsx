@@ -10,7 +10,10 @@ import {
   Activity,
   Calendar,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Settings2,
+  CheckCircle2,
+  Link2
 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -77,6 +80,21 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const [pageSize, setPageSize] = useState(9);
   const [totalItems, setTotalItems] = useState(0);
 
+  const [mappingWorkflow, setMappingWorkflow] = useState<Workflow | null>(null);
+  const [selectedModule, setSelectedModule] = useState<string>("TASK_ASSIGNMENT");
+
+  const BUSINESS_MODULES = [
+    { value: "TASK_ASSIGNMENT", label: "Nghiệp vụ Giao việc" },
+    { value: "DOCUMENT_APPROVAL", label: "Trình ký Văn bản" },
+    { value: "LEAVE_REQUEST", label: "Đơn xin nghỉ phép" },
+  ];
+
+  const getModuleName = (code?: string) => {
+    if (!code) return null;
+    const match = BUSINESS_MODULES.find(m => m.value === code);
+    return match ? match.label : code;
+  };
+
   const loadWorkflows = async () => {
     setIsLoading(true);
     try {
@@ -122,6 +140,24 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
       setItemToDelete(null);
+    }
+  };
+
+  const handleApplyModule = async () => {
+    if (!mappingWorkflow) return;
+    try {
+      const res = await workflowApi.list({ take: 100 });
+      const allWorkflows = res?.data || [];
+      const currentDefault = allWorkflows.find((w: any) => w.code === selectedModule);
+      if (currentDefault && currentDefault.id !== mappingWorkflow.id) {
+        await workflowApi.update(currentDefault.id, { code: `${selectedModule}_OLD_${Date.now()}` });
+      }
+      await workflowApi.update(mappingWorkflow.id, { code: selectedModule });
+      toast.success("Đã áp dụng quy trình thành công!");
+      setMappingWorkflow(null);
+      loadWorkflows();
+    } catch (e) {
+      toast.error("Lỗi khi áp dụng quy trình");
     }
   };
 
@@ -226,6 +262,9 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                     <DropdownMenuItem className="rounded-lg" onClick={() => { setTestContext("{\n  \n}"); setTestRunWorkflow(workflow); }}>
                       <Play className="mr-2 h-4 w-4" /> Chạy thử
                     </DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-lg text-emerald-600 focus:text-emerald-600" onClick={() => setMappingWorkflow(workflow)}>
+                      <Link2 className="mr-2 h-4 w-4" /> Áp dụng nghiệp vụ
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => handleDelete(workflow.id)}
@@ -253,6 +292,17 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                 <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px] wrap-break-words">
                   {workflow.description || "Chưa có mô tả cho quy trình này."}
                 </p>
+                {workflow.code && !workflow.code.includes('_OLD_') ? (
+                  <div className="flex items-center text-[11px] text-emerald-700 bg-emerald-500/10 px-2 py-1.5 rounded-lg border border-emerald-500/20 font-medium mt-3 w-fit">
+                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                    <span>Đang áp dụng cho: <strong>{getModuleName(workflow.code)}</strong></span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-[11px] text-muted-foreground bg-muted/30 px-2 py-1.5 rounded-lg border border-border/50 italic mt-3 w-fit">
+                    <Layers className="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                    Chưa phân bổ nghiệp vụ
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 pt-5 border-t border-border/40 flex items-center justify-between">
@@ -443,6 +493,37 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
             <Button onClick={handleStartTestRun} disabled={isTestRunning}>
               {isTestRunning ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />} Bắt đầu chạy
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Module Mapping Dialog */}
+      <Dialog open={!!mappingWorkflow} onOpenChange={(open) => !open && setMappingWorkflow(null)}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Áp dụng Nghiệp vụ</DialogTitle>
+            <DialogDescription>
+              Chọn luồng nghiệp vụ chính để áp dụng quy trình <strong>{mappingWorkflow?.name}</strong>. Lưu ý: mỗi luồng nghiệp vụ chỉ được áp dụng MỘT quy trình tại một thời điểm.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Luồng nghiệp vụ</Label>
+              <Select value={selectedModule} onValueChange={setSelectedModule}>
+                <SelectTrigger className="w-full h-11 rounded-xl">
+                  <SelectValue placeholder="Chọn nghiệp vụ..." />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {BUSINESS_MODULES.map(m => (
+                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setMappingWorkflow(null)} className="rounded-xl">Hủy</Button>
+            <Button onClick={handleApplyModule} className="rounded-xl">Lưu thay đổi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

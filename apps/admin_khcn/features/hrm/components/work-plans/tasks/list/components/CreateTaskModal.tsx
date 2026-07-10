@@ -11,7 +11,7 @@ import { ClipboardList, Calendar, Flag, Route } from 'lucide-react';
 import { hrmTasksApi } from '@/features/hrm/api';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
-import { workflowApi } from '@/features/workflow/api';
+
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -24,15 +24,10 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
     title: '',
     description: '',
     priority: 'MEDIUM',
-    dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-    workflowId: 'none',
+    dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
   });
 
-  const { data: workflowsData } = useQuery({
-    queryKey: ['workflows', 'list'],
-    queryFn: () => workflowApi.list(),
-  });
-  const workflows = workflowsData?.data || [];
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,12 +44,11 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
         dueDate: form.dueDate || undefined,
         assigneeCode: 'UNASSIGNED',
         status: 'TODO',
-        metadata: form.workflowId !== 'none' ? { workflowId: form.workflowId } : undefined,
       });
 
       toast.success(`Đã khởi tạo: ${form.title}`);
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
-      setForm({ title: '', description: '', priority: 'MEDIUM', dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0], workflowId: 'none' });
+      setForm({ title: '', description: '', priority: 'MEDIUM', dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0] });
       onClose(true);
     } catch {
       toast.error('Lỗi khi khởi tạo công việc');
@@ -135,24 +129,6 @@ export function CreateTaskModal({ isOpen, onClose }: CreateTaskModalProps) {
                   className="h-11 font-medium border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl"
                 />
               </div>
-            </div>
-
-            {/* Workflow Selection */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Route className="w-3 h-3" /> Quy trình áp dụng
-              </label>
-              <Select value={form.workflowId} onValueChange={(v) => setForm(p => ({ ...p, workflowId: v }))}>
-                <SelectTrigger className="h-11 font-medium border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl">
-                  <SelectValue placeholder="Chọn quy trình (tuỳ chọn)" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-200 max-h-60">
-                  <SelectItem value="none" className="italic text-slate-500">Mặc định (Không áp dụng workflow tuỳ chỉnh)</SelectItem>
-                  {workflows.map(wf => (
-                    <SelectItem key={wf.id} value={wf.id}>{wf.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

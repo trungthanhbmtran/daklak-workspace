@@ -9,7 +9,7 @@ export class WorkflowGrpcController {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('REDIS_SERVICE') private readonly redisClient: ClientProxy,
-  ) {}
+  ) { }
 
   // --- CRUD Operations ---
 
@@ -183,7 +183,7 @@ export class WorkflowGrpcController {
       });
 
       const mappedWorkflow = this.mapWorkflow(workflow);
-      
+
       this.redisClient.emit('WORKFLOW_UPDATED', {
         workflowId: mappedWorkflow.id,
         code: mappedWorkflow.code
@@ -239,7 +239,7 @@ export class WorkflowGrpcController {
   async listWorkflows(data: { skip?: number; take?: number; search?: string }) {
     const skip = data.skip || 0;
     const take = data.take || 10;
-    
+
     const where: any = {};
     if (data.search) {
       where.OR = [
@@ -264,14 +264,14 @@ export class WorkflowGrpcController {
     const workflows =
       ids.length > 0
         ? await this.prisma.workflowDefinition.findMany({
-            where: { id: { in: ids } },
-            orderBy: { createdAt: 'desc' },
-            include: {
-              nodes: { include: { assignments: true, actions: true } },
-              edges: true,
-              variables: true
-            }
-          })
+          where: { id: { in: ids } },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            nodes: { include: { assignments: true, actions: true } },
+            edges: true,
+            variables: true
+          }
+        })
         : [];
 
     return {
@@ -290,7 +290,7 @@ export class WorkflowGrpcController {
   async listInstances(data: { skip?: number; take?: number; workflowId?: string; status?: string; search?: string }) {
     const skip = data.skip || 0;
     const take = data.take || 10;
-    
+
     const where: any = {};
     if (data.workflowId) where.workflowId = data.workflowId;
     if (data.status) where.status = data.status;
@@ -300,7 +300,7 @@ export class WorkflowGrpcController {
         { workflow: { name: { contains: data.search } } }
       ];
     }
-    
+
     const [instances, total] = await Promise.all([
       this.prisma.workflowInstance.findMany({
         where,
@@ -327,7 +327,7 @@ export class WorkflowGrpcController {
     };
   }
 
-  
+
   // --- Execution Engine ---
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
@@ -396,10 +396,10 @@ export class WorkflowGrpcController {
   }) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: data.instanceId },
-      include: { 
+      include: {
         workflow: {
           include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
-        } 
+        }
       }
     });
     if (!instance) {
@@ -434,10 +434,10 @@ export class WorkflowGrpcController {
   }) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: data.instanceId },
-      include: { 
+      include: {
         workflow: {
           include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
-        } 
+        }
       }
     });
     if (!instance) {
@@ -446,7 +446,7 @@ export class WorkflowGrpcController {
 
     const definitionForEngine = this.buildEngineDefinition(instance.workflow);
     const engine = new WorkflowEngine(definitionForEngine, instance.workflow.id);
-    
+
     const actionName = data.actionData?.actionName;
     const nextNodeId = engine.getNextNodeId(data.nodeId, actionName, data.actionData || {});
 
