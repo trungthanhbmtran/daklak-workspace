@@ -132,39 +132,110 @@ async function main() {
         id: 'node_receive',
         type: 'user_task',
         position: { x: 250, y: 150 },
-        data: { permissions: { ...fullPermissions, RECEIVE: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Tiếp nhận & Vào sổ', description: 'Văn thư tiếp nhận văn bản', actionName: 'RECEIVE', sendNotification: false, assignmentStrategy: 'ANY', targetStatus: 'TODO' }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            RECEIVE: ['ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'] 
+          }, 
+          label: 'Tiếp nhận & Vào sổ', 
+          description: 'Văn thư tiếp nhận văn bản', 
+          actionName: 'RECEIVE', 
+          sendNotification: false, 
+          assignmentStrategy: 'ANY', 
+          targetStatus: 'TODO' 
+        }
       },
       {
         id: 'node_route',
         type: 'user_task',
         position: { x: 500, y: 150 },
-        data: { permissions: { ...fullPermissions, ROUTE: ['SUPERVISOR', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Lãnh đạo Bút phê', description: 'Lãnh đạo cơ quan điều chuyển văn bản', actionName: 'ROUTE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Có văn bản cần phê duyệt', template: 'Văn bản "{{taskTitle}}" đang chờ ý kiến chỉ đạo của bạn.', recipientExpression: '[supervisorCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            ROUTE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'] 
+          }, 
+          label: 'Lãnh đạo Bút phê', 
+          description: 'Lãnh đạo cơ quan điều chuyển văn bản', 
+          actionName: 'ROUTE', 
+          sendNotification: true, 
+          assignmentStrategy: 'DIRECT_MANAGER', 
+          notification: { title: 'Có văn bản cần phê duyệt', template: 'Văn bản "{{taskTitle}}" đang chờ ý kiến chỉ đạo của bạn.', recipientExpression: '[supervisorCode]' } 
+        }
       },
       { id: 'gw_route', type: 'exclusive_gateway', position: { x: 750, y: 150 }, data: { label: 'Điều chuyển' } },
       {
         id: 'node_assign_staff',
         type: 'user_task',
         position: { x: 1000, y: 150 },
-        data: { permissions: { ...fullPermissions, ASSIGN_STAFF: ['DEPT_LEADER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Trưởng phòng phân công', description: 'Lãnh đạo phòng ban giao việc cho chuyên viên', actionName: 'ASSIGN_STAFF', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Có văn bản cần phân công', template: 'Đã có chỉ đạo cho văn bản "{{taskTitle}}". Vui lòng phân công chuyên viên xử lý.', recipientExpression: '[assigneeCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            ASSIGN_STAFF: ['DEPT_LEADER', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'] 
+          }, 
+          label: 'Trưởng phòng phân công', 
+          description: 'Lãnh đạo phòng ban giao việc cho chuyên viên', 
+          actionName: 'ASSIGN_STAFF', 
+          sendNotification: true, 
+          assignmentStrategy: 'BY_DEPARTMENT', 
+          notification: { title: 'Có văn bản cần phân công', template: 'Đã có chỉ đạo cho văn bản "{{taskTitle}}". Vui lòng phân công chuyên viên xử lý.', recipientExpression: '[assigneeCode]' } 
+        }
       },
       {
         id: 'node_process',
         type: 'user_task',
         position: { x: 1250, y: 150 },
-        data: { permissions: { ...fullPermissions, PROCESS: ['ASSIGNEE', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Chuyên viên xử lý', targetStatus: 'IN_PROGRESS', description: 'Chuyên viên thụ lý dự thảo phản hồi', actionName: 'PROCESS', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Bạn được giao xử lý văn bản', template: 'Bạn vừa được phân công thụ lý văn bản "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            PROCESS: ['ASSIGNEE', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'] 
+          }, 
+          label: 'Chuyên viên xử lý', 
+          targetStatus: 'IN_PROGRESS', 
+          description: 'Chuyên viên thụ lý dự thảo phản hồi', 
+          actionName: 'PROCESS', 
+          sendNotification: true, 
+          assignmentStrategy: 'ANY', 
+          notification: { title: 'Bạn được giao xử lý văn bản', template: 'Bạn vừa được phân công thụ lý văn bản "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } 
+        }
       },
       {
         id: 'node_approve',
         type: 'user_task',
         position: { x: 1500, y: 150 },
-        data: { permissions: { ...fullPermissions, APPROVE: ['SUPERVISOR', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Duyệt kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Lãnh đạo duyệt dự thảo', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Trình duyệt kết quả xử lý', template: 'Chuyên viên đã hoàn thành xử lý văn bản "{{taskTitle}}". Vui lòng kiểm tra.', recipientExpression: '[supervisorCode, assignerCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            APPROVE: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
+            RETURN: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'],
+            RETURNED: ['SUPERVISOR', 'ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*']
+          }, 
+          label: 'Duyệt kết quả', 
+          targetStatus: 'PENDING_APPROVAL', 
+          autoProgress: 100, 
+          description: 'Lãnh đạo duyệt dự thảo', 
+          actionName: 'APPROVE', 
+          sendNotification: true, 
+          assignmentStrategy: 'DIRECT_MANAGER', 
+          notification: { title: 'Trình duyệt kết quả xử lý', template: 'Chuyên viên đã hoàn thành xử lý văn bản "{{taskTitle}}". Vui lòng kiểm tra.', recipientExpression: '[supervisorCode, assignerCode]' } 
+        }
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 1750, y: 150 }, data: { label: 'Quyết định' } },
       {
         id: 'node_issue',
         type: 'user_task',
         position: { x: 2000, y: 150 },
-        data: { permissions: { ...fullPermissions, ISSUE: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Ban hành / Lưu trữ', description: 'Văn thư ban hành văn bản đi hoặc lưu trữ', actionName: 'ISSUE', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Văn bản đã được duyệt', template: 'Văn bản "{{taskTitle}}" đã được duyệt và sẵn sàng để ban hành.', recipientExpression: '[creatorEmployeeCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            ISSUE: ['ROLE:DOC_IN:MANAGE', 'ROLE:DOC_IN:*'] 
+          }, 
+          label: 'Ban hành / Lưu trữ', 
+          description: 'Văn thư ban hành văn bản đi hoặc lưu trữ', 
+          actionName: 'ISSUE', 
+          sendNotification: true, 
+          assignmentStrategy: 'ANY', 
+          notification: { title: 'Văn bản đã được duyệt', template: 'Văn bản "{{taskTitle}}" đã được duyệt và sẵn sàng để ban hành.', recipientExpression: '[creatorEmployeeCode]' } 
+        }
       },
       { id: 'node_end', type: 'end', position: { x: 2250, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Văn bản đã ban hành', template: 'Quá trình xử lý văn bản "{{taskTitle}}" đã hoàn tất.', recipientExpression: '[assigneeCode, assignerCode]' } } }
     ],
@@ -190,27 +261,77 @@ async function main() {
         id: 'node_draft',
         type: 'user_task',
         position: { x: 250, y: 150 },
-        data: { permissions: { ...fullPermissions, SUBMIT_DRAFT: ['ASSIGNEE', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Soạn thảo', description: 'Tác giả soạn thảo bản thảo bài viết', actionName: 'SUBMIT_DRAFT', sendNotification: true, assignmentStrategy: 'ANY', targetStatus: 'IN_PROGRESS', notification: { title: 'Yêu cầu viết bài', template: 'Bạn được phân công soạn thảo bài viết "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            SUBMIT_DRAFT: ['ASSIGNEE', 'ROLE:POST:MANAGE', 'ROLE:POST:*'] 
+          }, 
+          label: 'Soạn thảo', 
+          description: 'Tác giả soạn thảo bản thảo bài viết', 
+          actionName: 'SUBMIT_DRAFT', 
+          sendNotification: true, 
+          assignmentStrategy: 'ANY', 
+          targetStatus: 'IN_PROGRESS', 
+          notification: { title: 'Yêu cầu viết bài', template: 'Bạn được phân công soạn thảo bài viết "{{taskTitle}}".', recipientExpression: '[assigneeCode]' } 
+        }
       },
       {
         id: 'node_edit',
         type: 'user_task',
         position: { x: 500, y: 150 },
-        data: { permissions: { ...fullPermissions, EDIT_ARTICLE: ['DEPT_LEADER', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Biên tập', description: 'Biên tập viên chỉnh sửa nội dung bài viết', actionName: 'EDIT_ARTICLE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'REVIEWING', notification: { title: 'Có bài viết chờ biên tập', template: 'Bài viết "{{taskTitle}}" vừa được nộp và đang chờ bạn biên tập.', recipientExpression: '[supervisorCode, assignerCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            EDIT_ARTICLE: ['DEPT_LEADER', 'ROLE:POST:MANAGE', 'ROLE:POST:*'] 
+          }, 
+          label: 'Biên tập', 
+          description: 'Biên tập viên chỉnh sửa nội dung bài viết', 
+          actionName: 'EDIT_ARTICLE', 
+          sendNotification: true, 
+          assignmentStrategy: 'BY_DEPARTMENT', 
+          targetStatus: 'REVIEWING', 
+          notification: { title: 'Có bài viết chờ biên tập', template: 'Bài viết "{{taskTitle}}" vừa được nộp và đang chờ bạn biên tập.', recipientExpression: '[supervisorCode, assignerCode]' } 
+        }
       },
       { id: 'gw_edit', type: 'exclusive_gateway', position: { x: 750, y: 150 }, data: { label: 'Đạt yêu cầu?' } },
       {
         id: 'node_approve',
         type: 'user_task',
         position: { x: 1000, y: 150 },
-        data: { permissions: { ...fullPermissions, APPROVE: ['SUPERVISOR', 'ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Lãnh đạo duyệt', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Tổng biên tập phê duyệt bài viết', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER', notification: { title: 'Có bài viết chờ phê duyệt', template: 'Bài viết "{{taskTitle}}" đã được biên tập và cần sự phê duyệt của bạn.', recipientExpression: '[creatorEmployeeCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            APPROVE: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
+            RETURN: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*'],
+            RETURNED: ['SUPERVISOR', 'ROLE:POST:MANAGE', 'ROLE:POST:*']
+          }, 
+          label: 'Lãnh đạo duyệt', 
+          targetStatus: 'PENDING_APPROVAL', 
+          autoProgress: 100, 
+          description: 'Tổng biên tập phê duyệt bài viết', 
+          actionName: 'APPROVE', 
+          sendNotification: true, 
+          assignmentStrategy: 'DIRECT_MANAGER', 
+          notification: { title: 'Có bài viết chờ phê duyệt', template: 'Bài viết "{{taskTitle}}" đã được biên tập và cần sự phê duyệt của bạn.', recipientExpression: '[creatorEmployeeCode]' } 
+        }
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 1250, y: 150 }, data: { label: 'Quyết định' } },
       {
         id: 'node_publish',
         type: 'user_task',
         position: { x: 1500, y: 150 },
-        data: { permissions: { ...fullPermissions, PUBLISH: ['ROLE:TASK:MANAGE', 'ROLE:TASK:*'] }, label: 'Xuất bản', description: 'Xuất bản bài viết lên cổng thông tin', actionName: 'PUBLISH', sendNotification: true, assignmentStrategy: 'ANY', notification: { title: 'Yêu cầu xuất bản bài viết', template: 'Bài viết "{{taskTitle}}" đã được duyệt và sẵn sàng để xuất bản.', recipientExpression: '[assigneeCode]' } }
+        data: { 
+          permissions: { 
+            ...fullPermissions, 
+            PUBLISH: ['ROLE:POST:MANAGE', 'ROLE:POST:*'] 
+          }, 
+          label: 'Xuất bản', 
+          description: 'Xuất bản bài viết lên cổng thông tin', 
+          actionName: 'PUBLISH', 
+          sendNotification: true, 
+          assignmentStrategy: 'ANY', 
+          notification: { title: 'Yêu cầu xuất bản bài viết', template: 'Bài viết "{{taskTitle}}" đã được duyệt và sẵn sàng để xuất bản.', recipientExpression: '[assigneeCode]' } 
+        }
       },
       { id: 'node_end', type: 'end', position: { x: 1750, y: 150 }, data: { label: 'Kết thúc', targetStatus: 'DONE', sendNotification: true, notification: { title: 'Bài viết đã xuất bản', template: 'Quá trình biên tập bài viết "{{taskTitle}}" đã hoàn tất.', recipientExpression: '[assignerCode, creatorEmployeeCode]' } } }
     ],

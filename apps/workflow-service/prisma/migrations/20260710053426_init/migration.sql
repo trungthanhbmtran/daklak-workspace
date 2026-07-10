@@ -1,43 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `businessId` on the `workflow_instances` table. All the data in the column will be lost.
-  - You are about to drop the column `businessType` on the `workflow_instances` table. All the data in the column will be lost.
-  - You are about to drop the column `context` on the `workflow_instances` table. All the data in the column will be lost.
-  - You are about to drop the column `createdAt` on the `workflow_instances` table. All the data in the column will be lost.
-  - You are about to drop the column `initiatorId` on the `workflow_instances` table. All the data in the column will be lost.
-  - You are about to drop the column `updatedAt` on the `workflow_instances` table. All the data in the column will be lost.
-  - You are about to drop the `execution_logs` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `workflows` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE `execution_logs` DROP FOREIGN KEY `execution_logs_instanceId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `workflow_instances` DROP FOREIGN KEY `workflow_instances_workflowId_fkey`;
-
--- DropIndex
-DROP INDEX `workflow_instances_workflowId_fkey` ON `workflow_instances`;
-
--- AlterTable
-ALTER TABLE `workflow_instances` DROP COLUMN `businessId`,
-    DROP COLUMN `businessType`,
-    DROP COLUMN `context`,
-    DROP COLUMN `createdAt`,
-    DROP COLUMN `initiatorId`,
-    DROP COLUMN `updatedAt`,
-    ADD COLUMN `finishedAt` DATETIME(3) NULL,
-    ADD COLUMN `startedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    ADD COLUMN `variables` JSON NULL,
-    ADD COLUMN `version` INTEGER NOT NULL DEFAULT 1;
-
--- DropTable
-DROP TABLE `execution_logs`;
-
--- DropTable
-DROP TABLE `workflows`;
-
 -- CreateTable
 CREATE TABLE `workflow_definitions` (
     `id` VARCHAR(191) NOT NULL,
@@ -76,6 +36,7 @@ CREATE TABLE `workflow_edges` (
     `sourceNodeId` VARCHAR(191) NOT NULL,
     `targetNodeId` VARCHAR(191) NOT NULL,
     `condition` TEXT NULL,
+    `properties` JSON NULL,
     `priority` INTEGER NOT NULL DEFAULT 0,
     `defaultFlow` BOOLEAN NOT NULL DEFAULT false,
 
@@ -118,6 +79,20 @@ CREATE TABLE `workflow_variables` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `workflow_instances` (
+    `id` VARCHAR(191) NOT NULL,
+    `workflowId` VARCHAR(191) NOT NULL,
+    `version` INTEGER NOT NULL DEFAULT 1,
+    `currentNodeId` VARCHAR(191) NULL,
+    `status` VARCHAR(191) NOT NULL,
+    `variables` JSON NULL,
+    `startedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `finishedAt` DATETIME(3) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `workflow_tasks` (
     `id` VARCHAR(191) NOT NULL,
     `instanceId` VARCHAR(191) NOT NULL,
@@ -127,6 +102,25 @@ CREATE TABLE `workflow_tasks` (
     `startedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `completedAt` DATETIME(3) NULL,
 
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `integration_connections` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `code` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `type` VARCHAR(191) NOT NULL DEFAULT 'REST',
+    `baseUrl` VARCHAR(191) NOT NULL,
+    `authConfig` JSON NULL,
+    `headers` JSON NULL,
+    `endpoints` JSON NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `integration_connections_code_key`(`code`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
