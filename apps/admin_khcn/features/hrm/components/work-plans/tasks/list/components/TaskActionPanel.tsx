@@ -152,19 +152,37 @@ export function TaskActionPanel({
             <div className="w-4 h-[2px] bg-slate-300 rounded" /> Thao tác
           </h3>
           <div className="flex flex-col gap-2.5">
-            {/* ── CONTEXT: PENDING_ASSIGN — Chỉ phân công, KHÔNG phân rã ── */}
+            {/* ── CONTEXT: PENDING_ASSIGN — Chỉ phân công ── */}
             {context === 'PENDING_ASSIGN' && (
               <>
                 <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-700 font-semibold flex items-center gap-2">
                   <span>🗂️</span> Chế độ Giao việc — chọn người nhận đầu việc này
                 </div>
-                <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-500 leading-relaxed">
-                  Sau khi giao, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong &quot;Việc của tôi&quot; — bạn không cần phân rã tại đây.
-                </div>
                 <Button className="w-full h-10 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm" onClick={() => onSmartAssign(activeTask)}>
                   <User className="w-4 h-4 mr-2" /> Phân công người thực hiện
                 </Button>
               </>
+            )}
+
+            {/* Xây dựng kế hoạch thực hiện — phân rã mục tiêu cá nhân/đơn vị */}
+            {allowedActions.includes('ADD_SUBTASK') && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 h-10 rounded-lg font-medium text-sm"
+                  onClick={onOpenSubTaskModal}
+                >
+                  <Split className="w-4 h-4 mr-2" />
+                  Thủ công
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 h-10 rounded-lg font-bold text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800"
+                  onClick={onOpenAiBreakdownModal}
+                >
+                  ✨ AI Phân rã
+                </Button>
+              </div>
             )}
 
             {/* ── CONTEXT: MY_EXECUTION — Thực thi + Xây dựng kế hoạch ── */}
@@ -173,26 +191,6 @@ export function TaskActionPanel({
                 <div className="px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-xl text-[11px] text-indigo-700 font-semibold flex items-center gap-2">
                   <span>✅</span> Chế độ Thực thi — cập nhật tiến độ hoặc xây dựng kế hoạch
                 </div>
-                {/* Xây dựng kế hoạch thực hiện — phân rã mục tiêu cá nhân/đơn vị */}
-                {allowedActions.includes('ADD_SUBTASK') && (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-10 rounded-lg font-medium text-sm"
-                      onClick={onOpenSubTaskModal}
-                    >
-                      <Split className="w-4 h-4 mr-2" />
-                      Thủ công
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-10 rounded-lg font-bold text-sm bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800"
-                      onClick={onOpenAiBreakdownModal}
-                    >
-                      ✨ AI Phân rã
-                    </Button>
-                  </div>
-                )}
                 {activeTask.plan && (
                   <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-500 leading-relaxed">
                     ℹ️ Tạo các mục tiêu cụ thể để thực hiện: <b className="text-slate-700">{activeTask.title}</b>

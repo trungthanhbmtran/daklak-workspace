@@ -32,7 +32,7 @@ async function main() {
         data: {
 
           permissions: {
-            ...basePermissions,
+            ...fullPermissions,
             PLAN_ASSIGNMENT: ['OWNER', 'DEPT_LEADER', 'ADMIN']
           },
           label: 'Phương án phân công', description: 'Lãnh đạo xác định định biên và cơ cấu phòng ban chịu trách nhiệm', actionName: 'PLAN_ASSIGNMENT', sendNotification: false, assignmentStrategy: 'BY_DEPARTMENT', targetStatus: 'TODO'

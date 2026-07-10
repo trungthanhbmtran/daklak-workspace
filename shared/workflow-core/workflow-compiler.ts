@@ -85,7 +85,13 @@ export class WorkflowCompiler {
           body += `  if (!perms[actionName]) return false;\n`; // Must be explicitly allowed
           body += `  const allowed = perms[actionName];\n`;
           body += `  if (allowed.length === 0) return true;\n`; // Empty means no role restrictions
-          body += `  const roles = userRoles || [];\n`;
+          body += `  const roles = [...(userRoles || [])];\n`;
+          body += `  if (typeof isOwner !== 'undefined' && isOwner) roles.push('OWNER');\n`;
+          body += `  if (typeof isAssignee !== 'undefined' && isAssignee) roles.push('ASSIGNEE');\n`;
+          body += `  if (typeof isSupervisor !== 'undefined' && isSupervisor) roles.push('SUPERVISOR');\n`;
+          body += `  if (typeof isDeptLeader !== 'undefined' && isDeptLeader) roles.push('DEPT_LEADER');\n`;
+          body += `  if (typeof isAdmin !== 'undefined' && isAdmin) roles.push('ADMIN');\n`;
+          body += `  if (typeof isCoordinator !== 'undefined' && isCoordinator) roles.push('COORDINATOR');\n`;
           body += `  if (allowed.includes('ANY') || allowed.includes('PARTICIPANT')) return true;\n`;
           body += `  return allowed.some(r => roles.includes(r));\n`;
           body += `}`;
