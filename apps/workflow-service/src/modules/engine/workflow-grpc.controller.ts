@@ -110,7 +110,7 @@ export class WorkflowGrpcController {
       console.log('[WorkflowService] Updating workflow:', data.id);
 
       // Simple implementation: delete related and recreate if nodes/edges provided
-      if (data.nodes || data.edges) {
+      if ((data.nodes && data.nodes.length > 0) || (data.edges && data.edges.length > 0)) {
         await this.prisma.workflowNode.deleteMany({ where: { workflowId: data.id } });
         await this.prisma.workflowEdge.deleteMany({ where: { workflowId: data.id } });
         await this.prisma.workflowVariable.deleteMany({ where: { workflowId: data.id } });
@@ -119,12 +119,12 @@ export class WorkflowGrpcController {
       const workflow = await this.prisma.workflowDefinition.update({
         where: { id: data.id },
         data: {
-          code: data.code,
-          name: data.name,
-          description: data.description,
-          version: data.version,
-          status: data.status,
-          ...(data.nodes ? {
+          code: data.code || undefined,
+          name: data.name || undefined,
+          description: data.description || undefined,
+          version: data.version || undefined,
+          status: data.status || undefined,
+          ...(data.nodes && data.nodes.length > 0 ? {
             nodes: {
               create: data.nodes.map(n => ({
                 id: `${data.id}_${n.nodeKey}`,
@@ -153,7 +153,7 @@ export class WorkflowGrpcController {
               }))
             }
           } : {}),
-          ...(data.edges ? {
+          ...(data.edges && data.edges.length > 0 ? {
             edges: {
               create: data.edges.map(e => ({
                 sourceNodeId: `${data.id}_${e.sourceNodeId}`,

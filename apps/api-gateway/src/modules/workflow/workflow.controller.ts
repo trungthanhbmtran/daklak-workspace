@@ -138,27 +138,30 @@ export class WorkflowController implements OnModuleInit {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật định nghĩa quy trình' })
   async update(@Param('id') id: string, @Body() body: any) {
-    const payload = {
+    const payload: any = {
       id,
       name: body.name,
       description: body.description,
       code: body.trigger || body.code,
-      nodes: (body.definition?.nodes || []).map((n: any) => ({
+    };
+    if (body.definition) {
+      payload.nodes = (body.definition.nodes || []).map((n: any) => ({
         nodeKey: n.id,
         type: n.type,
         name: n.data?.label || '',
         x: Math.round(n.position?.x || 0),
         y: Math.round(n.position?.y || 0),
         properties: n.data || {}
-      })),
-      edges: (body.definition?.edges || []).map((e: any) => ({
+      }));
+      payload.edges = (body.definition.edges || []).map((e: any) => ({
         sourceNodeId: e.source,
         targetNodeId: e.target,
         condition: e.data?.expression || e.label || '',
         properties: e.data || {}
-      })),
-      variables: body.definition?.variables || [],
-    };
+      }));
+      payload.variables = body.definition.variables || [];
+    }
+
     const result = (await firstValueFrom(
       this.workflowService.UpdateWorkflow(payload),
     )) as any;
