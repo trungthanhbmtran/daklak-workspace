@@ -228,18 +228,8 @@ export class WorkflowEngine {
   }
 
   public resolveAssignments(currentNodeId: string, context: WorkflowContext): string[] | null {
-    const node = this.getNode(currentNodeId);
-    if (!node || !node.assignmentFn) return null;
-
-    try {
-      const result = node.assignmentFn(context);
-      if (!result) return [];
-      if (Array.isArray(result)) return result;
-      return [String(result)];
-    } catch (e: any) {
-      console.error('[WorkflowEngine] Error evaluating assignmentExpression:', e);
-      return [];
-    }
+    // Dynamic assignment logic removed to force use of declarative AssignmentStrategy and PBAC
+    return null;
   }
 
   public evaluateSideEffects(currentNodeId: string): any[] {

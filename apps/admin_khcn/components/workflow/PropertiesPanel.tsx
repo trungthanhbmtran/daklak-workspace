@@ -64,6 +64,7 @@ export const PropertiesPanel = ({
   workflowCode,
   setWorkflowCode
 }: PropertiesPanelProps) => {
+  const [activeRoleGroups, setActiveRoleGroups] = React.useState<Record<string, string>>({});
   const data = selectedNode ? (selectedNode.data || {}) as any : (selectedEdge ? selectedEdge : {} as any);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -248,31 +249,7 @@ export const PropertiesPanel = ({
                 Trạng thái của công việc sẽ đổi thành mã này khi đi vào bước này. Bỏ trống sẽ giữ nguyên trạng thái cũ.
               </p>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Vai trò xử lý (PBAC)
-              </label>
-              <NativeSelect
-                name="role"
-                value={data.role || ""}
-                onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-              >
-                <NativeSelectOption value="">Chọn vai trò...</NativeSelectOption>
-                {taskRoles && taskRoles.length > 0 ? (
-                  taskRoles.map((role: any) => (
-                    <NativeSelectOption key={role.code} value={role.code}>{role.name || role.code}</NativeSelectOption>
-                  ))
-                ) : (
-                  <>
-                    <NativeSelectOption value="ADMIN">Administrator</NativeSelectOption>
-                    <NativeSelectOption value="MANAGER">Quản lý / Lãnh đạo</NativeSelectOption>
-                    <NativeSelectOption value="STAFF">Nhân viên / Chuyên viên</NativeSelectOption>
-                    <NativeSelectOption value="EXPERT">Chuyên gia phản biện</NativeSelectOption>
-                  </>
-                )}
-              </NativeSelect>
-            </div>
+
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Chiến lược phân công (Scope)
@@ -294,24 +271,7 @@ export const PropertiesPanel = ({
               </p>
             </div>
             
-            {/* Advanced Customization: Assignment Script */}
-            <div className="p-3 bg-violet-50/50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900 rounded-xl space-y-3">
-              <label className="text-xs font-bold text-violet-700 dark:text-violet-400 flex items-center gap-1.5">
-                <span className="font-mono bg-violet-100 dark:bg-violet-900 px-1 py-0.5 rounded text-[10px]">fx</span>
-                Kịch bản giao việc tự động (Assignment Script)
-              </label>
-              <Textarea
-                name="assignmentExpression"
-                value={data.assignmentExpression || ""}
-                onChange={handleChange}
-                className="w-full bg-white dark:bg-slate-950 border border-violet-200 dark:border-violet-800 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[80px] resize-y"
-                placeholder={`// Ví dụ: Giao cho cấp trên của người tạo\nreturn context.creator.managerId;`}
-                spellCheck={false}
-              />
-              <p className="text-[10px] text-violet-600/70 dark:text-violet-400/70 leading-relaxed">
-                Biểu thức kịch bản nâng cao ghi đè lên chiến lược phân công cứng. Có thể trả về 1 hoặc mảng các mã nhân sự (Code).
-              </p>
-            </div>
+
             <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/10 mt-2">
               <label className="text-sm font-semibold text-primary">
                 Gửi thông báo hệ thống
@@ -393,31 +353,40 @@ export const PropertiesPanel = ({
                               </button>
                             </span>
                           ))}
-                          <select
-                            className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
-                            onChange={(e) => {
-                              const role = e.target.value;
-                              if (!role) return;
-                              const currentRoles = Array.isArray(roles) ? roles : [];
-                              const newRoles = [...currentRoles, role].filter((v, i, a) => a.indexOf(v) === i);
-                              onUpdate(selectedNode!.id, { 
-                                ...data, 
-                                permissions: { ...data.permissions, [action]: newRoles } 
-                              });
-                              e.target.value = ''; // reset after selection
-                            }}
-                            defaultValue=""
-                          >
-                            <option value="" disabled>+ Chọn quyền</option>
-                            <optgroup label="Quyền Workflow">
-                              {SYSTEM_ROLES.map(r => <option key={r.code} value={r.code}>{r.code}</option>)}
-                            </optgroup>
-                            {taskRoles && taskRoles.length > 0 && (
-                              <optgroup label="Quyền Hệ thống (PBAC)">
-                                {taskRoles.map((r: any) => <option key={r.code} value={r.code}>{r.code}</option>)}
-                              </optgroup>
+                          <div className="flex items-center gap-1">
+                            <select
+                              className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                              value={activeRoleGroups[action] || ""}
+                              onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
+                            >
+                              <option value="" disabled>+ Chọn nhóm</option>
+                              <option value="WORKFLOW">Nhóm Quyền Mặc Định (Workflow)</option>
+                              {taskRoles && taskRoles.length > 0 && <option value="PBAC">Nhóm Quyền Hệ Thống (PBAC)</option>}
+                            </select>
+
+                            {activeRoleGroups[action] && (
+                              <select
+                                className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                                onChange={(e) => {
+                                  const role = e.target.value;
+                                  if (!role) return;
+                                  const currentRoles = Array.isArray(roles) ? roles : [];
+                                  const newRoles = [...currentRoles, role].filter((v, i, a) => a.indexOf(v) === i);
+                                  onUpdate(selectedNode!.id, { 
+                                    ...data, 
+                                    permissions: { ...data.permissions, [action]: newRoles } 
+                                  });
+                                  e.target.value = ''; // reset after selection
+                                  setActiveRoleGroups({ ...activeRoleGroups, [action]: "" }); // Reset group selection
+                                }}
+                                defaultValue=""
+                              >
+                                <option value="" disabled>+ Chọn quyền</option>
+                                {activeRoleGroups[action] === 'WORKFLOW' && SYSTEM_ROLES.map(r => <option key={r.code} value={r.code}>{r.name} ({r.code})</option>)}
+                                {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => <option key={r.code} value={r.code}>{r.name} ({r.code})</option>)}
+                              </select>
                             )}
-                          </select>
+                          </div>
                         </div>
                       </div>
                       <Button 
@@ -479,24 +448,7 @@ export const PropertiesPanel = ({
                 placeholder="Mô tả công việc cần thực hiện ở bước này..."
               />
             </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Biểu thức xác thực động (Validation fx)
-              </label>
-              <div className="relative group">
-                <div className="absolute left-3 top-3.5 text-slate-400 group-focus-within:text-violet-500 transition-colors">
-                  <span className="font-mono text-xs font-bold bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">fx</span>
-                </div>
-                <Textarea
-                  name="validationExpression"
-                  value={data.validationExpression || ""}
-                  onChange={handleChange}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 pl-12 text-sm font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[100px] resize-y leading-relaxed"
-                  placeholder={`// Viết biểu thức JavaScript (trả về true/false)\ne.g. userContext.allowedEmployeeCodes.includes('NV_001')`}
-                  spellCheck={false}
-                />
-              </div>
-            </div>
+
 
             {/* Advanced Customization: Dynamic Forms */}
             <div>

@@ -6,7 +6,6 @@ export interface CompiledNode {
   data: any;
   allowedActions: string[];
   validateFn?: (context: ValidationContext) => boolean;
-  assignmentFn?: (context: WorkflowContext) => any;
   outEdges: EdgeData[]; // direct reference to outgoing edges for O(1) traversal
 }
 
@@ -80,7 +79,17 @@ export class WorkflowCompiler {
       try {
         let body = `with (context || {}) {\n`;
 
-        if (node.data?.validationExpression) {
+        if (node.type === 'user_task') {
+          // Data-driven permissions evaluation
+          body += `  const perms = ${JSON.stringify(node.data?.permissions || {})};\n`;
+          body += `  if (!perms[actionName]) return false;\n`; // Must be explicitly allowed
+          body += `  const allowed = perms[actionName];\n`;
+          body += `  if (allowed.length === 0) return true;\n`; // Empty means no role restrictions
+          body += `  const roles = userRoles || [];\n`;
+          body += `  if (allowed.includes('ANY') || allowed.includes('PARTICIPANT')) return true;\n`;
+          body += `  return allowed.some(r => roles.includes(r));\n`;
+          body += `}`;
+        } else if (node.data?.validationExpression) {
           body += `  return (function() {\n    ${node.data.validationExpression}\n  })();\n}`;
         } else {
           body += `  return true;\n}`;
@@ -91,18 +100,7 @@ export class WorkflowCompiler {
         console.error(`[WorkflowCompiler] Failed to compile validationExpression for node ${node.id}`, e);
       }
 
-      // Compile assignment expression
-      if (node.data?.assignmentExpression) {
-        try {
-          compiledNode.assignmentFn = new Function('context', `
-            with (context || {}) {
-               ${node.data.assignmentExpression}
-            }
-          `) as (context: WorkflowContext) => any;
-        } catch (e) {
-          console.error(`[WorkflowCompiler] Failed to compile assignmentExpression for node ${node.id}`, e);
-        }
-      }
+
 
       // Compile allowed actions statically
       compiledNode.allowedActions = this.extractAllowedActions(node, compiledNode.outEdges);
