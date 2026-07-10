@@ -130,7 +130,6 @@ export class WorkflowController implements OnModuleInit {
       delete result.nodes;
       delete result.edges;
       delete result.variables;
-      delete result.code;
     }
     return { data: result };
   }
@@ -211,7 +210,6 @@ export class WorkflowController implements OnModuleInit {
       delete item.nodes;
       delete item.edges;
       delete item.variables;
-      delete item.code;
       return item;
     });
     return {
@@ -241,7 +239,6 @@ export class WorkflowController implements OnModuleInit {
       delete result.nodes;
       delete result.edges;
       delete result.variables;
-      delete result.code;
     }
     return { data: result };
   }
