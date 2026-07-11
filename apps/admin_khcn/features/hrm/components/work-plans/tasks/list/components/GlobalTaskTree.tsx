@@ -13,6 +13,14 @@ import { useTaskSubtasks } from '@/features/hrm/hooks/useTasks';
 import { TaskStatusBadge, TaskPriorityBadge, TaskRoleBadge, TASK_STATUS_CONFIG } from '@/components/shared/badges/TaskBadges';
 import { WorkflowStatusBadge } from '@/components/workflow/shared/WorkflowStatusBadge';
 
+const WORKFLOW_STEP_LABELS: Record<string, string> = {
+  PLAN_ASSIGNMENT: 'Chờ phân công',
+  ASSIGN: 'Chờ giao việc',
+  IN_PROGRESS: 'Đang thực hiện',
+  COMPLETE: 'Chờ báo cáo',
+  APPROVE: 'Chờ nghiệm thu',
+};
+
 interface TaskRowProps {
   task: any;
   depth: number;
@@ -128,17 +136,13 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
                 )}
 
                 {/* Workflow step chip */}
-                {task.workflowInstId && (task.allowedActions || []).length > 0 && (task.allowedActions || []).filter((a: string) => !['CHAT','EDIT','DELETE','ADD_SUBTASK','COORDINATE','FORWARD','MONITOR'].includes(a)).length > 0 && (
+                {task.workflowInstId && (task.allowedActions || []).some((a: string) => Object.keys(WORKFLOW_STEP_LABELS).includes(a)) && (
                   <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700/40 text-indigo-600 dark:text-indigo-400">
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
                     <span className="text-[10px] font-bold tracking-wide">
-                      {{
-                        PLAN_ASSIGNMENT: 'Chờ phân công',
-                        ASSIGN: 'Chờ giao việc',
-                        IN_PROGRESS: 'Đang thực hiện',
-                        COMPLETE: 'Chờ báo cáo',
-                        APPROVE: 'Chờ nghiệm thu',
-                      }[(task.allowedActions || []).find((a: string) => ['PLAN_ASSIGNMENT','ASSIGN','IN_PROGRESS','COMPLETE','APPROVE'].includes(a))] || 'Đang xử lý'}
+                      {WORKFLOW_STEP_LABELS[
+                        (task.allowedActions as string[] || []).find((a) => a in WORKFLOW_STEP_LABELS) ?? ''
+                      ] ?? 'Đang xử lý'}
                     </span>
                   </div>
                 )}
