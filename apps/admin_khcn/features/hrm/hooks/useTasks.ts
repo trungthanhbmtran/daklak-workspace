@@ -148,7 +148,7 @@ export function useAddComment(taskId: number | undefined) {
 export function useUpdateStatus(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { status: string; rejectReason?: string }) => {
+    mutationFn: (payload: { status?: string; rejectReason?: string; actionName?: string }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStatus(taskId, payload);
     },

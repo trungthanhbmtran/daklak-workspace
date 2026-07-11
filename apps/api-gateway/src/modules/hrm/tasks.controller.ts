@@ -332,6 +332,7 @@ export class TasksController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body('status') status: string,
     @Body('rejectReason') rejectReason?: string,
+    @Body('actionName') actionName?: string,
   ) {
     const user = req.user;
     return firstValueFrom(
@@ -340,6 +341,7 @@ export class TasksController implements OnModuleInit {
           id,
           status,
           rejectReason,
+          actionName,
           // Inject người thực hiện từ JWT token
           actorCode: user?.employeeCode || '',
           currentUserPermissions: user?.permissionsFlatten || [],

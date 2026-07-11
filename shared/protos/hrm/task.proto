@@ -41,6 +41,10 @@ message AssignTaskRequest {
   repeated string coassigneeCodes = 5;
   optional float assigneePercentage = 6;
   repeated float coassigneePercentages = 7;
+  int32 currentUserId = 8;
+  string currentEmployeeCode = 9;
+  int32 currentUserDept = 10;
+  repeated string currentUserPermissions = 11;
 }
 
 message RecommendAssigneesRequest {
@@ -50,6 +54,10 @@ message RecommendAssigneesRequest {
   string jobTitleId = 7;
   repeated int32 allowedDepartmentIds = 8;
   repeated string allowedEmployeeCodes = 9;
+  int32 currentUserId = 10;
+  string currentEmployeeCode = 11;
+  int32 currentUserDept = 12;
+  repeated string currentUserPermissions = 13;
 }
 
 message AssigneeRecommendation {
@@ -151,6 +159,10 @@ message CreateTaskRequest {
   optional float assigneePercentage = 19;
   repeated string coassigneeCodes = 20;
   repeated float coassigneePercentages = 21;
+  int32 currentUserId = 22;
+  string currentEmployeeCode = 23;
+  int32 currentUserDept = 24;
+  repeated string currentUserPermissions = 25;
 }
 
 message ListTasksRequest {
@@ -174,6 +186,7 @@ message ListTasksRequest {
   repeated string allowedEmployeeCodes = 18;
   int32 currentUserDept = 19;
   int32 currentUserId = 20;
+  repeated string currentUserPermissions = 21;
 }
 
 message UnitStats {
@@ -215,8 +228,13 @@ message GetTaskStatsResponse {
 message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
-  string rejectReason = 3; // optional
-  string actorCode = 4;    // người thực hiện (từ JWT)
+  string rejectReason = 3;         // optional
+  string actorCode = 4;             // người thực hiện (từ JWT)
+  string actionName = 5;            // optional — tên action workflow (mặc định = status)
+  int32 currentUserId = 6;
+  string currentEmployeeCode = 7;
+  repeated string currentUserPermissions = 8;
+  int32 currentUserDept = 9;
 }
 
 message UpdateTaskRequest {
@@ -229,6 +247,10 @@ message UpdateTaskRequest {
   string title = 7;
   string description = 8;
   optional int32 kpiCriteriaId = 9;
+  int32 currentUserId = 10;
+  string currentEmployeeCode = 11;
+  int32 currentUserDept = 12;
+  repeated string currentUserPermissions = 13;
 }
 
 message TaskTemplateResponse {
@@ -305,10 +327,18 @@ message AddCommentRequest {
   string authorCode = 2;
   string content = 3;
   bool isSystemMessage = 4;
+  int32 currentUserId = 5;
+  string currentEmployeeCode = 6;
+  int32 currentUserDept = 7;
+  repeated string currentUserPermissions = 8;
 }
 
 message GetCommentsRequest {
   int32 taskId = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
 }
 
 message GetCommentsResponse {
@@ -348,6 +378,10 @@ message DelegationNode {
 
 message GetSubTasksRequest {
   int32 taskId = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
 }
 
 message GetSubTasksResponse {
@@ -359,6 +393,10 @@ message GetSubTasksResponse {
 // ─── GetTask ───────────────────────────────────────────────────────────────
 message GetTaskRequest {
   int32 id = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
 }
 
 // ─── BreakdownTask ─────────────────────────────────────────────────────────
@@ -373,7 +411,10 @@ message BreakdownTaskRequest {
   float baseScore = 8;
   float weight = 9;
   int32 departmentId = 10;
-  
+  int32 currentUserId = 11;
+  string currentEmployeeCode = 12;
+  int32 currentUserDept = 13;
+  repeated string currentUserPermissions = 14;
 }
 
 // ─── UpdateTaskProgress ────────────────────────────────────────────────────
@@ -381,6 +422,10 @@ message UpdateTaskProgressRequest {
   int32 id = 1;
   float progress = 2;
   string actorCode = 3;
+  int32 currentUserId = 4;
+  string currentEmployeeCode = 5;
+  int32 currentUserDept = 6;
+  repeated string currentUserPermissions = 7;
 }
 
 // ─── RequestCoordination ───────────────────────────────────────────────────
@@ -392,7 +437,10 @@ message RequestCoordinationRequest {
   repeated string coordinatorIds = 5;
   string leadCode = 6;
   repeated string coordinatorCodes = 7;
-  
+  int32 currentUserId = 8;
+  string currentEmployeeCode = 9;
+  int32 currentUserDept = 10;
+  repeated string currentUserPermissions = 11;
 }
 
 message CoordinationResponse {
@@ -412,6 +460,10 @@ message UpsertTaskKpiSettingRequest {
   float penaltyPerDay = 9;
   float standardDurationDays = 10;
   int32 kpiCriteriaId = 11;
+  int32 currentUserId = 12;
+  string currentEmployeeCode = 13;
+  int32 currentUserDept = 14;
+  repeated string currentUserPermissions = 15;
 }
 
 message TaskKpiSettingData {
@@ -435,10 +487,18 @@ message TaskKpiSettingResponse {
 
 message GetTaskKpiSettingRequest {
   int32 taskId = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
 }
 
 message GetTaskHistoryRequest {
   int32 taskId = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
 }
 
 message TaskHistoryData {
