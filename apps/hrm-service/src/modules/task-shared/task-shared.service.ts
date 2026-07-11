@@ -74,6 +74,46 @@ export class TaskSharedService {
     return null;
   }
 
+  /**
+   * Convert google.protobuf.Struct (may come as {fields:{...}}) to plain JS object.
+   * If already a plain object, return as-is.
+   */
+  private parseProtoStruct(value: any): any {
+    if (!value) return {};
+    // Already a plain object with actual content (not protobuf wrapper)
+    if (value && typeof value === 'object' && !value.fields && !value.kind) {
+      return value;
+    }
+    // Protobuf Struct wrapper: { fields: { key: { kind: 'stringValue'|'numberValue'|'boolValue'|'structValue'|'listValue', ...Value: ... } } }
+    if (value.fields) {
+      const result: any = {};
+      for (const [k, v] of Object.entries(value.fields as Record<string, any>)) {
+        result[k] = this.parseProtoValue(v);
+      }
+      return result;
+    }
+    return value;
+  }
+
+  private parseProtoValue(value: any): any {
+    if (!value) return null;
+    if (value.stringValue !== undefined) return value.stringValue;
+    if (value.numberValue !== undefined) return value.numberValue;
+    if (value.boolValue !== undefined) return value.boolValue;
+    if (value.nullValue !== undefined) return null;
+    if (value.structValue) return this.parseProtoStruct(value.structValue);
+    if (value.listValue) {
+      return (value.listValue.values || []).map((v: any) => this.parseProtoValue(v));
+    }
+    if (value.kind === 'stringValue') return value.stringValue;
+    if (value.kind === 'numberValue') return value.numberValue;
+    if (value.kind === 'boolValue') return value.boolValue;
+    if (value.kind === 'structValue') return this.parseProtoStruct(value.structValue);
+    if (value.kind === 'listValue') return (value.listValue?.values || []).map((v: any) => this.parseProtoValue(v));
+    if (value.kind === 'nullValue') return null;
+    return value;
+  }
+
   public async getWorkflowDefinition(workflowId: string): Promise<any> {
     const cacheKey = `workflow:def:${workflowId}`;
     const cached = await this.cache.get<any>(cacheKey);
@@ -86,7 +126,7 @@ export class TaskSharedService {
           nodes: (res.nodes || []).map((n: any) => ({
              id: n.id,
              type: n.type,
-             data: n.properties || {}
+             data: this.parseProtoStruct(n.properties)
           })),
           edges: (res.edges || []).map((e: any) => ({
              source: e.sourceNodeId,
@@ -102,6 +142,7 @@ export class TaskSharedService {
     }
     return null;
   }
+
 
   public sendTaskNotification(recipients: string[], title: string, message: string, taskData: any) {
     if (!recipients || recipients.length === 0) return;
@@ -455,8 +496,10 @@ export class TaskSharedService {
 
     if (definition && currentNodeId) {
       try {
-        const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'default-task-workflow';
+        const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'TASK_PROCESSING_ID';
         const engine = new WorkflowEngine(definition, cacheKey);
+        const dbgNode = engine.getNode(currentNodeId);
+        this.logger.debug(`[computeAllowedActions] task=${t.id} nodeId=${currentNodeId} node=${JSON.stringify(dbgNode?.data)?.substring(0,200)} isAdmin=${access.isAdmin} empCode=${query.currentEmployeeCode}`);
         actions = engine.getAllowedActions(
           currentNodeId,
           query.currentUserPermissions || [],
@@ -476,10 +519,12 @@ export class TaskSharedService {
             isUnassigned,
           }
         );
+        this.logger.debug(`[computeAllowedActions] task=${t.id} computed actions=${JSON.stringify(actions)}`);
       } catch (err) {
         this.logger.error('Failed to calculate allowed actions from WorkflowEngine for task ' + t.id, err);
       }
     }
+
 
     if (actions.length === 0 && (isTreeParticipant || t.creatorEmployeeCode === query.currentEmployeeCode)) {
       actions.push('CHAT');
