@@ -1,4 +1,4 @@
-syntax = "proto3";
+bosyntax = "proto3";
 
 package task;
 

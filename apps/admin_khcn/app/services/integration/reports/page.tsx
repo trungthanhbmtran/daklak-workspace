@@ -1,14 +1,13 @@
-import { IocDashboard } from "@/features/integration/components/reports/IocDashboard";
+import { ReportDashboard } from "@/features/integration/components/reports/ReportDashboard";
 
 export const metadata = {
-  title: "Dữ liệu Live từ API Tích hợp | Cổng Ứng dụng Nội bộ",
+  title: "Thiết kế Báo cáo | Cổng Ứng dụng Nội bộ",
 };
 
-export default function IocDashboardPage() {
+export default function ReportDashboardPage() {
   return (
     <div className="container mx-auto p-6 max-w-7xl flex-1 min-h-0 flex flex-col overflow-y-auto">
-      <IocDashboard />
+      <ReportDashboard />
     </div>
   );
 }
-
