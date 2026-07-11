@@ -45,12 +45,12 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
     return p;
   };
 
-  const extractParams = (parameters: any[] | undefined, type: 'query' | 'header') => {
+  const extractParams = (parameters: any[] | undefined, types: string[]) => {
     if (!parameters?.length) return [];
     const result: any[] = [];
     for (let i = 0; i < parameters.length; i++) {
       const p = resolveParam(parameters[i]);
-      if (p.in === type) result.push({ key: p.name, value: "" });
+      if (types.includes(p.in)) result.push({ key: p.name, value: p.example || p.schema?.example || "" });
     }
     return result;
   };
@@ -92,8 +92,8 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
           folder: details.tags?.[0] || "",
           method: lowerMethod.toUpperCase(),
           path: pathKey,
-          headers: extractParams(allParams, 'header'),
-          params: extractParams(allParams, 'query'),
+          headers: extractParams(allParams, ['header']),
+          params: extractParams(allParams, ['query', 'path']),
           body: extractBody(details)
         });
       }
@@ -150,6 +150,7 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
         const rawUrl = req.url?.raw || (typeof req.url === 'string' ? req.url : "");
 
         const queryParams = req.url?.query?.map((q: any) => ({ key: q.key, value: q.value || "" })) || [];
+        const pathVars = req.url?.variable?.map((v: any) => ({ key: v.key, value: v.value || "" })) || [];
         const headers = req.header?.map((h: any) => ({ key: h.key, value: h.value })) || [];
 
         endpoints.push({
@@ -159,7 +160,7 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
           method: req.method || "GET",
           path: rawUrl,
           headers,
-          params: queryParams,
+          params: [...queryParams, ...pathVars],
           body: req.body?.raw || ""
         });
       }
