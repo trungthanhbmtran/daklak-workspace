@@ -11,6 +11,11 @@ service WorkflowService {
   rpc ListWorkflows (ListWorkflowsRequest) returns (ListWorkflowsResponse);
   rpc DeleteWorkflow (DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
 
+  rpc FindWorkflowByCode (FindWorkflowByCodeRequest) returns (WorkflowResponse);
+  rpc ListModules (EmptyRequest) returns (ListModulesResponse);
+  rpc PublishWorkflow (PublishWorkflowRequest) returns (WorkflowResponse);
+  rpc ApplyModule (ApplyModuleRequest) returns (WorkflowResponse);
+
   // Execution Engine
   rpc StartWorkflow (StartWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc TriggerWorkflow (TriggerWorkflowRequest) returns (WorkflowInstanceResponse);
@@ -19,6 +24,29 @@ service WorkflowService {
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
+}
+
+message EmptyRequest {}
+
+message ListModulesResponse {
+  repeated WorkflowModule items = 1;
+}
+
+message WorkflowModule {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  string updatedAt = 5;
+}
+
+message PublishWorkflowRequest {
+  string id = 1;
+}
+
+message ApplyModuleRequest {
+  string id = 1;
+  string moduleCode = 2;
 }
 
 message CreateWorkflowRequest {
