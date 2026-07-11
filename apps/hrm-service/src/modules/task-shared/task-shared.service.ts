@@ -297,7 +297,12 @@ export class TaskSharedService {
     }
 
     const perms = query.currentUserPermissions || [];
-    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
+    const isAdmin = query.isAdmin ||
+      perms.includes('TASK:MANAGE') ||
+      perms.includes('TASK:*') ||
+      perms.includes('SYSTEM:*') ||
+      perms.some((p: string) => p === 'SYSTEM:*' || (p.endsWith(':*') && p.startsWith('SYSTEM')));
+
     const currentEmployeeCode = query.currentEmployeeCode;
 
     if (!currentEmployeeCode) {
