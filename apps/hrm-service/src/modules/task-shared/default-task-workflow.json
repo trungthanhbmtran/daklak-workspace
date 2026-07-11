@@ -1,51 +1,139 @@
 {
   "id": "default-task-workflow",
-  "name": "Default Task Workflow",
+  "name": "Quy trình Quản lý Công việc (Mặc định)",
   "nodes": [
     {
-      "id": "IN_PROGRESS",
-      "type": "state",
+      "id": "TODO",
+      "type": "user_task",
       "data": {
+        "label": "Chờ phân công",
+        "approvalRequired": false,
+        "allowAddSubtask": true,
+        "allowEdit": true,
+        "allowDelete": true,
+        "permissions": {
+          "ASSIGN":      ["OWNER", "APPROVER"],
+          "ADD_SUBTASK": ["OWNER", "APPROVER"],
+          "EDIT":        ["OWNER"],
+          "DELETE":      ["OWNER"]
+        }
+      }
+    },
+    {
+      "id": "IN_PROGRESS",
+      "type": "user_task",
+      "data": {
+        "label": "Đang thực hiện",
+        "approvalRequired": false,
         "allowAddSubtask": true,
         "allowCoordinate": true,
         "allowEdit": true,
-        "allowDelete": true,
-        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; if (actionName === 'EDIT' || actionName === 'ASSIGN') { return (isOwner || isDeptLeader) && userRoles.includes('TASK:EDIT'); } if (actionName === 'DELETE') { return isOwner && isUnassigned && !hasChildren && userRoles.includes('TASK:DELETE'); } if (actionName === 'ADD_SUBTASK') { return (isOwner || isAssignee) && (userRoles.includes('TASK:EDIT') || userRoles.includes('TASK:EXECUTE')); } if (actionName === 'COMPLETE' || actionName === 'COORDINATE') { return isAssignee && !hasChildren && userRoles.includes('TASK:EXECUTE'); } if (actionName === 'RETURN') { return (isSupervisor || isDeptLeader) && !hasChildren && userRoles.includes('TASK:APPROVE'); } return false;"
+        "permissions": {
+          "COMPLETE":    ["ASSIGNEE"],
+          "ADD_SUBTASK": ["OWNER", "ASSIGNEE"],
+          "COORDINATE":  ["OWNER", "ASSIGNEE"],
+          "EDIT":        ["OWNER", "ASSIGNEE"],
+          "RETURN":      ["OWNER", "APPROVER"]
+        }
       }
     },
     {
       "id": "PENDING_APPROVAL",
-      "type": "state",
+      "type": "user_task",
       "data": {
+        "label": "Chờ nghiệm thu",
+        "approvalRequired": true,
+        "evidenceType": "upload",
         "allowAddSubtask": false,
-        "allowCoordinate": false,
         "allowEdit": false,
-        "allowDelete": false,
-        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; if (actionName === 'APPROVE' || actionName === 'RETURN') { return (isSupervisor || isDeptLeader || isOwner) && userRoles.includes('TASK:APPROVE'); } return false;"
+        "approvalNotificationTemplate": "{{assigneeName}} đã hoàn thành \"{{taskTitle}}\". Vui lòng kiểm tra và nghiệm thu.",
+        "permissions": {
+          "APPROVE": ["OWNER", "APPROVER"],
+          "RETURN":  ["OWNER", "APPROVER"]
+        }
       }
     },
     {
-      "id": "COMPLETED",
-      "type": "state",
+      "id": "RETURNED",
+      "type": "user_task",
       "data": {
+        "label": "Bị trả lại",
+        "approvalRequired": false,
         "allowAddSubtask": false,
-        "allowCoordinate": false,
+        "allowEdit": true,
+        "permissions": {
+          "RESUBMIT": ["ASSIGNEE"],
+          "EDIT":     ["ASSIGNEE"]
+        }
+      }
+    },
+    {
+      "id": "DONE",
+      "type": "user_task",
+      "data": {
+        "label": "Hoàn thành",
+        "approvalRequired": false,
+        "allowAddSubtask": false,
         "allowEdit": false,
         "allowDelete": false,
-        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; return false;"
+        "permissions": {}
       }
     },
     {
       "id": "CANCELLED",
-      "type": "state",
+      "type": "user_task",
       "data": {
+        "label": "Đã hủy",
+        "approvalRequired": false,
         "allowAddSubtask": false,
-        "allowCoordinate": false,
         "allowEdit": false,
         "allowDelete": false,
-        "validationExpression": "if (userRoles.includes('TASK:MANAGE') || userRoles.includes('TASK:*')) return true; return false;"
+        "permissions": {}
       }
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "id": "edge_todo_inprogress",
+      "source": "TODO",
+      "target": "IN_PROGRESS",
+      "label": "ASSIGN",
+      "data": { "actionName": "ASSIGN" }
+    },
+    {
+      "id": "edge_inprogress_pending",
+      "source": "IN_PROGRESS",
+      "target": "PENDING_APPROVAL",
+      "label": "COMPLETE",
+      "data": { "actionName": "COMPLETE" }
+    },
+    {
+      "id": "edge_pending_done",
+      "source": "PENDING_APPROVAL",
+      "target": "DONE",
+      "label": "APPROVE",
+      "data": { "actionName": "APPROVE" }
+    },
+    {
+      "id": "edge_pending_returned",
+      "source": "PENDING_APPROVAL",
+      "target": "RETURNED",
+      "label": "RETURN",
+      "data": { "actionName": "RETURN" }
+    },
+    {
+      "id": "edge_returned_inprogress",
+      "source": "RETURNED",
+      "target": "IN_PROGRESS",
+      "label": "RESUBMIT",
+      "data": { "actionName": "RESUBMIT" }
+    },
+    {
+      "id": "edge_inprogress_returned",
+      "source": "IN_PROGRESS",
+      "target": "RETURNED",
+      "label": "RETURN",
+      "data": { "actionName": "RETURN" }
+    }
+  ]
 }

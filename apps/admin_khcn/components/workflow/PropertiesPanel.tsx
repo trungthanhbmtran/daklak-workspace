@@ -24,6 +24,8 @@ interface PropertiesPanelProps {
   availableServices?: any[];
   availableTriggers?: any[];
   taskRoles?: any[];
+  /** Vị trí/chức danh tổ chức từ DB (JobTitle) — thay thế SYSTEM_ROLES hardcode */
+  orgRoles?: { code: string; name: string; rank?: number; authorityLevel?: string; category?: string }[];
   onUpdate: (id: string, data: any) => void;
   onUpdateEdge?: (id: string, data: any) => void;
   onDelete: (id: string) => void;
@@ -35,15 +37,13 @@ interface PropertiesPanelProps {
   setWorkflowCode: (code: string) => void;
 }
 
-const SYSTEM_ROLES = [
-  { code: 'OWNER', name: 'Người tạo/Sở hữu' },
-  { code: 'ASSIGNEE', name: 'Người được giao (Xử lý chính)' },
-  { code: 'PARTICIPANT', name: 'Người tham gia (Bất kỳ)' },
-  { code: 'SUPERVISOR', name: 'Người theo dõi/Chỉ đạo' },
-  { code: 'DEPT_LEADER', name: 'Trưởng phòng' },
-  { code: 'COORDINATOR', name: 'Người phối hợp' },
-  { code: 'CREATOR', name: 'Người tạo' },
-  { code: 'ADMIN', name: 'Quản trị viên HT' },
+/** Vai trò cố định theo ngữ cảnh task (participant roles) — không liên quan đến tổ chức */
+const TASK_PARTICIPANT_ROLES = [
+  { code: 'OWNER', name: 'Người giao việc (OWNER)' },
+  { code: 'ASSIGNEE', name: 'Người xử lý chính (ASSIGNEE)' },
+  { code: 'COORDINATOR', name: 'Người phối hợp (COORDINATOR)' },
+  { code: 'APPROVER', name: 'Người chỉ đạo/Theo dõi (APPROVER)' },
+  { code: 'ADMIN', name: 'Quản trị viên hệ thống (ADMIN)' },
 ];
 
 export const PropertiesPanel = ({
@@ -54,6 +54,7 @@ export const PropertiesPanel = ({
   availableServices = [],
   availableTriggers = [],
   taskRoles = [],
+  orgRoles = [],
   onUpdate,
   onUpdateEdge,
   onDelete,
@@ -360,8 +361,9 @@ export const PropertiesPanel = ({
                               onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
                             >
                               <option value="" disabled>+ Chọn nhóm</option>
-                              <option value="WORKFLOW">Nhóm Quyền Mặc Định (Workflow)</option>
-                              {taskRoles && taskRoles.length > 0 && <option value="PBAC">Nhóm Quyền Hệ Thống (PBAC)</option>}
+                              <option value="TASK">Vai trò trong Task (Owner/Assignee...)</option>
+                              {orgRoles.length > 0 && <option value="ORG">Vị trí tổ chức (Chức danh từ DB)</option>}
+                              {taskRoles && taskRoles.length > 0 && <option value="PBAC">Quyền PBAC hệ thống</option>}
                             </select>
 
                             {activeRoleGroups[action] && (
@@ -382,8 +384,20 @@ export const PropertiesPanel = ({
                                 defaultValue=""
                               >
                                 <option value="" disabled>+ Chọn quyền</option>
-                                {activeRoleGroups[action] === 'WORKFLOW' && SYSTEM_ROLES.map(r => <option key={r.code} value={r.code}>{r.name} ({r.code})</option>)}
-                                {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => <option key={r.code} value={r.code}>{r.name} ({r.code})</option>)}
+                                {/* Vai trò trong task (participant role) */}
+                                {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
+                                  <option key={r.code} value={r.code}>{r.name}</option>
+                                ))}
+                                {/* Vị trí tổ chức từ DB — sắp xếp theo cấp bậc */}
+                                {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
+                                  <option key={r.code} value={r.code}>
+                                    {r.name}{r.authorityLevel ? ` [${r.authorityLevel}]` : ''} ({r.code})
+                                  </option>
+                                ))}
+                                {/* Quyền PBAC hệ thống */}
+                                {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
+                                  <option key={r.code} value={r.code}>{r.name || r.nameVi} ({r.code})</option>
+                                ))}
                               </select>
                             )}
                           </div>
@@ -449,7 +463,6 @@ export const PropertiesPanel = ({
               />
             </div>
 
-
             {/* Advanced Customization: Dynamic Forms */}
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
@@ -466,6 +479,101 @@ export const PropertiesPanel = ({
               <p className="text-[10px] text-muted-foreground mt-1.5">
                 Cấu hình mảng JSON các trường thông tin bắt buộc/tùy chọn xuất hiện ở bước này.
               </p>
+            </div>
+
+            {/* Approval Evidence Configuration (Q2) */}
+            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 space-y-4 mt-2">
+              <h4 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                Cấu hình Phê duyệt & Minh chứng
+              </h4>
+
+              {/* approvalRequired toggle */}
+              <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border border-amber-100 dark:border-amber-900/40">
+                <div>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Bắt buộc phê duyệt
+                  </label>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Khi bật: Task chỉ hoàn thành khi người phụ trách trực tiếp phê duyệt.
+                  </p>
+                </div>
+                <Switch
+                  checked={data.approvalRequired || false}
+                  onCheckedChange={(checked) => handleChange({ target: { name: 'approvalRequired', value: checked } } as any)}
+                />
+              </div>
+
+              {/* approverType — Quy tắc cố định: người giao việc = người phê duyệt */}
+              {data.approvalRequired && (
+                <>
+                  <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/30 rounded-lg">
+                    <span className="mt-0.5 text-amber-600 dark:text-amber-400 text-base">ℹ</span>
+                    <div>
+                      <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                        Người giao việc = Người phê duyệt kết quả
+                      </p>
+                      <p className="text-[10px] text-amber-700/80 dark:text-amber-400/80 mt-0.5 leading-relaxed">
+                        Hệ thống tự động lấy <strong>OWNER</strong> của task (người đã giao việc) làm người phê duyệt. Không cần cấu hình thêm.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* evidenceType */}
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                      Loại minh chứng yêu cầu
+                    </label>
+                    <NativeSelect
+                      name="evidenceType"
+                      value={data.evidenceType || "none"}
+                      onChange={handleChange}
+                      className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all"
+                    >
+                      <NativeSelectOption value="none">Không yêu cầu minh chứng</NativeSelectOption>
+                      <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
+                      <NativeSelectOption value="api">Dữ liệu từ API ngoài</NativeSelectOption>
+                      <NativeSelectOption value="both">Cả hai (Upload + API)</NativeSelectOption>
+                    </NativeSelect>
+                    <p className="text-[10px] text-muted-foreground mt-1.5">
+                      Người thực hiện cần cung cấp minh chứng hoàn thành theo dạng này.
+                    </p>
+                  </div>
+
+                  {/* apiSource — chỉ hiện khi evidenceType là api hoặc both */}
+                  {(data.evidenceType === 'api' || data.evidenceType === 'both') && (
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                        Nguồn dữ liệu API
+                      </label>
+                      <Input
+                        name="apiSource"
+                        value={data.apiSource || ""}
+                        onChange={handleChange}
+                        className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all font-mono"
+                        placeholder="VD: /api/kpi/results?taskId={{taskId}}"
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-1.5">
+                        URL endpoint trả về dữ liệu đánh giá. Dùng <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{"{{taskId}}"}</code> để inject ID task hiện tại.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Notification template khi cần phê duyệt */}
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                      Mẫu thông báo yêu cầu phê duyệt
+                    </label>
+                    <Textarea
+                      name="approvalNotificationTemplate"
+                      value={data.approvalNotificationTemplate || ""}
+                      onChange={handleChange}
+                      className="w-full bg-background border border-border rounded-lg p-2 text-sm min-h-[70px] focus:ring-2 focus:ring-amber-300 outline-none transition-all resize-none"
+                      placeholder={`VD: "{{assigneeName}} đã hoàn thành \"{{taskTitle}}\". Vui lòng kiểm tra và phê duyệt."`}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Advanced Customization: Side Effects */}
@@ -487,6 +595,7 @@ export const PropertiesPanel = ({
             </div>
           </div>
         );
+
       case "script_task":
         return (
           <div className="space-y-4">

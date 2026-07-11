@@ -75,16 +75,16 @@ export class WorkflowCompiler {
         outEdges: outEdgesMap.get(node.id) || [],
       };
 
-      // Compile validation expression
+      // Biên dịch hàm validate từ permissions object (data-driven — người dùng cấu hình trên UI)
       try {
         let body = `with (context || {}) {\n`;
 
         if (node.type === 'user_task') {
           // Data-driven permissions evaluation
           body += `  const perms = ${JSON.stringify(node.data?.permissions || {})};\n`;
-          body += `  if (!perms[actionName]) return false;\n`; // Must be explicitly allowed
+          body += `  if (!perms[actionName]) return false;\n`;
           body += `  const allowed = perms[actionName];\n`;
-          body += `  if (allowed.length === 0) return true;\n`; // Empty means no role restrictions
+          body += `  if (allowed.length === 0) return true;\n`;
           body += `  const roles = [...(userRoles || [])];\n`;
           body += `  if (typeof isOwner !== 'undefined' && isOwner) roles.push('OWNER');\n`;
           body += `  if (typeof isAssignee !== 'undefined' && isAssignee) roles.push('ASSIGNEE');\n`;
@@ -95,15 +95,14 @@ export class WorkflowCompiler {
           body += `  if (allowed.includes('ANY') || allowed.includes('PARTICIPANT')) return true;\n`;
           body += `  return allowed.some(r => roles.includes(r));\n`;
           body += `}`;
-        } else if (node.data?.validationExpression) {
-          body += `  return (function() {\n    ${node.data.validationExpression}\n  })();\n}`;
         } else {
+          // Node không có permissions → cho phép mặc định
           body += `  return true;\n}`;
         }
 
         compiledNode.validateFn = new Function('context', body) as (context: ValidationContext) => boolean;
       } catch (e) {
-        console.error(`[WorkflowCompiler] Failed to compile validationExpression for node ${node.id}`, e);
+        console.error(`[WorkflowCompiler] Failed to compile permissions for node ${node.id}`, e);
       }
 
 
@@ -158,27 +157,30 @@ export class WorkflowCompiler {
   private static extractAllowedActions(node: NodeData, outEdges: EdgeData[]): string[] {
     const possibleActions = new Set<string>();
 
-    if (node.data?.validationExpression) {
-      const regex = /actionName\s*===\s*['"]([^'"]+)['"]/g;
-      let match;
-      while ((match = regex.exec(node.data.validationExpression)) !== null) {
-        possibleActions.add(match[1]);
-      }
+    // 1. user_task với permissions object — lấy action từ keys của permissions
+    if (node.type === 'user_task' && node.data?.permissions) {
+      const permKeys = Object.keys(node.data.permissions);
+      permKeys.forEach(a => possibleActions.add(a));
     }
 
+
+    // 3. Explicit actionName on node data
     if (node.data?.actionName) {
       possibleActions.add(node.data.actionName);
     }
 
+    // 4. Outgoing edge actions
     outEdges.forEach((edge) => {
       if (edge.data?.actionName) possibleActions.add(edge.data.actionName);
       else if (edge.label) possibleActions.add(edge.label);
     });
 
+    // 5. Nếu vẫn rỗng → fallback mặc định
     if (possibleActions.size === 0) {
       ['ASSIGN', 'COMPLETE', 'APPROVE', 'RETURN'].forEach((a) => possibleActions.add(a));
     }
 
+    // 6. Flag-based auxiliary actions
     if (node.data?.allowAddSubtask) possibleActions.add('ADD_SUBTASK');
     if (node.data?.allowCoordinate) possibleActions.add('COORDINATE');
     if (node.data?.allowEdit) possibleActions.add('EDIT');

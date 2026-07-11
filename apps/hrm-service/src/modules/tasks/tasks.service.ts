@@ -588,35 +588,71 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
 
 
-    // Bắt đầu workflow chuẩn cho Task (Decentralized)
+    // Bắt đầu workflow — Tra cứu workflow động (không hardcode)
     try {
-      const workflowId = await this.taskSharedService.getWorkflowIdByTrigger('TASK_ASSIGNMENT') || 'TASK_PROCESSING_ID';
-      const definition = await this.getWorkflowDefinition(workflowId);
+      const workflowCode = await this._resolveWorkflowCode(data, planId, parentId);
+      const workflowId = workflowCode
+        ? await this.taskSharedService.getWorkflowIdByTrigger(workflowCode)
+        : null;
 
-      if (definition) {
-        const engine = new WorkflowEngine(definition);
-        const initialNodeId = engine.getInitialNodeId();
+      if (workflowId) {
+        const initiatorId = data.currentUserId?.toString() || data.creatorCode || creatorCode || 'system';
+        let workflowInst: any = null;
 
-        if (initialNodeId) {
+        try {
+          workflowInst = await firstValueFrom<any>(
+            this.workflowService.StartWorkflow({
+              workflowId,
+              initiatorId,
+              businessId: t.id.toString(),
+              businessType: 'TASK',
+              initialContext: {
+                taskId: t.id,
+                assigneeCode: data.assigneeCode || 'UNASSIGNED',
+                assignerCode: creatorCode,
+              }
+            })
+          );
+        } catch (wfErr) {
+          this.logger.warn('Workflow StartWorkflow failed, falling back to local engine', wfErr);
+        }
+
+        const initialNodeId = workflowInst?.currentNodeId || await this._getLocalInitialNodeId(workflowId);
+
+        if (initialNodeId || workflowInst) {
+          const metaUpdate: any = {
+            ...((t.metadata as any) || {}),
+            workflowId,
+            workflowCode, // Lưu code để subtask kế thừa không cần hardcode
+            currentNodeId: initialNodeId,
+          };
+          if (workflowInst?.id) {
+            metaUpdate.workflowInstId = workflowInst.id;
+          }
+
           await this.prisma.task.update({
             where: { id: t.id },
-            data: {
-              metadata: {
-                ...((t.metadata as any) || {}),
-                workflowId,
-                currentNodeId: initialNodeId
-              }
-            }
+            data: { metadata: metaUpdate }
           });
-          const updatedMeta = (t.metadata as any) || {};
-          updatedMeta.workflowId = workflowId;
-          updatedMeta.currentNodeId = initialNodeId;
-          t.metadata = updatedMeta;
+          t.metadata = metaUpdate;
+        }
+      } else {
+        // Fallback: không có workflow Published nào → dùng local definition
+        const definition = await this.getWorkflowDefinition('default-task-workflow');
+        if (definition) {
+          const engine = new WorkflowEngine(definition);
+          const initialNodeId = engine.getInitialNodeId();
+          if (initialNodeId) {
+            const metaUpdate = { ...((t.metadata as any) || {}), currentNodeId: initialNodeId };
+            await this.prisma.task.update({ where: { id: t.id }, data: { metadata: metaUpdate } });
+            t.metadata = metaUpdate;
+          }
         }
       }
     } catch (err) {
-      this.logger.error('Failed to init local workflow for task ' + t.id, err);
+      this.logger.error('Failed to init workflow for task ' + t.id, err);
     }
+
 
     const createdTask = await this.prisma.task.findUnique({
       where: { id: t.id },
@@ -705,7 +741,62 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     return enrichedTaskResponse;
   }
 
+
+  /**
+   * Tra cứu workflow code theo thứ tự ưu tiên — KHÔNG hardcode bất kỳ string nào.
+   * 1. data.workflowCode — caller truyền rõ ràng (ưu tiên cao nhất)
+   * 2. plan.metadata.workflowCode — kế hoạch đã cấu hình workflow riêng
+   * 3. parent task metadata.workflowCode — subtask kế thừa từ task cha
+   * 4. null — không có workflow, dùng local fallback engine
+   */
+  private async _resolveWorkflowCode(data: any, planId: any, parentId: any): Promise<string | null> {
+    // 1. Caller truyền rõ ràng
+    if (data.workflowCode) return data.workflowCode;
+
+    // 2. Từ kế hoạch (MasterPlan)
+    if (planId) {
+      try {
+        const plan = await this.prisma.masterPlan.findUnique({
+          where: { id: parseInt(planId.toString(), 10) },
+          select: { metadata: true }
+        });
+        const planMeta = plan?.metadata as any;
+        if (planMeta?.workflowCode) return planMeta.workflowCode;
+      } catch (_e) {}
+    }
+
+    // 3. Từ task cha (subtask kế thừa workflow của cha)
+    if (parentId) {
+      try {
+        const parent = await this.prisma.task.findUnique({
+          where: { id: parseInt(parentId.toString(), 10) },
+          select: { metadata: true }
+        });
+        const parentMeta = parent?.metadata as any;
+        if (parentMeta?.workflowCode) return parentMeta.workflowCode;
+      } catch (_e) {}
+    }
+
+    // 4. Không tìm thấy
+    return null;
+  }
+
+  private async _getLocalInitialNodeId(workflowId: string): Promise<string | null> {
+
+    try {
+      const definition = await this.getWorkflowDefinition(workflowId);
+      if (definition) {
+        const engine = new WorkflowEngine(definition);
+        return engine.getInitialNodeId() || null;
+      }
+    } catch (err) {
+      this.logger.warn('_getLocalInitialNodeId failed for ' + workflowId, err);
+    }
+    return null;
+  }
+
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionNameForWorkflow?: string) {
+
     if (context) await this.taskSharedService.populateQueryHierarchy(context);
     const rawTask = await this.prisma.task.findUnique({ where: { id } });
     if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');

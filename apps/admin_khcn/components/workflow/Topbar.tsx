@@ -11,15 +11,29 @@ import {
   Edit3,
   Check,
   Loader2,
-  PanelLeft
+  PanelLeft,
+  Link2,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+
 
 interface TopbarProps {
   onSave: () => void;
   onPublish: () => void;
+  onPublishAndApply?: (moduleCode: string) => Promise<void>;
+  workflowModules?: { id?: string; code: string; name: string }[];
   onBack: () => void;
   workflowName: string;
   setWorkflowName: (name: string) => void;
@@ -31,6 +45,8 @@ interface TopbarProps {
 export const Topbar = ({
   onSave,
   onPublish,
+  onPublishAndApply,
+  workflowModules = [],
   onBack,
   workflowName,
   setWorkflowName,
@@ -39,6 +55,17 @@ export const Topbar = ({
   onOpenPalette
 }: TopbarProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+
+  const handleApplyModule = async (moduleCode: string) => {
+    if (!onPublishAndApply) return;
+    setIsApplying(true);
+    try {
+      await onPublishAndApply(moduleCode);
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-4 lg:px-6 shadow-sm z-50">
@@ -118,12 +145,62 @@ export const Topbar = ({
         </Button>
         <Button
           size="sm"
-          className="rounded-xl font-bold px-4 shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all border-none"
+          variant="outline"
+          className="rounded-xl font-medium px-4 transition-all border-border/60 hover:bg-muted/60"
           onClick={onPublish}
         >
           <Send className="h-4 w-4 mr-2" />
           Kích hoạt
         </Button>
+
+        {/* Nút Áp dụng nghiệp vụ (Publish + Bind module) */}
+        {onPublishAndApply && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                className="rounded-xl font-bold px-4 shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all border-none"
+                disabled={isApplying}
+              >
+                {isApplying ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Link2 className="h-4 w-4 mr-2" />
+                )}
+                Áp dụng nghiệp vụ
+                <ChevronDown className="h-3.5 w-3.5 ml-1.5 opacity-70" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-xl border-border/60 w-60">
+              <DropdownMenuLabel className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">
+                Chọn luồng nghiệp vụ
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {workflowModules.length === 0 ? (
+                <div className="px-3 py-4 text-center">
+                  <p className="text-[11px] text-muted-foreground">
+                    Chưa có workflow Published nào.
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">
+                    Hãy lưu và kích hoạt một workflow trước.
+                  </p>
+                </div>
+              ) : (
+                workflowModules.map((mod) => (
+                  <DropdownMenuItem
+                    key={mod.code}
+                    className="rounded-lg cursor-pointer flex flex-col items-start gap-0.5 py-2"
+                    onClick={() => handleApplyModule(mod.code)}
+                  >
+                    <span className="font-medium text-[12px]">{mod.name}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{mod.code}</span>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         <div className="h-6 w-[1px] bg-border/60 mx-1" />
         <Button variant="ghost" size="icon" className="rounded-xl hover:bg-muted text-muted-foreground">
           <History className="h-4 w-4" />

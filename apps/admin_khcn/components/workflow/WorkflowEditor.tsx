@@ -36,7 +36,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const { apps: availableServices } = useHubServices();
 
-  const { dynamicServices, dynamicTriggers, taskRoles } = useWorkflowDynamics();
+  const { dynamicServices, dynamicTriggers, taskRoles, workflowModules, orgRoles } = useWorkflowDynamics();
   
   const {
     nodes,
@@ -82,6 +82,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     isLoading,
     onSave,
     onPublish,
+    onPublishAndApply,
   } = useWorkflowData({
     id,
     nodes,
@@ -142,7 +143,9 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     <div className="flex flex-col w-full h-full overflow-hidden bg-background">
       <Topbar 
         onSave={onSave} 
-        onPublish={onPublish} 
+        onPublish={onPublish}
+        onPublishAndApply={onPublishAndApply}
+        workflowModules={workflowModules}
         onBack={onBack}
         workflowName={workflowName}
         setWorkflowName={setWorkflowName}
@@ -211,6 +214,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
           availableServices={dynamicServices.length > 0 ? dynamicServices : availableServices}
           availableTriggers={dynamicTriggers}
           taskRoles={taskRoles}
+          orgRoles={orgRoles}
           onUpdate={onUpdateNodeData}
           onUpdateEdge={onUpdateEdgeData}
           onDelete={onDeleteNode}

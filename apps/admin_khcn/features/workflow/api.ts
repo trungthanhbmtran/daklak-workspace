@@ -90,4 +90,17 @@ export const workflowApi = {
 
   getStatuses: () =>
     apiClient.get('/categories', { params: { group: 'WORKFLOW_STATUS' } }).then((res: any) => unwrapData<any[]>(res)),
+
+  getModules: () =>
+    apiClient.get('/workflow/modules').then((res: any) => unwrapData<{ id: string; code: string; name: string; description?: string }[]>(res)),
+
+  /** Lấy danh sách vị trí/chức danh tổ chức (JobTitle) để hiển thị trong thiết kế quyền workflow */
+  getOrgRoles: () =>
+    apiClient.get('/workflow/org-roles').then((res: any) => unwrapData<{ code: string; name: string; rank: number; authorityLevel?: string; category?: string }[]>(res)),
+
+  publish: (id: string) =>
+    apiClient.post(`/workflow/${id}/publish`).then((res: any) => unwrapData<Workflow>(res)),
+
+  applyModule: (id: string, moduleCode: string) =>
+    apiClient.post(`/workflow/${id}/apply-module`, { moduleCode }).then((res: any) => unwrapData<Workflow>(res)),
 };

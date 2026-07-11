@@ -286,8 +286,108 @@ export class WorkflowGrpcController {
     return { success: true };
   }
 
+  @GrpcMethod('WorkflowService', 'ListModules')
+  async listModules(_data: any) {
+    const workflows = await this.prisma.workflowDefinition.findMany({
+      where: { status: 'Published' },
+      select: { id: true, code: true, name: true, description: true, updatedAt: true }
+    });
+    // Loại bỏ các workflow đã bị archived (code chứa _OLD_)
+    const activeModules = workflows.filter(w => w.code && !w.code.includes('_OLD_'));
+    return { items: activeModules };
+  }
+
+  @GrpcMethod('WorkflowService', 'PublishWorkflow')
+  async publishWorkflow(data: { id: string }) {
+    try {
+      console.log('[WorkflowService] Publishing workflow:', data.id);
+      const workflow = await this.prisma.workflowDefinition.update({
+        where: { id: data.id },
+        data: { status: 'Published' },
+        include: {
+          nodes: { include: { assignments: true, actions: true } },
+          edges: true,
+          variables: true
+        }
+      });
+
+      // Emit cache invalidation event
+      this.redisClient.emit('WORKFLOW_UPDATED', {
+        workflowId: workflow.id,
+        code: workflow.code
+      });
+
+      return this.mapWorkflow(workflow);
+    } catch (e: any) {
+      console.error('[WorkflowService] Publish error:', e);
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
+  @GrpcMethod('WorkflowService', 'ApplyModule')
+  async applyModule(data: { id: string; moduleCode: string }) {
+    try {
+      console.log('[WorkflowService] Applying module:', data.moduleCode, 'to workflow:', data.id);
+
+      // Tìm workflow hiện tại đang dùng module code này (nếu có) → đánh dấu deprecated
+      const existingWithCode = await this.prisma.workflowDefinition.findMany({
+        where: {
+          code: data.moduleCode,
+          id: { not: data.id }
+        },
+        select: { id: true }
+      });
+
+      // Đổi code của workflow cũ để giải phóng slot (thêm _OLD_ prefix)
+      for (const old of existingWithCode) {
+        await this.prisma.workflowDefinition.update({
+          where: { id: old.id },
+          data: {
+            code: `${data.moduleCode}_OLD_${Date.now()}`,
+            status: 'Archived'
+          }
+        });
+      }
+
+      // Cập nhật workflow mới: set code = moduleCode + Published
+      const workflow = await this.prisma.workflowDefinition.update({
+        where: { id: data.id },
+        data: {
+          code: data.moduleCode,
+          status: 'Published'
+        },
+        include: {
+          nodes: { include: { assignments: true, actions: true } },
+          edges: true,
+          variables: true
+        }
+      });
+
+      // Emit event để invalidate cache trong các service khác
+      this.redisClient.emit('WORKFLOW_UPDATED', {
+        workflowId: workflow.id,
+        code: workflow.code
+      });
+      // Emit thêm event cho từng workflow cũ
+      for (const old of existingWithCode) {
+        this.redisClient.emit('WORKFLOW_UPDATED', {
+          workflowId: old.id,
+          code: data.moduleCode // old code cần invalidate
+        });
+      }
+
+      return this.mapWorkflow(workflow);
+    } catch (e: any) {
+      console.error('[WorkflowService] ApplyModule error:', e);
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
+
+
   @GrpcMethod('WorkflowService', 'ListInstances')
   async listInstances(data: { skip?: number; take?: number; workflowId?: string; status?: string; search?: string }) {
+
     const skip = data.skip || 0;
     const take = data.take || 10;
 

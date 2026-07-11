@@ -129,20 +129,56 @@ export function useWorkflowData({
 
   const onPublish = useCallback(async () => {
     if (!workflowId) {
-      toast.error("Vui lòng lưu bản nháp trước khi chạy thử!");
+      toast.error("Vui lòng lưu bản nháp trước khi kích hoạt!");
       return;
     }
 
     try {
-      await workflowApi.start(workflowId, {
-        startedAt: new Date().toISOString(),
-      });
-      toast.success("Đã kích hoạt và chạy thử nghiệm quy trình!");
+      await workflowApi.publish(workflowId);
+      toast.success("Đã kích hoạt quy trình!");
     } catch (error) {
       console.error("Publish error:", error);
       toast.error("Lỗi khi kích hoạt quy trình");
     }
   }, [workflowId]);
+
+  const onPublishAndApply = useCallback(async (moduleCode: string) => {
+    let targetId = workflowId;
+
+    // Nếu chưa lưu, lưu trước
+    if (!targetId) {
+      setIsSaving(true);
+      const workflowData = {
+        name: workflowName,
+        description: workflowDesc,
+        code: workflowCode,
+        definition: { nodes, edges },
+      };
+      try {
+        const response = await workflowApi.create(workflowData);
+        if (response && response.id) {
+          setWorkflowId(response.id);
+          targetId = response.id;
+        }
+      } catch (error) {
+        toast.error("Lỗi khi lưu quy trình");
+        setIsSaving(false);
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
+    if (!targetId) return;
+
+    try {
+      await workflowApi.applyModule(targetId, moduleCode);
+      toast.success(`Đã áp dụng quy trình vào nghiệp vụ ${moduleCode}!`);
+    } catch (error) {
+      console.error("Apply module error:", error);
+      toast.error("Lỗi khi áp dụng quy trình vào nghiệp vụ");
+    }
+  }, [workflowId, workflowName, workflowDesc, workflowCode, nodes, edges]);
 
   return {
     workflowId,
@@ -156,5 +192,6 @@ export function useWorkflowData({
     isLoading,
     onSave,
     onPublish,
+    onPublishAndApply,
   };
 }

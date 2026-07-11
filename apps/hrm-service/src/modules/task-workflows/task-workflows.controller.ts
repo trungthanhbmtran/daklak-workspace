@@ -14,7 +14,12 @@ export class TaskWorkflowsController {
   }
 
   @EventPattern('WORKFLOW_UPDATED')
-  handleWorkflowUpdated(data: { workflowId: string; definition: any }) {
-    return this.service.invalidateWorkflowCache(data.workflowId, data.definition);
+  handleWorkflowUpdated(data: { workflowId: string; code?: string; definition?: any }) {
+    // Invalidate definition cache cho workflowId
+    this.service.invalidateWorkflowCache(data.workflowId, data.definition);
+    // Invalidate trigger lookup cache nếu có code
+    if (data.code) {
+      this.service.shared.cache.delete(`workflow:trigger:${data.code}`);
+    }
   }
 }

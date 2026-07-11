@@ -25,10 +25,12 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 export class WorkflowController implements OnModuleInit {
   private workflowService: any;
   private categoryService: any;
+  private orgService: any;
 
   constructor(
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
+    @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
   ) {}
 
   onModuleInit() {
@@ -37,6 +39,9 @@ export class WorkflowController implements OnModuleInit {
     );
     this.categoryService = this.catClient.getService(
       MICROSERVICES.SYS_CATEGORY.SERVICE,
+    );
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
     );
   }
 
@@ -58,6 +63,33 @@ export class WorkflowController implements OnModuleInit {
       this.categoryService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
     )) as any;
     return { data: result.data || [] };
+  }
+
+  @Get('modules')
+  @ApiOperation({ summary: 'Danh sách module nghiệp vụ đang active (workflow Published)' })
+  async getModules() {
+    const result = (await firstValueFrom(
+      this.workflowService.ListModules({}),
+    )) as any;
+    return { data: result.items || [] };
+  }
+
+  @Get('org-roles')
+  @ApiOperation({ summary: 'Danh sách chức danh/vị trí trong tổ chức (JobTitle) để thiết kế quyền workflow' })
+  async getOrgRoles() {
+    const result = (await firstValueFrom(
+      this.orgService.ListJobTitles({}),
+    )) as any;
+    const items = (result.items ?? []).map((j: any) => ({
+      code: j.code,
+      name: j.name,
+      rank: j.rank ?? 0,
+      authorityLevel: j.authorityLevel,
+      category: j.category,
+    }));
+    // Sắp xếp theo cấp bậc (rank thấp = cấp cao hơn trong tổ chức)
+    items.sort((a: any, b: any) => (a.rank ?? 99) - (b.rank ?? 99));
+    return { data: items };
   }
 
   // --- Workflow Definitions ---
@@ -250,6 +282,56 @@ export class WorkflowController implements OnModuleInit {
       this.workflowService.DeleteWorkflow({ id }),
     )) as any;
     return { success: result.success || true };
+  }
+
+  @Post(':id/publish')
+  @ApiOperation({ summary: 'Publish quy trình (kích hoạt để sẵn sàng dùng)' })
+  async publish(@Param('id') id: string) {
+    const result = (await firstValueFrom(
+      this.workflowService.PublishWorkflow({ id }),
+    )) as any;
+    if (result) {
+      result.trigger = result.code;
+      result.definition = {
+        nodes: (result.nodes || []).map((n: any) => ({
+          id: n.nodeKey || n.id,
+          type: n.type,
+          position: { x: n.x || 0, y: n.y || 0 },
+          data: { ...n.properties, label: n.name }
+        })),
+        edges: this.mapEdges(result.edges, result.id, result.code),
+        variables: result.variables || [],
+      };
+      delete result.nodes;
+      delete result.edges;
+      delete result.variables;
+    }
+    return { data: result };
+  }
+
+  @Post(':id/apply-module')
+  @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
+  async applyModule(@Param('id') id: string, @Body() body: { moduleCode: string }) {
+    const result = (await firstValueFrom(
+      this.workflowService.ApplyModule({ id, moduleCode: body.moduleCode }),
+    )) as any;
+    if (result) {
+      result.trigger = result.code;
+      result.definition = {
+        nodes: (result.nodes || []).map((n: any) => ({
+          id: n.nodeKey || n.id,
+          type: n.type,
+          position: { x: n.x || 0, y: n.y || 0 },
+          data: { ...n.properties, label: n.name }
+        })),
+        edges: this.mapEdges(result.edges, result.id, result.code),
+        variables: result.variables || [],
+      };
+      delete result.nodes;
+      delete result.edges;
+      delete result.variables;
+    }
+    return { data: result };
   }
 
   // --- Execution Engine ---

@@ -236,17 +236,93 @@ export class TaskWorkflowsService {
     const enriched = await this.shared.enrichTasks([updatedTask]);
     return this.shared.toTaskResponse(enriched[0]);
   }
+  /**
+   * Xử lý action của task.
+   * approvalRequired = true → tự động tìm OWNER (người giao việc) làm người phê duyệt.
+   */
   async resolveTask(id: number, action: string, body: any) {
     if (action === 'COMPLETE') {
       const raw = await this.prisma.task.findUnique({ where: { id } });
       const tArr = [raw];
       await this.shared.enrichTasks(tArr);
       const t: any = tArr[0];
-      const requiresApproval = t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED';
-      const nextStatus = requiresApproval ? 'PENDING_APPROVAL' : 'DONE';
+
+      // Đọc approvalRequired từ workflow node tiếp theo (KHÔNG hardcode)
+      const metadata = (raw?.metadata as any) || {};
+      const activeWorkflowId = metadata.workflowId;
+      let approvalRequired = false;
+      let approvalNotifTemplate: string | undefined;
+
+      if (activeWorkflowId && metadata.currentNodeId) {
+        try {
+          const definition = await this.getWorkflowDefinition(activeWorkflowId);
+          if (definition) {
+            const engine = new WorkflowEngine(definition);
+            const nextNodeId = engine.getNextNodeId(metadata.currentNodeId, action, {});
+            if (nextNodeId) {
+              const nextNode = engine.getNode(nextNodeId);
+              if (nextNode?.data) {
+                approvalRequired = nextNode.data.approvalRequired || false;
+                approvalNotifTemplate = nextNode.data.approvalNotificationTemplate;
+              }
+            }
+          }
+        } catch (_e) {
+          approvalRequired = !!(t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED');
+        }
+      } else {
+        approvalRequired = !!(t?.assignerCode && t.assignerCode !== t.assigneeCode && t.assignerCode !== 'UNASSIGNED');
+      }
+
+      const nextStatus = approvalRequired ? 'PENDING_APPROVAL' : 'DONE';
+
+      // Người giao việc = người phê duyệt kết quả
+      // Tra OWNER từ TaskParticipant (ghi lại lúc tạo/giao task)
+      if (approvalRequired) {
+        const ownerParticipant = await this.prisma.taskParticipant.findFirst({
+          where: { taskId: id, participantRole: 'OWNER' },
+          select: { employeeCode: true }
+        });
+
+        const approverCode =
+          ownerParticipant?.employeeCode ||   // người giao việc (OWNER)
+          t.creatorEmployeeCode ||            // người tạo task
+          t.assignerCode;                     // fallback cuối
+
+        if (approverCode && approverCode !== body?.currentEmployeeCode) {
+          const emp = await this.prisma.employee.findUnique({
+            where: { employeeCode: approverCode },
+            select: { userId: true, fullName: true }
+          });
+          if (emp?.userId) {
+            const assigneeEmp = await this.prisma.employee.findUnique({
+              where: { employeeCode: t.assigneeCode },
+              select: { fullName: true }
+            });
+            const notifTitle = 'Yêu cầu phê duyệt kết quả công việc';
+            const notifMsg = approvalNotifTemplate
+              ? approvalNotifTemplate
+                  .replace(/\{\{assigneeName\}\}/g, assigneeEmp?.fullName || t.assigneeCode)
+                  .replace(/\{\{taskTitle\}\}/g, t.title || '')
+              : `${assigneeEmp?.fullName || t.assigneeCode} đã hoàn thành "${t.title}". Vui lòng kiểm tra và phê duyệt.`;
+
+            this.shared.notificationClient.emit('send_notification', {
+              title: notifTitle,
+              message: notifMsg,
+              type: 'SYSTEM',
+              recipients: [emp.userId],
+              metadata: { module: 'hrm', type: 'work-plans/tasks', id }
+            }).subscribe();
+          }
+        }
+      }
+
+
       return this.updateTaskStatus(id, nextStatus, undefined, body?.currentEmployeeCode, body, action);
     }
     if (action === 'APPROVE') return this.updateTaskStatus(id, 'DONE', undefined, body?.currentEmployeeCode, body, action);
     if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentEmployeeCode, body, action);
+    if (action === 'RESUBMIT') return this.updateTaskStatus(id, 'IN_PROGRESS', undefined, body?.currentEmployeeCode, body, action);
   }
 }
+

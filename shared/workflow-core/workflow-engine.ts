@@ -9,7 +9,8 @@ export interface NodeData {
   type?: string;
   data?: {
     role?: string;
-    validationExpression?: string;
+    /** @deprecated — dùng `permissions` object thay thế. Field này không còn được đọc. */
+    validationExpression?: never;
     [key: string]: any;
   };
 }

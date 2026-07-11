@@ -81,18 +81,13 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const [totalItems, setTotalItems] = useState(0);
 
   const [mappingWorkflow, setMappingWorkflow] = useState<Workflow | null>(null);
-  const [selectedModule, setSelectedModule] = useState<string>("TASK_ASSIGNMENT");
-
-  const BUSINESS_MODULES = [
-    { value: "TASK_ASSIGNMENT", label: "Nghiệp vụ Giao việc" },
-    { value: "DOCUMENT_APPROVAL", label: "Trình ký Văn bản" },
-    { value: "LEAVE_REQUEST", label: "Đơn xin nghỉ phép" },
-  ];
+  const [selectedModule, setSelectedModule] = useState<string>("");
+  const [workflowModules, setWorkflowModules] = useState<{ id: string; code: string; name: string }[]>([]);
 
   const getModuleName = (code?: string) => {
     if (!code) return null;
-    const match = BUSINESS_MODULES.find(m => m.value === code);
-    return match ? match.label : code;
+    const match = workflowModules.find(m => m.code === code);
+    return match ? match.name : code;
   };
 
   const loadWorkflows = async () => {
@@ -122,6 +117,18 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
     loadWorkflows();
   }, [page, pageSize, searchTerm]);
 
+  // Load modules từ DB khi mount
+  useEffect(() => {
+    workflowApi.getModules().then(modules => {
+      if (Array.isArray(modules)) {
+        setWorkflowModules(modules);
+        if (modules.length > 0 && !selectedModule) {
+          setSelectedModule(modules[0].code);
+        }
+      }
+    }).catch(() => {});
+  }, []);
+
   const handleDelete = (id: string) => {
     setItemToDelete(id);
     setIsDeleteDialogOpen(true);
@@ -146,14 +153,8 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const handleApplyModule = async () => {
     if (!mappingWorkflow) return;
     try {
-      const res = await workflowApi.list({ take: 100 });
-      const allWorkflows = res?.data || [];
-      const currentDefault = allWorkflows.find((w: any) => w.code === selectedModule);
-      if (currentDefault && currentDefault.id !== mappingWorkflow.id) {
-        await workflowApi.update(currentDefault.id, { code: `${selectedModule}_OLD_${Date.now()}` });
-      }
-      await workflowApi.update(mappingWorkflow.id, { code: selectedModule });
-      toast.success("Đã áp dụng quy trình thành công!");
+      await workflowApi.applyModule(mappingWorkflow.id, selectedModule);
+      toast.success("Đã áp dụng và kích hoạt quy trình thành công!");
       setMappingWorkflow(null);
       loadWorkflows();
     } catch (e) {
@@ -514,9 +515,18 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                   <SelectValue placeholder="Chọn nghiệp vụ..." />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
-                  {BUSINESS_MODULES.map(m => (
-                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                  ))}
+                  {workflowModules.length === 0 ? (
+                    <SelectItem value="__empty__" disabled>
+                      Chưa có workflow Published nào
+                    </SelectItem>
+                  ) : (
+                    workflowModules.map(m => (
+                      <SelectItem key={m.code} value={m.code}>
+                        <span className="font-medium">{m.name}</span>
+                        <span className="ml-2 text-xs text-muted-foreground font-mono">{m.code}</span>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

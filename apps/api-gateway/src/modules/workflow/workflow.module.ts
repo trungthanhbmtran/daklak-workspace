@@ -7,6 +7,7 @@ import { WorkflowController } from './workflow.controller';
   imports: [
     registerGrpcService(MICROSERVICES.WORKFLOW),
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
+    registerGrpcService(MICROSERVICES.ORGANIZATION),
   ],
   controllers: [WorkflowController],
 })
