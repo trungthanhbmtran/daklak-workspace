@@ -123,12 +123,85 @@ export const integrationApi = {
   }
 };
 
+export const integrationConnectionApi = {
+  getList: async () => {
+    const res = await apiClient.get('/workflow/integration-configs') as any;
+    return (res.data || []) as IntegrationConnection[];
+  },
+  create: async (data: Partial<IntegrationConnection>) => {
+    const res = await apiClient.post('/workflow/integration-configs', data) as any;
+    return res.data as IntegrationConnection;
+  },
+  update: async (id: string, data: Partial<IntegrationConnection>) => {
+    const res = await apiClient.put(`/workflow/integration-configs/${id}`, data) as any;
+    return res.data as IntegrationConnection;
+  },
+  delete: async (id: string) => {
+    await apiClient.delete(`/workflow/integration-configs/${id}`);
+    return true;
+  },
+  execute: async (code: string, endpointPath: string, method = 'GET', params?: any, data?: any) => {
+    const res = await apiClient.post(`/workflow/integration-configs/${code}/execute`, {
+      endpointPath,
+      method,
+      params,
+      data,
+    }) as any;
+    return res;
+  },
+};
+
+export interface IntegrationConnection {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+  type: string;
+  baseUrl: string;
+  authConfig?: {
+    type: 'BEARER' | 'API_KEY' | 'NONE';
+    token?: string;
+    keyName?: string;
+  };
+  headers?: Record<string, string>;
+  endpoints?: Array<{
+    name: string;
+    method: string;
+    path: string;
+    description?: string;
+    parameters?: any[];
+  }>;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const useIntegrationConnectionList = () => {
+  return useQuery({
+    queryKey: ['integration-connections'],
+    queryFn: integrationConnectionApi.getList,
+  });
+};
+
+export const useExecuteIntegration = () => {
+  return useMutation({
+    mutationFn: ({ code, endpointPath, method, params, data }: {
+      code: string;
+      endpointPath: string;
+      method?: string;
+      params?: any;
+      data?: any;
+    }) => integrationConnectionApi.execute(code, endpointPath, method, params, data),
+  });
+};
+
 export const useIntegrationList = (search?: string) => {
   return useQuery({
     queryKey: [...integrationKeys.lists(), search],
     queryFn: () => integrationApi.getList(search)
   });
 };
+
 
 export const useCreateIntegration = () => {
   const queryClient = useQueryClient();

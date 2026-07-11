@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
@@ -26,11 +27,13 @@ export class WorkflowController implements OnModuleInit {
   private workflowService: any;
   private categoryService: any;
   private orgService: any;
+  private readonly workflowRestBaseUrl = 'http://workflow-service:3001/api/v1';
 
   constructor(
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
+    private readonly httpService: HttpService,
   ) {}
 
   onModuleInit() {
@@ -410,4 +413,57 @@ export class WorkflowController implements OnModuleInit {
       data: response.logs || [],
     };
   }
+
+  // =====================================================
+  // Integration Connections (proxy → workflow-service REST)
+  // =====================================================
+
+  @Get('integration-configs')
+  @ApiOperation({ summary: 'Danh sách các kết nối API tích hợp (IOC, LGSP...)' })
+  async listIntegrationConfigs() {
+    const { data } = await firstValueFrom(
+      this.httpService.get(`${this.workflowRestBaseUrl}/integration-configs`),
+    );
+    return { success: true, data: data?.data || data || [] };
+  }
+
+  @Post('integration-configs')
+  @ApiOperation({ summary: 'Tạo mới kết nối API tích hợp' })
+  async createIntegrationConfig(@Body() body: any) {
+    const { data } = await firstValueFrom(
+      this.httpService.post(`${this.workflowRestBaseUrl}/integration-configs`, body),
+    );
+    return { success: true, data: data?.data || data };
+  }
+
+  @Put('integration-configs/:id')
+  @ApiOperation({ summary: 'Cập nhật kết nối API tích hợp' })
+  async updateIntegrationConfig(@Param('id') id: string, @Body() body: any) {
+    const { data } = await firstValueFrom(
+      this.httpService.put(`${this.workflowRestBaseUrl}/integration-configs/${id}`, body),
+    );
+    return { success: true, data: data?.data || data };
+  }
+
+  @Delete('integration-configs/:id')
+  @ApiOperation({ summary: 'Xóa kết nối API tích hợp' })
+  async deleteIntegrationConfig(@Param('id') id: string) {
+    await firstValueFrom(
+      this.httpService.delete(`${this.workflowRestBaseUrl}/integration-configs/${id}`),
+    );
+    return { success: true };
+  }
+
+  @Post('integration-configs/:code/execute')
+  @ApiOperation({ summary: 'Gọi API của hệ thống tích hợp (ví dụ: IOC_API_DLK)' })
+  async executeIntegration(
+    @Param('code') code: string,
+    @Body() body: any,
+  ) {
+    const { data } = await firstValueFrom(
+      this.httpService.post(`${this.workflowRestBaseUrl}/integration-configs/${code}/execute`, body),
+    );
+    return data;
+  }
 }
+
