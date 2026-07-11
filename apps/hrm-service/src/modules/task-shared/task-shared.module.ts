@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+﻿import { Global, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TaskSharedService } from './task-shared.service';
@@ -50,4 +50,5 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
   providers: [TaskSharedService, AppCacheService],
   exports: [TaskSharedService, AppCacheService, ClientsModule],
 })
-export class TaskSharedModule {}
+export class TaskSharedModule { }
+

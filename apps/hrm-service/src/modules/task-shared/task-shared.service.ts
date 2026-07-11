@@ -21,8 +21,8 @@ export class TaskSharedService {
     public cache: AppCacheService,
     
   ) {}
-  private userService: any;
-  private workflowService: any;
+  public userService: any;
+  public workflowService: any;
   onModuleInit() {
     this.userService = this.userClient.getService('UserService');
     this.workflowService = this.workflowClient.getService('WorkflowService');

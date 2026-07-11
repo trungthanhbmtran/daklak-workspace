@@ -1,17 +1,18 @@
-import { Injectable, Inject, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 import { paginateArray } from '@/utils/pagination.util';
 
 @Injectable()
-export class TasksService implements OnModuleInit, OnModuleDestroy {
+export class TasksService {
   private readonly logger = new Logger(TasksService.name);
-  private userService: any;
-  private workflowService: any;  private async getWorkflowDefinition(workflowId: string): Promise<any> {
+
+  /** Shorthand — delegate sang shared cache */
+  private async getWorkflowDefinition(workflowId: string): Promise<any> {
     return this.taskSharedService.getWorkflowDefinition(workflowId);
   }
 
@@ -21,38 +22,8 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private prisma: PrismaService,
-    @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
-    @Inject('USER_PACKAGE') private userClient: any,
-    @Inject('WORKFLOW_PACKAGE') private workflowClient: any,
     private taskSharedService: TaskSharedService,
-  ) { }
-
-  onModuleInit() {
-    this.userService = this.userClient.getService('UserService');
-    this.workflowService = this.workflowClient.getService('WorkflowService');
-  }
-
-  onModuleDestroy() {
-  }
-
-  private sendTaskNotification(recipients: string[], title: string, message: string, taskData: any) {
-    if (!recipients || recipients.length === 0) return;
-    try {
-      this.notificationClient.emit('send_notification', {
-        title,
-        message,
-        type: 'SYSTEM',
-        recipients,
-        metadata: {
-          module: (taskData.metadata && (taskData.metadata as any).module) ? (taskData.metadata as any).module : 'hrm',
-          type: (taskData.metadata && (taskData.metadata as any).type) ? (taskData.metadata as any).type : 'work-plans/tasks',
-          id: taskData.id
-        },
-      }).subscribe();
-    } catch (e) {
-      console.error(`Failed to send notification "${title}"`, e);
-    }
-  }
+  ) {}
 
   async listTasks(query: any) {
     await this.taskSharedService.populateQueryHierarchy(query);
@@ -492,13 +463,13 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       if (!assigneeEmp) {
         throw new RpcException('Người được giao không tồn tại trong hệ thống HRM.');
       }
-      
+
       if (data.departmentId) {
         if (assigneeEmp.departmentId !== parseInt(data.departmentId, 10)) {
           throw new RpcException('Logic định biên: Người được giao không thuộc phòng ban được chỉ định.');
         }
       }
-      
+
       if (data.jobTitleId) {
         if (assigneeEmp.jobTitleId !== parseInt(data.jobTitleId, 10)) {
           throw new RpcException('Logic định biên: Người được giao không có chức danh phù hợp.');
@@ -514,7 +485,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       if (assigneeEmp?.userId) {
         try {
           const subordinatesRes: any = await firstValueFrom(
-            this.userService.GetSubordinates({ userId: assigneeEmp.userId })
+            this.taskSharedService.userService.GetSubordinates({ userId: assigneeEmp.userId })
           );
           const allowedDomains = subordinatesRes?.allowedDomainIds || subordinatesRes?.allowed_domain_ids || [];
           if (!allowedDomains.includes(parseInt(data.domainId, 10))) {
@@ -601,7 +572,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
         try {
           workflowInst = await firstValueFrom<any>(
-            this.workflowService.StartWorkflow({
+            this.taskSharedService.workflowService.StartWorkflow({
               workflowId,
               initiatorId,
               businessId: t.id.toString(),
@@ -701,7 +672,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
 
     if (sendNotify) {
       if (data.assigneeCode) {
-        this.sendTaskNotification(
+        this.taskSharedService.sendTaskNotification(
           [data.assigneeCode],
           `Có công việc mới: ${nodeLabel}`,
           `Bạn vừa được giao nhiệm vụ: "${enrichedTaskResponse.title}"`,
@@ -710,7 +681,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       }
 
       if (Array.isArray(data.coassigneeCodes) && data.coassigneeCodes.length > 0) {
-        this.sendTaskNotification(
+        this.taskSharedService.sendTaskNotification(
           data.coassigneeCodes,
           `Có công việc phối hợp mới: ${nodeLabel}`,
           `Bạn được phân công phối hợp thực hiện nhiệm vụ: "${enrichedTaskResponse.title}"`,
@@ -721,11 +692,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       if (data.monitoredUnitId) {
         try {
           const monitorsRes: any = await firstValueFrom(
-            this.userService.GetEmployeesByScope({ monitored_unit_id: parseInt(data.monitoredUnitId, 10) })
+            this.taskSharedService.userService.GetEmployeesByScope({ monitored_unit_id: parseInt(data.monitoredUnitId, 10) })
           );
           const followerCodes = monitorsRes?.employeeCodes || monitorsRes?.employee_codes || [];
           if (followerCodes.length > 0) {
-            this.sendTaskNotification(
+            this.taskSharedService.sendTaskNotification(
               followerCodes,
               `Có công việc mới tại phòng ban theo dõi: ${nodeLabel}`,
               `Một nhiệm vụ mới ("${enrichedTaskResponse.title}") vừa được giao cho phòng ban bạn đang phụ trách theo dõi.`,
@@ -757,12 +728,11 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (planId) {
       try {
         const plan = await this.prisma.masterPlan.findUnique({
-          where: { id: parseInt(planId.toString(), 10) },
-          select: { metadata: true }
-        });
-        const planMeta = plan?.metadata as any;
+          where: { id: parseInt(planId.toString(), 10) }
+        }) as any;
+        const planMeta = plan?.metadata;
         if (planMeta?.workflowCode) return planMeta.workflowCode;
-      } catch (_e) {}
+      } catch (_e) { }
     }
 
     // 3. Từ task cha (subtask kế thừa workflow của cha)
@@ -774,7 +744,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
         });
         const parentMeta = parent?.metadata as any;
         if (parentMeta?.workflowCode) return parentMeta.workflowCode;
-      } catch (_e) {}
+      } catch (_e) { }
     }
 
     // 4. Không tìm thấy
@@ -802,30 +772,33 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     if (!rawTask) throw new RpcException('Nhiệm vụ không tồn tại');
 
     const actualActorCode = actorCode || context?.currentEmployeeCode;
+    const actionName = actionNameForWorkflow || status;
 
     const tCheckArr = [rawTask];
     await this.taskSharedService.enrichTasks(tCheckArr);
     const tCheck: any = tCheckArr[0];
 
-    // GỌI WORKFLOW ĐỂ VALIDATE VÀ NHẢY BƯỚC
     const metadata = (rawTask.metadata as any) || {};
     const activeWorkflowId = metadata.workflowId || rawTask.workflowInstId;
+
+    // --- Tải workflow engine 1 lần duy nhất ---
+    let engine: WorkflowEngine | null = null;
+    if (activeWorkflowId) {
+      const definition = await this.getWorkflowDefinition(activeWorkflowId);
+      if (definition) engine = new WorkflowEngine(definition);
+    }
+
+    // --- Validate + nhảy bước ---
     let nextNodeIdToSave: string | undefined = undefined;
-
-    if (activeWorkflowId && metadata.currentNodeId) {
+    if (engine && metadata.currentNodeId) {
       try {
-        let actionName = actionNameForWorkflow || status;
-
-        let hasChildren = false;
         const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: rawTask.id, depth: 1 } });
-        hasChildren = childrenCount > 0;
-
         const queryContext = { ...context, currentEmployeeCode: actualActorCode, currentUserId: context?.currentUserId };
         const access = await this.taskSharedService.checkTaskAccess(tCheck, queryContext);
 
         const businessData = {
           status: rawTask.status,
-          hasChildren,
+          hasChildren: childrenCount > 0,
           isOwner: access.isOwner,
           isAssignee: access.isAssignee,
           isSupervisor: access.isSupervisor,
@@ -835,105 +808,93 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           allowedEmployeeCodes: context?.allowedEmployeeCodes || [],
         };
 
-        const definition = await this.getWorkflowDefinition(activeWorkflowId);
-        if (definition) {
-          const engine = new WorkflowEngine(definition);
-          const validateRes = engine.validateAction(
-            metadata.currentNodeId,
-            actionName,
-            context?.currentUserPermissions || [],
-            actualActorCode,
-            businessData
-          );
-
-          if (!validateRes.allowed) {
-            const reasonMsg = validateRes.reason ? ` (${validateRes.reason})` : '';
-            throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}${reasonMsg}.`);
-          }
-
-          // Nhảy bước
-          const nextNodeId = engine.getNextNodeId(metadata.currentNodeId, actionName, { ...businessData, actionName });
-          if (nextNodeId) {
-            nextNodeIdToSave = nextNodeId;
-          }
+        const validateRes = engine.validateAction(
+          metadata.currentNodeId, actionName, context?.currentUserPermissions || [], actualActorCode, businessData
+        );
+        if (!validateRes.allowed) {
+          const reasonMsg = validateRes.reason ? ` (${validateRes.reason})` : '';
+          throw new RpcException(`Workflow không cho phép thực hiện hành động ${actionName}${reasonMsg}.`);
         }
+
+        const nextNodeId = engine.getNextNodeId(metadata.currentNodeId, actionName, { ...businessData, actionName });
+        if (nextNodeId) nextNodeIdToSave = nextNodeId;
       } catch (err) {
         if (err instanceof RpcException) throw err;
         this.logger.error('Lỗi tính toán ValidateAction qua local engine', err);
       }
     }
 
+    // --- Đọc node tiếp theo ---
     let targetStatus = status;
     let nextNodeData: any = null;
-    
-    if (nextNodeIdToSave && activeWorkflowId) {
-      const definition = await this.getWorkflowDefinition(activeWorkflowId);
-      if (definition) {
-        const engine = new WorkflowEngine(definition);
-        const nextNode = engine.getNode(nextNodeIdToSave);
-        if (nextNode && nextNode.data) {
-          nextNodeData = nextNode.data;
-          if (nextNodeData.targetStatus) {
-            targetStatus = nextNodeData.targetStatus;
-          }
-        }
+    if (nextNodeIdToSave && engine) {
+      const nextNode = engine.getNode(nextNodeIdToSave);
+      if (nextNode?.data) {
+        nextNodeData = nextNode.data;
+        targetStatus = nextNodeData.targetStatus || nextNodeIdToSave;
       }
     }
-    
+
+    // --- Gửi thông báo phê duyệt khi COMPLETE → node approvalRequired ---
+    if (nextNodeData?.approvalRequired && actionName === 'COMPLETE') {
+      try {
+        const ownerParticipant = await this.prisma.taskParticipant.findFirst({
+          where: { taskId: id, participantRole: 'OWNER' }, select: { employeeCode: true }
+        });
+        const approverCode = ownerParticipant?.employeeCode || tCheck.creatorEmployeeCode || tCheck.assignerCode;
+        if (approverCode && approverCode !== actualActorCode) {
+          const [approverEmp, assigneeEmp] = await Promise.all([
+            this.prisma.employee.findUnique({ where: { employeeCode: approverCode }, select: { userId: true } }),
+            this.prisma.employee.findUnique({ where: { employeeCode: tCheck.assigneeCode }, select: { fullName: true } }),
+          ]);
+          if (approverEmp?.userId) {
+            const tmpl = nextNodeData.approvalNotificationTemplate;
+            const notifMsg = tmpl
+              ? tmpl.replace(/\{\{assigneeName\}\}/g, assigneeEmp?.fullName || tCheck.assigneeCode)
+                .replace(/\{\{taskTitle\}\}/g, tCheck.title || '')
+              : `${assigneeEmp?.fullName || tCheck.assigneeCode} đã hoàn thành "${tCheck.title}". Vui lòng kiểm tra và phê duyệt.`;
+            this.taskSharedService.sendTaskNotification([approverEmp.userId], 'Yêu cầu phê duyệt kết quả công việc', notifMsg, { id, metadata: tCheck.metadata });
+          }
+        }
+      } catch (e) {
+        this.logger.error('Lỗi gửi thông báo phê duyệt', e);
+      }
+    }
+
+    // --- Cập nhật DB ---
     const dataToUpdate: any = { status: targetStatus };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
     if (targetStatus === 'DONE' || targetStatus === 'COMPLETED') dataToUpdate.completedAt = new Date();
     if (nextNodeIdToSave) {
       dataToUpdate.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: nextNodeIdToSave };
-      
-      // 1. Dynamic Assignment via Script
-      if (activeWorkflowId && nextNodeData) {
-        try {
-          const definition = await this.getWorkflowDefinition(activeWorkflowId);
-          if (definition) {
-            const engine = new WorkflowEngine(definition);
-            const currentAssignee = (rawTask as any).participants?.find((p: any) => p.participantRole === 'ASSIGNEE')?.employeeCode;
-            const currentOwner = (rawTask as any).participants?.find((p: any) => p.participantRole === 'OWNER')?.employeeCode;
 
-            const wfContext = {
-               creatorCode: rawTask.creatorEmployeeCode,
-               assignerCode: currentOwner,
-               assigneeCode: currentAssignee,
-               currentActorCode: actualActorCode,
-               status: rawTask.status,
-               targetStatus: targetStatus,
-               taskContext: context
-            };
-            const newAssignees = engine.resolveAssignments(nextNodeIdToSave, wfContext);
-            if (newAssignees && newAssignees.length > 0) {
-              await this.prisma.taskParticipant.upsert({
-                where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: newAssignees[0], participantRole: 'ASSIGNEE' } },
-                update: {},
-                create: { taskId: id, employeeCode: newAssignees[0], participantRole: 'ASSIGNEE' }
-              });
-              this.logger.log(`Workflow dynamically assigned task ${id} to ${newAssignees[0]}`);
-            }
+      // Dynamic Assignment via engine
+      if (engine && nextNodeData) {
+        try {
+          const currentAssignee = (rawTask as any).participants?.find((p: any) => p.participantRole === 'ASSIGNEE')?.employeeCode;
+          const currentOwner = (rawTask as any).participants?.find((p: any) => p.participantRole === 'OWNER')?.employeeCode;
+          const newAssignees = engine.resolveAssignments(nextNodeIdToSave, {
+            creatorCode: rawTask.creatorEmployeeCode, assignerCode: currentOwner,
+            assigneeCode: currentAssignee, currentActorCode: actualActorCode,
+            status: rawTask.status, targetStatus, taskContext: context
+          });
+          if (Array.isArray(newAssignees) && newAssignees.length > 0) {
+            await this.prisma.taskParticipant.upsert({
+              where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: newAssignees[0], participantRole: 'ASSIGNEE' } },
+              update: {},
+              create: { taskId: id, employeeCode: newAssignees[0], participantRole: 'ASSIGNEE' }
+            });
+            this.logger.log(`Workflow dynamically assigned task ${id} to ${newAssignees[0]}`);
           }
-        } catch (e) {
-          this.logger.error('Error resolving dynamic assignments', e);
-        }
+        } catch (e) { this.logger.error('Error resolving dynamic assignments', e); }
       }
     }
 
-    const t = await this.prisma.task.update({
-      where: { id },
-      data: dataToUpdate,
-      include: { participants: true }
-    });
+    await this.prisma.task.update({ where: { id }, data: dataToUpdate, include: { participants: true } });
 
-    if (rejectReason && (targetStatus === 'RETURNED' || (nextNodeData && nextNodeData.sideEffects?.includes('RETURN_TASK')))) {
+    if (rejectReason && (targetStatus === 'RETURNED' || nextNodeData?.sideEffects?.includes('RETURN_TASK'))) {
       await this.prisma.taskComment.create({
-        data: {
-          taskId: id,
-          authorCode: actualActorCode || null,
-          content: `Đã trả lại công việc với lý do: ${rejectReason}`,
-          isSystemMessage: true,
-        }
+        data: { taskId: id, authorCode: actualActorCode || null, content: `Đã trả lại công việc với lý do: ${rejectReason}`, isSystemMessage: true }
       });
     }
 
@@ -943,115 +904,73 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       await this.updateTaskProgress(id, 100, actualActorCode);
     }
 
-    // 2. Evaluate Side Effects
-    if (nextNodeIdToSave && activeWorkflowId) {
+    // --- Side Effects ---
+    if (nextNodeIdToSave && engine) {
       try {
-        const definition = await this.getWorkflowDefinition(activeWorkflowId);
-        if (definition) {
-          const engine = new WorkflowEngine(definition);
-          const sideEffects = engine.evaluateSideEffects(nextNodeIdToSave);
-          if (sideEffects && sideEffects.length > 0) {
-            for (const effect of sideEffects) {
-              this.logger.log(`Executing side effect ${effect.type} on task ${id}`);
-              // In the future: call external webhooks, etc.
-              if (effect.type === 'WEBHOOK' && effect.url) {
-                // await axios.post(effect.url, { taskId: id, status: targetStatus });
-                this.logger.log(`Simulating Webhook to ${effect.url}`);
-              }
-            }
+        const sideEffects = engine.evaluateSideEffects(nextNodeIdToSave);
+        for (const effect of sideEffects || []) {
+          this.logger.log(`Executing side effect ${effect.type} on task ${id}`);
+          if (effect.type === 'WEBHOOK' && effect.url) {
+            this.logger.log(`Simulating Webhook to ${effect.url}`);
           }
         }
-      } catch (e) {
-        this.logger.error('Error executing side effects', e);
-      }
+      } catch (e) { this.logger.error('Error executing side effects', e); }
     }
 
-    // Xử lý gửi thông báo tự động dựa trên cấu hình Workflow Engine (Node tiếp theo)
-    if (nextNodeIdToSave && activeWorkflowId) {
+    // --- Gửi thông báo workflow tự động ---
+    if (nextNodeIdToSave && engine && nextNodeData?.sendNotification) {
       try {
-        const definition = await this.getWorkflowDefinition(activeWorkflowId);
-        if (definition) {
-          const engine = new WorkflowEngine(definition);
-          const nextNode = engine.getNode(nextNodeIdToSave);
+        let title = `Có cập nhật: ${nextNodeData.label || ''}`;
+        let message = `Công việc "${tCheck.title}" đã chuyển sang bước: ${nextNodeData.label || ''}. ${nextNodeData.description || ''}`;
+        let recipientCodes: string[] = [];
 
-          // Chỉ gửi nếu Node đích được cấu hình tick chọn Gửi thông báo
-          if (nextNode && nextNode.data && nextNode.data.sendNotification) {
-            let title = `Có cập nhật: ${nextNode.data.label}`;
-            let message = `Công việc "${tCheck.title}" đã chuyển sang bước: ${nextNode.data.label}. ${nextNode.data.description || ''}`;
-            let recipientCodes: string[] = [];
+        if (nextNodeData.notification) {
+          const cfg = nextNodeData.notification;
+          title = cfg.title || title;
+          message = cfg.template ? cfg.template.replace('{{taskTitle}}', `"${tCheck.title}"`) : message;
 
-            // Ưu tiên sử dụng cấu hình Notification từ Workflow Node
-            if (nextNode.data.notification) {
-              const notifCfg = nextNode.data.notification;
-              title = notifCfg.title || title;
-              message = notifCfg.template ? notifCfg.template.replace('{{taskTitle}}', `"${tCheck.title}"`) : message;
-              
-              if (notifCfg.recipientExpression) {
-                // Đánh giá biểu thức tìm danh sách người nhận (ví dụ: "[assigneeCode, supervisorCode]")
-                try {
-                  const evalContext = {
-                     assignerCode: tCheck.assignerCode,
-                     assigneeCode: tCheck.assigneeCode,
-                     creatorEmployeeCode: tCheck.creatorEmployeeCode,
-                     supervisorCode: tCheck.supervisorCode,
-                     coordinatorCodes: tCheck.coassigneeCodes || []
-                  };
-                  const getRecipients = new Function('context', `
-                    with (context) { return ${notifCfg.recipientExpression}; }
-                  `);
-                  const computedRecipients = getRecipients(evalContext);
-                  if (Array.isArray(computedRecipients)) {
-                    recipientCodes = computedRecipients.filter(Boolean);
-                  }
-                } catch(e) {
-                   this.logger.error('Failed to parse recipientExpression', e);
-                }
-              }
-            } else {
-              // Generic fallback (No hardcoded workflow logic)
-              title = `Có công việc cần xử lý: ${nextNode.data.label || ''}`;
-              message = `Công việc "${tCheck.title}" vừa được chuyển đến bước: ${nextNode.data.label || ''}. Vui lòng kiểm tra và xử lý.`;
-              
-              if (nextNode.data.role === 'MANAGER') {
-                recipientCodes.push(tCheck.supervisorCode, tCheck.assignerCode, tCheck.creatorEmployeeCode);
-              } else {
-                recipientCodes.push(tCheck.assigneeCode);
-              }
-            }
-
-            // Lọc danh sách và loại trừ người đang thao tác
-            const uniqueCodes = [...new Set(recipientCodes.filter(c => c && c !== actualActorCode))];
-
-            for (const code of uniqueCodes) {
-              const emp = await this.prisma.employee.findUnique({ where: { employeeCode: code }, select: { userId: true } });
-              if (emp?.userId) {
-                this.notificationClient.emit('send_notification', {
-                  title,
-                  message,
-                  type: 'SYSTEM',
-                  recipients: [emp.userId],
-                  metadata: {
-                    module: (tCheck.metadata as any)?.module || 'hrm',
-                    type: (tCheck.metadata as any)?.type || 'work-plans/tasks',
-                    id: id
-                  },
-                }).subscribe();
-              }
+          // Ánh xạ khai báo (không dùng eval): key → giá trị thực từ task
+          if (cfg.recipients && Array.isArray(cfg.recipients)) {
+            // cfg.recipients: mảng key như ['assigneeCode', 'assignerCode']
+            const roleMap: Record<string, string | string[]> = {
+              assigneeCode: tCheck.assigneeCode,
+              assignerCode: tCheck.assignerCode,
+              creatorEmployeeCode: tCheck.creatorEmployeeCode,
+              supervisorCode: tCheck.supervisorCode,
+              coordinatorCodes: tCheck.coassigneeCodes || [],
+            };
+            for (const key of cfg.recipients) {
+              const val = roleMap[key];
+              if (Array.isArray(val)) recipientCodes.push(...val);
+              else if (val) recipientCodes.push(val);
             }
           }
+        } else {
+          title = `Có công việc cần xử lý: ${nextNodeData.label || ''}`;
+          message = `Công việc "${tCheck.title}" vừa được chuyển đến bước: ${nextNodeData.label || ''}. Vui lòng kiểm tra và xử lý.`;
+          if (nextNodeData.role === 'MANAGER') {
+            recipientCodes.push(tCheck.supervisorCode, tCheck.assignerCode, tCheck.creatorEmployeeCode);
+          } else {
+            recipientCodes.push(tCheck.assigneeCode);
+          }
         }
-      } catch (err) {
-        this.logger.error('Lỗi khi gửi thông báo tự động từ Workflow', err);
-      }
+
+        const uniqueCodes = [...new Set(recipientCodes.filter(c => c && c !== actualActorCode))];
+        // Lookup userId batch rồi gửi 1 lần qua shared
+        const recipientEmps = await this.prisma.employee.findMany({
+          where: { employeeCode: { in: uniqueCodes } },
+          select: { userId: true }
+        });
+        const recipientUserIds = recipientEmps.map(e => e.userId).filter(Boolean) as string[];
+        if (recipientUserIds.length > 0) {
+          this.taskSharedService.sendTaskNotification(recipientUserIds, title, message, { id, metadata: tCheck.metadata });
+        }
+      } catch (err) { this.logger.error('Lỗi khi gửi thông báo tự động từ Workflow', err); }
     }
 
     const updatedTask = await this.prisma.task.findUnique({
       where: { id },
-      include: {
-        participants: true,
-        plan: { select: { id: true, title: true, createdByCode: true } },
-        kpiSettings: true
-      }
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, kpiSettings: true }
     });
     const enriched = await this.taskSharedService.enrichTasks([updatedTask]);
     return this.taskSharedService.toTaskResponse(enriched[0]);
@@ -1148,7 +1067,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     const enrichedTaskResponse = this.taskSharedService.toTaskResponse(enriched[0]);
 
     if (data.assigneeCode) {
-      this.sendTaskNotification(
+      this.taskSharedService.sendTaskNotification(
         [data.assigneeCode],
         'Có công việc mới được giao',
         `Bạn vừa được phân công phụ trách nhiệm vụ: "${enrichedTaskResponse.title}"`,
@@ -1157,7 +1076,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (Array.isArray(data.coassigneeCodes) && data.coassigneeCodes.length > 0) {
-      this.sendTaskNotification(
+      this.taskSharedService.sendTaskNotification(
         data.coassigneeCodes,
         'Có công việc phối hợp mới',
         `Bạn được phân công phối hợp thực hiện nhiệm vụ: "${enrichedTaskResponse.title}"`,
@@ -1409,7 +1328,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       if (!isAdmin && query.currentUserId) {
         try {
           const subordinatesRes: any = await firstValueFrom(
-            this.userService.GetSubordinates({ userId: query.currentUserId })
+            this.taskSharedService.userService.GetSubordinates({ userId: query.currentUserId })
           );
           query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
           query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
@@ -1463,7 +1382,7 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       if (targetDomainId || targetMonitoredUnitId) {
         try {
           const scopeRes: any = await firstValueFrom(
-            this.userService.GetEmployeesByScope({ domainId: targetDomainId || 0, monitoredUnitId: targetMonitoredUnitId || 0 })
+            this.taskSharedService.userService.GetEmployeesByScope({ domainId: targetDomainId || 0, monitoredUnitId: targetMonitoredUnitId || 0 })
           );
           scopeEmployeeCodes = scopeRes?.employeeCodes || scopeRes?.employee_codes || [];
         } catch (e) {
@@ -1561,19 +1480,15 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       return { success: false, message: error.message || 'Lỗi gợi ý cán bộ' };
     }
   }
+
   async getTasks(query: any) { return this.listTasks(query); }
   async importTasks(data: any[]) { return { success: true }; }
   async exportTasks(query: any) { return { success: true }; }
-  async resolveTask(id: number, action: string, body: any) {
-    let fallbackStatus = 'TODO';
-    if (action === 'COMPLETE') fallbackStatus = 'DONE';
-    if (action === 'APPROVE') fallbackStatus = 'DONE';
-    if (action === 'RETURN') fallbackStatus = 'RETURNED';
-    return this.updateTaskStatus(id, fallbackStatus, body?.rejectReason, body?.currentEmployeeCode, body, action);
-  }
+
   async updateTask(id: number, data: any) {
     const updateData = { ...data };
     delete updateData.id; // Don't update the ID
+
     if (updateData.startDate) {
       updateData.startDate = new Date(updateData.startDate);
     }
@@ -1683,21 +1598,16 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
           select: { userId: true }
         });
 
-        const userIds = mentionedEmployees.map(e => e.userId).filter(Boolean);
+        const userIds = mentionedEmployees.map(e => e.userId).filter(Boolean) as string[];
 
         if (userIds.length > 0) {
           const actorName = emp?.fullName || actorCode;
-          this.notificationClient.emit('send_notification', {
-            title: 'Bạn được nhắc đến trong bình luận',
-            message: `${actorName} đã nhắc đến bạn trong bình luận của công việc "${t.title}"`,
-            type: 'SYSTEM',
-            recipients: userIds,
-            metadata: {
-              module: (t.metadata && (t.metadata as any).module) ? (t.metadata as any).module : 'hrm',
-              type: (t.metadata && (t.metadata as any).type) ? (t.metadata as any).type : 'work-plans/tasks',
-              id: t.id
-            },
-          }).subscribe();
+          this.taskSharedService.sendTaskNotification(
+            userIds,
+            'Bạn được nhắc đến trong bình luận',
+            `${actorName} đã nhắc đến bạn trong bình luận của công việc "${t.title}"`,
+            t
+          );
         }
       }
     }
@@ -1857,87 +1767,5 @@ export class TasksService implements OnModuleInit, OnModuleDestroy {
       return { success: true };
     });
   }
-
-  private async buildScopingWhereClause(query: any): Promise<any | null> {
-    const perms = query.currentUserPermissions || [];
-    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
-
-    if (isAdmin) {
-      return null; // Admin sees everything
-    }
-
-    const scopingConditions: any[] = [];
-
-    // 1. Participant check
-    if (query.currentEmployeeCode) {
-      scopingConditions.push({
-        participants: {
-          some: {
-            employeeCode: query.currentEmployeeCode
-          }
-        }
-      });
-      scopingConditions.push({
-        creatorEmployeeCode: query.currentEmployeeCode
-      });
-    }
-
-    // 2. Phân quyền theo Sơ đồ thẩm quyền
-    const hasAllowedDepts = query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0;
-    const hasAllowedCodes = query.allowedEmployeeCodes && query.allowedEmployeeCodes.length > 0;
-
-    if (hasAllowedDepts || hasAllowedCodes) {
-      const leaderOrConditions: any[] = [];
-      const allowedDepts = query.allowedDepartmentIds?.map(Number).filter(Boolean) || [];
-      const allowedCodes = query.allowedEmployeeCodes || [];
-
-      let allAllowedCodes = [...allowedCodes];
-
-      if (allowedDepts.length > 0) {
-        const empsInDepts = await this.prisma.employee.findMany({
-          where: { departmentId: { in: allowedDepts } },
-          select: { employeeCode: true }
-        });
-        const deptEmployeeCodes = empsInDepts.map(e => e.employeeCode).filter(Boolean);
-        allAllowedCodes = Array.from(new Set([...allAllowedCodes, ...deptEmployeeCodes]));
-
-        leaderOrConditions.push({
-          plan: { departmentId: { in: allowedDepts } }
-        });
-        leaderOrConditions.push({
-          monitoredUnitId: { in: allowedDepts }
-        });
-      }
-
-      const allowedDomains = query.allowedDomainIds?.map(Number).filter(Boolean) || [];
-      if (allowedDomains.length > 0) {
-        leaderOrConditions.push({
-          domainId: { in: allowedDomains }
-        });
-      }
-
-      if (allAllowedCodes.length > 0) {
-        leaderOrConditions.push({
-          participants: {
-            some: {
-              employeeCode: { in: allAllowedCodes },
-              participantRole: 'ASSIGNEE'
-            }
-          }
-        });
-        leaderOrConditions.push({
-          creatorEmployeeCode: { in: allAllowedCodes }
-        });
-      }
-
-      scopingConditions.push(...leaderOrConditions);
-    }
-
-    if (scopingConditions.length > 0) {
-      return { OR: scopingConditions };
-    }
-
-    // If no scoping conditions can be resolved, prevent any query return
-    return { id: -1 };
-  }
 }
+

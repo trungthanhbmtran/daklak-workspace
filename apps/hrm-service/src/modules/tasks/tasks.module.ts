@@ -1,85 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { TasksCronService } from './tasks.cron';
 import { TaskSharedModule } from '../task-shared/task-shared.module';
 
-const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(), '../../shared/protos');
-
 @Module({
   imports: [
-    TaskSharedModule,
-    ClientsModule.registerAsync([
-      {
-        name: 'NOTIFICATION_SERVICE',
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: {
-            urls: [config.get<string>('RABBITMQ_URL') || 'amqp://guest:guest@localhost:5672'],
-            queue: config.get<string>('NOTIFICATION_QUEUE') || 'notifications',
-            queueOptions: {
-              durable: true,
-            },
-          },
-        }),
-      }
-    ]),
-    ClientsModule.register([
-      {
-        name: 'USER_PACKAGE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'user',
-          protoPath: require('path').join(PROTO_ROOT, 'users/user.proto'),
-          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
-          loader: {
-            keepCase: false,
-            longs: String,
-            enums: String,
-            defaults: true,
-            includeDirs: [PROTO_ROOT],
-          },
-        },
-      },
-      {
-        name: 'ORGANIZATION_PACKAGE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'organization',
-          protoPath: require('path').join(PROTO_ROOT, 'users/organization.proto'),
-          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
-          loader: {
-            keepCase: false,
-            longs: String,
-            enums: String,
-            defaults: true,
-            includeDirs: [PROTO_ROOT],
-          },
-        },
-      },
-      {
-        name: 'WORKFLOW_PACKAGE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'workflow',
-          protoPath: require('path').join(PROTO_ROOT, 'workflow/workflow.proto'),
-          url: process.env.WORKFLOW_SERVICE_URL || 'workflow-service:50060',
-          loader: {
-            keepCase: false,
-            longs: String,
-            enums: String,
-            defaults: true,
-            includeDirs: [PROTO_ROOT],
-          },
-        },
-      },
-    ]),
+    TaskSharedModule, // @Global — cung cấp NOTIFICATION_SERVICE, USER_PACKAGE, WORKFLOW_PACKAGE, TaskSharedService
   ],
   controllers: [TasksController],
-  providers: [TasksService, TasksCronService]
+  providers: [TasksService, TasksCronService],
+  exports: [TasksService],
 })
-export class TasksModule { }
+export class TasksModule {}
