@@ -2,11 +2,10 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { firstValueFrom } from 'rxjs';
 import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
-import * as fs from 'fs';
-import * as path from 'path';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { TaskRole } from '@generated/prisma/client';
 import { AppCacheService } from '../../core/cache/app-cache.service';
+
 
 
 @Injectable()
@@ -436,17 +435,17 @@ export class TaskSharedService {
 
     if (activeWorkflowId && currentNodeId) {
        definition = await this.getWorkflowDefinition(activeWorkflowId);
-    } else {
-       // Load Default Workflow
-       try {
-         const defPath = path.join(__dirname, 'default-task-workflow.json');
-         if (fs.existsSync(defPath)) {
-            definition = JSON.parse(fs.readFileSync(defPath, 'utf8'));
-            currentNodeId = t.status || 'IN_PROGRESS';
-         }
-       } catch (err) {
-         this.logger.error('Failed to load default task workflow', err);
-       }
+    } else if (!activeWorkflowId) {
+      // Không có workflow — thử load theo code mặc định
+      try {
+        const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
+        if (defaultId) {
+          definition = await this.getWorkflowDefinition(defaultId);
+          currentNodeId = metadata.currentNodeId || null;
+        }
+      } catch (err) {
+        this.logger.warn('Failed to load default workflow TASK_PROCESSING_ID', err);
+      }
     }
 
     if (definition && currentNodeId) {
@@ -491,23 +490,22 @@ export class TaskSharedService {
       definition = await this.getWorkflowDefinition(workflowId);
     } else {
       try {
-        const defPath = path.join(__dirname, 'default-task-workflow.json');
-        if (fs.existsSync(defPath)) {
-          definition = JSON.parse(fs.readFileSync(defPath, 'utf8'));
-        }
+        const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
+        if (defaultId) definition = await this.getWorkflowDefinition(defaultId);
       } catch (err) {
-        this.logger.error('Failed to load default task workflow', err);
+        this.logger.warn('Failed to load default workflow for getWorkflowInitialNode', err);
       }
     }
 
     if (definition) {
       try {
-        const cacheKey = workflowId ? String(workflowId) : 'default-task-workflow';
+        const cacheKey = workflowId ? String(workflowId) : 'TASK_PROCESSING_ID';
         const engine = new WorkflowEngine(definition, cacheKey);
         const initialNodeId = engine.getInitialNodeId();
         if (initialNodeId) {
           const node = engine.getNode(initialNodeId);
           return { initialNodeId, nodeData: node?.data };
+
         }
       } catch (err) {
         this.logger.error('Failed to get initial node from WorkflowEngine', err);
@@ -544,14 +542,14 @@ export class TaskSharedService {
 
     if (activeWorkflowId && currentNodeId) {
        definition = await this.getWorkflowDefinition(activeWorkflowId);
-    } else {
+    } else if (!activeWorkflowId) {
        try {
-         const defPath = path.join(__dirname, 'default-task-workflow.json');
-         if (fs.existsSync(defPath)) {
-            definition = JSON.parse(fs.readFileSync(defPath, 'utf8'));
-            currentNodeId = t.status || 'IN_PROGRESS';
+         const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
+         if (defaultId) {
+           definition = await this.getWorkflowDefinition(defaultId);
+           currentNodeId = metadata.currentNodeId || null;
          }
-       } catch (err) {}
+       } catch (err) { this.logger.warn('Could not load TASK_PROCESSING_ID workflow', err); }
     }
 
     if (!definition || !currentNodeId) {
@@ -559,7 +557,7 @@ export class TaskSharedService {
     }
 
     try {
-      const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'default-task-workflow';
+      const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'TASK_PROCESSING_ID';
       const engine = new WorkflowEngine(definition, cacheKey);
       const businessData = {
         status: t.status,

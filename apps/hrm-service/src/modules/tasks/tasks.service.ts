@@ -608,18 +608,10 @@ export class TasksService {
           t.metadata = metaUpdate;
         }
       } else {
-        // Fallback: không có workflow Published nào → dùng local definition
-        const definition = await this.getWorkflowDefinition('default-task-workflow');
-        if (definition) {
-          const engine = new WorkflowEngine(definition);
-          const initialNodeId = engine.getInitialNodeId();
-          if (initialNodeId) {
-            const metaUpdate = { ...((t.metadata as any) || {}), currentNodeId: initialNodeId };
-            await this.prisma.task.update({ where: { id: t.id }, data: { metadata: metaUpdate } });
-            t.metadata = metaUpdate;
-          }
-        }
+        // workflowCode được resolve nhưng không tìm thấy trong DB
+        this.logger.warn(`Workflow code "${workflowCode ? workflowCode : 'N/A'}" không tìm thấy trong DB. Task ${t.id} không có workflow.`);
       }
+
     } catch (err) {
       this.logger.error('Failed to init workflow for task ' + t.id, err);
     }
@@ -747,9 +739,10 @@ export class TasksService {
       } catch (_e) { }
     }
 
-    // 4. Không tìm thấy
-    return null;
+    // 4. Default: luôn dùng workflow xử lý công việc chung (không hardcode ID, dùng code)
+    return 'TASK_PROCESSING_ID';
   }
+
 
   private async _getLocalInitialNodeId(workflowId: string): Promise<string | null> {
 
