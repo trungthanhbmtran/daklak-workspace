@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
 import { useUpdateStatus } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
+import { TASK_WORKFLOW_ACTION_FALLBACK } from '@/features/hrm/hooks/useCategoryMaps';
 
 /**
  * Hook quản lý các thao tác thực thi quy trình (workflow actions).
@@ -11,19 +12,9 @@ export function useTaskActions(activeTaskId: number | undefined) {
   const qc = useQueryClient();
   const updateStatus = useUpdateStatus(activeTaskId);
 
-  // Fallback map for translation, ideally this should come from i18n or backend label
-  const translateAction = (action: string) => {
-    const dict: Record<string, string> = {
-      'COMPLETE': 'Báo cáo hoàn thành',
-      'APPROVE': 'Nghiệm thu (Duyệt)',
-      'RETURN': 'Trả lại công việc',
-      'ASSIGN': 'Giao việc',
-      'REJECT': 'Từ chối',
-      'ACCEPT': 'Tiếp nhận',
-      'SUBMIT': 'Trình duyệt',
-    };
-    return dict[action] || action;
-  };
+  // Dùng fallback từ danh mục dùng chung, không hardcode riêng
+  const translateAction = (action: string): string =>
+    TASK_WORKFLOW_ACTION_FALLBACK[action] || action;
 
   const handleProcessTask = useCallback(async (actionName: string, reason?: string, onClose?: () => void) => {
     if (!activeTaskId) return;

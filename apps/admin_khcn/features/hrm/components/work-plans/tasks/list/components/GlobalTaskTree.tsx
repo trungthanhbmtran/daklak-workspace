@@ -12,14 +12,7 @@ import { cn } from '@/lib/utils';
 import { useTaskSubtasks } from '@/features/hrm/hooks/useTasks';
 import { TaskStatusBadge, TaskPriorityBadge, TaskRoleBadge, TASK_STATUS_CONFIG } from '@/components/shared/badges/TaskBadges';
 import { WorkflowStatusBadge } from '@/components/workflow/shared/WorkflowStatusBadge';
-
-const WORKFLOW_STEP_LABELS: Record<string, string> = {
-  PLAN_ASSIGNMENT: 'Chờ phân công',
-  ASSIGN: 'Chờ giao việc',
-  IN_PROGRESS: 'Đang thực hiện',
-  COMPLETE: 'Chờ báo cáo',
-  APPROVE: 'Chờ nghiệm thu',
-};
+import { useCategoryMap, TASK_WORKFLOW_ACTION_FALLBACK, WORKFLOW_STEP_ACTIONS } from '@/features/hrm/hooks/useCategoryMaps';
 
 interface TaskRowProps {
   task: any;
@@ -52,6 +45,9 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
   const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
 
   const isRoot = depth === 0;
+  // Danh mục động từ shared category
+  const workflowActionLabels = useCategoryMap('TASK_WORKFLOW_ACTION');
+  const WORKFLOW_STEP_LABELS = { ...TASK_WORKFLOW_ACTION_FALLBACK, ...workflowActionLabels };
 
   return (
     <div className="relative font-sans group/row">
@@ -136,12 +132,12 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
                 )}
 
                 {/* Workflow step chip */}
-                {task.workflowInstId && (task.allowedActions || []).some((a: string) => Object.keys(WORKFLOW_STEP_LABELS).includes(a)) && (
+                {task.workflowInstId && (task.allowedActions || []).some((a: string) => (WORKFLOW_STEP_ACTIONS as readonly string[]).includes(a)) && (
                   <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700/40 text-indigo-600 dark:text-indigo-400">
                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
                     <span className="text-[10px] font-bold tracking-wide">
                       {WORKFLOW_STEP_LABELS[
-                        (task.allowedActions as string[] || []).find((a) => a in WORKFLOW_STEP_LABELS) ?? ''
+                        (task.allowedActions as string[] || []).find((a) => (WORKFLOW_STEP_ACTIONS as readonly string[]).includes(a)) ?? ''
                       ] ?? 'Đang xử lý'}
                     </span>
                   </div>

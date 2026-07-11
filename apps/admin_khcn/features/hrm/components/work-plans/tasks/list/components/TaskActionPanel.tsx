@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useTaskActions } from '../hooks/useTaskActions';
 import { useTaskDelegation } from '../hooks/useTaskDelegation';
 import { cn } from '@/lib/utils';
+import { useCategoryMap, TASK_WORKFLOW_ACTION_FALLBACK } from '@/features/hrm/hooks/useCategoryMaps';
 
 interface TaskActionPanelProps {
   activeTask: any;
@@ -18,28 +19,20 @@ interface TaskActionPanelProps {
   onCloseDialog: () => void;
 }
 
-/** Map action sang nhãn tiếng Việt + icon + màu */
-const ACTION_CONFIG: Record<string, { label: string; icon: React.ReactNode; variant: 'primary' | 'danger' | 'secondary'; desc?: string }> = {
-  PLAN_ASSIGNMENT:  { label: 'Lập phương án phân công', icon: <Split className="w-4 h-4" />,        variant: 'primary',    desc: 'Xác định định biên và cơ cấu đơn vị chịu trách nhiệm' },
-  ASSIGN:           { label: 'Giao việc chính thức',     icon: <ArrowRight className="w-4 h-4" />,   variant: 'primary',    desc: 'Giao việc cho người thực hiện' },
-  IN_PROGRESS:      { label: 'Bắt đầu thực hiện',        icon: <Zap className="w-4 h-4" />,          variant: 'primary',    desc: 'Xác nhận tiếp nhận và bắt đầu thực hiện' },
-  COMPLETE:         { label: 'Báo cáo hoàn thành',        icon: <CheckCircle2 className="w-4 h-4" />, variant: 'primary',    desc: 'Nộp báo cáo kết quả và đề nghị nghiệm thu' },
-  APPROVE:          { label: 'Nghiệm thu / Phê duyệt',    icon: <CheckCircle2 className="w-4 h-4" />, variant: 'primary',    desc: 'Xác nhận kết quả đạt yêu cầu' },
-  MONITOR:          { label: 'Chỉ đạo / Theo dõi',        icon: <Eye className="w-4 h-4" />,          variant: 'secondary',  desc: 'Ghi nhận theo dõi tiến độ' },
-  FORWARD:          { label: 'Chuyển tiếp',               icon: <ChevronRight className="w-4 h-4" />, variant: 'secondary',  desc: 'Chuyển công việc cho đơn vị khác' },
-  COORDINATE:       { label: 'Xin phối hợp',              icon: <Users className="w-4 h-4" />,        variant: 'secondary',  desc: 'Mời thêm người tham gia phối hợp' },
-  REJECT:           { label: 'Trả lại / Từ chối',         icon: <Reply className="w-4 h-4" />,        variant: 'danger',     desc: 'Trả lại kết quả không đạt yêu cầu' },
-  RETURN:           { label: 'Trả lại',                   icon: <Reply className="w-4 h-4" />,        variant: 'danger',     desc: 'Trả lại để thực hiện lại' },
-  DONE:             { label: 'Đánh dấu hoàn thành',       icon: <CheckCircle2 className="w-4 h-4" />, variant: 'primary' },
+/** UI-config: icon + variant + desc (không hardcode label vì đã lấy từ danh mục) */
+const ACTION_UI_CONFIG: Record<string, { icon: React.ReactNode; variant: 'primary' | 'danger' | 'secondary'; desc?: string }> = {
+  PLAN_ASSIGNMENT:  { icon: <Split className="w-4 h-4" />,        variant: 'primary',    desc: 'Xác định định biên và cơ cấu đơn vị chịu trách nhiệm' },
+  ASSIGN:           { icon: <ArrowRight className="w-4 h-4" />,   variant: 'primary',    desc: 'Giao việc cho người thực hiện' },
+  IN_PROGRESS:      { icon: <Zap className="w-4 h-4" />,          variant: 'primary',    desc: 'Xác nhận tiếp nhận và bắt đầu thực hiện' },
+  COMPLETE:         { icon: <CheckCircle2 className="w-4 h-4" />, variant: 'primary',    desc: 'Nộp báo cáo kết quả và đề nghị nghiệm thu' },
+  APPROVE:          { icon: <CheckCircle2 className="w-4 h-4" />, variant: 'primary',    desc: 'Xác nhận kết quả đạt yêu cầu' },
+  MONITOR:          { icon: <Eye className="w-4 h-4" />,          variant: 'secondary',  desc: 'Ghi nhận theo dõi tiến độ' },
+  FORWARD:          { icon: <ChevronRight className="w-4 h-4" />, variant: 'secondary',  desc: 'Chuyển công việc cho đơn vị khác' },
+  COORDINATE:       { icon: <Users className="w-4 h-4" />,        variant: 'secondary',  desc: 'Mời thêm người tham gia phối hợp' },
+  REJECT:           { icon: <Reply className="w-4 h-4" />,        variant: 'danger',     desc: 'Trả lại kết quả không đạt yêu cầu' },
+  RETURN:           { icon: <Reply className="w-4 h-4" />,        variant: 'danger',     desc: 'Trả lại để thực hiện lại' },
+  DONE:             { icon: <CheckCircle2 className="w-4 h-4" />, variant: 'primary' },
 };
-
-function getActionConfig(name: string) {
-  return ACTION_CONFIG[name] ?? {
-    label: name,
-    icon: <BarChart3 className="w-4 h-4" />,
-    variant: 'secondary' as const,
-  };
-}
 
 /** Avatar chip */
 function PersonChip({ label, name, color }: { label: string; name: string; color: string }) {
@@ -75,6 +68,14 @@ export function TaskActionPanel({
   const { handleProcessTask } = useTaskActions(activeTask?.id);
   const { delegationChain } = useTaskDelegation(activeTask?.rootTaskId || activeTask?.id);
   const hasSubtasks = delegationChain.some((t: any) => t.parentId === activeTask?.id);
+
+  // Lấy label từ danh mục, fallback về TASK_WORKFLOW_ACTION_FALLBACK
+  const categoryLabels = useCategoryMap('TASK_WORKFLOW_ACTION');
+  const getActionConfig = (name: string) => {
+    const ui = ACTION_UI_CONFIG[name] ?? { icon: <BarChart3 className="w-4 h-4" />, variant: 'secondary' as const };
+    const label = categoryLabels[name] || TASK_WORKFLOW_ACTION_FALLBACK[name] || name;
+    return { ...ui, label };
+  };
 
   const systemActions = ['ADD_SUBTASK', 'COORDINATE', 'EDIT', 'DELETE', 'CHAT'];
   const workflowActions = allowedActions.filter((a: string) => !systemActions.includes(a));
