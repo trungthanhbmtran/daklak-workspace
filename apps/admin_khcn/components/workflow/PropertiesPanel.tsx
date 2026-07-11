@@ -266,6 +266,7 @@ export const PropertiesPanel = ({
                 <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
                 <NativeSelectOption value="BY_GEO_AREA">Theo Địa bàn phụ trách</NativeSelectOption>
                 <NativeSelectOption value="DIRECT_MANAGER">Cấp trên/dưới trực tiếp</NativeSelectOption>
+                <NativeSelectOption value="ASSIGNER">Người giao việc</NativeSelectOption>
               </NativeSelect>
               <p className="text-[10px] text-muted-foreground mt-1.5">
                 Backend sẽ dựa vào chiến lược này để đối chiếu với cấu trúc PBAC.

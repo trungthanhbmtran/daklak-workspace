@@ -74,7 +74,7 @@ async function main() {
           permissions: {
             ...fullPermissions,
           },
-          label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'DIRECT_MANAGER', targetStatus: 'IN_PROGRESS'
+          label: 'Lãnh đạo theo dõi', description: 'Lãnh đạo giám sát tiến độ công việc', actionName: 'MONITOR', sendNotification: false, assignmentStrategy: 'ASSIGNER', targetStatus: 'IN_PROGRESS'
         }
       },
       { id: 'gw_join', type: 'parallel_gateway', position: { x: 1250, y: 150 }, data: { label: 'Gộp luồng' } },
@@ -89,7 +89,7 @@ async function main() {
             COMPLETE: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN'],
             DONE: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN']
           },
-          label: 'Tổng hợp kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'COMPLETE', sendNotification: true, assignmentStrategy: 'BY_DEPARTMENT', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' }
+          label: 'Tổng hợp kết quả', targetStatus: 'PENDING_APPROVAL', autoProgress: 100, description: 'Nhân viên báo cáo kết quả hoàn thành', actionName: 'COMPLETE', sendNotification: true, assignmentStrategy: 'ASSIGNER', notification: { title: 'Yêu cầu nghiệm thu công việc', template: 'Nhân sự đã báo cáo hoàn thành công việc. Vui lòng kiểm tra và nghiệm thu.', recipientExpression: '[supervisorCode, assignerCode, creatorEmployeeCode]' }
         }
       },
       {
@@ -103,7 +103,7 @@ async function main() {
             APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ADMIN'],
             REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'OWNER', 'ADMIN']
           },
-          label: 'Nghiệm thu / Trả lại', description: 'Lãnh đạo phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'DIRECT_MANAGER'
+          label: 'Nghiệm thu / Trả lại', description: 'Người giao việc phê duyệt hoặc trả lại kết quả', actionName: 'APPROVE', sendNotification: true, assignmentStrategy: 'ASSIGNER'
         }
       },
       { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 2000, y: 150 }, data: { label: 'Quyết định' } },
