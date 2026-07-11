@@ -625,7 +625,7 @@ export class WorkflowGrpcController {
         name: n.name,
         x: n.x,
         y: n.y,
-        properties: n.properties || {},
+        propertiesJson: n.properties ? JSON.stringify(n.properties) : '{}',
         order: n.order,
         assignments: (n.assignments || []).map((a: any) => ({ id: a.id, type: a.type, value: a.value })),
         actions: (n.actions || []).map((a: any) => ({ id: a.id, actionType: a.actionType, service: a.service, action: a.action, payloadTemplate: a.payloadTemplate || {}, order: a.order }))
@@ -635,7 +635,7 @@ export class WorkflowGrpcController {
         sourceNodeId: e.sourceNodeId,
         targetNodeId: e.targetNodeId,
         condition: e.condition || '',
-        properties: e.properties || {},
+        propertiesJson: e.properties ? JSON.stringify(e.properties) : '{}',
         priority: e.priority,
         defaultFlow: e.defaultFlow
       })),

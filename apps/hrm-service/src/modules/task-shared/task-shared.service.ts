@@ -124,9 +124,9 @@ export class TaskSharedService {
       if (res) {
         const definition = {
           nodes: (res.nodes || []).map((n: any) => ({
-             id: n.id,
-             type: n.type,
-             data: this.parseProtoStruct(n.properties)
+            id: n.id,
+            type: n.type,
+            data: n.propertiesJson ? JSON.parse(n.propertiesJson) : {}
           })),
           edges: (res.edges || []).map((e: any) => ({
              source: e.sourceNodeId,
