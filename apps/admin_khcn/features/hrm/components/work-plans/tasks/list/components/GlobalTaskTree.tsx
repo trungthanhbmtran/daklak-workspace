@@ -127,6 +127,22 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
                   <TaskStatusBadge code={task.status} showIcon={true} />
                 )}
 
+                {/* Workflow step chip */}
+                {task.workflowInstId && (task.allowedActions || []).length > 0 && (task.allowedActions || []).filter((a: string) => !['CHAT','EDIT','DELETE','ADD_SUBTASK','COORDINATE','FORWARD','MONITOR'].includes(a)).length > 0 && (
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700/40 text-indigo-600 dark:text-indigo-400">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+                    <span className="text-[10px] font-bold tracking-wide">
+                      {{
+                        PLAN_ASSIGNMENT: 'Chờ phân công',
+                        ASSIGN: 'Chờ giao việc',
+                        IN_PROGRESS: 'Đang thực hiện',
+                        COMPLETE: 'Chờ báo cáo',
+                        APPROVE: 'Chờ nghiệm thu',
+                      }[(task.allowedActions || []).find((a: string) => ['PLAN_ASSIGNMENT','ASSIGN','IN_PROGRESS','COMPLETE','APPROVE'].includes(a))] || 'Đang xử lý'}
+                    </span>
+                  </div>
+                )}
+
                 {!isUnassigned ? (
                   <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 pl-1 pr-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                     <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] text-white font-bold shadow-inner">
@@ -170,12 +186,15 @@ const TaskRow = React.memo(function TaskRow({ task, depth, indexSequence, onSele
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity duration-200">
+            {/* Actions — always visible on root rows, hover-only on nested */}
+            <div className={cn(
+              "flex items-center gap-2 shrink-0 transition-opacity duration-200",
+              isRoot ? "opacity-100" : "opacity-0 group-hover/row:opacity-100"
+            )}>
               {canAssign && (
                 <Button
                   size="sm"
-                  className="h-9 px-4 text-xs font-bold bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-xl shadow-sm transition-colors border border-indigo-100 hover:border-transparent"
+                  className="h-9 px-4 text-xs font-bold bg-amber-50 hover:bg-amber-500 text-amber-600 hover:text-white rounded-xl shadow-sm transition-colors border border-amber-200 hover:border-transparent"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();

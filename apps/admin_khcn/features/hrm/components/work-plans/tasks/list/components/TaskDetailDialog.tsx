@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import {
   Calendar,
-  MessageSquare, Target, AlertCircle, History,
+  MessageSquare, Target, AlertCircle, History, ChevronRight,
 } from 'lucide-react';
 import { getDueDateDisplay } from '../utils';
 import { TaskStatusBadge, TaskPriorityBadge } from '@/components/shared/badges/TaskBadges';
@@ -110,8 +110,47 @@ export function TaskDetailDialog({
                 </div>
               )}
             </div>
+            {/* ── WORKFLOW STEPS INDICATOR ── */}
+            {activeTask.workflowInstId && (
+              <div className="px-6 py-2.5 border-b border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/60 dark:bg-indigo-900/20 flex items-center gap-2 overflow-x-auto hide-scrollbar">
+                {[
+                  { key: 'plan', label: 'Phân công', active: (activeTask.allowedActions || []).includes('PLAN_ASSIGNMENT') },
+                  { key: 'assign', label: 'Giao việc', active: (activeTask.allowedActions || []).includes('ASSIGN') },
+                  { key: 'inprogress', label: 'Thực hiện', active: ['IN_PROGRESS', 'MONITOR'].some(a => (activeTask.allowedActions || []).includes(a)) || activeTask.status === 'IN_PROGRESS' },
+                  { key: 'complete', label: 'Báo cáo', active: (activeTask.allowedActions || []).includes('COMPLETE') },
+                  { key: 'approve', label: 'Nghiệm thu', active: (activeTask.allowedActions || []).includes('APPROVE') || activeTask.status === 'PENDING_APPROVAL' },
+                  { key: 'done', label: 'Hoàn thành', active: activeTask.status === 'DONE' },
+                ].map((step, idx, arr) => {
+                  const isDone = (() => {
+                    const order = ['plan','assign','inprogress','complete','approve','done'];
+                    const statuses: Record<string, string[]> = {
+                      plan: [], assign: ['TODO'], inprogress: ['IN_PROGRESS'],
+                      complete: ['PENDING_APPROVAL'], approve: ['PENDING_APPROVAL'], done: ['DONE']
+                    };
+                    const currentIdx = order.indexOf(arr.find(s => s.active)?.key || 'plan');
+                    return idx < currentIdx;
+                  })();
+                  return (
+                    <React.Fragment key={step.key}>
+                      <div className={`flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
+                        step.active
+                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-indigo-900/50'
+                          : isDone
+                            ? 'bg-indigo-100 text-indigo-500 dark:bg-indigo-900/40 dark:text-indigo-400'
+                            : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                      }`}>
+                        {isDone && <span className="text-[10px]">✓</span>}
+                        {step.label}
+                      </div>
+                      {idx < arr.length - 1 && (
+                        <ChevronRight className="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            )}
 
-            {/* ── 3 COLUMNS ── */}
             <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_320px_320px] 2xl:grid-cols-[1fr_340px_340px] divide-y xl:divide-y-0 xl:divide-x divide-slate-200 dark:divide-slate-800">
 
               {/* ── COL 1: Mô tả + Chat ── */}
