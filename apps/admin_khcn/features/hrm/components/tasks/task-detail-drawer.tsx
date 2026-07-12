@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { TaskKpiEvaluation } from "./task-kpi-evaluation";
 import { Textarea } from "@/components/ui/textarea";
 import { BellRing, MessageSquare, Send, CheckCircle2, Clock, History, ArrowRightCircle, FileText, AlertCircle } from "lucide-react";
+import { CreateTaskDialog } from "./create-task-dialog";
+import { CreateStepDialog } from "./create-step-dialog";
+import { useState } from "react";
 
 interface TaskDetailDrawerProps {
   task: HrmTask;
@@ -18,6 +21,9 @@ interface TaskDetailDrawerProps {
 }
 
 export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerProps) {
+  const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
+  const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
+
   const isCompleted = task.status === "COMPLETED";
   const hasKpi = !!task.kpi;
 
@@ -204,7 +210,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     Nhiệm vụ con (Phân rã công việc)
                   </h3>
                   {!isCompleted && (
-                    <Button variant="outline" size="sm" className="h-7 text-xs">
+                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
                       + Tạo nhiệm vụ con
                     </Button>
                   )}
@@ -266,7 +272,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     Các bước thực hiện (Checklist nội bộ)
                   </h3>
                   {!isCompleted && (
-                    <Button variant="outline" size="sm" className="h-7 text-xs">
+                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
                       + Thêm bước
                     </Button>
                   )}
@@ -380,6 +386,18 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           </ScrollArea>
         </Tabs>
       </SheetContent>
+
+      {/* Dialogs */}
+      <CreateTaskDialog 
+        open={isCreateSubTaskOpen} 
+        onOpenChange={setIsCreateSubTaskOpen} 
+        parentId={task.id}
+      />
+      <CreateStepDialog 
+        open={isCreateStepOpen} 
+        onOpenChange={setIsCreateStepOpen} 
+        taskId={task.id}
+      />
     </Sheet>
   );
 }

@@ -11,6 +11,7 @@ import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
 import { Eye, Clock } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
+import { CreateTaskDialog } from "./create-task-dialog";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -38,6 +39,7 @@ export function TaskList() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [selectedTask, setSelectedTask] = useState<HrmTask | null>(null);
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 
   const filteredTasks = tasks.filter(task => {
     const matchStatus = statusFilter === "ALL" || task.status === statusFilter;
@@ -68,7 +70,7 @@ export function TaskList() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => alert("Chức năng Giao việc mới")}>+ Giao việc mới</Button>
+        <Button onClick={() => setIsCreateTaskOpen(true)}>+ Giao việc mới</Button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -141,6 +143,11 @@ export function TaskList() {
           onOpenChange={(open) => !open && setSelectedTask(null)}
         />
       )}
+      
+      <CreateTaskDialog 
+        open={isCreateTaskOpen} 
+        onOpenChange={setIsCreateTaskOpen} 
+      />
     </div>
   );
 }
