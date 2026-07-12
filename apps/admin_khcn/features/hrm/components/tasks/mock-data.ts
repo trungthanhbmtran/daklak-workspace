@@ -18,6 +18,43 @@ export const MOCK_TASKS: HrmTask[] = [
     progress: 40,
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    subTasks: [
+      {
+        id: "SUB-001",
+        taskId: "TASK-001",
+        title: "Xây dựng đề án",
+        status: "COMPLETED",
+        completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        assigneeId: 201,
+        assignee: { id: 201, employeeCode: "NV002", firstname: "Trần", lastname: "Thị B", fullName: "Trần Thị B", email: "", phone: "", identityCard: "" }
+      },
+      {
+        id: "SUB-002",
+        taskId: "TASK-001",
+        title: "Trình lãnh đạo trung tâm duyệt",
+        status: "COMPLETED",
+        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        assigneeId: 201,
+        assignee: { id: 201, employeeCode: "NV002", firstname: "Trần", lastname: "Thị B", fullName: "Trần Thị B", email: "", phone: "", identityCard: "" }
+      },
+      {
+        id: "SUB-003",
+        taskId: "TASK-001",
+        title: "Trình cho Sở Khoa học & Công nghệ",
+        status: "IN_PROGRESS",
+        dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+        assigneeId: 202,
+        assignee: { id: 202, employeeCode: "NV004", firstname: "Phạm", lastname: "Thị D", fullName: "Phạm Thị D", email: "", phone: "", identityCard: "" }
+      },
+      {
+        id: "SUB-004",
+        taskId: "TASK-001",
+        title: "Gửi Sở Tài chính thẩm định dự toán",
+        status: "TODO",
+        assigneeId: 202,
+        assignee: { id: 202, employeeCode: "NV004", firstname: "Phạm", lastname: "Thị D", fullName: "Phạm Thị D", email: "", phone: "", identityCard: "" }
+      }
+    ]
   },
   {
     id: "TASK-002",
@@ -79,5 +116,23 @@ export const MOCK_TASKS: HrmTask[] = [
     progress: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "TASK-005",
+    title: "Xây dựng kế hoạch chuyển đổi số năm 2026",
+    description: "Yêu cầu Phòng CNTT chủ trì, phối hợp với các phòng ban khác xây dựng kế hoạch chuyển đổi số.",
+    status: "ASSIGNED",
+    priority: "HIGH",
+    sourceDocumentRef: "246/UBND-CĐS",
+    assignerId: 101, // Lãnh đạo
+    assigneeDepartmentId: 10, // Phòng CNTT
+    assigner: { id: 101, employeeCode: "NV001", firstname: "Nguyễn", lastname: "Văn A", fullName: "Nguyễn Văn A", email: "", phone: "", identityCard: "" },
+    assigneeDepartment: { id: 10, name: "Phòng Công nghệ thông tin", code: "CNTT" },
+    startDate: new Date().toISOString(),
+    dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+    progress: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    subTasks: []
   }
 ];

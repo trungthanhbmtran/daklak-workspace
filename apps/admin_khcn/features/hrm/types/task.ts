@@ -1,4 +1,4 @@
-import { HrmEmployee } from "../types";
+import { HrmEmployee, HrmDepartment } from "../types";
 
 export type TaskStatus = "DRAFT" | "ASSIGNED" | "IN_PROGRESS" | "PENDING_REVIEW" | "COMPLETED" | "OVERDUE" | "REJECTED";
 export type TaskPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
@@ -19,6 +19,17 @@ export interface HrmTaskComment {
   content: string;
   createdAt: string;
   user?: HrmEmployee;
+}
+
+export interface HrmSubTask {
+  id: string;
+  taskId: string;
+  title: string;
+  status: "TODO" | "IN_PROGRESS" | "COMPLETED";
+  dueDate?: string;
+  completedAt?: string;
+  assigneeId?: number; // Người được phân công việc con này
+  assignee?: HrmEmployee;
 }
 
 export interface HrmTaskKPI {
@@ -44,12 +55,17 @@ export interface HrmTask {
   sourceDocumentId?: string; // Nguồn từ văn bản chỉ đạo (nếu có)
   sourceDocumentRef?: string; // Số ký hiệu văn bản
   
-  assignerId: number; // Người giao việc (Lãnh đạo / Trưởng phòng)
-  assigneeId: number; // Người xử lý chính (Chuyên viên)
+  assignerId: number; // Người giao việc (Lãnh đạo)
+  
+  // Nơi nhận việc (có thể là một cá nhân hoặc một phòng ban)
+  assigneeId?: number; 
+  assigneeDepartmentId?: number; 
+  
   coAssigneeIds?: number[]; // Người phối hợp
   
   assigner?: HrmEmployee;
   assignee?: HrmEmployee;
+  assigneeDepartment?: HrmDepartment;
   coAssignees?: HrmEmployee[];
   
   startDate: string;
@@ -61,6 +77,8 @@ export interface HrmTask {
   attachments?: HrmTaskAttachment[];
   comments?: HrmTaskComment[];
   kpi?: HrmTaskKPI; // Kết quả đánh giá KPI sau khi hoàn thành
+  subTasks?: HrmSubTask[]; // Các giai đoạn thực hiện công việc
+  
   
   createdAt: string;
   updatedAt: string;

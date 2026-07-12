@@ -49,8 +49,8 @@ export function TaskList() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
         <div className="flex w-full sm:w-auto gap-4">
-          <Input 
-            placeholder="Tìm kiếm công việc..." 
+          <Input
+            placeholder="Tìm kiếm công việc..."
             className="w-full sm:w-[300px]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -110,7 +110,9 @@ export function TaskList() {
                     <TableCell>{getPriorityBadge(task.priority)}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium">{task.assignee?.fullName}</span>
+                        <span className="text-sm font-medium">
+                          {task.assigneeDepartment ? `🏢 ${task.assigneeDepartment.name}` : task.assignee?.fullName || "Chưa xác định"}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -131,12 +133,12 @@ export function TaskList() {
           </TableBody>
         </Table>
       </div>
-      
+
       {selectedTask && (
-        <TaskDetailDrawer 
-          task={selectedTask} 
-          open={!!selectedTask} 
-          onOpenChange={(open) => !open && setSelectedTask(null)} 
+        <TaskDetailDrawer
+          task={selectedTask}
+          open={!!selectedTask}
+          onOpenChange={(open) => !open && setSelectedTask(null)}
         />
       )}
     </div>

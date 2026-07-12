@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { TaskKpiEvaluation } from "./task-kpi-evaluation";
 import { Textarea } from "@/components/ui/textarea";
+import { BellRing, MessageSquare, Send, CheckCircle2, Clock, History, ArrowRightCircle, FileText, AlertCircle } from "lucide-react";
 
 interface TaskDetailDrawerProps {
   task: HrmTask;
@@ -18,6 +19,88 @@ interface TaskDetailDrawerProps {
 
 export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerProps) {
   const isCompleted = task.status === "COMPLETED";
+  const hasKpi = !!task.kpi;
+
+  // Render động timeline dựa vào dữ liệu Task
+  const renderTimeline = () => {
+    const timeline = [];
+    
+    // 1. Giao việc
+    timeline.push({
+      id: "t1",
+      title: `Giao việc cho ${task.assignee?.fullName}`,
+      time: task.createdAt,
+      icon: Clock,
+      iconColor: "text-blue-500",
+      content: `Nội dung: ${task.description}`,
+    });
+
+    // 2. Tiếp nhận xử lý (Nếu status không phải DRAFT/ASSIGNED)
+    if (task.status !== "DRAFT" && task.status !== "ASSIGNED") {
+      timeline.push({
+        id: "t2",
+        title: "Bắt đầu xử lý",
+        time: task.startDate,
+        icon: ArrowRightCircle,
+        iconColor: "text-orange-500",
+        content: "Chuyên viên đã tiếp nhận và đang xử lý công việc.",
+      });
+    }
+
+    // 3. Chờ duyệt
+    if (task.status === "PENDING_REVIEW" || task.status === "COMPLETED") {
+      timeline.push({
+        id: "t3",
+        title: "Báo cáo kết quả",
+        time: task.updatedAt,
+        icon: FileText,
+        iconColor: "text-slate-600",
+        content: "Đã báo cáo tiến độ và gửi yêu cầu phê duyệt.",
+      });
+    }
+
+    // 4. Trễ hạn
+    const isOverdue = new Date(task.dueDate) < (task.completedAt ? new Date(task.completedAt) : new Date());
+    if (isOverdue && task.status !== "COMPLETED") {
+        timeline.push({
+            id: "t_overdue",
+            title: "Cảnh báo quá hạn",
+            time: task.dueDate,
+            icon: AlertCircle,
+            iconColor: "text-red-500",
+            content: "Công việc đã vượt quá thời hạn quy định.",
+        });
+    }
+
+    // 5. Hoàn thành
+    if (task.status === "COMPLETED") {
+      timeline.push({
+        id: "t4",
+        title: "Hoàn thành công việc",
+        time: task.completedAt || task.updatedAt,
+        icon: CheckCircle2,
+        iconColor: "text-green-500",
+        content: "Trưởng phòng/Lãnh đạo đã duyệt hoàn thành.",
+      });
+    }
+
+    // 6. Đánh giá KPI
+    if (task.kpi) {
+      timeline.push({
+        id: "t5",
+        title: "Đã đánh giá KPI",
+        time: task.kpi.evaluatedAt,
+        icon: History,
+        iconColor: "text-purple-500",
+        content: `Xếp loại: ${task.kpi.qualityGrade} (${task.kpi.totalScore} điểm)`,
+      });
+    }
+
+    // Sắp xếp theo thời gian (cũ nhất ở trên)
+    return timeline.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  };
+
+  const timelineEvents = renderTimeline();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -31,9 +114,17 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                   {task.description}
                 </SheetDescription>
               </div>
-              <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
-                {task.status}
-              </Badge>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
+                  {task.status}
+                </Badge>
+                {!isCompleted && (
+                  <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700">
+                    <BellRing className="w-3 h-3 mr-1" />
+                    Đôn đốc
+                  </Button>
+                )}
+              </div>
             </div>
           </SheetHeader>
 
@@ -43,8 +134,10 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <p className="font-medium">{task.assigner?.fullName || "Chưa xác định"}</p>
             </div>
             <div>
-              <p className="text-slate-500 mb-1">Người xử lý</p>
-              <p className="font-medium">{task.assignee?.fullName || "Chưa xác định"}</p>
+              <p className="text-slate-500 mb-1">Đơn vị / Người xử lý</p>
+              <p className="font-medium">
+                {task.assigneeDepartment ? `🏢 ${task.assigneeDepartment.name}` : task.assignee?.fullName || "Chưa xác định"}
+              </p>
             </div>
             <div>
               <p className="text-slate-500 mb-1">Thời hạn</p>
@@ -79,6 +172,12 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 Đánh giá KPI
               </TabsTrigger>
               <TabsTrigger
+                value="discussion"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3"
+              >
+                Trao đổi
+              </TabsTrigger>
+              <TabsTrigger
                 value="history"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3"
               >
@@ -89,6 +188,64 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
           <ScrollArea className="flex-1 p-6">
             <TabsContent value="processing" className="mt-0 space-y-6">
+              
+              {/* Danh sách các giai đoạn / bước thực hiện (Phân rã công việc) */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-medium text-sm">
+                    {task.assigneeDepartment ? "Phân công thực hiện (Phân rã công việc)" : "Các giai đoạn / Bước thực hiện"}
+                  </h3>
+                  {!isCompleted && (
+                    <Button variant="outline" size="sm" className="h-7 text-xs">
+                      {task.assigneeDepartment ? "+ Giao việc cho nhân viên" : "+ Thêm bước"}
+                    </Button>
+                  )}
+                </div>
+                
+                {task.subTasks && task.subTasks.length > 0 ? (
+                  <div className="border rounded-md divide-y bg-white">
+                    {task.subTasks.map(subTask => (
+                      <div key={subTask.id} className="flex items-center justify-between p-3">
+                        <div className="flex items-center gap-3">
+                          {subTask.status === "COMPLETED" ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          ) : subTask.status === "IN_PROGRESS" ? (
+                            <Clock className="w-5 h-5 text-blue-500" />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
+                          )}
+                          <div>
+                            <p className={`text-sm ${subTask.status === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
+                              {subTask.title}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1">
+                              {subTask.dueDate && (
+                                <p className="text-xs text-slate-500 flex items-center">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  Hạn: {format(new Date(subTask.dueDate), "dd/MM/yyyy")}
+                                </p>
+                              )}
+                              {subTask.assignee && (
+                                <p className="text-xs text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full">
+                                  👤 {subTask.assignee.fullName}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {subTask.status !== "COMPLETED" && !isCompleted && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs">Cập nhật</Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
+                    Chuyên viên chưa xây dựng kế hoạch thực hiện chi tiết.
+                  </div>
+                )}
+              </div>
+
               {/* Form xử lý công việc */}
               <div className="space-y-4 bg-white p-4 rounded-lg border">
                 <h3 className="font-medium text-sm">Cập nhật tiến độ</h3>
@@ -113,18 +270,61 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <TaskKpiEvaluation task={task} />
             </TabsContent>
 
-            <TabsContent value="history" className="mt-0">
-              <div className="space-y-4">
-                <div className="border-l-2 border-blue-500 pl-4 pb-4">
-                  <p className="text-sm font-medium">Lãnh đạo đã giao việc</p>
-                  <p className="text-xs text-slate-500">{format(new Date(task.createdAt), "dd/MM/yyyy HH:mm")}</p>
-                </div>
-                {isCompleted && (
-                  <div className="border-l-2 border-green-500 pl-4 pb-4">
-                    <p className="text-sm font-medium">Chuyên viên đã báo cáo hoàn thành</p>
-                    <p className="text-xs text-slate-500">{format(new Date(task.updatedAt), "dd/MM/yyyy HH:mm")}</p>
+            <TabsContent value="discussion" className="mt-0 h-full flex flex-col">
+              <div className="flex-1 space-y-4 mb-4">
+                {/* Mock comments */}
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
+                    {task.assigner?.firstname?.[0] || 'A'}
                   </div>
-                )}
+                  <div className="flex-1 bg-slate-100 p-3 rounded-lg rounded-tl-none">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-sm">{task.assigner?.fullName}</span>
+                      <span className="text-xs text-slate-500">{format(new Date(task.createdAt), "dd/MM HH:mm")}</span>
+                    </div>
+                    <p className="text-sm">Vui lòng rà soát kỹ các phụ lục đính kèm của hồ sơ này nhé.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 flex-row-reverse">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs shrink-0">
+                    {task.assignee?.firstname?.[0] || 'B'}
+                  </div>
+                  <div className="flex-1 bg-blue-50 p-3 rounded-lg rounded-tr-none">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-sm">{task.assignee?.fullName}</span>
+                      <span className="text-xs text-slate-500">Hôm qua, 14:30</span>
+                    </div>
+                    <p className="text-sm">Vâng, em đã kiểm tra xong phần phụ lục. Đang làm báo cáo thẩm định ạ.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-auto flex gap-2">
+                <Textarea placeholder="Nhập nội dung trao đổi..." className="min-h-[40px] h-[40px] resize-none" />
+                <Button size="icon" className="shrink-0"><Send className="w-4 h-4" /></Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-0">
+              <div className="relative pl-6 border-l-2 border-slate-200 space-y-8 pb-4 ml-2 mt-4">
+                {timelineEvents.map((event, index) => {
+                  const Icon = event.icon;
+                  return (
+                    <div key={event.id} className="relative">
+                      <div className="absolute -left-[33px] bg-white p-1">
+                        <Icon className={`w-4 h-4 ${event.iconColor}`} />
+                      </div>
+                      <p className="text-sm font-medium">{event.title}</p>
+                      <p className="text-xs text-slate-500 mt-1">{format(new Date(event.time), "dd/MM/yyyy HH:mm")}</p>
+                      {event.content && (
+                        <p className={`text-sm mt-2 p-3 rounded-md border ${index === 0 ? 'bg-slate-50 text-slate-600' : 'bg-white'}`}>
+                          {event.content}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </TabsContent>
           </ScrollArea>
