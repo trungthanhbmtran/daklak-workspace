@@ -26,7 +26,7 @@ export function NotificationListClient() {
   const { data: list = [], isLoading } = useQuery({
     queryKey: NOTIFICATIONS_KEY,
     queryFn: getNotifications,
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
   });
 
   const markRead = useMutation({

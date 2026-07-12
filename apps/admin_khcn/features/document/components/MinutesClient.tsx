@@ -1,31 +1,194 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Filter, Eye, Download, Users, ClipboardCheck, ArrowLeft, Clock, MapPin } from "lucide-react";
+import React, { useCallback, useMemo } from "react";
+import {
+  Plus, Filter, Eye, Download, Users,
+  ClipboardCheck, ArrowLeft, Clock, MapPin,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
-import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { MinutesForm } from "@/features/document/components/MinutesForm";
 import { useListMinutes } from "@/features/document/hooks/useDocuments";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function parseParticipants(raw: any): string[] {
+  if (typeof raw !== "string") return [];
+  return raw.split(",").map((p) => p.trim()).filter(Boolean);
+}
+
+// ─── MinutesRow — memoized, không mutation ────────────────────────────────────
+
+interface MinutesRowProps {
+  minutes: any;
+}
+
+const MinutesRow = React.memo(function MinutesRow({ minutes: m }: MinutesRowProps) {
+  const participants = useMemo(() => parseParticipants(m.participants), [m.participants]);
+  const dateStr = m.startTime ? new Date(m.startTime).toLocaleDateString("vi-VN") : "---";
+  const timeStr = m.startTime
+    ? new Date(m.startTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+    : "---";
+
+  return (
+    <TableRow className="hover:bg-primary/[0.02] transition-all group cursor-pointer">
+      {/* Time + Location */}
+      <TableCell className="px-6 py-5">
+        <div className="flex flex-col gap-1">
+          <span className="font-bold text-foreground">{dateStr}</span>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1 uppercase">
+            <Clock className="h-3 w-3" /> {timeStr}
+          </span>
+          <span className="text-[10px] text-primary/70 flex items-center gap-1 mt-1 font-medium italic">
+            <MapPin className="h-3 w-3" /> {m.location || "Chưa xác định"}
+          </span>
+        </div>
+      </TableCell>
+
+      {/* Title + status */}
+      <TableCell className="px-6 py-5">
+        <p className="font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
+          {m.title}
+        </p>
+        <div className="flex items-center gap-2 mt-2">
+          <Badge
+            variant="outline"
+            className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] shadow-none"
+          >
+            {m.status === "PUBLISHED" ? "Đã ký phát hành" : "Bản nháp"}
+          </Badge>
+        </div>
+      </TableCell>
+
+      {/* Participants */}
+      <TableCell className="px-6 py-5">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+            <Users className="h-3.5 w-3.5 text-muted-foreground" /> {participants.length} thành viên
+          </div>
+          <div className="flex -space-x-2">
+            {participants.slice(0, 3).map((p, i) => (
+              <div
+                key={i}
+                className="w-7 h-7 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center text-[10px] font-bold text-primary uppercase"
+              >
+                {p.charAt(0) || "U"}
+              </div>
+            ))}
+            {participants.length > 3 && (
+              <div className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                +{participants.length - 3}
+              </div>
+            )}
+          </div>
+        </div>
+      </TableCell>
+
+      {/* Actions */}
+      <TableCell className="px-6 py-5 text-right">
+        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="secondary" size="icon" className="rounded-full shadow-sm">
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="secondary" size="icon" className="rounded-full shadow-sm">
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+// ─── MinutesTable — presentational ───────────────────────────────────────────
+
+interface MinutesTableProps {
+  data: any[];
+  isLoading: boolean;
+}
+
+const MinutesTable = React.memo(function MinutesTable({ data, isLoading }: MinutesTableProps) {
+  return (
+    <Card className="border-none shadow-xl shadow-foreground/5 bg-background/60 backdrop-blur-sm rounded-2xl overflow-hidden">
+      <ScrollArea className="w-full">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/30">
+              <TableHead className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground w-48">
+                Thời gian / Địa điểm
+              </TableHead>
+              <TableHead className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground">
+                Tiêu đề biên bản
+              </TableHead>
+              <TableHead className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground w-64">
+                Người tham dự
+              </TableHead>
+              <TableHead className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground text-right w-32" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 4 }).map((__, j) => (
+                    <TableCell key={j} className="px-6 py-5">
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="py-20 text-center text-muted-foreground">
+                  Chưa có biên bản nào được ghi nhận.
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((m: any) => <MinutesRow key={m.id} minutes={m} />)
+            )}
+          </TableBody>
+        </Table>
+      </ScrollArea>
+      {data.length > 0 && (
+        <div className="p-8 text-center bg-muted/5 border-t">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
+            Hiển thị {data.length} biên bản
+          </p>
+        </div>
+      )}
+    </Card>
+  );
+});
+
+// ─── Root ─────────────────────────────────────────────────────────────────────
 
 export function MinutesClient() {
-  const [view, setView] = useState<'LIST' | 'CREATE'>('LIST');
+  const [view, setView] = useState<"LIST" | "CREATE">("LIST");
   const searchParams = useSearchParams();
-  const searchTerm = searchParams.get('search') || "";
+  const searchTerm = searchParams.get("search") || "";
 
   const { data: minutesData, isLoading } = useListMinutes({ search: searchTerm });
   const minutes = minutesData?.data ?? [];
 
-  if (view === 'CREATE') {
+  const handleSwitchToCreate = useCallback(() => setView("CREATE"), []);
+  const handleSwitchToList = useCallback(() => setView("LIST"), []);
+
+  if (view === "CREATE") {
     return (
       <div className="p-6 bg-muted/5 min-h-screen animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="max-w-4xl mx-auto">
-          <Button variant="ghost" onClick={() => setView('LIST')} className="mb-6 hover:bg-background">
+          <Button variant="ghost" onClick={handleSwitchToList} className="mb-6 hover:bg-background">
             <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
           </Button>
-          <MinutesForm onComplete={() => setView('LIST')} onCancel={() => setView('LIST')} />
+          <MinutesForm onComplete={handleSwitchToList} onCancel={handleSwitchToList} />
         </div>
       </div>
     );
@@ -38,91 +201,30 @@ export function MinutesClient() {
           <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <ClipboardCheck className="h-7 w-7 text-primary" /> Quản lý Biên bản cuộc họp
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">Lưu trữ và quản lý diễn biến các cuộc họp, hội thảo tại đơn vị.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Lưu trữ và quản lý diễn biến các cuộc họp, hội thảo tại đơn vị.
+          </p>
         </div>
-        <Button onClick={() => setView('CREATE')} className="shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 rounded-xl px-6 transition-all active:scale-95">
+        <Button
+          onClick={handleSwitchToCreate}
+          className="shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 rounded-xl px-6 transition-all active:scale-95"
+        >
           <Plus className="h-4 w-4 mr-2" /> Tạo biên bản mới
         </Button>
       </div>
 
-      <Card className="border-none shadow-xl shadow-foreground/5 bg-background/60 backdrop-blur-sm rounded-2xl overflow-hidden">
-        <div className="p-5 border-b bg-background flex flex-wrap gap-3 items-center">
-          <Search placeholder="Tìm theo tiêu đề, địa điểm, thành phần tham dự..." className="flex-1 min-w-[300px]" />
-          <Button variant="outline" className="h-11 rounded-xl border-dashed border-2 hover:bg-muted/10 transition-colors">
-            <Filter className="h-4 w-4 mr-2" /> Bộ lọc
-          </Button>
-        </div>
+      {/* Filter bar — outside of table, so it doesn't trigger table re-render */}
+      <div className="p-5 border rounded-xl bg-background flex flex-wrap gap-3 items-center shadow-sm">
+        <Search
+          placeholder="Tìm theo tiêu đề, địa điểm, thành phần tham dự..."
+          className="flex-1 min-w-[300px]"
+        />
+        <Button variant="outline" className="h-11 rounded-xl border-dashed border-2 hover:bg-muted/10">
+          <Filter className="h-4 w-4 mr-2" /> Bộ lọc
+        </Button>
+      </div>
 
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-sm text-left border-collapse">
-            <thead>
-              <tr className="bg-muted/30">
-                <th className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground w-48">Thời gian / Địa điểm</th>
-                <th className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Tiêu đề biên bản</th>
-                <th className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground w-64">Người tham dự</th>
-                <th className="px-6 py-4 font-bold text-[10px] uppercase tracking-widest text-muted-foreground text-right w-32">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {isLoading ? (
-                <tr><td colSpan={4} className="py-20 text-center text-muted-foreground italic">Đang tải danh sách biên bản...</td></tr>
-              ) : minutes.length === 0 ? (
-                <tr><td colSpan={4} className="py-20 text-center text-muted-foreground">Chưa có biên bản nào được ghi nhận.</td></tr>
-              ) : minutes.map((m: any) => (
-                <tr key={m.id} className="hover:bg-primary/[0.02] transition-all group cursor-pointer">
-                  <td className="px-6 py-6">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold text-foreground">{m.startTime ? new Date(m.startTime).toLocaleDateString('vi-VN') : '---'}</span>
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 uppercase">
-                        <Clock className="h-3 w-3" /> {m.startTime ? new Date(m.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '---'}
-                      </span>
-                      <span className="text-[10px] text-primary/70 flex items-center gap-1 mt-1 font-medium italic">
-                        <MapPin className="h-3 w-3" /> {m.location || 'Chưa xác định'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6">
-                    <p className="font-bold text-foreground group-hover:text-primary transition-colors text-base leading-snug">{m.title}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] shadow-none">
-                        {m.status === 'PUBLISHED' ? 'Đã ký phát hành' : 'Bản nháp'}
-                      </Badge>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2 text-xs font-medium text-foreground">
-                        <Users className="h-3.5 w-3.5 text-muted-foreground" /> {typeof m.participants === 'string' ? m.participants.split(',').length : 0} thành viên
-                      </div>
-                      <div className="flex -space-x-2">
-                        {typeof m.participants === 'string' && m.participants.split(',').slice(0, 3).map((p: string, i: number) => (
-                          <div key={i} className="w-7 h-7 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center text-[10px] font-bold text-primary uppercase">
-                            {p.trim().charAt(0) || 'U'}
-                          </div>
-                        ))}
-                        {typeof m.participants === 'string' && m.participants.split(',').length > 3 && (
-                          <div className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-                            +{m.participants.split(',').length - 3}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-6 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="secondary" size="icon" className="rounded-full shadow-sm"><Eye className="h-4 w-4" /></Button>
-                      <Button variant="secondary" size="icon" className="rounded-full shadow-sm"><Download className="h-4 w-4" /></Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="p-8 text-center bg-muted/5 border-t">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Hiển thị {minutes.length} biên bản</p>
-          </div>
-        </CardContent>
-      </Card>
+      <MinutesTable data={minutes} isLoading={isLoading} />
     </div>
   );
 }

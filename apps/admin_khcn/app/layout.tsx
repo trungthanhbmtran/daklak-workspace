@@ -33,8 +33,8 @@ export default function RootLayout({
 }>) {
   return (
     // suppressHydrationWarning giúp tránh lỗi khi dùng Theme (Light/Dark mode)
-    <html lang="vi" suppressHydrationWarning>
-      <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased overflow-hidden`}>
+    <html lang="vi" suppressHydrationWarning className={`${inter.variable} ${geistMono.variable}`}>
+      <body className={`font-sans antialiased overflow-hidden`}>
         <Providers>
           <TooltipProvider delayDuration={200} skipDelayDuration={100}>
             <Suspense fallback={null}>

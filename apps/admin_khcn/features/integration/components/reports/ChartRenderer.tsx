@@ -107,7 +107,7 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, height = 300 }: 
               fill="#8884d8"
               dataKey={yAxisKey}
               nameKey={xAxisKey}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }: { name?: string | number; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

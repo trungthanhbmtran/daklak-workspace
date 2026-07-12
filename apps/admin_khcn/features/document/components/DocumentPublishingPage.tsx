@@ -18,8 +18,18 @@ import { Switch } from "@/components/ui/switch";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { toast } from "sonner";
 
+function formatDate(dateStr?: string) {
+  if (!dateStr) return "---";
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "---";
+    return date.toLocaleDateString('vi-VN');
+  } catch (e) {
+    return "---";
+  }
+}
+
 export default function DocumentPublishingPage() {
-  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -34,7 +44,6 @@ export default function DocumentPublishingPage() {
   const [effectiveDate, setEffectiveDate] = useState("");
 
   useEffect(() => {
-    setMounted(true);
     setEffectiveDate(new Date().toISOString().split('T')[0]);
   }, []);
 
@@ -63,25 +72,6 @@ export default function DocumentPublishingPage() {
       setEffectiveDate(selectedDoc.issueDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
     }
   }, [selectedDoc]);
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "---";
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return "---";
-      return date.toLocaleDateString('vi-VN');
-    } catch (e) {
-      return "---";
-    }
-  };
-
-  if (!mounted) {
-    return (
-      <div className="p-6 space-y-6 bg-muted/5 min-h-screen flex items-center justify-center">
-        <div className="h-8 w-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   const handlePublish = async () => {
     if (!selectedDoc) {

@@ -15,12 +15,18 @@ import { Progress } from "@/components/ui/progress";
 
 import { useDocumentStats, useListDocuments } from "@/features/document/hooks/useDocuments";
 
-export function DocumentsDashboardClient() {
-  const [mounted, setMounted] = useState(false);
+function formatDate(dateStr?: string) {
+  if (!dateStr) return "Không có";
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "Không có";
+    return date.toLocaleDateString('vi-VN');
+  } catch (e) {
+    return "Không có";
+  }
+}
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+export function DocumentsDashboardClient() {
 
   const { data: stats, isLoading: statsLoading } = useDocumentStats();
   const { data: pendingTasksData, isLoading: tasksLoading } = useListDocuments({
@@ -39,25 +45,6 @@ export function DocumentsDashboardClient() {
   }, [stats]);
 
   const myPendingTasks = useMemo(() => pendingTasksData?.data ?? [], [pendingTasksData]);
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "Không có";
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return "Không có";
-      return date.toLocaleDateString('vi-VN');
-    } catch (e) {
-      return "Không có";
-    }
-  };
-
-  if (!mounted) {
-    return (
-      <div className="p-6 space-y-6 bg-muted/5 min-h-screen flex items-center justify-center">
-        <div className="h-8 w-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">

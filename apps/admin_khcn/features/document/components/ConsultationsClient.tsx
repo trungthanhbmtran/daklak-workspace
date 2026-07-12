@@ -23,8 +23,20 @@ import { Progress } from "@/components/ui/progress";
 import { useListConsultations } from "@/features/document/hooks/useDocuments";
 import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
 
+const formatDate = (date?: string) => {
+   if (!date) return "--";
+   try {
+      return new Date(date).toLocaleDateString("vi-VN", {
+         day: '2-digit',
+         month: '2-digit',
+         year: 'numeric'
+      });
+   } catch (e) {
+      return "--";
+   }
+};
+
 export function ConsultationsClient() {
-   const [mounted, setMounted] = useState(false);
    const [isModalOpen, setIsModalOpen] = useState(false);
    const searchParams = useSearchParams();
    const searchTerm = searchParams.get('search') || "";
@@ -35,33 +47,8 @@ export function ConsultationsClient() {
       search: searchTerm,
    });
 
-   // EFFECT: Hydration guard
-   useEffect(() => {
-      setMounted(true);
-   }, []);
 
    const consultations = useMemo(() => data?.data ?? [], [data]);
-
-   const formatDate = (date?: string) => {
-      if (!date) return "--";
-      try {
-         return new Date(date).toLocaleDateString("vi-VN", {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-         });
-      } catch (e) {
-         return "--";
-      }
-   };
-
-   if (!mounted) {
-      return (
-         <div className="p-6 space-y-8 bg-muted/5 min-h-screen flex items-center justify-center">
-            <div className="h-12 w-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-         </div>
-      );
-   }
 
    return (
       <div className="p-6 space-y-8 bg-muted/5 min-h-screen">

@@ -1,24 +1,57 @@
 "use client";
 
-import { Loader2, User as UserIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useCallback } from "react";
+import {
+  Loader2, User as UserIcon, ChevronLeft, ChevronRight,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import type { UserItem } from "../types";
 
+// ─── UserRow — memoized ───────────────────────────────────────────────────────
+
+interface UserRowProps {
+  item: UserItem;
+  onViewDetail: (item: UserItem) => void;
+}
+
+const UserRow = React.memo(function UserRow({ item, onViewDetail }: UserRowProps) {
+  const handleClick = useCallback(() => onViewDetail(item), [item, onViewDetail]);
+
+  return (
+    <TableRow className="hover:bg-muted/30 transition-colors">
+      <TableCell className="text-center text-muted-foreground font-mono text-sm">{item.id}</TableCell>
+      <TableCell className="font-medium">{item.email || "—"}</TableCell>
+      <TableCell className="text-muted-foreground hidden sm:table-cell">{item.username ?? "—"}</TableCell>
+      <TableCell className="font-medium hidden md:table-cell">{item.fullName ?? "—"}</TableCell>
+      <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">{item.phoneNumber ?? "—"}</TableCell>
+      <TableCell className="text-center">
+        {item.isActive ? (
+          <Badge className="bg-emerald-500 hover:bg-emerald-600 font-normal text-xs">Hoạt động</Badge>
+        ) : (
+          <Badge variant="secondary" className="font-normal text-xs">Tạm khóa</Badge>
+        )}
+      </TableCell>
+      <TableCell className="text-right">
+        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleClick}>
+          Chi tiết
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+// ─── UserTable — memoized ─────────────────────────────────────────────────────
+
 interface UserTableProps {
   isLoading: boolean;
   isError: boolean;
-  data: UserItem[];          // dữ liệu trang hiện tại (đã slice)
-  total: number;             // tổng số bản ghi (sau filter)
+  data: UserItem[];
+  total: number;
   page: number;
   totalPages: number;
   pageSize: number;
@@ -26,19 +59,15 @@ interface UserTableProps {
   onViewDetail: (item: UserItem) => void;
 }
 
-export function UserTable({
-  isLoading,
-  isError,
-  data,
-  total,
-  page,
-  totalPages,
-  pageSize,
-  onPageChange,
-  onViewDetail,
+export const UserTable = React.memo(function UserTable({
+  isLoading, isError, data, total, page, totalPages, pageSize,
+  onPageChange, onViewDetail,
 }: UserTableProps) {
   const start = (page - 1) * pageSize + 1;
   const end = Math.min(page * pageSize, total);
+
+  const handlePrev = useCallback(() => onPageChange(page - 1), [page, onPageChange]);
+  const handleNext = useCallback(() => onPageChange(page + 1), [page, onPageChange]);
 
   return (
     <div className="flex-1 min-h-0 rounded-md border bg-background shadow-sm overflow-hidden flex flex-col">
@@ -73,42 +102,7 @@ export function UserTable({
               </TableRow>
             ) : data.length > 0 ? (
               data.map((item) => (
-                <TableRow key={item.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="text-center text-muted-foreground font-mono text-sm">
-                    {item.id}
-                  </TableCell>
-                  <TableCell className="font-medium">{item.email || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground hidden sm:table-cell">
-                    {item.username ?? "—"}
-                  </TableCell>
-                  <TableCell className="font-medium hidden md:table-cell">
-                    {item.fullName ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
-                    {item.phoneNumber ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {item.isActive ? (
-                      <Badge className="bg-emerald-500 hover:bg-emerald-600 font-normal text-xs">
-                        Hoạt động
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="font-normal text-xs">
-                        Tạm khóa
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 text-xs"
-                      onClick={() => onViewDetail(item)}
-                    >
-                      Chi tiết
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                <UserRow key={item.id} item={item} onViewDetail={onViewDetail} />
               ))
             ) : (
               <TableRow>
@@ -125,32 +119,20 @@ export function UserTable({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      {/* Phân trang */}
+      {/* Pagination */}
       {!isLoading && !isError && total > 0 && (
         <div className="flex items-center justify-between px-4 py-2.5 border-t bg-muted/20 shrink-0">
           <span className="text-xs text-muted-foreground">
             {start}–{end} / {total} người dùng
           </span>
           <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
-            >
+            <Button variant="outline" size="icon" className="h-7 w-7" disabled={page <= 1} onClick={handlePrev}>
               <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
             <span className="text-xs font-medium px-2 min-w-[60px] text-center">
               {page} / {totalPages}
             </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              disabled={page >= totalPages}
-              onClick={() => onPageChange(page + 1)}
-            >
+            <Button variant="outline" size="icon" className="h-7 w-7" disabled={page >= totalPages} onClick={handleNext}>
               <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -158,4 +140,4 @@ export function UserTable({
       )}
     </div>
   );
-}
+});

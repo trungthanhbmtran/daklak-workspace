@@ -96,7 +96,7 @@ export function NotificationBell() {
   const { data: list = [], isLoading } = useQuery({
     queryKey: NOTIFICATIONS_KEY,
     queryFn: getNotifications,
-    refetchInterval: 30_000,
+    refetchInterval: open ? 30_000 : false,
   });
 
   const markRead = useMutation({

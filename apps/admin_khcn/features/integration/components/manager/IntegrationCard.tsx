@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { Edit, Trash2, ShieldCheck, Activity, Plug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,25 +16,25 @@ interface IntegrationCardProps {
   onExplore?: (item: IntegrationConfig) => void;
 }
 
-export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProps) {
+export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProps) {
   const deleteMutation = useDeleteIntegration();
   const toggleActiveMutation = useToggleActiveIntegration();
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (confirm("Bạn có chắc chắn muốn xóa cấu hình tích hợp này?")) {
       deleteMutation.mutate(item.id, {
         onSuccess: () => toast.success("Đã xóa cấu hình tích hợp"),
         onError: (err: any) => toast.error(err.message || "Xóa thất bại")
       });
     }
-  };
+  }, [item.id, deleteMutation]);
 
-  const handleToggleActive = (currentStatus: boolean) => {
+  const handleToggleActive = useCallback((currentStatus: boolean) => {
     toggleActiveMutation.mutate({ id: item.id, isActive: !currentStatus }, {
       onSuccess: () => toast.success("Đã cập nhật trạng thái hoạt động"),
       onError: (err: any) => toast.error(err.message || "Cập nhật thất bại")
     });
-  };
+  }, [item.id, toggleActiveMutation]);
 
   return (
     <Card className="group relative flex flex-col hover:shadow-lg transition-all duration-300 hover:border-violet-300 dark:hover:border-violet-700/50">
@@ -89,4 +89,4 @@ export function IntegrationCard({ item, onEdit, onExplore }: IntegrationCardProp
       </CardFooter>
     </Card>
   );
-}
+});
