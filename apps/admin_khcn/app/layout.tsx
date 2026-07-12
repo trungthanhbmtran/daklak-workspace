@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/providers";
@@ -9,6 +9,11 @@ import { Suspense } from "react";
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-inter",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +34,7 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning giúp tránh lỗi khi dùng Theme (Light/Dark mode)
     <html lang="vi" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased overflow-hidden`}>
+      <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased overflow-hidden`}>
         <Providers>
           <TooltipProvider delayDuration={200} skipDelayDuration={100}>
             <Suspense fallback={null}>
