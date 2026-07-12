@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { useOrganizationContext } from "../context/OrganizationContext";
+import { useParams } from "next/navigation";
 import { useDomainSearch, type CatalogServerItem } from "../hooks/useScopeCatalog";
 import {
   Briefcase, RotateCcw, Save, Search, X,
@@ -26,8 +27,10 @@ import { cn } from "@/lib/utils";
 /* ─── Main panel ──────────────────────────────────────── */
 export function UnitScopePanel() {
   const { state, actions, meta } = useOrganizationContext();
-  const { selectedId, flatUnits } = state;
+  const { flatUnits } = state;
   const { isUpdatingScope } = meta;
+  const params = useParams<{ id: string }>();
+  const selectedId = params?.id ? Number(params.id) : null;
 
   const unit = selectedId != null ? flatUnits.find(u => u.id === selectedId) : null;
 

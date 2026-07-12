@@ -18,6 +18,7 @@ export interface MenuItem {
    */
   linkedResourceCode?: string | null;
   type: string;
+  children?: MenuItem[];
 }
 
 /**

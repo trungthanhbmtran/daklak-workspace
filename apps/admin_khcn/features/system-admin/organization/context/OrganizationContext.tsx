@@ -4,6 +4,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import type { OrganizationUnitNode, CreateUnitPayload, UpdateUnitPayload } from "../types";
 
 export interface OrganizationState {
+  tree: OrganizationUnitNode[];
   flatUnits: OrganizationUnitNode[];
   isLoadingTree: boolean;
 }

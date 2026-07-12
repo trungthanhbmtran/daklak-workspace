@@ -83,8 +83,13 @@ function normalizeStaffingReportItem(r: any): StaffingReportItem {
 }
 
 export const organizationApi = {
-  getTree: (): Promise<{ items: OrganizationUnitNode[] }> =>
-    apiClient.get("/organizations/tree").then((r: any) => ({
+  getOrganizations: (q?: string): Promise<{ items: OrganizationUnitNode[] }> =>
+    apiClient.get("/organizations", { params: { q: q || undefined } }).then((r: any) => ({
+      items: (r.data ?? []).map(normalizeUnitNode),
+    })),
+
+  getTree: (q?: string): Promise<{ items: OrganizationUnitNode[] }> =>
+    apiClient.get("/organizations/tree", { params: { q: q || undefined } }).then((r: any) => ({
       items: (r.data ?? []).map(normalizeUnitNode),
     })),
 

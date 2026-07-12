@@ -7,29 +7,31 @@ import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSidebarLogic } from "../hooks/useSidebarLogic";
-import { useMenuApi } from "../hooks/useMenuApi";
-import { useParams } from "next/navigation";
+import { useMenuTreeQuery } from "../hooks/useMenuQueries";
+import { useParams, useSearchParams } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MenuItem } from "../types";
 
 export function MenuSidebar() {
-  const { menus, isLoadingMenus } = useMenuApi();
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
+
+  const { data: tree = [], isLoading: isLoadingMenus } = useMenuTreeQuery(searchTerm);
   const params = useParams<{ id: string }>();
   const activeId = params?.id ? Number(params.id) : undefined;
 
-  const { searchTerm, expandedRows, visibleIds, toggleExpand } = useSidebarLogic(menus);
-
-  const filteredMenus = menus.filter(m => visibleIds ? visibleIds.has(m.id) : true);
+  const { expandedRows, toggleExpand } = useSidebarLogic(tree);
 
   // LOGIC CHẾ ĐỘ 1: VIEW THEO NGHIỆP VỤ (CÂY CHA - CON)
-  const renderBusinessTree = (parentId: number | null, level: number = 0) => {
-    const children = filteredMenus.filter(m => parentId ? m.parentId === parentId : !m.parentId).sort((a, b) => a.sort - b.sort);
-    if (children.length === 0) return null;
+  const renderBusinessTree = (nodes: MenuItem[], level: number = 0) => {
+    if (!nodes || nodes.length === 0) return null;
 
     return (
       <div className="space-y-0.5">
-        {children.map(menu => {
+        {nodes.map(menu => {
           const isSelected = activeId === menu.id;
           const isExpanded = searchTerm ? true : expandedRows[menu.id];
-          const hasChildren = menus.some(m => m.parentId === menu.id);
+          const hasChildren = menu.children && menu.children.length > 0;
 
           return (
             <div key={menu.id}>
@@ -89,7 +91,7 @@ export function MenuSidebar() {
                 )}
                 {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground/40 mr-2 shrink-0" />}
               </Link>
-              {isExpanded && renderBusinessTree(menu.id, level + 1)}
+              {isExpanded && renderBusinessTree(menu.children || [], level + 1)}
             </div>
           );
         })}
@@ -115,21 +117,33 @@ export function MenuSidebar() {
           <Search
             placeholder="Tìm tên, mã..."
             className="w-full"
-
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 scrollbar-thin bg-muted/5">
-        {isLoadingMenus ? (
-          <div className="flex justify-center items-center py-6 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-            <span className="text-xs">Đang tải cấu trúc Menu...</span>
+      {isLoadingMenus ? (
+        <div className="flex justify-center p-4">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <ScrollArea className="flex-1 min-h-0 bg-background">
+          <div className="p-3">
+            {tree.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center text-sm text-muted-foreground gap-3">
+                <div className="p-3 rounded-full bg-muted/50 border border-dashed">
+                  <LayoutList className="h-6 w-6 text-muted-foreground/40" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Chưa có menu</p>
+                  <p className="text-xs mt-1">Bấm nút + để tạo mới</p>
+                </div>
+              </div>
+            ) : (
+              renderBusinessTree(tree, 0)
+            )}
           </div>
-        ) : (
-          renderBusinessTree(null)
-        )}
-      </div>
+        </ScrollArea>
+      )}
     </Card>
   );
 }

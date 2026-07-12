@@ -1,53 +1,23 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { MenuItem } from "../types";
 
-export function useSidebarLogic(menus: MenuItem[]) {
+export function useSidebarLogic(treeNodes: MenuItem[]) {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    if (menus.length > 0 && Object.keys(expandedRows).length === 0) {
+    if (treeNodes.length > 0 && Object.keys(expandedRows).length === 0) {
       const initialExpanded: Record<number, boolean> = {};
-      menus.filter(m => !m.parentId).forEach(m => { initialExpanded[m.id] = true; });
+      treeNodes.forEach(m => { initialExpanded[m.id] = true; });
       setExpandedRows(initialExpanded);
     }
-  }, [menus]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const visibleIds = useMemo(() => {
-    if (!searchTerm) return null;
-    const ids = new Set<number>();
-    const term = searchTerm.toLowerCase();
-
-    const addChildren = (parentId: number) => {
-      menus.filter(m => m.parentId === parentId).forEach(child => {
-        if (!ids.has(child.id)) {
-          ids.add(child.id);
-          addChildren(child.id);
-        }
-      });
-    };
-
-    menus.forEach(menu => {
-      if (menu.name.toLowerCase().includes(term) || menu.code.toLowerCase().includes(term)) {
-        ids.add(menu.id);
-
-        let current: MenuItem | undefined = menus.find(m => m.id === menu.parentId);
-        while (current) {
-          ids.add(current.id);
-          current = menus.find(m => m.id === current?.parentId);
-        }
-
-        addChildren(menu.id);
-      }
-    });
-    return ids;
-  }, [searchTerm, menus]);
+  }, [treeNodes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleExpand = (id: number) => {
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  return { searchTerm, expandedRows, visibleIds, toggleExpand };
+  return { searchTerm, expandedRows, toggleExpand };
 }

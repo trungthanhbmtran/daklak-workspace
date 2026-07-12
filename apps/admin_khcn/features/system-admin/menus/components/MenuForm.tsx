@@ -31,10 +31,16 @@ import { Separator } from "@/components/ui/separator";
 
 import { MenuItem, PbacResource } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";
-import { renderIcon } from "../utils";
-import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
-import { useMenuApi } from "../hooks/useMenuApi";
+import {
+  renderIcon,
+  calculateAutoSort,
+  groupResourcesByServiceCode,
+  generateDefaultMenuValues
+} from "../utils";
+import { useMenuFlatListQuery, usePbacResourcesQuery } from "../hooks/useMenuQueries";
+import { useMenuSaveMutation, useMenuDeleteMutation } from "../hooks/useMenuMutations";
 import { useFormLogic } from "../hooks/useFormLogic";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 interface MenuFormProps {
   menuId?: number; // Truyền id từ route /menus/[id] để sửa. Nếu không có => tạo mới
@@ -45,9 +51,12 @@ export function MenuForm({ menuId }: MenuFormProps) {
   const searchParams = useSearchParams();
   const isCreate = !menuId;
   const urlParentId = searchParams.get('parentId');
-  
+
   // Chỉ fetch resources khi ở form (tạo hoặc sửa)
-  const { menus, resources, isLoadingResources, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(true);
+  const { data: menus = [] } = useMenuFlatListQuery();
+  const { data: resources = [], isLoading: isLoadingResources } = usePbacResourcesQuery(true);
+  const { mutateAsync: saveMenu, isPending: isSaving } = useMenuSaveMutation();
+  const { mutateAsync: deleteMenu, isPending: isDeleting } = useMenuDeleteMutation();
   const { getParentPathPrefix } = useFormLogic(menus);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -63,59 +72,25 @@ export function MenuForm({ menuId }: MenuFormProps) {
   // Tính số thứ tự tự động: số con hiện có + 1
   const autoSort = useMemo(() => {
     if (!isCreate) return null;
-    const siblingCount = menus.filter((m: MenuItem) =>
-      isRootMenu ? !m.parentId : m.parentId === (parentId ?? null)
-    ).length;
-    return siblingCount + 1;
+    return calculateAutoSort(menus, isRootMenu, parentId ?? null);
   }, [menus, isCreate, isRootMenu, parentId]);
 
   const parentPathPrefix = getParentPathPrefix(parentMenu?.id ?? parentId ?? null);
 
   // Nhóm resources theo serviceCode để hiển thị grouped dropdown
   const groupedResources = useMemo(() => {
-    const groups: Record<string, PbacResource[]> = {};
-    for (const r of (resources as PbacResource[])) {
-      const key = r.serviceCode || "Khác";
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(r);
-    }
-    return groups;
+    return groupResourcesByServiceCode(resources as PbacResource[]);
   }, [resources]);
 
   const defaultValues = useMemo(() => {
-    let initialSuffix = "";
-    if (!isCreate && selectedMenu?.path) {
-      initialSuffix = selectedMenu.path.startsWith(parentPathPrefix)
-        ? selectedMenu.path.substring(parentPathPrefix.length)
-        : selectedMenu.path;
-    }
-
-    return isCreate
-      ? {
-        name: "",
-        code: "",
-        path: "",
-        icon: isRootMenu ? "LayoutDashboard" : "FileText",
-        description: "",
-        iconColor: "",
-        sort: autoSort ?? 1,
-        active: 1,
-        linkedResourceCode: null,
-        type: "MENU",
-      }
-      : {
-        name: selectedMenu?.name ?? "",
-        code: selectedMenu?.code ?? "",
-        path: initialSuffix,
-        icon: selectedMenu?.icon ?? "Circle",
-        description: selectedMenu?.description ?? "",
-        iconColor: selectedMenu?.iconColor ?? "",
-        sort: selectedMenu?.sort ?? 1,
-        active: selectedMenu?.active ?? 1,
-        linkedResourceCode: selectedMenu?.linkedResourceCode ?? null,
-        type: selectedMenu?.type ?? "MENU",
-      };
-  }, [selectedMenu, isCreate, parentPathPrefix, isRootMenu, autoSort]);
+    return generateDefaultMenuValues({
+      isCreate,
+      selectedMenu,
+      parentPathPrefix,
+      isRootMenu,
+      autoSort: autoSort ?? 1,
+    });
+  }, [isCreate, selectedMenu, parentPathPrefix, isRootMenu, autoSort]);
 
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(menuFormSchema) as unknown as Resolver<MenuFormValues>,
@@ -225,9 +200,9 @@ export function MenuForm({ menuId }: MenuFormProps) {
                 <FormField control={form.control} name="type" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Loại Menu</FormLabel>
-                    <select 
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" 
-                      value={field.value ?? "MENU"} 
+                    <select
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      value={field.value ?? "MENU"}
                       onChange={(e) => field.onChange(e.target.value)}
                     >
                       <option value="MENU">Menu (Link)</option>
@@ -246,9 +221,9 @@ export function MenuForm({ menuId }: MenuFormProps) {
                 <FormField control={form.control} name="active" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
-                    <select 
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" 
-                      onChange={(v) => field.onChange(parseInt(v.target.value))} 
+                    <select
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      onChange={(v) => field.onChange(parseInt(v.target.value))}
                       value={field.value?.toString()}
                     >
                       <option value="1" className="text-primary">Hiển thị</option>
@@ -435,6 +410,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
           {isSaving ? "Đang lưu..." : "Lưu cấu hình"}
         </Button>
       </div>
+
 
       <ConfirmDeleteModal
         isOpen={isDeleteDialogOpen}

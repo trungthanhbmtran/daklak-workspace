@@ -4,10 +4,8 @@ import { MenuItem } from "../types";
 import { renderIcon } from "../utils";
 
 interface MenuTreeProps {
-  menus: MenuItem[];
-  parentId: number | null;
+  nodes: MenuItem[];
   level: number;
-  visibleIds: Set<number> | null;
   expandedRows: Record<number, boolean>;
   searchTerm: string;
   selectedMenuId?: number;
@@ -16,19 +14,14 @@ interface MenuTreeProps {
   onToggleExpand: (id: number) => void;
 }
 
-export function MenuTree({ menus, parentId, level, visibleIds, expandedRows, searchTerm, selectedMenuId, onSelect, onAddChild, onToggleExpand }: MenuTreeProps) {
-  const children = menus
-    .filter(m => m.parentId === parentId)
-    .filter(m => !visibleIds || visibleIds.has(m.id))
-    .sort((a, b) => a.sort - b.sort);
-
-  if (children.length === 0) return null;
+export function MenuTree({ nodes, level, expandedRows, searchTerm, selectedMenuId, onSelect, onAddChild, onToggleExpand }: MenuTreeProps) {
+  if (!nodes || nodes.length === 0) return null;
 
   return (
     <div className="space-y-1" style={{ paddingLeft: level === 0 ? 0 : 20 }}>
-      {children.map((menu) => {
+      {nodes.map((menu) => {
         const isExpanded = searchTerm ? true : expandedRows[menu.id];
-        const hasChildren = menus.some(m => m.parentId === menu.id);
+        const hasChildren = menu.children && menu.children.length > 0;
         const isSelected = selectedMenuId === menu.id;
 
         return (
@@ -62,8 +55,8 @@ export function MenuTree({ menus, parentId, level, visibleIds, expandedRows, sea
 
             {isExpanded && hasChildren && (
               <MenuTree 
-                menus={menus} parentId={menu.id} level={level + 1}
-                visibleIds={visibleIds} expandedRows={expandedRows}
+                nodes={menu.children || []} level={level + 1}
+                expandedRows={expandedRows}
                 searchTerm={searchTerm} selectedMenuId={selectedMenuId}
                 onSelect={onSelect} onAddChild={onAddChild} onToggleExpand={onToggleExpand}
               />

@@ -43,7 +43,6 @@ function UnitRow({
   isExpanded,
   hasChildren,
   expandedIds,
-  flatUnits,
   activeId,
   onSelect,
   onToggleExpand,
@@ -55,7 +54,6 @@ function UnitRow({
   isExpanded: boolean;
   hasChildren: boolean;
   expandedIds: Set<number>;
-  flatUnits: OrganizationUnitNode[];
   activeId?: number;
   onSelect: (id: number) => void;
   onToggleExpand: (id: number) => void;
@@ -170,13 +168,11 @@ function UnitRow({
           {isSelected && <span className="h-2 w-2 rounded-full bg-primary mt-1 shadow-sm" />}
         </div>
       </div>
-      {isExpanded && (
+      {isExpanded && hasChildren && (
         <div className="mt-1">
           <UnitTree
-            parentKey={unit.id}
+            nodes={unit.children ?? []}
             level={level + 1}
-            flatUnits={flatUnits}
-            filtered={flatUnits}
             expandedIds={expandedIds}
             activeId={activeId}
             onSelect={onSelect}
@@ -190,33 +186,23 @@ function UnitRow({
 }
 
 function UnitTree({
-  parentKey,
+  nodes,
   level,
-  flatUnits,
-  filtered,
   expandedIds,
   activeId,
   onSelect,
   onToggleExpand,
   onAddChild,
 }: {
-  parentKey: number | null;
+  nodes: OrganizationUnitNode[];
   level: number;
-  flatUnits: OrganizationUnitNode[];
-  filtered: OrganizationUnitNode[];
   expandedIds: Set<number>;
   activeId?: number;
   onSelect: (id: number) => void;
   onToggleExpand: (id: number) => void;
   onAddChild: (id: number) => void;
 }) {
-  const children = filtered
-    .filter((u) =>
-      parentKey === null ? (u.parentId == null || u.parentId === 0) : u.parentId === parentKey
-    )
-    .sort((a, b) => (a.hierarchyPath ?? "").localeCompare(b.hierarchyPath ?? ""));
-
-  if (children.length === 0) return null;
+  if (nodes.length === 0) return null;
 
   return (
     <ul className="space-y-1 list-none relative">
@@ -226,10 +212,10 @@ function UnitTree({
           style={{ marginLeft: `${10 + (level - 1) * 20}px` }}
         />
       )}
-      {children.map((unit) => {
+      {nodes.map((unit) => {
         const isSelected = activeId === unit.id;
         const isExpanded = expandedIds.has(unit.id);
-        const hasChildren = flatUnits.some((u) => u.parentId === unit.id);
+        const hasChildren = unit.children && unit.children.length > 0;
         return (
           <UnitRow
             key={unit.id}
@@ -237,9 +223,8 @@ function UnitTree({
             level={level}
             isSelected={isSelected}
             isExpanded={isExpanded}
-            hasChildren={hasChildren}
+            hasChildren={Boolean(hasChildren)}
             expandedIds={expandedIds}
-            flatUnits={flatUnits}
             activeId={activeId}
             onSelect={onSelect}
             onToggleExpand={onToggleExpand}
@@ -253,7 +238,7 @@ function UnitTree({
 
 export function OrganizationSidebar() {
   const { state, actions } = useOrganizationContext();
-  const { flatUnits } = state;
+  const { flatUnits, tree } = state;
   const searchParams = useSearchParams();
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -276,17 +261,8 @@ export function OrganizationSidebar() {
     });
   };
 
-  const visibleIds = searchTerm.trim()
-    ? new Set(
-      flatUnits.filter(
-        (u) =>
-          u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          u.code.toLowerCase().includes(searchTerm.toLowerCase())
-      ).map((u) => u.id)
-    )
-    : null;
-
-  const filtered = visibleIds ? flatUnits.filter((u) => visibleIds.has(u.id)) : flatUnits;
+  // Tự động expand tất cả khi có searchTerm
+  const effectiveExpandedIds = searchTerm.trim() ? new Set(flatUnits.map(u => u.id)) : expandedIds;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -361,7 +337,7 @@ export function OrganizationSidebar() {
                 <p className="text-xs mt-1">Nhấn &quot;Thêm gốc&quot; để tạo đơn vị đầu tiên.</p>
               </div>
             </div>
-          ) : searchTerm.trim() && filtered.length === 0 ? (
+          ) : searchTerm.trim() && tree.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
               <SearchIcon className="h-6 w-6 text-muted-foreground/30" />
               <p>Không tìm thấy kết quả phù hợp.</p>
@@ -370,11 +346,9 @@ export function OrganizationSidebar() {
             <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
               <RootDropZone />
               <UnitTree
-                parentKey={null}
+                nodes={tree}
                 level={0}
-                flatUnits={flatUnits}
-                filtered={filtered}
-                expandedIds={expandedIds}
+                expandedIds={effectiveExpandedIds}
                 activeId={activeId}
                 onSelect={handleSelect}
                 onToggleExpand={toggleExpand}

@@ -27,7 +27,8 @@ export interface MenuNode {
 }
 
 export const menuApi = {
-  getMenus: () => apiClient.get<MenuItem[]>("/menus"),
+  getMenus: (q?: string) => apiClient.get<MenuItem[]>("/menus", { params: { q: q || undefined } }),
+  getMenuTree: (q?: string) => apiClient.get<{ items: MenuItem[] }>("/menus/tree", { params: { q: q || undefined } }).then((r: any) => r.data?.items ?? []),
   /** Menu sidebar theo user đăng nhập (cây, chỉ mục user có quyền) */
   getMyMenus: (app = "ADMIN_PORTAL") =>
     apiClient.get<{ items: MenuNode[] }>("/menus/me", { params: { app } }),

@@ -5,6 +5,7 @@
 export const organizationQueryKeys = {
   all: ["organization"] as const,
   tree: () => [...organizationQueryKeys.all, "tree"] as const,
+  lists: () => [...organizationQueryKeys.all, "lists"] as const,
   unit: (id: number) => [...organizationQueryKeys.all, "unit", id] as const,
   staffingReport: (unitId: number) => [...organizationQueryKeys.all, "staffing-report", unitId] as const,
   jobTitles: (unitId?: number) => [...organizationQueryKeys.all, "job-titles", unitId] as const,
