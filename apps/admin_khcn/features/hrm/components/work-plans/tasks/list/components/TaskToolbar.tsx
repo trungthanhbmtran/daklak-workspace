@@ -4,10 +4,12 @@ import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { SlidersHorizontal, Search, Plus, X } from 'lucide-react';
+import { SlidersHorizontal, Search, Plus, X, List, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 import { TaskRoleFilter, TASK_ROLE_META } from '@/components/shared/badges/TaskBadges';
+
+export type TaskViewMode = 'LIST' | 'BOARD';
 
 interface TaskToolbarProps {
   roleFilter: TaskRoleFilter;
@@ -18,6 +20,8 @@ interface TaskToolbarProps {
   onStatusChange: (v: string) => void;
   onPriorityChange: (v: string) => void;
   onSearchChange: (v: string) => void;
+  viewMode: TaskViewMode;
+  onViewModeChange: (mode: TaskViewMode) => void;
   onCreateTask?: () => void;
 }
 
@@ -35,6 +39,8 @@ export const TaskToolbar = memo(function TaskToolbar({
   onStatusChange,
   onPriorityChange,
   onSearchChange,
+  viewMode,
+  onViewModeChange,
   onCreateTask,
 }: TaskToolbarProps) {
   const { data: statusRes }: any = useGetCategoryByGroup('TASK_STATUS');
@@ -157,6 +163,32 @@ export const TaskToolbar = memo(function TaskToolbar({
             );
           },
         )}
+
+        <div className="flex-1 min-w-0" />
+        
+        {/* View Toggle */}
+        <div className="flex items-center p-0.5 bg-muted rounded-lg shrink-0">
+          <button
+            onClick={() => onViewModeChange('LIST')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-colors",
+              viewMode === 'LIST' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <List className="w-3.5 h-3.5" />
+            Danh sách
+          </button>
+          <button
+            onClick={() => onViewModeChange('BOARD')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-colors",
+              viewMode === 'BOARD' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            Bảng
+          </button>
+        </div>
       </div>
     </div>
   );

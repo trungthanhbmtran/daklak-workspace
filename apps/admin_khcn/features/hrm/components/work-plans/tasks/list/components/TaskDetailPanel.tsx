@@ -8,7 +8,6 @@ import {
   MessageSquare,
   AlertCircle,
   History,
-  GitBranch,
   Target,
   X
 } from 'lucide-react';
@@ -18,7 +17,6 @@ import { WorkflowTimeline } from '@/features/workflow/components/WorkflowTimelin
 import { WorkflowStatusBadge } from '@/components/workflow/shared/WorkflowStatusBadge';
 import { TaskChatContainer } from './TaskChatContainer';
 import { TaskActionPanel } from './TaskActionPanel';
-import { TaskDelegationTree } from './TaskDelegationTree';
 import { TaskHistoryList } from './TaskHistoryList';
 import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
@@ -74,7 +72,7 @@ export function TaskDetailPanel({
   context = 'MY_EXECUTION',
 }: TaskDetailPanelProps) {
   const [activeTask, setActiveTask] = React.useState(task);
-  const [leftTab, setLeftTab] = useState<'CHAT' | 'HISTORY' | 'TREE'>(initialTab);
+  const [leftTab, setLeftTab] = useState<'CHAT' | 'HISTORY'>(initialTab);
 
   const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
   const [isAiBreakdownModalOpen, setIsAiBreakdownModalOpen] = useState(false);
@@ -224,10 +222,6 @@ export function TaskDetailPanel({
                 <History className="w-3.5 h-3.5" />
                 Lịch sử
               </TabsTrigger>
-              <TabsTrigger value="TREE" className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:bg-transparent px-4 py-2.5 text-[12px] font-bold gap-1.5 shrink-0">
-                <GitBranch className="w-3.5 h-3.5" />
-                Cây con
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="CHAT" className="flex-1 min-h-0 mt-0 flex flex-col data-[state=inactive]:hidden">
@@ -237,14 +231,6 @@ export function TaskDetailPanel({
             <TabsContent value="HISTORY" className="flex-1 min-h-0 mt-0 overflow-y-auto px-5 py-3 data-[state=inactive]:hidden">
               <WorkflowTimeline instanceId={activeTask.workflowInstId} />
               <TaskHistoryList taskId={activeTask.id} />
-            </TabsContent>
-
-            <TabsContent value="TREE" className="flex-1 min-h-0 mt-0 overflow-y-auto data-[state=inactive]:hidden">
-              <TaskDelegationTree
-                rootTaskId={task?.rootTaskId || task?.id}
-                activeTaskId={activeTask?.id}
-                onSelectTask={handleSelectSubTask}
-              />
             </TabsContent>
           </Tabs>
         </div>

@@ -10,8 +10,11 @@ import { hrmKeys } from '@/features/hrm/keys';
 import { TaskToolbar } from './components/TaskToolbar';
 import { TaskRoleFilter } from '@/components/shared/badges/TaskBadges';
 import { GlobalTaskTree } from './components/GlobalTaskTree';
+import { TaskKanbanBoard } from './components/TaskKanbanBoard';
 import { TaskStatsBar } from './components/TaskStatsBar';
 import { TaskDetailPanel } from './components/TaskDetailPanel';
+import { TaskViewMode } from './components/TaskToolbar';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
   Pagination,
   PaginationContent,
@@ -44,6 +47,7 @@ export const TaskListClient = () => {
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState(defaultSearch);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<TaskViewMode>('LIST');
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
 
@@ -101,21 +105,55 @@ export const TaskListClient = () => {
     return () => clearInterval(interval);
   }, [qc]);
 
-  // ── Keyboard: N = New task ────────────────────────────────────────────────
+  // ── Keyboard Navigation ───────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (
-        e.key === 'n' &&
-        !e.ctrlKey &&
-        !e.metaKey &&
-        !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)
-      ) {
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+
+      // Esc đóng detail
+      if (e.key === 'Escape') {
+        setSelectedTask(null);
+        return;
+      }
+
+      // N = New task (nếu ko đang gõ input)
+      if (e.key === 'n' && !e.ctrlKey && !e.metaKey && !isInput) {
         setIsCreateModalOpen(true);
+        return;
+      }
+
+      if (isInput) return;
+
+      // Mũi tên để di chuyển (khi đang ko gõ input)
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const rootTasks = tasksResponse?.data || [];
+        if (!rootTasks.length) return;
+        
+        e.preventDefault(); // Ngăn cuộn trang
+        const currentIndex = selectedTask ? rootTasks.findIndex((t: any) => t.id === selectedTask.id) : -1;
+        let nextIndex = 0;
+        
+        if (e.key === 'ArrowDown') {
+          nextIndex = currentIndex < rootTasks.length - 1 ? currentIndex + 1 : 0;
+        } else {
+          nextIndex = currentIndex > 0 ? currentIndex - 1 : rootTasks.length - 1;
+        }
+        
+        setSelectedTask(rootTasks[nextIndex]);
+        setInitialDetailTab('CHAT');
+      }
+
+      // Enter để focus khung chat (nếu có task)
+      if (e.key === 'Enter' && selectedTask) {
+        e.preventDefault();
+        const chatInput = document.getElementById('task-chat-input');
+        if (chatInput) chatInput.focus();
       }
     };
+    
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [selectedTask, tasksResponse?.data]);
 
   const allTasks = tasksResponse?.data || [];
   const meta = tasksResponse?.meta || {};
@@ -157,11 +195,12 @@ export const TaskListClient = () => {
         </div>
       )}
 
-      {/* ══ MASTER VIEW (CỘT TRÁI) ══ */}
-      <div className={cn(
-        "flex flex-col h-full bg-background border border-border rounded-xl shadow-sm overflow-hidden shrink-0 transition-all duration-300",
-        selectedTask ? "hidden xl:flex w-[380px]" : "w-full"
-      )}>
+      {/* ══ MÀN HÌNH CHÍNH ══ */}
+      {viewMode === 'LIST' ? (
+        <div className={cn(
+          "flex flex-col h-full bg-background border border-border rounded-xl shadow-sm overflow-hidden shrink-0 transition-all duration-300",
+          selectedTask ? "hidden xl:flex w-[380px]" : "w-full"
+        )}>
         {/* Toolbar & Stats */}
         <div className="p-3 border-b border-border bg-card space-y-3 shrink-0">
           <TaskToolbar
@@ -173,6 +212,8 @@ export const TaskListClient = () => {
             onStatusChange={(v) => { setStatusFilter(v); setPage(1); }}
             onPriorityChange={(v) => { setPriorityFilter(v); setPage(1); }}
             onSearchChange={(v) => { setSearchQuery(v); setPage(1); }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
             onCreateTask={() => setIsCreateModalOpen(true)}
           />
           <div className="flex items-center justify-between gap-3">
@@ -222,9 +263,40 @@ export const TaskListClient = () => {
           </div>
         )}
       </div>
+      ) : (
+        <div className="flex flex-col w-full h-full gap-3 overflow-hidden">
+          <div className="bg-card border border-border rounded-xl p-3 shrink-0 shadow-sm space-y-3">
+            <TaskToolbar
+              roleFilter={roleFilter}
+              statusFilter={statusFilter}
+              priorityFilter={priorityFilter}
+              searchQuery={searchQuery}
+              onRoleChange={handleRoleChange}
+              onStatusChange={(v) => { setStatusFilter(v); setPage(1); }}
+              onPriorityChange={(v) => { setPriorityFilter(v); setPage(1); }}
+              onSearchChange={(v) => { setSearchQuery(v); setPage(1); }}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onCreateTask={() => setIsCreateModalOpen(true)}
+            />
+            <TaskStatsBar
+              stats={statsResponse?.data || { overdue: 0, warning: 0, inTime: 0, doneInTime: 0, doneOverdue: 0 }}
+              activeFilter={activeFilter}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+          
+          <TaskKanbanBoard 
+            tasks={allTasks}
+            isLoading={isLoading}
+            onSelectTask={handleSelectTask}
+            onSmartAssign={handleSmartAssign}
+          />
+        </div>
+      )}
 
-      {/* ══ DETAIL VIEW (CỘT PHẢI) ══ */}
-      {selectedTask ? (
+      {/* ══ DETAIL VIEW (CỘT PHẢI CHO CHẾ ĐỘ LIST) ══ */}
+      {viewMode === 'LIST' && selectedTask ? (
         <div className="flex-1 min-w-0 h-full animate-in slide-in-from-right-4 fade-in duration-200">
           <TaskDetailPanel
             task={selectedTask}
@@ -242,6 +314,22 @@ export const TaskListClient = () => {
             <p className="text-sm font-semibold">Chọn một công việc để xem chi tiết</p>
           </div>
         </div>
+      )}
+
+      {/* ══ MODAL DETAIL CHO CHẾ ĐỘ BOARD ══ */}
+      {viewMode === 'BOARD' && selectedTask && (
+        <Dialog open={!!selectedTask} onOpenChange={(open) => !open && handleCloseDetail()}>
+          <DialogContent className="w-[95vw] max-w-[1200px] h-[90vh] p-0 overflow-hidden rounded-2xl">
+            <TaskDetailPanel
+              task={selectedTask}
+              initialTab={initialDetailTab}
+              context={dialogContext}
+              onClose={handleCloseDetail}
+              onSmartAssign={handleSmartAssign}
+              onSelectTask={handleSelectTask}
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* ── Modals ── */}
