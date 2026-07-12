@@ -207,7 +207,6 @@ export const TaskChatContainer = React.memo(({
       <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800">
         <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-2 border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-indigo-400/50 transition-all">
           <MentionInput
-            id="task-chat-input"
             disabled={isTaskClosed || isSendingMessage}
             value={chatMessage}
             onChange={(e: any) => setChatMessage(e.target.value)}
