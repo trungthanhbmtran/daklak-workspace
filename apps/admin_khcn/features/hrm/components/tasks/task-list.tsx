@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MOCK_TASKS } from "./mock-data";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
-import { Eye, Clock } from "lucide-react";
+import { Eye, Clock, ChevronRight, ChevronDown, CornerDownRight } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
+import { Progress } from "@/components/ui/progress";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -40,12 +41,80 @@ export function TaskList() {
   const [search, setSearch] = useState("");
   const [selectedTask, setSelectedTask] = useState<HrmTask | null>(null);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
+  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (taskId: string) => {
+    setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
+  };
 
   const filteredTasks = tasks.filter(task => {
     const matchStatus = statusFilter === "ALL" || task.status === statusFilter;
     const matchSearch = task.title.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  const renderTaskRow = (task: HrmTask, depth: number) => {
+    const isOverdue = new Date(task.dueDate) < new Date() && task.status !== "COMPLETED";
+    const hasSubTasks = task.subTasks && task.subTasks.length > 0;
+    const isExpanded = expandedTasks[task.id];
+
+    return (
+      <React.Fragment key={task.id}>
+        <TableRow className="hover:bg-slate-50 transition-colors">
+          <TableCell className="font-medium" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
+            <div className="flex items-start gap-2">
+              {hasSubTasks ? (
+                <button onClick={() => toggleExpand(task.id)} className="mt-1 text-slate-500 hover:text-slate-800">
+                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </button>
+              ) : (
+                depth > 0 ? <CornerDownRight className="w-4 h-4 mt-1 text-slate-300" /> : <div className="w-4 h-4 mt-1" />
+              )}
+              <div className="flex flex-col">
+                <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : ""}`}>{task.title}</span>
+                {task.sourceDocumentRef && depth === 0 && (
+                  <span className="text-xs text-blue-600 mt-1 flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
+                    VB: {task.sourceDocumentRef}
+                  </span>
+                )}
+              </div>
+            </div>
+          </TableCell>
+          <TableCell>{getStatusBadge(task.status)}</TableCell>
+          <TableCell>{getPriorityBadge(task.priority)}</TableCell>
+          <TableCell>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">
+                {task.assigneeDepartment ? `🏢 ${task.assigneeDepartment.name}` : task.assignee?.fullName || "Chưa xác định"}
+              </span>
+            </div>
+          </TableCell>
+          <TableCell>
+            <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
+              {format(new Date(task.dueDate), "dd/MM/yyyy")}
+            </div>
+          </TableCell>
+          <TableCell>
+            <div className="flex flex-col gap-1 w-24">
+              <span className="text-xs font-semibold text-slate-600">{task.progress}%</span>
+              <Progress value={task.progress} className="h-2" />
+            </div>
+          </TableCell>
+          <TableCell className="text-right">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)}>
+              <Eye className="w-4 h-4 mr-2" />
+              Chi tiết
+            </Button>
+          </TableCell>
+        </TableRow>
+        
+        {isExpanded && hasSubTasks && (
+          task.subTasks!.map(subTask => renderTaskRow(subTask, depth + 1))
+        )}
+      </React.Fragment>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -82,55 +151,19 @@ export function TaskList() {
               <TableHead>Mức độ</TableHead>
               <TableHead>Người xử lý</TableHead>
               <TableHead>Thời hạn</TableHead>
+              <TableHead>Tiến độ</TableHead>
               <TableHead className="text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredTasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                   Không tìm thấy công việc nào
                 </TableCell>
               </TableRow>
             ) : (
-              filteredTasks.map((task) => {
-                const isOverdue = new Date(task.dueDate) < new Date() && task.status !== "COMPLETED";
-                return (
-                  <TableRow key={task.id} className="hover:bg-slate-50 transition-colors">
-                    <TableCell className="font-medium">
-                      <div className="flex flex-col">
-                        <span className="line-clamp-2">{task.title}</span>
-                        {task.sourceDocumentRef && (
-                          <span className="text-xs text-blue-600 mt-1 flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            VB: {task.sourceDocumentRef}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(task.status)}</TableCell>
-                    <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {task.assigneeDepartment ? `🏢 ${task.assigneeDepartment.name}` : task.assignee?.fullName || "Chưa xác định"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
-                        {format(new Date(task.dueDate), "dd/MM/yyyy")}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        Chi tiết
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
+              filteredTasks.map((task) => renderTaskRow(task, 0))
             )}
           </TableBody>
         </Table>
