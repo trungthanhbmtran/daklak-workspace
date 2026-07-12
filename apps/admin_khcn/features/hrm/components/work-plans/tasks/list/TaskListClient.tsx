@@ -11,6 +11,7 @@ import { TaskToolbar } from './components/TaskToolbar';
 import { TaskRoleFilter } from '@/components/shared/badges/TaskBadges';
 import { GlobalTaskTree } from './components/GlobalTaskTree';
 import { TaskStatsBar } from './components/TaskStatsBar';
+import { TaskDetailPanel } from './components/TaskDetailPanel';
 import {
   Pagination,
   PaginationContent,
@@ -20,12 +21,10 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, LayoutTemplate } from 'lucide-react';
 import { useDebounce } from './hooks/useDebounce';
+import { cn } from '@/lib/utils';
 
-const TaskDetailDialog = lazy(() =>
-  import('./components/TaskDetailDialog').then((m) => ({ default: m.TaskDetailDialog })),
-);
 const SmartAssignDrawer = lazy(() =>
   import('../assign/SmartAssignDrawer').then((m) => ({ default: m.SmartAssignDrawer })),
 );
@@ -91,17 +90,16 @@ export const TaskListClient = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlTaskId]);
 
-  // ── Auto-refresh 30s (bỏ qua khi đang mở dialog) ────────────────────────
+  // ── Auto-refresh 30s ────────────────────────
   useEffect(() => {
     const interval = setInterval(() => {
-      if (selectedTask) return;
       setIsRefreshing(true);
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       setLastRefresh(new Date());
       setTimeout(() => setIsRefreshing(false), 1000);
     }, 30000);
     return () => clearInterval(interval);
-  }, [qc, selectedTask]);
+  }, [qc]);
 
   // ── Keyboard: N = New task ────────────────────────────────────────────────
   useEffect(() => {
@@ -129,11 +127,6 @@ export const TaskListClient = () => {
     setInitialDetailTab('CHAT');
   }, []);
 
-  const handleSelectTaskHistory = useCallback((task: any) => {
-    setSelectedTask(task);
-    setInitialDetailTab('HISTORY');
-  }, []);
-
   const handleSmartAssign = useCallback((task: any) => setTaskToAssign(task), []);
   const handleCloseDetail = useCallback(() => setSelectedTask(null), []);
   const handleFilterChange = useCallback((id: string | null) => setActiveFilter(id), []);
@@ -143,6 +136,7 @@ export const TaskListClient = () => {
     setActiveFilter(null);
     setStatusFilter('ALL');
     setPage(1);
+    setSelectedTask(null); // Clear selected task on filter change
   }, []);
 
   // Xác định context theo role
@@ -153,93 +147,100 @@ export const TaskListClient = () => {
         : 'MY_EXECUTION';
 
   return (
-    <div className="space-y-3 animate-in fade-in duration-300 font-sans">
+    <div className="h-[calc(100vh-130px)] flex flex-col md:flex-row gap-4 animate-in fade-in duration-300 font-sans">
 
       {/* ── Fetching indicator ── */}
       {(isFetching && !isLoading || isRefreshing) && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-background shadow-md rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground border border-border">
+        <div className="fixed bottom-4 left-4 z-50 flex items-center gap-2 bg-background shadow-md rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground border border-border">
           <RefreshCw className="w-3 h-3 animate-spin text-indigo-500" />
-          Đang cập nhật...
+          Đang làm mới...
         </div>
       )}
 
-      {/* ── Toolbar ── */}
-      <TaskToolbar
-        roleFilter={roleFilter}
-        statusFilter={statusFilter}
-        priorityFilter={priorityFilter}
-        searchQuery={searchQuery}
-        onRoleChange={handleRoleChange}
-        onStatusChange={(v) => { setStatusFilter(v); setPage(1); }}
-        onPriorityChange={(v) => { setPriorityFilter(v); setPage(1); }}
-        onSearchChange={(v) => { setSearchQuery(v); setPage(1); }}
-        onCreateTask={() => setIsCreateModalOpen(true)}
-      />
+      {/* ══ MASTER VIEW (CỘT TRÁI) ══ */}
+      <div className={cn(
+        "flex flex-col h-full bg-background border border-border rounded-xl shadow-sm overflow-hidden shrink-0 transition-all duration-300",
+        selectedTask ? "hidden xl:flex w-[380px]" : "w-full"
+      )}>
+        {/* Toolbar & Stats */}
+        <div className="p-3 border-b border-border bg-card space-y-3 shrink-0">
+          <TaskToolbar
+            roleFilter={roleFilter}
+            statusFilter={statusFilter}
+            priorityFilter={priorityFilter}
+            searchQuery={searchQuery}
+            onRoleChange={handleRoleChange}
+            onStatusChange={(v) => { setStatusFilter(v); setPage(1); }}
+            onPriorityChange={(v) => { setPriorityFilter(v); setPage(1); }}
+            onSearchChange={(v) => { setSearchQuery(v); setPage(1); }}
+            onCreateTask={() => setIsCreateModalOpen(true)}
+          />
+          <div className="flex items-center justify-between gap-3">
+            <TaskStatsBar
+              stats={statsResponse?.data || { overdue: 0, warning: 0, inTime: 0, doneInTime: 0, doneOverdue: 0 }}
+              activeFilter={activeFilter}
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+        </div>
 
-      {/* ── Stats strip ── */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <TaskStatsBar
-          stats={statsResponse?.data || { overdue: 0, warning: 0, inTime: 0, doneInTime: 0, doneOverdue: 0 }}
-          activeFilter={activeFilter}
-          onFilterChange={handleFilterChange}
-        />
-        <span className="text-[10px] text-muted-foreground shrink-0">
-          Cập nhật: {lastRefresh.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-        </span>
+        {/* Task List (Tree) */}
+        <div className="flex-1 min-h-0 bg-background">
+          <GlobalTaskTree
+            tasks={allTasks}
+            isLoading={isLoading}
+            activeTaskId={selectedTask?.id}
+            onSelectTask={handleSelectTask}
+          />
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="py-2 border-t border-border bg-card shrink-0 flex justify-center">
+            <Pagination className="scale-90">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious onClick={() => setPage((p) => Math.max(1, p - 1))} className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                  if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
+                    return (
+                      <PaginationItem key={p}>
+                        <PaginationLink isActive={page === p} onClick={() => setPage(p)} className="cursor-pointer">{p}</PaginationLink>
+                      </PaginationItem>
+                    );
+                  } else if (p === page - 2 || p === page + 2) {
+                    return <PaginationItem key={p}><PaginationEllipsis /></PaginationItem>;
+                  }
+                  return null;
+                })}
+                <PaginationItem>
+                  <PaginationNext onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
-      {/* ── Task tree ── */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <GlobalTaskTree
-          tasks={allTasks}
-          isLoading={isLoading}
-          onSelectTask={handleSelectTask}
-          onSelectTaskHistory={handleSelectTaskHistory}
-          onSmartAssign={handleSmartAssign}
-        />
-      </div>
-
-      {/* ── Pagination ── */}
-      {totalPages > 1 && (
-        <div className="py-2 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
-                  return (
-                    <PaginationItem key={p}>
-                      <PaginationLink
-                        isActive={page === p}
-                        onClick={() => setPage(p)}
-                        className="cursor-pointer"
-                      >
-                        {p}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                } else if (p === page - 2 || p === page + 2) {
-                  return (
-                    <PaginationItem key={p}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  );
-                }
-                return null;
-              })}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+      {/* ══ DETAIL VIEW (CỘT PHẢI) ══ */}
+      {selectedTask ? (
+        <div className="flex-1 min-w-0 h-full animate-in slide-in-from-right-4 fade-in duration-200">
+          <TaskDetailPanel
+            task={selectedTask}
+            initialTab={initialDetailTab}
+            context={dialogContext}
+            onClose={handleCloseDetail}
+            onSmartAssign={handleSmartAssign}
+            onSelectTask={handleSelectTask}
+          />
+        </div>
+      ) : (
+        <div className="hidden xl:flex flex-1 min-w-0 h-full border border-border border-dashed rounded-xl items-center justify-center bg-muted/20">
+          <div className="flex flex-col items-center gap-3 text-muted-foreground opacity-60">
+            <LayoutTemplate className="w-16 h-16 stroke-1" />
+            <p className="text-sm font-semibold">Chọn một công việc để xem chi tiết</p>
+          </div>
         </div>
       )}
 
@@ -249,19 +250,6 @@ export const TaskListClient = () => {
           <CreateTaskModal
             isOpen={isCreateModalOpen}
             onClose={() => setIsCreateModalOpen(false)}
-          />
-        </Suspense>
-      )}
-
-      {selectedTask && (
-        <Suspense fallback={null}>
-          <TaskDetailDialog
-            task={selectedTask}
-            initialTab={initialDetailTab}
-            context={dialogContext}
-            onClose={handleCloseDetail}
-            onSmartAssign={handleSmartAssign}
-            onSelectTask={handleSelectTask}
           />
         </Suspense>
       )}
