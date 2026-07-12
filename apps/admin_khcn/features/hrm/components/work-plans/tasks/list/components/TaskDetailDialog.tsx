@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Calendar,
-  MessageSquare, Target, AlertCircle, History, ChevronRight,
+  MessageSquare,
+  AlertCircle,
+  History,
+  GitBranch,
+  Target,
 } from 'lucide-react';
 import { getDueDateDisplay } from '../utils';
 import { TaskStatusBadge, TaskPriorityBadge } from '@/components/shared/badges/TaskBadges';
@@ -19,19 +24,36 @@ import { useQueryClient } from '@tanstack/react-query';
 import { hrmKeys } from '@/features/hrm/keys';
 import { useTaskChat } from '../hooks/useTaskChat';
 
-function TaskChatBadge({ activeTaskId }: { activeTaskId: number | undefined }) {
-  const { taskComments } = useTaskChat(activeTaskId);
+// ─── Lazy modals ──────────────────────────────────────────────────────────────
+
+const SubTaskModal = lazy(() =>
+  import('../../subtask/SubTaskModal').then((m) => ({ default: m.SubTaskModal })),
+);
+const AiTaskBreakdownModal = lazy(() =>
+  import('../../subtask/AiTaskBreakdownModal').then((m) => ({ default: m.AiTaskBreakdownModal })),
+);
+const CoordinationModal = lazy(() =>
+  import('../../coordination/CoordinationModal').then((m) => ({ default: m.CoordinationModal })),
+);
+const AssignCoordinationModal = lazy(() =>
+  import('../../assign/AssignCoordinationModal').then((m) => ({
+    default: m.AssignCoordinationModal,
+  })),
+);
+
+// ─── Chat badge (số tin nhắn) ─────────────────────────────────────────────────
+
+function ChatCountBadge({ taskId }: { taskId: number | undefined }) {
+  const { taskComments } = useTaskChat(taskId);
+  if (taskComments.length === 0) return null;
   return (
-    <Badge variant="secondary" className="rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 border border-indigo-100">
-      {taskComments.length} tin
-    </Badge>
+    <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-bold">
+      {taskComments.length > 99 ? '99+' : taskComments.length}
+    </span>
   );
 }
 
-const SubTaskModal = lazy(() => import('../../subtask/SubTaskModal').then(m => ({ default: m.SubTaskModal })));
-const AiTaskBreakdownModal = lazy(() => import('../../subtask/AiTaskBreakdownModal').then(m => ({ default: m.AiTaskBreakdownModal })));
-const CoordinationModal = lazy(() => import('../../coordination/CoordinationModal').then(m => ({ default: m.CoordinationModal })));
-const AssignCoordinationModal = lazy(() => import('../../assign/AssignCoordinationModal').then(m => ({ default: m.AssignCoordinationModal })));
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface TaskDetailDialogProps {
   task: any | null;
@@ -42,6 +64,8 @@ interface TaskDetailDialogProps {
   context?: any;
 }
 
+// ─── TaskDetailDialog ─────────────────────────────────────────────────────────
+
 export function TaskDetailDialog({
   task,
   onClose,
@@ -50,15 +74,7 @@ export function TaskDetailDialog({
   context = 'MY_EXECUTION',
 }: TaskDetailDialogProps) {
   const [activeTask, setActiveTask] = React.useState(task);
-  const [activeTab, setActiveTab] = useState<'CHAT' | 'HISTORY'>(initialTab);
-
-  React.useEffect(() => {
-    setActiveTask(task);
-  }, [task]);
-
-  React.useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab]);
+  const [leftTab, setLeftTab] = useState<'CHAT' | 'HISTORY' | 'TREE'>(initialTab);
 
   const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
   const [isAiBreakdownModalOpen, setIsAiBreakdownModalOpen] = useState(false);
@@ -66,11 +82,24 @@ export function TaskDetailDialog({
   const [isAssignCoordinationModalOpen, setIsAssignCoordinationModalOpen] = useState(false);
 
   const qc = useQueryClient();
-  const fetchComments = () => {
+
+  // Sync khi task prop thay đổi
+  React.useEffect(() => {
+    setActiveTask(task);
+    setLeftTab(initialTab);
+  }, [task, initialTab]);
+
+  // Chọn task con từ cây → reset về tab CHAT
+  const handleSelectSubTask = useCallback((node: any) => {
+    setActiveTask(node);
+    setLeftTab('CHAT');
+  }, []);
+
+  const fetchComments = useCallback(() => {
     if (activeTask?.id) {
       qc.invalidateQueries({ queryKey: hrmKeys.taskComments(activeTask.id) });
     }
-  };
+  }, [activeTask?.id, qc]);
 
   if (!activeTask) return null;
 
@@ -80,164 +109,178 @@ export function TaskDetailDialog({
   return (
     <>
       <Dialog open={!!task} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="w-screen sm:w-[98vw] xl:w-[95vw] max-w-[1600px] h-dvh sm:h-[97vh] font-sans p-0 overflow-hidden rounded-none sm:rounded-[2rem] border-0 sm:border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
-          <div className="flex flex-col flex-1 min-h-0">
-
-            {/* ── TOP HEADER ── */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 gap-4">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="scale-90 origin-left shrink-0">
-                  {activeTask.workflowInstId ? (
-                    <WorkflowStatusBadge status={activeTask.status || 'TODO'} showIcon={true} />
-                  ) : (
-                    <TaskStatusBadge code={activeTask.status || 'TODO'} showIcon={true} />
+        <DialogContent
+          className="w-screen sm:w-[98vw] xl:w-[92vw] max-w-[1400px] h-dvh sm:h-[95vh] font-sans p-0 overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-border shadow-2xl bg-background flex flex-col"
+        >
+          {/* ── HEADER ── */}
+          <div className="flex items-start justify-between px-5 py-3.5 border-b border-border bg-card sticky top-0 z-20 gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              {/* Status */}
+              <div className="shrink-0 mt-0.5">
+                {activeTask.workflowInstId ? (
+                  <WorkflowStatusBadge status={activeTask.status || 'TODO'} showIcon />
+                ) : (
+                  <TaskStatusBadge code={activeTask.status || 'TODO'} showIcon />
+                )}
+              </div>
+              {/* Title */}
+              <div className="flex-1 min-w-0">
+                <h2 className="font-bold text-[15px] text-foreground leading-tight line-clamp-2">
+                  {activeTask.title}
+                </h2>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <TaskPriorityBadge code={activeTask.priority || 'NORMAL'} className="text-[10px] px-2 py-0.5" />
+                  {activeTask.plan && (
+                    <Badge variant="outline" className="text-[10px] px-2 py-0.5 gap-1 bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-300">
+                      <Target className="w-2.5 h-2.5" />
+                      {activeTask.plan.title}
+                    </Badge>
                   )}
                 </div>
-                <div className="hidden sm:block">
-                  <TaskPriorityBadge code={activeTask.priority || 'NORMAL'} className="px-3 py-1 text-[11px]" />
-                </div>
-                {activeTask.plan && (
-                  <Badge variant="outline" className="hidden md:flex bg-indigo-50 text-indigo-700 border-indigo-200 px-2.5 py-1 rounded-lg font-bold items-center gap-1.5 shrink-0">
-                    <Target className="w-3.5 h-3.5" /> {activeTask.plan.title}
-                  </Badge>
-                )}
-                <h2 className="font-black text-slate-700 dark:text-slate-200 text-[15px] truncate">{activeTask.title}</h2>
               </div>
-              {activeTask.dueDate && (
-                <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold shrink-0 ${dueInfo.color} ${dueInfo.bg} border ${dueInfo.border}`}>
-                  <Calendar className="w-4 h-4" />
-                  {new Date(activeTask.dueDate).toLocaleDateString('vi-VN')}
-                </div>
-              )}
             </div>
-            {/* ── WORKFLOW STEPS INDICATOR ── */}
-            {activeTask.workflowInstId && (
-              <div className="px-6 py-2.5 border-b border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/60 dark:bg-indigo-900/20 flex items-center gap-2 overflow-x-auto hide-scrollbar">
-                {[
-                  { key: 'plan', label: 'Phân công', active: (activeTask.allowedActions || []).includes('PLAN_ASSIGNMENT') },
-                  { key: 'assign', label: 'Giao việc', active: (activeTask.allowedActions || []).includes('ASSIGN') },
-                  { key: 'inprogress', label: 'Thực hiện', active: ['IN_PROGRESS', 'MONITOR'].some(a => (activeTask.allowedActions || []).includes(a)) || activeTask.status === 'IN_PROGRESS' },
-                  { key: 'complete', label: 'Báo cáo', active: (activeTask.allowedActions || []).includes('COMPLETE') },
-                  { key: 'approve', label: 'Nghiệm thu', active: (activeTask.allowedActions || []).includes('APPROVE') || activeTask.status === 'PENDING_APPROVAL' },
-                  { key: 'done', label: 'Hoàn thành', active: activeTask.status === 'DONE' },
-                ].map((step, idx, arr) => {
-                  const isDone = (() => {
-                    const order = ['plan','assign','inprogress','complete','approve','done'];
-                    const statuses: Record<string, string[]> = {
-                      plan: [], assign: ['TODO'], inprogress: ['IN_PROGRESS'],
-                      complete: ['PENDING_APPROVAL'], approve: ['PENDING_APPROVAL'], done: ['DONE']
-                    };
-                    const currentIdx = order.indexOf(arr.find(s => s.active)?.key || 'plan');
-                    return idx < currentIdx;
-                  })();
-                  return (
-                    <React.Fragment key={step.key}>
-                      <div className={`flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
-                        step.active
-                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200 dark:shadow-indigo-900/50'
-                          : isDone
-                            ? 'bg-indigo-100 text-indigo-500 dark:bg-indigo-900/40 dark:text-indigo-400'
-                            : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
-                      }`}>
-                        {isDone && <span className="text-[10px]">✓</span>}
-                        {step.label}
-                      </div>
-                      {idx < arr.length - 1 && (
-                        <ChevronRight className="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+
+            {/* Due date */}
+            {activeTask.dueDate && (
+              <div
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold shrink-0 ${dueInfo.color} ${dueInfo.bg} border ${dueInfo.border}`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                {new Date(activeTask.dueDate).toLocaleDateString('vi-VN')}
               </div>
             )}
+          </div>
 
-            <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_320px_320px] 2xl:grid-cols-[1fr_340px_340px] divide-y xl:divide-y-0 xl:divide-x divide-slate-200 dark:divide-slate-800">
-
-              {/* ── COL 1: Mô tả + Chat ── */}
-              <div className="flex flex-col gap-0 overflow-y-auto">
-                {activeTask.status === 'PENDING_APPROVAL' && (
-                  <div className="bg-fuchsia-50 dark:bg-fuchsia-900/20 text-fuchsia-700 dark:text-fuchsia-300 p-3 px-6 flex items-center gap-2 text-[13px] font-bold border-b border-fuchsia-100 dark:border-fuchsia-800">
-                    <AlertCircle className="w-4 h-4" /> ⏳ Đang chờ lãnh đạo nghiệm thu... (Tạm khóa)
-                  </div>
-                )}
-                {/* Description */}
-                <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <div className="w-4 h-[2px] bg-slate-300 rounded" /> Mô tả công việc
-                  </h3>
-                  <div className="relative">
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5  bg-linear-to-br from-indigo-400 to-indigo-200 rounded-full" />
-                    <div className="pl-5 text-slate-600 dark:text-slate-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
-                      {activeTask.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
+          {/* ── WORKFLOW STEPS ── */}
+          {activeTask.workflowInstId && (
+            <div className="px-5 py-2 border-b border-indigo-100 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-900/10 flex items-center gap-2 overflow-x-auto hide-scrollbar shrink-0">
+              {[
+                { key: 'plan',       label: 'Phân công', active: (activeTask.allowedActions || []).includes('PLAN_ASSIGNMENT') },
+                { key: 'assign',     label: 'Giao việc',  active: (activeTask.allowedActions || []).includes('ASSIGN') },
+                { key: 'inprogress', label: 'Thực hiện',  active: ['IN_PROGRESS', 'MONITOR'].some((a) => (activeTask.allowedActions || []).includes(a)) || activeTask.status === 'IN_PROGRESS' },
+                { key: 'complete',   label: 'Báo cáo',   active: (activeTask.allowedActions || []).includes('COMPLETE') },
+                { key: 'approve',    label: 'Nghiệm thu', active: (activeTask.allowedActions || []).includes('APPROVE') || activeTask.status === 'PENDING_APPROVAL' },
+                { key: 'done',       label: 'Hoàn thành', active: activeTask.status === 'DONE' },
+              ].map((step, idx, arr) => {
+                const order = ['plan', 'assign', 'inprogress', 'complete', 'approve', 'done'];
+                const currentIdx = order.indexOf(arr.find((s) => s.active)?.key || 'plan');
+                const isDone = idx < currentIdx;
+                return (
+                  <React.Fragment key={step.key}>
+                    <div
+                      className={`flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
+                        step.active
+                          ? 'bg-indigo-600 text-white'
+                          : isDone
+                          ? 'bg-indigo-100 text-indigo-500 dark:bg-indigo-900/40 dark:text-indigo-400'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {isDone && <span className="text-[9px]">✓</span>}
+                      {step.label}
                     </div>
-                  </div>
-                </div>
-
-                {/* Chat & History */}
-                <div className="flex flex-col flex-1 min-h-[360px]">
-                  <div className="px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => setActiveTab('CHAT')}
-                        className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${activeTab === 'CHAT' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
-                          }`}
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" /> Trao đổi
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('HISTORY')}
-                        className={`text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${activeTab === 'HISTORY' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 hover:text-slate-600'
-                          }`}
-                      >
-                        <History className="w-3.5 h-3.5" /> Lịch sử
-                      </button>
-                    </div>
-
-                    {activeTab === 'CHAT' && (
-                      <TaskChatBadge activeTaskId={activeTask?.id} />
+                    {idx < arr.length - 1 && (
+                      <span className="text-muted-foreground text-[10px] shrink-0">›</span>
                     )}
-                  </div>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
 
-                  {/* Content Area */}
-                  {activeTab === 'HISTORY' ? (
-                    <div className="flex-1 overflow-y-auto px-6 bg-slate-50/20 dark:bg-slate-900/10 max-h-[465px]">
-                      <WorkflowTimeline instanceId={activeTask.workflowInstId} />
-                      <TaskHistoryList taskId={activeTask.id} />
-                    </div>
-                  ) : (
-                    <TaskChatContainer
-                      activeTask={activeTask}
-                      allowedActions={allowedActions}
-                    />
+          {/* ── BODY: 2 cột ── */}
+          <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_300px] divide-y xl:divide-y-0 xl:divide-x divide-border overflow-hidden">
+
+            {/* ══ COL TRÁI: Mô tả + Tabs (Trao đổi | Lịch sử | Cây CV) ══ */}
+            <div className="flex flex-col min-h-0 overflow-hidden">
+
+              {/* Pending approval notice */}
+              {activeTask.status === 'PENDING_APPROVAL' && (
+                <div className="bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 px-5 py-2.5 flex items-center gap-2 text-[12px] font-semibold border-b border-violet-100 dark:border-violet-800 shrink-0">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  ⏳ Đang chờ lãnh đạo nghiệm thu...
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="px-5 pt-4 pb-3 border-b border-border shrink-0">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">
+                  Mô tả công việc
+                </p>
+                <div className="text-[14px] text-foreground/80 leading-relaxed whitespace-pre-wrap max-h-28 overflow-y-auto pr-1">
+                  {activeTask.description || (
+                    <span className="italic text-muted-foreground">Chưa có mô tả...</span>
                   )}
                 </div>
               </div>
 
-              {/* ── COL 2: Nhân sự + Thao tác + Thời hạn ── */}
-              <TaskActionPanel
-                activeTask={activeTask}
-                context={context}
-                allowedActions={allowedActions}
-                dueInfo={dueInfo}
-                onSmartAssign={onSmartAssign}
-                onOpenSubTaskModal={() => setIsSubTaskModalOpen(true)}
-                onOpenAiBreakdownModal={() => setIsAiBreakdownModalOpen(true)}
-                onOpenCoordinationModal={() => setIsCoordinationModalOpen(true)}
-                onCloseDialog={() => onClose()}
-              />
+              {/* Tabs */}
+              <Tabs
+                value={leftTab}
+                onValueChange={(v) => setLeftTab(v as typeof leftTab)}
+                className="flex-1 min-h-0 flex flex-col"
+              >
+                <TabsList className="shrink-0 rounded-none border-b border-border bg-transparent h-auto px-5 py-0 gap-0 justify-start">
+                  <TabsTrigger
+                    value="CHAT"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:bg-transparent px-4 py-2.5 text-[12px] font-bold gap-1.5 shrink-0"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Trao đổi
+                    <ChatCountBadge taskId={activeTask?.id} />
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="HISTORY"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:bg-transparent px-4 py-2.5 text-[12px] font-bold gap-1.5 shrink-0"
+                  >
+                    <History className="w-3.5 h-3.5" />
+                    Lịch sử
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="TREE"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:bg-transparent px-4 py-2.5 text-[12px] font-bold gap-1.5 shrink-0"
+                  >
+                    <GitBranch className="w-3.5 h-3.5" />
+                    Cây công việc
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* ── COL 3: Cây công việc ── */}
-              <TaskDelegationTree
-                rootTaskId={task?.rootTaskId || task?.id}
-                activeTaskId={activeTask?.id}
-                onSelectTask={setActiveTask}
-              />
+                <TabsContent value="CHAT" className="flex-1 min-h-0 mt-0 flex flex-col data-[state=inactive]:hidden">
+                  <TaskChatContainer activeTask={activeTask} allowedActions={allowedActions} />
+                </TabsContent>
+
+                <TabsContent value="HISTORY" className="flex-1 min-h-0 mt-0 overflow-y-auto px-5 py-3 data-[state=inactive]:hidden">
+                  <WorkflowTimeline instanceId={activeTask.workflowInstId} />
+                  <TaskHistoryList taskId={activeTask.id} />
+                </TabsContent>
+
+                <TabsContent value="TREE" className="flex-1 min-h-0 mt-0 overflow-y-auto data-[state=inactive]:hidden">
+                  <TaskDelegationTree
+                    rootTaskId={task?.rootTaskId || task?.id}
+                    activeTaskId={activeTask?.id}
+                    onSelectTask={handleSelectSubTask}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
+
+            {/* ══ COL PHẢI: Nhân sự + Thao tác + Thời hạn ══ */}
+            <TaskActionPanel
+              activeTask={activeTask}
+              context={context}
+              allowedActions={allowedActions}
+              dueInfo={dueInfo}
+              onSmartAssign={onSmartAssign}
+              onOpenSubTaskModal={() => setIsSubTaskModalOpen(true)}
+              onOpenAiBreakdownModal={() => setIsAiBreakdownModalOpen(true)}
+              onOpenCoordinationModal={() => setIsCoordinationModalOpen(true)}
+              onCloseDialog={onClose}
+            />
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* ── Modals ── */}
+      {/* ── Nested Modals ── */}
       {isSubTaskModalOpen && (
         <Suspense fallback={null}>
           <SubTaskModal
@@ -287,9 +330,7 @@ export function TaskDetailDialog({
             task={activeTask}
             open={isAssignCoordinationModalOpen}
             onOpenChange={setIsAssignCoordinationModalOpen}
-            onSuccess={() => {
-              fetchComments();
-            }}
+            onSuccess={() => fetchComments()}
           />
         </Suspense>
       )}
