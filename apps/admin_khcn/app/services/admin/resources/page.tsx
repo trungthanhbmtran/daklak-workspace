@@ -1,20 +1,20 @@
-import { ResourceClient } from "@/features/system-admin/resources";
+import { Component } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 export const metadata = { title: "Quản trị Tài nguyên & Quyền hệ thống" };
 
 export default function ResourcesPage() {
   return (
-    <div className="p-6 h-full flex flex-col min-h-0">
-      <div className="mb-6 shrink-0">
-        <h1 className="text-2xl font-bold tracking-tight">Tài nguyên & Quyền (Resources & Permissions)</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Định nghĩa các Module (Tài nguyên) trong hệ thống và các Hành động (Quyền) tương ứng. 
-          Lưu ý: Chỉ thay đổi khi có sự cập nhật API từ Backend.
+    <Card className="w-full h-full shadow-sm border-border flex items-center justify-center bg-muted/10 border-dashed rounded-xl">
+      <div className="flex flex-col items-center max-w-sm text-center">
+        <div className="h-16 w-16 bg-background border rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+          <Component className="h-8 w-8 text-muted-foreground/50" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-1">Chưa chọn Tài nguyên</h3>
+        <p className="text-sm text-muted-foreground">
+          Vui lòng chọn một Module ở danh sách bên trái để xem và chỉnh sửa thông tin.
         </p>
       </div>
-      <div className="flex-1 min-h-0">
-        <ResourceClient />
-      </div>
-    </div>
+    </Card>
   );
 }
