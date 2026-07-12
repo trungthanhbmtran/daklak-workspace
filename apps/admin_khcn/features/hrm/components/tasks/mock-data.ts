@@ -20,39 +20,44 @@ export const MOCK_TASKS: HrmTask[] = [
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     subTasks: [
       {
-        id: "SUB-001",
-        taskId: "TASK-001",
+        id: "TASK-001-A",
+        parentId: "TASK-001",
         title: "Xây dựng đề án",
+        description: "Viết dự thảo đề án trình lãnh đạo",
         status: "COMPLETED",
+        priority: "NORMAL",
+        assignerId: 102,
+        assigneeId: 201,
+        assigner: { id: 102, employeeCode: "NV003", firstname: "Lê", lastname: "Văn C", fullName: "Lê Văn C", email: "", phone: "", identityCard: "" },
+        assignee: { id: 201, employeeCode: "NV002", firstname: "Trần", lastname: "Thị B", fullName: "Trần Thị B", email: "", phone: "", identityCard: "" },
+        startDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        assigneeId: 201,
-        assignee: { id: 201, employeeCode: "NV002", firstname: "Trần", lastname: "Thị B", fullName: "Trần Thị B", email: "", phone: "", identityCard: "" }
+        progress: 100,
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        steps: [
+          { id: "S1", taskId: "TASK-001-A", title: "Thu thập tài liệu liên quan", status: "COMPLETED", order: 1 },
+          { id: "S2", taskId: "TASK-001-A", title: "Viết dự thảo đề án", status: "COMPLETED", order: 2 },
+          { id: "S3", taskId: "TASK-001-A", title: "Gửi lãnh đạo phòng duyệt", status: "COMPLETED", order: 3 },
+        ]
       },
       {
-        id: "SUB-002",
-        taskId: "TASK-001",
-        title: "Trình lãnh đạo trung tâm duyệt",
-        status: "COMPLETED",
-        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        assigneeId: 201,
-        assignee: { id: 201, employeeCode: "NV002", firstname: "Trần", lastname: "Thị B", fullName: "Trần Thị B", email: "", phone: "", identityCard: "" }
-      },
-      {
-        id: "SUB-003",
-        taskId: "TASK-001",
+        id: "TASK-001-B",
+        parentId: "TASK-001",
         title: "Trình cho Sở Khoa học & Công nghệ",
+        description: "Gửi công văn xin ý kiến Sở",
         status: "IN_PROGRESS",
+        priority: "HIGH",
+        assignerId: 102,
+        assigneeId: 202,
+        assigner: { id: 102, employeeCode: "NV003", firstname: "Lê", lastname: "Văn C", fullName: "Lê Văn C", email: "", phone: "", identityCard: "" },
+        assignee: { id: 202, employeeCode: "NV004", firstname: "Phạm", lastname: "Thị D", fullName: "Phạm Thị D", email: "", phone: "", identityCard: "" },
+        startDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
         dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-        assigneeId: 202,
-        assignee: { id: 202, employeeCode: "NV004", firstname: "Phạm", lastname: "Thị D", fullName: "Phạm Thị D", email: "", phone: "", identityCard: "" }
-      },
-      {
-        id: "SUB-004",
-        taskId: "TASK-001",
-        title: "Gửi Sở Tài chính thẩm định dự toán",
-        status: "TODO",
-        assigneeId: 202,
-        assignee: { id: 202, employeeCode: "NV004", firstname: "Phạm", lastname: "Thị D", fullName: "Phạm Thị D", email: "", phone: "", identityCard: "" }
+        progress: 50,
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
       }
     ]
   },
@@ -71,6 +76,12 @@ export const MOCK_TASKS: HrmTask[] = [
     progress: 100,
     createdAt: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString(),
+    steps: [
+      { id: "S4", taskId: "TASK-002", title: "Khảo sát hệ thống cũ", status: "COMPLETED", order: 1 },
+      { id: "S5", taskId: "TASK-002", title: "Lập danh sách lỗi", status: "COMPLETED", order: 2 },
+      { id: "S6", taskId: "TASK-002", title: "Bảo trì máy chủ", status: "COMPLETED", order: 3 },
+      { id: "S7", taskId: "TASK-002", title: "Lập biên bản nghiệm thu", status: "TODO", order: 4 },
+    ]
   },
   {
     id: "TASK-003",

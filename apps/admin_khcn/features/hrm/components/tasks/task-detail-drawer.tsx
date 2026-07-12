@@ -109,6 +109,14 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           <SheetHeader>
             <div className="flex justify-between items-start gap-4">
               <div>
+                {task.parentId && (
+                  <div className="mb-2">
+                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 flex items-center w-fit cursor-pointer hover:bg-blue-100 transition-colors">
+                      <ArrowRightCircle className="w-3 h-3 mr-1 inline" />
+                      Thuộc nhiệm vụ: {task.parentId}
+                    </span>
+                  </div>
+                )}
                 <SheetTitle className="text-xl font-bold">{task.title}</SheetTitle>
                 <SheetDescription className="mt-2 text-slate-600">
                   {task.description}
@@ -193,11 +201,11 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium text-sm">
-                    {task.assigneeDepartment ? "Phân công thực hiện (Phân rã công việc)" : "Các giai đoạn / Bước thực hiện"}
+                    Nhiệm vụ con (Phân rã công việc)
                   </h3>
                   {!isCompleted && (
                     <Button variant="outline" size="sm" className="h-7 text-xs">
-                      {task.assigneeDepartment ? "+ Giao việc cho nhân viên" : "+ Thêm bước"}
+                      + Tạo nhiệm vụ con
                     </Button>
                   )}
                 </div>
@@ -225,9 +233,14 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                                   Hạn: {format(new Date(subTask.dueDate), "dd/MM/yyyy")}
                                 </p>
                               )}
-                              {subTask.assignee && (
+                              {(subTask.assignee || subTask.assigneeDepartment) && (
                                 <p className="text-xs text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full">
-                                  👤 {subTask.assignee.fullName}
+                                  {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
+                                </p>
+                              )}
+                              {subTask.status !== "COMPLETED" && subTask.progress !== undefined && (
+                                <p className="text-xs text-orange-600 flex items-center bg-orange-50 px-2 py-0.5 rounded-full">
+                                  Tiến độ: {subTask.progress}%
                                 </p>
                               )}
                             </div>
@@ -242,6 +255,43 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 ) : (
                   <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
                     Chuyên viên chưa xây dựng kế hoạch thực hiện chi tiết.
+                  </div>
+                )}
+              </div>
+
+              {/* Danh sách các bước thực hiện nội bộ (Checklist) */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-medium text-sm">
+                    Các bước thực hiện (Checklist nội bộ)
+                  </h3>
+                  {!isCompleted && (
+                    <Button variant="outline" size="sm" className="h-7 text-xs">
+                      + Thêm bước
+                    </Button>
+                  )}
+                </div>
+                
+                {task.steps && task.steps.length > 0 ? (
+                  <div className="border rounded-md divide-y bg-white">
+                    {task.steps.map(step => (
+                      <div key={step.id} className="flex items-center justify-between p-3">
+                        <div className="flex items-center gap-3">
+                          {step.status === "COMPLETED" ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
+                          )}
+                          <p className={`text-sm ${step.status === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
+                            {step.title}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
+                    Chưa có kế hoạch chi tiết (Các bước thực hiện nội bộ).
                   </div>
                 )}
               </div>

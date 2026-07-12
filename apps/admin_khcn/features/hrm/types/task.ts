@@ -21,15 +21,12 @@ export interface HrmTaskComment {
   user?: HrmEmployee;
 }
 
-export interface HrmSubTask {
+export interface HrmTaskStep {
   id: string;
   taskId: string;
   title: string;
-  status: "TODO" | "IN_PROGRESS" | "COMPLETED";
-  dueDate?: string;
-  completedAt?: string;
-  assigneeId?: number; // Người được phân công việc con này
-  assignee?: HrmEmployee;
+  status: "TODO" | "COMPLETED";
+  order: number;
 }
 
 export interface HrmTaskKPI {
@@ -77,7 +74,12 @@ export interface HrmTask {
   attachments?: HrmTaskAttachment[];
   comments?: HrmTaskComment[];
   kpi?: HrmTaskKPI; // Kết quả đánh giá KPI sau khi hoàn thành
-  subTasks?: HrmSubTask[]; // Các giai đoạn thực hiện công việc
+  
+  // Quan hệ kế thừa nhiệm vụ (Cây phân cấp)
+  parentId?: string; // ID của công việc cha (nếu có)
+  parentTask?: HrmTask; 
+  subTasks?: HrmTask[]; // Danh sách các công việc con được phân rã từ công việc này
+  steps?: HrmTaskStep[]; // Các bước thực hiện nội bộ (checklist) để dễ giám sát tiến độ
   
   
   createdAt: string;
