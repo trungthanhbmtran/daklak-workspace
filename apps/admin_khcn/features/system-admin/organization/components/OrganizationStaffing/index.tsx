@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,8 +23,11 @@ import type { JobTitleItem, StaffingReportItem } from "../../types";
 import { useDomainSearch } from "../../hooks/useScopeCatalog";
 
 export function OrganizationStaffing() {
+  const params = useParams<{ id: string }>();
+  const selectedId = params?.id ? Number(params.id) : undefined;
+  
   const { state } = useOrganizationContext();
-  const { selectedId, flatUnits } = state;
+  const { flatUnits } = state;
 
   const [activeTab, setActiveTab] = useState<"DANG" | "CHINH_QUYEN">("CHINH_QUYEN");
   const [selectedJobTitleId, setSelectedJobTitleId] = useState<string>("");
@@ -77,8 +81,6 @@ export function OrganizationStaffing() {
       }
     );
   };
-
-
 
   const handleSubmitStaffing = (e: React.FormEvent) => {
     e.preventDefault();

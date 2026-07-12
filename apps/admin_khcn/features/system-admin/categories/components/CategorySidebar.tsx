@@ -1,20 +1,24 @@
+"use client";
+
 import { Search, FolderGit2, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useGetCategoryGroups } from "../hooks/useCategoryApi";
+import { useCategoryUI } from "../hooks/useCategoryUI";
 
-interface SidebarProps {
-  isLoading: boolean;
-  searchGroupTerm: string;
-  setSearchGroupTerm: (val: string) => void;
-  filteredGroups: { code: string; name: string }[];
-  activeGroup: string;
-  onSelectGroup: (group: string) => void;
-  uniqueGroups: { code: string; name: string }[];
-}
+export function CategorySidebar() {
+  const { data: groups, isLoading } = useGetCategoryGroups();
+  const params = useParams<{ code: string }>();
+  const router = useRouter();
+  
+  const activeGroup = params?.code || "";
 
-export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm, filteredGroups, activeGroup, onSelectGroup, uniqueGroups }: SidebarProps) {
+  // Sử dụng UI hook để search nhóm
+  const ui = useCategoryUI([], groups || []);
+
   return (
     <>
       <Card className="hidden md:flex w-72 shrink-0 flex-col p-3 border-border/50 shadow-sm h-full min-h-0">
@@ -25,27 +29,30 @@ export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm
             <Input
               placeholder="Tìm nhóm danh mục..."
               className="pl-8 h-9 text-sm bg-muted/30 focus:bg-background transition-colors"
-              value={searchGroupTerm}
-              onChange={(e) => setSearchGroupTerm(e.target.value)}
+              value={ui.state.searchGroupTerm}
+              onChange={(e) => ui.setters.setSearchGroupTerm(e.target.value)}
             />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto pr-1 space-y-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40">
           {isLoading ? (
-            <div className="flex items-center justify-center py-4 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải...</div>
-          ) : filteredGroups.length > 0 ? (
-            filteredGroups.map((group) => {
+            <div className="flex items-center justify-center py-4 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải...
+            </div>
+          ) : ui.derived.filteredGroups.length > 0 ? (
+            ui.derived.filteredGroups.map((group) => {
               const isActive = activeGroup === group.code;
               return (
-                <Button
+                <Link
                   key={group.code}
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full justify-start font-normal transition-colors h-9 px-3 ${isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
-                  onClick={() => onSelectGroup(group.code)}
+                  href={`/services/admin/categories/${group.code}`}
+                  className={`w-full flex items-center justify-start rounded-md font-normal transition-colors h-9 px-3 ${
+                    isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-foreground"
+                  }`}
                 >
                   <FolderGit2 className={`mr-2 h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                   <span className="truncate">{group.name}</span>
-                </Button>
+                </Link>
               );
             })
           ) : (
@@ -56,10 +63,15 @@ export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm
 
       <div className="w-full md:hidden mb-2">
         <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Chọn Nhóm danh mục:</label>
-        <Select value={activeGroup} onValueChange={onSelectGroup}>
-          <SelectTrigger className="w-full bg-background h-11"><SelectValue placeholder="Chọn nhóm danh mục" /></SelectTrigger>
+        <Select 
+          value={activeGroup} 
+          onValueChange={(val) => router.push(`/services/admin/categories/${val}`)}
+        >
+          <SelectTrigger className="w-full bg-background h-11">
+            <SelectValue placeholder="Chọn nhóm danh mục" />
+          </SelectTrigger>
           <SelectContent>
-            {uniqueGroups.map((group) => (
+            {ui.derived.uniqueGroups.map((group) => (
               <SelectItem key={group.code} value={group.code}>{group.name}</SelectItem>
             ))}
           </SelectContent>

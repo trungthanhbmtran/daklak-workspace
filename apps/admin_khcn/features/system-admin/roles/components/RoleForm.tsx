@@ -1,7 +1,12 @@
+"use client";
+
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock } from "lucide-react";
+import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, Loader2 } from "lucide-react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,23 +19,38 @@ import { Separator } from "@/components/ui/separator";
 import { Role, Permission } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+import { roleApi } from "../api";
+import { roleKeys } from "../keys";
 
 // Lazy load: chỉ tải khi có role được chọn / tạo mới
 const PolicyCardDialog = lazy(() => import("./PolicyCardDialog"));
 
 interface RoleFormProps {
-  selectedRole: Role | null;
-  createMode: boolean;
-  permissions: Permission[];
-  isLoadingPerms?: boolean;
-  onSave: (data: Partial<Role>) => void;
-  onDelete: () => void;
-  onCancel: () => void;
-  isSaving: boolean;
-  isDeleting: boolean;
+  roleId?: number; // Nếu có roleId => Edit Mode. Nếu không => Create Mode
 }
 
-export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms, onSave, onDelete, onCancel, isSaving, isDeleting }: RoleFormProps) {
+export function RoleForm({ roleId }: RoleFormProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const createMode = !roleId;
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // 1. Fetch permissions (luôn cần)
+  const { data: permissions = [], isLoading: isLoadingPerms } = useQuery({
+    queryKey: roleKeys.permissions(),
+    queryFn: () => roleApi.getPermissionMatrix(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // 2. Fetch role detail nếu ở chế độ Edit
+  const { data: roleDetail, isLoading: isLoadingRole } = useQuery({
+    queryKey: [...roleKeys.lists(), "detail", roleId],
+    queryFn: () => roleApi.getRoleById(roleId!),
+    enabled: !!roleId,
+    staleTime: 60 * 1000,
+  });
+
   const form = useForm<RoleFormValues>({
     resolver: zodResolver(roleFormSchema) as unknown as Resolver<RoleFormValues>,
     defaultValues: {
@@ -38,17 +58,19 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
     }
   });
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   useEffect(() => {
-    form.reset({
-      name: selectedRole?.name || "",
-      code: selectedRole?.code || "",
-      description: selectedRole?.description || "",
-      active: selectedRole?.active ?? 1,
-      policies: selectedRole?.policies || [],
-    });
-  }, [selectedRole, createMode, form]);
+    if (createMode) {
+      form.reset({ name: "", code: "", description: "", active: 1, policies: [] });
+    } else if (roleDetail) {
+      form.reset({
+        name: roleDetail.name || "",
+        code: roleDetail.code || "",
+        description: roleDetail.description || "",
+        active: roleDetail.active ?? 1,
+        policies: roleDetail.policies || [],
+      });
+    }
+  }, [roleDetail, createMode, form]);
 
   // Gom nhóm available actions (permissions) theo Resource Name (module)
   const groupedPermissions = useMemo(() => {
@@ -60,16 +82,50 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
     }, {} as Record<string, Permission[]>);
   }, [permissions]);
 
-  if (!selectedRole && !createMode) {
+  // 3. Mutations
+  const saveMutation = useMutation({
+    mutationFn: roleApi.saveRole,
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: roleKeys.all });
+      if (variables.id) queryClient.invalidateQueries({ queryKey: [...roleKeys.lists(), "detail", variables.id] });
+      toast.success("Đã lưu cấu hình vai trò!");
+      
+      if (createMode) {
+        // Sau khi tạo xong, có thể redirect về danh sách hoặc sang trang edit (cần ID trả về)
+        router.push("/services/admin/roles");
+      }
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: roleApi.deleteRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: roleKeys.all });
+      toast.success("Đã xóa vai trò!");
+      router.push("/services/admin/roles");
+    },
+  });
+
+  const onSave = (data: RoleFormValues) => {
+    const payload = !createMode && roleId
+      ? { ...data, id: roleId }
+      : data;
+    saveMutation.mutate(payload);
+  };
+
+  const onDelete = () => {
+    if (roleId) deleteMutation.mutate(roleId);
+  };
+
+  const onCancel = () => {
+    router.push("/services/admin/roles");
+  };
+
+  if (isLoadingRole) {
     return (
-      <Card className="flex-1 w-full min-h-0 shadow-none border-border border-dashed bg-muted/10 flex flex-col items-center justify-center p-12 text-center rounded-xl">
-        <div className="p-4 bg-background rounded-full shadow-sm mb-4">
-          <ShieldAlert className="h-10 w-10 text-muted-foreground/40" />
-        </div>
-        <h3 className="font-bold text-foreground">Chưa chọn Vai trò</h3>
-        <p className="text-xs text-muted-foreground max-w-[220px] mt-1">
-          Vui lòng chọn vai trò bên trái để bắt đầu thiết lập quyền truy cập tài nguyên.
-        </p>
+      <Card className="flex-1 w-full min-h-0 shadow-sm border-border flex flex-col items-center justify-center p-12 text-center rounded-xl bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+        <p className="text-sm font-medium">Đang tải dữ liệu vai trò...</p>
       </Card>
     );
   }
@@ -84,7 +140,7 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
           </div>
           <div>
             <CardTitle className="text-base font-bold leading-none">
-              {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${selectedRole?.name}`}
+              {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${roleDetail?.name}`}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Mô hình phân quyền:</span>
@@ -93,7 +149,7 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
           </div>
         </div>
         {!createMode && (
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(true)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" disabled={deleteMutation.isPending} onClick={() => setIsDeleteDialogOpen(true)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         )}
@@ -181,8 +237,8 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
       {/* FOOTER */}
       <div className="p-4 border-t bg-muted/20 shrink-0 flex justify-end gap-3 items-center">
         <Button variant="ghost" onClick={onCancel} className="text-xs font-semibold h-9 px-6">Hủy</Button>
-        <Button type="submit" form="role-form" className="px-10 text-xs font-bold h-9 shadow-sm" disabled={isSaving}>
-          {isSaving ? "Đang xử lý..." : "Lưu Vai trò"}
+        <Button type="submit" form="role-form" className="px-10 text-xs font-bold h-9 shadow-sm" disabled={saveMutation.isPending}>
+          {saveMutation.isPending ? "Đang xử lý..." : "Lưu Vai trò"}
         </Button>
       </div>
 
@@ -194,10 +250,9 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
           setIsDeleteDialogOpen(false);
         }}
         title="Xóa vai trò"
-        description={`Bạn có chắc chắn muốn xóa vai trò "${selectedRole?.name}"? Hành động này không thể hoàn tác.`}
-        isDeleting={isDeleting}
+        description={`Bạn có chắc chắn muốn xóa vai trò "${roleDetail?.name}"? Hành động này không thể hoàn tác.`}
+        isDeleting={deleteMutation.isPending}
       />
     </Card>
   );
 }
-

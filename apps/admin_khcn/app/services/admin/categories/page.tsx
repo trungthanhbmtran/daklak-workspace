@@ -1,4 +1,4 @@
-import { CategoryClient } from "@/features/system-admin/categories";
+import { FolderGit2 } from "lucide-react";
 
 export const metadata = {
   title: "Quản lý Danh mục | Quản trị Hệ thống",
@@ -6,18 +6,15 @@ export const metadata = {
 
 export default function CategoriesPage() {
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Danh mục hệ thống</h2>
-          <p className="text-muted-foreground">
-            Quản lý các danh mục dùng chung (Phòng ban, Chức vụ, Loại văn bản...)
-          </p>
+    <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border border-dashed bg-muted/20">
+      <div className="flex flex-col items-center gap-4 px-6 text-center">
+        <div className="rounded-full bg-muted/50 p-5">
+          <FolderGit2 className="h-12 w-12 text-muted-foreground/50" />
         </div>
+        <p className="text-sm text-muted-foreground max-w-[280px]">
+          Chọn một nhóm danh mục từ danh sách bên trái để xem và chỉnh sửa các giá trị.
+        </p>
       </div>
-
-      {/* Gọi Client Component để xử lý logic bảng và Popup */}
-      <CategoryClient />
     </div>
   );
 }

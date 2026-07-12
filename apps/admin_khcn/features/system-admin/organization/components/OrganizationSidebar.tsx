@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation";
 import {
   DndContext,
   PointerSensor,
@@ -104,9 +104,10 @@ function UnitRow({
           </div>
           <div className="w-5 shrink-0 flex justify-center mt-[2px]">
             {hasChildren ? (
-              <button
-                type="button"
-                className={`p-0.5 rounded transition-colors ${isSelected ? "text-primary hover:bg-primary/20" : "text-muted-foreground hover:bg-black/10"}`}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-5 w-5 rounded transition-colors ${isSelected ? "text-primary hover:bg-primary/20" : "text-muted-foreground hover:bg-black/10"}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleExpand(unit.id);
@@ -117,7 +118,7 @@ function UnitRow({
                 ) : (
                   <ChevronRight className="h-4 w-4" />
                 )}
-              </button>
+              </Button>
             ) : (
               <span className="h-4 w-4 inline-block" />
             )}
@@ -252,10 +253,17 @@ function UnitTree({
 
 export function OrganizationSidebar() {
   const { state, actions } = useOrganizationContext();
-  const { flatUnits, mode, selectedId, parentId } = state;
-  const activeId = mode === "create_child" ? parentId : selectedId;
-
+  const { flatUnits } = state;
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+
+  // Determine activeId from route params or searchParams
+  const routeId = params?.id ? Number(params.id) : undefined;
+  const parentIdStr = searchParams.get('parentId');
+  const parentId = parentIdStr ? Number(parentIdStr) : undefined;
+  const activeId = routeId ?? parentId;
+
   const searchTerm = searchParams.get('search') || "";
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
@@ -304,6 +312,18 @@ export function OrganizationSidebar() {
     actions.updateUnit(draggedId, { parentId: newParentId });
   };
 
+  const handleSelect = (id: number) => {
+    router.push(`/services/admin/organization/${id}`);
+  };
+
+  const handleAddChild = (id: number) => {
+    router.push(`/services/admin/organization/create?parentId=${id}`);
+  };
+
+  const handleAddRoot = () => {
+    router.push(`/services/admin/organization/create`);
+  };
+
   return (
     <Card className="w-full lg:w-[380px] flex flex-col h-full shrink-0 rounded-xl border bg-card shadow-sm overflow-hidden">
       <div className="shrink-0 p-4 space-y-4 border-b bg-muted/10">
@@ -319,7 +339,7 @@ export function OrganizationSidebar() {
           <Button
             size="sm"
             className="h-8 shrink-0 px-3 shadow-sm bg-primary hover:bg-primary/90"
-            onClick={actions.addRoot}
+            onClick={handleAddRoot}
           >
             <Plus className="h-3.5 w-3.5 mr-1.5" />
             <span className="font-medium">Thêm gốc</span>
@@ -356,9 +376,9 @@ export function OrganizationSidebar() {
                 filtered={filtered}
                 expandedIds={expandedIds}
                 activeId={activeId}
-                onSelect={actions.select}
+                onSelect={handleSelect}
                 onToggleExpand={toggleExpand}
-                onAddChild={actions.addChild}
+                onAddChild={handleAddChild}
               />
             </DndContext>
           )}

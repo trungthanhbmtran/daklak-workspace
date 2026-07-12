@@ -1,24 +1,21 @@
 "use client";
 
-
-import { Plus, ChevronRight, LayoutList, Layers, ChevronDown } from "lucide-react";
+import { Plus, ChevronRight, LayoutList, Layers, ChevronDown, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
-import { MenuItem } from "../types";
+import { Badge } from "@/components/ui/badge";
 import { useSidebarLogic } from "../hooks/useSidebarLogic";
+import { useMenuApi } from "../hooks/useMenuApi";
+import { useParams } from "next/navigation";
 
-interface MenuSidebarProps {
-  menus: MenuItem[];
-  activeId?: number;
-  onSelect: (id: number) => void;
-  onAddRoot: () => void;
-  onAddChild: (parentId: number) => void;
-}
+export function MenuSidebar() {
+  const { menus, isLoadingMenus } = useMenuApi();
+  const params = useParams<{ id: string }>();
+  const activeId = params?.id ? Number(params.id) : undefined;
 
-export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }: MenuSidebarProps) {
   const { searchTerm, expandedRows, visibleIds, toggleExpand } = useSidebarLogic(menus);
-
 
   const filteredMenus = menus.filter(m => visibleIds ? visibleIds.has(m.id) : true);
 
@@ -36,20 +33,22 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
 
           return (
             <div key={menu.id}>
-              <div
-                className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-accent text-foreground"
+              <Link
+                href={`/services/admin/menus/${menu.id}`}
+                className={`group flex items-center justify-between p-2 rounded-lg transition-all ${isSelected ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-accent text-foreground"
                   }`}
                 style={{ paddingLeft: `${(level * 16) + 8}px` }}
-                onClick={() => onSelect(menu.id)}
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   {hasChildren ? (
-                    <button
-                      className={`p-0.5 rounded-sm hover:bg-black/10 transition-colors ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`}
-                      onClick={(e) => { e.stopPropagation(); toggleExpand(menu.id); }}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-5 w-5 rounded-sm hover:bg-black/10 transition-colors ${isSelected ? "text-primary-foreground hover:text-primary-foreground" : "text-muted-foreground"}`}
+                      onClick={(e) => { e.preventDefault(); toggleExpand(menu.id); }}
                     >
                       {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                    </button>
+                    </Button>
                   ) : (
                     <LayoutList className={`h-3.5 w-3.5 ml-1 ${isSelected ? "opacity-90" : "text-muted-foreground/50"}`} />
                   )}
@@ -64,12 +63,15 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                       {menu.type && (
                         <>
                           <span className={`text-[8px] ${isSelected ? "text-primary-foreground/30" : "text-muted-foreground/30"}`}>•</span>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${menu.type === 'SERVICE_ITEM'
-                            ? (isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
-                            : (isSelected ? 'bg-white/10 text-white' : 'bg-muted text-muted-foreground')
-                            }`}>
+                          <Badge
+                            variant={menu.type === 'SERVICE_ITEM' ? 'default' : 'secondary'}
+                            className={`text-[9px] px-1.5 py-0 h-4 min-h-0 font-bold rounded-sm ${isSelected
+                              ? (menu.type === 'SERVICE_ITEM' ? 'bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30' : 'bg-white/10 text-white hover:bg-white/20')
+                              : ''
+                              }`}
+                          >
                             {menu.type === 'SERVICE_ITEM' ? 'SERVICE_ITEM' : 'MENU'}
-                          </span>
+                          </Badge>
                         </>
                       )}
                     </div>
@@ -77,15 +79,16 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                 </div>
                 {!isSelected && (
                   <Button
-                    size="icon" variant="ghost"
+                    size="icon" variant="ghost" asChild
                     className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-background shrink-0 transition-opacity"
-                    onClick={(e) => { e.stopPropagation(); onAddChild(menu.id); }}
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Link href={`/services/admin/menus/create?parentId=${menu.id}`} onClick={(e) => e.stopPropagation()}>
+                      <Plus className="h-3.5 w-3.5" />
+                    </Link>
                   </Button>
                 )}
                 {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground/40 mr-2 shrink-0" />}
-              </div>
+              </Link>
               {isExpanded && renderBusinessTree(menu.id, level + 1)}
             </div>
           );
@@ -94,8 +97,6 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
     );
   };
 
-
-
   return (
     <Card className="w-full lg:w-[350px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0 rounded-xl bg-background p-0 gap-0">
       <div className="p-4 border-b bg-muted/30 shrink-0">
@@ -103,18 +104,31 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
           <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <Layers className="h-3.5 w-3.5 text-primary" /> Quản lý Menu
           </h3>
-          <Button size="sm" variant="ghost" className="h-7 px-2 text-primary hover:bg-primary/10" onClick={onAddRoot}>
-            <Plus className="h-4 w-4 mr-1" /> Thêm gốc
+          <Button size="sm" variant="ghost" className="h-7 px-2 text-primary hover:bg-primary/10" asChild>
+            <Link href="/services/admin/menus/create">
+              <Plus className="h-4 w-4 mr-1" /> Thêm gốc
+            </Link>
           </Button>
         </div>
 
         <div className="mt-3 w-full">
-          <Search placeholder="Tìm tên, mã..." className="w-full" />
+          <Search
+            placeholder="Tìm tên, mã..."
+            className="w-full"
+
+          />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 scrollbar-thin bg-muted/5">
-        {renderBusinessTree(null)}
+        {isLoadingMenus ? (
+          <div className="flex justify-center items-center py-6 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin mr-2" />
+            <span className="text-xs">Đang tải cấu trúc Menu...</span>
+          </div>
+        ) : (
+          renderBusinessTree(null)
+        )}
       </div>
     </Card>
   );

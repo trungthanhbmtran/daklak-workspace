@@ -3,21 +3,12 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { OrganizationUnitNode, CreateUnitPayload, UpdateUnitPayload } from "../types";
 
-export type ViewMode = "idle" | "create_root" | "create_child";
-
 export interface OrganizationState {
   flatUnits: OrganizationUnitNode[];
-  mode: ViewMode;
-  selectedId?: number;
-  parentId?: number;
   isLoadingTree: boolean;
 }
 
 export interface OrganizationActions {
-  select: (id: number) => void;
-  addRoot: () => void;
-  addChild: (parentId: number) => void;
-  cancel: () => void;
   createUnit: (payload: CreateUnitPayload) => Promise<unknown>;
   updateUnit: (id: number, payload: UpdateUnitPayload) => Promise<unknown>;
   updateScope: (id: number, payload: { domainIds?: number[] }) => Promise<unknown>;

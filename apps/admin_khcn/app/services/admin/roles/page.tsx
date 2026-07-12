@@ -1,17 +1,20 @@
-import { RoleClient } from "@/features/system-admin/roles";
+import { ShieldAlert } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
-export const metadata = { title: "Chính sách phân quyền (PBAC)" };
+export const metadata = {
+  title: "Quản lý Vai trò | Quản trị Hệ thống",
+};
 
 export default function RolesPage() {
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <div className="flex flex-col shrink-0">
-        <h1 className="text-2xl font-bold tracking-tight">Vai trò & Chính sách (PBAC)</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Thiết lập vai trò và phân bổ quyền (policy) theo tài nguyên – Xem, Thêm, Sửa, Xóa cho từng module.
-        </p>
+    <Card className="flex-1 w-full h-full min-h-0 shadow-none border-border border-dashed bg-muted/10 flex flex-col items-center justify-center p-12 text-center rounded-xl">
+      <div className="p-4 bg-background rounded-full shadow-sm mb-4">
+        <ShieldAlert className="h-10 w-10 text-muted-foreground/40" />
       </div>
-      <RoleClient />
-    </div>
+      <h3 className="font-bold text-foreground">Chưa chọn Vai trò</h3>
+      <p className="text-xs text-muted-foreground max-w-[220px] mt-1">
+        Vui lòng chọn vai trò bên trái để bắt đầu thiết lập quyền truy cập tài nguyên.
+      </p>
+    </Card>
   );
 }

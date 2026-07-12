@@ -1,4 +1,5 @@
-import { OrganizationClient } from "@/features/system-admin/organization";
+import { Building2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 export const metadata = {
   title: "Cơ cấu tổ chức | Quản trị Hệ thống",
@@ -6,20 +7,15 @@ export const metadata = {
 
 export default function OrganizationPage() {
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-4">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Cơ cấu tổ chức</h2>
-          <p className="text-muted-foreground">
-            Quản lý đơn vị tổ chức (cây đơn vị), định biên và chức danh theo Nghị định 24/2014/NĐ-CP và 107/2020/NĐ-CP.
-          </p>
-          <p className="text-xs text-muted-foreground/80 mt-1">
-            Tổ chức cơ quan chuyên môn thuộc UBND tỉnh, TP trực thuộc TW: Sở (Phòng, Thanh tra, Văn phòng, Chi cục, Đơn vị sự nghiệp).
-          </p>
+    <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border border-dashed bg-muted/20">
+      <div className="flex flex-col items-center gap-4 px-6 text-center">
+        <div className="rounded-full bg-muted/50 p-5">
+          <Building2 className="h-12 w-12 text-muted-foreground/50" />
         </div>
+        <p className="text-sm text-muted-foreground max-w-[280px]">
+          Chọn một đơn vị từ cây tổ chức bên trái để xem và chỉnh sửa thông tin.
+        </p>
       </div>
-
-      <OrganizationClient />
     </div>
   );
 }

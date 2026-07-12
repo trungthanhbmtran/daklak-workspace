@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,85 +32,33 @@ import { Separator } from "@/components/ui/separator";
 import { MenuItem, PbacResource } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";
 import { renderIcon } from "../utils";
-import type { ViewState } from "..";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { useMenuApi } from "../hooks/useMenuApi";
 import { useFormLogic } from "../hooks/useFormLogic";
 
-// ============================================================================
-// 1. COMPONENT CHÍNH: MENU FORM
-// ============================================================================
 interface MenuFormProps {
-  menus: MenuItem[];
-  viewState: ViewState;
-  onSuccess: () => void;
-  onCancel: () => void;
+  menuId?: number; // Truyền id từ route /menus/[id] để sửa. Nếu không có => tạo mới
 }
 
-export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProps) {
-  // Chỉ fetch resources khi mở form tạo/sửa
-  const needResources = viewState.mode !== "idle";
-  const { resources, isLoadingResources, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(needResources);
+export function MenuForm({ menuId }: MenuFormProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isCreate = !menuId;
+  const urlParentId = searchParams.get('parentId');
+  
+  // Chỉ fetch resources khi ở form (tạo hoặc sửa)
+  const { menus, resources, isLoadingResources, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(true);
   const { getParentPathPrefix } = useFormLogic(menus);
-
-  const { mode, selectedId, parentId } = viewState;
-  const isCreate = mode.startsWith("create");
-
-  if (mode === "idle") {
-    return (
-      <Card className="flex-1 w-full min-h-0 shadow-none border-border flex items-center justify-center bg-muted/5 border-dashed rounded-xl transition-all p-0 gap-0">
-        <div className="flex flex-col items-center">
-          <div className="p-4 bg-background rounded-full shadow-sm mb-4">
-            <LayoutDashboard className="h-10 w-10 text-muted-foreground/30" />
-          </div>
-          <p className="text-sm font-medium text-muted-foreground">Chọn menu từ danh sách để thiết lập cấu hình</p>
-        </div>
-      </Card>
-    );
-  }
-
-  const formKey = isCreate ? `create-${parentId || 'root'}` : `edit-${selectedId}`;
-
-  return (
-    <MenuFormInner
-      key={formKey}
-      menus={menus}
-      viewState={viewState}
-      resources={resources}
-      isLoadingResources={isLoadingResources}
-      getParentPathPrefix={getParentPathPrefix}
-      saveMenu={saveMenu}
-      isSaving={isSaving}
-      deleteMenu={deleteMenu}
-      isDeleting={isDeleting}
-      onSuccess={onSuccess}
-      onCancel={onCancel}
-    />
-  );
-}
-
-// ============================================================================
-// 2. COMPONENT LÕI: NƠI XỬ LÝ FORM & GIAO DIỆN
-// ============================================================================
-function MenuFormInner(props: any) {
-  const {
-    menus, viewState, resources, isLoadingResources,
-    getParentPathPrefix, saveMenu, isSaving, deleteMenu, isDeleting, onSuccess, onCancel
-  } = props;
-
-  const { mode, selectedId, parentId: viewParentId } = viewState;
-  const isCreate = mode.startsWith("create");
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Lấy data menu hiện tại và menu cha
+  const selectedId = menuId;
   const selectedMenu = !isCreate ? menus.find((m: MenuItem) => m.id === selectedId) : null;
-  const parentId = viewParentId ?? (isCreate ? undefined : selectedMenu?.parentId ?? undefined);
-  const parentMenu = isCreate
-    ? (parentId != null ? menus.find((m: MenuItem) => m.id === parentId) : null)
-    : (selectedMenu ? menus.find((m: MenuItem) => m.id === selectedMenu.parentId) : null);
+  const parentId = urlParentId ? Number(urlParentId) : (isCreate ? undefined : selectedMenu?.parentId ?? undefined);
+  const parentMenu = parentId ? menus.find((m: MenuItem) => m.id === parentId) : null;
 
-  const isRootMenu = parentMenu == null && parentId == null;
+  const isRootMenu = parentMenu == null && !parentId;
 
   // Tính số thứ tự tự động: số con hiện có + 1
   const autoSort = useMemo(() => {
@@ -204,7 +153,7 @@ function MenuFormInner(props: any) {
     }
 
     await saveMenu(payload);
-    onSuccess();
+    router.push('/services/admin/menus');
   };
 
   const handleDelete = () => {
@@ -215,8 +164,12 @@ function MenuFormInner(props: any) {
     if (selectedId) {
       await deleteMenu(selectedId);
       setIsDeleteDialogOpen(false);
-      onSuccess();
+      router.push('/services/admin/menus');
     }
+  };
+
+  const handleCancel = () => {
+    router.push('/services/admin/menus');
   };
 
   return (
@@ -239,7 +192,6 @@ function MenuFormInner(props: any) {
       <CardContent className="flex-1 overflow-y-auto p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
-
             {/* SECTION 1: THÔNG TIN CƠ BẢN */}
             <div className="p-6 space-y-4 border-b border-border/50">
               <h3 className="text-[13px] font-bold text-foreground border-b pb-2 flex items-center gap-2">
@@ -476,7 +428,7 @@ function MenuFormInner(props: any) {
 
       {/* FOOTER */}
       <div className="p-4 border-t bg-background shrink-0 flex justify-end gap-3 items-center shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <Button type="button" variant="ghost" onClick={onCancel} className="text-xs font-bold h-10 px-6">
+        <Button type="button" variant="ghost" onClick={handleCancel} className="text-xs font-bold h-10 px-6">
           Hủy bỏ
         </Button>
         <Button type="button" className="px-8 font-bold text-xs h-10 shadow-md transition-transform hover:scale-[1.02]" disabled={isSaving} onClick={form.handleSubmit(handleSubmit)}>

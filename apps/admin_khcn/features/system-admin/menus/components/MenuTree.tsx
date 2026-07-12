@@ -43,12 +43,14 @@ export function MenuTree({ menus, parentId, level, visibleIds, expandedRows, sea
               {level > 0 && <CornerDownRight className="absolute left-[-10px] top-1/2 -translate-y-1/2 h-3 w-3 text-border" />}
               
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <button 
+                <Button
+                  variant="ghost" 
+                  size="icon"
                   onClick={(e) => { e.stopPropagation(); onToggleExpand(menu.id); }} 
-                  className={`h-4 w-4 flex items-center justify-center rounded hover:bg-black/10 ${!hasChildren && "invisible"}`}
+                  className={`h-4 w-4 rounded hover:bg-black/10 ${!hasChildren && "invisible"}`}
                 >
                   {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                </button>
+                </Button>
                 <span className={isSelected ? "text-primary-foreground" : "text-primary"}>{renderIcon(menu.icon)}</span>
                 <span className="text-sm font-medium truncate">{menu.name}</span>
               </div>

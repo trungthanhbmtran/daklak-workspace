@@ -1,3 +1,5 @@
+"use client";
+
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
@@ -9,7 +11,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useGetPaginatedCategoryByGroup, useDeleteCategory } from "../hooks/useCategoryApi";
+import { useGetPaginatedCategoryByGroup, useDeleteCategory, useGetCategoryGroups } from "../hooks/useCategoryApi";
 import { useCategoryUI } from "../hooks/useCategoryUI";
 import { CategoryTable } from "./CategoryTable";
 import { CreateCategoryModal, EditCategoryModal } from "./CategoryModals";
@@ -19,14 +21,16 @@ import { useSearchParams } from "next/navigation";
 
 interface CategoryContentProps {
   activeGroup: string;
-  groups: any[];
 }
 
-export function CategoryContent({ activeGroup, groups }: CategoryContentProps) {
+export function CategoryContent({ activeGroup }: CategoryContentProps) {
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
+
+  // Fetch groups to get the group name
+  const { data: groups } = useGetCategoryGroups();
 
   useEffect(() => {
     setPage(1);
@@ -67,7 +71,7 @@ export function CategoryContent({ activeGroup, groups }: CategoryContentProps) {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
         <div className="hidden sm:block">
           <h3 className="text-lg font-semibold text-foreground">
-            {groups?.find((g) => g.code === activeGroup)?.name || activeGroup}
+            {groups?.find((g: any) => g.code === activeGroup)?.name || activeGroup}
           </h3>
           <p className="text-sm text-muted-foreground">Quản lý các giá trị thuộc nhóm này</p>
         </div>

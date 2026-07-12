@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Building2, Info } from "lucide-react";
@@ -13,65 +14,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { UnitTypeSelector } from "./UnitTypeSelector";
 import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";
 import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../hooks/useUnitTypeCategories";
-import type { OrganizationUnitNode } from "../types";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 import { useOrganizationContext } from "../context/OrganizationContext";
 
 export function OrganizationForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { state, actions, meta } = useOrganizationContext();
-  const { flatUnits, mode, parentId } = state;
+  const { flatUnits } = state;
 
-  if (mode === "idle") {
-    return (
-      <div className="flex-1 flex items-center justify-center rounded-lg border border-dashed">
-        <div className="flex flex-col items-center gap-3 px-6 text-center">
-          <div className="rounded-full bg-muted p-4">
-            <Building2 className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Chưa có đơn vị nào được chọn</p>
-            <p className="text-xs text-muted-foreground">
-              Chọn đơn vị từ cây bên trái hoặc nhấn "Thêm gốc" để tạo mới.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  const parentIdStr = searchParams.get('parentId');
+  const parentId = parentIdStr ? Number(parentIdStr) : undefined;
   const parentUnit = parentId != null ? flatUnits.find((u) => u.id === parentId) : null;
 
-  return (
-    <OrganizationFormInner
-      key={`create-${parentId ?? "root"}`}
-      parentUnit={parentUnit}
-      parentId={parentId ?? undefined}
-      createUnit={actions.createUnit}
-      isCreating={meta.isCreating}
-      onSuccess={actions.cancel}
-      onCancel={actions.cancel}
-    />
-  );
-}
-
-function OrganizationFormInner({
-  parentUnit,
-  parentId,
-  createUnit,
-  isCreating,
-  onSuccess,
-  onCancel,
-}: {
-  parentUnit: OrganizationUnitNode | null | undefined;
-  parentId?: number;
-  createUnit: (payload: {
-    code: string; name: string; shortName?: string; categoryCode: string;
-    parentId?: number;
-  }) => Promise<unknown>;
-  isCreating: boolean;
-  onSuccess: () => void;
-  onCancel: () => void;
-}) {
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
     defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" },
@@ -87,19 +42,23 @@ function OrganizationFormInner({
   const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
-    await createUnit({
+    await actions.createUnit({
       code: values.code.trim(),
       name: values.name.trim(),
       shortName: values.shortName?.trim() || undefined,
       categoryCode: values.categoryCode,
       parentId: parentId ?? undefined,
     });
-    onSuccess();
+    router.push('/services/admin/organization');
+  };
+
+  const handleCancel = () => {
+    router.push('/services/admin/organization');
   };
 
   return (
-    <Card className="flex-1 flex flex-col overflow-hidden rounded-lg shadow-none">
-      <CardHeader className="pb-4 shrink-0">
+    <Card className="flex-1 flex flex-col overflow-hidden rounded-lg shadow-none border-border">
+      <CardHeader className="pb-4 shrink-0 bg-muted/10 border-b">
         <div className="space-y-0.5">
           <p className="text-xs text-muted-foreground">
             {parentUnit ? `Trực thuộc: ${parentUnit.name}` : "Đơn vị cấp gốc"}
@@ -110,10 +69,8 @@ function OrganizationFormInner({
         </div>
       </CardHeader>
 
-      <Separator />
-
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-1 flex-col overflow-hidden">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-1 flex-col overflow-hidden bg-background">
           <CardContent className="flex-1 overflow-y-auto pt-6 space-y-6">
 
             {/* ── Định danh ── */}
@@ -220,12 +177,12 @@ function OrganizationFormInner({
 
           <Separator />
 
-          <CardFooter className="pt-4 flex justify-end gap-2 shrink-0">
-            <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+          <CardFooter className="pt-4 pb-4 flex justify-end gap-2 shrink-0 bg-muted/10 border-t">
+            <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
               Hủy
             </Button>
-            <Button type="submit" size="sm" disabled={isCreating}>
-              {isCreating ? "Đang thêm..." : (
+            <Button type="submit" size="sm" disabled={meta.isCreating}>
+              {meta.isCreating ? "Đang thêm..." : (
                 <>
                   <Plus className="h-4 w-4 mr-1.5" />
                   Thêm đơn vị
