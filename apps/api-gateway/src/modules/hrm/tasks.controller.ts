@@ -127,6 +127,14 @@ export class TasksController implements OnModuleInit {
           const u = usersMap.get(task.supervisorCode);
           if (u) task.supervisorName = u.fullName || u.username;
         }
+        if (task.coassigneeCodes && Array.isArray(task.coassigneeCodes)) {
+          task.coassigneeNames = task.coassigneeCodes
+            .map((code: string) => {
+              const u = usersMap.get(code);
+              return u ? (u.fullName || u.username) : code;
+            })
+            .filter(Boolean);
+        }
         if (task.children) task.children.forEach(mapUsers);
       };
       tasks.forEach(mapUsers);

@@ -238,8 +238,13 @@ export function TaskList() {
           <TableCell>
             <div className="flex flex-col">
               <span className="text-sm font-medium">
-                {task.assigneeDepartment ? `🏢 ${task.assigneeDepartment.name}` : task.assignee?.fullName || "Chưa xác định"}
+                {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
               </span>
+              {task.coassigneeNames && task.coassigneeNames.length > 0 && (
+                <span className="text-xs text-slate-500 mt-0.5">
+                  Phối hợp: {task.coassigneeNames.join(", ")}
+                </span>
+              )}
             </div>
           </TableCell>
           <TableCell>

@@ -174,14 +174,26 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             <div>
               <p className="text-slate-500 mb-1">Người giao</p>
-              <p className="font-medium">{task.assigner?.fullName || "Chưa xác định"}</p>
+              <p className="font-medium">{task.assignerName || task.assigner?.fullName || "Chưa xác định"}</p>
             </div>
             <div>
               <p className="text-slate-500 mb-1">Đơn vị / Người xử lý</p>
               <p className="font-medium">
-                {task.assigneeDepartment ? `🏢 ${task.assigneeDepartment.name}` : task.assignee?.fullName || "Chưa xác định"}
+                {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
               </p>
             </div>
+            {task.coassigneeNames && task.coassigneeNames.length > 0 && (
+              <div className="col-span-2">
+                <p className="text-slate-500 mb-1">Người phối hợp xử lý</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {task.coassigneeNames.map((name, idx) => (
+                    <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200">
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <p className="text-slate-500 mb-1">Thời hạn</p>
               <p className={`font-medium ${new Date(task.dueDate) < new Date() && !isCompleted ? "text-red-500" : ""}`}>

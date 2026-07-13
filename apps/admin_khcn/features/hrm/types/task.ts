@@ -64,6 +64,14 @@ export interface HrmTask {
   assignee?: HrmEmployee;
   assigneeDepartment?: HrmDepartment;
   coAssignees?: HrmEmployee[];
+
+  assigneeName?: string;
+  assignerName?: string;
+  supervisorName?: string;
+  coassigneeNames?: string[];
+  assigneeAvatar?: string;
+  assigneeJobTitle?: string;
+  assigneeUnitName?: string;
   
   startDate: string;
   dueDate: string;
