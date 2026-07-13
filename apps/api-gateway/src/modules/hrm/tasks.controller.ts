@@ -135,6 +135,31 @@ export class TasksController implements OnModuleInit {
     return tasks;
   }
 
+  private translateTaskData(task: any) {
+    if (!task) return task;
+    const statusMap: Record<string, string> = {
+      ASSIGNED: 'Mới giao',
+      IN_PROGRESS: 'Đang xử lý',
+      PENDING_REVIEW: 'Chờ duyệt',
+      COMPLETED: 'Hoàn thành',
+      OVERDUE: 'Quá hạn',
+      REJECTED: 'Bị từ chối',
+      DRAFT: 'Nháp'
+    };
+    const priorityMap: Record<string, string> = {
+      HIGH: 'Cao',
+      NORMAL: 'Thường',
+      LOW: 'Thấp',
+      URGENT: 'Khẩn'
+    };
+    if (task.status && statusMap[task.status]) task.status = statusMap[task.status];
+    if (task.priority && priorityMap[task.priority]) task.priority = priorityMap[task.priority];
+    if (task.children) task.children.forEach((c: any) => this.translateTaskData(c));
+    if (task.subTasks) task.subTasks.forEach((c: any) => this.translateTaskData(c));
+    return task;
+  }
+
+
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
@@ -143,9 +168,11 @@ export class TasksController implements OnModuleInit {
       body.currentUserId = req.user.id ? parseInt(req.user.id, 10) : undefined;
       body.currentUserPermissions = req.user.permissionsFlatten || [];
     }
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
     );
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
   }
 
   @Get()
@@ -229,8 +256,10 @@ export class TasksController implements OnModuleInit {
     if (response?.data) {
       if (Array.isArray(response.data)) {
         await this.populateUsers(response.data);
+        response.data.forEach((t: any) => this.translateTaskData(t));
       } else {
         await this.populateUsers([response.data]);
+        this.translateTaskData(response.data);
       }
     }
 
@@ -310,7 +339,7 @@ export class TasksController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
   ) {
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.UpdateTask(
         {
           id,
@@ -325,6 +354,8 @@ export class TasksController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
   }
 
   @Put(':id/status')
@@ -336,14 +367,13 @@ export class TasksController implements OnModuleInit {
     @Body('actionName') actionName?: string,
   ) {
     const user = req.user;
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.UpdateTaskStatus(
         {
           id,
           status,
           rejectReason,
           actionName,
-          // Inject người thực hiện từ JWT token
           actorCode: user?.employeeCode || '',
           currentUserPermissions: user?.permissionsFlatten || [],
           currentUserId: user?.id,
@@ -352,6 +382,8 @@ export class TasksController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
   }
 
   @Get('recommend-assignees')
@@ -442,7 +474,7 @@ export class TasksController implements OnModuleInit {
     const user = req.user;
     const assignerCode = user?.employeeCode;
 
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.AssignTask(
         {
           id,
@@ -457,6 +489,8 @@ export class TasksController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
   }
 
   @Post(':id/breakdown')
@@ -488,7 +522,7 @@ export class TasksController implements OnModuleInit {
       throw new Error('Nhiệm vụ không tồn tại');
     }
 
-    return firstValueFrom(
+    const breakdownResponse: any = await firstValueFrom(
       this.taskService.BreakdownTask(
         {
           ...body,
@@ -499,6 +533,8 @@ export class TasksController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
+    if (breakdownResponse?.data) this.translateTaskData(breakdownResponse.data);
+    return breakdownResponse;
   }
 
   @Get(':id/comments')
@@ -630,7 +666,7 @@ export class TasksController implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
 
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.GetSubTasks(
         {
           taskId: id,
@@ -642,6 +678,14 @@ export class TasksController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
+    if (response?.data) {
+      if (Array.isArray(response.data)) {
+        response.data.forEach((t: any) => this.translateTaskData(t));
+      } else {
+        this.translateTaskData(response.data);
+      }
+    }
+    return response;
   }
 
   @Get(':id/history')
