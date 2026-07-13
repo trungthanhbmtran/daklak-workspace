@@ -120,14 +120,6 @@ export function TaskList() {
                   <div className="w-5 h-5" /> // Empty space alignment
                 )}
               </div>
-              
-              <div className="shrink-0">
-                {hasSubTasks ? (
-                  isExpanded ? <FolderOpen className="w-4 h-4 text-blue-500 fill-blue-100" /> : <Folder className="w-4 h-4 text-blue-500 fill-blue-100" />
-                ) : (
-                  <FileText className="w-4 h-4 text-slate-400" />
-                )}
-              </div>
 
               <div className="flex flex-col ml-1 py-1">
                 <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>{task.title}</span>

@@ -171,32 +171,12 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
         </div>
 
         <Tabs defaultValue="processing" className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-6 pt-4 bg-white border-b">
-            <TabsList className="w-full justify-start rounded-none border-b-0 h-auto p-0 bg-transparent gap-6">
-              <TabsTrigger
-                value="processing"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3"
-              >
-                Xử lý & Cập nhật
-              </TabsTrigger>
-              <TabsTrigger
-                value="kpi"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3"
-              >
-                Đánh giá KPI
-              </TabsTrigger>
-              <TabsTrigger
-                value="discussion"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3"
-              >
-                Trao đổi
-              </TabsTrigger>
-              <TabsTrigger
-                value="history"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 pb-3"
-              >
-                Lịch sử
-              </TabsTrigger>
+          <div className="px-6 py-4 bg-white border-b">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="processing">Xử lý & Cập nhật</TabsTrigger>
+              <TabsTrigger value="kpi">Đánh giá KPI</TabsTrigger>
+              <TabsTrigger value="discussion">Trao đổi</TabsTrigger>
+              <TabsTrigger value="history">Lịch sử</TabsTrigger>
             </TabsList>
           </div>
 
