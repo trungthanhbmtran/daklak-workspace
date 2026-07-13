@@ -35,6 +35,73 @@ const getPriorityBadge = (priority: string) => {
   }
 };
 
+const TreeLines = ({ 
+  depth, 
+  isLastChild, 
+  ancestorsLast, 
+  isExpanded, 
+  hasSubTasks 
+}: { 
+  depth: number, 
+  isLastChild: boolean, 
+  ancestorsLast: boolean[], 
+  isExpanded: boolean, 
+  hasSubTasks: boolean 
+}) => {
+  return (
+    <>
+      {/* Ancestor continuing vertical lines */}
+      {ancestorsLast.map((isAncestorLast, i) => {
+        if (i === 0) return null; // Root tasks don't have continuing vertical lines connecting them
+        if (isAncestorLast) return null;
+        return (
+          <div 
+            key={`ancestor-line-${i}`}
+            className="absolute w-px bg-slate-300 pointer-events-none" 
+            style={{ left: `${26 + i * 32}px`, top: '0', bottom: '0' }} 
+          />
+        );
+      })}
+
+      {/* Current level L-shape lines */}
+      {depth > 0 && (
+        <>
+          {/* Vertical segment */}
+          <div 
+            className="absolute w-px bg-slate-300 pointer-events-none" 
+            style={{ 
+              left: `${26 + (depth - 1) * 32}px`, 
+              top: '0', 
+              bottom: isLastChild ? '50%' : '0' 
+            }} 
+          />
+          {/* Horizontal segment */}
+          <div 
+            className="absolute h-px bg-slate-300 pointer-events-none" 
+            style={{ 
+              left: `${26 + (depth - 1) * 32}px`, 
+              top: '50%', 
+              width: '22px' 
+            }} 
+          />
+        </>
+      )}
+
+      {/* Parent expanded line dropping down */}
+      {isExpanded && hasSubTasks && (
+        <div 
+          className="absolute w-px bg-slate-300 pointer-events-none" 
+          style={{ 
+            left: `${26 + depth * 32}px`, 
+            top: 'calc(50% + 12px)', 
+            bottom: '0'
+          }} 
+        />
+      )}
+    </>
+  );
+};
+
 export function TaskList() {
   const [tasks, setTasks] = useState<HrmTask[]>(MOCK_TASKS);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -62,72 +129,35 @@ export function TaskList() {
       <React.Fragment key={task.id}>
         <TableRow className={`hover:bg-slate-50/80 transition-colors ${depth > 0 ? "bg-slate-50/40" : ""}`}>
           <TableCell className="font-medium relative" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
-            {/* Ancestor continuing vertical lines */}
-            {ancestorsLast.map((isAncestorLast, i) => {
-              if (isAncestorLast) return null;
-              return (
-                <div 
-                  key={`ancestor-line-${i}`}
-                  className="absolute w-px bg-slate-300 pointer-events-none" 
-                  style={{ left: `${26 + i * 32}px`, top: '0', bottom: '0' }} 
-                />
-              );
-            })}
-
-            {/* Current level L-shape lines */}
-            {depth > 0 && (
-              <>
-                {/* Vertical segment */}
-                <div 
-                  className="absolute w-px bg-slate-300 pointer-events-none" 
-                  style={{ 
-                    left: `${26 + (depth - 1) * 32}px`, 
-                    top: '0', 
-                    bottom: isLastChild ? '50%' : '0' 
-                  }} 
-                />
-                {/* Horizontal segment */}
-                <div 
-                  className="absolute h-px bg-slate-300 pointer-events-none" 
-                  style={{ 
-                    left: `${26 + (depth - 1) * 32}px`, 
-                    top: '50%', 
-                    width: '22px' 
-                  }} 
-                />
-              </>
-            )}
-
-            {/* Parent expanded line dropping down */}
-            {isExpanded && hasSubTasks && (
-              <div 
-                className="absolute w-px bg-slate-300 pointer-events-none" 
-                style={{ 
-                  left: `${26 + depth * 32}px`, 
-                  top: 'calc(50% + 12px)', 
-                  bottom: '0'
-                }} 
-              />
-            )}
+            
+            <TreeLines 
+              depth={depth}
+              isLastChild={isLastChild}
+              ancestorsLast={ancestorsLast}
+              isExpanded={isExpanded}
+              hasSubTasks={!!hasSubTasks}
+            />
 
             <div className="flex items-center gap-1.5 relative z-10">
-              <div className="flex items-center justify-center w-5 h-5 shrink-0">
-                {hasSubTasks ? (
-                  <button onClick={() => toggleExpand(task.id)} className="w-5 h-5 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors">
+              {hasSubTasks && (
+                <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white">
+                  <Button 
+                    variant="ghost"
+                    onClick={() => toggleExpand(task.id)} 
+                    className="w-5 h-5 p-0 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors"
+                  >
                     {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                  </button>
-                ) : (
-                  <div className="w-5 h-5" /> // Empty space alignment
-                )}
-              </div>
+                  </Button>
+                </div>
+              )}
 
-              <div className="flex flex-col ml-1 py-1">
+              <div className="flex flex-col py-1">
                 <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>{task.title}</span>
                 {task.sourceDocumentRef && depth === 0 && (
-                  <span className="text-[11px] font-normal text-blue-600 mt-0.5 flex items-center bg-blue-50 w-fit px-1.5 rounded">
+                  <Badge variant="secondary" className="mt-0.5 flex items-center w-fit px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
                     <Clock className="w-3 h-3 mr-1" />
                     VB: {task.sourceDocumentRef}
-                  </span>
+                  </Badge>
                 )}
               </div>
             </div>
