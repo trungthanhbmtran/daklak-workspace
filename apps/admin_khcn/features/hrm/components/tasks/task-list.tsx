@@ -145,28 +145,18 @@ const TaskListSkeleton = () => (
   </>
 );
 
-// ── Build tree from flat list ──────────────────────────────────────────────────
+// ── Map tree from backend ──────────────────────────────────────────────────────────
 
-function buildTaskTree(flatTasks: HrmTask[]): HrmTask[] {
-  const map = new Map<string, HrmTask>();
-  const roots: HrmTask[] = [];
-
-  // Khởi tạo map với subTasks rỗng
-  for (const task of flatTasks) {
-    map.set(task.id, { ...task, subTasks: [] });
-  }
-
-  // Gắn con vào cha
-  for (const task of flatTasks) {
-    const node = map.get(task.id)!;
-    if (task.parentId && map.has(task.parentId)) {
-      map.get(task.parentId)!.subTasks!.push(node);
-    } else {
-      roots.push(node);
-    }
-  }
-
-  return roots;
+function buildTaskTree(tasks: HrmTask[]): HrmTask[] {
+  if (!tasks || !Array.isArray(tasks)) return [];
+  
+  return tasks.map(task => {
+    const children = (task as any).children || [];
+    return {
+      ...task,
+      subTasks: children.length > 0 ? buildTaskTree(children) : []
+    };
+  });
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
