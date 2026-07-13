@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon } from "lucide-react";
+import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X } from "lucide-react";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -21,6 +21,22 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("NORMAL");
   const [assignee, setAssignee] = useState("");
+  const [coordinators, setCoordinators] = useState<{id: string, name: string}[]>([]);
+  
+  const handleAddCoordinator = (value: string) => {
+    let name = value;
+    if (value === "DEPT_12") name = "🏢 P. Kế toán";
+    if (value === "DEPT_13") name = "🏢 P. Tổ chức";
+    if (value === "EMP_305") name = "👤 Lê Văn H";
+    
+    if (!coordinators.find(c => c.id === value)) {
+      setCoordinators([...coordinators, {id: value, name}]);
+    }
+  };
+
+  const removeCoordinator = (id: string) => {
+    setCoordinators(coordinators.filter(c => c.id !== id));
+  };
   
   const isSubTask = !!parentId;
 
@@ -89,63 +105,141 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     <SelectValue placeholder="Chọn người nhận..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
-                    <SelectGroup>
-                      <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Gợi ý (Năng lực / Phù hợp nhất)</SelectLabel>
-                      <SelectItem value="EMP_202">
-                        <div className="flex items-center justify-between w-full gap-4">
-                          <div className="flex items-center gap-2">
-                            <UserCircle2 className="w-4 h-4 text-blue-500" />
-                            <span>Phạm Thị D (Chuyên viên)</span>
-                          </div>
-                          <div className="flex gap-1">
-                            <Badge variant="default" className="text-[10px] h-4 px-1 py-0 leading-none">Phù hợp</Badge>
-                            <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Năng lực tốt</Badge>
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="DEPT_10">
-                        <div className="flex items-center justify-between w-full gap-4">
-                          <span>🏢 P. Công nghệ thông tin</span>
-                          <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Đúng chuyên môn</Badge>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
-                    
-                    <SelectSeparator />
-                    
-                    <SelectGroup>
-                      <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Cần lưu ý (Hiệu suất thấp)</SelectLabel>
-                      <SelectItem value="EMP_203">
-                        <div className="flex items-center justify-between w-full gap-4">
-                          <div className="flex items-center gap-2">
-                            <UserCircle2 className="w-4 h-4 text-red-500" />
-                            <span>Lê Văn C (Chuyên viên)</span>
-                          </div>
-                          <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0 leading-none bg-red-100 text-red-700 hover:bg-red-200 border-transparent">Hiệu suất thấp</Badge>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
+                    {isSubTask ? (
+                      <>
+                        <SelectGroup>
+                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân sự trực thuộc (Gợi ý)</SelectLabel>
+                          <SelectItem value="EMP_301">
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <div className="flex items-center gap-2">
+                                <UserCircle2 className="w-4 h-4 text-blue-500" />
+                                <span>Nguyễn Văn E (Nhân viên)</span>
+                              </div>
+                              <div className="flex gap-1">
+                                <Badge variant="default" className="text-[10px] h-4 px-1 py-0 leading-none">Phù hợp nhất</Badge>
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="EMP_302">
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <div className="flex items-center gap-2">
+                                <UserCircle2 className="w-4 h-4 text-blue-500" />
+                                <span>Trần Thị F (Nhân viên)</span>
+                              </div>
+                              <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Năng lực tốt</Badge>
+                            </div>
+                          </SelectItem>
+                        </SelectGroup>
+                        
+                        <SelectSeparator />
+                        
+                        <SelectGroup>
+                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Cần lưu ý (Hiệu suất thấp)</SelectLabel>
+                          <SelectItem value="EMP_303">
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <div className="flex items-center gap-2">
+                                <UserCircle2 className="w-4 h-4 text-red-500" />
+                                <span>Lê Hữu G (Nhân viên)</span>
+                              </div>
+                              <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0 leading-none bg-red-100 text-red-700 hover:bg-red-200 border-transparent">Hiệu suất thấp</Badge>
+                            </div>
+                          </SelectItem>
+                        </SelectGroup>
+                      </>
+                    ) : (
+                      <>
+                        <SelectGroup>
+                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Gợi ý (Năng lực / Phù hợp nhất)</SelectLabel>
+                          <SelectItem value="EMP_202">
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <div className="flex items-center gap-2">
+                                <UserCircle2 className="w-4 h-4 text-blue-500" />
+                                <span>Phạm Thị D (Chuyên viên)</span>
+                              </div>
+                              <div className="flex gap-1">
+                                <Badge variant="default" className="text-[10px] h-4 px-1 py-0 leading-none">Phù hợp</Badge>
+                                <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Năng lực tốt</Badge>
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="DEPT_10">
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <span>🏢 P. Công nghệ thông tin</span>
+                              <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Đúng chuyên môn</Badge>
+                            </div>
+                          </SelectItem>
+                        </SelectGroup>
+                        
+                        <SelectSeparator />
+                        
+                        <SelectGroup>
+                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Cần lưu ý (Hiệu suất thấp)</SelectLabel>
+                          <SelectItem value="EMP_203">
+                            <div className="flex items-center justify-between w-full gap-4">
+                              <div className="flex items-center gap-2">
+                                <UserCircle2 className="w-4 h-4 text-red-500" />
+                                <span>Lê Văn C (Chuyên viên)</span>
+                              </div>
+                              <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0 leading-none bg-red-100 text-red-700 hover:bg-red-200 border-transparent">Hiệu suất thấp</Badge>
+                            </div>
+                          </SelectItem>
+                        </SelectGroup>
 
-                    <SelectSeparator />
+                        <SelectSeparator />
 
-                    <SelectGroup>
-                      <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Danh sách khác</SelectLabel>
-                      <SelectItem value="DEPT_11">
-                        <div className="flex items-center justify-between w-full">
-                          <span>🏢 P. Hành chính - Tổng hợp</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="EMP_201">
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-2">
-                            <UserCircle2 className="w-4 h-4 text-slate-400" />
-                            <span>Trần Thị B (Chuyên viên)</span>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Danh sách khác</SelectLabel>
+                          <SelectItem value="DEPT_11">
+                            <div className="flex items-center justify-between w-full">
+                              <span>🏢 P. Hành chính - Tổng hợp</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="EMP_201">
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                <UserCircle2 className="w-4 h-4 text-slate-400" />
+                                <span>Trần Thị B (Chuyên viên)</span>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        </SelectGroup>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Đơn vị phối hợp */}
+              <div className="space-y-3 pt-1">
+                <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <UsersIcon className="w-4 h-4 text-slate-400"/> Phối hợp thực hiện
+                </Label>
+                <Select value="" onValueChange={handleAddCoordinator}>
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm">
+                    <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DEPT_12">🏢 P. Kế toán</SelectItem>
+                    <SelectItem value="DEPT_13">🏢 P. Tổ chức</SelectItem>
+                    <SelectItem value="EMP_305">👤 Lê Văn H</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {coordinators.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {coordinators.map(c => (
+                      <Badge key={c.id} variant="secondary" className="flex items-center gap-1.5 py-1 px-2 bg-white border border-slate-200 text-sm font-normal">
+                        {c.name}
+                        <div 
+                          className="w-4 h-4 rounded-full hover:bg-slate-200 flex items-center justify-center cursor-pointer transition-colors"
+                          onClick={() => removeCoordinator(c.id)}
+                        >
+                          <X className="w-3 h-3 text-slate-500 hover:text-red-500" />
+                        </div>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
