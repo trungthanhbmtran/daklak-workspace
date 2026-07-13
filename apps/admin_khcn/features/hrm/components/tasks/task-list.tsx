@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MOCK_TASKS } from "./mock-data";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
-import { Eye, Clock, ChevronRight, ChevronDown, CornerDownRight } from "lucide-react";
+import { Eye, Clock, ChevronRight, ChevronDown, CornerDownRight, Folder, FolderOpen, FileText } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
@@ -53,27 +53,51 @@ export function TaskList() {
     return matchStatus && matchSearch;
   });
 
-  const renderTaskRow = (task: HrmTask, depth: number) => {
+  const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false) => {
     const isOverdue = new Date(task.dueDate) < new Date() && task.status !== "COMPLETED";
     const hasSubTasks = task.subTasks && task.subTasks.length > 0;
     const isExpanded = expandedTasks[task.id];
 
     return (
       <React.Fragment key={task.id}>
-        <TableRow className="hover:bg-slate-50 transition-colors">
-          <TableCell className="font-medium" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
-            <div className="flex items-start gap-2">
-              {hasSubTasks ? (
-                <button onClick={() => toggleExpand(task.id)} className="mt-1 text-slate-500 hover:text-slate-800">
-                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                </button>
-              ) : (
-                depth > 0 ? <CornerDownRight className="w-4 h-4 mt-1 text-slate-300" /> : <div className="w-4 h-4 mt-1" />
-              )}
-              <div className="flex flex-col">
-                <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : ""}`}>{task.title}</span>
+        <TableRow className={`hover:bg-slate-50/80 transition-colors ${depth > 0 ? "bg-slate-50/40" : ""}`}>
+          <TableCell className="font-medium relative" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
+            {/* Guide lines for tree view */}
+            {depth > 0 && (
+              <div 
+                className="absolute border-l-2 border-b-2 border-slate-200 rounded-bl-sm pointer-events-none" 
+                style={{ 
+                  left: `${(depth - 1) * 2 + 1.5}rem`, 
+                  top: '-1rem', 
+                  bottom: '50%',
+                  width: '1.2rem'
+                }} 
+              />
+            )}
+            
+            <div className="flex items-center gap-1.5 relative z-10">
+              <div className="flex items-center justify-center w-5 h-5 shrink-0">
+                {hasSubTasks ? (
+                  <button onClick={() => toggleExpand(task.id)} className="w-5 h-5 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors">
+                    {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                  </button>
+                ) : (
+                  <div className="w-5 h-5" /> // Empty space alignment
+                )}
+              </div>
+              
+              <div className="shrink-0">
+                {hasSubTasks ? (
+                  isExpanded ? <FolderOpen className="w-4 h-4 text-blue-500 fill-blue-100" /> : <Folder className="w-4 h-4 text-blue-500 fill-blue-100" />
+                ) : (
+                  <FileText className="w-4 h-4 text-slate-400" />
+                )}
+              </div>
+
+              <div className="flex flex-col ml-1 py-1">
+                <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>{task.title}</span>
                 {task.sourceDocumentRef && depth === 0 && (
-                  <span className="text-xs text-blue-600 mt-1 flex items-center">
+                  <span className="text-[11px] font-normal text-blue-600 mt-0.5 flex items-center bg-blue-50 w-fit px-1.5 rounded">
                     <Clock className="w-3 h-3 mr-1" />
                     VB: {task.sourceDocumentRef}
                   </span>
@@ -97,20 +121,20 @@ export function TaskList() {
           </TableCell>
           <TableCell>
             <div className="flex flex-col gap-1 w-24">
-              <span className="text-xs font-semibold text-slate-600">{task.progress}%</span>
-              <Progress value={task.progress} className="h-2" />
+              <span className="text-[10px] font-semibold text-slate-600 leading-none">{task.progress}%</span>
+              <Progress value={task.progress} className="h-1.5" />
             </div>
           </TableCell>
           <TableCell className="text-right">
-            <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)}>
-              <Eye className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
+              <Eye className="w-3 h-3 mr-1" />
               Chi tiết
             </Button>
           </TableCell>
         </TableRow>
         
         {isExpanded && hasSubTasks && (
-          task.subTasks!.map(subTask => renderTaskRow(subTask, depth + 1))
+          task.subTasks!.map((subTask, index) => renderTaskRow(subTask, depth + 1, index === task.subTasks!.length - 1))
         )}
       </React.Fragment>
     );
@@ -118,16 +142,16 @@ export function TaskList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
-        <div className="flex w-full sm:w-auto gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+        <div className="flex w-full sm:w-auto gap-3">
           <Input
             placeholder="Tìm kiếm công việc..."
-            className="w-full sm:w-[300px]"
+            className="w-full sm:w-[280px]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
@@ -139,26 +163,26 @@ export function TaskList() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsCreateTaskOpen(true)}>+ Giao việc mới</Button>
+        <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-slate-50">
-              <TableHead className="w-[300px]">Tên công việc</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Mức độ</TableHead>
-              <TableHead>Người xử lý</TableHead>
-              <TableHead>Thời hạn</TableHead>
-              <TableHead>Tiến độ</TableHead>
-              <TableHead className="text-right">Thao tác</TableHead>
+            <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+              <TableHead className="w-[400px] pl-6 font-semibold">Tên công việc</TableHead>
+              <TableHead className="font-semibold">Trạng thái</TableHead>
+              <TableHead className="font-semibold">Mức độ</TableHead>
+              <TableHead className="font-semibold">Người xử lý</TableHead>
+              <TableHead className="font-semibold">Thời hạn</TableHead>
+              <TableHead className="font-semibold">Tiến độ</TableHead>
+              <TableHead className="text-right font-semibold">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredTasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
                   Không tìm thấy công việc nào
                 </TableCell>
               </TableRow>
