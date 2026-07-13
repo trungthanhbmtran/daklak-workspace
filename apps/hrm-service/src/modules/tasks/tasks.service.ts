@@ -1006,8 +1006,13 @@ export class TasksService {
           );
 
           if (!validateRes.allowed) {
-            this.logger.error(`Validate Action blocked ASSIGN: ${validateRes.reason}, businessData: ${JSON.stringify({ isOwner: access.isOwner, creator: tCheckArr[0]?.creatorEmployeeCode, current: context?.currentEmployeeCode })}`);
-            throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
+            // Bypass for structural roles to ensure they can always delegate tasks
+            if (access.isOwner || access.isAdmin || access.isDeptLeader) {
+              this.logger.debug(`Bypassed ASSIGN workflow validation for ${context?.currentEmployeeCode} due to having structural role.`);
+            } else {
+              this.logger.error(`Validate Action blocked ASSIGN: ${validateRes.reason}, businessData: ${JSON.stringify({ isOwner: access.isOwner, creator: tCheckArr[0]?.creatorEmployeeCode, current: context?.currentEmployeeCode })}`);
+              throw new RpcException(`Workflow không cho phép thực hiện hành động phân công/giao việc.`);
+            }
           }
 
           // Chú ý: action ASSIGN thường không làm nhảy bước workflow (không đổi trạng thái task)

@@ -1,4 +1,4 @@
-﻿import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
 
@@ -20,6 +20,7 @@ async function main() {
     ADD_SUBTASK: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
     COORDINATE:  ['OWNER', 'DEPT_LEADER', 'ADMIN'],
     FORWARD:     ['OWNER', 'DEPT_LEADER', 'ADMIN'],
+    ASSIGN:      ['OWNER', 'DEPT_LEADER', 'ADMIN'],
   };
 
   // ─── 1. Quy trinh xu ly cong viec (TASK_PROCESSING_ID) ───────────────────
