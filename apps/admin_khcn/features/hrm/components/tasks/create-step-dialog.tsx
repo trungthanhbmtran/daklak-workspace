@@ -5,30 +5,38 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ListChecksIcon, UserIcon, CheckCircle2 } from "lucide-react";
+import { ListChecksIcon, CheckCircle2, Loader2 } from "lucide-react";
+import { useCreateStep } from "../../hooks/useTasks";
 
 interface CreateStepDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  taskId: string;
+  taskId: string | number;
 }
 
 export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialogProps) {
   const [title, setTitle] = useState("");
-  const [assignee, setAssignee] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const createStep = useCreateStep(Number(taskId));
+  const isPending = createStep.isPending;
+
+  const resetForm = () => { setTitle(""); };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic lưu bước mới sẽ ở đây
-    alert(`Đã thêm bước vào công việc ${taskId}:\n- Tiêu đề: ${title}\n- Phụ trách: ${assignee}`);
-    setTitle("");
-    setAssignee("");
-    onOpenChange(false);
+    if (!title.trim()) return;
+
+    try {
+      await createStep.mutateAsync({ title: title.trim() });
+      resetForm();
+      onOpenChange(false);
+    } catch {
+      // Lỗi đã xử lý trong hook (onError toast)
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(v) => { if (!isPending) { resetForm(); onOpenChange(v); } }}>
       <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-0 shadow-2xl">
         <div className="p-6 pb-5 border-b bg-white dark:bg-slate-950">
           <DialogHeader>
@@ -39,7 +47,7 @@ export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialo
                Thêm bước thực hiện (Checklist)
             </DialogTitle>
             <DialogDescription className="ml-10">
-              Chia nhỏ công việc thành các bước và phân công cho người chủ trì hoặc bên phối hợp.
+              Chia nhỏ công việc thành các bước cụ thể để dễ theo dõi và giám sát tiến độ.
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -56,38 +64,27 @@ export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialo
               onChange={(e) => setTitle(e.target.value)}
               className="text-base h-11 transition-all focus-visible:ring-indigo-500 bg-white"
               autoFocus
+              disabled={isPending}
             />
-          </div>
-
-          <div className="space-y-3">
-            <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              <UserIcon className="w-4 h-4 text-slate-400"/> Người / Đơn vị thực hiện <span className="text-red-500">*</span>
-            </Label>
-            <Select value={assignee} onValueChange={setAssignee} required>
-              <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-indigo-500 shadow-sm">
-                <SelectValue placeholder="Chọn người phụ trách từ danh sách tham gia..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Chủ trì chính</SelectLabel>
-                  <SelectItem value="EMP_MAIN">👤 Phạm Thị D (Người xử lý chính)</SelectItem>
-                </SelectGroup>
-                <SelectGroup>
-                  <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Bên phối hợp</SelectLabel>
-                  <SelectItem value="EMP_COOR_1">👤 Lê Văn H (Cá nhân phối hợp)</SelectItem>
-                  <SelectItem value="DEPT_COOR_1">🏢 P. Kế toán (Đơn vị phối hợp)</SelectItem>
-                  <SelectItem value="DEPT_COOR_2">🏢 P. Tổ chức (Đơn vị phối hợp)</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
           </div>
           
           <div className="pt-4 flex justify-end gap-3 sm:space-x-0">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-slate-200 dark:hover:bg-slate-800">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => { resetForm(); onOpenChange(false); }} 
+              disabled={isPending}
+              className="hover:bg-slate-200 dark:hover:bg-slate-800"
+            >
               Huỷ bỏ
             </Button>
-            <Button type="submit" className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
-              <CheckCircle2 className="w-4 h-4" /> Lưu bước
+            <Button 
+              type="submit" 
+              disabled={isPending || !title.trim()}
+              className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md"
+            >
+              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {isPending ? "Đang lưu..." : "Lưu bước"}
             </Button>
           </div>
         </form>

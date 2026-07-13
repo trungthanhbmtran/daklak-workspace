@@ -8,12 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X } from "lucide-react";
+import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X, Loader2 } from "lucide-react";
+import { useCreateTask, useCreateSubTask } from "../../hooks/useTasks";
+import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
+import { toast } from "sonner";
 
 interface CreateTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  parentId?: string; // Nếu có parentId thì đây là form Tạo nhiệm vụ con
+  parentId?: string | number;
 }
 
 export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDialogProps) {
@@ -21,34 +24,79 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("NORMAL");
   const [assignee, setAssignee] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [coordinators, setCoordinators] = useState<{id: string, name: string}[]>([]);
-  
+
+  const isSubTask = !!parentId;
+
+  // ── Mutations ──
+  const createTask = useCreateTask();
+  const createSubTask = useCreateSubTask();
+  const isPending = createTask.isPending || createSubTask.isPending;
+
+  // ── Danh sách nhân viên từ API ──
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true });
+  const employees = (employeesData as any)?.data ?? [];
+
   const handleAddCoordinator = (value: string) => {
-    let name = value;
-    if (value === "DEPT_12") name = "🏢 P. Kế toán";
-    if (value === "DEPT_13") name = "🏢 P. Tổ chức";
-    if (value === "EMP_305") name = "👤 Lê Văn H";
-    
+    const emp = employees.find((e: any) => e.employeeCode === value);
+    const name = emp ? `👤 ${emp.fullName}` : value;
     if (!coordinators.find(c => c.id === value)) {
-      setCoordinators([...coordinators, {id: value, name}]);
+      setCoordinators([...coordinators, { id: value, name }]);
     }
   };
 
   const removeCoordinator = (id: string) => {
     setCoordinators(coordinators.filter(c => c.id !== id));
   };
-  
-  const isSubTask = !!parentId;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setPriority("NORMAL");
+    setAssignee("");
+    setDueDate("");
+    setCoordinators([]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic lưu công việc mới sẽ ở đây
-    alert(`Đã lưu ${isSubTask ? "nhiệm vụ con" : "công việc mới"}:\n- Tiêu đề: ${title}\n- Người/Đơn vị xử lý: ${assignee}`);
-    onOpenChange(false);
+    if (!title.trim()) { toast.error("Vui lòng nhập tiêu đề công việc"); return; }
+    if (!assignee) { toast.error("Vui lòng chọn người/đơn vị nhận việc"); return; }
+    if (!dueDate) { toast.error("Vui lòng chọn thời hạn"); return; }
+
+    // Phân tích assignee: nếu bắt đầu bằng DEPT_ → departmentId, ngược lại → assigneeCode
+    const isDept = assignee.startsWith("DEPT_");
+    const payload: any = {
+      title: title.trim(),
+      description: description.trim() || undefined,
+      priority,
+      dueDate: new Date(dueDate).toISOString(),
+      coAssigneeCodes: coordinators.map(c => c.id),
+    };
+
+    if (isDept) {
+      payload.departmentId = parseInt(assignee.replace("DEPT_", ""), 10);
+    } else {
+      payload.assigneeCode = assignee;
+    }
+
+    try {
+      if (isSubTask) {
+        await createSubTask.mutateAsync({ parentId: Number(parentId), payload });
+      } else {
+        await createTask.mutateAsync(payload);
+      }
+      toast.success(isSubTask ? "Đã tạo nhiệm vụ con thành công" : "Đã giao việc thành công");
+      resetForm();
+      onOpenChange(false);
+    } catch {
+      // Lỗi đã được xử lý trong hooks (onError)
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(v) => { if (!isPending) { resetForm(); onOpenChange(v); } }}>
       <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden border-0 shadow-2xl">
         <div className="p-6 pb-5 border-b bg-white dark:bg-slate-950">
           <DialogHeader>
@@ -105,105 +153,20 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     <SelectValue placeholder="Chọn người nhận..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
-                    {isSubTask ? (
-                      <>
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân sự trực thuộc (Gợi ý)</SelectLabel>
-                          <SelectItem value="EMP_301">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-blue-500" />
-                                <span>Nguyễn Văn E (Nhân viên)</span>
-                              </div>
-                              <div className="flex gap-1">
-                                <Badge variant="default" className="text-[10px] h-4 px-1 py-0 leading-none">Phù hợp nhất</Badge>
-                              </div>
+                    {employees.length > 0 ? (
+                      <SelectGroup>
+                        <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
+                        {employees.map((emp: any) => (
+                          <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                            <div className="flex items-center gap-2">
+                              <UserCircle2 className="w-4 h-4 text-blue-500" />
+                              <span>{emp.fullName} ({emp.employeeCode})</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="EMP_302">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-blue-500" />
-                                <span>Trần Thị F (Nhân viên)</span>
-                              </div>
-                              <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Năng lực tốt</Badge>
-                            </div>
-                          </SelectItem>
-                        </SelectGroup>
-                        
-                        <SelectSeparator />
-                        
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Cần lưu ý (Hiệu suất thấp)</SelectLabel>
-                          <SelectItem value="EMP_303">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-red-500" />
-                                <span>Lê Hữu G (Nhân viên)</span>
-                              </div>
-                              <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0 leading-none bg-red-100 text-red-700 hover:bg-red-200 border-transparent">Hiệu suất thấp</Badge>
-                            </div>
-                          </SelectItem>
-                        </SelectGroup>
-                      </>
+                        ))}
+                      </SelectGroup>
                     ) : (
-                      <>
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Gợi ý (Năng lực / Phù hợp nhất)</SelectLabel>
-                          <SelectItem value="EMP_202">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-blue-500" />
-                                <span>Phạm Thị D (Chuyên viên)</span>
-                              </div>
-                              <div className="flex gap-1">
-                                <Badge variant="default" className="text-[10px] h-4 px-1 py-0 leading-none">Phù hợp</Badge>
-                                <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Năng lực tốt</Badge>
-                              </div>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="DEPT_10">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <span>🏢 P. Công nghệ thông tin</span>
-                              <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 border-transparent">Đúng chuyên môn</Badge>
-                            </div>
-                          </SelectItem>
-                        </SelectGroup>
-                        
-                        <SelectSeparator />
-                        
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Cần lưu ý (Hiệu suất thấp)</SelectLabel>
-                          <SelectItem value="EMP_203">
-                            <div className="flex items-center justify-between w-full gap-4">
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-red-500" />
-                                <span>Lê Văn C (Chuyên viên)</span>
-                              </div>
-                              <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0 leading-none bg-red-100 text-red-700 hover:bg-red-200 border-transparent">Hiệu suất thấp</Badge>
-                            </div>
-                          </SelectItem>
-                        </SelectGroup>
-
-                        <SelectSeparator />
-
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Danh sách khác</SelectLabel>
-                          <SelectItem value="DEPT_11">
-                            <div className="flex items-center justify-between w-full">
-                              <span>🏢 P. Hành chính - Tổng hợp</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="EMP_201">
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-slate-400" />
-                                <span>Trần Thị B (Chuyên viên)</span>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        </SelectGroup>
-                      </>
+                      <SelectItem value="loading" disabled>Đang tải danh sách...</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -219,9 +182,13 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="DEPT_12">🏢 P. Kế toán</SelectItem>
-                    <SelectItem value="DEPT_13">🏢 P. Tổ chức</SelectItem>
-                    <SelectItem value="EMP_305">👤 Lê Văn H</SelectItem>
+                    {employees
+                      .filter((e: any) => e.employeeCode !== assignee && !coordinators.find(c => c.id === e.employeeCode))
+                      .map((emp: any) => (
+                        <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                          👤 {emp.fullName}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 
@@ -246,7 +213,13 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <CalendarIcon className="w-4 h-4 text-slate-400"/> Thời hạn <span className="text-red-500">*</span>
                 </Label>
-                <Input required type="date" className="bg-white dark:bg-slate-950 h-11 focus-visible:ring-blue-500 shadow-sm" />
+                <Input 
+                  required 
+                  type="date" 
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="bg-white dark:bg-slate-950 h-11 focus-visible:ring-blue-500 shadow-sm" 
+                />
               </div>
 
               <div className="space-y-3">
@@ -278,11 +251,12 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
           
           <div className="p-4 border-t bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
             <DialogFooter className="flex justify-end gap-3 sm:space-x-0">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-slate-200 dark:hover:bg-slate-800">
+              <Button type="button" variant="ghost" onClick={() => { resetForm(); onOpenChange(false); }} disabled={isPending} className="hover:bg-slate-200 dark:hover:bg-slate-800">
                 Huỷ bỏ
               </Button>
-              <Button type="submit" className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md">
-                <CheckCircle2 className="w-4 h-4" /> Giao việc ngay
+              <Button type="submit" disabled={isPending} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                {isPending ? "Đang lưu..." : "Giao việc ngay"}
               </Button>
             </DialogFooter>
           </div>

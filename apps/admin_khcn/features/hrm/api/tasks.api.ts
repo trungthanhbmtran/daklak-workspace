@@ -91,4 +91,21 @@ export const hrmTasksApi = {
   upsertKpiSetting(id: number, payload: any): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/kpi-setting`, payload) as any;
   },
+
+  /** Steps (Checklist nội bộ) */
+  listSteps(taskId: number): Promise<ApiResponse<any[]>> {
+    return apiClient.get(`/hrm/tasks/${taskId}/steps`) as any;
+  },
+
+  createStep(taskId: number, payload: { title: string; order?: number; assigneeCode?: string }): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/tasks/${taskId}/steps`, payload) as any;
+  },
+
+  updateStep(taskId: number, stepId: number, payload: { title?: string; status?: string; order?: number }): Promise<ApiResponse<any>> {
+    return apiClient.put(`/hrm/tasks/${taskId}/steps/${stepId}`, payload) as any;
+  },
+
+  deleteStep(taskId: number, stepId: number): Promise<ApiResponse<any>> {
+    return apiClient.delete(`/hrm/tasks/${taskId}/steps/${stepId}`) as any;
+  },
 };

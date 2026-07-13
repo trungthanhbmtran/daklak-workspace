@@ -6,13 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MOCK_TASKS } from "./mock-data";
+import { Skeleton } from "@/components/ui/skeleton";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
-import { Eye, Clock, ChevronRight, ChevronDown, CornerDownRight, Folder, FolderOpen, FileText } from "lucide-react";
+import { Eye, Clock, ChevronRight, ChevronDown, AlertCircle } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
+import { useTasksList } from "../../hooks/useTasks";
+
+// ── Badge helpers ──────────────────────────────────────────────────────────────
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -21,6 +24,7 @@ const getStatusBadge = (status: string) => {
     case "PENDING_REVIEW": return <Badge variant="default" className="bg-orange-500">Chờ duyệt</Badge>;
     case "COMPLETED": return <Badge variant="default" className="bg-green-500">Hoàn thành</Badge>;
     case "OVERDUE": return <Badge variant="destructive">Quá hạn</Badge>;
+    case "REJECTED": return <Badge variant="destructive" className="bg-red-700">Bị từ chối</Badge>;
     default: return <Badge variant="outline">{status}</Badge>;
   }
 };
@@ -34,6 +38,8 @@ const getPriorityBadge = (priority: string) => {
     default: return null;
   }
 };
+
+// ── Tree connector lines component ────────────────────────────────────────────
 
 const TreeLines = ({ 
   depth, 
@@ -52,7 +58,7 @@ const TreeLines = ({
     <>
       {/* Ancestor continuing vertical lines */}
       {ancestorsLast.map((isAncestorLast, i) => {
-        if (i === 0) return null; // Root tasks don't have continuing vertical lines connecting them
+        if (i === 0) return null;
         if (isAncestorLast) return null;
         return (
           <div 
@@ -66,7 +72,6 @@ const TreeLines = ({
       {/* Current level L-shape lines */}
       {depth > 0 && (
         <>
-          {/* Vertical segment */}
           <div 
             className="absolute w-px bg-slate-300 pointer-events-none" 
             style={{ 
@@ -75,7 +80,6 @@ const TreeLines = ({
               bottom: isLastChild ? '50%' : '0' 
             }} 
           />
-          {/* Horizontal segment */}
           <div 
             className="absolute h-px bg-slate-300 pointer-events-none" 
             style={{ 
@@ -102,23 +106,69 @@ const TreeLines = ({
   );
 };
 
+// ── Loading skeleton ───────────────────────────────────────────────────────────
+
+const TaskListSkeleton = () => (
+  <>
+    {Array.from({ length: 6 }).map((_, i) => (
+      <TableRow key={i}>
+        <TableCell><Skeleton className="h-4 w-[280px]" /></TableCell>
+        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+        <TableCell><Skeleton className="h-2 w-20" /></TableCell>
+        <TableCell><Skeleton className="h-7 w-16 ml-auto" /></TableCell>
+      </TableRow>
+    ))}
+  </>
+);
+
+// ── Build tree from flat list ──────────────────────────────────────────────────
+
+function buildTaskTree(flatTasks: HrmTask[]): HrmTask[] {
+  const map = new Map<string, HrmTask>();
+  const roots: HrmTask[] = [];
+
+  // Khởi tạo map với subTasks rỗng
+  for (const task of flatTasks) {
+    map.set(task.id, { ...task, subTasks: [] });
+  }
+
+  // Gắn con vào cha
+  for (const task of flatTasks) {
+    const node = map.get(task.id)!;
+    if (task.parentId && map.has(task.parentId)) {
+      map.get(task.parentId)!.subTasks!.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
 export function TaskList() {
-  const [tasks, setTasks] = useState<HrmTask[]>(MOCK_TASKS);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [selectedTask, setSelectedTask] = useState<HrmTask | null>(null);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
+  // ── API: danh sách task ──
+  const { data, isLoading, isError, refetch } = useTasksList({
+    status: statusFilter === "ALL" ? undefined : statusFilter,
+    search: search || undefined,
+  });
+
+  const flatTasks: HrmTask[] = (data as any)?.data ?? [];
+  const tasks = buildTaskTree(flatTasks);
+
   const toggleExpand = (taskId: string) => {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
-
-  const filteredTasks = tasks.filter(task => {
-    const matchStatus = statusFilter === "ALL" || task.status === statusFilter;
-    const matchSearch = task.title.toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
-  });
 
   const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false, ancestorsLast: boolean[] = []) => {
     const isOverdue = new Date(task.dueDate) < new Date() && task.status !== "COMPLETED";
@@ -134,7 +184,7 @@ export function TaskList() {
               depth={depth}
               isLastChild={isLastChild}
               ancestorsLast={ancestorsLast}
-              isExpanded={isExpanded}
+              isExpanded={!!isExpanded}
               hasSubTasks={!!hasSubTasks}
             />
 
@@ -224,6 +274,7 @@ export function TaskList() {
               <SelectItem value="IN_PROGRESS">Đang xử lý</SelectItem>
               <SelectItem value="PENDING_REVIEW">Chờ duyệt</SelectItem>
               <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
+              <SelectItem value="OVERDUE">Quá hạn</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -244,14 +295,26 @@ export function TaskList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTasks.length === 0 ? (
+            {isLoading ? (
+              <TaskListSkeleton />
+            ) : isError ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center h-32">
+                  <div className="flex flex-col items-center gap-2 text-slate-500">
+                    <AlertCircle className="w-8 h-8 text-red-400" />
+                    <span>Không thể tải danh sách công việc.</span>
+                    <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : tasks.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
                   Không tìm thấy công việc nào
                 </TableCell>
               </TableRow>
             ) : (
-              filteredTasks.map((task) => renderTaskRow(task, 0))
+              tasks.map((task) => renderTaskRow(task, 0))
             )}
           </TableBody>
         </Table>

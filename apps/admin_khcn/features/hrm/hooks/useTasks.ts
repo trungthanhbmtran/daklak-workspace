@@ -163,3 +163,123 @@ export function useUpdateStatus(taskId: number | undefined) {
     },
   });
 }
+
+/** Lịch sử thao tác của một task. */
+export function useTaskHistory(taskId: number | undefined) {
+  return useQuery({
+    queryKey: taskId ? hrmKeys.taskHistory(taskId) : [...hrmKeys.tasks(), "history", "none"],
+    queryFn: taskId ? () => hrmTasksApi.getHistory(taskId) : skipToken,
+    staleTime: DETAIL_STALE_TIME,
+    gcTime: DETAIL_GC_TIME,
+    refetchOnWindowFocus: false,
+  });
+}
+
+/** Danh sách các bước thực hiện (steps/checklist) của một task. */
+export function useTaskSteps(taskId: number | undefined) {
+  return useQuery({
+    queryKey: taskId ? hrmKeys.taskSteps(taskId) : [...hrmKeys.tasks(), "steps", "none"],
+    queryFn: taskId ? () => hrmTasksApi.listSteps(taskId) : skipToken,
+    staleTime: DETAIL_STALE_TIME,
+    gcTime: DETAIL_GC_TIME,
+  });
+}
+
+/** Tạo bước thực hiện mới cho một task. */
+export function useCreateStep(taskId: number | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { title: string; order?: number; assigneeCode?: string }) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.createStep(taskId, payload);
+    },
+    onSuccess: () => {
+      if (taskId) qc.invalidateQueries({ queryKey: hrmKeys.taskSteps(taskId) });
+      toast.success("Đã thêm bước thực hiện");
+    },
+    onError: () => {
+      toast.error("Thêm bước thất bại, vui lòng thử lại");
+    },
+  });
+}
+
+/** Toggle trạng thái bước (TODO → COMPLETED và ngược lại). */
+export function useUpdateStep(taskId: number | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string } }) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.updateStep(taskId, stepId, payload);
+    },
+    onSuccess: () => {
+      if (taskId) qc.invalidateQueries({ queryKey: hrmKeys.taskSteps(taskId) });
+    },
+    onError: () => {
+      toast.error("Cập nhật bước thất bại");
+    },
+  });
+}
+
+/** Tạo nhiệm vụ con (phân rã) từ task cha. */
+export function useCreateSubTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ parentId, payload }: {
+      parentId: number;
+      payload: {
+        title: string;
+        description?: string;
+        priority?: string;
+        dueDate?: string;
+        assigneeCode?: string;
+      };
+    }) => hrmTasksApi.createSubTask(parentId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      toast.success("Đã tạo nhiệm vụ con thành công");
+    },
+    onError: () => {
+      toast.error("Tạo nhiệm vụ con thất bại, vui lòng thử lại");
+    },
+  });
+}
+
+/** Cập nhật % tiến độ công việc. */
+export function useUpdateProgress(taskId: number | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (progress: number) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.updateProgress(taskId, progress);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      toast.success("Đã cập nhật tiến độ");
+    },
+    onError: () => {
+      toast.error("Cập nhật tiến độ thất bại");
+    },
+  });
+}
+
+/** Giao việc: chỉ định người thực hiện chính và người phối hợp. */
+export function useAssignTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: {
+      id: number;
+      payload: {
+        assigneeCode?: string;
+        departmentId?: number;
+        coAssigneeCodes?: string[];
+      };
+    }) => hrmTasksApi.assignTask(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      toast.success("Giao việc thành công");
+    },
+    onError: () => {
+      toast.error("Giao việc thất bại, vui lòng thử lại");
+    },
+  });
+}
