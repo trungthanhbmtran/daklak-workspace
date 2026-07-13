@@ -177,6 +177,13 @@ export class TasksController implements OnModuleInit {
       body.currentUserId = req.user.id ? parseInt(req.user.id, 10) : undefined;
       body.currentUserPermissions = req.user.permissionsFlatten || [];
     }
+    
+    // Map from frontend (coAssigneeCodes) to proto (coassigneeCodes)
+    if (body.coAssigneeCodes) {
+      body.coassigneeCodes = body.coAssigneeCodes;
+      delete body.coAssigneeCodes;
+    }
+    
     const response: any = await firstValueFrom(
       this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
     );
@@ -535,6 +542,7 @@ export class TasksController implements OnModuleInit {
       this.taskService.BreakdownTask(
         {
           ...body,
+          coassigneeCodes: body.coassigneeCodes || body.coAssigneeCodes,
           id: id,
           parentId: id,
           assignerCode,
