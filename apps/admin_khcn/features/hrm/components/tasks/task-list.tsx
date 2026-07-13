@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -63,18 +62,18 @@ const getPriorityBadge = (priority: string) => {
 
 // ── Tree connector lines component ────────────────────────────────────────────
 
-const TreeLines = ({ 
-  depth, 
-  isLastChild, 
-  ancestorsLast, 
-  isExpanded, 
-  hasSubTasks 
-}: { 
-  depth: number, 
-  isLastChild: boolean, 
-  ancestorsLast: boolean[], 
-  isExpanded: boolean, 
-  hasSubTasks: boolean 
+const TreeLines = ({
+  depth,
+  isLastChild,
+  ancestorsLast,
+  isExpanded,
+  hasSubTasks
+}: {
+  depth: number,
+  isLastChild: boolean,
+  ancestorsLast: boolean[],
+  isExpanded: boolean,
+  hasSubTasks: boolean
 }) => {
   return (
     <>
@@ -83,10 +82,10 @@ const TreeLines = ({
         if (i === 0) return null;
         if (isAncestorLast) return null;
         return (
-          <div 
+          <div
             key={`ancestor-line-${i}`}
-            className="absolute w-px bg-slate-300 pointer-events-none" 
-            style={{ left: `${26 + i * 32}px`, top: '0', bottom: '0' }} 
+            className="absolute w-px bg-slate-300 pointer-events-none"
+            style={{ left: `${26 + i * 32}px`, top: '0', bottom: '0' }}
           />
         );
       })}
@@ -94,34 +93,34 @@ const TreeLines = ({
       {/* Current level L-shape lines */}
       {depth > 0 && (
         <>
-          <div 
-            className="absolute w-px bg-slate-300 pointer-events-none" 
-            style={{ 
-              left: `${26 + (depth - 1) * 32}px`, 
-              top: '0', 
-              bottom: isLastChild ? '50%' : '0' 
-            }} 
+          <div
+            className="absolute w-px bg-slate-300 pointer-events-none"
+            style={{
+              left: `${26 + (depth - 1) * 32}px`,
+              top: '0',
+              bottom: isLastChild ? '50%' : '0'
+            }}
           />
-          <div 
-            className="absolute h-px bg-slate-300 pointer-events-none" 
-            style={{ 
-              left: `${26 + (depth - 1) * 32}px`, 
-              top: '50%', 
-              width: '22px' 
-            }} 
+          <div
+            className="absolute h-px bg-slate-300 pointer-events-none"
+            style={{
+              left: `${26 + (depth - 1) * 32}px`,
+              top: '50%',
+              width: '22px'
+            }}
           />
         </>
       )}
 
       {/* Parent expanded line dropping down */}
       {isExpanded && hasSubTasks && (
-        <div 
-          className="absolute w-px bg-slate-300 pointer-events-none" 
-          style={{ 
-            left: `${26 + depth * 32}px`, 
-            top: 'calc(50% + 12px)', 
+        <div
+          className="absolute w-px bg-slate-300 pointer-events-none"
+          style={{
+            left: `${26 + depth * 32}px`,
+            top: 'calc(50% + 12px)',
             bottom: '0'
-          }} 
+          }}
         />
       )}
     </>
@@ -201,8 +200,8 @@ export function TaskList() {
       <React.Fragment key={task.id}>
         <TableRow className={`hover:bg-slate-50/80 transition-colors ${depth > 0 ? "bg-slate-50/40" : ""}`}>
           <TableCell className="font-medium relative" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
-            
-            <TreeLines 
+
+            <TreeLines
               depth={depth}
               isLastChild={isLastChild}
               ancestorsLast={ancestorsLast}
@@ -213,9 +212,9 @@ export function TaskList() {
             <div className="flex items-center gap-1.5 relative z-10">
               {hasSubTasks && (
                 <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white">
-                  <Button 
+                  <Button
                     variant="ghost"
-                    onClick={() => toggleExpand(task.id)} 
+                    onClick={() => toggleExpand(task.id)}
                     className="w-5 h-5 p-0 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors"
                   >
                     {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
@@ -261,12 +260,12 @@ export function TaskList() {
             </Button>
           </TableCell>
         </TableRow>
-        
+
         {isExpanded && hasSubTasks && (
-          task.subTasks!.map((subTask, index) => 
+          task.subTasks!.map((subTask, index) =>
             renderTaskRow(
-              subTask, 
-              depth + 1, 
+              subTask,
+              depth + 1,
               index === task.subTasks!.length - 1,
               [...ancestorsLast, isLastChild]
             )
@@ -349,10 +348,10 @@ export function TaskList() {
           onOpenChange={(open) => !open && setSelectedTask(null)}
         />
       )}
-      
-      <CreateTaskDialog 
-        open={isCreateTaskOpen} 
-        onOpenChange={setIsCreateTaskOpen} 
+
+      <CreateTaskDialog
+        open={isCreateTaskOpen}
+        onOpenChange={setIsCreateTaskOpen}
       />
     </div>
   );
