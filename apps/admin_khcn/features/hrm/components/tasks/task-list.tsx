@@ -53,7 +53,7 @@ export function TaskList() {
     return matchStatus && matchSearch;
   });
 
-  const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false) => {
+  const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false, ancestorsLast: boolean[] = []) => {
     const isOverdue = new Date(task.dueDate) < new Date() && task.status !== "COMPLETED";
     const hasSubTasks = task.subTasks && task.subTasks.length > 0;
     const isExpanded = expandedTasks[task.id];
@@ -62,19 +62,54 @@ export function TaskList() {
       <React.Fragment key={task.id}>
         <TableRow className={`hover:bg-slate-50/80 transition-colors ${depth > 0 ? "bg-slate-50/40" : ""}`}>
           <TableCell className="font-medium relative" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
-            {/* Guide lines for tree view */}
+            {/* Ancestor continuing vertical lines */}
+            {ancestorsLast.map((isAncestorLast, i) => {
+              if (isAncestorLast) return null;
+              return (
+                <div 
+                  key={`ancestor-line-${i}`}
+                  className="absolute w-px bg-slate-300 pointer-events-none" 
+                  style={{ left: `${26 + i * 32}px`, top: '0', bottom: '0' }} 
+                />
+              );
+            })}
+
+            {/* Current level L-shape lines */}
             {depth > 0 && (
+              <>
+                {/* Vertical segment */}
+                <div 
+                  className="absolute w-px bg-slate-300 pointer-events-none" 
+                  style={{ 
+                    left: `${26 + (depth - 1) * 32}px`, 
+                    top: '0', 
+                    bottom: isLastChild ? '50%' : '0' 
+                  }} 
+                />
+                {/* Horizontal segment */}
+                <div 
+                  className="absolute h-px bg-slate-300 pointer-events-none" 
+                  style={{ 
+                    left: `${26 + (depth - 1) * 32}px`, 
+                    top: '50%', 
+                    width: '22px' 
+                  }} 
+                />
+              </>
+            )}
+
+            {/* Parent expanded line dropping down */}
+            {isExpanded && hasSubTasks && (
               <div 
-                className="absolute border-l-2 border-b-2 border-slate-200 rounded-bl-sm pointer-events-none" 
+                className="absolute w-px bg-slate-300 pointer-events-none" 
                 style={{ 
-                  left: `${(depth - 1) * 2 + 1.5}rem`, 
-                  top: '-1rem', 
-                  bottom: '50%',
-                  width: '1.2rem'
+                  left: `${26 + depth * 32}px`, 
+                  top: 'calc(50% + 12px)', 
+                  bottom: '0'
                 }} 
               />
             )}
-            
+
             <div className="flex items-center gap-1.5 relative z-10">
               <div className="flex items-center justify-center w-5 h-5 shrink-0">
                 {hasSubTasks ? (
@@ -134,7 +169,14 @@ export function TaskList() {
         </TableRow>
         
         {isExpanded && hasSubTasks && (
-          task.subTasks!.map((subTask, index) => renderTaskRow(subTask, depth + 1, index === task.subTasks!.length - 1))
+          task.subTasks!.map((subTask, index) => 
+            renderTaskRow(
+              subTask, 
+              depth + 1, 
+              index === task.subTasks!.length - 1,
+              [...ancestorsLast, isLastChild]
+            )
+          )
         )}
       </React.Fragment>
     );
