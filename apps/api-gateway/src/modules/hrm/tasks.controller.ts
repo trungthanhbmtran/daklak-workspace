@@ -707,29 +707,31 @@ export class TasksController implements OnModuleInit {
   // ─── Task Steps (Checklist) ────────────────────────────────────────────────────────
 
   @Get(':id/steps')
-  async listSteps(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.taskService.ListSteps({ taskId: id }));
+  async listSteps(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return firstValueFrom(this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req)));
   }
 
   @Post(':id/steps')
-  async createStep(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
-    return firstValueFrom(this.taskService.CreateStep({ taskId: id, ...body }));
+  async createStep(@Req() req: any, @Param('id', ParseIntPipe) id: number, @Body() body: any) {
+    return firstValueFrom(this.taskService.CreateStep({ taskId: id, ...body }, this.getGrpcMetadata(req)));
   }
 
   @Put(':id/steps/:stepId')
   async updateStep(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Param('stepId', ParseIntPipe) stepId: number,
     @Body() body: any,
   ) {
-    return firstValueFrom(this.taskService.UpdateStep({ taskId: id, stepId, ...body }));
+    return firstValueFrom(this.taskService.UpdateStep({ taskId: id, stepId, ...body }, this.getGrpcMetadata(req)));
   }
 
   @Delete(':id/steps/:stepId')
   async deleteStep(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Param('stepId', ParseIntPipe) stepId: number,
   ) {
-    return firstValueFrom(this.taskService.DeleteStep({ taskId: id, stepId }));
+    return firstValueFrom(this.taskService.DeleteStep({ taskId: id, stepId }, this.getGrpcMetadata(req)));
   }
 }
