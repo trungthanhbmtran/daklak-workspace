@@ -522,3 +522,56 @@ message TaskHistoryResponse {
   string message = 2;
   repeated TaskHistoryData data = 3;
 }
+
+// ─── TaskStep Messages ────────────────────────────────────────────────────────
+message TaskStep {
+  int32 id = 1;
+  int32 taskId = 2;
+  string title = 3;
+  string status = 4;
+  int32 order = 5;
+  string assigneeCode = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+message TaskStepResponse {
+  bool success = 1;
+  string message = 2;
+  TaskStep data = 3;
+}
+
+message ListStepsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated TaskStep data = 3;
+}
+
+message CreateStepRequest {
+  int32 taskId = 1;
+  string title = 2;
+  optional int32 order = 3;
+  optional string assigneeCode = 4;
+}
+
+message UpdateStepRequest {
+  int32 taskId = 1;
+  int32 stepId = 2;
+  optional string title = 3;
+  optional string status = 4;
+  optional int32 order = 5;
+}
+
+message ListStepsRequest {
+  int32 taskId = 1;
+}
+
+message DeleteStepRequest {
+  int32 taskId = 1;
+  int32 stepId = 2;
+}
+
+message DeleteStepResponse {
+  bool success = 1;
+  string message = 2;
+}
