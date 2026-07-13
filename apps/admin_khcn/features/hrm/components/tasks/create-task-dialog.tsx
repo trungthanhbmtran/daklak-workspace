@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -88,11 +89,52 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                 <SelectValue placeholder="Chọn người hoặc phòng ban nhận việc..." />
               </SelectTrigger>
               <SelectContent>
-                {/* Dữ liệu giả lập */}
-                <SelectItem value="DEPT_10">🏢 Phòng Công nghệ thông tin</SelectItem>
-                <SelectItem value="DEPT_11">🏢 Phòng Hành chính - Tổng hợp</SelectItem>
-                <SelectItem value="EMP_201">👤 Trần Thị B (Chuyên viên)</SelectItem>
-                <SelectItem value="EMP_202">👤 Phạm Thị D (Chuyên viên)</SelectItem>
+                <SelectGroup>
+                  <SelectLabel className="text-xs text-muted-foreground uppercase font-semibold">Gợi ý (Năng lực / Phù hợp nhất)</SelectLabel>
+                  <SelectItem value="EMP_202">
+                    <div className="flex items-center justify-between w-full gap-4">
+                      <span>👤 Phạm Thị D (Chuyên viên)</span>
+                      <div className="flex gap-1">
+                        <Badge variant="default" className="text-[10px] h-4 px-1 py-0 leading-none">Phù hợp nhất</Badge>
+                        <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 hover:bg-blue-200 border-transparent">Năng lực tốt</Badge>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="DEPT_10">
+                    <div className="flex items-center justify-between w-full gap-4">
+                      <span>🏢 Phòng Công nghệ thông tin</span>
+                      <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0 leading-none bg-blue-100 text-blue-800 hover:bg-blue-200 border-transparent">Đúng chuyên môn</Badge>
+                    </div>
+                  </SelectItem>
+                </SelectGroup>
+                
+                <SelectSeparator />
+                
+                <SelectGroup>
+                  <SelectLabel className="text-xs text-muted-foreground uppercase font-semibold">Cần lưu ý (Hiệu suất thấp)</SelectLabel>
+                  <SelectItem value="EMP_203">
+                    <div className="flex items-center justify-between w-full gap-4">
+                      <span>👤 Lê Văn C (Chuyên viên)</span>
+                      <Badge variant="destructive" className="text-[10px] h-4 px-1 py-0 leading-none">Hiệu suất thấp</Badge>
+                    </div>
+                  </SelectItem>
+                </SelectGroup>
+
+                <SelectSeparator />
+
+                <SelectGroup>
+                  <SelectLabel className="text-xs text-muted-foreground uppercase font-semibold">Danh sách khác</SelectLabel>
+                  <SelectItem value="DEPT_11">
+                    <div className="flex items-center justify-between w-full">
+                      <span>🏢 Phòng Hành chính - Tổng hợp</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="EMP_201">
+                    <div className="flex items-center justify-between w-full">
+                      <span>👤 Trần Thị B (Chuyên viên)</span>
+                    </div>
+                  </SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
