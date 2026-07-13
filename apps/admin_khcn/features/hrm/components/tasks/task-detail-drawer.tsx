@@ -14,6 +14,14 @@ import {
   BellRing, MessageSquare, Send, CheckCircle2, Clock, History,
   ArrowRightCircle, FileText, AlertCircle, Loader2
 } from "lucide-react";
+
+const safeFormatDate = (date: any, fmt: string) => {
+  if (!date) return "Chưa xác định";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "Chưa xác định";
+  return format(d, fmt);
+};
+
 import { CreateTaskDialog } from "./create-task-dialog";
 import { CreateStepDialog } from "./create-step-dialog";
 import { useState } from "react";
@@ -177,7 +185,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             <div>
               <p className="text-slate-500 mb-1">Thời hạn</p>
               <p className={`font-medium ${new Date(task.dueDate) < new Date() && !isCompleted ? "text-red-500" : ""}`}>
-                {format(new Date(task.dueDate), "dd/MM/yyyy HH:mm")}
+                {safeFormatDate(task.dueDate, "dd/MM/yyyy HH:mm")}
               </p>
             </div>
             {task.sourceDocumentRef && (
@@ -245,7 +253,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                               {subTask.dueDate && (
                                 <p className="text-xs text-slate-500 flex items-center">
                                   <Clock className="w-3 h-3 mr-1" />
-                                  Hạn: {format(new Date(subTask.dueDate), "dd/MM/yyyy")}
+                                  Hạn: {safeFormatDate(subTask.dueDate, "dd/MM/yyyy")}
                                 </p>
                               )}
                               {(subTask.assignee || subTask.assigneeDepartment) && (
@@ -394,7 +402,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-medium text-sm">{comment.authorName || comment.user?.fullName || "Người dùng"}</span>
                           <span className="text-xs text-slate-500">
-                            {format(new Date(comment.createdAt), "dd/MM HH:mm")}
+                            {safeFormatDate(comment.createdAt, "dd/MM HH:mm")}
                           </span>
                         </div>
                         <p className="text-sm">{comment.content}</p>
@@ -439,7 +447,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                           <Icon className={`w-4 h-4 ${event.iconColor}`} />
                         </div>
                         <p className="text-sm font-medium">{event.title}</p>
-                        <p className="text-xs text-slate-500 mt-1">{format(new Date(event.time), "dd/MM/yyyy HH:mm")}</p>
+                        <p className="text-xs text-slate-500 mt-1">{safeFormatDate(event.time, "dd/MM/yyyy HH:mm")}</p>
                         {event.content && (
                           <p className={`text-sm mt-2 p-3 rounded-md border ${index === 0 ? 'bg-slate-50 text-slate-600' : 'bg-white'}`}>
                             {event.content}
@@ -482,7 +490,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     )}
                   </div>
                   <p className="text-xs text-slate-400">
-                    Đánh giá lúc: {format(new Date(task.kpi.evaluatedAt), "dd/MM/yyyy HH:mm")}
+                    Đánh giá lúc: {safeFormatDate(task.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")}
                   </p>
                 </div>
               ) : (

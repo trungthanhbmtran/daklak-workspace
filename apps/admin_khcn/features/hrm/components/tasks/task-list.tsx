@@ -15,6 +15,14 @@ import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList } from "../../hooks/useTasks";
 
+const safeFormatDate = (date: any, fmt: string) => {
+  if (!date) return "Chưa xác định";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "Chưa xác định";
+  return format(d, fmt);
+};
+
+
 // ── Badge helpers ──────────────────────────────────────────────────────────────
 
 const getStatusBadge = (status: string) => {
@@ -223,7 +231,7 @@ export function TaskList() {
           </TableCell>
           <TableCell>
             <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
-              {format(new Date(task.dueDate), "dd/MM/yyyy")}
+              {safeFormatDate(task.dueDate, "dd/MM/yyyy")}
             </div>
           </TableCell>
           <TableCell>
