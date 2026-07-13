@@ -31,6 +31,12 @@ service TaskService {
   rpc BreakdownTask (BreakdownTaskRequest) returns (TaskResponse) {}
   rpc UpdateTaskProgress (UpdateTaskProgressRequest) returns (TaskResponse) {}
   rpc RequestCoordination (RequestCoordinationRequest) returns (CoordinationResponse) {}
+
+  // Steps (Checklist)
+  rpc CreateStep (CreateStepRequest) returns (TaskStepResponse) {}
+  rpc UpdateStep (UpdateStepRequest) returns (TaskStepResponse) {}
+  rpc ListSteps (ListStepsRequest) returns (ListStepsResponse) {}
+  rpc DeleteStep (DeleteStepRequest) returns (DeleteStepResponse) {}
 }
 
 message AssignTaskRequest {

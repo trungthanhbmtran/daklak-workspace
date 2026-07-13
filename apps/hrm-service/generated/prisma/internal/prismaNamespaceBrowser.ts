@@ -63,6 +63,7 @@ export const ModelName = {
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   MasterPlan: 'MasterPlan',
   Task: 'Task',
+  TaskStep: 'TaskStep',
   TaskAttachment: 'TaskAttachment',
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
@@ -287,6 +288,20 @@ export const TaskScalarFieldEnum = {
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskStepScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  title: 'title',
+  status: 'status',
+  order: 'order',
+  assigneeCode: 'assigneeCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskStepScalarFieldEnum = (typeof TaskStepScalarFieldEnum)[keyof typeof TaskStepScalarFieldEnum]
 
 
 export const TaskAttachmentScalarFieldEnum = {
@@ -518,6 +533,15 @@ export const TaskOrderByRelevanceFieldEnum = {
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskStepOrderByRelevanceFieldEnum = {
+  title: 'title',
+  status: 'status',
+  assigneeCode: 'assigneeCode'
+} as const
+
+export type TaskStepOrderByRelevanceFieldEnum = (typeof TaskStepOrderByRelevanceFieldEnum)[keyof typeof TaskStepOrderByRelevanceFieldEnum]
 
 
 export const TaskAttachmentOrderByRelevanceFieldEnum = {

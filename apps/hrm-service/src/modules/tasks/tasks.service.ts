@@ -1765,5 +1765,66 @@ export class TasksService {
       return { success: true };
     });
   }
+
+  // ─── Task Steps (Checklist) ────────────────────────────────────────────────────────
+
+  async createStep(taskId: number, data: any) {
+    try {
+      const step = await this.prisma.taskStep.create({
+        data: {
+          taskId,
+          title: data.title,
+          order: data.order || 0,
+          assigneeCode: data.assigneeCode
+        }
+      });
+      return { success: true, message: 'Tạo bước thành công', data: step };
+    } catch (error) {
+      this.logger.error(`Error createStep: ${error.message}`);
+      throw new RpcException('Không thể tạo bước thực hiện');
+    }
+  }
+
+  async updateStep(taskId: number, stepId: number, data: any) {
+    try {
+      const step = await this.prisma.taskStep.update({
+        where: { id: stepId, taskId },
+        data: {
+          title: data.title,
+          status: data.status,
+          order: data.order
+        }
+      });
+      return { success: true, message: 'Cập nhật bước thành công', data: step };
+    } catch (error) {
+      this.logger.error(`Error updateStep: ${error.message}`);
+      throw new RpcException('Không thể cập nhật bước thực hiện');
+    }
+  }
+
+  async listSteps(taskId: number) {
+    try {
+      const steps = await this.prisma.taskStep.findMany({
+        where: { taskId },
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }]
+      });
+      return { success: true, message: 'Thành công', data: steps };
+    } catch (error) {
+      this.logger.error(`Error listSteps: ${error.message}`);
+      throw new RpcException('Không thể lấy danh sách bước thực hiện');
+    }
+  }
+
+  async deleteStep(taskId: number, stepId: number) {
+    try {
+      await this.prisma.taskStep.delete({
+        where: { id: stepId, taskId }
+      });
+      return { success: true, message: 'Xóa bước thành công' };
+    } catch (error) {
+      this.logger.error(`Error deleteStep: ${error.message}`);
+      throw new RpcException('Không thể xóa bước thực hiện');
+    }
+  }
 }
 

@@ -703,4 +703,32 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(this.taskService.GetTaskKpiSetting({ taskId: id }));
   }
 
+  // ─── Task Steps (Checklist) ────────────────────────────────────────────────────────
+
+  @Get(':id/steps')
+  async listSteps(@Param('id', ParseIntPipe) id: number) {
+    return firstValueFrom(this.taskService.ListSteps({ taskId: id }));
+  }
+
+  @Post(':id/steps')
+  async createStep(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
+    return firstValueFrom(this.taskService.CreateStep({ taskId: id, ...body }));
+  }
+
+  @Put(':id/steps/:stepId')
+  async updateStep(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('stepId', ParseIntPipe) stepId: number,
+    @Body() body: any,
+  ) {
+    return firstValueFrom(this.taskService.UpdateStep({ taskId: id, stepId, ...body }));
+  }
+
+  @Delete(':id/steps/:stepId')
+  async deleteStep(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('stepId', ParseIntPipe) stepId: number,
+  ) {
+    return firstValueFrom(this.taskService.DeleteStep({ taskId: id, stepId }));
+  }
 }

@@ -50,4 +50,25 @@ export class TasksController {
     return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode);
   }
 
+  // ─── Task Steps (Checklist) ────────────────────────────────────────────────────────
+
+  @GrpcMethod('TaskService', 'CreateStep')
+  createStep(data: any) {
+    return this.tasksService.createStep(data.taskId, data);
+  }
+
+  @GrpcMethod('TaskService', 'UpdateStep')
+  updateStep(data: any) {
+    return this.tasksService.updateStep(data.taskId, data.stepId, data);
+  }
+
+  @GrpcMethod('TaskService', 'ListSteps')
+  listSteps(data: any) {
+    return this.tasksService.listSteps(data.taskId);
+  }
+
+  @GrpcMethod('TaskService', 'DeleteStep')
+  deleteStep(data: any) {
+    return this.tasksService.deleteStep(data.taskId, data.stepId);
+  }
 }

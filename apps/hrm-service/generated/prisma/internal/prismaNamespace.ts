@@ -396,6 +396,7 @@ export const ModelName = {
   KpiEvaluationDetail: 'KpiEvaluationDetail',
   MasterPlan: 'MasterPlan',
   Task: 'Task',
+  TaskStep: 'TaskStep',
   TaskAttachment: 'TaskAttachment',
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "jobTitleKpiTarget" | "staffingSlotKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "masterPlan" | "task" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "taskHistory" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "jobTitleKpiTarget" | "staffingSlotKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "taskHistory" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1214,6 +1215,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TaskStep: {
+      payload: Prisma.$TaskStepPayload<ExtArgs>
+      fields: Prisma.TaskStepFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskStepFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskStepFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskStepFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskStepFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>
+        }
+        findMany: {
+          args: Prisma.TaskStepFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>[]
+        }
+        create: {
+          args: Prisma.TaskStepCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>
+        }
+        createMany: {
+          args: Prisma.TaskStepCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.TaskStepDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>
+        }
+        update: {
+          args: Prisma.TaskStepUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskStepDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskStepUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.TaskStepUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskStepPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskStepAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskStep>
+        }
+        groupBy: {
+          args: Prisma.TaskStepGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskStepGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskStepCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskStepCountAggregateOutputType> | number
+        }
+      }
+    }
     TaskAttachment: {
       payload: Prisma.$TaskAttachmentPayload<ExtArgs>
       fields: Prisma.TaskAttachmentFieldRefs
@@ -1916,6 +1983,20 @@ export const TaskScalarFieldEnum = {
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
+export const TaskStepScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  title: 'title',
+  status: 'status',
+  order: 'order',
+  assigneeCode: 'assigneeCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskStepScalarFieldEnum = (typeof TaskStepScalarFieldEnum)[keyof typeof TaskStepScalarFieldEnum]
+
+
 export const TaskAttachmentScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
@@ -2147,6 +2228,15 @@ export const TaskOrderByRelevanceFieldEnum = {
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
 
 
+export const TaskStepOrderByRelevanceFieldEnum = {
+  title: 'title',
+  status: 'status',
+  assigneeCode: 'assigneeCode'
+} as const
+
+export type TaskStepOrderByRelevanceFieldEnum = (typeof TaskStepOrderByRelevanceFieldEnum)[keyof typeof TaskStepOrderByRelevanceFieldEnum]
+
+
 export const TaskAttachmentOrderByRelevanceFieldEnum = {
   documentId: 'documentId',
   type: 'type'
@@ -2370,6 +2460,7 @@ export type GlobalOmitConfig = {
   kpiEvaluationDetail?: Prisma.KpiEvaluationDetailOmit
   masterPlan?: Prisma.MasterPlanOmit
   task?: Prisma.TaskOmit
+  taskStep?: Prisma.TaskStepOmit
   taskAttachment?: Prisma.TaskAttachmentOmit
   taskParticipant?: Prisma.TaskParticipantOmit
   taskClosure?: Prisma.TaskClosureOmit

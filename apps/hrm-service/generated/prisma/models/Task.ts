@@ -366,6 +366,7 @@ export type TaskWhereInput = {
   attachments?: Prisma.TaskAttachmentListRelationFilter
   comments?: Prisma.TaskCommentListRelationFilter
   histories?: Prisma.TaskHistoryListRelationFilter
+  steps?: Prisma.TaskStepListRelationFilter
   ancestors?: Prisma.TaskClosureListRelationFilter
   descendants?: Prisma.TaskClosureListRelationFilter
 }
@@ -398,6 +399,7 @@ export type TaskOrderByWithRelationInput = {
   attachments?: Prisma.TaskAttachmentOrderByRelationAggregateInput
   comments?: Prisma.TaskCommentOrderByRelationAggregateInput
   histories?: Prisma.TaskHistoryOrderByRelationAggregateInput
+  steps?: Prisma.TaskStepOrderByRelationAggregateInput
   ancestors?: Prisma.TaskClosureOrderByRelationAggregateInput
   descendants?: Prisma.TaskClosureOrderByRelationAggregateInput
   _relevance?: Prisma.TaskOrderByRelevanceInput
@@ -434,6 +436,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   attachments?: Prisma.TaskAttachmentListRelationFilter
   comments?: Prisma.TaskCommentListRelationFilter
   histories?: Prisma.TaskHistoryListRelationFilter
+  steps?: Prisma.TaskStepListRelationFilter
   ancestors?: Prisma.TaskClosureListRelationFilter
   descendants?: Prisma.TaskClosureListRelationFilter
 }, "id">
@@ -520,6 +523,7 @@ export type TaskCreateInput = {
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -551,6 +555,7 @@ export type TaskUncheckedCreateInput = {
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -581,6 +586,7 @@ export type TaskUpdateInput = {
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -612,6 +618,7 @@ export type TaskUncheckedUpdateInput = {
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -851,6 +858,20 @@ export type TaskUncheckedUpdateManyWithoutPlanNestedInput = {
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
 }
 
+export type TaskCreateNestedOneWithoutStepsInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutStepsInput, Prisma.TaskUncheckedCreateWithoutStepsInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutStepsInput
+  connect?: Prisma.TaskWhereUniqueInput
+}
+
+export type TaskUpdateOneRequiredWithoutStepsNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutStepsInput, Prisma.TaskUncheckedCreateWithoutStepsInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutStepsInput
+  upsert?: Prisma.TaskUpsertWithoutStepsInput
+  connect?: Prisma.TaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutStepsInput, Prisma.TaskUpdateWithoutStepsInput>, Prisma.TaskUncheckedUpdateWithoutStepsInput>
+}
+
 export type TaskCreateNestedOneWithoutAttachmentsInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutAttachmentsInput, Prisma.TaskUncheckedCreateWithoutAttachmentsInput>
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutAttachmentsInput
@@ -960,6 +981,7 @@ export type TaskCreateWithoutKpiSettingsInput = {
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -990,6 +1012,7 @@ export type TaskUncheckedCreateWithoutKpiSettingsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1035,6 +1058,7 @@ export type TaskUpdateWithoutKpiSettingsInput = {
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1065,6 +1089,7 @@ export type TaskUncheckedUpdateWithoutKpiSettingsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -1094,6 +1119,7 @@ export type TaskCreateWithoutPlanInput = {
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -1124,6 +1150,7 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1181,6 +1208,144 @@ export type TaskScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
 }
 
+export type TaskCreateWithoutStepsInput = {
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  kpiSettings?: Prisma.TaskKpiSettingCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskUncheckedCreateWithoutStepsInput = {
+  id?: number
+  parentId?: number | null
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  progress?: number
+  rejectReason?: string | null
+  startDate?: Date | string | null
+  dueDate?: Date | string | null
+  completedAt?: Date | string | null
+  isDeadlineWarned?: boolean
+  isRiskWarned?: boolean
+  domainId?: number | null
+  monitoredUnitId?: number | null
+  planId?: number | null
+  workflowInstId?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
+  participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+  attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+  comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+  descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+}
+
+export type TaskCreateOrConnectWithoutStepsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutStepsInput, Prisma.TaskUncheckedCreateWithoutStepsInput>
+}
+
+export type TaskUpsertWithoutStepsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutStepsInput, Prisma.TaskUncheckedUpdateWithoutStepsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutStepsInput, Prisma.TaskUncheckedCreateWithoutStepsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutStepsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutStepsInput, Prisma.TaskUncheckedUpdateWithoutStepsInput>
+}
+
+export type TaskUpdateWithoutStepsInput = {
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  kpiSettings?: Prisma.TaskKpiSettingUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutStepsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  progress?: Prisma.FloatFieldUpdateOperationsInput | number
+  rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDeadlineWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isRiskWarned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  domainId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  monitoredUnitId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  creatorEmployeeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  kpiSettings?: Prisma.TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
+  participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+  attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+  comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+  descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+}
+
 export type TaskCreateWithoutAttachmentsInput = {
   parentId?: number | null
   title: string
@@ -1206,6 +1371,7 @@ export type TaskCreateWithoutAttachmentsInput = {
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -1236,6 +1402,7 @@ export type TaskUncheckedCreateWithoutAttachmentsInput = {
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1281,6 +1448,7 @@ export type TaskUpdateWithoutAttachmentsInput = {
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1311,6 +1479,7 @@ export type TaskUncheckedUpdateWithoutAttachmentsInput = {
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -1340,6 +1509,7 @@ export type TaskCreateWithoutParticipantsInput = {
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -1370,6 +1540,7 @@ export type TaskUncheckedCreateWithoutParticipantsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1415,6 +1586,7 @@ export type TaskUpdateWithoutParticipantsInput = {
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1445,6 +1617,7 @@ export type TaskUncheckedUpdateWithoutParticipantsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -1475,6 +1648,7 @@ export type TaskCreateWithoutDescendantsInput = {
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
 }
 
@@ -1505,6 +1679,7 @@ export type TaskUncheckedCreateWithoutDescendantsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
 }
 
@@ -1539,6 +1714,7 @@ export type TaskCreateWithoutAncestorsInput = {
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
 
@@ -1569,6 +1745,7 @@ export type TaskUncheckedCreateWithoutAncestorsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
 
@@ -1614,6 +1791,7 @@ export type TaskUpdateWithoutDescendantsInput = {
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
 }
 
@@ -1644,6 +1822,7 @@ export type TaskUncheckedUpdateWithoutDescendantsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
 }
 
@@ -1684,6 +1863,7 @@ export type TaskUpdateWithoutAncestorsInput = {
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
 
@@ -1714,6 +1894,7 @@ export type TaskUncheckedUpdateWithoutAncestorsInput = {
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
 
@@ -1742,6 +1923,7 @@ export type TaskCreateWithoutCommentsInput = {
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -1772,6 +1954,7 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   histories?: Prisma.TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1817,6 +2000,7 @@ export type TaskUpdateWithoutCommentsInput = {
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1847,6 +2031,7 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -1876,6 +2061,7 @@ export type TaskCreateWithoutHistoriesInput = {
   participants?: Prisma.TaskParticipantCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureCreateNestedManyWithoutAncestorInput
 }
@@ -1906,6 +2092,7 @@ export type TaskUncheckedCreateWithoutHistoriesInput = {
   participants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
   attachments?: Prisma.TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
+  steps?: Prisma.TaskStepUncheckedCreateNestedManyWithoutTaskInput
   ancestors?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
   descendants?: Prisma.TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
 }
@@ -1951,6 +2138,7 @@ export type TaskUpdateWithoutHistoriesInput = {
   participants?: Prisma.TaskParticipantUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -1981,6 +2169,7 @@ export type TaskUncheckedUpdateWithoutHistoriesInput = {
   participants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -2033,6 +2222,7 @@ export type TaskUpdateWithoutPlanInput = {
   attachments?: Prisma.TaskAttachmentUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUpdateManyWithoutAncestorNestedInput
 }
@@ -2063,6 +2253,7 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   attachments?: Prisma.TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
   histories?: Prisma.TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+  steps?: Prisma.TaskStepUncheckedUpdateManyWithoutTaskNestedInput
   ancestors?: Prisma.TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
   descendants?: Prisma.TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
 }
@@ -2100,6 +2291,7 @@ export type TaskCountOutputType = {
   attachments: number
   comments: number
   histories: number
+  steps: number
   ancestors: number
   descendants: number
 }
@@ -2109,6 +2301,7 @@ export type TaskCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   attachments?: boolean | TaskCountOutputTypeCountAttachmentsArgs
   comments?: boolean | TaskCountOutputTypeCountCommentsArgs
   histories?: boolean | TaskCountOutputTypeCountHistoriesArgs
+  steps?: boolean | TaskCountOutputTypeCountStepsArgs
   ancestors?: boolean | TaskCountOutputTypeCountAncestorsArgs
   descendants?: boolean | TaskCountOutputTypeCountDescendantsArgs
 }
@@ -2154,6 +2347,13 @@ export type TaskCountOutputTypeCountHistoriesArgs<ExtArgs extends runtime.Types.
 /**
  * TaskCountOutputType without action
  */
+export type TaskCountOutputTypeCountStepsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TaskStepWhereInput
+}
+
+/**
+ * TaskCountOutputType without action
+ */
 export type TaskCountOutputTypeCountAncestorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TaskClosureWhereInput
 }
@@ -2194,6 +2394,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   attachments?: boolean | Prisma.Task$attachmentsArgs<ExtArgs>
   comments?: boolean | Prisma.Task$commentsArgs<ExtArgs>
   histories?: boolean | Prisma.Task$historiesArgs<ExtArgs>
+  steps?: boolean | Prisma.Task$stepsArgs<ExtArgs>
   ancestors?: boolean | Prisma.Task$ancestorsArgs<ExtArgs>
   descendants?: boolean | Prisma.Task$descendantsArgs<ExtArgs>
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -2233,6 +2434,7 @@ export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   attachments?: boolean | Prisma.Task$attachmentsArgs<ExtArgs>
   comments?: boolean | Prisma.Task$commentsArgs<ExtArgs>
   histories?: boolean | Prisma.Task$historiesArgs<ExtArgs>
+  steps?: boolean | Prisma.Task$stepsArgs<ExtArgs>
   ancestors?: boolean | Prisma.Task$ancestorsArgs<ExtArgs>
   descendants?: boolean | Prisma.Task$descendantsArgs<ExtArgs>
   _count?: boolean | Prisma.TaskCountOutputTypeDefaultArgs<ExtArgs>
@@ -2247,6 +2449,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     attachments: Prisma.$TaskAttachmentPayload<ExtArgs>[]
     comments: Prisma.$TaskCommentPayload<ExtArgs>[]
     histories: Prisma.$TaskHistoryPayload<ExtArgs>[]
+    steps: Prisma.$TaskStepPayload<ExtArgs>[]
     ancestors: Prisma.$TaskClosurePayload<ExtArgs>[]
     descendants: Prisma.$TaskClosurePayload<ExtArgs>[]
   }
@@ -2618,6 +2821,7 @@ export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Typ
   attachments<T extends Prisma.Task$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Task$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   histories<T extends Prisma.Task$historiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$historiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  steps<T extends Prisma.Task$stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ancestors<T extends Prisma.Task$ancestorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$ancestorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   descendants<T extends Prisma.Task$descendantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$descendantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3149,6 +3353,30 @@ export type Task$historiesArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.TaskHistoryScalarFieldEnum | Prisma.TaskHistoryScalarFieldEnum[]
+}
+
+/**
+ * Task.steps
+ */
+export type Task$stepsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TaskStep
+   */
+  select?: Prisma.TaskStepSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TaskStep
+   */
+  omit?: Prisma.TaskStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskStepInclude<ExtArgs> | null
+  where?: Prisma.TaskStepWhereInput
+  orderBy?: Prisma.TaskStepOrderByWithRelationInput | Prisma.TaskStepOrderByWithRelationInput[]
+  cursor?: Prisma.TaskStepWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TaskStepScalarFieldEnum | Prisma.TaskStepScalarFieldEnum[]
 }
 
 /**

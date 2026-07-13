@@ -78,6 +78,11 @@ export type MasterPlan = Prisma.MasterPlanModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model TaskStep
+ * 
+ */
+export type TaskStep = Prisma.TaskStepModel
+/**
  * Model TaskAttachment
  * 
  */

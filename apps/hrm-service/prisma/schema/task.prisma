@@ -34,6 +34,7 @@ model Task {
   attachments  TaskAttachment[]
   comments     TaskComment[]
   histories    TaskHistory[]
+  steps        TaskStep[]
 
   ancestors   TaskClosure[] @relation("TaskClosureDescendant")
   descendants TaskClosure[] @relation("TaskClosureAncestor")
@@ -44,6 +45,22 @@ model Task {
   @@index([planId])
   @@index([createdAt])
   @@map("tasks")
+}
+
+model TaskStep {
+  id           Int      @id @default(autoincrement())
+  taskId       Int      @map("task_id")
+  title        String   @map("title")
+  status       String   @default("TODO") // TODO, COMPLETED
+  order        Int      @default(0)
+  assigneeCode String?  @map("assignee_code")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_steps")
 }
 
 model TaskAttachment {
