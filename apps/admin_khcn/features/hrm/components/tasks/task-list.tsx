@@ -27,25 +27,20 @@ const safeFormatDate = (date: any, fmt: string) => {
 
 const getStatusBadge = (status: string) => {
   switch (status?.toUpperCase()) {
-    case "ASSIGNED":
     case "MỚI GIAO":
       return <Badge variant="outline" className="bg-slate-100">Mới giao</Badge>;
-    case "IN_PROGRESS":
     case "ĐANG XỬ LÝ":
-    case "ĐANG THỰC HIỆN":
       return <Badge variant="default" className="bg-blue-500">Đang xử lý</Badge>;
-    case "PENDING_REVIEW":
     case "CHỜ DUYỆT":
       return <Badge variant="default" className="bg-orange-500">Chờ duyệt</Badge>;
-    case "COMPLETED":
     case "HOÀN THÀNH":
       return <Badge variant="default" className="bg-green-500">Hoàn thành</Badge>;
-    case "OVERDUE":
     case "QUÁ HẠN":
       return <Badge variant="destructive">Quá hạn</Badge>;
-    case "REJECTED":
     case "BỊ TỪ CHỐI":
       return <Badge variant="destructive" className="bg-red-700">Bị từ chối</Badge>;
+    case "NHÁP":
+      return <Badge variant="secondary">Nháp</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -53,20 +48,13 @@ const getStatusBadge = (status: string) => {
 
 const getPriorityBadge = (priority: string) => {
   switch (priority?.toUpperCase()) {
-    case "HIGH":
     case "CAO":
       return <Badge variant="destructive">Cao</Badge>;
-    case "NORMAL":
     case "THƯỜNG":
-    case "TRUNG BÌNH":
-    case "BÌNH THƯỜNG":
       return <Badge variant="outline" className="text-blue-600">Thường</Badge>;
-    case "LOW":
     case "THẤP":
       return <Badge variant="outline" className="text-slate-500">Thấp</Badge>;
-    case "URGENT":
     case "KHẨN":
-    case "KHẨN CẤP":
       return <Badge variant="destructive" className="bg-red-700 animate-pulse">Khẩn</Badge>;
     default:
       return <Badge variant="outline" className="text-slate-500">{priority}</Badge>;
@@ -205,7 +193,7 @@ export function TaskList() {
   };
 
   const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false, ancestorsLast: boolean[] = []) => {
-    const isOverdue = new Date(task.dueDate) < new Date() && task.status?.toUpperCase() !== "COMPLETED" && task.status?.toUpperCase() !== "HOÀN THÀNH";
+    const isOverdue = new Date(task.dueDate) < new Date() && task.status?.toUpperCase() !== "HOÀN THÀNH";
     const hasSubTasks = task.subTasks && task.subTasks.length > 0;
     const isExpanded = expandedTasks[task.id];
 

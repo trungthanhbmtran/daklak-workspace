@@ -47,7 +47,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const [reportText, setReportText] = useState("");
 
   const taskId = Number(task.id);
-  const isCompleted = task.status?.toUpperCase() === "COMPLETED" || task.status?.toUpperCase() === "HOÀN THÀNH";
+  const isCompleted = task.status?.toUpperCase() === "HOÀN THÀNH";
 
   // ── Queries ──
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
@@ -118,18 +118,18 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     // Fallback timeline từ status task
     const timeline: any[] = [];
     timeline.push({ id: "t1", title: `Giao việc cho ${task.assignee?.fullName ?? "người xử lý"}`, time: task.createdAt, icon: Clock, iconColor: "text-blue-500", content: `Nội dung: ${task.description}` });
-    if (task.status?.toUpperCase() !== "DRAFT" && task.status?.toUpperCase() !== "ASSIGNED" && task.status?.toUpperCase() !== "MỚI GIAO") {
+    if (task.status?.toUpperCase() !== "NHÁP" && task.status?.toUpperCase() !== "MỚI GIAO") {
       timeline.push({ id: "t2", title: "Bắt đầu xử lý", time: task.startDate, icon: ArrowRightCircle, iconColor: "text-orange-500", content: "Đã tiếp nhận và đang xử lý." });
     }
-    if (task.status?.toUpperCase() === "PENDING_REVIEW" || task.status?.toUpperCase() === "CHỜ DUYỆT" || task.status?.toUpperCase() === "COMPLETED" || task.status?.toUpperCase() === "HOÀN THÀNH") {
+    if (task.status?.toUpperCase() === "CHỜ DUYỆT" || task.status?.toUpperCase() === "HOÀN THÀNH") {
       timeline.push({ id: "t3", title: "Báo cáo kết quả", time: task.updatedAt, icon: FileText, iconColor: "text-slate-600", content: "Đã báo cáo tiến độ và gửi yêu cầu phê duyệt." });
     }
     const isOverdue = new Date(task.dueDate) < (task.completedAt ? new Date(task.completedAt) : new Date());
-    if (isOverdue && task.status?.toUpperCase() !== "COMPLETED" && task.status?.toUpperCase() !== "HOÀN THÀNH") {
-      timeline.push({ id: "t_overdue", title: "Cảnh báo quá hạn", time: task.dueDate, icon: AlertCircle, iconColor: "text-red-500", content: "Công việc đã vượt quá thời hạn quy định." });
+    if (isOverdue && task.status?.toUpperCase() !== "HOÀN THÀNH") {
+      timeline.push({ id: "t4", title: "Quá hạn", time: task.dueDate, icon: AlertCircle, iconColor: "text-red-500", content: "Công việc đã vượt quá thời hạn quy định." });
     }
-    if (task.status?.toUpperCase() === "COMPLETED" || task.status?.toUpperCase() === "HOÀN THÀNH") {
-      timeline.push({ id: "t4", title: "Hoàn thành công việc", time: task.completedAt || task.updatedAt, icon: CheckCircle2, iconColor: "text-green-500", content: "Đã duyệt hoàn thành." });
+    if (task.status?.toUpperCase() === "HOÀN THÀNH") {
+      timeline.push({ id: "t5", title: "Hoàn thành", time: task.completedAt || task.updatedAt, icon: CheckCircle2, iconColor: "text-green-500", content: "Đã hoàn thành toàn bộ công việc." });
     }
     return timeline.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
   };
@@ -238,15 +238,15 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     {subTasks.map((subTask: HrmTask) => (
                       <div key={subTask.id} className="flex items-center justify-between p-3">
                         <div className="flex items-center gap-3">
-                          {subTask.status?.toUpperCase() === "COMPLETED" || subTask.status?.toUpperCase() === "HOÀN THÀNH" ? (
+                          {subTask.status?.toUpperCase() === "HOÀN THÀNH" ? (
                             <CheckCircle2 className="w-5 h-5 text-green-500" />
-                          ) : subTask.status?.toUpperCase() === "IN_PROGRESS" || subTask.status?.toUpperCase() === "ĐANG XỬ LÝ" || subTask.status?.toUpperCase() === "ĐANG THỰC HIỆN" ? (
+                          ) : subTask.status?.toUpperCase() === "ĐANG XỬ LÝ" ? (
                             <Clock className="w-5 h-5 text-blue-500" />
                           ) : (
                             <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
                           )}
                           <div>
-                            <p className={`text-sm ${subTask.status?.toUpperCase() === "COMPLETED" || subTask.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
+                            <p className={`text-sm ${subTask.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
                               {subTask.title}
                             </p>
                             <div className="flex items-center gap-3 mt-1">
@@ -261,8 +261,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                                   {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
                                 </p>
                               )}
-                              {subTask.status?.toUpperCase() !== "COMPLETED" && subTask.status?.toUpperCase() !== "HOÀN THÀNH" && subTask.progress !== undefined && (
-                                <p className="text-xs text-orange-600 flex items-center bg-orange-50 px-2 py-0.5 rounded-full">
+                              {subTask.status?.toUpperCase() !== "HOÀN THÀNH" && subTask.progress !== undefined && (
+                                <p className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium">
                                   Tiến độ: {subTask.progress}%
                                 </p>
                               )}
@@ -304,13 +304,13 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                             disabled={isCompleted || updateStep.isPending}
                             className="shrink-0 focus:outline-none"
                           >
-                            {step.status?.toUpperCase() === "COMPLETED" || step.status?.toUpperCase() === "HOÀN THÀNH" ? (
+                            {step.status?.toUpperCase() === "HOÀN THÀNH" ? (
                               <CheckCircle2 className="w-5 h-5 text-green-500" />
                             ) : (
                               <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
                             )}
                           </button>
-                          <p className={`text-sm ${step.status?.toUpperCase() === "COMPLETED" || step.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
+                          <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
                             {step.title}
                           </p>
                         </div>
