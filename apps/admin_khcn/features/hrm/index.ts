@@ -14,7 +14,6 @@ export {
 
 export { HrmDashboardClient } from "./components/HrmDashboardClient";
 export { EmployeeListClient } from "./components/EmployeeListClient";
-export { TaskListClient } from "./components/work-plans/tasks/list/TaskListClient";
 
 export {
   hrmDepartmentsApi,
