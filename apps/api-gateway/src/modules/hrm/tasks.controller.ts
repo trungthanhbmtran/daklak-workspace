@@ -697,8 +697,10 @@ export class TasksController implements OnModuleInit {
     );
     if (response?.data) {
       if (Array.isArray(response.data)) {
+        await this.populateUsers(response.data);
         response.data.forEach((t: any) => this.translateTaskData(t));
       } else {
+        await this.populateUsers([response.data]);
         this.translateTaskData(response.data);
       }
     }
