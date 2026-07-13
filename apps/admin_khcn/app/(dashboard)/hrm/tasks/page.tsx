@@ -1,22 +1,5 @@
-import { TaskDashboard } from "@/features/hrm/components/tasks/task-dashboard";
-import { TaskList } from "@/features/hrm/components/tasks/task-list";
+import { redirect } from "next/navigation";
 
-export default function TasksPage() {
-  return (
-    <div className="flex flex-col gap-6 p-6 min-h-screen bg-slate-50/50">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Quản lý Công việc & KPI</h1>
-        <p className="text-muted-foreground">
-          Theo dõi tiến độ, phân công và đánh giá chất lượng công việc.
-        </p>
-      </div>
-
-      <TaskDashboard />
-      
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold mb-4">Danh sách Công việc</h2>
-        <TaskList />
-      </div>
-    </div>
-  );
+export default function TasksAdminRedirect() {
+  redirect("/services/hrm/tasks");
 }
