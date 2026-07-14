@@ -227,6 +227,19 @@ export const PropertiesPanel = ({
           <div className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Tên bước xử lý (Label)
+              </label>
+              <Input type="text"
+                name="label"
+                value={data.label || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="VD: Giao việc, Duyệt báo cáo..."
+              />
+            </div>
+            
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Loại thao tác (Action Type)
               </label>
               <NativeSelect
@@ -241,109 +254,116 @@ export const PropertiesPanel = ({
                 <NativeSelectOption value="REJECT">Từ chối / Trả lại</NativeSelectOption>
                 <NativeSelectOption value="SUBMIT">Hoàn thành / Báo cáo</NativeSelectOption>
               </NativeSelect>
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Xác định bản chất của bước này để hệ thống gợi ý các nhánh tiếp theo.
-              </p>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Trạng thái mục tiêu (Target Status)
-              </label>
-              <Input type="text"
-                name="targetStatus"
-                value={data.targetStatus || ""}
-                onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
-                placeholder="VD: PENDING_APPROVAL, IN_PROGRESS"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Trạng thái của công việc sẽ đổi thành mã này khi đi vào bước này. Bỏ trống sẽ giữ nguyên trạng thái cũ.
-              </p>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Chiến lược phân công (Scope)
-              </label>
-              <NativeSelect
-                name="assignmentStrategy"
-                value={data.assignmentStrategy || "ANY"}
-                onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-              >
-                <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
-                <NativeSelectOption value="BY_DOMAIN">Theo Lĩnh vực phụ trách</NativeSelectOption>
-                <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
-                <NativeSelectOption value="BY_GEO_AREA">Theo Địa bàn phụ trách</NativeSelectOption>
-                <NativeSelectOption value="DIRECT_MANAGER">Cấp trên/dưới trực tiếp</NativeSelectOption>
-                <NativeSelectOption value="ASSIGNER">Người giao việc</NativeSelectOption>
-              </NativeSelect>
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Backend sẽ dựa vào chiến lược này để đối chiếu với cấu trúc PBAC.
-              </p>
             </div>
             
-
-            <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/10 mt-2">
-              <label className="text-sm font-semibold text-primary">
-                Gửi thông báo hệ thống
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Yêu cầu xử lý
               </label>
-              <Switch
-                name="sendNotification"
-                checked={data.sendNotification || false}
-                onCheckedChange={(checked) => handleChange({ target: { name: 'sendNotification', value: checked } } as any)}
+              <Textarea
+                name="description"
+                value={data.description || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                placeholder="Mô tả chi tiết công việc cần thực hiện ở bước này..."
               />
             </div>
 
-            <div className="space-y-3 mt-4 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
-              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Chức năng phụ trợ trên UI</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Giao việc con</label>
-                  <Switch checked={data.allowAddSubtask || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAddSubtask', value: c } } as any)} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Xin phối hợp</label>
-                  <Switch checked={data.allowCoordinate || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowCoordinate', value: c } } as any)} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Sửa công việc</label>
-                  <Switch checked={data.allowEdit || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowEdit', value: c } } as any)} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Xóa công việc</label>
-                  <Switch checked={data.allowDelete || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowDelete', value: c } } as any)} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Giao/Chuyển</label>
-                  <Switch checked={data.allowAssign !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAssign', value: c } } as any)} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Thảo luận</label>
-                  <Switch checked={data.allowChat !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowChat', value: c } } as any)} />
-                </div>
-              </div>
-            </div>
-
-            {/* Dynamic Permissions Configuration */}
-            <Accordion type="single" collapsible className="w-full mt-4">
+            <Accordion type="multiple" className="w-full mt-4 space-y-2">
               <AccordionItem value="advanced" className="border-none">
-                <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors [&[data-state=open]]:rounded-b-none hover:no-underline py-2">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình Nâng cao (Quyền, Phân công)</span>
+                <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình nâng cao (Quyền, UI, Phân công)</span>
                 </AccordionTrigger>
-                <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 dark:bg-slate-900/50 border border-t-0 border-slate-200 dark:border-slate-800 space-y-4 pt-4">
+                <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-6">
                   
-                  {/* Quyền (Permissions) */}
+                  {/* Approval Evidence Configuration */}
+                  <div className="space-y-4">
+                    <h4 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      Phê duyệt & Minh chứng
+                    </h4>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        Bắt buộc phê duyệt
+                      </label>
+                      <Switch
+                        checked={data.approvalRequired || false}
+                        onCheckedChange={(checked) => handleChange({ target: { name: 'approvalRequired', value: checked } } as any)}
+                      />
+                    </div>
+                    {data.approvalRequired && (
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                          Loại minh chứng yêu cầu
+                        </label>
+                        <NativeSelect
+                          name="evidenceType"
+                          value={data.evidenceType || "none"}
+                          onChange={handleChange}
+                          className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all"
+                        >
+                          <NativeSelectOption value="none">Không yêu cầu</NativeSelectOption>
+                          <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
+                          <NativeSelectOption value="api">Dữ liệu từ API</NativeSelectOption>
+                          <NativeSelectOption value="both">Cả hai (Upload + API)</NativeSelectOption>
+                        </NativeSelect>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-slate-200 dark:border-slate-800" />
+
+                  {/* UI Toggles */}
+                  <div className="space-y-3">
+                    <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hiển thị chức năng (UI)</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Giao việc con</label><Switch checked={data.allowAddSubtask || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAddSubtask', value: c } } as any)} /></div>
+                      <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Xin phối hợp</label><Switch checked={data.allowCoordinate || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowCoordinate', value: c } } as any)} /></div>
+                      <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Sửa task</label><Switch checked={data.allowEdit || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowEdit', value: c } } as any)} /></div>
+                      <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Xóa task</label><Switch checked={data.allowDelete || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowDelete', value: c } } as any)} /></div>
+                      <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Giao/Chuyển</label><Switch checked={data.allowAssign !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAssign', value: c } } as any)} /></div>
+                      <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Thảo luận</label><Switch checked={data.allowChat !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowChat', value: c } } as any)} /></div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-200 dark:border-slate-800" />
+
+                  {/* Target Status & Assignment */}
+                  <div className="space-y-4">
+                    <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Chuyển trạng thái & Phân công</h4>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Trạng thái mục tiêu</label>
+                      <Input name="targetStatus" value={data.targetStatus || ""} onChange={handleChange} className="w-full text-sm bg-white" placeholder="VD: IN_PROGRESS" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Giao trực tiếp cho nhân sự (Mã NV)</label>
+                      <Input name="employeeCode" value={data.employeeCode || ""} onChange={handleChange} className="w-full text-sm bg-white" placeholder="VD: NV001" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Chiến lược phân công tự động (PBAC)</label>
+                      <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange} className="w-full text-sm bg-white">
+                        <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
+                        <NativeSelectOption value="BY_DOMAIN">Theo Lĩnh vực phụ trách</NativeSelectOption>
+                        <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
+                        <NativeSelectOption value="BY_GEO_AREA">Theo Địa bàn phụ trách</NativeSelectOption>
+                        <NativeSelectOption value="DIRECT_MANAGER">Cấp trên/dưới trực tiếp</NativeSelectOption>
+                        <NativeSelectOption value="ASSIGNER">Người giao việc</NativeSelectOption>
+                      </NativeSelect>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-200 dark:border-slate-800" />
+
+                  {/* Dynamic Permissions Configuration */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình Quyền Tùy biến</h4>
+                      <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Quyền thao tác tuỳ biến</h4>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         className="h-6 px-2 text-[10px] text-violet-600 hover:text-violet-700 hover:bg-violet-100"
                         onClick={() => {
                           const currentPerms = data.permissions || {};
-                          // Generate a unique action name if NEW_ACTION exists
                           let newActionName = 'NEW_ACTION';
                           let counter = 1;
                           while (currentPerms[newActionName]) {
@@ -359,6 +379,7 @@ export const PropertiesPanel = ({
                         <Plus className="h-3 w-3 mr-1" /> Thêm quyền
                       </Button>
                     </div>
+                    
                     <div className="space-y-3">
                       {Object.entries(data.permissions || {}).map(([action, roles]) => (
                         <div key={action} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
@@ -370,7 +391,6 @@ export const PropertiesPanel = ({
                                   const newAction = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
                                   const newPerms = { ...data.permissions };
                                   const oldRoles = newPerms[action];
-                                  // Preserve the key order by recreating the object
                                   const updatedPerms: any = {};
                                   for (const key of Object.keys(newPerms)) {
                                     if (key === action) {
@@ -410,14 +430,14 @@ export const PropertiesPanel = ({
                                     onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
                                   >
                                     <option value="" disabled>+ Chọn nhóm</option>
-                                    <option value="TASK">Vai trò trong Task (Owner/Assignee...)</option>
-                                    {orgRoles.length > 0 && <option value="ORG">Vị trí tổ chức (Chức danh từ DB)</option>}
-                                    {taskRoles && taskRoles.length > 0 && <option value="PBAC">Quyền PBAC hệ thống</option>}
+                                    <option value="TASK">Vai trò trong Task</option>
+                                    {orgRoles.length > 0 && <option value="ORG">Vị trí tổ chức</option>}
+                                    {taskRoles && taskRoles.length > 0 && <option value="PBAC">Quyền hệ thống</option>}
                                   </select>
 
                                   {activeRoleGroups[action] && (
                                     <select
-                                      className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                                      className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300 max-w-[120px]"
                                       onChange={(e) => {
                                         const role = e.target.value;
                                         if (!role) return;
@@ -427,25 +447,20 @@ export const PropertiesPanel = ({
                                           ...data, 
                                           permissions: { ...data.permissions, [action]: newRoles } 
                                         });
-                                        e.target.value = ''; // reset after selection
-                                        setActiveRoleGroups({ ...activeRoleGroups, [action]: "" }); // Reset group selection
+                                        e.target.value = '';
+                                        setActiveRoleGroups({ ...activeRoleGroups, [action]: "" });
                                       }}
                                       defaultValue=""
                                     >
-                                      <option value="" disabled>+ Chọn quyền</option>
-                                      {/* Vai trò trong task (participant role) */}
+                                      <option value="" disabled>+ Chọn</option>
                                       {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
                                         <option key={r.code} value={r.code}>{r.name}</option>
                                       ))}
-                                      {/* Vị trí tổ chức từ DB — sắp xếp theo cấp bậc */}
                                       {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
-                                        <option key={r.code} value={r.code}>
-                                          {r.name}{r.authorityLevel ? ` [${r.authorityLevel}]` : ''} ({r.code})
-                                        </option>
+                                        <option key={r.code} value={r.code}>{r.name}</option>
                                       ))}
-                                      {/* Quyền PBAC hệ thống */}
                                       {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
-                                        <option key={r.code} value={r.code}>{r.name || r.nameVi} ({r.code})</option>
+                                        <option key={r.code} value={r.code}>{r.name || r.nameVi}</option>
                                       ))}
                                     </select>
                                   )}
@@ -459,7 +474,6 @@ export const PropertiesPanel = ({
                               onClick={() => {
                                 const newPerms = { ...data.permissions };
                                 delete newPerms[action];
-                                // If empty, we might want to delete the permissions object entirely to fallback to default
                                 if (Object.keys(newPerms).length === 0) {
                                   const newData = { ...data };
                                   delete newData.permissions;
@@ -476,104 +490,24 @@ export const PropertiesPanel = ({
                       ))}
                       {(!data.permissions || Object.keys(data.permissions).length === 0) && (
                         <p className="text-[10px] text-slate-400 text-center py-2">
-                          Chưa có cấu hình quyền tùy biến. Nút này sẽ sử dụng quyền mặc định của hệ thống.
+                          Sử dụng quyền hệ thống mặc định.
                         </p>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
-                      Người xử lý tại bước này sẽ tự động sở hữu các vai trò được cấp trong hệ thống. Hệ thống hợp nhất quyền mặc định và phân quyền tự động để duyệt tính năng hiển thị cho từng cá nhân cụ thể.
-                    </p>
                   </div>
+
                 </AccordionContent>
               </AccordionItem>
-            </Accordion>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Hoặc chỉ định Mã nhân sự cụ thể
-              </label>
-              <Input type="text"
-                name="employeeCode"
-                value={data.employeeCode || ""}
-                onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                placeholder="VD: NV001"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Nếu điền mã nhân sự, hệ thống sẽ ưu tiên giao việc trực tiếp thay vì giao theo vai trò PBAC.
-              </p>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Yêu cầu xử lý
-              </label>
-              <Textarea
-                name="description"
-                value={data.description || ""}
-                onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                placeholder="Mô tả công việc cần thực hiện ở bước này..."
-              />
-            </div>
 
-            {/* Approval Evidence Configuration (Q2) */}
-            <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 space-y-4 mt-2">
-              <h4 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                Cấu hình Phê duyệt & Minh chứng
-              </h4>
-
-              <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border border-amber-100 dark:border-amber-900/40">
-                <div>
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Bắt buộc phê duyệt
-                  </label>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    Khi bật: Task chỉ hoàn thành khi người phụ trách trực tiếp phê duyệt.
-                  </p>
-                </div>
-                <Switch
-                  checked={data.approvalRequired || false}
-                  onCheckedChange={(checked) => handleChange({ target: { name: 'approvalRequired', value: checked } } as any)}
-                />
-              </div>
-
-              {data.approvalRequired && (
-                <>
-                  <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/30 rounded-lg">
-                    <span className="mt-0.5 text-amber-600 dark:text-amber-400 text-base">ℹ</span>
-                    <div>
-                      <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
-                        Người giao việc = Người phê duyệt kết quả
-                      </p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                      Loại minh chứng yêu cầu
-                    </label>
-                    <NativeSelect
-                      name="evidenceType"
-                      value={data.evidenceType || "none"}
-                      onChange={handleChange}
-                      className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all"
-                    >
-                      <NativeSelectOption value="none">Không yêu cầu minh chứng</NativeSelectOption>
-                      <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
-                      <NativeSelectOption value="api">Dữ liệu từ API ngoài</NativeSelectOption>
-                      <NativeSelectOption value="both">Cả hai (Upload + API)</NativeSelectOption>
-                    </NativeSelect>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <Accordion type="single" collapsible className="w-full mt-4">
               <AccordionItem value="dev-advanced" className="border-none">
                 <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Lập trình mở rộng (IT Only)</span>
                 </AccordionTrigger>
                 <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Bật Notification (Hệ thống cũ)</label>
+                    <Switch checked={data.sendNotification || false} onCheckedChange={(c) => handleChange({ target: { name: 'sendNotification', value: c } } as any)} />
+                  </div>
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Biểu mẫu động (Form Schema)</label>
                     <Textarea name="formSchema" value={data.formSchema || ""} onChange={handleChange} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-mono min-h-[100px]" placeholder='[{ "name": "lyDo", "label": "Lý do", "type": "textarea" }]' spellCheck={false} />
