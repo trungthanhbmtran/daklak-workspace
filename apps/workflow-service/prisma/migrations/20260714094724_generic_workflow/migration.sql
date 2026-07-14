@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `workflow_instances` ADD COLUMN `entityId` VARCHAR(191) NOT NULL DEFAULT 'UNKNOWN',
+    ADD COLUMN `entityType` VARCHAR(191) NOT NULL DEFAULT 'TASK';

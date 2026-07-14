@@ -108,6 +108,8 @@ model WorkflowInstance {
   id            String   @id @default(uuid())
   workflowId    String
   version       Int      @default(1)
+  entityType    String   @default("TASK")
+  entityId      String   @default("UNKNOWN")
   currentNodeId String?
   status        String   // Running, Completed, Failed, Pending
   variables     Json?

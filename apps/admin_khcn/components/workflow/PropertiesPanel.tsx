@@ -145,70 +145,74 @@ export const PropertiesPanel = ({
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-              Mã rẽ nhánh (Action Code)
+              Điều kiện rẽ nhánh (Dành cho Gateway)
             </label>
-            <Input type="text"
+            <NativeSelect
               name="actionName"
               value={(edgeData.actionName as string) || ""}
-              onChange={handleChange}
-              className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
-              placeholder="VD: APPROVE, REJECT, SUBMIT"
-            />
+              onChange={(e) => {
+                const actionVal = e.target.value;
+                let newExpression = "";
+                let newLabel = (selectedEdge.label as string) || "";
+                
+                if (actionVal === "APPROVE") {
+                  newExpression = "actionName === 'APPROVE'";
+                  if (!newLabel || newLabel === "Từ chối") newLabel = "Đồng ý / Phê duyệt";
+                } else if (actionVal === "REJECT") {
+                  newExpression = "actionName === 'REJECT'";
+                  if (!newLabel || newLabel === "Đồng ý / Phê duyệt") newLabel = "Từ chối";
+                } else if (actionVal === "SUBMIT") {
+                  newExpression = "actionName === 'SUBMIT'";
+                } else if (actionVal) {
+                  newExpression = `actionName === '${actionVal}'`;
+                }
+
+                if (onUpdateEdge) {
+                  onUpdateEdge(selectedEdge.id, {
+                    ...selectedEdge,
+                    label: newLabel,
+                    data: {
+                      ...(selectedEdge.data || {}),
+                      actionName: actionVal,
+                      expression: newExpression
+                    }
+                  });
+                }
+              }}
+              className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            >
+              <NativeSelectOption value="">(Không có điều kiện - Đi thẳng)</NativeSelectOption>
+              <NativeSelectOption value="APPROVE">Nếu bước trước: ĐỒNG Ý / PHÊ DUYỆT</NativeSelectOption>
+              <NativeSelectOption value="REJECT">Nếu bước trước: TỪ CHỐI</NativeSelectOption>
+              <NativeSelectOption value="SUBMIT">Nếu bước trước: HOÀN THÀNH / TRÌNH KÝ</NativeSelectOption>
+            </NativeSelect>
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              Mã tiếng Anh dùng trong xử lý logic (VD: APPROVE). Nếu để trống, sẽ dùng Tên thao tác (Label).
+              Chỉ áp dụng khi đường nối này đi ra từ Nút Rẽ nhánh (Gateway).
             </p>
           </div>
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-              Biểu thức rẽ nhánh (Expression)
-            </label>
-            <div className="flex gap-2 mb-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-[10px] h-7 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                onClick={() => {
-                  onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
-                    ...selectedEdge, 
-                    label: "Phê duyệt",
-                    data: { ...(selectedEdge.data || {}), actionName: "APPROVE", expression: "actionName === 'APPROVE'" } 
-                  });
-                }}
-              >
-                Phê duyệt (Approved)
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-[10px] h-7 bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
-                onClick={() => {
-                  onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
-                    ...selectedEdge, 
-                    label: "Từ chối",
-                    data: { ...(selectedEdge.data || {}), actionName: "REJECT", expression: "actionName === 'REJECT'", sideEffects: ['RETURN_TASK'] } 
-                  });
-                }}
-              >
-                Từ chối (Rejected)
-              </Button>
-            </div>
-            <div className="relative group">
-              <div className="absolute left-3 top-3.5 text-slate-400 group-focus-within:text-violet-500 transition-colors">
-                <span className="font-mono text-xs font-bold bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">fx</span>
-              </div>
-              <Textarea
-                name="expression"
-                value={(edgeData.expression as string) || ""}
-                onChange={handleChange}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 pl-12 text-sm font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[100px] resize-y leading-relaxed"
-                placeholder={`// Viết biểu thức JavaScript (dành cho Gateway)\ne.g. actionName === 'APPROVE'`}
-                spellCheck={false}
-              />
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-1.5">
-              Áp dụng nếu đường nối đi ra từ Exclusive Gateway. Trả về true để rẽ vào nhánh này.
-            </p>
-          </div>
+          
+          <Accordion type="single" collapsible className="w-full mt-4">
+            <AccordionItem value="advanced" className="border-none">
+              <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mã điều kiện (Dành cho IT)</span>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-4">
+                <div className="relative group">
+                  <div className="absolute left-3 top-3.5 text-slate-400">
+                    <span className="font-mono text-xs font-bold bg-slate-100 px-1 py-0.5 rounded">fx</span>
+                  </div>
+                  <Textarea
+                    name="expression"
+                    value={(edgeData.expression as string) || ""}
+                    onChange={handleChange}
+                    className="w-full bg-white border border-slate-200 rounded-xl p-3 pl-12 text-sm font-mono min-h-[80px]"
+                    placeholder="actionName === 'APPROVE'"
+                    spellCheck={false}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       );
     }
@@ -223,17 +227,22 @@ export const PropertiesPanel = ({
           <div className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Mã hành động nghiệp vụ (Action)
+                Loại thao tác (Action Type)
               </label>
-              <Input type="text"
+              <NativeSelect
                 name="actionName"
                 value={data.actionName || ""}
                 onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
-                placeholder="VD: ASSIGN, APPROVE, IN_PROGRESS"
-              />
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <NativeSelectOption value="">(Tùy chọn) Chọn loại thao tác...</NativeSelectOption>
+                <NativeSelectOption value="ASSIGN">Giao việc / Phân công</NativeSelectOption>
+                <NativeSelectOption value="APPROVE">Phê duyệt / Ký duyệt</NativeSelectOption>
+                <NativeSelectOption value="REJECT">Từ chối / Trả lại</NativeSelectOption>
+                <NativeSelectOption value="SUBMIT">Hoàn thành / Báo cáo</NativeSelectOption>
+              </NativeSelect>
               <p className="text-[10px] text-muted-foreground mt-1.5">
-                Mã này giúp backend nhận diện bước này đóng vai trò gì.
+                Xác định bản chất của bước này để hệ thống gợi ý các nhánh tiếp theo.
               </p>
             </div>
             <div>
@@ -284,6 +293,36 @@ export const PropertiesPanel = ({
                 checked={data.sendNotification || false}
                 onCheckedChange={(checked) => handleChange({ target: { name: 'sendNotification', value: checked } } as any)}
               />
+            </div>
+
+            <div className="space-y-3 mt-4 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Chức năng phụ trợ trên UI</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Giao việc con</label>
+                  <Switch checked={data.allowAddSubtask || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAddSubtask', value: c } } as any)} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Xin phối hợp</label>
+                  <Switch checked={data.allowCoordinate || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowCoordinate', value: c } } as any)} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Sửa công việc</label>
+                  <Switch checked={data.allowEdit || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowEdit', value: c } } as any)} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Xóa công việc</label>
+                  <Switch checked={data.allowDelete || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowDelete', value: c } } as any)} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Giao/Chuyển</label>
+                  <Switch checked={data.allowAssign !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAssign', value: c } } as any)} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Thảo luận</label>
+                  <Switch checked={data.allowChat !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowChat', value: c } } as any)} />
+                </div>
+              </div>
             </div>
 
             {/* Dynamic Permissions Configuration */}
@@ -476,24 +515,6 @@ export const PropertiesPanel = ({
               />
             </div>
 
-            {/* Advanced Customization: Dynamic Forms */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Biểu mẫu động (Form Schema)
-              </label>
-              <Textarea
-                name="formSchema"
-                value={data.formSchema || ""}
-                onChange={handleChange}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-y"
-                placeholder={`[\n  { "name": "lyDo", "label": "Lý do", "type": "textarea", "required": true }\n]`}
-                spellCheck={false}
-              />
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Cấu hình mảng JSON các trường thông tin bắt buộc/tùy chọn xuất hiện ở bước này.
-              </p>
-            </div>
-
             {/* Approval Evidence Configuration (Q2) */}
             <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 space-y-4 mt-2">
               <h4 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
@@ -501,7 +522,6 @@ export const PropertiesPanel = ({
                 Cấu hình Phê duyệt & Minh chứng
               </h4>
 
-              {/* approvalRequired toggle */}
               <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border border-amber-100 dark:border-amber-900/40">
                 <div>
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -517,7 +537,6 @@ export const PropertiesPanel = ({
                 />
               </div>
 
-              {/* approverType — Quy tắc cố định: người giao việc = người phê duyệt */}
               {data.approvalRequired && (
                 <>
                   <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/30 rounded-lg">
@@ -526,13 +545,9 @@ export const PropertiesPanel = ({
                       <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
                         Người giao việc = Người phê duyệt kết quả
                       </p>
-                      <p className="text-[10px] text-amber-700/80 dark:text-amber-400/80 mt-0.5 leading-relaxed">
-                        Hệ thống tự động lấy <strong>OWNER</strong> của task (người đã giao việc) làm người phê duyệt. Không cần cấu hình thêm.
-                      </p>
                     </div>
                   </div>
 
-                  {/* evidenceType */}
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                       Loại minh chứng yêu cầu
@@ -548,64 +563,28 @@ export const PropertiesPanel = ({
                       <NativeSelectOption value="api">Dữ liệu từ API ngoài</NativeSelectOption>
                       <NativeSelectOption value="both">Cả hai (Upload + API)</NativeSelectOption>
                     </NativeSelect>
-                    <p className="text-[10px] text-muted-foreground mt-1.5">
-                      Người thực hiện cần cung cấp minh chứng hoàn thành theo dạng này.
-                    </p>
-                  </div>
-
-                  {/* apiSource — chỉ hiện khi evidenceType là api hoặc both */}
-                  {(data.evidenceType === 'api' || data.evidenceType === 'both') && (
-                    <div>
-                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                        Nguồn dữ liệu API
-                      </label>
-                      <Input
-                        name="apiSource"
-                        value={data.apiSource || ""}
-                        onChange={handleChange}
-                        className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all font-mono"
-                        placeholder="VD: /api/kpi/results?taskId={{taskId}}"
-                      />
-                      <p className="text-[10px] text-muted-foreground mt-1.5">
-                        URL endpoint trả về dữ liệu đánh giá. Dùng <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">{"{{taskId}}"}</code> để inject ID task hiện tại.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Notification template khi cần phê duyệt */}
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                      Mẫu thông báo yêu cầu phê duyệt
-                    </label>
-                    <Textarea
-                      name="approvalNotificationTemplate"
-                      value={data.approvalNotificationTemplate || ""}
-                      onChange={handleChange}
-                      className="w-full bg-background border border-border rounded-lg p-2 text-sm min-h-[70px] focus:ring-2 focus:ring-amber-300 outline-none transition-all resize-none"
-                      placeholder={`VD: "{{assigneeName}} đã hoàn thành \"{{taskTitle}}\". Vui lòng kiểm tra và phê duyệt."`}
-                    />
                   </div>
                 </>
               )}
             </div>
 
-            {/* Advanced Customization: Side Effects */}
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                Hành động phụ (Side Effects / Webhooks)
-              </label>
-              <Textarea
-                name="sideEffects"
-                value={data.sideEffects || ""}
-                onChange={handleChange}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[80px] resize-y"
-                placeholder={`[\n  { "type": "WEBHOOK", "url": "https://..." }\n]`}
-                spellCheck={false}
-              />
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                Mảng JSON mô tả các hệ thống cần gọi (Trigger API, Gửi email ngoại,...) khi bước này xử lý.
-              </p>
-            </div>
+            <Accordion type="single" collapsible className="w-full mt-4">
+              <AccordionItem value="dev-advanced" className="border-none">
+                <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Lập trình mở rộng (IT Only)</span>
+                </AccordionTrigger>
+                <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Biểu mẫu động (Form Schema)</label>
+                    <Textarea name="formSchema" value={data.formSchema || ""} onChange={handleChange} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-mono min-h-[100px]" placeholder='[{ "name": "lyDo", "label": "Lý do", "type": "textarea" }]' spellCheck={false} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Hành động phụ (Side Effects)</label>
+                    <Textarea name="sideEffects" value={data.sideEffects || ""} onChange={handleChange} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-mono min-h-[80px]" placeholder='[{ "type": "WEBHOOK", "url": "..." }]' spellCheck={false} />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         );
 

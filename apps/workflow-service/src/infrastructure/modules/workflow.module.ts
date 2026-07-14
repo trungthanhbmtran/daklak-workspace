@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { WorkflowController } from './workflow.controller';
-import { WorkflowGrpcController } from './workflow-grpc.controller';
+import { WorkflowController } from '../../presentation/controllers/workflow.controller';
+import { WorkflowGrpcController } from '../../presentation/controllers/workflow-grpc.controller';
 import { PrismaModule } from '@/database/prisma.module';
 
 const protoRoot =

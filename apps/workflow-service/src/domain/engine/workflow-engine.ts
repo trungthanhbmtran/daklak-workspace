@@ -1,8 +1,5 @@
-import { CompiledWorkflow, CompiledNode, WorkflowCompiler } from './workflow-compiler';
-
-export interface WorkflowContext {
-  [key: string]: any;
-}
+import { CompiledWorkflow, CompiledNode, WorkflowCompiler } from '../compiler/workflow-compiler';
+import { WorkflowContext } from '../plugins/node.plugin';
 
 export interface NodeData {
   id: string;
@@ -41,6 +38,30 @@ export interface ValidationContext {
 }
 
 
+
+import { INodePlugin } from '../plugins/node.plugin';
+import { StartNodePlugin } from '../plugins/nodes/start-node.plugin';
+import { EndNodePlugin } from '../plugins/nodes/end-node.plugin';
+import { UserTaskNodePlugin } from '../plugins/nodes/user-task-node.plugin';
+import { ExclusiveGatewayNodePlugin } from '../plugins/nodes/gateway-node.plugin';
+
+export class PluginRegistry {
+  private static nodePlugins: Map<string, INodePlugin> = new Map();
+
+  static registerNodePlugin(plugin: INodePlugin) {
+    this.nodePlugins.set(plugin.getType(), plugin);
+  }
+
+  static getNodePlugin(type: string): INodePlugin | undefined {
+    return this.nodePlugins.get(type);
+  }
+}
+
+// Register basic plugins
+PluginRegistry.registerNodePlugin(new StartNodePlugin());
+PluginRegistry.registerNodePlugin(new EndNodePlugin());
+PluginRegistry.registerNodePlugin(new UserTaskNodePlugin());
+PluginRegistry.registerNodePlugin(new ExclusiveGatewayNodePlugin());
 
 export class WorkflowEngine {
   private compiled: CompiledWorkflow;
@@ -88,22 +109,20 @@ export class WorkflowEngine {
     const node = this.getNode(currentNodeId);
     if (!node) return { allowed: false, reason: 'Current node not found in workflow definition' };
 
-    const ctx = currentContext || businessData || {};
-
-    if (node.validateFn) {
-      const evalContext: ValidationContext = {
-        ...ctx,
+    const plugin = PluginRegistry.getNodePlugin(node.type || 'user_task');
+    if (plugin) {
+      const evalContext: any = {
+        ...businessData,
+        ...currentContext,
         actionName,
         userId,
         userRoles,
         userContext: userContext || {},
+        currentNodeData: node.data,
       };
-      const isAllowed = node.validateFn(evalContext);
-      if (!isAllowed) {
-        return { allowed: false, reason: 'Không thỏa mãn điều kiện quy trình chặn.' };
-      }
-      return { allowed: true };
+      return plugin.validate(currentNodeId, evalContext);
     }
+
     return { allowed: true };
   }
 
@@ -126,6 +145,22 @@ export class WorkflowEngine {
       if (res.allowed) allowed.push(action);
     }
     return allowed;
+  }
+
+  public async executeNode(nodeId: string, context: WorkflowContext): Promise<WorkflowContext> {
+    const node = this.getNode(nodeId);
+    if (!node) return context;
+
+    const plugin = PluginRegistry.getNodePlugin(node.type || 'user_task');
+    if (plugin) {
+      const execContext: any = {
+        ...context,
+        currentNodeData: node.data,
+      };
+      return await plugin.execute(nodeId, execContext);
+    }
+    
+    return context;
   }
 
   public getNextNodeId(currentNodeId: string, actionName: string, evalContext?: any): string | null {

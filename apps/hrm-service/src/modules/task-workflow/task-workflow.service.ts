@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
+
 import { TaskSharedService } from '../task-shared/task-shared.service';
 import { PrismaService } from '../../database/prisma.service';
 
@@ -108,12 +108,11 @@ export class TaskWorkflowService {
     return { workflowId, workflowCode, currentNodeId, workflowInstId };
   }
 
-  /** Lấy initialNodeId từ workflow definition qua engine local */
+  /** Lấy initialNodeId từ workflow definition qua engine remote */
   async getLocalInitialNodeId(workflowId: string): Promise<string | null> {
-    const definition = await this.shared.getWorkflowDefinition(workflowId);
-    if (!definition) return null;
     try {
-      return new WorkflowEngine(definition).getInitialNodeId() ?? null;
+      const res = await firstValueFrom<any>(this.shared.workflowService.GetInitialNode({ workflowId }));
+      return res?.initialNodeId || null;
     } catch (err) {
       this.logger.warn(`getLocalInitialNodeId failed for ${workflowId}`, err);
       return null;
@@ -149,8 +148,6 @@ export class TaskWorkflowService {
       return { allowed: false, reason: 'Không tìm thấy cấu hình Workflow' };
     }
 
-    const engine = new WorkflowEngine(definition, String(workflowId));
-
     const businessData = {
       ...task,
       status: task.status,
@@ -165,30 +162,37 @@ export class TaskWorkflowService {
       actionName,
     };
 
-    const validateRes = engine.validateAction(
+    const validateRes = await firstValueFrom<any>(this.shared.workflowService.ValidateAction({
+      workflowId: String(workflowId),
       currentNodeId,
       actionName,
-      actorContext.permissions ?? [],
-      actorContext.actorCode,
+      userRoles: actorContext.permissions ?? [],
+      userId: actorContext.actorCode || '',
       businessData,
-    );
+    }));
 
     if (!validateRes.allowed) {
       return { allowed: false, reason: validateRes.reason };
     }
 
-    const nextNodeId = engine.getNextNodeId(currentNodeId, actionName, businessData) ?? undefined;
+    const nextNodeRes = await firstValueFrom<any>(this.shared.workflowService.GetNextNode({
+      workflowId: String(workflowId),
+      currentNodeId,
+      actionName,
+      evalContext: businessData,
+    }));
+
+    const nextNodeId = nextNodeRes.nextNodeId || undefined;
     let nextNodeData: any = undefined;
     let targetStatus: string | undefined = undefined;
     let isCompleted: boolean | undefined = undefined;
 
     if (nextNodeId) {
-      const nextNode = engine.getNode(nextNodeId);
-      if (nextNode?.data) {
-        nextNodeData = nextNode.data;
+      nextNodeData = nextNodeRes.nextNodeData ? JSON.parse(nextNodeRes.nextNodeData) : undefined;
+      if (nextNodeData) {
         targetStatus = nextNodeData.targetStatus ?? nextNodeId;
       }
-      isCompleted = nextNode?.type === 'end' || nextNodeData?.isCompleted === true;
+      isCompleted = nextNodeRes.type === 'end' || nextNodeRes.type === 'END' || nextNodeData?.isCompleted === true;
     }
 
     return { allowed: true, nextNodeId, nextNodeData, targetStatus, isCompleted };
@@ -203,8 +207,7 @@ export class TaskWorkflowService {
     const definition = await this.shared.getWorkflowDefinition(workflowId);
     if (!definition) return null;
     try {
-      const engine = new WorkflowEngine(definition, String(workflowId));
-      return engine.getNode(nodeId)?.data ?? null;
+      return definition.nodes?.find((n: any) => n.id === nodeId)?.data ?? null;
     } catch {
       return null;
     }

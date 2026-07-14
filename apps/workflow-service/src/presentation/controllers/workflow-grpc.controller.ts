@@ -2,7 +2,7 @@ import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod, RpcException, ClientProxy } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { PrismaService } from '@/database/prisma.service';
-import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
+import { WorkflowEngine } from '@domain/engine/workflow-engine';
 
 @Controller()
 export class WorkflowGrpcController {
@@ -438,6 +438,110 @@ export class WorkflowGrpcController {
     businessId?: string;
     businessType?: string;
   }) {
+    const { StartWorkflowUseCase } = require('../../application/usecases/start-workflow.usecase');
+    const useCase = new StartWorkflowUseCase(this.prisma);
+    return await useCase.execute({
+      workflowId: data.workflowId,
+      entityType: data.businessType || 'UNKNOWN',
+      entityId: data.businessId || 'UNKNOWN',
+      initialContext: data.initialContext,
+      initiatorId: data.initiatorId,
+    });
+  }
+
+  @GrpcMethod('WorkflowService', 'ValidateAction')
+  async validateAction(data: {
+    instanceId?: string;
+    workflowId?: string;
+    currentNodeId?: string;
+    actionName: string;
+    userRoles: string[];
+    userId: string;
+    businessData: any;
+  }) {
+    let workflow: any;
+    let currentNodeId = data.currentNodeId;
+
+    if (data.instanceId) {
+      const instance = await this.prisma.workflowInstance.findUnique({
+        where: { id: data.instanceId },
+        include: {
+          workflow: {
+            include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
+          }
+        }
+      });
+      if (!instance) {
+        throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
+      }
+      workflow = instance.workflow;
+      currentNodeId = instance.currentNodeId || undefined;
+    } else if (data.workflowId) {
+      workflow = await this.prisma.workflowDefinition.findUnique({
+        where: { id: data.workflowId },
+        include: {
+          nodes: { include: { assignments: true, actions: true } },
+          edges: true
+        }
+      });
+    }
+
+    if (!workflow || !currentNodeId) {
+      return { allowed: false, reason: 'Missing workflow or current node' };
+    }
+
+    const definitionForEngine = this.buildEngineDefinition(workflow);
+    const engine = new WorkflowEngine(definitionForEngine, workflow.id);
+    const result = engine.validateAction(
+      currentNodeId,
+      data.actionName,
+      data.userRoles || [],
+      data.userId,
+      data.businessData || {}
+    );
+
+    return {
+      allowed: result.allowed,
+      reason: result.reason || ''
+    };
+  }
+
+  @GrpcMethod('WorkflowService', 'GetNextNode')
+  async getNextNode(data: {
+    workflowId: string;
+    currentNodeId: string;
+    actionName: string;
+    evalContext: any;
+  }) {
+    const workflow = await this.prisma.workflowDefinition.findUnique({
+      where: { id: data.workflowId },
+      include: {
+        nodes: { include: { assignments: true, actions: true } },
+        edges: true
+      }
+    });
+    if (!workflow) {
+      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Workflow not found' });
+    }
+
+    const definitionForEngine = this.buildEngineDefinition(workflow);
+    const engine = new WorkflowEngine(definitionForEngine, workflow.id);
+    
+    const nextNodeId = engine.getNextNodeId(data.currentNodeId, data.actionName, data.evalContext || {});
+    if (!nextNodeId) {
+      return { nextNodeId: '' }; // no path found
+    }
+    const nextNode = engine.getNode(nextNodeId);
+
+    return {
+      nextNodeId,
+      nextNodeData: nextNode?.data ? JSON.stringify(nextNode.data) : '{}',
+      type: nextNode?.type || ''
+    };
+  }
+
+  @GrpcMethod('WorkflowService', 'GetInitialNode')
+  async getInitialNode(data: { workflowId: string }) {
     const workflow = await this.prisma.workflowDefinition.findUnique({
       where: { id: data.workflowId },
       include: {
@@ -452,77 +556,43 @@ export class WorkflowGrpcController {
     const definitionForEngine = this.buildEngineDefinition(workflow);
     const engine = new WorkflowEngine(definitionForEngine, workflow.id);
     const initialNodeId = engine.getInitialNodeId();
+    if (!initialNodeId) return { initialNodeId: '' };
 
-    if (!initialNodeId) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: 'Workflow definition has no initial node' });
-    }
-
-    const initialNode = engine.getNode(initialNodeId);
-
-    const instance = await this.prisma.workflowInstance.create({
-      data: {
-        workflowId: workflow.id,
-        status: 'RUNNING',
-        currentNodeId: initialNodeId,
-        variables: data.initialContext || {},
-        tasks: {
-          create: [{
-            nodeId: initialNodeId,
-            assigneeId: data.initiatorId,
-            status: 'Pending'
-          }]
-        }
-      },
-      include: { workflow: { select: { name: true } } }
-    });
-
+    const node = engine.getNode(initialNodeId);
     return {
-      id: instance.id,
-      workflowId: instance.workflowId,
-      status: instance.status,
-      currentNodeId: instance.currentNodeId,
-      context: instance.variables,
-      workflowName: instance.workflow.name,
+      initialNodeId,
+      nodeData: node?.data ? JSON.stringify(node.data) : '{}'
     };
   }
 
-  @GrpcMethod('WorkflowService', 'ValidateAction')
-  async validateAction(data: {
-    instanceId: string;
-    actionName: string;
+  @GrpcMethod('WorkflowService', 'GetAllowedActions')
+  async getAllowedActions(data: {
+    workflowId: string;
+    currentNodeId: string;
     userRoles: string[];
     userId: string;
     businessData: any;
   }) {
-    const instance = await this.prisma.workflowInstance.findUnique({
-      where: { id: data.instanceId },
+    const workflow = await this.prisma.workflowDefinition.findUnique({
+      where: { id: data.workflowId },
       include: {
-        workflow: {
-          include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
-        }
+        nodes: { include: { assignments: true, actions: true } },
+        edges: true
       }
     });
-    if (!instance) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
-    }
-    if (!instance.currentNodeId) {
-      return { allowed: false, reason: 'Instance has no active node' };
+    if (!workflow) {
+      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Workflow not found' });
     }
 
-    const definitionForEngine = this.buildEngineDefinition(instance.workflow);
-    const engine = new WorkflowEngine(definitionForEngine, instance.workflow.id);
-    const result = engine.validateAction(
-      instance.currentNodeId,
-      data.actionName,
+    const definitionForEngine = this.buildEngineDefinition(workflow);
+    const engine = new WorkflowEngine(definitionForEngine, workflow.id);
+    const allowed = engine.getAllowedActions(
+      data.currentNodeId,
       data.userRoles || [],
       data.userId,
       data.businessData || {}
     );
-
-    return {
-      allowed: result.allowed,
-      reason: result.reason || ''
-    };
+    return { actions: allowed };
   }
 
   @GrpcMethod('WorkflowService', 'ResumeWorkflow')
@@ -532,61 +602,14 @@ export class WorkflowGrpcController {
     actionData: any;
     userRoles: string[];
   }) {
-    const instance = await this.prisma.workflowInstance.findUnique({
-      where: { id: data.instanceId },
-      include: {
-        workflow: {
-          include: { nodes: { include: { assignments: true, actions: true } }, edges: true }
-        }
-      }
+    const { ResumeWorkflowUseCase } = require('../../application/usecases/resume-workflow.usecase');
+    const useCase = new ResumeWorkflowUseCase(this.prisma);
+    return await useCase.execute({
+      instanceId: data.instanceId,
+      nodeId: data.nodeId,
+      actionData: data.actionData,
+      userRoles: data.userRoles,
     });
-    if (!instance) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
-    }
-
-    const definitionForEngine = this.buildEngineDefinition(instance.workflow);
-    const engine = new WorkflowEngine(definitionForEngine, instance.workflow.id);
-
-    const actionName = data.actionData?.actionName;
-    const nextNodeId = engine.getNextNodeId(data.nodeId, actionName, data.actionData || {});
-
-    if (!nextNodeId) {
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'No valid path found for action ' + actionName });
-    }
-
-    const nextNode = engine.getNode(nextNodeId);
-    let targetStatus = 'RUNNING';
-    if (nextNode && nextNode.data && nextNode.data.targetStatus) {
-      targetStatus = nextNode.data.targetStatus;
-    } else if (nextNode && nextNode.type === 'END') {
-      targetStatus = 'COMPLETED';
-    }
-
-    const updatedInstance = await this.prisma.workflowInstance.update({
-      where: { id: instance.id },
-      data: {
-        currentNodeId: nextNodeId,
-        status: targetStatus,
-        variables: { ...(typeof instance.variables === 'object' && instance.variables ? instance.variables : {}), ...(data.actionData || {}) },
-        finishedAt: targetStatus === 'COMPLETED' ? new Date() : null,
-        tasks: {
-          create: [{
-            nodeId: nextNodeId,
-            status: targetStatus === 'COMPLETED' ? 'Completed' : 'Pending'
-          }]
-        }
-      },
-      include: { workflow: { select: { name: true } } }
-    });
-
-    return {
-      id: updatedInstance.id,
-      workflowId: updatedInstance.workflowId,
-      status: updatedInstance.status,
-      currentNodeId: updatedInstance.currentNodeId,
-      context: updatedInstance.variables,
-      workflowName: updatedInstance.workflow.name,
-    };
   }
 
   // --- Helpers ---

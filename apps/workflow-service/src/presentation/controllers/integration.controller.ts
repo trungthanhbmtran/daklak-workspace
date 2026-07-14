@@ -8,9 +8,9 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { IntegrationService } from './integration.service';
+import { IntegrationService } from '../../application/services/integration.service';
 
-@Controller('integration-configs')
+@Controller('integration')
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 

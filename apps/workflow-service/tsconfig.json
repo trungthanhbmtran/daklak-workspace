@@ -16,7 +16,8 @@
     "paths": {
       "@/*": ["src/*"],
       "@generated/*": ["generated/*"],
-      "@shared/*": ["../../shared/*", "shared/*"]
+      "@shared/*": ["../../shared/*", "shared/*"],
+      "@domain/*": ["src/domain/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

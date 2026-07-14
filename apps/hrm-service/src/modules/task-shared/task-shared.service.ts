@@ -1,7 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { firstValueFrom } from 'rxjs';
-import { WorkflowEngine } from '@shared/workflow-core/workflow-engine';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { TaskRole } from '@generated/prisma/client';
 import { AppCacheService } from '../../core/cache/app-cache.service';
@@ -476,7 +475,7 @@ export class TaskSharedService {
     const metadata = (t.metadata as any) || {};
     const activeWorkflowId = metadata.workflowId || t.workflowInstId;
 
-    let definition = null;
+    let definition: any = null;
     let currentNodeId = metadata.currentNodeId;
 
     if (activeWorkflowId && currentNodeId) {
@@ -496,15 +495,13 @@ export class TaskSharedService {
 
     if (definition && currentNodeId) {
       try {
-        const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'TASK_PROCESSING_ID';
-        const engine = new WorkflowEngine(definition, cacheKey);
-        const dbgNode = engine.getNode(currentNodeId);
-        this.logger.debug(`[computeAllowedActions] task=${t.id} nodeId=${currentNodeId} node=${JSON.stringify(dbgNode?.data)?.substring(0,200)} isAdmin=${access.isAdmin} empCode=${query.currentEmployeeCode}`);
-        actions = engine.getAllowedActions(
+        this.logger.debug(`[computeAllowedActions] task=${t.id} nodeId=${currentNodeId} isAdmin=${access.isAdmin} empCode=${query.currentEmployeeCode}`);
+        const res = await firstValueFrom<any>(this.workflowService.GetAllowedActions({
+          workflowId: activeWorkflowId || definition.id,
           currentNodeId,
-          query.currentUserPermissions || [],
-          query.currentEmployeeCode,
-          {
+          userRoles: query.currentUserPermissions || [],
+          userId: query.currentEmployeeCode,
+          businessData: {
             status: t.status,
             hasChildren,
             isAdmin: access.isAdmin,
@@ -518,7 +515,8 @@ export class TaskSharedService {
             allowedEmployeeCodes: query.allowedEmployeeCodes || [],
             isUnassigned,
           }
-        );
+        }));
+        actions = res.actions || [];
         this.logger.debug(`[computeAllowedActions] task=${t.id} computed actions=${JSON.stringify(actions)}`);
       } catch (err) {
         this.logger.error('Failed to calculate allowed actions from WorkflowEngine for task ' + t.id, err);
@@ -535,7 +533,7 @@ export class TaskSharedService {
 
   
   public async getWorkflowInitialNode(workflowId?: string): Promise<{ initialNodeId?: string; nodeData?: any }> {
-    let definition = null;
+    let definition: any = null;
     if (workflowId) {
       definition = await this.getWorkflowDefinition(workflowId);
     } else {
@@ -549,13 +547,9 @@ export class TaskSharedService {
 
     if (definition) {
       try {
-        const cacheKey = workflowId ? String(workflowId) : 'TASK_PROCESSING_ID';
-        const engine = new WorkflowEngine(definition, cacheKey);
-        const initialNodeId = engine.getInitialNodeId();
-        if (initialNodeId) {
-          const node = engine.getNode(initialNodeId);
-          return { initialNodeId, nodeData: node?.data };
-
+        const res = await firstValueFrom<any>(this.workflowService.GetInitialNode({ workflowId: definition.id || workflowId || 'TASK_PROCESSING_ID' }));
+        if (res && res.initialNodeId) {
+          return { initialNodeId: res.initialNodeId, nodeData: res.nodeData ? JSON.parse(res.nodeData) : {} };
         }
       } catch (err) {
         this.logger.error('Failed to get initial node from WorkflowEngine', err);
@@ -587,7 +581,7 @@ export class TaskSharedService {
     const metadata = (t.metadata as any) || {};
     const activeWorkflowId = metadata.workflowId || t.workflowInstId;
 
-    let definition = null;
+    let definition: any = null;
     let currentNodeId = metadata.currentNodeId;
 
     if (activeWorkflowId && currentNodeId) {
@@ -607,8 +601,6 @@ export class TaskSharedService {
     }
 
     try {
-      const cacheKey = activeWorkflowId ? String(activeWorkflowId) : 'TASK_PROCESSING_ID';
-      const engine = new WorkflowEngine(definition, cacheKey);
       const businessData = {
         status: t.status,
         hasChildren,
@@ -623,26 +615,28 @@ export class TaskSharedService {
         actionName
       };
 
-      const validateRes = engine.validateAction(
+      const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
+        workflowId: definition.id || activeWorkflowId || 'TASK_PROCESSING_ID',
         currentNodeId,
         actionName,
-        query.currentUserPermissions || [],
-        query.currentEmployeeCode,
+        userRoles: query.currentUserPermissions || [],
+        userId: query.currentEmployeeCode,
         businessData
-      );
+      }));
 
       if (!validateRes.allowed) {
         return { allowed: false, reason: validateRes.reason };
       }
 
-      const nextNodeId = engine.getNextNodeId(currentNodeId, actionName, businessData);
-      let nextNodeData: any = undefined;
-      if (nextNodeId) {
-        const nextNode = engine.getNode(nextNodeId);
-        if (nextNode && nextNode.data) {
-          nextNodeData = nextNode.data;
-        }
-      }
+      const nextNodeRes = await firstValueFrom<any>(this.workflowService.GetNextNode({
+        workflowId: definition.id || activeWorkflowId || 'TASK_PROCESSING_ID',
+        currentNodeId,
+        actionName,
+        evalContext: businessData
+      }));
+
+      const nextNodeId = nextNodeRes.nextNodeId || undefined;
+      const nextNodeData = nextNodeRes.nextNodeData ? JSON.parse(nextNodeRes.nextNodeData) : undefined;
 
       return {
         allowed: true,

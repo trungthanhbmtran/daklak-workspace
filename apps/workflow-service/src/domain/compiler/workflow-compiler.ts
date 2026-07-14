@@ -1,11 +1,10 @@
-import { NodeData, EdgeData, WorkflowDefinition, ValidationContext, WorkflowContext } from './workflow-engine';
-
+import { NodeData, EdgeData, WorkflowDefinition, ValidationContext } from '../engine/workflow-engine';
+import { WorkflowContext } from '../plugins/node.plugin';
 export interface CompiledNode {
   id: string;
   type?: string;
   data: any;
   allowedActions: string[];
-  validateFn?: (context: ValidationContext) => boolean;
   outEdges: EdgeData[]; // direct reference to outgoing edges for O(1) traversal
 }
 
@@ -75,37 +74,7 @@ export class WorkflowCompiler {
         outEdges: outEdgesMap.get(node.id) || [],
       };
 
-      // Biên dịch hàm validate từ permissions object (data-driven — người dùng cấu hình trên UI)
-      try {
-        let body = `with (context || {}) {\n`;
-
-        if (node.type === 'user_task') {
-          // Data-driven permissions evaluation
-          body += `  const perms = ${JSON.stringify(node.data?.permissions || {})};\n`;
-          body += `  if (!perms[actionName]) return false;\n`;
-          body += `  const allowed = perms[actionName];\n`;
-          body += `  if (allowed.length === 0) return true;\n`;
-          body += `  const roles = [...(userRoles || [])];\n`;
-          body += `  if (typeof isOwner !== 'undefined' && isOwner) roles.push('OWNER');\n`;
-          body += `  if (typeof isAssignee !== 'undefined' && isAssignee) roles.push('ASSIGNEE');\n`;
-          body += `  if (typeof isSupervisor !== 'undefined' && isSupervisor) roles.push('SUPERVISOR');\n`;
-          body += `  if (typeof isDeptLeader !== 'undefined' && isDeptLeader) roles.push('DEPT_LEADER');\n`;
-          body += `  if (typeof isAdmin !== 'undefined' && isAdmin) roles.push('ADMIN');\n`;
-          body += `  if (typeof isCoordinator !== 'undefined' && isCoordinator) roles.push('COORDINATOR');\n`;
-          body += `  if (allowed.includes('ANY') || allowed.includes('PARTICIPANT')) return true;\n`;
-          body += `  return allowed.some(r => roles.includes(r));\n`;
-          body += `}`;
-        } else {
-          // Node không có permissions → cho phép mặc định
-          body += `  return true;\n}`;
-        }
-
-        compiledNode.validateFn = new Function('context', body) as (context: ValidationContext) => boolean;
-      } catch (e) {
-        console.error(`[WorkflowCompiler] Failed to compile permissions for node ${node.id}`, e);
-      }
-
-
+      // Permissions validation is now delegated to NodePlugins in WorkflowEngine.
 
       // Compile allowed actions statically
       compiledNode.allowedActions = this.extractAllowedActions(node, compiledNode.outEdges);
