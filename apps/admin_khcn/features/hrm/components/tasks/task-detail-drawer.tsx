@@ -234,7 +234,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
-                  {!isCompleted && (
+                  {task.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
                       + Tạo nhiệm vụ con
                     </Button>
@@ -295,7 +295,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium text-sm">Các bước thực hiện (Checklist nội bộ)</h3>
-                  {!isCompleted && (
+                  {task.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
                       + Thêm bước
                     </Button>
@@ -432,21 +432,29 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               </div>
 
               <div className="mt-auto flex gap-2">
-                <Textarea 
-                  placeholder="Nhập nội dung trao đổi..." 
-                  className="min-h-[40px] h-[40px] resize-none"
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
-                />
-                <Button 
-                  size="icon" 
-                  className="shrink-0"
-                  onClick={handleSendComment}
-                  disabled={addComment.isPending || !commentText.trim()}
-                >
-                  {addComment.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </Button>
+                {task.allowedActions?.includes('CHAT') ? (
+                  <>
+                    <Textarea 
+                      placeholder="Nhập nội dung trao đổi..." 
+                      className="min-h-[40px] h-[40px] resize-none"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
+                    />
+                    <Button 
+                      size="icon" 
+                      className="shrink-0"
+                      onClick={handleSendComment}
+                      disabled={addComment.isPending || !commentText.trim()}
+                    >
+                      {addComment.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </Button>
+                  </>
+                ) : (
+                  <div className="w-full text-center text-slate-400 text-sm py-2 italic border border-dashed rounded-md bg-slate-50">
+                    Bạn không có quyền tham gia thảo luận ở bước này.
+                  </div>
+                )}
               </div>
             </TabsContent>
 
