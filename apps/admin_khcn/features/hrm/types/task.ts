@@ -92,4 +92,5 @@ export interface HrmTask {
   
   createdAt: string;
   updatedAt: string;
+  allowedActions?: string[];
 }
