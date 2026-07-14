@@ -92,7 +92,7 @@ export class MasterPlansService {
       data: masterPlans.map((mp: any) => {
         let completedTasks = 0;
         const tasks = mp.tasks.map((t: any) => {
-          if (t.status === 'DONE') completedTasks++;
+          if (t.isCompleted) completedTasks++;
           const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId;
           const assigneeCode = assigneeId ? (userToCodeMap.get(assigneeId) || 'UNASSIGNED') : 'UNASSIGNED';
           return {
@@ -185,7 +185,7 @@ export class MasterPlansService {
 
     let completedTasks = 0;
     const tasks = mp.tasks.map((t: any) => {
-      if (t.status === 'DONE') completedTasks++;
+      if (t.isCompleted) completedTasks++;
       const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId;
       const assigneeCode = assigneeId ? (userToCodeMap.get(assigneeId) || 'UNASSIGNED') : 'UNASSIGNED';
       return {
@@ -361,8 +361,8 @@ export class MasterPlansService {
     pastPlans.forEach(plan => {
       totalTasks += plan.tasks.length;
       plan.tasks.forEach(t => {
-        if (t.status === 'DONE') completedTasks++;
-        if (t.status === 'OVERDUE') overdueTasks++;
+        if (t.isCompleted) completedTasks++;
+        if (t.dueDate && new Date(t.dueDate) < new Date() && !t.isCompleted) overdueTasks++;
       });
     });
 
@@ -379,7 +379,7 @@ export class MasterPlansService {
         historicalContext: pastPlans.map(p => ({
           title: p.title,
           total: p.tasks.length,
-          done: p.tasks.filter(t => t.status === 'DONE').length
+          done: p.tasks.filter(t => t.isCompleted).length
         }))
       }
     };

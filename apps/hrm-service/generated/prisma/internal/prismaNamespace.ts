@@ -1949,6 +1949,7 @@ export const MasterPlanScalarFieldEnum = {
   departmentId: 'departmentId',
   createdByCode: 'createdByCode',
   documentId: 'documentId',
+  workflowCode: 'workflowCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1968,6 +1969,7 @@ export const TaskScalarFieldEnum = {
   startDate: 'startDate',
   dueDate: 'dueDate',
   completedAt: 'completedAt',
+  isCompleted: 'isCompleted',
   isDeadlineWarned: 'isDeadlineWarned',
   isRiskWarned: 'isRiskWarned',
   domainId: 'domainId',
@@ -1990,6 +1992,8 @@ export const TaskStepScalarFieldEnum = {
   status: 'status',
   order: 'order',
   assigneeCode: 'assigneeCode',
+  baseScore: 'baseScore',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2209,7 +2213,8 @@ export const MasterPlanOrderByRelevanceFieldEnum = {
   type: 'type',
   status: 'status',
   createdByCode: 'createdByCode',
-  documentId: 'documentId'
+  documentId: 'documentId',
+  workflowCode: 'workflowCode'
 } as const
 
 export type MasterPlanOrderByRelevanceFieldEnum = (typeof MasterPlanOrderByRelevanceFieldEnum)[keyof typeof MasterPlanOrderByRelevanceFieldEnum]

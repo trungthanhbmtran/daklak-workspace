@@ -12,6 +12,7 @@ model MasterPlan {
   createdByCode String? @map("created_by_code")
 
   documentId String? @map("document_id")
+  workflowCode String? @map("workflow_code")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

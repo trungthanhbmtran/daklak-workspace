@@ -189,7 +189,7 @@ export function useTaskSteps(taskId: number | undefined) {
 export function useCreateStep(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { title: string; order?: number; assigneeCode?: string }) => {
+    mutationFn: (payload: { title: string; order?: number; assigneeCode?: string; baseScore?: number }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.createStep(taskId, payload);
     },
@@ -207,7 +207,7 @@ export function useCreateStep(taskId: number | undefined) {
 export function useUpdateStep(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string } }) => {
+    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string; baseScore?: number } }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStep(taskId, stepId, payload);
     },

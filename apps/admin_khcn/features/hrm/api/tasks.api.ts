@@ -97,11 +97,11 @@ export const hrmTasksApi = {
     return apiClient.get(`/hrm/tasks/${taskId}/steps`) as any;
   },
 
-  createStep(taskId: number, payload: { title: string; order?: number; assigneeCode?: string }): Promise<ApiResponse<any>> {
+  createStep(taskId: number, payload: { title: string; order?: number; assigneeCode?: string; baseScore?: number }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${taskId}/steps`, payload) as any;
   },
 
-  updateStep(taskId: number, stepId: number, payload: { title?: string; status?: string; order?: number }): Promise<ApiResponse<any>> {
+  updateStep(taskId: number, stepId: number, payload: { title?: string; status?: string; order?: number; assigneeCode?: string; baseScore?: number }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${taskId}/steps/${stepId}`, payload) as any;
   },
 

@@ -199,8 +199,9 @@ export class WorkflowEngine {
     }
 
     const edgeAction = edge.data?.actionName || edge.label;
-    if (edgeAction && evalContext?.status) {
-      return edgeAction === evalContext.status;
+    if (edgeAction) {
+      if (evalContext?.actionName && edgeAction === evalContext.actionName) return true;
+      if (evalContext?.status && edgeAction === evalContext.status) return true;
     }
     return false;
   }

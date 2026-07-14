@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 interface PropertiesPanelProps {
   isOpen: boolean;
@@ -170,7 +171,7 @@ export const PropertiesPanel = ({
                   onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
                     ...selectedEdge, 
                     label: "Phê duyệt",
-                    data: { ...(selectedEdge.data || {}), actionName: "APPROVE", expression: "status === 'APPROVED'" } 
+                    data: { ...(selectedEdge.data || {}), actionName: "APPROVE", expression: "actionName === 'APPROVE'" } 
                   });
                 }}
               >
@@ -184,7 +185,7 @@ export const PropertiesPanel = ({
                   onUpdateEdge && onUpdateEdge(selectedEdge.id, { 
                     ...selectedEdge, 
                     label: "Từ chối",
-                    data: { ...(selectedEdge.data || {}), actionName: "REJECT", expression: "status === 'REJECTED'", sideEffects: ['RETURN_TASK'] } 
+                    data: { ...(selectedEdge.data || {}), actionName: "REJECT", expression: "actionName === 'REJECT'", sideEffects: ['RETURN_TASK'] } 
                   });
                 }}
               >
@@ -200,7 +201,7 @@ export const PropertiesPanel = ({
                 value={(edgeData.expression as string) || ""}
                 onChange={handleChange}
                 className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 pl-12 text-sm font-mono focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none transition-all min-h-[100px] resize-y leading-relaxed"
-                placeholder={`// Viết biểu thức JavaScript (dành cho Gateway)\ne.g. status === 'APPROVED'`}
+                placeholder={`// Viết biểu thức JavaScript (dành cho Gateway)\ne.g. actionName === 'APPROVE'`}
                 spellCheck={false}
               />
             </div>
@@ -286,156 +287,167 @@ export const PropertiesPanel = ({
             </div>
 
             {/* Dynamic Permissions Configuration */}
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình Quyền (Permissions)</h4>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 px-2 text-[10px] text-violet-600 hover:text-violet-700 hover:bg-violet-100"
-                  onClick={() => {
-                    const currentPerms = data.permissions || {};
-                    // Generate a unique action name if NEW_ACTION exists
-                    let newActionName = 'NEW_ACTION';
-                    let counter = 1;
-                    while (currentPerms[newActionName]) {
-                      newActionName = `NEW_ACTION_${counter}`;
-                      counter++;
-                    }
-                    onUpdate(selectedNode!.id, { 
-                      ...data, 
-                      permissions: { ...currentPerms, [newActionName]: ['PARTICIPANT'] } 
-                    });
-                  }}
-                >
-                  <Plus className="h-3 w-3 mr-1" /> Thêm quyền
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {Object.entries(data.permissions || {}).map(([action, roles]) => (
-                  <div key={action} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1 flex flex-col gap-2">
-                        <Input 
-                          value={action} 
-                          onChange={(e) => {
-                            const newAction = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
-                            const newPerms = { ...data.permissions };
-                            const oldRoles = newPerms[action];
-                            // Preserve the key order by recreating the object
-                            const updatedPerms: any = {};
-                            for (const key of Object.keys(newPerms)) {
-                              if (key === action) {
-                                updatedPerms[newAction] = oldRoles;
-                              } else {
-                                updatedPerms[key] = newPerms[key];
-                              }
-                            }
-                            onUpdate(selectedNode!.id, { ...data, permissions: updatedPerms });
-                          }}
-                          className="h-7 text-xs font-bold font-mono w-[130px] bg-slate-100 dark:bg-slate-900 border-none px-2"
-                          placeholder="ACTION"
-                        />
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {Array.isArray(roles) && roles.map((role: string) => (
-                            <span key={role} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
-                              {role}
-                              <button
-                                type="button"
-                                className="ml-1 text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
-                                onClick={() => {
-                                  const newRoles = roles.filter(r => r !== role);
-                                  onUpdate(selectedNode!.id, { 
-                                    ...data, 
-                                    permissions: { ...data.permissions, [action]: newRoles } 
-                                  });
-                                }}
-                              >
-                                <X className="h-2.5 w-2.5" />
-                              </button>
-                            </span>
-                          ))}
-                          <div className="flex items-center gap-1">
-                            <select
-                              className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
-                              value={activeRoleGroups[action] || ""}
-                              onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
-                            >
-                              <option value="" disabled>+ Chọn nhóm</option>
-                              <option value="TASK">Vai trò trong Task (Owner/Assignee...)</option>
-                              {orgRoles.length > 0 && <option value="ORG">Vị trí tổ chức (Chức danh từ DB)</option>}
-                              {taskRoles && taskRoles.length > 0 && <option value="PBAC">Quyền PBAC hệ thống</option>}
-                            </select>
-
-                            {activeRoleGroups[action] && (
-                              <select
-                                className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
-                                onChange={(e) => {
-                                  const role = e.target.value;
-                                  if (!role) return;
-                                  const currentRoles = Array.isArray(roles) ? roles : [];
-                                  const newRoles = [...currentRoles, role].filter((v, i, a) => a.indexOf(v) === i);
-                                  onUpdate(selectedNode!.id, { 
-                                    ...data, 
-                                    permissions: { ...data.permissions, [action]: newRoles } 
-                                  });
-                                  e.target.value = ''; // reset after selection
-                                  setActiveRoleGroups({ ...activeRoleGroups, [action]: "" }); // Reset group selection
-                                }}
-                                defaultValue=""
-                              >
-                                <option value="" disabled>+ Chọn quyền</option>
-                                {/* Vai trò trong task (participant role) */}
-                                {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
-                                  <option key={r.code} value={r.code}>{r.name}</option>
-                                ))}
-                                {/* Vị trí tổ chức từ DB — sắp xếp theo cấp bậc */}
-                                {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
-                                  <option key={r.code} value={r.code}>
-                                    {r.name}{r.authorityLevel ? ` [${r.authorityLevel}]` : ''} ({r.code})
-                                  </option>
-                                ))}
-                                {/* Quyền PBAC hệ thống */}
-                                {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
-                                  <option key={r.code} value={r.code}>{r.name || r.nameVi} ({r.code})</option>
-                                ))}
-                              </select>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+            <Accordion type="single" collapsible className="w-full mt-4">
+              <AccordionItem value="advanced" className="border-none">
+                <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors [&[data-state=open]]:rounded-b-none hover:no-underline py-2">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình Nâng cao (Quyền, Phân công)</span>
+                </AccordionTrigger>
+                <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 dark:bg-slate-900/50 border border-t-0 border-slate-200 dark:border-slate-800 space-y-4 pt-4">
+                  
+                  {/* Quyền (Permissions) */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình Quyền Tùy biến</h4>
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"
+                        size="sm" 
+                        className="h-6 px-2 text-[10px] text-violet-600 hover:text-violet-700 hover:bg-violet-100"
                         onClick={() => {
-                          const newPerms = { ...data.permissions };
-                          delete newPerms[action];
-                          // If empty, we might want to delete the permissions object entirely to fallback to default
-                          if (Object.keys(newPerms).length === 0) {
-                            const newData = { ...data };
-                            delete newData.permissions;
-                            onUpdate(selectedNode!.id, newData);
-                          } else {
-                            onUpdate(selectedNode!.id, { ...data, permissions: newPerms });
+                          const currentPerms = data.permissions || {};
+                          // Generate a unique action name if NEW_ACTION exists
+                          let newActionName = 'NEW_ACTION';
+                          let counter = 1;
+                          while (currentPerms[newActionName]) {
+                            newActionName = `NEW_ACTION_${counter}`;
+                            counter++;
                           }
+                          onUpdate(selectedNode!.id, { 
+                            ...data, 
+                            permissions: { ...currentPerms, [newActionName]: ['PARTICIPANT'] } 
+                          });
                         }}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Plus className="h-3 w-3 mr-1" /> Thêm quyền
                       </Button>
                     </div>
+                    <div className="space-y-3">
+                      {Object.entries(data.permissions || {}).map(([action, roles]) => (
+                        <div key={action} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
+                          <div className="flex items-start gap-2">
+                            <div className="flex-1 flex flex-col gap-2">
+                              <Input 
+                                value={action} 
+                                onChange={(e) => {
+                                  const newAction = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
+                                  const newPerms = { ...data.permissions };
+                                  const oldRoles = newPerms[action];
+                                  // Preserve the key order by recreating the object
+                                  const updatedPerms: any = {};
+                                  for (const key of Object.keys(newPerms)) {
+                                    if (key === action) {
+                                      updatedPerms[newAction] = oldRoles;
+                                    } else {
+                                      updatedPerms[key] = newPerms[key];
+                                    }
+                                  }
+                                  onUpdate(selectedNode!.id, { ...data, permissions: updatedPerms });
+                                }}
+                                className="h-7 text-xs font-bold font-mono w-[130px] bg-slate-100 dark:bg-slate-900 border-none px-2"
+                                placeholder="ACTION"
+                              />
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                {Array.isArray(roles) && roles.map((role: string) => (
+                                  <span key={role} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                                    {role}
+                                    <button
+                                      type="button"
+                                      className="ml-1 text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
+                                      onClick={() => {
+                                        const newRoles = roles.filter(r => r !== role);
+                                        onUpdate(selectedNode!.id, { 
+                                          ...data, 
+                                          permissions: { ...data.permissions, [action]: newRoles } 
+                                        });
+                                      }}
+                                    >
+                                      <X className="h-2.5 w-2.5" />
+                                    </button>
+                                  </span>
+                                ))}
+                                <div className="flex items-center gap-1">
+                                  <select
+                                    className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                                    value={activeRoleGroups[action] || ""}
+                                    onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
+                                  >
+                                    <option value="" disabled>+ Chọn nhóm</option>
+                                    <option value="TASK">Vai trò trong Task (Owner/Assignee...)</option>
+                                    {orgRoles.length > 0 && <option value="ORG">Vị trí tổ chức (Chức danh từ DB)</option>}
+                                    {taskRoles && taskRoles.length > 0 && <option value="PBAC">Quyền PBAC hệ thống</option>}
+                                  </select>
+
+                                  {activeRoleGroups[action] && (
+                                    <select
+                                      className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                                      onChange={(e) => {
+                                        const role = e.target.value;
+                                        if (!role) return;
+                                        const currentRoles = Array.isArray(roles) ? roles : [];
+                                        const newRoles = [...currentRoles, role].filter((v, i, a) => a.indexOf(v) === i);
+                                        onUpdate(selectedNode!.id, { 
+                                          ...data, 
+                                          permissions: { ...data.permissions, [action]: newRoles } 
+                                        });
+                                        e.target.value = ''; // reset after selection
+                                        setActiveRoleGroups({ ...activeRoleGroups, [action]: "" }); // Reset group selection
+                                      }}
+                                      defaultValue=""
+                                    >
+                                      <option value="" disabled>+ Chọn quyền</option>
+                                      {/* Vai trò trong task (participant role) */}
+                                      {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
+                                        <option key={r.code} value={r.code}>{r.name}</option>
+                                      ))}
+                                      {/* Vị trí tổ chức từ DB — sắp xếp theo cấp bậc */}
+                                      {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
+                                        <option key={r.code} value={r.code}>
+                                          {r.name}{r.authorityLevel ? ` [${r.authorityLevel}]` : ''} ({r.code})
+                                        </option>
+                                      ))}
+                                      {/* Quyền PBAC hệ thống */}
+                                      {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
+                                        <option key={r.code} value={r.code}>{r.name || r.nameVi} ({r.code})</option>
+                                      ))}
+                                    </select>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"
+                              onClick={() => {
+                                const newPerms = { ...data.permissions };
+                                delete newPerms[action];
+                                // If empty, we might want to delete the permissions object entirely to fallback to default
+                                if (Object.keys(newPerms).length === 0) {
+                                  const newData = { ...data };
+                                  delete newData.permissions;
+                                  onUpdate(selectedNode!.id, newData);
+                                } else {
+                                  onUpdate(selectedNode!.id, { ...data, permissions: newPerms });
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {(!data.permissions || Object.keys(data.permissions).length === 0) && (
+                        <p className="text-[10px] text-slate-400 text-center py-2">
+                          Chưa có cấu hình quyền tùy biến. Nút này sẽ sử dụng quyền mặc định của hệ thống.
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                      Người xử lý tại bước này sẽ tự động sở hữu các vai trò được cấp trong hệ thống. Hệ thống hợp nhất quyền mặc định và phân quyền tự động để duyệt tính năng hiển thị cho từng cá nhân cụ thể.
+                    </p>
                   </div>
-                ))}
-                {(!data.permissions || Object.keys(data.permissions).length === 0) && (
-                  <p className="text-[10px] text-slate-400 text-center py-2">
-                    Chưa có cấu hình quyền. Nút này sẽ sử dụng quyền mặc định của hệ thống.
-                  </p>
-                )}
-              </div>
-              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
-                Người xử lý tại bước này sẽ tự động sở hữu các vai trò được cấp trong hệ thống. Hệ thống hợp nhất quyền mặc định và phân quyền tự động để duyệt tính năng hiển thị cho từng cá nhân cụ thể.
-              </p>
-            </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                 Hoặc chỉ định Mã nhân sự cụ thể

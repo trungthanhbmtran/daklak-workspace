@@ -117,6 +117,7 @@ export interface HrmMasterPlan {
   startDate?: string;
   endDate?: string;
   status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+  workflowCode?: string;
   createdAt: string;
   perspectives?: HrmPlanPerspective[];
   tasks?: any[];

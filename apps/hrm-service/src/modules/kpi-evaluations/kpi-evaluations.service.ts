@@ -314,7 +314,7 @@ export class KpiEvaluationsService {
         employeeCode: employeeCode,
         participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] },
         task: {
-          status: { in: ['DONE', 'COMPLETED'] },
+          isCompleted: true,
           completedAt: {
             gte: period.startDate,
             lte: period.endDate
@@ -354,7 +354,7 @@ export class KpiEvaluationsService {
         dueDate.setHours(0, 0, 0, 0);
 
         const diffTime = completedDate.getTime() - dueDate.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
         if (diffDays < 0) {
           // Completed early
@@ -398,6 +398,46 @@ export class KpiEvaluationsService {
         dueDate: task.dueDate ? task.dueDate.toISOString() : '',
         status: task.status,
         kpiCriteriaId: criteriaId
+      });
+    }
+
+    // 1.5. Tính toán điểm từ các Bước Checklist (TaskStep)
+    const completedSteps = await this.prisma.taskStep.findMany({
+      where: {
+        status: 'COMPLETED',
+        completedAt: {
+          gte: period.startDate,
+          lte: period.endDate
+        },
+        OR: [
+          { assigneeCode: employeeCode },
+          { 
+            assigneeCode: null, 
+            task: {
+              participants: {
+                some: { employeeCode, participantRole: 'ASSIGNEE' }
+              }
+            }
+          }
+        ]
+      },
+      include: { task: true }
+    });
+
+    const calculatedSteps: any[] = [];
+    for (const step of completedSteps) {
+      if (!step.baseScore) continue;
+      
+      const stepScore = step.baseScore;
+      totalScore += stepScore;
+      
+      calculatedSteps.push({
+        stepId: step.id,
+        taskId: step.taskId,
+        title: step.title,
+        baseScore: stepScore,
+        finalScore: stepScore,
+        completedAt: step.completedAt ? step.completedAt.toISOString() : ''
       });
     }
 
@@ -502,6 +542,7 @@ export class KpiEvaluationsService {
       totalScore,
       evaluationId,
       tasks: calculatedTasks,
+      steps: calculatedSteps,
       groupedScores,
       groupedTasksCount,
       groupedIntegrationData

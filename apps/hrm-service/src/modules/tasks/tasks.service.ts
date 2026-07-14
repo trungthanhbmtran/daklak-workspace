@@ -89,12 +89,11 @@ export class TasksService {
     await this.shared.populateQueryHierarchy(query);
 
     const where: any = {};
-    const activeStatuses = ['TODO', 'IN_PROGRESS', 'REVIEWING', 'OVERDUE', 'RETURNED'];
     const conditions: any[] = [];
 
     if (query.id) where.id = parseInt(query.id, 10);
     if (query.status && query.status !== 'ALL') where.status = query.status;
-    else if (!query.statsFilter) where.status = { in: activeStatuses };
+    else if (!query.statsFilter) where.isCompleted = false;
 
     if (query.role && query.currentEmployeeCode) {
       conditions.push({ participants: { some: { employeeCode: query.currentEmployeeCode, participantRole: query.role } } });
@@ -119,18 +118,18 @@ export class TasksService {
 
     if (query.search) where.title = { contains: query.search };
     if (query.priority && query.priority !== 'ALL') where.priority = query.priority;
-    if (query.planId) { where.planId = parseInt(query.planId, 10); delete where.status; }
+    if (query.planId) { where.planId = parseInt(query.planId, 10); delete where.isCompleted; delete where.status; }
 
     // statsFilter date ranges
     if (query.statsFilter) {
       const now = new Date(); now.setHours(0, 0, 0, 0);
       if (query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue') {
-        where.status = 'DONE';
+        where.isCompleted = true;
       } else if (query.statsFilter === 'overdue') {
-        where.status = { in: activeStatuses }; where.dueDate = { lt: now };
+        where.isCompleted = false; where.dueDate = { lt: now };
       } else {
         const t3 = new Date(now); t3.setDate(now.getDate() + 3);
-        where.status = { in: activeStatuses };
+        where.isCompleted = false;
         where.dueDate = query.statsFilter === 'warning' ? { gte: now, lte: t3 } : { gt: t3 };
         if (query.statsFilter === 'inTime') where.OR = [{ dueDate: { gt: t3 } }, { dueDate: null }];
       }
@@ -184,7 +183,6 @@ export class TasksService {
   async getTaskStats(query: any) {
     const where: any = {};
     const conditions: any[] = [];
-    const activeStatuses = ['TODO', 'IN_PROGRESS', 'REVIEWING', 'OVERDUE', 'RETURNED'];
 
     if (query.role === 'ASSIGNEE' && query.assigneeCode) {
       conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: 'ASSIGNEE' } } });
@@ -217,7 +215,7 @@ export class TasksService {
 
     const allTasks = await this.prisma.task.findMany({
       where,
-      select: { status: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
+      select: { status: true, isCompleted: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
         participants: { where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, select: { employeeCode: true, participantRole: true } } },
     });
 
@@ -227,14 +225,14 @@ export class TasksService {
 
     allTasks.forEach((t: any) => {
       const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
-      const isDone = t.status === 'DONE' || t.status === 'COMPLETED' || t.progress === 100;
+      const isDone = t.isCompleted === true;
       if (isDone) {
         const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
         (dueTime && completedTime > dueTime) ? doneOverdue++ : doneInTime++;
       } else if (!dueTime) {
         inTime++;
       } else {
-        const diff = Math.ceil((dueTime - nowTime) / 86_400_000);
+        const diff = Math.round((dueTime - nowTime) / 86_400_000);
         diff < 0 ? overdue++ : (diff <= 3 ? warning++ : inTime++);
       }
     });
@@ -363,8 +361,11 @@ export class TasksService {
 
     // Update DB
     const updateData: any = { status: transition.targetStatus || status };
+    if (transition.isCompleted !== undefined) {
+      updateData.isCompleted = transition.isCompleted;
+    }
     if (rejectReason !== undefined) updateData.rejectReason = rejectReason;
-    if (['DONE', 'COMPLETED'].includes(updateData.status)) updateData.completedAt = new Date();
+    if (updateData.isCompleted) updateData.completedAt = new Date();
     if (transition.nextNodeId) {
       updateData.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: transition.nextNodeId };
     }
@@ -378,7 +379,7 @@ export class TasksService {
     // Auto-progress từ workflow node hoặc default khi DONE
     if (transition.nextNodeData?.autoProgress !== undefined) {
       await this.updateTaskProgress(id, transition.nextNodeData.autoProgress, actorCode);
-    } else if (updateData.status === 'DONE') {
+    } else if (updateData.isCompleted) {
       await this.updateTaskProgress(id, 100, actorCode);
     }
 
@@ -588,12 +589,35 @@ export class TasksService {
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
 
   async createStep(taskId: number, data: any) {
-    const step = await this.prisma.taskStep.create({ data: { taskId, title: data.title, order: data.order || 0, assigneeCode: data.assigneeCode } });
+    const step = await this.prisma.taskStep.create({ 
+      data: { 
+        taskId, 
+        title: data.title, 
+        order: data.order || 0, 
+        assigneeCode: data.assigneeCode,
+        baseScore: data.baseScore !== undefined ? parseFloat(data.baseScore) : 0
+      } 
+    });
     return { success: true, message: 'Tạo bước thành công', data: step };
   }
 
   async updateStep(taskId: number, stepId: number, data: any) {
-    const step = await this.prisma.taskStep.update({ where: { id: stepId, taskId }, data: { title: data.title, status: data.status, order: data.order } });
+    const updateData: any = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.order !== undefined) updateData.order = data.order;
+    if (data.assigneeCode !== undefined) updateData.assigneeCode = data.assigneeCode;
+    if (data.baseScore !== undefined) updateData.baseScore = parseFloat(data.baseScore);
+    
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+      if (data.status === 'COMPLETED') {
+        updateData.completedAt = new Date();
+      } else if (data.status === 'TODO') {
+        updateData.completedAt = null;
+      }
+    }
+
+    const step = await this.prisma.taskStep.update({ where: { id: stepId, taskId }, data: updateData });
     return { success: true, message: 'Cập nhật bước thành công', data: step };
   }
 
@@ -631,7 +655,7 @@ export class TasksService {
 
     const [employees, loadCounts, evaluations] = await Promise.all([
       this.prisma.employee.findMany({ where }),
-      this.prisma.taskParticipant.groupBy({ by: ['employeeCode'], where: { participantRole: 'ASSIGNEE', task: { status: { not: 'DONE' } } }, _count: { taskId: true } }),
+      this.prisma.taskParticipant.groupBy({ by: ['employeeCode'], where: { participantRole: 'ASSIGNEE', task: { isCompleted: false } }, _count: { taskId: true } }),
       this.prisma.kpiEvaluation.findMany({ orderBy: { createdAt: 'desc' }, select: { employeeCode: true, totalScore: true } }),
     ]);
 

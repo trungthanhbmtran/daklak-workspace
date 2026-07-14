@@ -30,12 +30,14 @@ export type TaskStepAvgAggregateOutputType = {
   id: number | null
   taskId: number | null
   order: number | null
+  baseScore: number | null
 }
 
 export type TaskStepSumAggregateOutputType = {
   id: number | null
   taskId: number | null
   order: number | null
+  baseScore: number | null
 }
 
 export type TaskStepMinAggregateOutputType = {
@@ -45,6 +47,8 @@ export type TaskStepMinAggregateOutputType = {
   status: string | null
   order: number | null
   assigneeCode: string | null
+  baseScore: number | null
+  completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +60,8 @@ export type TaskStepMaxAggregateOutputType = {
   status: string | null
   order: number | null
   assigneeCode: string | null
+  baseScore: number | null
+  completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -67,6 +73,8 @@ export type TaskStepCountAggregateOutputType = {
   status: number
   order: number
   assigneeCode: number
+  baseScore: number
+  completedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -77,12 +85,14 @@ export type TaskStepAvgAggregateInputType = {
   id?: true
   taskId?: true
   order?: true
+  baseScore?: true
 }
 
 export type TaskStepSumAggregateInputType = {
   id?: true
   taskId?: true
   order?: true
+  baseScore?: true
 }
 
 export type TaskStepMinAggregateInputType = {
@@ -92,6 +102,8 @@ export type TaskStepMinAggregateInputType = {
   status?: true
   order?: true
   assigneeCode?: true
+  baseScore?: true
+  completedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -103,6 +115,8 @@ export type TaskStepMaxAggregateInputType = {
   status?: true
   order?: true
   assigneeCode?: true
+  baseScore?: true
+  completedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -114,6 +128,8 @@ export type TaskStepCountAggregateInputType = {
   status?: true
   order?: true
   assigneeCode?: true
+  baseScore?: true
+  completedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -212,6 +228,8 @@ export type TaskStepGroupByOutputType = {
   status: string
   order: number
   assigneeCode: string | null
+  baseScore: number
+  completedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: TaskStepCountAggregateOutputType | null
@@ -246,6 +264,8 @@ export type TaskStepWhereInput = {
   status?: Prisma.StringFilter<"TaskStep"> | string
   order?: Prisma.IntFilter<"TaskStep"> | number
   assigneeCode?: Prisma.StringNullableFilter<"TaskStep"> | string | null
+  baseScore?: Prisma.FloatFilter<"TaskStep"> | number
+  completedAt?: Prisma.DateTimeNullableFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
@@ -258,6 +278,8 @@ export type TaskStepOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   order?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
@@ -274,6 +296,8 @@ export type TaskStepWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"TaskStep"> | string
   order?: Prisma.IntFilter<"TaskStep"> | number
   assigneeCode?: Prisma.StringNullableFilter<"TaskStep"> | string | null
+  baseScore?: Prisma.FloatFilter<"TaskStep"> | number
+  completedAt?: Prisma.DateTimeNullableFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
@@ -286,6 +310,8 @@ export type TaskStepOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   order?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TaskStepCountOrderByAggregateInput
@@ -305,6 +331,8 @@ export type TaskStepScalarWhereWithAggregatesInput = {
   status?: Prisma.StringWithAggregatesFilter<"TaskStep"> | string
   order?: Prisma.IntWithAggregatesFilter<"TaskStep"> | number
   assigneeCode?: Prisma.StringNullableWithAggregatesFilter<"TaskStep"> | string | null
+  baseScore?: Prisma.FloatWithAggregatesFilter<"TaskStep"> | number
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TaskStep"> | Date | string
 }
@@ -314,6 +342,8 @@ export type TaskStepCreateInput = {
   status?: string
   order?: number
   assigneeCode?: string | null
+  baseScore?: number
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   task: Prisma.TaskCreateNestedOneWithoutStepsInput
@@ -326,6 +356,8 @@ export type TaskStepUncheckedCreateInput = {
   status?: string
   order?: number
   assigneeCode?: string | null
+  baseScore?: number
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -335,6 +367,8 @@ export type TaskStepUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   task?: Prisma.TaskUpdateOneRequiredWithoutStepsNestedInput
@@ -347,6 +381,8 @@ export type TaskStepUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -358,6 +394,8 @@ export type TaskStepCreateManyInput = {
   status?: string
   order?: number
   assigneeCode?: string | null
+  baseScore?: number
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -367,6 +405,8 @@ export type TaskStepUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -378,6 +418,8 @@ export type TaskStepUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -405,6 +447,8 @@ export type TaskStepCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   order?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -413,6 +457,7 @@ export type TaskStepAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
 }
 
 export type TaskStepMaxOrderByAggregateInput = {
@@ -422,6 +467,8 @@ export type TaskStepMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   order?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,6 +480,8 @@ export type TaskStepMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   order?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -441,6 +490,7 @@ export type TaskStepSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
 }
 
 export type TaskStepCreateNestedManyWithoutTaskInput = {
@@ -490,6 +540,8 @@ export type TaskStepCreateWithoutTaskInput = {
   status?: string
   order?: number
   assigneeCode?: string | null
+  baseScore?: number
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -500,6 +552,8 @@ export type TaskStepUncheckedCreateWithoutTaskInput = {
   status?: string
   order?: number
   assigneeCode?: string | null
+  baseScore?: number
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -540,6 +594,8 @@ export type TaskStepScalarWhereInput = {
   status?: Prisma.StringFilter<"TaskStep"> | string
   order?: Prisma.IntFilter<"TaskStep"> | number
   assigneeCode?: Prisma.StringNullableFilter<"TaskStep"> | string | null
+  baseScore?: Prisma.FloatFilter<"TaskStep"> | number
+  completedAt?: Prisma.DateTimeNullableFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
 }
@@ -550,6 +606,8 @@ export type TaskStepCreateManyTaskInput = {
   status?: string
   order?: number
   assigneeCode?: string | null
+  baseScore?: number
+  completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -559,6 +617,8 @@ export type TaskStepUpdateWithoutTaskInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -569,6 +629,8 @@ export type TaskStepUncheckedUpdateWithoutTaskInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -579,6 +641,8 @@ export type TaskStepUncheckedUpdateManyWithoutTaskInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   order?: Prisma.IntFieldUpdateOperationsInput | number
   assigneeCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseScore?: Prisma.FloatFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -592,6 +656,8 @@ export type TaskStepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   status?: boolean
   order?: boolean
   assigneeCode?: boolean
+  baseScore?: boolean
+  completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
@@ -606,11 +672,13 @@ export type TaskStepSelectScalar = {
   status?: boolean
   order?: boolean
   assigneeCode?: boolean
+  baseScore?: boolean
+  completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TaskStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "status" | "order" | "assigneeCode" | "createdAt" | "updatedAt", ExtArgs["result"]["taskStep"]>
+export type TaskStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "status" | "order" | "assigneeCode" | "baseScore" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["taskStep"]>
 export type TaskStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }
@@ -627,6 +695,8 @@ export type $TaskStepPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     status: string
     order: number
     assigneeCode: string | null
+    baseScore: number
+    completedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["taskStep"]>
@@ -1005,6 +1075,8 @@ export interface TaskStepFieldRefs {
   readonly status: Prisma.FieldRef<"TaskStep", 'String'>
   readonly order: Prisma.FieldRef<"TaskStep", 'Int'>
   readonly assigneeCode: Prisma.FieldRef<"TaskStep", 'String'>
+  readonly baseScore: Prisma.FieldRef<"TaskStep", 'Float'>
+  readonly completedAt: Prisma.FieldRef<"TaskStep", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"TaskStep", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TaskStep", 'DateTime'>
 }

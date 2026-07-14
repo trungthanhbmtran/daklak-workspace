@@ -12,6 +12,7 @@ model Task {
   startDate   DateTime? @map("start_date") @db.Date
   dueDate     DateTime? @map("due_date") @db.Date
   completedAt DateTime? @map("completed_at")
+  isCompleted Boolean   @default(false) @map("is_completed")
 
   isDeadlineWarned Boolean @default(false) @map("is_deadline_warned")
   isRiskWarned     Boolean @default(false) @map("is_risk_warned")
@@ -41,6 +42,7 @@ model Task {
 
   @@index([dueDate])
   @@index([status, dueDate])
+  @@index([isCompleted, dueDate])
   @@index([parentId])
   @@index([planId])
   @@index([createdAt])
@@ -54,6 +56,8 @@ model TaskStep {
   status       String   @default("TODO") // TODO, COMPLETED
   order        Int      @default(0)
   assigneeCode String?  @map("assignee_code")
+  baseScore    Float    @default(0) @map("base_score")
+  completedAt  DateTime? @map("completed_at")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

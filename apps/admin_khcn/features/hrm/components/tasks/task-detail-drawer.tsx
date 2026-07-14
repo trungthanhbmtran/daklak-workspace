@@ -322,9 +322,16 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                               <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
                             )}
                           </button>
-                          <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
-                            {step.title}
-                          </p>
+                          <div className="flex flex-col">
+                            <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" || step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
+                              {step.title}
+                            </p>
+                            {step.baseScore > 0 && (
+                              <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium mt-1">
+                                +{step.baseScore} điểm KPI
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

@@ -16,18 +16,22 @@ interface CreateStepDialogProps {
 
 export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialogProps) {
   const [title, setTitle] = useState("");
+  const [baseScore, setBaseScore] = useState<number | "">("");
 
   const createStep = useCreateStep(Number(taskId));
   const isPending = createStep.isPending;
 
-  const resetForm = () => { setTitle(""); };
+  const resetForm = () => { setTitle(""); setBaseScore(""); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
     try {
-      await createStep.mutateAsync({ title: title.trim() });
+      await createStep.mutateAsync({ 
+        title: title.trim(),
+        baseScore: baseScore === "" ? 0 : Number(baseScore)
+      });
       resetForm();
       onOpenChange(false);
     } catch {
@@ -64,6 +68,20 @@ export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialo
               onChange={(e) => setTitle(e.target.value)}
               className="text-base h-11 transition-all focus-visible:ring-indigo-500 bg-white"
               autoFocus
+              disabled={isPending}
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Điểm KPI (Tùy chọn)
+            </Label>
+            <Input 
+              type="number"
+              placeholder="Nhập điểm thưởng khi hoàn thành bước này" 
+              value={baseScore}
+              onChange={(e) => setBaseScore(e.target.value === "" ? "" : Number(e.target.value))}
+              className="text-base h-11 transition-all focus-visible:ring-indigo-500 bg-white"
               disabled={isPending}
             />
           </div>

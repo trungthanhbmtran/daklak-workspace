@@ -11,6 +11,7 @@ export interface WorkflowTransitionResult {
   nextNodeId?: string;
   nextNodeData?: any;
   targetStatus?: string;
+  isCompleted?: boolean;
 }
 
 /**
@@ -151,6 +152,7 @@ export class TaskWorkflowService {
     const engine = new WorkflowEngine(definition, String(workflowId));
 
     const businessData = {
+      ...task,
       status: task.status,
       hasChildren: actorContext.hasChildren ?? false,
       isOwner: actorContext.access?.isOwner ?? false,
@@ -178,6 +180,7 @@ export class TaskWorkflowService {
     const nextNodeId = engine.getNextNodeId(currentNodeId, actionName, businessData) ?? undefined;
     let nextNodeData: any = undefined;
     let targetStatus: string | undefined = undefined;
+    let isCompleted: boolean | undefined = undefined;
 
     if (nextNodeId) {
       const nextNode = engine.getNode(nextNodeId);
@@ -185,9 +188,10 @@ export class TaskWorkflowService {
         nextNodeData = nextNode.data;
         targetStatus = nextNodeData.targetStatus ?? nextNodeId;
       }
+      isCompleted = nextNode?.type === 'end' || nextNodeData?.isCompleted === true;
     }
 
-    return { allowed: true, nextNodeId, nextNodeData, targetStatus };
+    return { allowed: true, nextNodeId, nextNodeData, targetStatus, isCompleted };
   }
 
   // ─── Node Data Helpers ────────────────────────────────────────────────────
