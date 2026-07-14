@@ -25,8 +25,8 @@ interface PropertiesPanelProps {
   availableServices?: any[];
   availableTriggers?: any[];
   taskRoles?: any[];
-  orgRoles?: any[];
-  dictionaries?: any;
+  /** Vị trí/chức danh tổ chức từ DB (JobTitle) — thay thế SYSTEM_ROLES hardcode */
+  orgRoles?: { code: string; name: string; rank?: number; authorityLevel?: string; category?: string }[];
   onUpdate: (id: string, data: any) => void;
   onUpdateEdge?: (id: string, data: any) => void;
   onDelete: (id: string) => void;
@@ -47,7 +47,6 @@ export const PropertiesPanel = ({
   availableTriggers = [],
   taskRoles = [],
   orgRoles = [],
-  dictionaries = {},
   onUpdate,
   onUpdateEdge,
   onDelete,
@@ -64,7 +63,7 @@ export const PropertiesPanel = ({
     const { name, value } = e.target;
     const isCheckbox = (e.target as any).type === "checkbox";
     const finalValue = isCheckbox ? (e.target as HTMLInputElement).checked : value;
-
+    
     if (selectedNode) {
       onUpdate(selectedNode.id, { ...data, [name]: finalValue });
     } else if (selectedEdge && onUpdateEdge) {
@@ -100,9 +99,9 @@ export const PropertiesPanel = ({
     }
 
     if (!selectedNode) return null;
-
+    
     const { type } = selectedNode;
-    const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles, dictionaries };
+    const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles };
 
     switch (type) {
       case "user_task":
