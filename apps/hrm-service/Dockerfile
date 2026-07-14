@@ -11,7 +11,6 @@ RUN npm ci
 
 COPY apps/hrm-service/ ./
 COPY shared/protos ./shared/protos
-COPY shared/workflow-core ./shared/workflow-core
 
 # Generate Prisma client and build the NestJS app
 # Provide a dummy DATABASE_URL for Prisma generate during build
@@ -41,7 +40,6 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/prisma ./prisma
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
-COPY --chown=app:app --from=builder /app/shared/workflow-core ./shared/workflow-core
 COPY --chown=app:app --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --chown=app:app --from=builder /app/generated ./generated
 
