@@ -111,20 +111,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
 
             <div className="border-t border-slate-200 dark:border-slate-800" />
 
-            {/* UI Toggles */}
-            <div className="space-y-3">
-              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Hiển thị chức năng (UI)</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Giao việc con</label><Switch checked={data.allowAddSubtask || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAddSubtask', value: c } } as any)} /></div>
-                <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Xin phối hợp</label><Switch checked={data.allowCoordinate || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowCoordinate', value: c } } as any)} /></div>
-                <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Sửa task</label><Switch checked={data.allowEdit || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowEdit', value: c } } as any)} /></div>
-                <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Xóa task</label><Switch checked={data.allowDelete || false} onCheckedChange={(c) => handleChange({ target: { name: 'allowDelete', value: c } } as any)} /></div>
-                <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Giao/Chuyển</label><Switch checked={data.allowAssign !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowAssign', value: c } } as any)} /></div>
-                <div className="flex items-center justify-between"><label className="text-xs font-medium text-slate-700">Thảo luận</label><Switch checked={data.allowChat !== false} onCheckedChange={(c) => handleChange({ target: { name: 'allowChat', value: c } } as any)} /></div>
-              </div>
-            </div>
 
-            <div className="border-t border-slate-200 dark:border-slate-800" />
 
             {/* Target Status & Assignment */}
             <div className="space-y-4">
