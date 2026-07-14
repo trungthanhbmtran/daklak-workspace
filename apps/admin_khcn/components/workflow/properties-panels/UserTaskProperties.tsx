@@ -16,11 +16,11 @@ const TASK_PARTICIPANT_ROLES = [
   { code: 'ADMIN', name: 'Quản trị viên hệ thống (ADMIN)' },
 ];
 
-export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate, taskRoles = [], orgRoles = [], dictionaries = {} }: PropertiesPanelComponentProps) => {
+export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate, taskRoles = [], orgRoles = [], dictionaries = {} }: any) => {
   const [activeRoleGroups, setActiveRoleGroups] = useState<Record<string, string>>({});
   
   const participantRoles = dictionaries.participantRoles || TASK_PARTICIPANT_ROLES;
-  
+
   if (!selectedNode || !onUpdate) return null;
 
   return (
@@ -37,7 +37,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
           placeholder="VD: Giao việc, Duyệt báo cáo..."
         />
       </div>
-      
+
       <div>
         <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
           Loại thao tác (Action Type)
@@ -50,7 +50,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
         >
           <NativeSelectOption value="">(Tùy chọn) Chọn loại thao tác...</NativeSelectOption>
           {dictionaries.actionTypes ? (
-            dictionaries.actionTypes.map(a => <NativeSelectOption key={a.code} value={a.code}>{a.name}</NativeSelectOption>)
+            dictionaries.actionTypes.map((a: any) => <NativeSelectOption key={a.code} value={a.code}>{a.name}</NativeSelectOption>)
           ) : (
             <>
               <NativeSelectOption value="ASSIGN">Giao việc / Phân công</NativeSelectOption>
@@ -61,7 +61,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
           )}
         </NativeSelect>
       </div>
-      
+
       <div>
         <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
           Yêu cầu xử lý
@@ -81,7 +81,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình nâng cao (Quyền, UI, Phân công)</span>
           </AccordionTrigger>
           <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-6">
-            
+
             {/* Approval Evidence Configuration */}
             <div className="space-y-4">
               <h4 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
@@ -110,7 +110,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                   >
                     <NativeSelectOption value="none">Không yêu cầu</NativeSelectOption>
                     {dictionaries.evidenceTypes ? (
-                      dictionaries.evidenceTypes.map(e => <NativeSelectOption key={e.code} value={e.code}>{e.name}</NativeSelectOption>)
+                      dictionaries.evidenceTypes.map((e: any) => <NativeSelectOption key={e.code} value={e.code}>{e.name}</NativeSelectOption>)
                     ) : (
                       <>
                         <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
@@ -142,7 +142,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Chiến lược phân công tự động (PBAC)</label>
                 <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange} className="w-full text-sm bg-white">
                   {dictionaries.assignmentStrategies ? (
-                    dictionaries.assignmentStrategies.map(s => <NativeSelectOption key={s.code} value={s.code}>{s.name}</NativeSelectOption>)
+                    dictionaries.assignmentStrategies.map((s: any) => <NativeSelectOption key={s.code} value={s.code}>{s.name}</NativeSelectOption>)
                   ) : (
                     <>
                       <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
@@ -163,9 +163,9 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
             <div className="space-y-3">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Quyền thao tác tuỳ biến</h4>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="h-6 px-2 text-[10px] text-violet-600 hover:text-violet-700 hover:bg-violet-100"
                   onClick={() => {
                     const currentPerms = data.permissions || {};
@@ -175,23 +175,23 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                       newActionName = `NEW_ACTION_${counter}`;
                       counter++;
                     }
-                    onUpdate(selectedNode.id, { 
-                      ...data, 
-                      permissions: { ...currentPerms, [newActionName]: ['PARTICIPANT'] } 
+                    onUpdate(selectedNode.id, {
+                      ...data,
+                      permissions: { ...currentPerms, [newActionName]: ['PARTICIPANT'] }
                     });
                   }}
                 >
                   <Plus className="h-3 w-3 mr-1" /> Thêm quyền
                 </Button>
               </div>
-              
+
               <div className="space-y-3">
                 {Object.entries(data.permissions || {}).map(([action, roles]) => (
                   <div key={action} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
                     <div className="flex items-start gap-2">
                       <div className="flex-1 flex flex-col gap-2">
-                        <Input 
-                          value={action} 
+                        <Input
+                          value={action}
                           onChange={(e) => {
                             const newAction = e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
                             const newPerms = { ...data.permissions };
@@ -218,9 +218,9 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                                 className="ml-1 text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
                                 onClick={() => {
                                   const newRoles = roles.filter(r => r !== role);
-                                  onUpdate(selectedNode.id, { 
-                                    ...data, 
-                                    permissions: { ...data.permissions, [action]: newRoles } 
+                                  onUpdate(selectedNode.id, {
+                                    ...data,
+                                    permissions: { ...data.permissions, [action]: newRoles }
                                   });
                                 }}
                               >
@@ -248,9 +248,9 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                                   if (!role) return;
                                   const currentRoles = Array.isArray(roles) ? roles : [];
                                   const newRoles = [...currentRoles, role].filter((v, i, a) => a.indexOf(v) === i);
-                                  onUpdate(selectedNode.id, { 
-                                    ...data, 
-                                    permissions: { ...data.permissions, [action]: newRoles } 
+                                  onUpdate(selectedNode.id, {
+                                    ...data,
+                                    permissions: { ...data.permissions, [action]: newRoles }
                                   });
                                   e.target.value = '';
                                   setActiveRoleGroups({ ...activeRoleGroups, [action]: "" });
@@ -258,10 +258,10 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                                 defaultValue=""
                               >
                                 <option value="" disabled>+ Chọn</option>
-                                {activeRoleGroups[action] === 'TASK' && participantRoles.map(r => (
+                                {activeRoleGroups[action] === 'TASK' && participantRoles.map((r: any) => (
                                   <option key={r.code} value={r.code}>{r.name}</option>
                                 ))}
-                                {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
+                                {activeRoleGroups[action] === 'ORG' && orgRoles.map((r: any) => (
                                   <option key={r.code} value={r.code}>{r.name}</option>
                                 ))}
                                 {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
@@ -272,9 +272,9 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                           </div>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"
                         onClick={() => {
                           const newPerms = { ...data.permissions };

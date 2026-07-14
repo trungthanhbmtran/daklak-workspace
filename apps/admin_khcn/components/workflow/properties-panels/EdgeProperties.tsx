@@ -5,10 +5,10 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import { PropertiesPanelComponentProps } from "./types";
 
-export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge, dictionaries = {} }: PropertiesPanelComponentProps) => {
+export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge, dictionaries = {} }: any) => {
   if (!selectedEdge) return null;
   const edgeData = data;
-  
+
   return (
     <div className="space-y-4">
       <div>
@@ -37,7 +37,7 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge,
             const actionVal = e.target.value;
             let newExpression = "";
             let newLabel = (selectedEdge.label as string) || "";
-            
+
             if (actionVal === "APPROVE") {
               newExpression = "actionName === 'APPROVE'";
               if (!newLabel || newLabel === "Từ chối") newLabel = "Đồng ý / Phê duyệt";
@@ -66,7 +66,7 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge,
         >
           <NativeSelectOption value="">(Không có điều kiện - Đi thẳng)</NativeSelectOption>
           {dictionaries.gatewayConditions ? (
-            dictionaries.gatewayConditions.map(c => <NativeSelectOption key={c.code} value={c.code}>{c.name}</NativeSelectOption>)
+            dictionaries.gatewayConditions.map((c: any) => <NativeSelectOption key={c.code} value={c.code}>{c.name}</NativeSelectOption>)
           ) : (
             <>
               <NativeSelectOption value="APPROVE">Nếu bước trước: ĐỒNG Ý / PHÊ DUYỆT</NativeSelectOption>
@@ -79,7 +79,7 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge,
           Chỉ áp dụng khi đường nối này đi ra từ Nút Rẽ nhánh (Gateway).
         </p>
       </div>
-      
+
       <Accordion type="single" collapsible className="w-full mt-4">
         <AccordionItem value="advanced" className="border-none">
           <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">

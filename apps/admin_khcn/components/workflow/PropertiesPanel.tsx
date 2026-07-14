@@ -25,14 +25,8 @@ interface PropertiesPanelProps {
   availableServices?: any[];
   availableTriggers?: any[];
   taskRoles?: any[];
-  orgRoles?: { code: string; name: string; rank?: number; authorityLevel?: string; category?: string }[];
-  dictionaries?: {
-    actionTypes?: { code: string; name: string }[];
-    assignmentStrategies?: { code: string; name: string }[];
-    evidenceTypes?: { code: string; name: string }[];
-    participantRoles?: { code: string; name: string }[];
-    gatewayConditions?: { code: string; name: string }[];
-  };
+  orgRoles?: any[];
+  dictionaries?: any;
   onUpdate: (id: string, data: any) => void;
   onUpdateEdge?: (id: string, data: any) => void;
   onDelete: (id: string) => void;
@@ -70,7 +64,7 @@ export const PropertiesPanel = ({
     const { name, value } = e.target;
     const isCheckbox = (e.target as any).type === "checkbox";
     const finalValue = isCheckbox ? (e.target as HTMLInputElement).checked : value;
-    
+
     if (selectedNode) {
       onUpdate(selectedNode.id, { ...data, [name]: finalValue });
     } else if (selectedEdge && onUpdateEdge) {
@@ -106,7 +100,7 @@ export const PropertiesPanel = ({
     }
 
     if (!selectedNode) return null;
-    
+
     const { type } = selectedNode;
     const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles, dictionaries };
 
