@@ -5,7 +5,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import { PropertiesPanelComponentProps } from "./types";
 
-export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge }: PropertiesPanelComponentProps) => {
+export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge, dictionaries = {} }: PropertiesPanelComponentProps) => {
   if (!selectedEdge) return null;
   const edgeData = data;
   
@@ -65,9 +65,15 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
           className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
         >
           <NativeSelectOption value="">(Không có điều kiện - Đi thẳng)</NativeSelectOption>
-          <NativeSelectOption value="APPROVE">Nếu bước trước: ĐỒNG Ý / PHÊ DUYỆT</NativeSelectOption>
-          <NativeSelectOption value="REJECT">Nếu bước trước: TỪ CHỐI</NativeSelectOption>
-          <NativeSelectOption value="SUBMIT">Nếu bước trước: HOÀN THÀNH / TRÌNH KÝ</NativeSelectOption>
+          {dictionaries.gatewayConditions ? (
+            dictionaries.gatewayConditions.map(c => <NativeSelectOption key={c.code} value={c.code}>{c.name}</NativeSelectOption>)
+          ) : (
+            <>
+              <NativeSelectOption value="APPROVE">Nếu bước trước: ĐỒNG Ý / PHÊ DUYỆT</NativeSelectOption>
+              <NativeSelectOption value="REJECT">Nếu bước trước: TỪ CHỐI</NativeSelectOption>
+              <NativeSelectOption value="SUBMIT">Nếu bước trước: HOÀN THÀNH / TRÌNH KÝ</NativeSelectOption>
+            </>
+          )}
         </NativeSelect>
         <p className="text-[10px] text-muted-foreground mt-1.5">
           Chỉ áp dụng khi đường nối này đi ra từ Nút Rẽ nhánh (Gateway).

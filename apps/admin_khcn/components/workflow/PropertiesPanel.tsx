@@ -25,8 +25,14 @@ interface PropertiesPanelProps {
   availableServices?: any[];
   availableTriggers?: any[];
   taskRoles?: any[];
-  /** Vị trí/chức danh tổ chức từ DB (JobTitle) — thay thế SYSTEM_ROLES hardcode */
   orgRoles?: { code: string; name: string; rank?: number; authorityLevel?: string; category?: string }[];
+  dictionaries?: {
+    actionTypes?: { code: string; name: string }[];
+    assignmentStrategies?: { code: string; name: string }[];
+    evidenceTypes?: { code: string; name: string }[];
+    participantRoles?: { code: string; name: string }[];
+    gatewayConditions?: { code: string; name: string }[];
+  };
   onUpdate: (id: string, data: any) => void;
   onUpdateEdge?: (id: string, data: any) => void;
   onDelete: (id: string) => void;
@@ -47,6 +53,7 @@ export const PropertiesPanel = ({
   availableTriggers = [],
   taskRoles = [],
   orgRoles = [],
+  dictionaries = {},
   onUpdate,
   onUpdateEdge,
   onDelete,
@@ -101,7 +108,7 @@ export const PropertiesPanel = ({
     if (!selectedNode) return null;
     
     const { type } = selectedNode;
-    const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles };
+    const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles, dictionaries };
 
     switch (type) {
       case "user_task":

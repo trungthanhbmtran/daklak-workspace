@@ -16,8 +16,10 @@ const TASK_PARTICIPANT_ROLES = [
   { code: 'ADMIN', name: 'Quản trị viên hệ thống (ADMIN)' },
 ];
 
-export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate, taskRoles = [], orgRoles = [] }: PropertiesPanelComponentProps) => {
+export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate, taskRoles = [], orgRoles = [], dictionaries = {} }: PropertiesPanelComponentProps) => {
   const [activeRoleGroups, setActiveRoleGroups] = useState<Record<string, string>>({});
+  
+  const participantRoles = dictionaries.participantRoles || TASK_PARTICIPANT_ROLES;
   
   if (!selectedNode || !onUpdate) return null;
 
@@ -47,10 +49,16 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
           className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
         >
           <NativeSelectOption value="">(Tùy chọn) Chọn loại thao tác...</NativeSelectOption>
-          <NativeSelectOption value="ASSIGN">Giao việc / Phân công</NativeSelectOption>
-          <NativeSelectOption value="APPROVE">Phê duyệt / Ký duyệt</NativeSelectOption>
-          <NativeSelectOption value="REJECT">Từ chối / Trả lại</NativeSelectOption>
-          <NativeSelectOption value="SUBMIT">Hoàn thành / Báo cáo</NativeSelectOption>
+          {dictionaries.actionTypes ? (
+            dictionaries.actionTypes.map(a => <NativeSelectOption key={a.code} value={a.code}>{a.name}</NativeSelectOption>)
+          ) : (
+            <>
+              <NativeSelectOption value="ASSIGN">Giao việc / Phân công</NativeSelectOption>
+              <NativeSelectOption value="APPROVE">Phê duyệt / Ký duyệt</NativeSelectOption>
+              <NativeSelectOption value="REJECT">Từ chối / Trả lại</NativeSelectOption>
+              <NativeSelectOption value="SUBMIT">Hoàn thành / Báo cáo</NativeSelectOption>
+            </>
+          )}
         </NativeSelect>
       </div>
       
@@ -101,9 +109,15 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                     className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all"
                   >
                     <NativeSelectOption value="none">Không yêu cầu</NativeSelectOption>
-                    <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
-                    <NativeSelectOption value="api">Dữ liệu từ API</NativeSelectOption>
-                    <NativeSelectOption value="both">Cả hai (Upload + API)</NativeSelectOption>
+                    {dictionaries.evidenceTypes ? (
+                      dictionaries.evidenceTypes.map(e => <NativeSelectOption key={e.code} value={e.code}>{e.name}</NativeSelectOption>)
+                    ) : (
+                      <>
+                        <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
+                        <NativeSelectOption value="api">Dữ liệu từ API</NativeSelectOption>
+                        <NativeSelectOption value="both">Cả hai (Upload + API)</NativeSelectOption>
+                      </>
+                    )}
                   </NativeSelect>
                 </div>
               )}
@@ -127,12 +141,18 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Chiến lược phân công tự động (PBAC)</label>
                 <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange} className="w-full text-sm bg-white">
-                  <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
-                  <NativeSelectOption value="BY_DOMAIN">Theo Lĩnh vực phụ trách</NativeSelectOption>
-                  <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
-                  <NativeSelectOption value="BY_GEO_AREA">Theo Địa bàn phụ trách</NativeSelectOption>
-                  <NativeSelectOption value="DIRECT_MANAGER">Cấp trên/dưới trực tiếp</NativeSelectOption>
-                  <NativeSelectOption value="ASSIGNER">Người giao việc</NativeSelectOption>
+                  {dictionaries.assignmentStrategies ? (
+                    dictionaries.assignmentStrategies.map(s => <NativeSelectOption key={s.code} value={s.code}>{s.name}</NativeSelectOption>)
+                  ) : (
+                    <>
+                      <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
+                      <NativeSelectOption value="BY_DOMAIN">Theo Lĩnh vực phụ trách</NativeSelectOption>
+                      <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
+                      <NativeSelectOption value="BY_GEO_AREA">Theo Địa bàn phụ trách</NativeSelectOption>
+                      <NativeSelectOption value="DIRECT_MANAGER">Cấp trên/dưới trực tiếp</NativeSelectOption>
+                      <NativeSelectOption value="ASSIGNER">Người giao việc</NativeSelectOption>
+                    </>
+                  )}
                 </NativeSelect>
               </div>
             </div>
@@ -238,7 +258,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                                 defaultValue=""
                               >
                                 <option value="" disabled>+ Chọn</option>
-                                {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
+                                {activeRoleGroups[action] === 'TASK' && participantRoles.map(r => (
                                   <option key={r.code} value={r.code}>{r.name}</option>
                                 ))}
                                 {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
