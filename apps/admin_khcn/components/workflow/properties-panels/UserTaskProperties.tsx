@@ -241,7 +241,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                                 {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
                                   <option key={r.code} value={r.code}>{r.name}</option>
                                 ))}
-                                {activeRoleGroups[action] === 'ORG' && orgRoles.map(r => (
+                                {activeRoleGroups[action] === 'ORG' && orgRoles.map((r: any) => (
                                   <option key={r.code} value={r.code}>{r.name}</option>
                                 ))}
                                 {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
