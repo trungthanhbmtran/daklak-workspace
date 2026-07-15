@@ -49,7 +49,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
   const taskId = Number(task.id);
   const isCompleted = task.status?.toUpperCase() === "HOÀN THÀNH" || task.status?.toUpperCase() === "COMPLETED";
-  const isAssigned = task.status?.toUpperCase() === "MỚI GIAO" || task.status?.toUpperCase() === "ASSIGNED";
+  const isAssigned = task.status?.toUpperCase() === "MỚI GIAO" || task.status?.toUpperCase() === "ASSIGNED" || task.status?.toUpperCase() === "TODO";
 
   // ── Queries ──
   const { user } = useUser();

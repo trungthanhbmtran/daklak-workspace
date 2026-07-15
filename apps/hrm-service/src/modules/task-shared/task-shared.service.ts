@@ -528,8 +528,10 @@ export class TaskSharedService {
       actions.push('CHAT');
     }
 
-    // Natively inject actions for the assignee when the task is in progress
-    if (access.isAssignee && t.status === 'IN_PROGRESS') {
+    // Natively inject actions for the assignee when the task is in progress or TODO
+    const isTaskActive = !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'MỚI GIAO' && t.status !== 'TODO';
+    
+    if (access.isAssignee && isTaskActive) {
       actions.push('CREATE_SUBTASK');
       actions.push('ADD_SUBTASK'); // Required by backend breakdownTask
       actions.push('CREATE_STEP');
