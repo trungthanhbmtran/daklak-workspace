@@ -113,7 +113,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     const reason = window.prompt("Nhập lý do từ chối nhận việc:");
     if (!reason) return;
     try {
-      await updateStatus.mutateAsync({ status: "REJECTED" });
+      await updateStatus.mutateAsync({ status: "REJECTED", actionName: "REJECT", rejectReason: reason } as any);
       await addComment.mutateAsync(`Từ chối nhận việc. Lý do: ${reason}`);
       toast.success("Đã từ chối công việc");
       onOpenChange(false);

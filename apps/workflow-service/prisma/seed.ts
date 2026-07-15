@@ -24,8 +24,16 @@ async function main() {
       {
         id: 'node_assign', type: 'user_task', position: { x: 300, y: 200 },
         data: {
-          label: 'Phân công',
+          label: 'Phân công / Tiếp nhận',
           actionName: 'ASSIGN', targetStatus: 'TODO',
+          permissions: { ...fullPermissions, ASSIGN: ['OWNER', 'DEPT_LEADER', 'ADMIN'], IN_PROGRESS: ['ASSIGNEE'], REJECT: ['ASSIGNEE'] },
+        }
+      },
+      {
+        id: 'node_rejected', type: 'user_task', position: { x: 300, y: 350 },
+        data: {
+          label: 'Từ chối nhận việc',
+          targetStatus: 'REJECTED',
           permissions: { ...fullPermissions, ASSIGN: ['OWNER', 'DEPT_LEADER', 'ADMIN'] },
         }
       },
@@ -63,7 +71,10 @@ async function main() {
     ],
     edges: [
       { id: 'edge_start',            source: 'node_start',           target: 'node_assign',          label: '' },
-      { id: 'edge_assign_progress',  source: 'node_assign',          target: 'node_in_progress',     label: 'ASSIGN' },
+      { id: 'edge_assign_loop',      source: 'node_assign',          target: 'node_assign',          label: 'ASSIGN' },
+      { id: 'edge_assign_progress',  source: 'node_assign',          target: 'node_in_progress',     label: 'IN_PROGRESS' },
+      { id: 'edge_assign_reject',    source: 'node_assign',          target: 'node_rejected',        label: 'REJECT' },
+      { id: 'edge_reject_assign',    source: 'node_rejected',        target: 'node_assign',          label: 'ASSIGN' },
       { id: 'edge_progress_report',  source: 'node_in_progress',     target: 'node_report',          label: 'IN_PROGRESS' },
       { id: 'edge_report_approve',   source: 'node_report',          target: 'node_approve',         label: 'COMPLETE' },
       { id: 'edge_approve_gw',       source: 'node_approve',         target: 'gw_approve',           label: 'APPROVE_OR_REJECT' },
