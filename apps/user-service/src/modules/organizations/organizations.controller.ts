@@ -172,6 +172,15 @@ export class OrganizationsController {
     };
   }
 
+  @GrpcMethod('OrganizationService', 'GetOrganizations')
+  async getOrganizations(data: { q?: string }) {
+    const res = await this.orgService.getOrganizations(data.q);
+    const list = res?.data ?? [];
+    return {
+      nodes: list.map((node: any) => this.mapUnitNode(node)),
+    };
+  }
+
   @GrpcMethod('OrganizationService', 'GetSubTree')
   async getSubTree(data: { id: number }) {
     const res = await this.orgService.getSubTree(data.id);

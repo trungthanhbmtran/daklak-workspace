@@ -269,6 +269,37 @@ export class OrganizationsService {
     return result;
   }
 
+  // Lấy danh sách phẳng (có thể lọc theo tên, mã)
+  async getOrganizations(q?: string) {
+    const where: any = {};
+    if (q) {
+      where.OR = [
+        { name: { contains: q } },
+        { code: { contains: q } },
+        { shortName: { contains: q } },
+      ];
+    }
+    const units = await this.prisma.organizationUnit.findMany({
+      where,
+      orderBy: { hierarchyPath: 'asc' },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    return { data: units };
+  }
+
   // Lấy cây con của 1 đơn vị (Dùng Materialized Path)
   async getSubTree(rootId: number) {
     const cacheKey = `SUB_TREE_${rootId}`;

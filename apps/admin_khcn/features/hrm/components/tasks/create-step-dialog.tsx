@@ -6,22 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ListChecksIcon, CheckCircle2, Loader2 } from "lucide-react";
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useCreateStep } from "../../hooks/useTasks";
 
 interface CreateStepDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  taskId: string | number;
+  task: any;
 }
 
-export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialogProps) {
+export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogProps) {
   const [title, setTitle] = useState("");
   const [baseScore, setBaseScore] = useState<number | "">("");
+  const [assigneeCode, setAssigneeCode] = useState<string>("");
 
-  const createStep = useCreateStep(Number(taskId));
+  const createStep = useCreateStep(Number(task?.id));
   const isPending = createStep.isPending;
 
-  const resetForm = () => { setTitle(""); setBaseScore(""); };
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 100 });
+  const employees = (employeesData as any)?.data ?? [];
+
+  const resetForm = () => { setTitle(""); setBaseScore(""); setAssigneeCode(""); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +37,8 @@ export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialo
     try {
       await createStep.mutateAsync({ 
         title: title.trim(),
-        baseScore: baseScore === "" ? 0 : Number(baseScore)
+        baseScore: baseScore === "" ? 0 : Number(baseScore),
+        assigneeCode: assigneeCode || undefined
       });
       resetForm();
       onOpenChange(false);
@@ -84,6 +92,28 @@ export function CreateStepDialog({ open, onOpenChange, taskId }: CreateStepDialo
               className="text-base h-11 transition-all focus-visible:ring-indigo-500 bg-white"
               disabled={isPending}
             />
+          </div>
+
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Người thực hiện (Phân việc)
+            </Label>
+            <Select value={assigneeCode} onValueChange={setAssigneeCode} disabled={isPending}>
+              <SelectTrigger className="w-full bg-white h-11 focus:ring-indigo-500">
+                <SelectValue placeholder="Chọn người thực hiện bước này..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="UNASSIGNED" className="text-slate-500 italic">-- Chưa phân công --</SelectItem>
+                {employees.map((emp: any) => (
+                  <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                    👤 {emp.fullName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-slate-500">
+              Bạn có thể phân bước này cho một người phối hợp trong công việc.
+            </p>
           </div>
           
           <div className="pt-4 flex justify-end gap-3 sm:space-x-0">

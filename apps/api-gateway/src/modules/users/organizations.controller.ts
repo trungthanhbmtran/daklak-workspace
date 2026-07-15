@@ -154,6 +154,38 @@ export class OrganizationsController implements OnModuleInit {
     };
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Lấy danh sách phẳng đơn vị tổ chức (theo phân quyền)' })
+  @ApiResponse({ status: 200, description: 'Danh sách phẳng đơn vị tổ chức' })
+  async getOrganizations(@Req() request: any, @Query('q') q?: string) {
+    const res = (await firstValueFrom(
+      this.orgService.GetOrganizations({ q: q || '' })
+    )) as any;
+    
+    let flatList = res.nodes || [];
+
+    const userId = request?.user?.id;
+    const userInfo: any = userId
+      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(() => null)
+      : null;
+
+    const isAdmin: boolean = !!userInfo?.roles?.some(
+      (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN'
+    );
+
+    if (!isAdmin) {
+      if (!userInfo?.unitCode) {
+        flatList = [];
+      } else {
+        flatList = flatList.filter((node: any) => 
+          node.code && node.code.startsWith(userInfo.unitCode)
+        );
+      }
+    }
+
+    return { success: true, data: flatList };
+  }
+
   @Get('job-titles')
   @ApiOperation({
     summary:

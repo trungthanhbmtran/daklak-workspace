@@ -326,11 +326,18 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                             <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" || step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
                               {step.title}
                             </p>
-                            {step.baseScore > 0 && (
-                              <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium mt-1">
-                                +{step.baseScore} điểm KPI
-                              </span>
-                            )}
+                            <div className="flex items-center gap-2 mt-1">
+                              {step.assigneeName && (
+                                <span className="text-[11px] text-slate-500 flex items-center">
+                                  👤 {step.assigneeName}
+                                </span>
+                              )}
+                              {step.baseScore > 0 && (
+                                <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium">
+                                  +{step.baseScore} điểm KPI
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -539,7 +546,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
       <CreateStepDialog 
         open={isCreateStepOpen} 
         onOpenChange={setIsCreateStepOpen} 
-        taskId={task.id}
+        task={task}
       />
     </Sheet>
   );
