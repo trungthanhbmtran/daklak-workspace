@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X, Loader2 } from "lucide-react";
 import { useCreateTask, useCreateSubTask } from "../../hooks/useTasks";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
+import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { toast } from "sonner";
 
 interface CreateTaskDialogProps {
@@ -38,9 +39,21 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true });
   const employees = (employeesData as any)?.data ?? [];
 
+  // ── Danh sách phòng ban từ API ──
+  const { data: orgData } = useOrganizationFlatListQuery();
+  const departments = orgData?.items ?? [];
+
   const handleAddCoordinator = (value: string) => {
-    const emp = employees.find((e: any) => e.employeeCode === value);
-    const name = emp ? `👤 ${emp.fullName}` : value;
+    let name = value;
+    if (value.startsWith("DEPT_")) {
+      const deptId = parseInt(value.replace("DEPT_", ""), 10);
+      const dept = departments.find((d: any) => d.id === deptId);
+      if (dept) name = `🏢 ${dept.name}`;
+    } else {
+      const emp = employees.find((e: any) => e.employeeCode === value);
+      if (emp) name = `👤 ${emp.fullName}`;
+    }
+
     if (!coordinators.find(c => c.id === value)) {
       setCoordinators([...coordinators, { id: value, name }]);
     }
@@ -153,6 +166,19 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     <SelectValue placeholder="Chọn người nhận..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
+                    {departments.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Phòng ban</SelectLabel>
+                        {departments.map((dept: any) => (
+                          <SelectItem key={`DEPT_${dept.id}`} value={`DEPT_${dept.id}`}>
+                            <div className="flex items-center gap-2">
+                              <UsersIcon className="w-4 h-4 text-orange-500" />
+                              <span>{dept.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
                     {employees.length > 0 ? (
                       <SelectGroup>
                         <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
@@ -182,13 +208,30 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {employees
-                      .filter((e: any) => e.employeeCode !== assignee && !coordinators.find(c => c.id === e.employeeCode))
-                      .map((emp: any) => (
-                        <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                          👤 {emp.fullName}
-                        </SelectItem>
-                      ))}
+                    {departments.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Phòng ban</SelectLabel>
+                        {departments
+                          .filter((d: any) => `DEPT_${d.id}` !== assignee && !coordinators.find(c => c.id === `DEPT_${d.id}`))
+                          .map((dept: any) => (
+                            <SelectItem key={`DEPT_${dept.id}`} value={`DEPT_${dept.id}`}>
+                              🏢 {dept.name}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    )}
+                    {employees.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
+                        {employees
+                          .filter((e: any) => e.employeeCode !== assignee && !coordinators.find(c => c.id === e.employeeCode))
+                          .map((emp: any) => (
+                            <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                              👤 {emp.fullName}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    )}
                   </SelectContent>
                 </Select>
                 
