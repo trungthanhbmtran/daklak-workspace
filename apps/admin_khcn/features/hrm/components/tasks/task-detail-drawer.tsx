@@ -1,5 +1,6 @@
 "use client";
 
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HrmTask } from "../../types/task";
 import { Badge } from "@/components/ui/badge";
@@ -33,12 +34,13 @@ import {
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 
-interface TaskDetailPanelProps {
+interface TaskDetailDrawerProps {
   task: HrmTask;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
+export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerProps) {
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -95,7 +97,7 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
     try {
       await updateStatus.mutateAsync({ status: "COMPLETED" });
       toast.success("Đã hoàn thành công việc");
-      onClose();
+      onOpenChange(false);
     } catch { /* handled */ }
   };
 
@@ -114,7 +116,7 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
       await updateStatus.mutateAsync({ status: "REJECTED" });
       await addComment.mutateAsync(`Từ chối nhận việc. Lý do: ${reason}`);
       toast.success("Đã từ chối công việc");
-      onClose();
+      onOpenChange(false);
     } catch { /* handled */ }
   };
 
@@ -166,10 +168,11 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
   const timelineEvents = buildTimeline();
 
   return (
-    <>
-      <div className="flex flex-col h-full bg-slate-50 relative">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full bg-slate-50">
         {/* Header */}
         <div className="p-6 bg-white border-b">
+          <SheetHeader>
             <div className="flex justify-between items-start gap-4">
               <div>
                 {task.parentId && (
@@ -180,16 +183,13 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
                     </span>
                   </div>
                 )}
-                <h3 className="text-xl font-bold pr-8">{task.title}</h3>
-                <p className="mt-2 text-slate-600">
+                <SheetTitle className="text-xl font-bold">{task.title}</SheetTitle>
+                <SheetDescription className="mt-2 text-slate-600">
                   {task.description}
-                </p>
+                </SheetDescription>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
-                <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 right-4 h-8 w-8 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full">
-                  <X className="h-4 w-4" />
-                </Button>
-                <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500 mt-6" : "mt-6"}>
+                <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
                   {task.status}
                 </Badge>
                 {!isCompleted && (
@@ -200,6 +200,7 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
                 )}
               </div>
             </div>
+          </SheetHeader>
 
           <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             <div>
@@ -595,9 +596,6 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
             </TabsContent>
           </ScrollArea>
         </Tabs>
-      </div>
-
-      {/* Dialogs */}
       <CreateTaskDialog
         open={isCreateSubTaskOpen}
         onOpenChange={setIsCreateSubTaskOpen}
@@ -605,10 +603,11 @@ export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
       />
 
       <CreateStepDialog
-        taskId={taskId}
+        task={task}
         open={isCreateStepOpen}
         onOpenChange={setIsCreateStepOpen}
       />
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }
