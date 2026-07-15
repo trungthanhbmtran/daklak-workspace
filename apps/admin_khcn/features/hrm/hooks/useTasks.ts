@@ -41,6 +41,14 @@ export function useTaskStats(params: any = {}) {
   });
 }
 
+export function useTaskDetail(taskId: number | undefined) {
+  return useQuery({
+    queryKey: [...hrmKeys.tasks(), 'detail', taskId],
+    queryFn: taskId ? () => hrmTasksApi.getTask(taskId) : skipToken,
+    staleTime: TASKS_STALE_TIME,
+  });
+}
+
 /**
  * Comments của một task.
  * - enabled: chỉ fetch khi taskId có giá trị

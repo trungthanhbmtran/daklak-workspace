@@ -722,6 +722,23 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(this.taskService.GetTaskKpiSetting({ taskId: id }));
   }
 
+  @Get(':id')
+  async getTask(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    const user = req.user;
+    const response = (await firstValueFrom(
+      this.taskService.getTask(
+        {
+          id,
+          currentEmployeeCode: user?.employeeCode,
+          isAdmin: user?.permissionsFlatten?.includes('TASK:MANAGE') || false,
+        },
+        this.getGrpcMetadata(req),
+      )
+    )) as any;
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
+  }
+
   // ─── Task Steps (Checklist) ────────────────────────────────────────────────────────
 
   @Get(':id/steps')

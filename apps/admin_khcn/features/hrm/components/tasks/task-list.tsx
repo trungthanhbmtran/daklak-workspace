@@ -9,10 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
 import { Eye, Clock, ChevronRight, ChevronDown, AlertCircle } from "lucide-react";
-import { TaskDetailDrawer } from "./task-detail-drawer";
+import { TaskDetailPanel } from "./task-detail-panel";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
-import { useTasksList } from "../../hooks/useTasks";
+import { useTasksList, useTaskDetail } from "../../hooks/useTasks";
+import { useSearchParams, useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -177,6 +179,17 @@ export function TaskList() {
   const flatTasks: HrmTask[] = (data as any)?.data ?? [];
   const tasks = buildTaskTree(flatTasks);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const taskIdParam = searchParams?.get("taskId");
+  const { data: detailData } = useTaskDetail(taskIdParam ? Number(taskIdParam) : undefined);
+
+  React.useEffect(() => {
+    if (taskIdParam && detailData?.data && !selectedTask) {
+      setSelectedTask(detailData.data);
+    }
+  }, [taskIdParam, detailData, selectedTask]);
+
   const toggleExpand = (taskId: string) => {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
@@ -271,77 +284,88 @@ export function TaskList() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-        <div className="flex w-full sm:w-auto gap-3">
-          <Input
-            placeholder="Tìm kiếm công việc..."
-            className="w-full sm:w-[280px]"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-              <SelectItem value="ASSIGNED">Mới giao</SelectItem>
-              <SelectItem value="IN_PROGRESS">Đang xử lý</SelectItem>
-              <SelectItem value="PENDING_REVIEW">Chờ duyệt</SelectItem>
-              <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
-              <SelectItem value="OVERDUE">Quá hạn</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="flex flex-col xl:flex-row gap-6 h-[calc(100vh-160px)]">
+      
+      {/* Left Pane: Task List */}
+      <div className={`flex flex-col bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden ${selectedTask ? 'hidden xl:flex xl:w-1/3 2xl:w-2/5 flex-none' : 'w-full'}`}>
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50 p-4 border-b border-slate-200">
+          <div className="flex w-full sm:w-auto gap-3">
+            <Input
+              placeholder="Tìm kiếm công việc..."
+              className="w-full sm:w-[280px]"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Trạng thái" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
+                <SelectItem value="ASSIGNED">Mới giao</SelectItem>
+                <SelectItem value="IN_PROGRESS">Đang xử lý</SelectItem>
+                <SelectItem value="PENDING_REVIEW">Chờ duyệt</SelectItem>
+                <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
+                <SelectItem value="OVERDUE">Quá hạn</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm shrink-0">+ Giao việc</Button>
         </div>
-        <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
+
+        <ScrollArea className="flex-1 overflow-x-auto">
+          <Table className="w-full min-w-[800px]">
+            <TableHeader>
+              <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
+                <TableHead className="w-[300px] pl-6 font-semibold">Tên công việc</TableHead>
+                <TableHead className="font-semibold w-[120px]">Trạng thái</TableHead>
+                <TableHead className="font-semibold w-[100px]">Mức độ</TableHead>
+                <TableHead className="font-semibold w-[150px]">Người xử lý</TableHead>
+                <TableHead className="font-semibold w-[120px]">Thời hạn</TableHead>
+                <TableHead className="font-semibold w-[120px]">Tiến độ</TableHead>
+                <TableHead className="text-right font-semibold w-[80px]">Thao tác</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TaskListSkeleton />
+              ) : isError ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center h-32">
+                    <div className="flex flex-col items-center gap-2 text-slate-500">
+                      <AlertCircle className="w-8 h-8 text-red-400" />
+                      <span>Không thể tải danh sách công việc.</span>
+                      <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : tasks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                    Không tìm thấy công việc nào
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tasks.map((task) => renderTaskRow(task, 0))
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-              <TableHead className="w-[400px] pl-6 font-semibold">Tên công việc</TableHead>
-              <TableHead className="font-semibold">Trạng thái</TableHead>
-              <TableHead className="font-semibold">Mức độ</TableHead>
-              <TableHead className="font-semibold">Người xử lý</TableHead>
-              <TableHead className="font-semibold">Thời hạn</TableHead>
-              <TableHead className="font-semibold">Tiến độ</TableHead>
-              <TableHead className="text-right font-semibold">Thao tác</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TaskListSkeleton />
-            ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center h-32">
-                  <div className="flex flex-col items-center gap-2 text-slate-500">
-                    <AlertCircle className="w-8 h-8 text-red-400" />
-                    <span>Không thể tải danh sách công việc.</span>
-                    <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : tasks.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-                  Không tìm thấy công việc nào
-                </TableCell>
-              </TableRow>
-            ) : (
-              tasks.map((task) => renderTaskRow(task, 0))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
+      {/* Right Pane: Task Detail */}
       {selectedTask && (
-        <TaskDetailDrawer
-          task={selectedTask}
-          open={!!selectedTask}
-          onOpenChange={(open) => !open && setSelectedTask(null)}
-        />
+        <div className="flex-1 flex flex-col bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden min-w-0 animate-in slide-in-from-right-4 fade-in duration-300">
+          <TaskDetailPanel
+            task={selectedTask}
+            onClose={() => {
+              setSelectedTask(null);
+              if (taskIdParam) {
+                router.replace("/services/hrm/work-plans/tasks");
+              }
+            }}
+          />
+        </div>
       )}
 
       <CreateTaskDialog

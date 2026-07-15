@@ -1,6 +1,5 @@
 "use client";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HrmTask } from "../../types/task";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import {
   BellRing, MessageSquare, Send, CheckCircle2, Clock, History,
-  ArrowRightCircle, FileText, AlertCircle, Loader2
+  ArrowRightCircle, FileText, AlertCircle, Loader2, X
 } from "lucide-react";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -34,13 +33,12 @@ import {
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 
-interface TaskDetailDrawerProps {
+interface TaskDetailPanelProps {
   task: HrmTask;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
 }
 
-export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerProps) {
+export function TaskDetailPanel({ task, onClose }: TaskDetailPanelProps) {
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -97,7 +95,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     try {
       await updateStatus.mutateAsync({ status: "COMPLETED" });
       toast.success("Đã hoàn thành công việc");
-      onOpenChange(false);
+      onClose();
     } catch { /* handled */ }
   };
 
@@ -116,7 +114,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
       await updateStatus.mutateAsync({ status: "REJECTED" });
       await addComment.mutateAsync(`Từ chối nhận việc. Lý do: ${reason}`);
       toast.success("Đã từ chối công việc");
-      onOpenChange(false);
+      onClose();
     } catch { /* handled */ }
   };
 
@@ -168,11 +166,10 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const timelineEvents = buildTimeline();
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full bg-slate-50">
+    <>
+      <div className="flex flex-col h-full bg-slate-50 relative">
         {/* Header */}
         <div className="p-6 bg-white border-b">
-          <SheetHeader>
             <div className="flex justify-between items-start gap-4">
               <div>
                 {task.parentId && (
@@ -183,13 +180,16 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     </span>
                   </div>
                 )}
-                <SheetTitle className="text-xl font-bold">{task.title}</SheetTitle>
-                <SheetDescription className="mt-2 text-slate-600">
+                <h3 className="text-xl font-bold pr-8">{task.title}</h3>
+                <p className="mt-2 text-slate-600">
                   {task.description}
-                </SheetDescription>
+                </p>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
-                <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
+                <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 right-4 h-8 w-8 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full">
+                  <X className="h-4 w-4" />
+                </Button>
+                <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500 mt-6" : "mt-6"}>
                   {task.status}
                 </Badge>
                 {!isCompleted && (
@@ -200,7 +200,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 )}
               </div>
             </div>
-          </SheetHeader>
 
           <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             <div>
@@ -596,19 +595,20 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </TabsContent>
           </ScrollArea>
         </Tabs>
-      </SheetContent>
+      </div>
 
       {/* Dialogs */}
-      <CreateTaskDialog 
-        open={isCreateSubTaskOpen} 
-        onOpenChange={setIsCreateSubTaskOpen} 
-        parentId={task.id}
+      <CreateTaskDialog
+        open={isCreateSubTaskOpen}
+        onOpenChange={setIsCreateSubTaskOpen}
+        parentId={String(taskId)}
       />
-      <CreateStepDialog 
-        open={isCreateStepOpen} 
-        onOpenChange={setIsCreateStepOpen} 
-        task={task}
+
+      <CreateStepDialog
+        taskId={taskId}
+        open={isCreateStepOpen}
+        onOpenChange={setIsCreateStepOpen}
       />
-    </Sheet>
+    </>
   );
 }

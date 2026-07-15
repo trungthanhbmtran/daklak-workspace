@@ -29,6 +29,9 @@ function NotificationRow({
 }) {
   const resolveHref = (item: NotificationItem) => {
     const { module, type, id, link } = item.metadata || {};
+    if (module === 'hrm' && type === 'work-plans/tasks' && id) {
+      return `/services/hrm/work-plans/tasks?taskId=${id}`;
+    }
     if (module && type && id) return `/services/${module}/${type}/${id}`;
     if (link) return link;
     return "#";

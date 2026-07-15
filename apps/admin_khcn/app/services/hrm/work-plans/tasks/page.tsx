@@ -1,5 +1,6 @@
 import { TaskDashboard } from "@/features/hrm/components/tasks/task-dashboard";
 import { TaskList } from "@/features/hrm/components/tasks/task-list";
+import { Suspense } from "react";
 
 export default function TasksPage() {
   return (
@@ -15,7 +16,9 @@ export default function TasksPage() {
       
       <div className="mt-4">
         <h2 className="text-xl font-semibold mb-4">Danh sách Công việc</h2>
-        <TaskList />
+        <Suspense fallback={<div className="p-4 text-center text-slate-500">Đang tải danh sách...</div>}>
+          <TaskList />
+        </Suspense>
       </div>
     </div>
   );
