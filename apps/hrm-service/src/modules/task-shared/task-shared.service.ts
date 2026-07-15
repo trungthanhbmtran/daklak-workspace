@@ -528,6 +528,26 @@ export class TaskSharedService {
       actions.push('CHAT');
     }
 
+    // Natively inject actions for the assignee when the task is in progress
+    if (access.isAssignee && t.status === 'IN_PROGRESS') {
+      actions.push('CREATE_SUBTASK');
+      actions.push('ADD_SUBTASK'); // Required by backend breakdownTask
+      actions.push('CREATE_STEP');
+      actions.push('UPDATE_PROGRESS');
+      actions.push('EDIT');
+    }
+
+    // Nếu người chủ trì giao việc, họ có thể chỉnh sửa/xóa khi task chưa bắt đầu
+    if (access.isOwner && (t.status === 'DRAFT' || t.status === 'ASSIGNED')) {
+      actions.push('EDIT');
+      actions.push('DELETE');
+    }
+
+    // Always allow chat for participants
+    if (isTreeParticipant || t.creatorEmployeeCode === query.currentEmployeeCode) {
+      actions.push('CHAT');
+    }
+
     return Array.from(new Set(actions));
   }
 
