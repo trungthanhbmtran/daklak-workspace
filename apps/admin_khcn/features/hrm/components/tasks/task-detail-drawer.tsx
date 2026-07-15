@@ -32,6 +32,7 @@ import {
   useUpdateProgress, useUpdateStep
 } from "../../hooks/useTasks";
 import { toast } from "sonner";
+import { useUser } from "@/hooks/useUser";
 
 interface TaskDetailDrawerProps {
   task: HrmTask;
@@ -47,9 +48,11 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const [reportText, setReportText] = useState("");
 
   const taskId = Number(task.id);
-  const isCompleted = task.status?.toUpperCase() === "HOÀN THÀNH";
+  const isCompleted = task.status?.toUpperCase() === "HOÀN THÀNH" || task.status?.toUpperCase() === "COMPLETED";
+  const isAssigned = task.status?.toUpperCase() === "MỚI GIAO" || task.status?.toUpperCase() === "ASSIGNED";
 
   // ── Queries ──
+  const { user } = useUser();
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
   const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(taskId);
   const { data: stepsData, isLoading: stepsLoading } = useTaskSteps(taskId);
@@ -95,6 +98,34 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
       await updateStatus.mutateAsync({ status: "COMPLETED" });
       toast.success("Đã hoàn thành công việc");
       onOpenChange(false);
+    } catch { /* handled */ }
+  };
+
+  const handleAcceptTask = async () => {
+    try {
+      await updateStatus.mutateAsync({ status: "IN_PROGRESS" });
+      toast.success("Đã nhận việc thành công");
+      await addComment.mutateAsync(`Đã tiếp nhận công việc và bắt đầu xử lý.`);
+    } catch { /* handled */ }
+  };
+
+  const handleRejectTask = async () => {
+    const reason = window.prompt("Nhập lý do từ chối nhận việc:");
+    if (!reason) return;
+    try {
+      await updateStatus.mutateAsync({ status: "REJECTED" });
+      await addComment.mutateAsync(`Từ chối nhận việc. Lý do: ${reason}`);
+      toast.success("Đã từ chối công việc");
+      onOpenChange(false);
+    } catch { /* handled */ }
+  };
+
+  const handleRequestCoordination = async () => {
+    const reason = window.prompt("Nhập lý do / nội dung xin phối hợp:");
+    if (!reason) return;
+    try {
+      await addComment.mutateAsync(`Yêu cầu bổ sung người phối hợp: ${reason}`);
+      toast.success("Đã gửi yêu cầu phối hợp");
     } catch { /* handled */ }
   };
 
@@ -230,10 +261,38 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             {/* ── Tab Xử lý & Cập nhật ── */}
             <TabsContent value="processing" className="mt-0 space-y-6">
 
-              {/* Nhiệm vụ con */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
+              {/* Box tiếp nhận công việc */}
+              {isAssigned && (
+                <div className="space-y-4 bg-amber-50 p-4 rounded-lg border border-amber-200 mb-6">
+                  <h3 className="font-medium text-amber-900 flex items-center">
+                    <BellRing className="w-4 h-4 mr-2" />
+                    Xác nhận tiếp nhận công việc
+                  </h3>
+                  <p className="text-sm text-amber-700">
+                    Công việc này vừa được giao. Vui lòng xác nhận tiếp nhận để có thể bắt đầu xử lý (phân rã công việc, cập nhật tiến độ, v.v.), hoặc từ chối nếu không đúng thẩm quyền.
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Button onClick={handleAcceptTask} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Nhận việc
+                    </Button>
+                    <Button onClick={handleRejectTask} size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
+                      Từ chối
+                    </Button>
+                    <Button onClick={handleRequestCoordination} size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                      Xin phối hợp
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Chỉ cho phép thực hiện các nghiệp vụ khi đã nhận việc (không còn là ASSIGNED) */}
+              {!isAssigned && (
+                <>
+                  {/* Nhiệm vụ con */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
                   {task.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
                       + Tạo nhiệm vụ con
@@ -405,6 +464,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 <h3 className="font-medium text-sm text-slate-500">Tài liệu đính kèm</h3>
                 <div className="text-sm text-slate-500 italic">Chưa có tài liệu nào</div>
               </div>
+                </>
+              )}
             </TabsContent>
 
             {/* ── Tab Trao đổi ── */}
