@@ -122,6 +122,7 @@ export class TaskSharedService {
       const res = await firstValueFrom<any>(this.workflowService.FindOneWorkflow({ id: workflowId }));
       if (res) {
         const definition = {
+          id: workflowId,
           nodes: (res.nodes || []).map((n: any) => ({
             id: n.id,
             type: n.type,
