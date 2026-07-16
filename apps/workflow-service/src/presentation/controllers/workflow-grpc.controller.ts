@@ -497,7 +497,7 @@ export class WorkflowGrpcController {
       data.actionName,
       data.userRoles || [],
       data.userId,
-      data.businessData || {}
+      this.parseProtoStruct(data.businessData)
     );
 
     return {
@@ -527,7 +527,7 @@ export class WorkflowGrpcController {
     const definitionForEngine = this.buildEngineDefinition(workflow);
     const engine = new WorkflowEngine(definitionForEngine, workflow.id);
     
-    const nextNodeId = engine.getNextNodeId(data.currentNodeId, data.actionName, data.evalContext || {});
+    const nextNodeId = engine.getNextNodeId(data.currentNodeId, data.actionName, this.parseProtoStruct(data.evalContext));
     if (!nextNodeId) {
       return { nextNodeId: '' }; // no path found
     }
@@ -590,7 +590,7 @@ export class WorkflowGrpcController {
       data.currentNodeId,
       data.userRoles || [],
       data.userId,
-      data.businessData || {}
+      this.parseProtoStruct(data.businessData)
     );
     return { actions: allowed };
   }
@@ -628,6 +628,38 @@ export class WorkflowGrpcController {
         data: e.properties || {}
       }))
     };
+  }
+
+  private parseProtoStruct(value: any): any {
+    if (!value) return {};
+    if (value && typeof value === 'object' && !value.fields && !value.kind) {
+      return value;
+    }
+    if (value.fields) {
+      const result: any = {};
+      for (const [k, v] of Object.entries(value.fields as Record<string, any>)) {
+        result[k] = this.parseProtoValue(v);
+      }
+      return result;
+    }
+    return value;
+  }
+
+  private parseProtoValue(value: any): any {
+    if (!value) return null;
+    if (value.stringValue !== undefined) return value.stringValue;
+    if (value.numberValue !== undefined) return value.numberValue;
+    if (value.boolValue !== undefined) return value.boolValue;
+    if (value.nullValue !== undefined) return null;
+    if (value.structValue) return this.parseProtoStruct(value.structValue);
+    if (value.listValue) return (value.listValue.values || []).map((v: any) => this.parseProtoValue(v));
+    if (value.kind === 'stringValue') return value.stringValue;
+    if (value.kind === 'numberValue') return value.numberValue;
+    if (value.kind === 'boolValue') return value.boolValue;
+    if (value.kind === 'structValue') return this.parseProtoStruct(value.structValue);
+    if (value.kind === 'listValue') return (value.listValue?.values || []).map((v: any) => this.parseProtoValue(v));
+    if (value.kind === 'nullValue') return null;
+    return value;
   }
 
   private mapWorkflow(w: any): any {
