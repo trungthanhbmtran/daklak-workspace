@@ -21,11 +21,20 @@ async function main() {
   const taskWorkflowDef = {
     nodes: [
       { id: 'node_start', type: 'start', position: { x: 50, y: 200 }, data: { label: 'Bắt đầu' } },
+      { id: 'gw_init', type: 'exclusive_gateway', position: { x: 150, y: 200 }, data: { label: 'Kiểm tra phân công' } },
+      {
+        id: 'node_unassigned', type: 'user_task', position: { x: 300, y: 50 },
+        data: {
+          label: 'Chờ phân công',
+          actionName: 'ASSIGN', targetStatus: 'TODO',
+          permissions: { ...fullPermissions, ASSIGN: ['OWNER', 'DEPT_LEADER', 'ADMIN'] },
+        }
+      },
       {
         id: 'node_assign', type: 'user_task', position: { x: 300, y: 200 },
         data: {
-          label: 'Phân công / Tiếp nhận',
-          actionName: 'ASSIGN', targetStatus: 'ASSIGNED',
+          label: 'Tiếp nhận công việc',
+          actionName: 'RECEIVE', targetStatus: 'ASSIGNED',
           permissions: { ...fullPermissions, ASSIGN: ['OWNER', 'DEPT_LEADER', 'ADMIN'], IN_PROGRESS: ['ASSIGNEE'], REJECT: ['ASSIGNEE'] },
         }
       },
@@ -70,10 +79,16 @@ async function main() {
       },
     ],
     edges: [
-      { id: 'edge_start',            source: 'node_start',           target: 'node_assign',          label: '' },
+      { id: 'edge_start_gw',         source: 'node_start',           target: 'gw_init',              label: '' },
+      { id: 'edge_gw_unassigned',    source: 'gw_init',              target: 'node_unassigned',      label: 'Chưa phân công', data: { expression: 'assigneeCode === "UNASSIGNED"' } },
+      { id: 'edge_gw_assigned',      source: 'gw_init',              target: 'node_assign',          label: 'Đã phân công',   data: { expression: 'assigneeCode !== "UNASSIGNED"' } },
+      
+      { id: 'edge_unassigned_to_assign', source: 'node_unassigned',  target: 'node_assign',          label: 'ASSIGN' },
+      
       { id: 'edge_assign_loop',      source: 'node_assign',          target: 'node_assign',          label: 'ASSIGN' },
       { id: 'edge_assign_progress',  source: 'node_assign',          target: 'node_in_progress',     label: 'IN_PROGRESS' },
       { id: 'edge_assign_reject',    source: 'node_assign',          target: 'node_rejected',        label: 'REJECT' },
+      
       { id: 'edge_reject_assign',    source: 'node_rejected',        target: 'node_assign',          label: 'ASSIGN' },
       { id: 'edge_progress_report',  source: 'node_in_progress',     target: 'node_report',          label: 'IN_PROGRESS' },
       { id: 'edge_report_approve',   source: 'node_report',          target: 'node_approve',         label: 'COMPLETE' },

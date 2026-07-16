@@ -263,8 +263,6 @@ export class TasksService {
     const kpi = await this.resolveKpiSettings(data, planId);
     const isCrossDomain = await this.checkCrossDomain(assigneeCode, data.domainId);
 
-    const defaultStatus = assigneeCode !== 'UNASSIGNED' ? 'ASSIGNED' : 'TODO';
-
     // Tạo task + participants + closure trong transaction
     const newTask = await this.prisma.$transaction(async (tx) => {
       const task = await tx.task.create({
@@ -272,7 +270,7 @@ export class TasksService {
           parentId,
           title: data.title || data.taskName || 'Nhiệm vụ không tên',
           description: data.description,
-          status: data.status || defaultStatus,
+          status: data.status || 'TODO',
           priority: data.priority || 'MEDIUM',
           startDate: data.startDate ? new Date(data.startDate) : null,
           dueDate: data.dueDate ? new Date(data.dueDate) : null,
@@ -322,12 +320,19 @@ export class TasksService {
       : null;
 
     if (wfInit) {
+      const nodeData = await this.wf.getCurrentNodeData(wfInit.workflowId, wfInit.currentNodeId);
+      
       const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
       const metadata = { ...existingMetadata, workflowId: wfInit.workflowId, workflowCode: wfInit.workflowCode, currentNodeId: wfInit.currentNodeId, ...(wfInit.workflowInstId && { workflowInstId: wfInit.workflowInstId }) };
-      await this.prisma.task.update({ where: { id: newTask.id }, data: { metadata } });
+      
+      const updateData: any = { metadata };
+      if (nodeData?.targetStatus) {
+        updateData.status = nodeData.targetStatus;
+      }
+      
+      await this.prisma.task.update({ where: { id: newTask.id }, data: updateData });
 
       // Seed checklist steps từ workflow node (nếu workflow designer đã cấu hình)
-      const nodeData = await this.wf.getCurrentNodeData(wfInit.workflowId, wfInit.currentNodeId);
       await this.wf.seedStepsFromNode(newTask.id, nodeData);
 
       // Gửi thông báo theo cấu hình của workflow node

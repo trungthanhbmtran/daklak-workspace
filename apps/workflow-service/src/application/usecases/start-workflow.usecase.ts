@@ -47,8 +47,13 @@ export class StartWorkflowUseCase {
     
     workflowContext = await engine.executeNode(initialNodeId, workflowContext);
 
-    // We can evaluate next edge here immediately if StartNode auto-transitions, 
-    // but for compatibility we just leave it in RUNNING state on the initial node or the next node.
+    // Auto-traverse from start node to the next valid node based on conditions
+    const nextNodeId = engine.getNextNodeId(initialNodeId, '', workflowContext.variables);
+    const activeNodeId = nextNodeId || initialNodeId;
+
+    if (activeNodeId !== initialNodeId) {
+      workflowContext = await engine.executeNode(activeNodeId, workflowContext);
+    }
     
     const instance = await this.prisma.workflowInstance.create({
       data: {
@@ -56,11 +61,11 @@ export class StartWorkflowUseCase {
         entityType: data.entityType,
         entityId: data.entityId,
         status: 'RUNNING',
-        currentNodeId: initialNodeId,
+        currentNodeId: activeNodeId,
         variables: workflowContext.variables || {},
         tasks: {
           create: [{
-            nodeId: initialNodeId,
+            nodeId: activeNodeId,
             assigneeId: data.initiatorId,
             status: 'Pending'
           }]
