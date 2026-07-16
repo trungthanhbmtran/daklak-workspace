@@ -22,10 +22,23 @@ export class TaskHistoryService {
       where: { taskId },
       orderBy: { createdAt: 'desc' }
     });
+
+    const actorCodes = [...new Set(history.map(h => h.actorCode).filter(Boolean))] as string[];
+    const employees = await this.prisma.employee.findMany({
+      where: { employeeCode: { in: actorCodes } },
+      select: { employeeCode: true, fullName: true }
+    });
+    const empMap = new Map(employees.map(e => [e.employeeCode, e.fullName]));
+
+    const mappedHistory = history.map(h => ({
+      ...h,
+      actorName: h.actorCode ? empMap.get(h.actorCode) : null
+    }));
+
     return {
       success: true,
       message: 'Lấy lịch sử công việc thành công',
-      data: history
+      data: mappedHistory
     };
   }
 }

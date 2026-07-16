@@ -14,7 +14,7 @@ import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList, useTaskDetail } from "../../hooks/useTasks";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -325,8 +325,9 @@ export function TaskList() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-260px)] w-full">
-          <Table>
+        <ScrollArea className="h-[calc(100vh-300px)] w-full" type="auto">
+          <div className="min-w-[1100px]">
+            <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 hover:bg-slate-50 sticky top-0 z-10 shadow-[0_1px_0_0_#e2e8f0]">
                 <TableHead className="w-[400px] pl-6 font-semibold bg-slate-50">Tên công việc</TableHead>
@@ -361,7 +362,9 @@ export function TaskList() {
               tasks.map((task) => renderTaskRow(task, 0))
             )}
           </TableBody>
-          </Table>
+        </Table>
+          </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
 

@@ -140,7 +140,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     if (history.length > 0) {
       return history.map((h: any) => ({
         id: h.id,
-        title: h.action || h.description || "Thao tác",
+        title: (h.actorName || "Hệ thống") + " đã " + (h.action?.toLowerCase() || h.description || "thao tác"),
         time: h.createdAt,
         icon: History,
         iconColor: "text-slate-500",
@@ -235,7 +235,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div className="col-span-2">
                 <p className="text-slate-500 mb-1">Người phối hợp xử lý</p>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {currentTask.coassigneeNames.map((name, idx) => (
+                  {currentTask.coassigneeNames.map((name: string, idx: number) => (
                     <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200">
                       {name}
                     </span>
