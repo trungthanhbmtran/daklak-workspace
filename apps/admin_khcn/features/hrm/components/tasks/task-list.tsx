@@ -14,6 +14,7 @@ import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList, useTaskDetail } from "../../hooks/useTasks";
 import { useSearchParams, useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -324,18 +325,19 @@ export function TaskList() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-              <TableHead className="w-[400px] pl-6 font-semibold">Tên công việc</TableHead>
-              <TableHead className="font-semibold">Trạng thái</TableHead>
-              <TableHead className="font-semibold">Mức độ</TableHead>
-              <TableHead className="font-semibold">Người xử lý</TableHead>
-              <TableHead className="font-semibold">Thời hạn</TableHead>
-              <TableHead className="font-semibold">Tiến độ</TableHead>
-              <TableHead className="text-right font-semibold">Thao tác</TableHead>
-            </TableRow>
-          </TableHeader>
+        <ScrollArea className="h-[calc(100vh-260px)] w-full">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-slate-50 hover:bg-slate-50 sticky top-0 z-10 shadow-[0_1px_0_0_#e2e8f0]">
+                <TableHead className="w-[400px] pl-6 font-semibold bg-slate-50">Tên công việc</TableHead>
+                <TableHead className="font-semibold bg-slate-50">Trạng thái</TableHead>
+                <TableHead className="font-semibold bg-slate-50">Mức độ</TableHead>
+                <TableHead className="font-semibold bg-slate-50">Người xử lý</TableHead>
+                <TableHead className="font-semibold bg-slate-50">Thời hạn</TableHead>
+                <TableHead className="font-semibold bg-slate-50">Tiến độ</TableHead>
+                <TableHead className="text-right font-semibold bg-slate-50">Thao tác</TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {isLoading ? (
               <TaskListSkeleton />
@@ -359,7 +361,8 @@ export function TaskList() {
               tasks.map((task) => renderTaskRow(task, 0))
             )}
           </TableBody>
-        </Table>
+          </Table>
+        </ScrollArea>
       </div>
 
       {selectedTask && (

@@ -53,9 +53,9 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const { user } = useUser();
   const { data: detailData } = useTaskDetail(taskId);
   const currentTask = (detailData as any)?.data ?? task;
-
-  const isCompleted = currentTask.status?.toUpperCase() === "HOÀN THÀNH" || currentTask.status?.toUpperCase() === "COMPLETED";
-  const isAssigned = (currentTask.status?.toUpperCase() === "MỚI GIAO" || currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && currentTask.allowedActions?.includes('RECEIVE');
+  const isSubTask = !!currentTask.parentId;
+  const isCompleted = currentTask.status?.toUpperCase() === "HOÀN THÀNH" || currentTask.status?.toUpperCase() === "COMPLETED" || currentTask.status?.toUpperCase() === "DONE";
+  const isAssigned = (currentTask.status?.toUpperCase() === "MỚI GIAO" || currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('IN_PROGRESS'));
 
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
   const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(taskId);
@@ -107,9 +107,9 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
   const handleAcceptTask = async () => {
     try {
-      await updateStatus.mutateAsync({ status: "IN_PROGRESS" });
+      const actionName = currentTask.allowedActions?.includes('RECEIVE') ? 'RECEIVE' : 'IN_PROGRESS';
+      await updateStatus.mutateAsync({ status: "IN_PROGRESS", actionName } as any);
       toast.success("Đã nhận việc thành công");
-      await addComment.mutateAsync(`Đã tiếp nhận công việc và bắt đầu xử lý.`);
     } catch { /* handled */ }
   };
 
@@ -118,7 +118,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     if (!reason) return;
     try {
       await updateStatus.mutateAsync({ status: "REJECTED", actionName: "REJECT", rejectReason: reason } as any);
-      await addComment.mutateAsync(`Từ chối nhận việc. Lý do: ${reason}`);
       toast.success("Đã từ chối công việc");
     } catch { /* handled */ }
   };
@@ -138,15 +137,28 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
   // ── Timeline Builder ──
   const buildTimeline = () => {
-    if (history.length > 0) {
-      return history.map((h: any) => ({
-        id: h.id,
-        title: h.action || h.description || "Thao tác",
-        time: h.createdAt,
-        icon: History,
-        iconColor: "text-slate-500",
-        content: h.note || h.detail || "",
-      }));
+    const systemMessages = comments.filter((c: any) => c.isSystemMessage);
+    
+    if (systemMessages.length > 0 || history.length > 0) {
+      const combined = [
+        ...history.map((h: any) => ({
+          id: h.id,
+          title: h.action || h.description || "Thao tác",
+          time: h.createdAt,
+          icon: History,
+          iconColor: "text-slate-500",
+          content: h.note || h.detail || h.newValue?.reason || h.newValue?.message || "",
+        })),
+        ...systemMessages.map((c: any) => ({
+          id: c.id,
+          title: c.authorName + " đã cập nhật",
+          time: c.createdAt,
+          icon: History,
+          iconColor: "text-blue-500",
+          content: c.content,
+        }))
+      ];
+      return combined.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
     }
     // Fallback timeline từ status task
     const timeline: any[] = [];
@@ -499,22 +511,28 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
                   </div>
                 ) : (
-                  comments.map((comment: any) => (
-                    <div key={comment.id || comment.createdAt} className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
-                        {(comment.authorName || comment.user?.fullName || "U")?.[0]?.toUpperCase()}
-                      </div>
-                      <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium text-sm">{comment.authorName || comment.user?.fullName || "Người dùng"}</span>
-                          <span className="text-xs text-slate-500">
-                            {safeFormatDate(comment.createdAt, "dd/MM HH:mm")}
-                          </span>
-                        </div>
-                        <p className="text-sm">{comment.content}</p>
-                      </div>
+                  comments.filter((c: any) => !c.isSystemMessage).length === 0 ? (
+                    <div className="text-center text-slate-500 italic py-8">
+                      Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
                     </div>
-                  ))
+                  ) : (
+                    comments.filter((c: any) => !c.isSystemMessage).map((comment: any) => (
+                      <div key={comment.id || comment.createdAt} className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
+                          {(comment.authorName || comment.user?.fullName || "U")?.[0]?.toUpperCase()}
+                        </div>
+                        <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-medium text-sm">{comment.authorName || comment.user?.fullName || "Người dùng"}</span>
+                            <span className="text-xs text-slate-500">
+                              {safeFormatDate(comment.createdAt, "dd/MM HH:mm")}
+                            </span>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+                        </div>
+                      </div>
+                    ))
+                  )
                 )}
               </div>
 

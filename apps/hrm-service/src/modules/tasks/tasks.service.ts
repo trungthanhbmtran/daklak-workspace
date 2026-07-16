@@ -377,8 +377,12 @@ export class TasksService {
 
     await this.prisma.task.update({ where: { id }, data: updateData });
 
-    if (rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK'))) {
-      await this.prisma.taskComment.create({ data: { taskId: id, authorCode: actorCode || null, content: `Đã trả lại với lý do: ${rejectReason}`, isSystemMessage: true } });
+    if (rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED')) {
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || null, newValue: { reason: rejectReason } } });
+    }
+    
+    if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || null } });
     }
 
     // Auto-progress từ workflow node hoặc default khi DONE
@@ -706,7 +710,7 @@ export class TasksService {
     const { leadCode, coordinatorCodes = [], message, requesterCode } = { leadCode: data.leadCode || data.leadId, coordinatorCodes: data.coordinatorCodes || data.coordinatorIds || [], message: data.message, requesterCode: data.requesterCode };
 
     if (!leadCode && coordinatorCodes.length === 0) {
-      if (message) await this.prisma.taskComment.create({ data: { taskId: id, authorCode: requesterCode || null, content: `Gửi yêu cầu phối hợp: ${message}`, isSystemMessage: true } });
+      if (message) await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Xin phối hợp', actorCode: requesterCode || null, newValue: { message } } });
       return { success: true, data: await this.toResponse(await this.findTaskOrFail(id), data) };
     }
 
