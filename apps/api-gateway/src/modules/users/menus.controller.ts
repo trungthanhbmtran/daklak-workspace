@@ -67,6 +67,21 @@ function toFrontendItem(m: MenuDto): MenuDto {
   };
 }
 
+function buildMenuTree(items: MenuDto[]): any[] {
+  const itemMap = new Map();
+  items.forEach(item => itemMap.set(item.id, { ...item, children: [] }));
+  
+  const tree: any[] = [];
+  itemMap.forEach(item => {
+    if (item.parentId && itemMap.has(item.parentId)) {
+      itemMap.get(item.parentId).children.push(item);
+    } else {
+      tree.push(item);
+    }
+  });
+  return tree;
+}
+
 const joinPath = (base: string, path: string) => {
   return `${base}/${path}`.replace(/\/+/g, '/');
 };
@@ -124,6 +139,17 @@ export class MenusController implements OnModuleInit {
     const res = (await firstValueFrom(this.menuService.GetAll({}))) as any;
     const items = res?.items ?? [];
     return items.map(toFrontendItem);
+  }
+
+  @Get('tree')
+  @ApiOperation({ summary: 'Lấy danh sách menu dưới dạng cây' })
+  @ApiResponse({ status: 200, description: 'Cây menu' })
+  async getMenuTree(@Query('app') app?: string) {
+    const res = (await firstValueFrom(this.menuService.GetAll({}))) as any;
+    const items = res?.items ?? [];
+    const frontendItems = items.map(toFrontendItem);
+    const tree = buildMenuTree(frontendItems);
+    return { items: tree };
   }
 
   @Get('me')
