@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList, useTaskDetail } from "../../hooks/useTasks";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -151,7 +150,7 @@ const TaskListSkeleton = () => (
 
 function buildTaskTree(tasks: HrmTask[]): HrmTask[] {
   if (!tasks || !Array.isArray(tasks)) return [];
-  
+
   return tasks.map(task => {
     const children = (task as any).children || [];
     return {
@@ -324,69 +323,75 @@ export function TaskList() {
         <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-300px)] w-full" type="auto">
-          <div className="min-w-[1100px]">
-            <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 hover:bg-slate-50 sticky top-0 z-10 shadow-[0_1px_0_0_#e2e8f0]">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative">
+        <div className="h-[calc(100vh-300px)] w-full overflow-auto [&_[data-slot=table-container]]:overflow-visible">
+          <Table className="min-w-[1100px]">
+            <TableHeader className="sticky top-0 z-20 bg-slate-50 shadow-sm shadow-slate-200/50">
+              <TableRow className="bg-slate-50 hover:bg-slate-50">
                 <TableHead className="w-[400px] pl-6 font-semibold bg-slate-50">Tên công việc</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Trạng thái</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Mức độ</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Người xử lý</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Thời hạn</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Tiến độ</TableHead>
-                <TableHead className="text-right font-semibold bg-slate-50">Thao tác</TableHead>
+                <TableHead className="text-right font-semibold bg-slate-50 pr-6">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TaskListSkeleton />
-            ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center h-32">
-                  <div className="flex flex-col items-center gap-2 text-slate-500">
-                    <AlertCircle className="w-8 h-8 text-red-400" />
-                    <span>Không thể tải danh sách công việc.</span>
-                    <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
-                  </div>
+            <TableBody>
+              {isLoading ? (
+                <TaskListSkeleton />
+              ) : isError ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center h-32">
+                    <div className="flex flex-col items-center gap-2 text-slate-500">
+                      <AlertCircle className="w-8 h-8 text-red-400" />
+                      <span>Không thể tải danh sách công việc.</span>
+                      <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : tasks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                    Không tìm thấy công việc nào
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tasks.map((task) => renderTaskRow(task, 0))
+              )}
+            </TableBody>
+            <TableFooter className="sticky bottom-0 z-20 bg-slate-50 text-slate-600 shadow-[0_-1px_0_0_#e2e8f0]">
+              <TableRow className="hover:bg-slate-50">
+                <TableCell colSpan={7} className="font-medium text-right pr-6">
+                  Tổng số: {tasks.length} công việc
                 </TableCell>
               </TableRow>
-            ) : tasks.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-                  Không tìm thấy công việc nào
-                </TableCell>
-              </TableRow>
-            ) : (
-              tasks.map((task) => renderTaskRow(task, 0))
-            )}
-          </TableBody>
-        </Table>
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+            </TableFooter>
+          </Table>
+        </div>
       </div>
 
-      {selectedTask && (
-        <TaskDetailDrawer
-          open={!!selectedTask}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedTask(null);
-              if (taskIdParam) {
-                router.replace("/services/hrm/work-plans/tasks");
+      {
+        selectedTask && (
+          <TaskDetailDrawer
+            open={!!selectedTask}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSelectedTask(null);
+                if (taskIdParam) {
+                  router.replace("/services/hrm/work-plans/tasks");
+                }
               }
-            }
-          }}
-          task={selectedTask as HrmTask}
-        />
-      )}
+            }}
+            task={selectedTask as HrmTask}
+          />
+        )
+      }
 
       <CreateTaskDialog
         open={isCreateTaskOpen}
         onOpenChange={setIsCreateTaskOpen}
       />
-    </div>
+    </div >
   );
 }
