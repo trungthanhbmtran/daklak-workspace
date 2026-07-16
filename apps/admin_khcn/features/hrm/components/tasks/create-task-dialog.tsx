@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,29 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
   const [recurrence, setRecurrence] = useState("MONTHLY"); // DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY
 
   const isSubTask = !!parentId;
+
+  // ── Smart Defaults ──
+  useEffect(() => {
+    if (open) {
+      if (!dueDate) {
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        // Format to YYYY-MM-DDThh:mm for input type datetime-local (or we just use date)
+        const tzoffset = (today.getTimezoneOffset() * 60000); 
+        const localISOTime = (new Date(today.getTime() - tzoffset)).toISOString().slice(0, 16);
+        setDueDate(localISOTime);
+      }
+    }
+  }, [open]);
+
+  const applyQuickPreset = (presetTitle: string, presetPriority: string = "NORMAL", type: string = "ONE_TIME", presetRecurrence?: string) => {
+    setTitle(presetTitle);
+    setPriority(presetPriority);
+    setTaskType(type);
+    if (presetRecurrence) {
+      setRecurrence(presetRecurrence);
+    }
+  };
 
   // ── Mutations ──
   const createTask = useCreateTask();
@@ -134,7 +157,16 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
         </div>
         
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="flex flex-col md:flex-row max-h-[65vh] overflow-y-auto bg-white dark:bg-slate-950">
+          {/* Gợi ý nhanh (Quick presets) */}
+          <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2 overflow-x-auto">
+            <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Gợi ý nhanh:</span>
+            <Badge variant="outline" className="cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Báo cáo tuần theo quyết định", "NORMAL", "PERIODIC", "WEEKLY")}>Báo cáo tuần</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-amber-50 hover:text-amber-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Báo cáo tháng theo quyết định", "NORMAL", "PERIODIC", "MONTHLY")}>Báo cáo tháng</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Báo cáo năm theo quyết định", "NORMAL", "PERIODIC", "YEARLY")}>Báo cáo năm</Badge>
+            <Badge variant="outline" className="cursor-pointer hover:bg-purple-50 hover:text-purple-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Soạn thảo văn bản", "HIGH", "ONE_TIME")}>Soạn văn bản (Gấp)</Badge>
+          </div>
+
+          <div className="flex flex-col md:flex-row max-h-[60vh] overflow-y-auto bg-white dark:bg-slate-950">
             {/* Cột trái: Thông tin chính */}
             <div className="flex-1 p-6 space-y-6">
               <div className="space-y-3">
@@ -171,7 +203,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <BriefcaseIcon className="w-4 h-4 text-slate-400"/> Tính chất công việc
                 </Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div 
                     onClick={() => setTaskType("ONE_TIME")}
                     className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${taskType === "ONE_TIME" ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
@@ -179,31 +211,33 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     Đột xuất
                   </div>
                   <div 
-                    onClick={() => setTaskType("REGULAR")}
-                    className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${taskType === "REGULAR" ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                    onClick={() => { setTaskType("PERIODIC"); if(recurrence === "NONE") setRecurrence("MONTHLY"); }}
+                    className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${(taskType === "PERIODIC" || taskType === "REGULAR") ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                   >
-                    Thường xuyên
-                  </div>
-                  <div 
-                    onClick={() => setTaskType("PERIODIC")}
-                    className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${taskType === "PERIODIC" ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                  >
-                    Định kỳ
+                    Thường xuyên / Định kỳ
                   </div>
                 </div>
               </div>
 
-              {/* Nếu chọn định kỳ, hiển thị tần suất */}
-              {taskType === "PERIODIC" && (
+              {/* Nếu chọn định kỳ/thường xuyên, hiển thị tần suất */}
+              {(taskType === "PERIODIC" || taskType === "REGULAR") && (
                 <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                   <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                     <Repeat className="w-4 h-4 text-slate-400"/> Tần suất lặp lại
                   </Label>
-                  <Select value={recurrence} onValueChange={setRecurrence}>
+                  <Select value={taskType === "REGULAR" ? "NONE" : recurrence} onValueChange={(val) => {
+                    if (val === "NONE") {
+                      setTaskType("REGULAR");
+                    } else {
+                      setTaskType("PERIODIC");
+                      setRecurrence(val);
+                    }
+                  }}>
                     <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 focus:ring-emerald-500 shadow-sm border-emerald-200">
                       <SelectValue placeholder="Chọn tần suất..." />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="NONE">Chỉ thường xuyên (Không lặp lại)</SelectItem>
                       <SelectItem value="DAILY">Hàng ngày</SelectItem>
                       <SelectItem value="WEEKLY">Hàng tuần</SelectItem>
                       <SelectItem value="MONTHLY">Hàng tháng</SelectItem>
@@ -213,6 +247,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                   </Select>
                 </div>
               )}
+
 
               <div className="space-y-3 pt-2 border-t border-slate-200 border-dashed">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
