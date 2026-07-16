@@ -160,7 +160,10 @@ export function useUpdateStatus(taskId: number | undefined) {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStatus(taskId, payload);
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
+      if (taskId && res) {
+        qc.setQueryData(hrmKeys.taskDetail(taskId), res);
+      }
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       if (taskId) {
         qc.invalidateQueries({ queryKey: hrmKeys.taskComments(taskId) });
@@ -288,6 +291,30 @@ export function useAssignTask() {
     },
     onError: () => {
       toast.error("Giao việc thất bại, vui lòng thử lại");
+    },
+  });
+}
+
+/** Xin phối hợp xử lý công việc. */
+export function useRequestCoordination(taskId: number | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { message?: string; coordinatorCodes?: string[] }) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.requestCoordination(taskId, payload);
+    },
+    onSuccess: (res) => {
+      if (taskId && res?.data) {
+        qc.setQueryData(hrmKeys.taskDetail(taskId), res.data);
+      }
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      if (taskId) {
+        qc.invalidateQueries({ queryKey: hrmKeys.taskComments(taskId) });
+      }
+      toast.success("Đã gửi yêu cầu phối hợp");
+    },
+    onError: () => {
+      toast.error("Gửi yêu cầu phối hợp thất bại, vui lòng thử lại");
     },
   });
 }

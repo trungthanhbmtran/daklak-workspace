@@ -29,7 +29,7 @@ import {
   useTaskComments, useAddComment,
   useTaskSubtasks, useTaskSteps,
   useTaskHistory, useUpdateStatus,
-  useUpdateProgress, useUpdateStep
+  useUpdateProgress, useUpdateStep, useTaskDetail, useRequestCoordination
 } from "../../hooks/useTasks";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
@@ -48,19 +48,23 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const [reportText, setReportText] = useState("");
 
   const taskId = Number(task.id);
-  const isCompleted = task.status?.toUpperCase() === "HOÀN THÀNH" || task.status?.toUpperCase() === "COMPLETED";
-  const isAssigned = task.status?.toUpperCase() === "MỚI GIAO" || task.status?.toUpperCase() === "ASSIGNED" || task.status?.toUpperCase() === "TODO";
 
   // ── Queries ──
   const { user } = useUser();
+  const { data: detailData } = useTaskDetail(taskId);
+  const currentTask = (detailData as any)?.data ?? task;
+
+  const isCompleted = currentTask.status?.toUpperCase() === "HOÀN THÀNH" || currentTask.status?.toUpperCase() === "COMPLETED";
+  const isAssigned = (currentTask.status?.toUpperCase() === "MỚI GIAO" || currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && currentTask.allowedActions?.includes('RECEIVE');
+
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
   const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(taskId);
   const { data: stepsData, isLoading: stepsLoading } = useTaskSteps(taskId);
   const { data: historyData, isLoading: historyLoading } = useTaskHistory(taskId);
 
   const comments: any[] = (commentsData as any)?.data ?? [];
-  const subTasks: HrmTask[] = (subtasksData as any)?.data ?? task.subTasks ?? [];
-  const steps: any[] = (stepsData as any)?.data ?? task.steps ?? [];
+  const subTasks: HrmTask[] = (subtasksData as any)?.data ?? currentTask.subTasks ?? [];
+  const steps: any[] = (stepsData as any)?.data ?? currentTask.steps ?? [];
   const history: any[] = (historyData as any)?.data ?? [];
 
   // ── Mutations ──
@@ -68,6 +72,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const updateStatus = useUpdateStatus(taskId);
   const updateProgress = useUpdateProgress(taskId);
   const updateStep = useUpdateStep(taskId);
+  const requestCoordination = useRequestCoordination(taskId);
 
   const handleSendComment = async () => {
     if (!commentText.trim()) return;
@@ -78,12 +83,12 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   };
 
   const handleSaveReport = async () => {
-    if (!reportText.trim() && progressValue === task.progress) {
+    if (!reportText.trim() && progressValue === currentTask.progress) {
       toast.info("Không có thay đổi nào để lưu");
       return;
     }
     try {
-      if (progressValue !== task.progress) {
+      if (progressValue !== currentTask.progress) {
         await updateProgress.mutateAsync(progressValue);
       }
       if (reportText.trim()) {
@@ -97,7 +102,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     try {
       await updateStatus.mutateAsync({ status: "COMPLETED" });
       toast.success("Đã hoàn thành công việc");
-      onOpenChange(false);
     } catch { /* handled */ }
   };
 
@@ -116,7 +120,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
       await updateStatus.mutateAsync({ status: "REJECTED", actionName: "REJECT", rejectReason: reason } as any);
       await addComment.mutateAsync(`Từ chối nhận việc. Lý do: ${reason}`);
       toast.success("Đã từ chối công việc");
-      onOpenChange(false);
     } catch { /* handled */ }
   };
 
@@ -124,8 +127,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     const reason = window.prompt("Nhập lý do / nội dung xin phối hợp:");
     if (!reason) return;
     try {
-      await addComment.mutateAsync(`Yêu cầu bổ sung người phối hợp: ${reason}`);
-      toast.success("Đã gửi yêu cầu phối hợp");
+      await requestCoordination.mutateAsync({ message: reason });
     } catch { /* handled */ }
   };
 
@@ -148,19 +150,19 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     }
     // Fallback timeline từ status task
     const timeline: any[] = [];
-    timeline.push({ id: "t1", title: `Giao việc cho ${task.assignee?.fullName ?? "người xử lý"}`, time: task.createdAt, icon: Clock, iconColor: "text-blue-500", content: `Nội dung: ${task.description}` });
-    if (task.status?.toUpperCase() !== "NHÁP" && task.status?.toUpperCase() !== "MỚI GIAO") {
-      timeline.push({ id: "t2", title: "Bắt đầu xử lý", time: task.startDate, icon: ArrowRightCircle, iconColor: "text-orange-500", content: "Đã tiếp nhận và đang xử lý." });
+    timeline.push({ id: "t1", title: `Giao việc cho ${currentTask.assignee?.fullName ?? "người xử lý"}`, time: currentTask.createdAt, icon: Clock, iconColor: "text-blue-500", content: `Nội dung: ${currentTask.description}` });
+    if (currentTask.status?.toUpperCase() !== "NHÁP" && currentTask.status?.toUpperCase() !== "MỚI GIAO") {
+      timeline.push({ id: "t2", title: "Bắt đầu xử lý", time: currentTask.startDate, icon: ArrowRightCircle, iconColor: "text-orange-500", content: "Đã tiếp nhận và đang xử lý." });
     }
-    if (task.status?.toUpperCase() === "CHỜ DUYỆT" || task.status?.toUpperCase() === "HOÀN THÀNH") {
-      timeline.push({ id: "t3", title: "Báo cáo kết quả", time: task.updatedAt, icon: FileText, iconColor: "text-slate-600", content: "Đã báo cáo tiến độ và gửi yêu cầu phê duyệt." });
+    if (currentTask.status?.toUpperCase() === "CHỜ DUYỆT" || currentTask.status?.toUpperCase() === "HOÀN THÀNH") {
+      timeline.push({ id: "t3", title: "Báo cáo kết quả", time: currentTask.updatedAt, icon: FileText, iconColor: "text-slate-600", content: "Đã báo cáo tiến độ và gửi yêu cầu phê duyệt." });
     }
-    const isOverdue = new Date(task.dueDate) < (task.completedAt ? new Date(task.completedAt) : new Date());
-    if (isOverdue && task.status?.toUpperCase() !== "HOÀN THÀNH") {
-      timeline.push({ id: "t4", title: "Quá hạn", time: task.dueDate, icon: AlertCircle, iconColor: "text-red-500", content: "Công việc đã vượt quá thời hạn quy định." });
+    const isOverdue = new Date(currentTask.dueDate) < (currentTask.completedAt ? new Date(currentTask.completedAt) : new Date());
+    if (isOverdue && currentTask.status?.toUpperCase() !== "HOÀN THÀNH") {
+      timeline.push({ id: "t4", title: "Quá hạn", time: currentTask.dueDate, icon: AlertCircle, iconColor: "text-red-500", content: "Công việc đã vượt quá thời hạn quy định." });
     }
-    if (task.status?.toUpperCase() === "HOÀN THÀNH") {
-      timeline.push({ id: "t5", title: "Hoàn thành", time: task.completedAt || task.updatedAt, icon: CheckCircle2, iconColor: "text-green-500", content: "Đã hoàn thành toàn bộ công việc." });
+    if (currentTask.status?.toUpperCase() === "HOÀN THÀNH") {
+      timeline.push({ id: "t5", title: "Hoàn thành", time: currentTask.completedAt || currentTask.updatedAt, icon: CheckCircle2, iconColor: "text-green-500", content: "Đã hoàn thành toàn bộ công việc." });
     }
     return timeline.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
   };
@@ -175,22 +177,22 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           <SheetHeader>
             <div className="flex justify-between items-start gap-4">
               <div>
-                {task.parentId && (
+                {currentTask.parentId && (
                   <div className="mb-2">
                     <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 flex items-center w-fit cursor-pointer hover:bg-blue-100 transition-colors">
                       <ArrowRightCircle className="w-3 h-3 mr-1 inline" />
-                      Thuộc nhiệm vụ: {task.parentId}
+                      Thuộc nhiệm vụ: {currentTask.parentId}
                     </span>
                   </div>
                 )}
-                <SheetTitle className="text-xl font-bold">{task.title}</SheetTitle>
+                <SheetTitle className="text-xl font-bold">{currentTask.title}</SheetTitle>
                 <SheetDescription className="mt-2 text-slate-600">
-                  {task.description}
+                  {currentTask.description}
                 </SheetDescription>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
                 <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
-                  {task.status}
+                  {currentTask.status}
                 </Badge>
                 {!isCompleted && (
                   <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700">
@@ -205,19 +207,19 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             <div>
               <p className="text-slate-500 mb-1">Người giao</p>
-              <p className="font-medium">{task.assignerName || task.assigner?.fullName || "Chưa xác định"}</p>
+              <p className="font-medium">{currentTask.assignerName || currentTask.assigner?.fullName || "Chưa xác định"}</p>
             </div>
             <div>
               <p className="text-slate-500 mb-1">Đơn vị / Người xử lý</p>
               <p className="font-medium">
-                {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
+                {currentTask.assigneeName || currentTask.assigneeDepartment?.name || currentTask.assignee?.fullName || "Chưa phân công"}
               </p>
             </div>
-            {task.coassigneeNames && task.coassigneeNames.length > 0 && (
+            {currentTask.coassigneeNames && currentTask.coassigneeNames.length > 0 && (
               <div className="col-span-2">
                 <p className="text-slate-500 mb-1">Người phối hợp xử lý</p>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {task.coassigneeNames.map((name, idx) => (
+                  {currentTask.coassigneeNames.map((name, idx) => (
                     <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200">
                       {name}
                     </span>
@@ -227,15 +229,15 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             )}
             <div>
               <p className="text-slate-500 mb-1">Thời hạn</p>
-              <p className={`font-medium ${new Date(task.dueDate) < new Date() && !isCompleted ? "text-red-500" : ""}`}>
-                {safeFormatDate(task.dueDate, "dd/MM/yyyy HH:mm")}
+              <p className={`font-medium ${new Date(currentTask.dueDate) < new Date() && !isCompleted ? "text-red-500" : ""}`}>
+                {safeFormatDate(currentTask.dueDate, "dd/MM/yyyy HH:mm")}
               </p>
             </div>
-            {task.sourceDocumentRef && (
+            {currentTask.sourceDocumentRef && (
               <div>
                 <p className="text-slate-500 mb-1">Căn cứ văn bản</p>
                 <p className="font-medium text-blue-600 cursor-pointer hover:underline">
-                  {task.sourceDocumentRef}
+                  {currentTask.sourceDocumentRef}
                 </p>
               </div>
             )}
@@ -293,7 +295,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
-                  {task.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
+                  {currentTask.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
                       + Tạo nhiệm vụ con
                     </Button>
@@ -354,7 +356,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium text-sm">Các bước thực hiện (Checklist nội bộ)</h3>
-                  {task.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
+                  {currentTask.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
                       + Thêm bước
                     </Button>
@@ -500,7 +502,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               </div>
 
               <div className="mt-auto flex gap-2">
-                {task.allowedActions?.includes('CHAT') ? (
+                {currentTask.allowedActions?.includes('CHAT') ? (
                   <>
                     <Textarea 
                       placeholder="Nhập nội dung trao đổi..." 
@@ -557,35 +559,35 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
             {/* ── Tab KPI ── */}
             <TabsContent value="kpi" className="mt-0 h-full">
-              {task.kpi ? (
+              {currentTask.kpi ? (
                 <div className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
                   <h3 className="font-semibold text-sm">Kết quả đánh giá KPI</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-slate-500 mb-1">Xếp loại chất lượng</p>
-                      <Badge variant="default" className="bg-green-500">{task.kpi.qualityGrade}</Badge>
+                      <Badge variant="default" className="bg-green-500">{currentTask.kpi.qualityGrade}</Badge>
                     </div>
                     <div>
                       <p className="text-slate-500 mb-1">Tổng điểm</p>
-                      <p className="font-bold text-lg">{task.kpi.totalScore} / 100</p>
+                      <p className="font-bold text-lg">{currentTask.kpi.totalScore} / 100</p>
                     </div>
                     <div>
                       <p className="text-slate-500 mb-1">Điểm tiến độ</p>
-                      <p className="font-medium">{task.kpi.timelinessScore}</p>
+                      <p className="font-medium">{currentTask.kpi.timelinessScore}</p>
                     </div>
                     <div>
                       <p className="text-slate-500 mb-1">Điểm chất lượng</p>
-                      <p className="font-medium">{task.kpi.qualityScore}</p>
+                      <p className="font-medium">{currentTask.kpi.qualityScore}</p>
                     </div>
-                    {task.kpi.note && (
+                    {currentTask.kpi.note && (
                       <div className="col-span-2">
                         <p className="text-slate-500 mb-1">Ghi chú</p>
-                        <p className="text-sm italic bg-slate-50 p-2 rounded">{task.kpi.note}</p>
+                        <p className="text-sm italic bg-slate-50 p-2 rounded">{currentTask.kpi.note}</p>
                       </div>
                     )}
                   </div>
                   <p className="text-xs text-slate-400">
-                    Đánh giá lúc: {safeFormatDate(task.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")}
+                    Đánh giá lúc: {safeFormatDate(currentTask.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")}
                   </p>
                 </div>
               ) : (

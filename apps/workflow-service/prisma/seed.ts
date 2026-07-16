@@ -92,7 +92,7 @@ async function main() {
         data: {
           label: 'Tiếp nhận',
           actionName: 'RECEIVE', targetStatus: 'TODO',
-          permissions: { ...fullPermissions, RECEIVE: ['OWNER', 'DEPT_LEADER', 'ADMIN'] },
+          permissions: { ...fullPermissions, RECEIVE: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN'] },
         }
       },
       {
@@ -100,7 +100,7 @@ async function main() {
         data: {
           label: 'Bút phê',
           actionName: 'ROUTE',
-          permissions: { ...fullPermissions, ROUTE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'], ASSIGN_DEPT: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'], ARCHIVE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'] },
+          permissions: { ...fullPermissions, ROUTE: ['ASSIGNEE', 'SUPERVISOR', 'DEPT_LEADER', 'ADMIN'], ASSIGN_DEPT: ['ASSIGNEE', 'SUPERVISOR', 'DEPT_LEADER', 'ADMIN'], ARCHIVE: ['ASSIGNEE', 'SUPERVISOR', 'DEPT_LEADER', 'ADMIN'] },
         }
       },
       { id: 'gw_route', type: 'exclusive_gateway', position: { x: 750, y: 200 }, data: { label: 'Điều chuyển / Lưu trữ' } },
@@ -109,7 +109,7 @@ async function main() {
         data: {
           label: 'Phân công',
           actionName: 'ASSIGN_STAFF',
-          permissions: { ...fullPermissions, ASSIGN_STAFF: ['DEPT_LEADER', 'ADMIN'] },
+          permissions: { ...fullPermissions, ASSIGN_STAFF: ['ASSIGNEE', 'DEPT_LEADER', 'ADMIN'] },
         }
       },
       {
@@ -134,7 +134,7 @@ async function main() {
         data: {
           label: 'Ban hành',
           actionName: 'ISSUE',
-          permissions: { ...fullPermissions, ISSUE: ['OWNER', 'DEPT_LEADER', 'ADMIN'] },
+          permissions: { ...fullPermissions, ISSUE: ['ASSIGNEE', 'OWNER', 'DEPT_LEADER', 'ADMIN'] },
         }
       },
       {

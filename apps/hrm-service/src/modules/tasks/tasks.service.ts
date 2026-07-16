@@ -391,7 +391,7 @@ export class TasksService {
     // Notify chuyển trạng thái
     await this.notif.notifyTransition(enriched, transition.nextNodeData, actorCode || context?.currentEmployeeCode);
 
-    return this.toResponse(await this.findTaskOrFail(id));
+    return this.toResponse(await this.findTaskOrFail(id), context);
   }
 
   async assignTask(id: number, data: any) {
@@ -702,10 +702,10 @@ export class TasksService {
 
     if (!leadCode && coordinatorCodes.length === 0) {
       if (message) await this.prisma.taskComment.create({ data: { taskId: id, authorCode: requesterCode || null, content: `Gửi yêu cầu phối hợp: ${message}`, isSystemMessage: true } });
-      return { success: true };
+      return { success: true, data: await this.toResponse(await this.findTaskOrFail(id), data) };
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       if (leadCode) {
         await tx.taskParticipant.deleteMany({ where: { taskId: id, participantRole: TaskRole.ASSIGNEE } });
         await tx.taskParticipant.create({ data: { taskId: id, employeeCode: leadCode, participantRole: TaskRole.ASSIGNEE } });
@@ -716,8 +716,9 @@ export class TasksService {
       }
       const st = await tx.task.findUnique({ where: { id }, select: { status: true } });
       if (st?.status === 'TEMPLATE') await tx.task.update({ where: { id }, data: { status: 'TODO' } });
-      return { success: true };
     });
+
+    return { success: true, data: await this.toResponse(await this.findTaskOrFail(id), data) };
   }
 
   // Aliases
