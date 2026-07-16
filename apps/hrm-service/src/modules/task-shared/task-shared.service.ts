@@ -113,6 +113,31 @@ export class TaskSharedService {
     return value;
   }
 
+  public toProtoValue(val: any): any {
+    if (val === null || val === undefined) return { nullValue: 0 };
+    if (typeof val === 'string') return { stringValue: val };
+    if (typeof val === 'number') return { numberValue: val };
+    if (typeof val === 'boolean') return { boolValue: val };
+    if (Array.isArray(val)) return { listValue: { values: val.map(v => this.toProtoValue(v)) } };
+    if (typeof val === 'object') {
+      const fields: any = {};
+      for (const [k, v] of Object.entries(val)) {
+        fields[k] = this.toProtoValue(v);
+      }
+      return { structValue: { fields } };
+    }
+    return { stringValue: String(val) };
+  }
+
+  public toProtoStruct(obj: any): any {
+    if (!obj || typeof obj !== 'object') return { fields: {} };
+    const fields: any = {};
+    for (const [k, v] of Object.entries(obj)) {
+      fields[k] = this.toProtoValue(v);
+    }
+    return { fields };
+  }
+
   public async getWorkflowDefinition(workflowId: string): Promise<any> {
     const cacheKey = `workflow:def:${workflowId}`;
     const cached = await this.cache.get<any>(cacheKey);
@@ -502,7 +527,7 @@ export class TaskSharedService {
           currentNodeId,
           userRoles: query.currentUserPermissions || [],
           userId: query.currentEmployeeCode,
-          businessData: {
+          businessData: this.toProtoStruct({
             status: t.status,
             hasChildren,
             isAdmin: access.isAdmin,
@@ -515,7 +540,7 @@ export class TaskSharedService {
             isLowestLevel: access.isLowestLevel,
             allowedEmployeeCodes: query.allowedEmployeeCodes || [],
             isUnassigned,
-          }
+          })
         }));
         actions = res.actions || [];
         this.logger.debug(`[computeAllowedActions] task=${t.id} computed actions=${JSON.stringify(actions)}`);

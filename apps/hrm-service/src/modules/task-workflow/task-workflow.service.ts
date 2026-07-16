@@ -89,11 +89,11 @@ export class TaskWorkflowService {
           initiatorId: context.initiatorId,
           businessId: taskId.toString(),
           businessType: 'TASK',
-          initialContext: {
+          initialContext: this.shared.toProtoStruct({
             taskId,
             assigneeCode: context.assigneeCode || 'UNASSIGNED',
             assignerCode: context.assignerCode,
-          },
+          }),
         }),
       );
       workflowInstId = inst?.id;
@@ -168,7 +168,7 @@ export class TaskWorkflowService {
       actionName,
       userRoles: actorContext.permissions ?? [],
       userId: actorContext.actorCode || '',
-      businessData,
+      businessData: this.shared.toProtoStruct(businessData),
     }));
 
     if (!validateRes.allowed) {
@@ -179,7 +179,7 @@ export class TaskWorkflowService {
       workflowId: String(workflowId),
       currentNodeId,
       actionName,
-      evalContext: businessData,
+      evalContext: this.shared.toProtoStruct(businessData),
     }));
 
     const nextNodeId = nextNodeRes.nextNodeId || undefined;
