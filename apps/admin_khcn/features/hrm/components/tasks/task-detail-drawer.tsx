@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import {
   BellRing, MessageSquare, Send, CheckCircle2, Clock, History,
-  ArrowRightCircle, FileText, AlertCircle, Loader2, X
+  ArrowRightCircle, FileText, AlertCircle, Loader2, X, Repeat, CalendarClock, Briefcase
 } from "lucide-react";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -185,7 +185,24 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     </span>
                   </div>
                 )}
-                <SheetTitle className="text-xl font-bold">{currentTask.title}</SheetTitle>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <SheetTitle className="text-xl font-bold">{currentTask.title}</SheetTitle>
+                  {currentTask.metadata?.taskType === "REGULAR" && (
+                    <Badge variant="outline" className="text-amber-700 bg-amber-50 border-amber-200">
+                      <Briefcase className="w-3 h-3 mr-1" /> Thường xuyên
+                    </Badge>
+                  )}
+                  {currentTask.metadata?.taskType === "PERIODIC" && (
+                    <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-200">
+                      <Repeat className="w-3 h-3 mr-1" /> Định kỳ 
+                      {currentTask.metadata?.recurrence === "DAILY" && " (Hàng ngày)"}
+                      {currentTask.metadata?.recurrence === "WEEKLY" && " (Hàng tuần)"}
+                      {currentTask.metadata?.recurrence === "MONTHLY" && " (Hàng tháng)"}
+                      {currentTask.metadata?.recurrence === "QUARTERLY" && " (Hàng quý)"}
+                      {currentTask.metadata?.recurrence === "YEARLY" && " (Hàng năm)"}
+                    </Badge>
+                  )}
+                </div>
                 <SheetDescription className="mt-2 text-slate-600">
                   {currentTask.description}
                 </SheetDescription>

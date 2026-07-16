@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
-import { Eye, Clock, ChevronRight, ChevronDown, AlertCircle } from "lucide-react";
+import { Eye, Clock, ChevronRight, ChevronDown, AlertCircle, Repeat, Briefcase } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
@@ -225,13 +225,27 @@ export function TaskList() {
               )}
 
               <div className="flex flex-col py-1">
-                <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>{task.title}</span>
-                {task.sourceDocumentRef && depth === 0 && (
-                  <Badge variant="secondary" className="mt-0.5 flex items-center w-fit px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
-                    <Clock className="w-3 h-3 mr-1" />
-                    VB: {task.sourceDocumentRef}
-                  </Badge>
-                )}
+                <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>
+                  {task.title}
+                </span>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  {task.metadata?.taskType === "REGULAR" && (
+                    <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-amber-50 text-amber-700 font-normal text-[10px] border-amber-200">
+                      <Briefcase className="w-3 h-3 mr-1" /> Thường xuyên
+                    </Badge>
+                  )}
+                  {task.metadata?.taskType === "PERIODIC" && (
+                    <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-emerald-50 text-emerald-700 font-normal text-[10px] border-emerald-200">
+                      <Repeat className="w-3 h-3 mr-1" /> Định kỳ
+                    </Badge>
+                  )}
+                  {task.sourceDocumentRef && depth === 0 && (
+                    <Badge variant="secondary" className="flex items-center px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
+                      <Clock className="w-3 h-3 mr-1" />
+                      VB: {task.sourceDocumentRef}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           </TableCell>

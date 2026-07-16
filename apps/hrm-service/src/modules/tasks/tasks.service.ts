@@ -278,6 +278,10 @@ export class TasksService {
           planId,
           domainId: data.domainId ? parseInt(data.domainId, 10) : null,
           monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
+          metadata: {
+            taskType: data.metadata?.taskType || 'ONE_TIME',
+            ...(data.metadata?.recurrence && { recurrence: data.metadata.recurrence })
+          },
           kpiSettings: {
             create: {
               baseScore: kpi.baseScore,
@@ -316,7 +320,8 @@ export class TasksService {
       : null;
 
     if (wfInit) {
-      const metadata = { workflowId: wfInit.workflowId, workflowCode: wfInit.workflowCode, currentNodeId: wfInit.currentNodeId, ...(wfInit.workflowInstId && { workflowInstId: wfInit.workflowInstId }) };
+      const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
+      const metadata = { ...existingMetadata, workflowId: wfInit.workflowId, workflowCode: wfInit.workflowCode, currentNodeId: wfInit.currentNodeId, ...(wfInit.workflowInstId && { workflowInstId: wfInit.workflowInstId }) };
       await this.prisma.task.update({ where: { id: newTask.id }, data: { metadata } });
 
       // Seed checklist steps từ workflow node (nếu workflow designer đã cấu hình)
