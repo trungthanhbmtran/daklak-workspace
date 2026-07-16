@@ -263,6 +263,8 @@ export class TasksService {
     const kpi = await this.resolveKpiSettings(data, planId);
     const isCrossDomain = await this.checkCrossDomain(assigneeCode, data.domainId);
 
+    const defaultStatus = assigneeCode !== 'UNASSIGNED' ? 'ASSIGNED' : 'TODO';
+
     // Tạo task + participants + closure trong transaction
     const newTask = await this.prisma.$transaction(async (tx) => {
       const task = await tx.task.create({
@@ -270,7 +272,7 @@ export class TasksService {
           parentId,
           title: data.title || data.taskName || 'Nhiệm vụ không tên',
           description: data.description,
-          status: data.status || 'TODO',
+          status: data.status || defaultStatus,
           priority: data.priority || 'MEDIUM',
           startDate: data.startDate ? new Date(data.startDate) : null,
           dueDate: data.dueDate ? new Date(data.dueDate) : null,

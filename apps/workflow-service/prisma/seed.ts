@@ -25,7 +25,7 @@ async function main() {
         id: 'node_assign', type: 'user_task', position: { x: 300, y: 200 },
         data: {
           label: 'Phân công / Tiếp nhận',
-          actionName: 'ASSIGN', targetStatus: 'TODO',
+          actionName: 'ASSIGN', targetStatus: 'ASSIGNED',
           permissions: { ...fullPermissions, ASSIGN: ['OWNER', 'DEPT_LEADER', 'ADMIN'], IN_PROGRESS: ['ASSIGNEE'], REJECT: ['ASSIGNEE'] },
         }
       },
