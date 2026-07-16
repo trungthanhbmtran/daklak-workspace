@@ -653,12 +653,6 @@ export class WorkflowGrpcController {
     if (value.nullValue !== undefined) return null;
     if (value.structValue) return this.parseProtoStruct(value.structValue);
     if (value.listValue) return (value.listValue.values || []).map((v: any) => this.parseProtoValue(v));
-    if (value.kind === 'stringValue') return value.stringValue;
-    if (value.kind === 'numberValue') return value.numberValue;
-    if (value.kind === 'boolValue') return value.boolValue;
-    if (value.kind === 'structValue') return this.parseProtoStruct(value.structValue);
-    if (value.kind === 'listValue') return (value.listValue?.values || []).map((v: any) => this.parseProtoValue(v));
-    if (value.kind === 'nullValue') return null;
     return value;
   }
 

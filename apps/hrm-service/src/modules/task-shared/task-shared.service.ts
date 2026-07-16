@@ -74,45 +74,9 @@ export class TaskSharedService {
   }
 
   /**
-   * Convert google.protobuf.Struct (may come as {fields:{...}}) to plain JS object.
-   * If already a plain object, return as-is.
+   * Serialize a plain JS object into google.protobuf.Struct wire format.
+   * Used when calling workflow-service gRPC methods that accept Struct fields.
    */
-  private parseProtoStruct(value: any): any {
-    if (!value) return {};
-    // Already a plain object with actual content (not protobuf wrapper)
-    if (value && typeof value === 'object' && !value.fields && !value.kind) {
-      return value;
-    }
-    // Protobuf Struct wrapper: { fields: { key: { kind: 'stringValue'|'numberValue'|'boolValue'|'structValue'|'listValue', ...Value: ... } } }
-    if (value.fields) {
-      const result: any = {};
-      for (const [k, v] of Object.entries(value.fields as Record<string, any>)) {
-        result[k] = this.parseProtoValue(v);
-      }
-      return result;
-    }
-    return value;
-  }
-
-  private parseProtoValue(value: any): any {
-    if (!value) return null;
-    if (value.stringValue !== undefined) return value.stringValue;
-    if (value.numberValue !== undefined) return value.numberValue;
-    if (value.boolValue !== undefined) return value.boolValue;
-    if (value.nullValue !== undefined) return null;
-    if (value.structValue) return this.parseProtoStruct(value.structValue);
-    if (value.listValue) {
-      return (value.listValue.values || []).map((v: any) => this.parseProtoValue(v));
-    }
-    if (value.kind === 'stringValue') return value.stringValue;
-    if (value.kind === 'numberValue') return value.numberValue;
-    if (value.kind === 'boolValue') return value.boolValue;
-    if (value.kind === 'structValue') return this.parseProtoStruct(value.structValue);
-    if (value.kind === 'listValue') return (value.listValue?.values || []).map((v: any) => this.parseProtoValue(v));
-    if (value.kind === 'nullValue') return null;
-    return value;
-  }
-
   public toProtoValue(val: any): any {
     if (val === null || val === undefined) return { nullValue: 0 };
     if (typeof val === 'string') return { stringValue: val };
@@ -605,99 +569,6 @@ export class TaskSharedService {
     }
     return {};
   }
-
-  public async getWorkflowActionContext(t: any, query: any, actionName: string): Promise<{
-    allowed: boolean;
-    reason?: string;
-    nextNodeId?: string;
-    nextNodeData?: any;
-    definition?: any;
-  }> {
-    const access = await this.checkTaskAccess(t, query);
-
-    let hasChildren = false;
-    if (t.children && t.children.length > 0) {
-      hasChildren = true;
-    } else if (t._count && typeof t._count.children === 'number') {
-      hasChildren = t._count.children > 0;
-    } else {
-      const childrenCount = await this.prisma.taskClosure.count({ where: { ancestorId: t.id, depth: 1 } });
-      hasChildren = childrenCount > 0;
-    }
-
-    const isUnassigned = !t.assigneeCode || t.assigneeCode === 'UNASSIGNED';
-    const metadata = (t.metadata as any) || {};
-    const activeWorkflowId = metadata.workflowId || t.workflowInstId;
-
-    let definition: any = null;
-    let currentNodeId = metadata.currentNodeId;
-
-    if (activeWorkflowId && currentNodeId) {
-       definition = await this.getWorkflowDefinition(activeWorkflowId);
-    } else if (!activeWorkflowId) {
-       try {
-         const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
-         if (defaultId) {
-           definition = await this.getWorkflowDefinition(defaultId);
-           currentNodeId = metadata.currentNodeId || null;
-         }
-       } catch (err) { this.logger.warn('Could not load TASK_PROCESSING_ID workflow', err); }
-    }
-
-    if (!definition || !currentNodeId) {
-      return { allowed: false, reason: 'Không tìm thấy cấu hình Workflow' };
-    }
-
-    try {
-      const businessData = {
-        status: t.status,
-        hasChildren,
-        isOwner: access.isOwner,
-        isAssignee: access.isAssignee,
-        isSupervisor: access.isSupervisor,
-        isCoordinator: access.isCoordinator,
-        isDeptLeader: access.isDeptLeader,
-        isLowestLevel: access.isLowestLevel,
-        allowedEmployeeCodes: query.allowedEmployeeCodes || [],
-        isUnassigned,
-        actionName
-      };
-
-      const validateRes = await firstValueFrom<any>(this.workflowService.ValidateAction({
-        workflowId: definition.id || activeWorkflowId || 'TASK_PROCESSING_ID',
-        currentNodeId,
-        actionName,
-        userRoles: query.currentUserPermissions || [],
-        userId: query.currentEmployeeCode,
-        businessData
-      }));
-
-      if (!validateRes.allowed) {
-        return { allowed: false, reason: validateRes.reason };
-      }
-
-      const nextNodeRes = await firstValueFrom<any>(this.workflowService.GetNextNode({
-        workflowId: definition.id || activeWorkflowId || 'TASK_PROCESSING_ID',
-        currentNodeId,
-        actionName,
-        evalContext: businessData
-      }));
-
-      const nextNodeId = nextNodeRes.nextNodeId || undefined;
-      const nextNodeData = nextNodeRes.nextNodeData ? JSON.parse(nextNodeRes.nextNodeData) : undefined;
-
-      return {
-        allowed: true,
-        nextNodeId: nextNodeId || undefined,
-        nextNodeData,
-        definition
-      };
-    } catch (err) {
-      this.logger.error('Failed to validate action via WorkflowEngine', err);
-      return { allowed: false, reason: 'Lỗi hệ thống khi phân tích quy trình' };
-    }
-  }
-
   public toTaskResponse(t: any): any {
     if (!t) return null;
     return {

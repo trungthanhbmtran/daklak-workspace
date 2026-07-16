@@ -149,7 +149,6 @@ export class TaskWorkflowService {
     }
 
     const businessData = {
-      ...task,
       status: task.status,
       hasChildren: actorContext.hasChildren ?? false,
       isOwner: actorContext.access?.isOwner ?? false,
