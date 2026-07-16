@@ -542,33 +542,6 @@ export class TaskSharedService {
 
     return Array.from(new Set(actions));
   }
-
-  
-  public async getWorkflowInitialNode(workflowId?: string): Promise<{ initialNodeId?: string; nodeData?: any }> {
-    let definition: any = null;
-    if (workflowId) {
-      definition = await this.getWorkflowDefinition(workflowId);
-    } else {
-      try {
-        const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
-        if (defaultId) definition = await this.getWorkflowDefinition(defaultId);
-      } catch (err) {
-        this.logger.warn('Failed to load default workflow for getWorkflowInitialNode', err);
-      }
-    }
-
-    if (definition) {
-      try {
-        const res = await firstValueFrom<any>(this.workflowService.GetInitialNode({ workflowId: definition.id || workflowId || 'TASK_PROCESSING_ID' }));
-        if (res && res.initialNodeId) {
-          return { initialNodeId: res.initialNodeId, nodeData: res.nodeData ? JSON.parse(res.nodeData) : {} };
-        }
-      } catch (err) {
-        this.logger.error('Failed to get initial node from WorkflowEngine', err);
-      }
-    }
-    return {};
-  }
   public toTaskResponse(t: any): any {
     if (!t) return null;
     return {
