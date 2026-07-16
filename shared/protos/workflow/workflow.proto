@@ -24,6 +24,8 @@ service WorkflowService {
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
+  rpc GetInitialNode (GetInitialNodeRequest) returns (GetInitialNodeResponse);
+  rpc GetNextNode (GetNextNodeRequest) returns (GetNextNodeResponse);
 }
 
 message EmptyRequest {}
@@ -174,6 +176,8 @@ message ValidateActionRequest {
   repeated string userRoles = 3;
   string userId = 4;
   google.protobuf.Struct businessData = 5;
+  string workflowId = 6;
+  string currentNodeId = 7;
 }
 
 message ValidateActionResponse {
@@ -186,10 +190,12 @@ message GetAllowedActionsRequest {
   repeated string userRoles = 2;
   string userId = 3;
   google.protobuf.Struct businessData = 4;
+  string workflowId = 5;
+  string currentNodeId = 6;
 }
 
 message GetAllowedActionsResponse {
-  repeated string allowedActions = 1;
+  repeated string actions = 1;
 }
 
 message TriggerWorkflowRequest {
@@ -244,4 +250,26 @@ message WorkflowTask {
   string status = 5;
   string startedAt = 6;
   string completedAt = 7;
+}
+
+message GetInitialNodeRequest {
+  string workflowId = 1;
+}
+
+message GetInitialNodeResponse {
+  string initialNodeId = 1;
+  string nodeData = 2;
+}
+
+message GetNextNodeRequest {
+  string workflowId = 1;
+  string currentNodeId = 2;
+  string actionName = 3;
+  google.protobuf.Struct evalContext = 4;
+}
+
+message GetNextNodeResponse {
+  string nextNodeId = 1;
+  string nextNodeData = 2;
+  string type = 3;
 }
