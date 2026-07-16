@@ -137,28 +137,15 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
   // ── Timeline Builder ──
   const buildTimeline = () => {
-    const systemMessages = comments.filter((c: any) => c.isSystemMessage);
-    
-    if (systemMessages.length > 0 || history.length > 0) {
-      const combined = [
-        ...history.map((h: any) => ({
-          id: h.id,
-          title: h.action || h.description || "Thao tác",
-          time: h.createdAt,
-          icon: History,
-          iconColor: "text-slate-500",
-          content: h.note || h.detail || h.newValue?.reason || h.newValue?.message || "",
-        })),
-        ...systemMessages.map((c: any) => ({
-          id: c.id,
-          title: c.authorName + " đã cập nhật",
-          time: c.createdAt,
-          icon: History,
-          iconColor: "text-blue-500",
-          content: c.content,
-        }))
-      ];
-      return combined.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    if (history.length > 0) {
+      return history.map((h: any) => ({
+        id: h.id,
+        title: h.action || h.description || "Thao tác",
+        time: h.createdAt,
+        icon: History,
+        iconColor: "text-slate-500",
+        content: h.note || h.detail || h.newValue?.reason || h.newValue?.message || "",
+      })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
     }
     // Fallback timeline từ status task
     const timeline: any[] = [];
@@ -511,12 +498,12 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
                   </div>
                 ) : (
-                  comments.filter((c: any) => !c.isSystemMessage).length === 0 ? (
+                  comments.length === 0 ? (
                     <div className="text-center text-slate-500 italic py-8">
                       Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
                     </div>
                   ) : (
-                    comments.filter((c: any) => !c.isSystemMessage).map((comment: any) => (
+                    comments.map((comment: any) => (
                       <div key={comment.id || comment.createdAt} className="flex gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
                           {(comment.authorName || comment.user?.fullName || "U")?.[0]?.toUpperCase()}
