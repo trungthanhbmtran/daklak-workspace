@@ -338,27 +338,31 @@ export function TaskList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                <TaskListSkeleton />
-              ) : isError ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center h-32">
-                    <div className="flex flex-col items-center gap-2 text-slate-500">
-                      <AlertCircle className="w-8 h-8 text-red-400" />
-                      <span>Không thể tải danh sách công việc.</span>
-                      <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : tasks.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-                    Không tìm thấy công việc nào
-                  </TableCell>
-                </TableRow>
-              ) : (
-                tasks.map((task) => renderTaskRow(task, 0))
-              )}
+              {(() => {
+                if (isLoading) return <TaskListSkeleton />;
+
+                if (isError) return (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center h-32">
+                      <div className="flex flex-col items-center gap-2 text-slate-500">
+                        <AlertCircle className="w-8 h-8 text-red-400" />
+                        <span>Không thể tải danh sách công việc.</span>
+                        <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+
+                if (tasks.length === 0) return (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                      Không tìm thấy công việc nào
+                    </TableCell>
+                  </TableRow>
+                );
+
+                return tasks.map((task) => renderTaskRow(task, 0));
+              })()}
             </TableBody>
             <TableFooter className="sticky bottom-0 z-20 bg-slate-50 text-slate-600 shadow-[0_-1px_0_0_#e2e8f0]">
               <TableRow className="hover:bg-slate-50">
