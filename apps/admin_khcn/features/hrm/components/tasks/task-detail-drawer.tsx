@@ -172,7 +172,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full bg-slate-50">
         {/* Header */}
-        <div className="p-6 bg-white border-b shrink-0">
+        <div className="p-6 bg-white border-b">
           <SheetHeader>
             <div className="flex justify-between items-start gap-4">
               <div>
@@ -193,7 +193,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                   )}
                   {currentTask.metadata?.taskType === "PERIODIC" && (
                     <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-200">
-                      <Repeat className="w-3 h-3 mr-1" /> Định kỳ 
+                      <Repeat className="w-3 h-3 mr-1" /> Định kỳ
                       {currentTask.metadata?.recurrence === "DAILY" && " (Hàng ngày)"}
                       {currentTask.metadata?.recurrence === "WEEKLY" && " (Hàng tuần)"}
                       {currentTask.metadata?.recurrence === "MONTHLY" && " (Hàng tháng)"}
@@ -202,7 +202,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     </Badge>
                   )}
                 </div>
-                <SheetDescription className="mt-2 text-slate-600 max-h-[250px] overflow-y-auto whitespace-pre-wrap pr-2">
+                <SheetDescription className="mt-2 text-slate-600">
                   {currentTask.description}
                 </SheetDescription>
               </div>
@@ -311,177 +311,177 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
-                  {currentTask.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
-                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
-                      + Tạo nhiệm vụ con
-                    </Button>
-                  )}
-                </div>
-                
-                {subtasksLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
-                  </div>
-                ) : subTasks.length > 0 ? (
-                  <div className="border rounded-md divide-y bg-white">
-                    {subTasks.map((subTask: HrmTask) => (
-                      <div key={subTask.id} className="flex items-center justify-between p-3">
-                        <div className="flex items-center gap-3">
-                          {subTask.status?.toUpperCase() === "HOÀN THÀNH" ? (
-                            <CheckCircle2 className="w-5 h-5 text-green-500" />
-                          ) : subTask.status?.toUpperCase() === "ĐANG XỬ LÝ" ? (
-                            <Clock className="w-5 h-5 text-blue-500" />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
-                          )}
-                          <div>
-                            <p className={`text-sm ${subTask.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
-                              {subTask.title}
-                            </p>
-                            <div className="flex items-center gap-3 mt-1">
-                              {subTask.dueDate && (
-                                <p className="text-xs text-slate-500 flex items-center">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  Hạn: {safeFormatDate(subTask.dueDate, "dd/MM/yyyy")}
-                                </p>
+                      {currentTask.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
+                          + Tạo nhiệm vụ con
+                        </Button>
+                      )}
+                    </div>
+
+                    {subtasksLoading ? (
+                      <div className="space-y-2">
+                        {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
+                      </div>
+                    ) : subTasks.length > 0 ? (
+                      <div className="border rounded-md divide-y bg-white">
+                        {subTasks.map((subTask: HrmTask) => (
+                          <div key={subTask.id} className="flex items-center justify-between p-3">
+                            <div className="flex items-center gap-3">
+                              {subTask.status?.toUpperCase() === "HOÀN THÀNH" ? (
+                                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                              ) : subTask.status?.toUpperCase() === "ĐANG XỬ LÝ" ? (
+                                <Clock className="w-5 h-5 text-blue-500" />
+                              ) : (
+                                <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
                               )}
-                              {(subTask.assignee || subTask.assigneeDepartment) && (
-                                <p className="text-xs text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full">
-                                  {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
+                              <div>
+                                <p className={`text-sm ${subTask.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
+                                  {subTask.title}
                                 </p>
-                              )}
-                              {subTask.status?.toUpperCase() !== "HOÀN THÀNH" && subTask.progress !== undefined && (
-                                <p className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium">
-                                  Tiến độ: {subTask.progress}%
-                                </p>
-                              )}
+                                <div className="flex items-center gap-3 mt-1">
+                                  {subTask.dueDate && (
+                                    <p className="text-xs text-slate-500 flex items-center">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      Hạn: {safeFormatDate(subTask.dueDate, "dd/MM/yyyy")}
+                                    </p>
+                                  )}
+                                  {(subTask.assignee || subTask.assigneeDepartment) && (
+                                    <p className="text-xs text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full">
+                                      {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
+                                    </p>
+                                  )}
+                                  {subTask.status?.toUpperCase() !== "HOÀN THÀNH" && subTask.progress !== undefined && (
+                                    <p className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium">
+                                      Tiến độ: {subTask.progress}%
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
+                        Chưa có nhiệm vụ con nào.
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
-                    Chưa có nhiệm vụ con nào.
-                  </div>
-                )}
-              </div>
 
-              {/* Bước thực hiện */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-sm">Các bước thực hiện (Checklist nội bộ)</h3>
-                  {currentTask.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
-                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
-                      + Thêm bước
-                    </Button>
-                  )}
-                </div>
-                
-                {stepsLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-full rounded-md" />)}
+                  {/* Bước thực hiện */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium text-sm">Các bước thực hiện (Checklist nội bộ)</h3>
+                      {currentTask.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
+                          + Thêm bước
+                        </Button>
+                      )}
+                    </div>
+
+                    {stepsLoading ? (
+                      <div className="space-y-2">
+                        {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-full rounded-md" />)}
+                      </div>
+                    ) : steps.length > 0 ? (
+                      <div className="border rounded-md divide-y bg-white">
+                        {steps.map((step: any) => (
+                          <div key={step.id} className="flex items-center justify-between p-3">
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => handleToggleStep(step)}
+                                disabled={isCompleted || updateStep.isPending}
+                                className="shrink-0 focus:outline-none"
+                              >
+                                {step.status?.toUpperCase() === "HOÀN THÀNH" ? (
+                                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
+                                )}
+                              </button>
+                              <div className="flex flex-col">
+                                <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" || step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
+                                  {step.title}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  {step.assigneeName && (
+                                    <span className="text-[11px] text-slate-500 flex items-center">
+                                      👤 {step.assigneeName}
+                                    </span>
+                                  )}
+                                  {step.baseScore > 0 && (
+                                    <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium">
+                                      +{step.baseScore} điểm KPI
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
+                        Chưa có kế hoạch chi tiết (Các bước thực hiện nội bộ).
+                      </div>
+                    )}
                   </div>
-                ) : steps.length > 0 ? (
-                  <div className="border rounded-md divide-y bg-white">
-                    {steps.map((step: any) => (
-                      <div key={step.id} className="flex items-center justify-between p-3">
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleToggleStep(step)}
-                            disabled={isCompleted || updateStep.isPending}
-                            className="shrink-0 focus:outline-none"
+
+                  {/* Cập nhật tiến độ */}
+                  {!isCompleted && (
+                    <div className="space-y-4 bg-white p-4 rounded-lg border">
+                      <h3 className="font-medium text-sm">Cập nhật tiến độ</h3>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-slate-500">
+                          <span>Tiến độ hiện tại</span>
+                          <span className="font-semibold text-blue-600">{progressValue}%</span>
+                        </div>
+                        <Slider
+                          value={[progressValue]}
+                          onValueChange={([v]) => setProgressValue(v)}
+                          max={100}
+                          step={5}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <Textarea
+                        placeholder="Nhập nội dung báo cáo tiến độ / kết quả..."
+                        className="min-h-[100px]"
+                        value={reportText}
+                        onChange={(e) => setReportText(e.target.value)}
+                      />
+                      <div className="flex justify-between items-center">
+                        <Button variant="outline" size="sm">Đính kèm file</Button>
+                        <div className="space-x-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleSaveReport}
+                            disabled={updateProgress.isPending || addComment.isPending}
                           >
-                            {step.status?.toUpperCase() === "HOÀN THÀNH" ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-500" />
-                            ) : (
-                              <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
-                            )}
-                          </button>
-                          <div className="flex flex-col">
-                            <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" || step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
-                              {step.title}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              {step.assigneeName && (
-                                <span className="text-[11px] text-slate-500 flex items-center">
-                                  👤 {step.assigneeName}
-                                </span>
-                              )}
-                              {step.baseScore > 0 && (
-                                <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium">
-                                  +{step.baseScore} điểm KPI
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                            {(updateProgress.isPending || addComment.isPending) ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                            Lưu tiến độ
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleComplete}
+                            disabled={updateStatus.isPending}
+                          >
+                            {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                            Báo cáo hoàn thành
+                          </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
-                    Chưa có kế hoạch chi tiết (Các bước thực hiện nội bộ).
-                  </div>
-                )}
-              </div>
+                    </div>
+                  )}
 
-              {/* Cập nhật tiến độ */}
-              {!isCompleted && (
-                <div className="space-y-4 bg-white p-4 rounded-lg border">
-                  <h3 className="font-medium text-sm">Cập nhật tiến độ</h3>
-                  
+                  {/* Tài liệu đính kèm */}
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs text-slate-500">
-                      <span>Tiến độ hiện tại</span>
-                      <span className="font-semibold text-blue-600">{progressValue}%</span>
-                    </div>
-                    <Slider
-                      value={[progressValue]}
-                      onValueChange={([v]) => setProgressValue(v)}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
+                    <h3 className="font-medium text-sm text-slate-500">Tài liệu đính kèm</h3>
+                    <div className="text-sm text-slate-500 italic">Chưa có tài liệu nào</div>
                   </div>
-
-                  <Textarea 
-                    placeholder="Nhập nội dung báo cáo tiến độ / kết quả..." 
-                    className="min-h-[100px]"
-                    value={reportText}
-                    onChange={(e) => setReportText(e.target.value)}
-                  />
-                  <div className="flex justify-between items-center">
-                    <Button variant="outline" size="sm">Đính kèm file</Button>
-                    <div className="space-x-2">
-                      <Button 
-                        variant="secondary" 
-                        size="sm"
-                        onClick={handleSaveReport}
-                        disabled={updateProgress.isPending || addComment.isPending}
-                      >
-                        {(updateProgress.isPending || addComment.isPending) ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                        Lưu tiến độ
-                      </Button>
-                      <Button 
-                        size="sm"
-                        onClick={handleComplete}
-                        disabled={updateStatus.isPending}
-                      >
-                        {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                        Báo cáo hoàn thành
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Tài liệu đính kèm */}
-              <div className="space-y-2">
-                <h3 className="font-medium text-sm text-slate-500">Tài liệu đính kèm</h3>
-                <div className="text-sm text-slate-500 italic">Chưa có tài liệu nào</div>
-              </div>
                 </>
               )}
             </TabsContent>
@@ -526,15 +526,15 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div className="mt-auto flex gap-2">
                 {currentTask.allowedActions?.includes('CHAT') ? (
                   <>
-                    <Textarea 
-                      placeholder="Nhập nội dung trao đổi..." 
+                    <Textarea
+                      placeholder="Nhập nội dung trao đổi..."
                       className="min-h-[40px] h-[40px] resize-none"
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
                     />
-                    <Button 
-                      size="icon" 
+                    <Button
+                      size="icon"
                       className="shrink-0"
                       onClick={handleSendComment}
                       disabled={addComment.isPending || !commentText.trim()}
@@ -620,17 +620,17 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </TabsContent>
           </ScrollArea>
         </Tabs>
-      <CreateTaskDialog
-        open={isCreateSubTaskOpen}
-        onOpenChange={setIsCreateSubTaskOpen}
-        parentId={String(taskId)}
-      />
+        <CreateTaskDialog
+          open={isCreateSubTaskOpen}
+          onOpenChange={setIsCreateSubTaskOpen}
+          parentId={String(taskId)}
+        />
 
-      <CreateStepDialog
-        task={task}
-        open={isCreateStepOpen}
-        onOpenChange={setIsCreateStepOpen}
-      />
+        <CreateStepDialog
+          task={task}
+          open={isCreateStepOpen}
+          onOpenChange={setIsCreateStepOpen}
+        />
       </SheetContent>
     </Sheet>
   );
