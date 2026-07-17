@@ -324,9 +324,9 @@ export function TaskList() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative">
-        <div className="h-[calc(100vh-300px)] w-full overflow-auto [&_[data-slot=table-container]]:overflow-visible">
+        <div className="w-full overflow-x-auto [&_[data-slot=table-container]]:overflow-visible">
           <Table className="min-w-[1100px]">
-            <TableHeader className="sticky top-0 z-20 bg-slate-50 shadow-sm shadow-slate-200/50">
+            <TableHeader className="bg-slate-50 border-b border-slate-200">
               <TableRow className="bg-slate-50 hover:bg-slate-50">
                 <TableHead className="w-[400px] pl-6 font-semibold bg-slate-50">Tên công việc</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Trạng thái</TableHead>
@@ -364,7 +364,7 @@ export function TaskList() {
                 return tasks.map((task) => renderTaskRow(task, 0));
               })()}
             </TableBody>
-            <TableFooter className="sticky bottom-0 z-20 bg-slate-50 text-slate-600 shadow-[0_-1px_0_0_#e2e8f0]">
+            <TableFooter className="bg-slate-50 text-slate-600 border-t border-slate-200">
               <TableRow className="hover:bg-slate-50">
                 <TableCell colSpan={7} className="font-medium text-right pr-6">
                   Tổng số: {tasks.length} công việc

@@ -1,6 +1,8 @@
 import { TaskDashboard } from "@/features/hrm/components/tasks/task-dashboard";
 import { TaskList } from "@/features/hrm/components/tasks/task-list";
 import { Suspense } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ListTodo, LayoutDashboard } from "lucide-react";
 
 export default function TasksPage() {
   return (
@@ -12,14 +14,28 @@ export default function TasksPage() {
         </p>
       </div>
 
-      <TaskDashboard />
-
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold mb-4">Danh sách Công việc</h2>
-        <Suspense fallback={<div className="p-4 text-center text-slate-500">Đang tải danh sách...</div>}>
-          <TaskList />
-        </Suspense>
-      </div>
+      <Tabs defaultValue="tasks" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="tasks" className="flex items-center gap-2">
+            <ListTodo className="w-4 h-4" />
+            Danh sách công việc
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <LayoutDashboard className="w-4 h-4" />
+            Tổng quan (Dashboard)
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="tasks" className="mt-0 outline-none">
+          <Suspense fallback={<div className="p-4 text-center text-slate-500">Đang tải danh sách...</div>}>
+            <TaskList />
+          </Suspense>
+        </TabsContent>
+        
+        <TabsContent value="dashboard" className="mt-0 outline-none">
+          <TaskDashboard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
