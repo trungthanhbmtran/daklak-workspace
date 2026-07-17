@@ -17,7 +17,7 @@ export class TasksService {
     private readonly shared: TaskSharedService,
     private readonly wf: TaskWorkflowService,
     private readonly notif: TaskNotificationService,
-  ) {}
+  ) { }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -100,10 +100,12 @@ export class TasksService {
     }
 
     if (query.assigneeCode === 'UNASSIGNED') {
-      conditions.push({ OR: [
-        { participants: { none: { participantRole: TaskRole.ASSIGNEE } } },
-        { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: TaskRole.ASSIGNEE } } },
-      ] });
+      conditions.push({
+        OR: [
+          { participants: { none: { participantRole: TaskRole.ASSIGNEE } } },
+          { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: TaskRole.ASSIGNEE } } },
+        ]
+      });
     } else if (query.assigneeCode) {
       conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE } } });
     }
@@ -189,10 +191,12 @@ export class TasksService {
     } else if (query.role === 'OWNER' && query.assignerCode) {
       conditions.push({ participants: { some: { employeeCode: query.assignerCode, participantRole: 'OWNER' } } });
     } else if (query.role === 'UNASSIGNED' || query.assigneeCode === 'UNASSIGNED') {
-      conditions.push({ OR: [
-        { participants: { none: { participantRole: 'ASSIGNEE' } } },
-        { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' } } },
-      ] });
+      conditions.push({
+        OR: [
+          { participants: { none: { participantRole: 'ASSIGNEE' } } },
+          { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' } } },
+        ]
+      });
     }
 
     if (!query.role || query.role === 'ALL') {
@@ -215,8 +219,10 @@ export class TasksService {
 
     const allTasks = await this.prisma.task.findMany({
       where,
-      select: { status: true, isCompleted: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
-        participants: { where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, select: { employeeCode: true, participantRole: true } } },
+      select: {
+        status: true, isCompleted: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
+        participants: { where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, select: { employeeCode: true, participantRole: true } }
+      },
     });
 
     const now = new Date(); now.setHours(0, 0, 0, 0);
@@ -321,15 +327,15 @@ export class TasksService {
 
     if (wfInit) {
       const nodeData = await this.wf.getCurrentNodeData(wfInit.workflowId, wfInit.currentNodeId);
-      
+
       const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
       const metadata = { ...existingMetadata, workflowId: wfInit.workflowId, workflowCode: wfInit.workflowCode, currentNodeId: wfInit.currentNodeId, ...(wfInit.workflowInstId && { workflowInstId: wfInit.workflowInstId }) };
-      
+
       const updateData: any = { metadata };
       if (nodeData?.targetStatus) {
         updateData.status = nodeData.targetStatus;
       }
-      
+
       await this.prisma.task.update({ where: { id: newTask.id }, data: updateData });
 
       // Seed checklist steps từ workflow node (nếu workflow designer đã cấu hình)
@@ -387,7 +393,7 @@ export class TasksService {
     if (rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED')) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || null, newValue: { reason: rejectReason } } });
     }
-    
+
     if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || null } });
     }
@@ -468,18 +474,48 @@ export class TasksService {
   }
 
   async updateTaskProgress(id: number, progress: number, actorCode?: string) {
-    const p = Math.max(0, Math.min(100, progress));
+    const p = Math.max(0, Math.min(100, Math.round(progress)));
     await this.prisma.task.update({ where: { id }, data: { progress: p } });
 
     const closure = await this.prisma.taskClosure.findFirst({ where: { descendantId: id, depth: 1 } });
     if (closure) {
-      const children = await this.prisma.taskClosure.findMany({ where: { ancestorId: closure.ancestorId, depth: 1 }, select: { descendantId: true } });
-      const tasks = await this.prisma.task.findMany({ where: { id: { in: children.map(c => c.descendantId) } }, select: { progress: true } });
-      const avg = tasks.reduce((sum, t) => sum + t.progress, 0) / tasks.length;
-      await this.updateTaskProgress(closure.ancestorId, avg, actorCode);
+      await this.autoComputeTaskProgress(closure.ancestorId, actorCode);
     }
 
     return this.toResponse(await this.findTaskOrFail(id));
+  }
+
+  async autoComputeTaskProgress(taskId: number, actorCode?: string) {
+    const steps = await this.prisma.taskStep.findMany({ where: { taskId } });
+    const children = await this.prisma.taskClosure.findMany({ where: { ancestorId: taskId, depth: 1 }, select: { descendantId: true } });
+    const subtasks = await this.prisma.task.findMany({ where: { id: { in: children.map(c => c.descendantId) } }, select: { progress: true, status: true, isCompleted: true } });
+
+    const totalSteps = steps.length;
+    const totalSubtasks = subtasks.length;
+
+    if (totalSteps === 0 && totalSubtasks === 0) return;
+
+    let completedSteps = 0;
+    for (const s of steps) {
+      if (s.status === 'COMPLETED') completedSteps++;
+    }
+
+    let subtaskProgressSum = 0;
+    for (const st of subtasks) {
+      if (st.status === 'COMPLETED' || st.isCompleted) {
+        subtaskProgressSum += 100;
+      } else {
+        subtaskProgressSum += (st.progress ?? 0);
+      }
+    }
+
+    const computedProgress = Math.round(((completedSteps * 100) + subtaskProgressSum) / (totalSteps + totalSubtasks));
+
+    // Lấy progress hiện tại để tránh loop vô hạn nếu không thay đổi
+    const currentTask = await this.prisma.task.findUnique({ where: { id: taskId }, select: { progress: true } });
+    if (currentTask && currentTask.progress !== computedProgress) {
+      await this.updateTaskProgress(taskId, computedProgress, actorCode);
+    }
   }
 
   async deleteTask(id: number) {
@@ -596,24 +632,27 @@ export class TasksService {
     const emps = await this.prisma.employee.findMany({ where: { employeeCode: { in: codes as string[] } }, select: { employeeCode: true, fullName: true, avatar: true } });
     const empMap = new Map(emps.map(e => [e.employeeCode, e]));
 
-    return { success: true, data: comments.map(c => {
-      const e = c.authorCode ? empMap.get(c.authorCode) : null;
-      return { id: c.id, taskId: c.taskId, authorCode: e?.employeeCode || 'SYSTEM', authorName: e?.fullName || 'SYSTEM', authorAvatar: e?.avatar || '', content: c.content, isSystemMessage: c.isSystemMessage, createdAt: c.createdAt.toISOString(), isMine: e ? e.employeeCode === query.currentEmployeeCode : false };
-    }) };
+    return {
+      success: true, data: comments.map(c => {
+        const e = c.authorCode ? empMap.get(c.authorCode) : null;
+        return { id: c.id, taskId: c.taskId, authorCode: e?.employeeCode || 'SYSTEM', authorName: e?.fullName || 'SYSTEM', authorAvatar: e?.avatar || '', content: c.content, isSystemMessage: c.isSystemMessage, createdAt: c.createdAt.toISOString(), isMine: e ? e.employeeCode === query.currentEmployeeCode : false };
+      })
+    };
   }
 
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
 
   async createStep(taskId: number, data: any) {
-    const step = await this.prisma.taskStep.create({ 
-      data: { 
-        taskId, 
-        title: data.title, 
-        order: data.order || 0, 
+    const step = await this.prisma.taskStep.create({
+      data: {
+        taskId,
+        title: data.title,
+        order: data.order || 0,
         assigneeCode: data.assigneeCode,
         baseScore: data.baseScore !== undefined ? parseFloat(data.baseScore) : 0
-      } 
+      }
     });
+    await this.autoComputeTaskProgress(taskId);
     return { success: true, message: 'Tạo bước thành công', data: step };
   }
 
@@ -623,7 +662,7 @@ export class TasksService {
     if (data.order !== undefined) updateData.order = data.order;
     if (data.assigneeCode !== undefined) updateData.assigneeCode = data.assigneeCode;
     if (data.baseScore !== undefined) updateData.baseScore = parseFloat(data.baseScore);
-    
+
     if (data.status !== undefined) {
       updateData.status = data.status;
       if (data.status === 'COMPLETED') {
@@ -634,6 +673,7 @@ export class TasksService {
     }
 
     const step = await this.prisma.taskStep.update({ where: { id: stepId, taskId }, data: updateData });
+    await this.autoComputeTaskProgress(taskId);
     return { success: true, message: 'Cập nhật bước thành công', data: step };
   }
 
@@ -644,6 +684,7 @@ export class TasksService {
 
   async deleteStep(taskId: number, stepId: number) {
     await this.prisma.taskStep.delete({ where: { id: stepId, taskId } });
+    await this.autoComputeTaskProgress(taskId);
     return { success: true, message: 'Xóa bước thành công' };
   }
 

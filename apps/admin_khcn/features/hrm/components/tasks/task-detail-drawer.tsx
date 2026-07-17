@@ -24,7 +24,7 @@ const safeFormatDate = (date: any, fmt: string) => {
 
 import { CreateTaskDialog } from "./create-task-dialog";
 import { CreateStepDialog } from "./create-step-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useTaskComments, useAddComment,
   useTaskSubtasks, useTaskSteps,
@@ -44,7 +44,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [progressValue, setProgressValue] = useState(task.progress ?? 0);
   const [reportText, setReportText] = useState("");
 
   const taskId = Number(task.id);
@@ -54,8 +53,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const { data: detailData } = useTaskDetail(taskId);
   const currentTask = (detailData as any)?.data ?? task;
   const isSubTask = !!currentTask.parentId;
-  const isCompleted = currentTask.status?.toUpperCase() === "HOÀN THÀNH" || currentTask.status?.toUpperCase() === "COMPLETED" || currentTask.status?.toUpperCase() === "DONE";
-  const isAssigned = (currentTask.status?.toUpperCase() === "MỚI GIAO" || currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('IN_PROGRESS'));
+  const isCompleted = currentTask.status?.toUpperCase() === "COMPLETED" || currentTask.status?.toUpperCase() === "DONE";
+  const isAssigned = (currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('IN_PROGRESS'));
 
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
   const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(taskId);
@@ -83,14 +82,11 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   };
 
   const handleSaveReport = async () => {
-    if (!reportText.trim() && progressValue === currentTask.progress) {
-      toast.info("Không có thay đổi nào để lưu");
+    if (!reportText.trim()) {
+      toast.info("Vui lòng nhập nội dung báo cáo");
       return;
     }
     try {
-      if (progressValue !== currentTask.progress) {
-        await updateProgress.mutateAsync(progressValue);
-      }
       if (reportText.trim()) {
         await addComment.mutateAsync(`📋 Báo cáo tiến độ: ${reportText.trim()}`);
         setReportText("");
@@ -150,17 +146,17 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     // Fallback timeline từ status task
     const timeline: any[] = [];
     timeline.push({ id: "t1", title: `Giao việc cho ${currentTask.assignee?.fullName ?? "người xử lý"}`, time: currentTask.createdAt, icon: Clock, iconColor: "text-blue-500", content: `Nội dung: ${currentTask.description}` });
-    if (currentTask.status?.toUpperCase() !== "NHÁP" && currentTask.status?.toUpperCase() !== "MỚI GIAO") {
+    if (currentTask.status?.toUpperCase() !== "DRAFT" && currentTask.status?.toUpperCase() !== "ASSIGNED" && currentTask.status?.toUpperCase() !== "TODO") {
       timeline.push({ id: "t2", title: "Bắt đầu xử lý", time: currentTask.startDate, icon: ArrowRightCircle, iconColor: "text-orange-500", content: "Đã tiếp nhận và đang xử lý." });
     }
-    if (currentTask.status?.toUpperCase() === "CHỜ DUYỆT" || currentTask.status?.toUpperCase() === "HOÀN THÀNH") {
+    if (currentTask.status?.toUpperCase() === "PENDING_APPROVAL" || currentTask.status?.toUpperCase() === "COMPLETED") {
       timeline.push({ id: "t3", title: "Báo cáo kết quả", time: currentTask.updatedAt, icon: FileText, iconColor: "text-slate-600", content: "Đã báo cáo tiến độ và gửi yêu cầu phê duyệt." });
     }
     const isOverdue = new Date(currentTask.dueDate) < (currentTask.completedAt ? new Date(currentTask.completedAt) : new Date());
-    if (isOverdue && currentTask.status?.toUpperCase() !== "HOÀN THÀNH") {
+    if (isOverdue && currentTask.status?.toUpperCase() !== "COMPLETED") {
       timeline.push({ id: "t4", title: "Quá hạn", time: currentTask.dueDate, icon: AlertCircle, iconColor: "text-red-500", content: "Công việc đã vượt quá thời hạn quy định." });
     }
-    if (currentTask.status?.toUpperCase() === "HOÀN THÀNH") {
+    if (currentTask.status?.toUpperCase() === "COMPLETED") {
       timeline.push({ id: "t5", title: "Hoàn thành", time: currentTask.completedAt || currentTask.updatedAt, icon: CheckCircle2, iconColor: "text-green-500", content: "Đã hoàn thành toàn bộ công việc." });
     }
     return timeline.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
@@ -327,15 +323,15 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                         {subTasks.map((subTask: HrmTask) => (
                           <div key={subTask.id} className="flex items-center justify-between p-3">
                             <div className="flex items-center gap-3">
-                              {subTask.status?.toUpperCase() === "HOÀN THÀNH" ? (
+                              {subTask.status?.toUpperCase() === "COMPLETED" ? (
                                 <CheckCircle2 className="w-5 h-5 text-green-500" />
-                              ) : subTask.status?.toUpperCase() === "ĐANG XỬ LÝ" ? (
+                              ) : subTask.status?.toUpperCase() === "IN_PROGRESS" ? (
                                 <Clock className="w-5 h-5 text-blue-500" />
                               ) : (
                                 <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
                               )}
                               <div>
-                                <p className={`text-sm ${subTask.status?.toUpperCase() === "HOÀN THÀNH" ? "line-through text-slate-500" : "font-medium"}`}>
+                                <p className={`text-sm ${subTask.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
                                   {subTask.title}
                                 </p>
                                 <div className="flex items-center gap-3 mt-1">
@@ -350,7 +346,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                                       {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
                                     </p>
                                   )}
-                                  {subTask.status?.toUpperCase() !== "HOÀN THÀNH" && subTask.progress !== undefined && (
+                                  {subTask.status?.toUpperCase() !== "COMPLETED" && subTask.progress !== undefined && (
                                     <p className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium">
                                       Tiến độ: {subTask.progress}%
                                     </p>
@@ -393,14 +389,14 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                                 disabled={isCompleted || updateStep.isPending}
                                 className="shrink-0 focus:outline-none"
                               >
-                                {step.status?.toUpperCase() === "HOÀN THÀNH" ? (
+                                {step.status?.toUpperCase() === "COMPLETED" ? (
                                   <CheckCircle2 className="w-5 h-5 text-green-500" />
                                 ) : (
                                   <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
                                 )}
                               </button>
                               <div className="flex flex-col">
-                                <p className={`text-sm ${step.status?.toUpperCase() === "HOÀN THÀNH" || step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
+                                <p className={`text-sm ${step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
                                   {step.title}
                                 </p>
                                 <div className="flex items-center gap-2 mt-1">
@@ -430,20 +426,19 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                   {/* Cập nhật tiến độ */}
                   {!isCompleted && (
                     <div className="space-y-4 bg-white p-4 rounded-lg border">
-                      <h3 className="font-medium text-sm">Cập nhật tiến độ</h3>
+                      <h3 className="font-medium text-sm">Báo cáo & Cập nhật</h3>
 
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs text-slate-500">
-                          <span>Tiến độ hiện tại</span>
-                          <span className="font-semibold text-blue-600">{progressValue}%</span>
+                          <span>Tiến độ hiện tại (Tự động đánh giá)</span>
+                          <span className="font-semibold text-blue-600">{currentTask.progress ?? 0}%</span>
                         </div>
-                        <Slider
-                          value={[progressValue]}
-                          onValueChange={([v]) => setProgressValue(v)}
-                          max={100}
-                          step={5}
-                          className="w-full"
-                        />
+                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${currentTask.progress ?? 0}%` }} />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Tiến độ được hệ thống tự động tính toán dựa trên mức độ hoàn thành của các Bước thực hiện và Nhiệm vụ con.
+                        </p>
                       </div>
 
                       <Textarea
