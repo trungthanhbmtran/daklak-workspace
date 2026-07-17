@@ -1,14 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
 import { PropertiesPanelComponentProps } from "./types";
+import { Plus, Trash2 } from "lucide-react";
 
 export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge }: PropertiesPanelComponentProps) => {
   if (!selectedEdge) return null;
   const edgeData = data;
   
+  // State for visual rule builder
+  const [field, setField] = useState("");
+  const [operator, setOperator] = useState("===");
+  const [value, setValue] = useState("");
+  
+  // Parse expression to populate visual builder on load
+  useEffect(() => {
+    if (edgeData.expression) {
+      const match = (edgeData.expression as string).match(/^([a-zA-Z0-9_]+)\s*(===|!==|>|<|>=|<=)\s*(['"]?)(.*?)\3$/);
+      if (match) {
+        setField(match[1]);
+        setOperator(match[2]);
+        setValue(match[4]);
+      }
+    }
+  }, [edgeData.expression]);
+
+  const updateExpression = (f: string, o: string, v: string) => {
+    if (!f) return;
+    const isNumber = !isNaN(Number(v)) && v !== "";
+    const quote = isNumber ? "" : "'";
+    const newExpression = `${f} ${o} ${quote}${v}${quote}`;
+    
+    if (onUpdateEdge) {
+      onUpdateEdge(selectedEdge.id, {
+        ...selectedEdge,
+        data: {
+          ...(selectedEdge.data || {}),
+          expression: newExpression
+        }
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -26,52 +61,46 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
           Tên hiển thị trên sơ đồ quy trình.
         </p>
       </div>
+
       <div>
         <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-          Điều kiện rẽ nhánh (Dành cho Gateway)
+          Bộ tạo điều kiện (Visual Rule Builder)
         </label>
-        <NativeSelect
-          name="actionName"
-          value={(edgeData.actionName as string) || ""}
-          onChange={(e) => {
-            const actionVal = e.target.value;
-            let newExpression = "";
-            let newLabel = (selectedEdge.label as string) || "";
-            
-            if (actionVal === "APPROVE") {
-              newExpression = "actionName === 'APPROVE'";
-              if (!newLabel || newLabel === "Từ chối") newLabel = "Đồng ý / Phê duyệt";
-            } else if (actionVal === "REJECT") {
-              newExpression = "actionName === 'REJECT'";
-              if (!newLabel || newLabel === "Đồng ý / Phê duyệt") newLabel = "Từ chối";
-            } else if (actionVal === "SUBMIT") {
-              newExpression = "actionName === 'SUBMIT'";
-            } else if (actionVal) {
-              newExpression = `actionName === '${actionVal}'`;
-            }
+        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 space-y-3">
+          <div className="flex gap-2">
+            <NativeSelect
+              value={field}
+              onChange={(e) => { setField(e.target.value); updateExpression(e.target.value, operator, value); }}
+              className="w-1/3 bg-white"
+            >
+              <NativeSelectOption value="">-- Chọn biến --</NativeSelectOption>
+              <NativeSelectOption value="actionName">Hành động (actionName)</NativeSelectOption>
+              <NativeSelectOption value="assigneeCode">Người thực hiện (assigneeCode)</NativeSelectOption>
+              <NativeSelectOption value="status">Trạng thái (status)</NativeSelectOption>
+            </NativeSelect>
 
-            if (onUpdateEdge) {
-              onUpdateEdge(selectedEdge.id, {
-                ...selectedEdge,
-                label: newLabel,
-                data: {
-                  ...(selectedEdge.data || {}),
-                  actionName: actionVal,
-                  expression: newExpression
-                }
-              });
-            }
-          }}
-          className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-        >
-          <NativeSelectOption value="">(Không có điều kiện - Đi thẳng)</NativeSelectOption>
-          <NativeSelectOption value="APPROVE">Nếu bước trước: ĐỒNG Ý / PHÊ DUYỆT</NativeSelectOption>
-          <NativeSelectOption value="REJECT">Nếu bước trước: TỪ CHỐI</NativeSelectOption>
-          <NativeSelectOption value="SUBMIT">Nếu bước trước: HOÀN THÀNH / TRÌNH KÝ</NativeSelectOption>
-        </NativeSelect>
-        <p className="text-[10px] text-muted-foreground mt-1.5">
-          Chỉ áp dụng khi đường nối này đi ra từ Nút Rẽ nhánh (Gateway).
-        </p>
+            <NativeSelect
+              value={operator}
+              onChange={(e) => { setOperator(e.target.value); updateExpression(field, e.target.value, value); }}
+              className="w-1/4 bg-white"
+            >
+              <NativeSelectOption value="===">Bằng</NativeSelectOption>
+              <NativeSelectOption value="!==">Khác</NativeSelectOption>
+              <NativeSelectOption value=">">Lớn hơn</NativeSelectOption>
+              <NativeSelectOption value="<">Nhỏ hơn</NativeSelectOption>
+            </NativeSelect>
+
+            <Input
+              value={value}
+              onChange={(e) => { setValue(e.target.value); updateExpression(field, operator, e.target.value); }}
+              placeholder="VD: UNASSIGNED"
+              className="w-5/12 bg-white"
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground">
+            Thiết lập điều kiện rẽ nhánh trực quan. Dành cho các cổng Gateway.
+          </p>
+        </div>
       </div>
       
       <Accordion type="single" collapsible className="w-full mt-4">
