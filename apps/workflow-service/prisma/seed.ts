@@ -9,10 +9,10 @@ async function main() {
 
   // ─── Permission presets ───────────────────────────────────────────────────
   const fullPermissions = {
-    CHAT:    ['PARTICIPANT', 'ADMIN'],
+    CHAT: ['PARTICIPANT', 'ADMIN'],
     MONITOR: ['PARTICIPANT', 'ADMIN'],
-    EDIT:    ['OWNER', 'DEPT_LEADER', 'ADMIN'],
-    DELETE:  ['OWNER', 'DEPT_LEADER', 'ADMIN'],
+    EDIT: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
+    DELETE: ['OWNER', 'DEPT_LEADER', 'ADMIN'],
     EXECUTE: ['ASSIGNEE', 'OWNER', 'ADMIN'],
   };
 
@@ -79,22 +79,19 @@ async function main() {
       },
     ],
     edges: [
-      { id: 'edge_start_gw',         source: 'node_start',           target: 'gw_init',              label: '' },
-      { id: 'edge_gw_unassigned',    source: 'gw_init',              target: 'node_unassigned',      label: 'Chưa phân công', data: { expression: 'assigneeCode === "UNASSIGNED"' } },
-      { id: 'edge_gw_assigned',      source: 'gw_init',              target: 'node_assign',          label: 'Đã phân công',   data: { expression: 'assigneeCode !== "UNASSIGNED"' } },
-      
-      { id: 'edge_unassigned_to_assign', source: 'node_unassigned',  target: 'node_assign',          label: 'ASSIGN' },
-      
-      { id: 'edge_assign_loop',      source: 'node_assign',          target: 'node_assign',          label: 'ASSIGN' },
-      { id: 'edge_assign_progress',  source: 'node_assign',          target: 'node_in_progress',     label: 'IN_PROGRESS' },
-      { id: 'edge_assign_reject',    source: 'node_assign',          target: 'node_rejected',        label: 'REJECT' },
-      
-      { id: 'edge_reject_assign',    source: 'node_rejected',        target: 'node_assign',          label: 'ASSIGN' },
-      { id: 'edge_progress_report',  source: 'node_in_progress',     target: 'node_report',          label: 'IN_PROGRESS' },
-      { id: 'edge_report_approve',   source: 'node_report',          target: 'node_approve',         label: 'COMPLETE' },
-      { id: 'edge_approve_gw',       source: 'node_approve',         target: 'gw_approve',           label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_end',           source: 'gw_approve',           target: 'node_end',             label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return',        source: 'gw_approve',           target: 'node_in_progress',     label: 'REJECT',  data: { expression: 'actionName === "REJECT"' } },
+      { id: 'edge_start_gw', source: 'node_start', target: 'gw_init', label: '' },
+      { id: 'edge_gw_unassigned', source: 'gw_init', target: 'node_unassigned', label: 'Chưa phân công', data: { expression: 'assigneeCode === "UNASSIGNED"' } },
+      { id: 'edge_gw_assigned', source: 'gw_init', target: 'node_assign', label: 'Đã phân công', data: { expression: 'assigneeCode !== "UNASSIGNED"' } },
+      { id: 'edge_unassigned_to_assign', source: 'node_unassigned', target: 'node_assign', label: 'ASSIGN' },
+      { id: 'edge_assign_loop', source: 'node_assign', target: 'node_assign', label: 'ASSIGN' },
+      { id: 'edge_assign_progress', source: 'node_assign', target: 'node_in_progress', label: 'IN_PROGRESS' },
+      { id: 'edge_assign_reject', source: 'node_assign', target: 'node_rejected', label: 'REJECT' },
+      { id: 'edge_reject_assign', source: 'node_rejected', target: 'node_assign', label: 'ASSIGN' },
+      { id: 'edge_progress_report', source: 'node_in_progress', target: 'node_report', label: 'IN_PROGRESS' },
+      { id: 'edge_report_approve', source: 'node_report', target: 'node_approve', label: 'COMPLETE' },
+      { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', label: 'APPROVE' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_in_progress', label: 'REJECT' },
     ],
   };
 
@@ -160,17 +157,17 @@ async function main() {
       },
     ],
     edges: [
-      { id: 'edge_start',          source: 'node_start',        target: 'node_receive',       label: '' },
-      { id: 'edge_recv_route',     source: 'node_receive',      target: 'node_route',         label: 'RECEIVE' },
-      { id: 'edge_route_gw',       source: 'node_route',        target: 'gw_route',           label: 'ROUTE' },
-      { id: 'edge_gw_assign',      source: 'gw_route',          target: 'node_assign_staff',  label: 'ASSIGN_DEPT', data: { expression: 'actionName === "ASSIGN_DEPT"' } },
-      { id: 'edge_gw_archive',     source: 'gw_route',          target: 'node_issue',         label: 'ARCHIVE',     data: { expression: 'actionName === "ARCHIVE"' } },
-      { id: 'edge_assign_process', source: 'node_assign_staff', target: 'node_process',       label: 'ASSIGN_STAFF' },
-      { id: 'edge_process_approve',source: 'node_process',      target: 'node_approve',       label: 'PROCESS' },
-      { id: 'edge_approve_gw',     source: 'node_approve',      target: 'gw_approve',         label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_issue',       source: 'gw_approve',        target: 'node_issue',         label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return',      source: 'gw_approve',        target: 'node_process',       label: 'REJECT',  data: { expression: 'actionName === "REJECT"' } },
-      { id: 'edge_issue_end',      source: 'node_issue',        target: 'node_end',           label: 'ISSUE' },
+      { id: 'edge_start', source: 'node_start', target: 'node_receive', label: '' },
+      { id: 'edge_recv_route', source: 'node_receive', target: 'node_route', label: 'RECEIVE' },
+      { id: 'edge_route_gw', source: 'node_route', target: 'gw_route', label: 'ROUTE' },
+      { id: 'edge_gw_assign', source: 'gw_route', target: 'node_assign_staff', label: 'ASSIGN_DEPT' },
+      { id: 'edge_gw_archive', source: 'gw_route', target: 'node_issue', label: 'ARCHIVE' },
+      { id: 'edge_assign_process', source: 'node_assign_staff', target: 'node_process', label: 'ASSIGN_STAFF' },
+      { id: 'edge_process_approve', source: 'node_process', target: 'node_approve', label: 'PROCESS' },
+      { id: 'edge_approve_gw', source: 'node_approve', target: 'gw_approve', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_issue', source: 'gw_approve', target: 'node_issue', label: 'APPROVE' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_process', label: 'REJECT' },
+      { id: 'edge_issue_end', source: 'node_issue', target: 'node_end', label: 'ISSUE' },
     ],
   };
 
@@ -204,8 +201,8 @@ async function main() {
       { id: 'edge_start', source: 'node_start', target: 'node_self_eval', label: '' },
       { id: 'edge_eval_review', source: 'node_self_eval', target: 'node_manager_review', label: 'SELF_EVALUATE' },
       { id: 'edge_review_gw', source: 'node_manager_review', target: 'gw_approve', label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_self_eval', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', label: 'APPROVE' },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_self_eval', label: 'REJECT' },
     ],
   };
 
@@ -257,16 +254,16 @@ async function main() {
       { id: 'edge_start', source: 'node_start', target: 'node_propose', label: '' },
       { id: 'edge_propose_dept', source: 'node_propose', target: 'node_dept_review', label: 'PROPOSE' },
       { id: 'edge_dept_gw', source: 'node_dept_review', target: 'gw_dept', label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_finance', source: 'gw_dept', target: 'node_finance_review', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return_dept', source: 'gw_dept', target: 'node_propose', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
-      
+      { id: 'edge_gw_finance', source: 'gw_dept', target: 'node_finance_review', label: 'APPROVE' },
+      { id: 'edge_gw_return_dept', source: 'gw_dept', target: 'node_propose', label: 'REJECT' },
+
       { id: 'edge_finance_gw', source: 'node_finance_review', target: 'gw_finance', label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_director', source: 'gw_finance', target: 'node_director_approve', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return_finance', source: 'gw_finance', target: 'node_dept_review', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+      { id: 'edge_gw_director', source: 'gw_finance', target: 'node_director_approve', label: 'APPROVE' },
+      { id: 'edge_gw_return_finance', source: 'gw_finance', target: 'node_dept_review', label: 'REJECT' },
 
       { id: 'edge_director_gw', source: 'node_director_approve', target: 'gw_director', label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_end', source: 'gw_director', target: 'node_end', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return_director', source: 'gw_director', target: 'node_finance_review', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+      { id: 'edge_gw_end', source: 'gw_director', target: 'node_end', label: 'APPROVE' },
+      { id: 'edge_gw_return_director', source: 'gw_director', target: 'node_finance_review', label: 'REJECT' },
     ],
   };
 
@@ -309,12 +306,12 @@ async function main() {
       { id: 'edge_start', source: 'node_start', target: 'node_draft', label: '' },
       { id: 'edge_draft_legal', source: 'node_draft', target: 'node_legal_review', label: 'DRAFT' },
       { id: 'edge_legal_gw', source: 'node_legal_review', target: 'gw_legal', label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_director', source: 'gw_legal', target: 'node_director_approve', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return_legal', source: 'gw_legal', target: 'node_draft', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
-      
+      { id: 'edge_gw_director', source: 'gw_legal', target: 'node_director_approve', label: 'APPROVE' },
+      { id: 'edge_gw_return_legal', source: 'gw_legal', target: 'node_draft', label: 'REJECT' },
+
       { id: 'edge_director_gw', source: 'node_director_approve', target: 'gw_director', label: 'APPROVE_OR_REJECT' },
-      { id: 'edge_gw_end', source: 'gw_director', target: 'node_end', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
-      { id: 'edge_gw_return_director', source: 'gw_director', target: 'node_legal_review', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+      { id: 'edge_gw_end', source: 'gw_director', target: 'node_end', label: 'APPROVE' },
+      { id: 'edge_gw_return_director', source: 'gw_director', target: 'node_legal_review', label: 'REJECT' },
     ],
   };
 
