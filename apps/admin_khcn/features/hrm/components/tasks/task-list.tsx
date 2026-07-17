@@ -74,6 +74,73 @@ const getPriorityBadge = (priority: string) => {
 };
 
 
+// ── Tree connector lines component ────────────────────────────────────────────
+
+const TreeLines = ({
+  depth,
+  isLastChild,
+  ancestorsLast,
+  isExpanded,
+  hasSubTasks
+}: {
+  depth: number,
+  isLastChild: boolean,
+  ancestorsLast: boolean[],
+  isExpanded: boolean,
+  hasSubTasks: boolean
+}) => {
+  return (
+    <>
+      {/* Ancestor continuing vertical lines */}
+      {ancestorsLast.map((isAncestorLast, i) => {
+        if (i === 0) return null;
+        if (isAncestorLast) return null;
+        return (
+          <div
+            key={`ancestor-line-${i}`}
+            className="absolute w-px bg-slate-300 pointer-events-none"
+            style={{ left: `${26 + i * 32}px`, top: '0', bottom: '0' }}
+          />
+        );
+      })}
+
+      {/* Current level L-shape lines */}
+      {depth > 0 && (
+        <>
+          <div
+            className="absolute w-px bg-slate-300 pointer-events-none"
+            style={{
+              left: `${26 + (depth - 1) * 32}px`,
+              top: '0',
+              bottom: isLastChild ? '50%' : '0'
+            }}
+          />
+          <div
+            className="absolute h-px bg-slate-300 pointer-events-none"
+            style={{
+              left: `${26 + (depth - 1) * 32}px`,
+              top: '50%',
+              width: '22px'
+            }}
+          />
+        </>
+      )}
+
+      {/* Parent expanded line dropping down */}
+      {isExpanded && hasSubTasks && (
+        <div
+          className="absolute w-px bg-slate-300 pointer-events-none"
+          style={{
+            left: `${26 + depth * 32}px`,
+            top: 'calc(50% + 12px)',
+            bottom: '0'
+          }}
+        />
+      )}
+    </>
+  );
+};
+
 // ── Loading skeleton ───────────────────────────────────────────────────────────
 
 const TaskListSkeleton = () => (
@@ -139,7 +206,7 @@ export function TaskList() {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
-  const renderTaskRow = (task: HrmTask, depth: number) => {
+  const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false, ancestorsLast: boolean[] = []) => {
     const isOverdue = new Date(task.dueDate) < new Date() && task.status?.toUpperCase() !== "HOÀN THÀNH" && task.status?.toUpperCase() !== "COMPLETED";
     const hasSubTasks = task.subTasks && task.subTasks.length > 0;
     const isExpanded = expandedTasks[task.id];
@@ -147,18 +214,28 @@ export function TaskList() {
     return (
       <React.Fragment key={task.id}>
         <TableRow className={`hover:bg-slate-50/80 transition-colors group ${depth > 0 ? "bg-slate-50/60" : ""}`}>
-          <TableCell className="font-medium relative" style={{ paddingLeft: `${(depth * 1.5) + 1.5}rem` }}>
+          <TableCell className="font-medium relative" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
+            <TreeLines
+              depth={depth}
+              isLastChild={isLastChild}
+              ancestorsLast={ancestorsLast}
+              isExpanded={!!isExpanded}
+              hasSubTasks={!!hasSubTasks}
+            />
+
             <div className="flex items-center gap-2 relative z-10">
               {hasSubTasks ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => toggleExpand(task.id)}
-                  className="w-6 h-6 p-0 flex items-center justify-center rounded-md hover:bg-slate-200 transition-colors shrink-0"
-                >
-                  {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                </Button>
+                <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white">
+                  <Button
+                    variant="ghost"
+                    onClick={() => toggleExpand(task.id)}
+                    className="w-5 h-5 p-0 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors"
+                  >
+                    {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                  </Button>
+                </div>
               ) : (
-                <div className="w-6 h-6 shrink-0" />
+                <div className="w-5 h-5 shrink-0" />
               )}
 
               <div className="flex flex-col py-1.5">
@@ -229,7 +306,14 @@ export function TaskList() {
         </TableRow>
 
         {isExpanded && hasSubTasks && (
-          task.subTasks!.map((subTask) => renderTaskRow(subTask, depth + 1))
+          task.subTasks!.map((subTask, index) =>
+            renderTaskRow(
+              subTask,
+              depth + 1,
+              index === task.subTasks!.length - 1,
+              [...ancestorsLast, isLastChild]
+            )
+          )
         )}
       </React.Fragment>
     );
