@@ -172,7 +172,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full bg-slate-50">
         {/* Header */}
-        <div className="p-6 bg-white border-b">
+        <div className="p-6 bg-white border-b shrink-0">
           <SheetHeader>
             <div className="flex justify-between items-start gap-4">
               <div>
@@ -202,7 +202,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     </Badge>
                   )}
                 </div>
-                <SheetDescription className="mt-2 text-slate-600">
+                <SheetDescription className="mt-2 text-slate-600 max-h-[250px] overflow-y-auto whitespace-pre-wrap pr-2">
                   {currentTask.description}
                 </SheetDescription>
               </div>
