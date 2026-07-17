@@ -256,6 +256,31 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           </div>
         </div>
 
+        {/* Box tiếp nhận công việc - Đưa lên trên cùng */}
+        {isAssigned && (
+          <div className="bg-amber-50 p-4 border-b border-amber-200 flex-shrink-0">
+            <h3 className="font-medium text-amber-900 flex items-center">
+              <BellRing className="w-4 h-4 mr-2" />
+              Xác nhận tiếp nhận công việc
+            </h3>
+            <p className="text-sm text-amber-700 mt-1 mb-3">
+              Công việc này vừa được giao. Vui lòng xác nhận tiếp nhận để có thể bắt đầu xử lý (phân rã công việc, cập nhật tiến độ, v.v.), hoặc từ chối nếu không đúng thẩm quyền.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleAcceptTask} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Nhận việc
+              </Button>
+              <Button onClick={handleRejectTask} size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 bg-white">
+                Từ chối
+              </Button>
+              <Button onClick={handleRequestCoordination} size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 bg-white">
+                Xin phối hợp
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <Tabs defaultValue="processing" className="flex-1 flex flex-col overflow-hidden">
           <div className="px-6 py-4 bg-white border-b">
@@ -274,31 +299,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
             {/* ── Tab Xử lý & Cập nhật ── */}
             <TabsContent value="processing" className="mt-0 space-y-6">
-
-              {/* Box tiếp nhận công việc */}
-              {isAssigned && (
-                <div className="space-y-4 bg-amber-50 p-4 rounded-lg border border-amber-200 mb-6">
-                  <h3 className="font-medium text-amber-900 flex items-center">
-                    <BellRing className="w-4 h-4 mr-2" />
-                    Xác nhận tiếp nhận công việc
-                  </h3>
-                  <p className="text-sm text-amber-700">
-                    Công việc này vừa được giao. Vui lòng xác nhận tiếp nhận để có thể bắt đầu xử lý (phân rã công việc, cập nhật tiến độ, v.v.), hoặc từ chối nếu không đúng thẩm quyền.
-                  </p>
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Button onClick={handleAcceptTask} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Nhận việc
-                    </Button>
-                    <Button onClick={handleRejectTask} size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
-                      Từ chối
-                    </Button>
-                    <Button onClick={handleRequestCoordination} size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700">
-                      Xin phối hợp
-                    </Button>
-                  </div>
-                </div>
-              )}
 
               {/* Chỉ cho phép thực hiện các nghiệp vụ khi đã nhận việc (không còn là ASSIGNED) */}
               {!isAssigned && (

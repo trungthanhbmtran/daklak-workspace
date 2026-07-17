@@ -105,6 +105,14 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
     if (!assignee) { toast.error("Vui lòng chọn người/đơn vị nhận việc"); return; }
     if (!dueDate) { toast.error("Vui lòng chọn thời hạn"); return; }
 
+    const selectedDate = new Date(dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      toast.error("Thời gian hạn chót không được trước thời gian giao việc (hiện tại)");
+      return;
+    }
+
     // Phân tích assignee: nếu bắt đầu bằng DEPT_ → departmentId, ngược lại → assigneeCode
     const isDept = assignee.startsWith("DEPT_");
     const payload: any = {
@@ -352,6 +360,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                   required 
                   type="date" 
                   value={dueDate}
+                  min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setDueDate(e.target.value)}
                   className="bg-white dark:bg-slate-950 h-11 focus-visible:ring-blue-500 shadow-sm" 
                 />
