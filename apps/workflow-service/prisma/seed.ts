@@ -174,6 +174,150 @@ async function main() {
     ],
   };
 
+  // ─── 3. Quy trinh danh gia KPI (KPI_EVALUATION_ID) ──────────────────────────
+  const kpiEvaluationWorkflowDef = {
+    nodes: [
+      { id: 'node_start', type: 'start', position: { x: 50, y: 200 }, data: { label: 'Bắt đầu' } },
+      {
+        id: 'node_self_eval', type: 'user_task', position: { x: 300, y: 200 },
+        data: {
+          label: 'Tự đánh giá',
+          actionName: 'SELF_EVALUATE', targetStatus: 'SELF_EVALUATED',
+          permissions: { ...fullPermissions, SELF_EVALUATE: ['ASSIGNEE', 'ADMIN'] },
+        }
+      },
+      {
+        id: 'node_manager_review', type: 'user_task', position: { x: 600, y: 200 },
+        data: {
+          label: 'Quản lý phê duyệt',
+          actionName: 'APPROVE', targetStatus: 'PENDING_APPROVAL',
+          permissions: { ...fullPermissions, APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'], REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'] },
+        }
+      },
+      { id: 'gw_approve', type: 'exclusive_gateway', position: { x: 900, y: 200 }, data: { label: 'Kết quả phê duyệt' } },
+      {
+        id: 'node_end', type: 'end', position: { x: 1200, y: 200 },
+        data: { label: 'Kết thúc', targetStatus: 'DONE' }
+      },
+    ],
+    edges: [
+      { id: 'edge_start', source: 'node_start', target: 'node_self_eval', label: '' },
+      { id: 'edge_eval_review', source: 'node_self_eval', target: 'node_manager_review', label: 'SELF_EVALUATE' },
+      { id: 'edge_review_gw', source: 'node_manager_review', target: 'gw_approve', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_end', source: 'gw_approve', target: 'node_end', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
+      { id: 'edge_gw_return', source: 'gw_approve', target: 'node_self_eval', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+    ],
+  };
+
+  // ─── 4. Quy trinh phe duyet ngan sach (BUDGET_APPROVAL_ID) ────────────────
+  const budgetApprovalWorkflowDef = {
+    nodes: [
+      { id: 'node_start', type: 'start', position: { x: 50, y: 200 }, data: { label: 'Bắt đầu' } },
+      {
+        id: 'node_propose', type: 'user_task', position: { x: 250, y: 200 },
+        data: {
+          label: 'Lập đề xuất',
+          actionName: 'PROPOSE', targetStatus: 'TODO',
+          permissions: { ...fullPermissions, PROPOSE: ['ASSIGNEE', 'ADMIN'] },
+        }
+      },
+      {
+        id: 'node_dept_review', type: 'user_task', position: { x: 500, y: 200 },
+        data: {
+          label: 'Trưởng phòng duyệt',
+          actionName: 'APPROVE', targetStatus: 'PENDING_APPROVAL',
+          permissions: { ...fullPermissions, APPROVE: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'], REJECT: ['SUPERVISOR', 'DEPT_LEADER', 'ADMIN'] },
+        }
+      },
+      { id: 'gw_dept', type: 'exclusive_gateway', position: { x: 750, y: 200 }, data: { label: 'Kết quả duyệt TP' } },
+      {
+        id: 'node_finance_review', type: 'user_task', position: { x: 1000, y: 200 },
+        data: {
+          label: 'Thẩm định tài chính',
+          actionName: 'APPROVE', targetStatus: 'FINANCE_REVIEW',
+          permissions: { ...fullPermissions, APPROVE: ['FINANCE_DEPT', 'ADMIN'], REJECT: ['FINANCE_DEPT', 'ADMIN'] },
+        }
+      },
+      { id: 'gw_finance', type: 'exclusive_gateway', position: { x: 1250, y: 200 }, data: { label: 'Kết quả TĐTC' } },
+      {
+        id: 'node_director_approve', type: 'user_task', position: { x: 1500, y: 200 },
+        data: {
+          label: 'Giám đốc phê duyệt',
+          actionName: 'APPROVE', targetStatus: 'DIRECTOR_APPROVAL',
+          permissions: { ...fullPermissions, APPROVE: ['DIRECTOR', 'ADMIN'], REJECT: ['DIRECTOR', 'ADMIN'] },
+        }
+      },
+      { id: 'gw_director', type: 'exclusive_gateway', position: { x: 1750, y: 200 }, data: { label: 'Kết quả GĐ duyệt' } },
+      {
+        id: 'node_end', type: 'end', position: { x: 2000, y: 200 },
+        data: { label: 'Kết thúc', targetStatus: 'DONE' }
+      },
+    ],
+    edges: [
+      { id: 'edge_start', source: 'node_start', target: 'node_propose', label: '' },
+      { id: 'edge_propose_dept', source: 'node_propose', target: 'node_dept_review', label: 'PROPOSE' },
+      { id: 'edge_dept_gw', source: 'node_dept_review', target: 'gw_dept', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_finance', source: 'gw_dept', target: 'node_finance_review', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
+      { id: 'edge_gw_return_dept', source: 'gw_dept', target: 'node_propose', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+      
+      { id: 'edge_finance_gw', source: 'node_finance_review', target: 'gw_finance', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_director', source: 'gw_finance', target: 'node_director_approve', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
+      { id: 'edge_gw_return_finance', source: 'gw_finance', target: 'node_dept_review', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+
+      { id: 'edge_director_gw', source: 'node_director_approve', target: 'gw_director', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_end', source: 'gw_director', target: 'node_end', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
+      { id: 'edge_gw_return_director', source: 'gw_director', target: 'node_finance_review', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+    ],
+  };
+
+  // ─── 5. Quy trinh tham dinh phap ly (LEGAL_APPROVAL_ID) ───────────────────
+  const legalApprovalWorkflowDef = {
+    nodes: [
+      { id: 'node_start', type: 'start', position: { x: 50, y: 200 }, data: { label: 'Bắt đầu' } },
+      {
+        id: 'node_draft', type: 'user_task', position: { x: 250, y: 200 },
+        data: {
+          label: 'Dự thảo pháp lý',
+          actionName: 'DRAFT', targetStatus: 'TODO',
+          permissions: { ...fullPermissions, DRAFT: ['ASSIGNEE', 'ADMIN'] },
+        }
+      },
+      {
+        id: 'node_legal_review', type: 'user_task', position: { x: 500, y: 200 },
+        data: {
+          label: 'Phòng pháp chế thẩm định',
+          actionName: 'APPROVE', targetStatus: 'LEGAL_REVIEW',
+          permissions: { ...fullPermissions, APPROVE: ['LEGAL_DEPT', 'ADMIN'], REJECT: ['LEGAL_DEPT', 'ADMIN'] },
+        }
+      },
+      { id: 'gw_legal', type: 'exclusive_gateway', position: { x: 750, y: 200 }, data: { label: 'Kết quả thẩm định' } },
+      {
+        id: 'node_director_approve', type: 'user_task', position: { x: 1000, y: 200 },
+        data: {
+          label: 'Lãnh đạo phê duyệt',
+          actionName: 'APPROVE', targetStatus: 'DIRECTOR_APPROVAL',
+          permissions: { ...fullPermissions, APPROVE: ['DIRECTOR', 'ADMIN'], REJECT: ['DIRECTOR', 'ADMIN'] },
+        }
+      },
+      { id: 'gw_director', type: 'exclusive_gateway', position: { x: 1250, y: 200 }, data: { label: 'Kết quả phê duyệt' } },
+      {
+        id: 'node_end', type: 'end', position: { x: 1500, y: 200 },
+        data: { label: 'Kết thúc', targetStatus: 'DONE' }
+      },
+    ],
+    edges: [
+      { id: 'edge_start', source: 'node_start', target: 'node_draft', label: '' },
+      { id: 'edge_draft_legal', source: 'node_draft', target: 'node_legal_review', label: 'DRAFT' },
+      { id: 'edge_legal_gw', source: 'node_legal_review', target: 'gw_legal', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_director', source: 'gw_legal', target: 'node_director_approve', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
+      { id: 'edge_gw_return_legal', source: 'gw_legal', target: 'node_draft', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+      
+      { id: 'edge_director_gw', source: 'node_director_approve', target: 'gw_director', label: 'APPROVE_OR_REJECT' },
+      { id: 'edge_gw_end', source: 'gw_director', target: 'node_end', label: 'APPROVE', data: { expression: 'actionName === "APPROVE"' } },
+      { id: 'edge_gw_return_director', source: 'gw_director', target: 'node_legal_review', label: 'REJECT', data: { expression: 'actionName === "REJECT"' } },
+    ],
+  };
+
   // ─── Seed helper ──────────────────────────────────────────────────────────
   async function seedWorkflow(
     code: string,
@@ -228,6 +372,27 @@ async function main() {
     'Quy trình điều chuyển văn bản',
     'Quy trình tiếp nhận, bút phê, xử lý và ban hành văn bản.',
     docTransferWorkflowDef,
+  );
+
+  await seedWorkflow(
+    'KPI_EVALUATION_ID',
+    'Quy trình đánh giá KPI kép',
+    'Quy trình tự đánh giá và quản lý phê duyệt KPI.',
+    kpiEvaluationWorkflowDef,
+  );
+
+  await seedWorkflow(
+    'BUDGET_APPROVAL_ID',
+    'Quy trình phê duyệt ngân sách',
+    'Quy trình đề xuất, thẩm định tài chính và giám đốc phê duyệt.',
+    budgetApprovalWorkflowDef,
+  );
+
+  await seedWorkflow(
+    'LEGAL_APPROVAL_ID',
+    'Quy trình thẩm định pháp lý',
+    'Quy trình dự thảo, phòng pháp chế thẩm định và giám đốc phê duyệt.',
+    legalApprovalWorkflowDef,
   );
 
   console.log('Seeding hoàn tất!');
