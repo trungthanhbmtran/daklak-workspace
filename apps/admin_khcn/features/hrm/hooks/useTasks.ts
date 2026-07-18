@@ -285,7 +285,11 @@ export function useAssignTask() {
         coAssigneeCodes?: string[];
       };
     }) => hrmTasksApi.assignTask(id, payload),
-    onSuccess: () => {
+    onSuccess: (res, variables) => {
+      if (variables.id && res) {
+        qc.setQueryData(hrmKeys.taskDetail(variables.id), res);
+        qc.invalidateQueries({ queryKey: hrmKeys.taskHistory(variables.id) });
+      }
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       toast.success("Giao việc thành công");
     },

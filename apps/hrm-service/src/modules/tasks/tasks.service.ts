@@ -447,7 +447,7 @@ export class TasksService {
       await tx.taskParticipant.deleteMany({ where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] } } });
       const participants = this.shared.buildParticipantsData(id, data);
       if (participants.length > 0) await tx.taskParticipant.createMany({ data: participants, skipDuplicates: true });
-      if (rawTask.status === 'TEMPLATE') await tx.task.update({ where: { id }, data: { status: 'TODO' } });
+      await tx.task.update({ where: { id }, data: { status: 'TODO' } });
     });
 
     await this.prisma.taskHistory.create({
@@ -455,7 +455,7 @@ export class TasksService {
         taskId: id,
         action: 'Giao việc',
         actorCode: data?.currentEmployeeCode || null,
-        newValue: { assigneeCode: data.assigneeCode, coassigneeCodes: data.coassigneeCodes }
+        newValue: { assigneeCode: data.assigneeCode, coassigneeCodes: data.coassigneeCodes, status: 'TODO' }
       }
     });
 
