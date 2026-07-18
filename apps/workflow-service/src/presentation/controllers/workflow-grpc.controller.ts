@@ -444,7 +444,7 @@ export class WorkflowGrpcController {
       workflowId: data.workflowId,
       entityType: data.businessType || 'UNKNOWN',
       entityId: data.businessId || 'UNKNOWN',
-      initialContext: data.initialContext,
+      initialContext: this.parseProtoStruct(data.initialContext),
       initiatorId: data.initiatorId,
     });
   }

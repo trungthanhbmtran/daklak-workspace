@@ -87,12 +87,17 @@ export class WorkflowCompiler {
       const sourceNode = compiledNodes.get(edge.source);
       if (sourceNode && sourceNode.type === 'exclusive_gateway') {
         const compiledEdge: CompiledGatewayEdge = { edge };
+        const conditionStr = edge.label || edge.data?.condition || edge.data?.expression;
 
-        if (edge.data?.expression) {
+        if (conditionStr) {
           try {
             compiledEdge.conditionFn = new Function('context', `
                with (context || {}) {
-                  return (${edge.data.expression});
+                  try {
+                    return (${conditionStr});
+                  } catch (err) {
+                    return false;
+                  }
                }
             `) as (context: any) => boolean;
           } catch (e) {
