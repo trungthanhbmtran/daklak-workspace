@@ -35,11 +35,11 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
   updateTaskStatus(data: any) {
-    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode, data, data.actionName);
+    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode || data.currentEmployeeCode, data, data.actionName);
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskProgress')
-  updateTaskProgress(data: any) { return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode); }
+  updateTaskProgress(data: any) { return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode || data.currentEmployeeCode); }
 
   // ─── Hierarchy ────────────────────────────────────────────────────────────
 

@@ -24,6 +24,9 @@ import { toast } from "sonner";
 import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
 import { TaskHistoryTab } from "./task-detail-history-tab";
+import { useUser } from "@/hooks/useUser";
+import { useState } from "react";
+import { TaskAssignDialog } from "./task-assign-dialog";
 
 interface TaskDetailDrawerProps {
   task: HrmTask;
@@ -33,6 +36,8 @@ interface TaskDetailDrawerProps {
 
 export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerProps) {
   const taskId = Number(task.id);
+  const { user } = useUser();
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
 
   // ── Queries ──
   const { data: detailData } = useTaskDetail(taskId);
@@ -41,6 +46,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const isCompleted = currentTask.status?.toUpperCase() === "COMPLETED" || currentTask.status?.toUpperCase() === "DONE";
   const isAssigned = (currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('IN_PROGRESS'));
   const comments: any[] = (commentsData as any)?.data ?? [];
+  const isAssigner = user?.employeeCode === currentTask.creatorEmployeeCode || user?.employeeCode === currentTask.assignerCode;
 
   // ── Mutations ──
   const updateStatus = useUpdateStatus(taskId);
@@ -113,12 +119,20 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
                   {currentTask.status}
                 </Badge>
-                {!isCompleted && (
-                  <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700">
-                    <BellRing className="w-3 h-3 mr-1" />
-                    Đôn đốc
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {isAssigner && !isCompleted && (
+                    <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
+                      <Briefcase className="w-3 h-3 mr-1" />
+                      Giao lại / Phối hợp
+                    </Button>
+                  )}
+                  {!isCompleted && (
+                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700">
+                      <BellRing className="w-3 h-3 mr-1" />
+                      Đôn đốc
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </SheetHeader>
@@ -271,6 +285,14 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </TabsContent>
           </ScrollArea>
         </Tabs>
+        
+        <TaskAssignDialog
+          open={isAssignOpen}
+          onOpenChange={setIsAssignOpen}
+          taskId={taskId}
+          currentAssigneeCode={currentTask.assigneeCode}
+          currentCoordinatorsCodes={currentTask.coassigneeCodes || []}
+        />
       </SheetContent>
     </Sheet>
   );

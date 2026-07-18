@@ -400,14 +400,14 @@ export class TasksService {
     await this.prisma.task.update({ where: { id }, data: updateData });
 
     if (rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED')) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || null, newValue: { reason: rejectReason } } });
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || context?.currentEmployeeCode || null, newValue: { reason: rejectReason } } });
       await this.prisma.taskParticipant.deleteMany({
         where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
       });
     } else if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || null } });
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || context?.currentEmployeeCode || null } });
     } else if (rawTask.status !== updateData.status) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode: actorCode || null, newValue: { status: updateData.status } } });
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode: actorCode || context?.currentEmployeeCode || null, newValue: { status: updateData.status } } });
     }
 
     // Auto-progress từ workflow node hoặc default khi DONE
