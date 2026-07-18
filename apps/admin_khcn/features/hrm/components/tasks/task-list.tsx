@@ -286,7 +286,7 @@ export function TaskList() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="flex flex-col flex-1 min-h-0 gap-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-slate-200">
         <div className="flex w-full sm:w-auto gap-3">
           <Input
@@ -312,10 +312,10 @@ export function TaskList() {
         <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
       </div>
 
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative flex flex-col min-h-0">
-        <div className="w-full flex-1 overflow-auto [&_[data-slot=table-container]]:overflow-visible relative">
-          <Table className="min-w-[1100px] w-full">
-            <TableHeader className="bg-slate-50 border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+      <div className="flex-1 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col min-h-0 relative">
+        <div className="w-full flex-1 overflow-auto [&_[data-slot=table-container]]:overflow-visible [&_[data-slot=table-container]]:min-w-full relative scroll-smooth">
+          <Table className="min-w-[1100px] w-full border-collapse">
+            <TableHeader className="bg-slate-50 sticky top-0 z-30 shadow-sm border-b-0 after:absolute after:inset-x-0 after:bottom-0 after:border-b after:border-slate-200">
               <TableRow className="bg-slate-50 hover:bg-slate-50">
                 <TableHead className="w-[400px] pl-6 font-semibold bg-slate-50">Tên công việc</TableHead>
                 <TableHead className="font-semibold bg-slate-50">Trạng thái</TableHead>
@@ -353,7 +353,7 @@ export function TaskList() {
                 return tasks.map((task) => renderTaskRow(task, 0));
               })()}
             </TableBody>
-            <TableFooter className="bg-slate-50 text-slate-600 border-t border-slate-200 sticky bottom-0 z-20 shadow-[0_-1px_2px_rgba(0,0,0,0.05)]">
+            <TableFooter className="bg-slate-50 text-slate-600 sticky bottom-0 z-30 shadow-[0_-1px_2px_rgba(0,0,0,0.05)] border-t-0 before:absolute before:inset-x-0 before:top-0 before:border-t before:border-slate-200">
               <TableRow className="hover:bg-slate-50">
                 <TableCell colSpan={7} className="font-medium text-right pr-6">
                   Tổng số: {tasks.length} công việc
