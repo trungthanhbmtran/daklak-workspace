@@ -392,6 +392,9 @@ export class TasksService {
 
     if (rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED')) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || null, newValue: { reason: rejectReason } } });
+      await this.prisma.taskParticipant.deleteMany({
+        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
+      });
     }
 
     if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
@@ -436,6 +439,15 @@ export class TasksService {
       const participants = this.shared.buildParticipantsData(id, data);
       if (participants.length > 0) await tx.taskParticipant.createMany({ data: participants, skipDuplicates: true });
       if (rawTask.status === 'TEMPLATE') await tx.task.update({ where: { id }, data: { status: 'TODO' } });
+    });
+
+    await this.prisma.taskHistory.create({
+      data: {
+        taskId: id,
+        action: 'Giao việc',
+        actorCode: data?.currentEmployeeCode || null,
+        newValue: { assigneeCode: data.assigneeCode, coassigneeCodes: data.coassigneeCodes }
+      }
     });
 
     const result = await this.toResponse(await this.findTaskOrFail(id));
@@ -759,8 +771,21 @@ export class TasksService {
 
     if (!leadCode && coordinatorCodes.length === 0) {
       if (message) await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Xin phối hợp', actorCode: requesterCode || null, newValue: { message } } });
+      await this.prisma.taskParticipant.deleteMany({
+        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
+      });
+      await this.prisma.task.update({ where: { id }, data: { status: 'TODO' } });
       return { success: true, data: await this.toResponse(await this.findTaskOrFail(id), data) };
     }
+
+    await this.prisma.taskHistory.create({
+      data: {
+        taskId: id,
+        action: 'Xin phối hợp',
+        actorCode: requesterCode || null,
+        newValue: { message, leadCode, coordinatorCodes }
+      }
+    });
 
     await this.prisma.$transaction(async (tx) => {
       if (leadCode) {
