@@ -23,17 +23,33 @@ export class TaskHistoryService {
       orderBy: { createdAt: 'desc' }
     });
 
-    const actorCodes = [...new Set(history.map(h => h.actorCode).filter(Boolean))] as string[];
-    const employees = await this.prisma.employee.findMany({
-      where: { employeeCode: { in: actorCodes } },
-      select: { employeeCode: true, fullName: true }
+    const employeeCodes = new Set<string>();
+    history.forEach(h => {
+      if (h.actorCode) employeeCodes.add(h.actorCode);
+      const val = h.newValue as any;
+      if (val?.assigneeCode) employeeCodes.add(val.assigneeCode);
+      if (val?.coassigneeCodes) val.coassigneeCodes.forEach((c: string) => employeeCodes.add(c));
     });
-    const empMap = new Map(employees.map(e => [e.employeeCode, e.fullName]));
 
-    const mappedHistory = history.map(h => ({
-      ...h,
-      actorName: h.actorCode ? empMap.get(h.actorCode) : null
-    }));
+    const employees = await this.prisma.employee.findMany({
+      where: { employeeCode: { in: Array.from(employeeCodes) } },
+      select: { employeeCode: true, fullName: true, avatar: true }
+    });
+    const empMap = new Map(employees.map(e => [e.employeeCode, e]));
+
+    const mappedHistory = history.map(h => {
+      const val = h.newValue as any;
+      const assigneeName = val?.assigneeCode ? empMap.get(val.assigneeCode)?.fullName || val.assigneeCode : null;
+      const coassigneeNames = val?.coassigneeCodes ? val.coassigneeCodes.map((c: string) => empMap.get(c)?.fullName || c) : null;
+
+      return {
+        ...h,
+        actorName: h.actorCode ? empMap.get(h.actorCode)?.fullName : null,
+        actorAvatar: h.actorCode ? empMap.get(h.actorCode)?.avatar : null,
+        assigneeName,
+        coassigneeNames
+      };
+    });
 
     return {
       success: true,

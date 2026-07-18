@@ -7,12 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
 import {
-  BellRing, MessageSquare, Send, CheckCircle2, Clock, History,
-  ArrowRightCircle, FileText, AlertCircle, Loader2, X, Repeat, CalendarClock, Briefcase
+  BellRing, MessageSquare, CheckCircle2,
+  ArrowRightCircle, Repeat, Briefcase
 } from "lucide-react";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -22,17 +19,11 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-import { CreateTaskDialog } from "./create-task-dialog";
-import { CreateStepDialog } from "./create-step-dialog";
-import { useState, useEffect } from "react";
-import {
-  useTaskComments, useAddComment,
-  useTaskSubtasks, useTaskSteps,
-  useTaskHistory, useUpdateStatus,
-  useUpdateProgress, useUpdateStep, useTaskDetail, useRequestCoordination
-} from "../../hooks/useTasks";
+import { useUpdateStatus, useTaskDetail, useRequestCoordination, useTaskComments } from "../../hooks/useTasks";
 import { toast } from "sonner";
-import { useUser } from "@/hooks/useUser";
+import { TaskProcessingTab } from "./task-detail-processing-tab";
+import { TaskDiscussionTab } from "./task-detail-discussion-tab";
+import { TaskHistoryTab } from "./task-detail-history-tab";
 
 interface TaskDetailDrawerProps {
   task: HrmTask;
@@ -41,65 +32,19 @@ interface TaskDetailDrawerProps {
 }
 
 export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerProps) {
-  const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
-  const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const [reportText, setReportText] = useState("");
-
   const taskId = Number(task.id);
 
   // ── Queries ──
-  const { user } = useUser();
   const { data: detailData } = useTaskDetail(taskId);
+  const { data: commentsData } = useTaskComments(taskId);
   const currentTask = (detailData as any)?.data ?? task;
-  const isSubTask = !!currentTask.parentId;
   const isCompleted = currentTask.status?.toUpperCase() === "COMPLETED" || currentTask.status?.toUpperCase() === "DONE";
   const isAssigned = (currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('IN_PROGRESS'));
-
-  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
-  const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(taskId);
-  const { data: stepsData, isLoading: stepsLoading } = useTaskSteps(taskId);
-  const { data: historyData, isLoading: historyLoading } = useTaskHistory(taskId);
-
   const comments: any[] = (commentsData as any)?.data ?? [];
-  const subTasks: HrmTask[] = (subtasksData as any)?.data ?? currentTask.subTasks ?? [];
-  const steps: any[] = (stepsData as any)?.data ?? currentTask.steps ?? [];
-  const history: any[] = (historyData as any)?.data ?? [];
 
   // ── Mutations ──
-  const addComment = useAddComment(taskId);
   const updateStatus = useUpdateStatus(taskId);
-  const updateProgress = useUpdateProgress(taskId);
-  const updateStep = useUpdateStep(taskId);
   const requestCoordination = useRequestCoordination(taskId);
-
-  const handleSendComment = async () => {
-    if (!commentText.trim()) return;
-    try {
-      await addComment.mutateAsync(commentText.trim());
-      setCommentText("");
-    } catch { /* handled in hook */ }
-  };
-
-  const handleSaveReport = async () => {
-    if (!reportText.trim()) {
-      toast.info("Vui lòng nhập nội dung báo cáo");
-      return;
-    }
-    try {
-      if (reportText.trim()) {
-        await addComment.mutateAsync(`📋 Báo cáo tiến độ: ${reportText.trim()}`);
-        setReportText("");
-      }
-    } catch { /* handled in hooks */ }
-  };
-
-  const handleComplete = async () => {
-    try {
-      await updateStatus.mutateAsync({ status: "COMPLETED" });
-      toast.success("Đã hoàn thành công việc");
-    } catch { /* handled */ }
-  };
 
   const handleAcceptTask = async () => {
     try {
@@ -125,44 +70,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
       await requestCoordination.mutateAsync({ message: reason });
     } catch { /* handled */ }
   };
-
-  const handleToggleStep = async (step: any) => {
-    const newStatus = step.status === "COMPLETED" ? "TODO" : "COMPLETED";
-    await updateStep.mutateAsync({ stepId: Number(step.id), payload: { status: newStatus } });
-  };
-
-  // ── Timeline Builder ──
-  const buildTimeline = () => {
-    if (history.length > 0) {
-      return history.map((h: any) => ({
-        id: h.id,
-        title: (h.actorName || "Hệ thống") + " đã " + (h.action?.toLowerCase() || h.description || "thao tác"),
-        time: h.createdAt,
-        icon: History,
-        iconColor: "text-slate-500",
-        content: h.note || h.detail || h.newValue?.reason || h.newValue?.message || "",
-      })).sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
-    }
-    // Fallback timeline từ status task
-    const timeline: any[] = [];
-    timeline.push({ id: "t1", title: `Giao việc cho ${currentTask.assignee?.fullName ?? "người xử lý"}`, time: currentTask.createdAt, icon: Clock, iconColor: "text-blue-500", content: `Nội dung: ${currentTask.description}` });
-    if (currentTask.status?.toUpperCase() !== "DRAFT" && currentTask.status?.toUpperCase() !== "ASSIGNED" && currentTask.status?.toUpperCase() !== "TODO") {
-      timeline.push({ id: "t2", title: "Bắt đầu xử lý", time: currentTask.startDate, icon: ArrowRightCircle, iconColor: "text-orange-500", content: "Đã tiếp nhận và đang xử lý." });
-    }
-    if (currentTask.status?.toUpperCase() === "PENDING_APPROVAL" || currentTask.status?.toUpperCase() === "COMPLETED") {
-      timeline.push({ id: "t3", title: "Báo cáo kết quả", time: currentTask.updatedAt, icon: FileText, iconColor: "text-slate-600", content: "Đã báo cáo tiến độ và gửi yêu cầu phê duyệt." });
-    }
-    const isOverdue = new Date(currentTask.dueDate) < (currentTask.completedAt ? new Date(currentTask.completedAt) : new Date());
-    if (isOverdue && currentTask.status?.toUpperCase() !== "COMPLETED") {
-      timeline.push({ id: "t4", title: "Quá hạn", time: currentTask.dueDate, icon: AlertCircle, iconColor: "text-red-500", content: "Công việc đã vượt quá thời hạn quy định." });
-    }
-    if (currentTask.status?.toUpperCase() === "COMPLETED") {
-      timeline.push({ id: "t5", title: "Hoàn thành", time: currentTask.completedAt || currentTask.updatedAt, icon: CheckCircle2, iconColor: "text-green-500", content: "Đã hoàn thành toàn bộ công việc." });
-    }
-    return timeline.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-  };
-
-  const timelineEvents = buildTimeline();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -299,279 +206,28 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
             {/* ── Tab Xử lý & Cập nhật ── */}
             <TabsContent value="processing" className="mt-0 space-y-6">
-
-              {/* Chỉ cho phép thực hiện các nghiệp vụ khi đã nhận việc (không còn là ASSIGNED) */}
-              {!isAssigned && (
-                <>
-                  {/* Nhiệm vụ con */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
-                      {currentTask.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
-                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
-                          + Tạo nhiệm vụ con
-                        </Button>
-                      )}
-                    </div>
-
-                    {subtasksLoading ? (
-                      <div className="space-y-2">
-                        {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
-                      </div>
-                    ) : subTasks.length > 0 ? (
-                      <div className="border rounded-md divide-y bg-white">
-                        {subTasks.map((subTask: HrmTask) => (
-                          <div key={subTask.id} className="flex items-center justify-between p-3">
-                            <div className="flex items-center gap-3">
-                              {subTask.status?.toUpperCase() === "COMPLETED" ? (
-                                <CheckCircle2 className="w-5 h-5 text-green-500" />
-                              ) : subTask.status?.toUpperCase() === "IN_PROGRESS" ? (
-                                <Clock className="w-5 h-5 text-blue-500" />
-                              ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
-                              )}
-                              <div>
-                                <p className={`text-sm ${subTask.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
-                                  {subTask.title}
-                                </p>
-                                <div className="flex items-center gap-3 mt-1">
-                                  {subTask.dueDate && (
-                                    <p className="text-xs text-slate-500 flex items-center">
-                                      <Clock className="w-3 h-3 mr-1" />
-                                      Hạn: {safeFormatDate(subTask.dueDate, "dd/MM/yyyy")}
-                                    </p>
-                                  )}
-                                  {(subTask.assignee || subTask.assigneeDepartment) && (
-                                    <p className="text-xs text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full">
-                                      {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
-                                    </p>
-                                  )}
-                                  {subTask.status?.toUpperCase() !== "COMPLETED" && subTask.progress !== undefined && (
-                                    <p className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium">
-                                      Tiến độ: {subTask.progress}%
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
-                        Chưa có nhiệm vụ con nào.
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bước thực hiện */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-sm">Các bước thực hiện (Checklist nội bộ)</h3>
-                      {currentTask.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
-                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
-                          + Thêm bước
-                        </Button>
-                      )}
-                    </div>
-
-                    {stepsLoading ? (
-                      <div className="space-y-2">
-                        {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 w-full rounded-md" />)}
-                      </div>
-                    ) : steps.length > 0 ? (
-                      <div className="border rounded-md divide-y bg-white">
-                        {steps.map((step: any) => (
-                          <div key={step.id} className="flex items-center justify-between p-3">
-                            <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => handleToggleStep(step)}
-                                disabled={isCompleted || updateStep.isPending}
-                                className="shrink-0 focus:outline-none"
-                              >
-                                {step.status?.toUpperCase() === "COMPLETED" ? (
-                                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                ) : (
-                                  <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
-                                )}
-                              </button>
-                              <div className="flex flex-col">
-                                <p className={`text-sm ${step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
-                                  {step.title}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  {step.assigneeName && (
-                                    <span className="text-[11px] text-slate-500 flex items-center">
-                                      👤 {step.assigneeName}
-                                    </span>
-                                  )}
-                                  {step.baseScore > 0 && (
-                                    <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium">
-                                      +{step.baseScore} điểm KPI
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
-                        Chưa có kế hoạch chi tiết (Các bước thực hiện nội bộ).
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Cập nhật tiến độ */}
-                  {!isCompleted && (
-                    <div className="space-y-4 bg-white p-4 rounded-lg border">
-                      <h3 className="font-medium text-sm">Báo cáo & Cập nhật</h3>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-slate-500">
-                          <span>Tiến độ hiện tại (Tự động đánh giá)</span>
-                          <span className="font-semibold text-blue-600">{currentTask.progress ?? 0}%</span>
-                        </div>
-                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${currentTask.progress ?? 0}%` }} />
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          Tiến độ được hệ thống tự động tính toán dựa trên mức độ hoàn thành của các Bước thực hiện và Nhiệm vụ con.
-                        </p>
-                      </div>
-
-                      <Textarea
-                        placeholder="Nhập nội dung báo cáo tiến độ / kết quả..."
-                        className="min-h-[100px]"
-                        value={reportText}
-                        onChange={(e) => setReportText(e.target.value)}
-                      />
-                      <div className="flex justify-between items-center">
-                        <Button variant="outline" size="sm">Đính kèm file</Button>
-                        <div className="space-x-2">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={handleSaveReport}
-                            disabled={updateProgress.isPending || addComment.isPending}
-                          >
-                            {(updateProgress.isPending || addComment.isPending) ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                            Lưu tiến độ
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleComplete}
-                            disabled={updateStatus.isPending}
-                          >
-                            {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                            Báo cáo hoàn thành
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tài liệu đính kèm */}
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-sm text-slate-500">Tài liệu đính kèm</h3>
-                    <div className="text-sm text-slate-500 italic">Chưa có tài liệu nào</div>
-                  </div>
-                </>
-              )}
+              <TaskProcessingTab
+                taskId={taskId}
+                currentTask={currentTask}
+                isCompleted={isCompleted}
+                isAssigned={isAssigned}
+              />
             </TabsContent>
 
             {/* ── Tab Trao đổi ── */}
             <TabsContent value="discussion" className="mt-0 h-full flex flex-col">
-              <div className="flex-1 space-y-4 mb-4">
-                {commentsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2].map(i => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
-                  </div>
-                ) : comments.length === 0 ? (
-                  <div className="text-center text-slate-500 italic py-8">
-                    Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
-                  </div>
-                ) : (
-                  comments.length === 0 ? (
-                    <div className="text-center text-slate-500 italic py-8">
-                      Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
-                    </div>
-                  ) : (
-                    comments.map((comment: any) => (
-                      <div key={comment.id || comment.createdAt} className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
-                          {(comment.authorName || comment.user?.fullName || "U")?.[0]?.toUpperCase()}
-                        </div>
-                        <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="font-medium text-sm">{comment.authorName || comment.user?.fullName || "Người dùng"}</span>
-                            <span className="text-xs text-slate-500">
-                              {safeFormatDate(comment.createdAt, "dd/MM HH:mm")}
-                            </span>
-                          </div>
-                          <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
-                        </div>
-                      </div>
-                    ))
-                  )
-                )}
-              </div>
-
-              <div className="mt-auto flex gap-2">
-                {currentTask.allowedActions?.includes('CHAT') ? (
-                  <>
-                    <Textarea
-                      placeholder="Nhập nội dung trao đổi..."
-                      className="min-h-[40px] h-[40px] resize-none"
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
-                    />
-                    <Button
-                      size="icon"
-                      className="shrink-0"
-                      onClick={handleSendComment}
-                      disabled={addComment.isPending || !commentText.trim()}
-                    >
-                      {addComment.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    </Button>
-                  </>
-                ) : (
-                  <div className="w-full text-center text-slate-400 text-sm py-2 italic border border-dashed rounded-md bg-slate-50">
-                    Bạn không có quyền tham gia thảo luận ở bước này.
-                  </div>
-                )}
-              </div>
+              <TaskDiscussionTab
+                taskId={taskId}
+                allowedActions={currentTask.allowedActions}
+              />
             </TabsContent>
 
             {/* ── Tab Lịch sử ── */}
             <TabsContent value="history" className="mt-0">
-              {historyLoading ? (
-                <div className="space-y-4 mt-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" />)}
-                </div>
-              ) : (
-                <div className="relative pl-6 border-l-2 border-slate-200 space-y-8 pb-4 ml-2 mt-4">
-                  {timelineEvents.map((event, index) => {
-                    const Icon = event.icon;
-                    return (
-                      <div key={event.id} className="relative">
-                        <div className="absolute -left-[33px] bg-white p-1">
-                          <Icon className={`w-4 h-4 ${event.iconColor}`} />
-                        </div>
-                        <p className="text-sm font-medium">{event.title}</p>
-                        <p className="text-xs text-slate-500 mt-1">{safeFormatDate(event.time, "dd/MM/yyyy HH:mm")}</p>
-                        {event.content && (
-                          <p className={`text-sm mt-2 p-3 rounded-md border ${index === 0 ? 'bg-slate-50 text-slate-600' : 'bg-white'}`}>
-                            {event.content}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <TaskHistoryTab
+                taskId={taskId}
+                currentTask={currentTask}
+              />
             </TabsContent>
 
             {/* ── Tab KPI ── */}
@@ -615,17 +271,6 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </TabsContent>
           </ScrollArea>
         </Tabs>
-        <CreateTaskDialog
-          open={isCreateSubTaskOpen}
-          onOpenChange={setIsCreateSubTaskOpen}
-          parentId={String(taskId)}
-        />
-
-        <CreateStepDialog
-          task={task}
-          open={isCreateStepOpen}
-          onOpenChange={setIsCreateStepOpen}
-        />
       </SheetContent>
     </Sheet>
   );

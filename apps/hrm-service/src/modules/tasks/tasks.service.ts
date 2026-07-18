@@ -316,6 +316,15 @@ export class TasksService {
         }
       }
 
+      await tx.taskHistory.create({
+        data: {
+          taskId: task.id,
+          action: 'Khởi tạo công việc',
+          actorCode: creatorCode,
+          newValue: { title: task.title, assigneeCode: data.assigneeCode || 'UNASSIGNED' }
+        }
+      });
+
       return task;
     });
 
@@ -395,10 +404,10 @@ export class TasksService {
       await this.prisma.taskParticipant.deleteMany({
         where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
       });
-    }
-
-    if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
+    } else if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || null } });
+    } else if (rawTask.status !== updateData.status) {
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode: actorCode || null, newValue: { status: updateData.status } } });
     }
 
     // Auto-progress từ workflow node hoặc default khi DONE
@@ -482,12 +491,31 @@ export class TasksService {
       data: { ...taskData, ...(Object.keys(kpiData).length > 0 && { kpiSettings: { upsert: { create: kpiData, update: kpiData } } }) },
       include: this.taskInclude,
     });
+
+    await this.prisma.taskHistory.create({
+      data: {
+        taskId: id,
+        action: 'Cập nhật thông tin',
+        actorCode: data?.currentEmployeeCode || null,
+        newValue: taskData
+      }
+    });
+
     return this.toResponse(t);
   }
 
   async updateTaskProgress(id: number, progress: number, actorCode?: string) {
     const p = Math.max(0, Math.min(100, Math.round(progress)));
     await this.prisma.task.update({ where: { id }, data: { progress: p } });
+
+    await this.prisma.taskHistory.create({
+      data: {
+        taskId: id,
+        action: 'Cập nhật tiến độ',
+        actorCode: actorCode || null,
+        newValue: { progress: p }
+      }
+    });
 
     const closure = await this.prisma.taskClosure.findFirst({ where: { descendantId: id, depth: 1 } });
     if (closure) {
