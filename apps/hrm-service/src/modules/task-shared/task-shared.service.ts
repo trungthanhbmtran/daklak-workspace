@@ -529,6 +529,12 @@ export class TaskSharedService {
       actions.push('EDIT');
     }
 
+    if (access.isAssignee && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'MỚI GIAO')) {
+      actions.push('RECEIVE');
+      actions.push('IN_PROGRESS');
+      actions.push('REJECT');
+    }
+
     // Nếu người chủ trì giao việc, họ có thể chỉnh sửa/xóa khi task chưa bắt đầu
     if (access.isOwner && (t.status === 'DRAFT' || t.status === 'ASSIGNED')) {
       actions.push('EDIT');
