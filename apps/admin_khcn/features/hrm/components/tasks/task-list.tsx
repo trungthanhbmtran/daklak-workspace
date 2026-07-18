@@ -23,27 +23,16 @@ const safeFormatDate = (date: any, fmt: string) => {
 };
 
 
+import { translateTaskStatus, getTaskStatusColor } from "./task-utils";
+
 // ── Badge helpers ──────────────────────────────────────────────────────────────
 
 const getStatusBadge = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "MỚI GIAO":
-      return <Badge variant="outline" className="bg-slate-100">Mới giao</Badge>;
-    case "ĐANG XỬ LÝ":
-      return <Badge variant="default" className="bg-blue-500">Đang xử lý</Badge>;
-    case "CHỜ DUYỆT":
-      return <Badge variant="default" className="bg-orange-500">Chờ duyệt</Badge>;
-    case "HOÀN THÀNH":
-      return <Badge variant="default" className="bg-green-500">Hoàn thành</Badge>;
-    case "QUÁ HẠN":
-      return <Badge variant="destructive">Quá hạn</Badge>;
-    case "BỊ TỪ CHỐI":
-      return <Badge variant="destructive" className="bg-red-700">Bị từ chối</Badge>;
-    case "NHÁP":
-      return <Badge variant="secondary">Nháp</Badge>;
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
+  return (
+    <Badge variant="outline" className={getTaskStatusColor(status)}>
+      {translateTaskStatus(status)}
+    </Badge>
+  );
 };
 
 const getPriorityBadge = (priority: string) => {

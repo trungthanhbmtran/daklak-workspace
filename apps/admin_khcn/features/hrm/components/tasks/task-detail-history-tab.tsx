@@ -4,6 +4,7 @@ import { useTaskHistory } from "../../hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { History, Clock, ArrowRightCircle, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
+import { translateTaskStatus } from "./task-utils";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -21,19 +22,11 @@ export function TaskHistoryTab({ taskId, currentTask }: { taskId: number; curren
       return history.map((h: any) => {
         let content = h.note || h.detail || h.newValue?.reason || h.newValue?.message || "";
 
-        const translateStatus = (status: string) => {
-          const map: Record<string, string> = {
-            TODO: "Cần làm", IN_PROGRESS: "Đang thực hiện", PENDING_APPROVAL: "Chờ phê duyệt",
-            COMPLETED: "Hoàn thành", RETURNED: "Bị trả lại", REJECTED: "Đã từ chối", CANCELLED: "Đã hủy", DRAFT: "Bản nháp"
-          };
-          return map[status?.toUpperCase()] || status;
-        };
-
         if (h.newValue?.progress !== undefined) {
           content += (content ? "\n" : "") + `Tiến độ mới: ${h.newValue.progress}%`;
         }
         if (h.newValue?.status) {
-          content += (content ? "\n" : "") + `Trạng thái mới: ${translateStatus(h.newValue.status)}`;
+          content += (content ? "\n" : "") + `Trạng thái mới: ${translateTaskStatus(h.newValue.status)}`;
         }
         if (h.action === "Cập nhật thông tin" && h.newValue) {
           if (h.newValue.title) content += (content ? "\n" : "") + `Tiêu đề: ${h.newValue.title}`;

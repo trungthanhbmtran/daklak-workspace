@@ -27,6 +27,7 @@ import { TaskHistoryTab } from "./task-detail-history-tab";
 import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
 import { TaskAssignDialog } from "./task-assign-dialog";
+import { translateTaskStatus, getTaskStatusColor } from "./task-utils";
 
 interface TaskDetailDrawerProps {
   task: HrmTask;
@@ -116,8 +117,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 </SheetDescription>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
-                <Badge variant={isCompleted ? "default" : "secondary"} className={isCompleted ? "bg-green-500" : ""}>
-                  {currentTask.status}
+                <Badge variant={isCompleted ? "default" : "outline"} className={isCompleted ? "bg-green-500 text-white" : getTaskStatusColor(currentTask.status || "")}>
+                  {translateTaskStatus(currentTask.status || "")}
                 </Badge>
                 <div className="flex gap-2">
                   {isAssigner && !isCompleted && (
