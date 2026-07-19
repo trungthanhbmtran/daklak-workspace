@@ -26,7 +26,7 @@ export function ServiceLayout({ children }: ServiceLayoutProps) {
         </Suspense>
 
         {/* Content area — scroll nội bộ do các page tự quản lý */}
-        <div className="flex flex-1 flex-col bg-muted/20 overflow-hidden min-h-0">
+        <div className="flex flex-1 flex-col bg-muted/20 overflow-hidden min-h-0 p-2 sm:p-4 lg:p-6">
           <Suspense fallback={
             <div className="flex flex-1 items-center justify-center h-full">
               <Spinner className="w-8 h-8 text-primary" />

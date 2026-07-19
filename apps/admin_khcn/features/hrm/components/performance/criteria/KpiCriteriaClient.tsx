@@ -290,7 +290,7 @@ export function KpiCriteriaClient() {
               {editingId ? "Cập nhật Tiêu chí" : "Tạo Tiêu chí mới"}
             </DialogTitle>
           </DialogHeader>
-          
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
@@ -455,7 +455,7 @@ export function KpiCriteriaClient() {
                   )}
                 />
               </div>
-              
+
               <DialogFooter className="px-6 py-4 border-t bg-muted/30">
                 <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
                   Hủy
