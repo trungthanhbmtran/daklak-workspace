@@ -6,13 +6,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCaption,
+  TableFooter
 } from "@/components/ui/table";
 import { ResponsiveTableProps } from './types';
 
-export default function DesktopTable<T>({ columns, data, keyExtractor }: ResponsiveTableProps<T>) {
+export default function DesktopTable<T>({ columns, data, keyExtractor, caption, footer }: ResponsiveTableProps<T>) {
   return (
-    <div className="w-full overflow-hidden rounded-md border">
+    <div className="w-full overflow-hidden">
       <Table>
+        {caption && <TableCaption>{caption}</TableCaption>}
         <TableHeader>
           <TableRow className="bg-muted/30">
             {columns.map((col, index) => (
@@ -24,7 +27,7 @@ export default function DesktopTable<T>({ columns, data, keyExtractor }: Respons
         </TableHeader>
         <TableBody>
           {data.map((row, rowIndex) => (
-            <TableRow key={keyExtractor(row)}>
+            <TableRow key={keyExtractor(row, rowIndex)}>
               {columns.map((col, colIndex) => (
                 <TableCell key={colIndex} className={col.className}>
                   {col.cell
@@ -37,6 +40,7 @@ export default function DesktopTable<T>({ columns, data, keyExtractor }: Respons
             </TableRow>
           ))}
         </TableBody>
+        {footer && <TableFooter>{footer}</TableFooter>}
       </Table>
     </div>
   );

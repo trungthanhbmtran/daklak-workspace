@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle2, Search, FileText, UserCheck, Award } from "lucide-react";
@@ -101,38 +101,34 @@ export function ReviewKpiClient() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead>Mã phiếu</TableHead>
-                <TableHead>Nhân viên</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-8">Đang tải...</TableCell></TableRow>
-              ) : evalsData?.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Không có phiếu KPI nào đang chờ duyệt.</TableCell></TableRow>
-              ) : (
-                evalsData?.map((ev: any) => (
-                  <TableRow key={ev.id}>
-                    <TableCell className="font-medium text-muted-foreground">#{ev.id}</TableCell>
-                    <TableCell className="font-bold">{ev.employeeName || ev.employeeCode}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">Chờ duyệt</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" onClick={() => setSelectedEvalId(ev.id)}>
-                        <UserCheck className="w-4 h-4 mr-2" /> Duyệt phiếu
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable
+            loading={isLoading}
+            data={evalsData || []}
+            keyExtractor={(ev) => String(ev.id)}
+            emptyMessage="Không có phiếu KPI nào đang chờ duyệt."
+            columns={[
+              {
+                header: "Mã phiếu",
+                cell: (ev: any) => <div className="font-medium text-muted-foreground">#{ev.id}</div>
+              },
+              {
+                header: "Nhân viên",
+                cell: (ev: any) => <div className="font-bold">{ev.employeeName || ev.employeeCode}</div>
+              },
+              {
+                header: "Trạng thái",
+                cell: () => <Badge variant="secondary">Chờ duyệt</Badge>
+              },
+              {
+                header: "Thao tác",
+                cell: (ev: any) => (
+                  <Button size="sm" onClick={() => setSelectedEvalId(ev.id)}>
+                    <UserCheck className="w-4 h-4 mr-2" /> Duyệt phiếu
+                  </Button>
+                )
+              }
+            ]}
+          />
         </CardContent>
       </Card>
 
@@ -152,59 +148,66 @@ export function ReviewKpiClient() {
           ) : evalDetail && (
             <div className="space-y-6 mt-4">
               <div className="border rounded-xl overflow-hidden shadow-sm">
-                <Table>
-                  <TableHeader className="bg-muted/50">
-                    <TableRow>
-                      <TableHead className="w-[25%] font-bold">Tiêu chí</TableHead>
-                      <TableHead className="w-[10%] text-center font-bold">Điểm chuẩn</TableHead>
-                      <TableHead className="w-[30%] font-bold">Giải trình / Ghi chú của NV</TableHead>
-                      <TableHead className="w-[15%] text-center font-bold">Tự chấm</TableHead>
-                      <TableHead className="w-[20%] text-center font-bold bg-muted border-l">
-                        Lãnh đạo chấm
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {formDetails.map((detail: any, idx: number) => {
-                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
-                      return (
-                        <TableRow key={idx} className="hover:bg-muted/50">
-                          <TableCell>
-                            <div className="font-semibold">{detail.criteriaName}</div>
-                            <Text variant="small" className="text-[11px] text-muted-foreground mt-1 line-clamp-2 font-normal">{detail.description}</Text>
-                            {isAuto && <Badge variant="secondary" className="mt-2">Tự động (Máy tính)</Badge>}
-                            {detail.scoringMethod === 'INTEGRATION_API' && <Badge variant="destructive" className="mt-2 bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">Liên thông (LGSP)</Badge>}
-                          </TableCell>
-                          <TableCell className="text-center font-bold text-muted-foreground">{detail.baseScore}</TableCell>
-                          
-                          <TableCell>
-                            <Text variant="small" className="bg-background p-3 rounded-md border min-h-[60px] whitespace-pre-wrap leading-relaxed shadow-sm font-normal block">
-                              {detail.notes || <Text as="span" variant="small" className="text-muted-foreground italic font-normal">Không có giải trình</Text>}
-                            </Text>
-                          </TableCell>
-
-                          <TableCell className="text-center">
-                            <Text as="span" weight="bold" className="px-3 py-1 rounded-md text-primary bg-primary/10">
-                              {detail.selfScore || 0}
-                            </Text>
-                          </TableCell>
-
-                          <TableCell className="text-center border-l bg-muted/30">
-                            <Input 
-                              type="number" 
-                              className="text-center font-black text-lg h-12"
-                              value={detail.reviewerScore ?? ''} 
-                              onChange={(e) => handleUpdateDetail(detail.criteriaId, parseFloat(e.target.value))}
-                              placeholder="Nhập điểm..."
-                              max={detail.baseScore * 2}
-                              min={0}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <ResponsiveTable
+                  data={formDetails}
+                  keyExtractor={(detail) => String(detail.criteriaId)}
+                  columns={[
+                    {
+                      header: "Tiêu chí",
+                      className: "w-[25%]",
+                      cell: (detail: any) => (
+                        <div>
+                          <div className="font-semibold">{detail.criteriaName}</div>
+                          <Text variant="small" className="text-[11px] text-muted-foreground mt-1 line-clamp-2 font-normal">{detail.description}</Text>
+                          {detail.scoringMethod === 'AUTOMATIC' && <Badge variant="secondary" className="mt-2">Tự động (Máy tính)</Badge>}
+                          {detail.scoringMethod === 'INTEGRATION_API' && <Badge variant="destructive" className="mt-2 bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">Liên thông (LGSP)</Badge>}
+                        </div>
+                      )
+                    },
+                    {
+                      header: "Điểm chuẩn",
+                      className: "w-[10%] text-center",
+                      cell: (detail: any) => <div className="text-center font-bold text-muted-foreground">{detail.baseScore}</div>
+                    },
+                    {
+                      header: "Giải trình / Ghi chú của NV",
+                      className: "w-[30%]",
+                      cell: (detail: any) => (
+                        <Text variant="small" className="bg-background p-3 rounded-md border min-h-[60px] whitespace-pre-wrap leading-relaxed shadow-sm font-normal block">
+                          {detail.notes || <Text as="span" variant="small" className="text-muted-foreground italic font-normal">Không có giải trình</Text>}
+                        </Text>
+                      )
+                    },
+                    {
+                      header: "Tự chấm",
+                      className: "w-[15%] text-center",
+                      cell: (detail: any) => (
+                        <div className="text-center">
+                          <Text as="span" weight="bold" className="px-3 py-1 rounded-md text-primary bg-primary/10">
+                            {detail.selfScore || 0}
+                          </Text>
+                        </div>
+                      )
+                    },
+                    {
+                      header: "Lãnh đạo chấm",
+                      className: "w-[20%] text-center bg-muted border-l",
+                      cell: (detail: any) => (
+                        <div className="flex justify-center p-2">
+                          <Input 
+                            type="number" 
+                            className="text-center font-black text-lg h-12 w-full max-w-[120px]"
+                            value={detail.reviewerScore ?? ''} 
+                            onChange={(e) => handleUpdateDetail(detail.criteriaId, parseFloat(e.target.value))}
+                            placeholder="Nhập điểm..."
+                            max={detail.baseScore * 2}
+                            min={0}
+                          />
+                        </div>
+                      )
+                    }
+                  ]}
+                />
               </div>
 
               {/* Chi tiết Task */}
@@ -214,24 +217,24 @@ export function ReviewKpiClient() {
                     <CheckCircle2 className="w-4 h-4 text-primary" />
                     Bảng đối chiếu Công việc (Dùng cho Tiêu chí Tự động)
                   </Text>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Tên công việc</TableHead>
-                        <TableHead>Điểm chuẩn</TableHead>
-                        <TableHead>Điểm hệ thống tự tính (Thưởng/Phạt)</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {evalDetail.tasks.map((t: any) => (
-                        <TableRow key={t.taskId}>
-                          <TableCell className="text-xs font-medium">{t.title}</TableCell>
-                          <TableCell className="text-xs">{t.baseScore}</TableCell>
-                          <TableCell className="text-xs font-bold text-primary">{t.finalScore}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <ResponsiveTable
+                    data={evalDetail.tasks}
+                    keyExtractor={(t) => String(t.taskId)}
+                    columns={[
+                      {
+                        header: "Tên công việc",
+                        cell: (t: any) => <div className="text-xs font-medium">{t.title}</div>
+                      },
+                      {
+                        header: "Điểm chuẩn",
+                        cell: (t: any) => <div className="text-xs">{t.baseScore}</div>
+                      },
+                      {
+                        header: "Điểm hệ thống tự tính (Thưởng/Phạt)",
+                        cell: (t: any) => <div className="text-xs font-bold text-primary">{t.finalScore}</div>
+                      }
+                    ]}
+                  />
                 </div>
               )}
 

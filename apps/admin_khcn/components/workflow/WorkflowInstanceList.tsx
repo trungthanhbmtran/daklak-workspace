@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 
 // Xóa Pagination
 import { workflowApi, WorkflowInstance } from "@/features/workflow/api";
@@ -94,71 +94,64 @@ const WorkflowInstanceList = () => {
           }
         }}
       >
-        <Table className="min-w-[800px]">
-          <TableHeader className="bg-muted/40 sticky top-0 z-10 shadow-sm outline outline-1 outline-border/40">
-            <TableRow>
-              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Mã Instance</TableHead>
-              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Quy trình</TableHead>
-              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Trạng thái</TableHead>
-              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Bắt đầu lúc</TableHead>
-              <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-right">Thao tác</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-border/40">
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="animate-pulse">
-                  <TableCell colSpan={5} className="px-4 py-4"><div className="h-4 bg-muted rounded w-full" /></TableCell>
-                </TableRow>
-              ))
-            ) : instances.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="px-4 py-12 text-center text-muted-foreground italic">
-                  Chưa có dữ liệu thực thi nào được ghi nhận.
-                </TableCell>
-              </TableRow>
-            ) : (
-              <>
-                {instances.map((instance) => {
-                  return (
-                    <TableRow key={instance.id} className="hover:bg-muted/20 transition-colors group">
-                      <TableCell className="px-4 py-4 font-mono text-xs text-muted-foreground whitespace-normal wrap-break-words">
-                        {instance.id.substring(0, 13)}...
-                      </TableCell>
-                      <TableCell className="px-4 py-4 font-medium whitespace-normal wrap-break-words">
-                        {instance.workflowName || "Quy trình không xác định"}
-                      </TableCell>
-                      <TableCell className="px-4 py-4">
-                        <WorkflowStatusBadge status={instance.status} />
-                      </TableCell>
-                      <TableCell className="px-4 py-4 text-xs text-muted-foreground">
-                        {instance.createdAt ? format(new Date(instance.createdAt), "HH:mm dd/MM/yyyy", { locale: vi }) : "N/A"}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleViewHistory(instance)}
-                          title="Xem lịch sử"
-                        >
-                          <Clock className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {isFetchingNextPage && (
-                  <TableRow className="animate-pulse">
-                    <TableCell colSpan={5} className="px-4 py-4 text-center text-muted-foreground text-xs font-medium">
-                      Đang tải thêm...
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
-            )}
-          </TableBody>
-        </Table>
+        <ResponsiveTable
+          loading={isLoading}
+          data={instances}
+          keyExtractor={(instance) => instance.id}
+          emptyMessage="Chưa có dữ liệu thực thi nào được ghi nhận."
+          columns={[
+            {
+              header: "Mã Instance",
+              cell: (instance) => (
+                <div className="font-mono text-xs text-muted-foreground whitespace-normal wrap-break-words">
+                  {instance.id.substring(0, 13)}...
+                </div>
+              ),
+            },
+            {
+              header: "Quy trình",
+              cell: (instance) => (
+                <div className="font-medium whitespace-normal wrap-break-words">
+                  {instance.workflowName || "Quy trình không xác định"}
+                </div>
+              ),
+            },
+            {
+              header: "Trạng thái",
+              cell: (instance) => <WorkflowStatusBadge status={instance.status} />,
+            },
+            {
+              header: "Bắt đầu lúc",
+              cell: (instance) => (
+                <div className="text-xs text-muted-foreground">
+                  {instance.createdAt ? format(new Date(instance.createdAt), "HH:mm dd/MM/yyyy", { locale: vi }) : "N/A"}
+                </div>
+              ),
+            },
+            {
+              header: "Thao tác",
+              className: "text-right",
+              cell: (instance) => (
+                <div className="flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleViewHistory(instance)}
+                    title="Xem lịch sử"
+                  >
+                    <Clock className="h-4 w-4" />
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+        />
+        {isFetchingNextPage && (
+          <div className="p-4 text-center text-muted-foreground text-xs font-medium animate-pulse">
+            Đang tải thêm...
+          </div>
+        )}
       </div>
 
 

@@ -3,11 +3,12 @@
 import React from "react";
 import { PortalMenu } from "@/features/posts/types";
 import { CategoryItem } from "@/features/system-admin/categories/types";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MenuTableRow } from "./MenuTableRow";
-import { Loader2 } from "lucide-react";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
+import { Loader2, ChevronRight, Layers, FileText, ExternalLink, Layout, Edit, Trash2 } from "lucide-react";
 import { Text } from "@/components/ui/typography";
-
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 
 interface MenuTableProps {
   menus: PortalMenu[];
@@ -21,6 +22,26 @@ interface MenuTableProps {
   onToggleActive: (id: string, active: boolean) => void;
 }
 
+const getMenuTranslation = (menu: PortalMenu, langCode: string) => {
+  if (langCode === "vi") {
+    return { name: menu.name, description: menu.description || "" };
+  }
+  let parsedTranslations = menu.translations || {};
+  if (typeof parsedTranslations === "string") {
+    try {
+      parsedTranslations = JSON.parse(parsedTranslations);
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    } catch (e) {
+      parsedTranslations = {};
+    }
+  }
+  const trans = parsedTranslations[langCode];
+  return {
+    name: trans?.name || "",
+    description: trans?.description || "",
+  };
+};
+
 export function MenuTable({
   menus,
   loading,
@@ -32,55 +53,234 @@ export function MenuTable({
   onDelete,
   onToggleActive,
 }: MenuTableProps) {
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <Text className="text-muted-foreground font-semibold">Đang tải danh sách menu...</Text>
-      </div>
-    );
-  }
 
-  if (menus.length === 0) {
-    return (
-      <div className="text-center py-16 text-muted-foreground font-medium">
-        Không có menu nào được định nghĩa cho vị trí này.
-      </div>
-    );
-  }
+  const getVisibleMenus = React.useCallback(() => {
+    const flatten = (items: PortalMenu[], depth = 0): any[] => {
+      let result: any[] = [];
+      items.forEach((menu) => {
+        const hasChildren = menu.children && menu.children.length > 0;
+        const isExpanded = !!expandedItems[menu.id];
+        
+        result.push({ 
+          ...menu,
+          _treeInfo: { depth, hasChildren, isExpanded }
+        });
+        
+        if (isExpanded && hasChildren) {
+          result = result.concat(flatten(menu.children!, depth + 1));
+        }
+      });
+      return result;
+    };
+    return flatten(menus);
+  }, [menus, expandedItems]);
+
+  const visibleMenus = getVisibleMenus();
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader className="bg-muted/30 border-b border-border">
-          <TableRow>
-            <TableHead className="w-[350px] font-bold text-foreground">Tên Menu / Mô tả</TableHead>
-            <TableHead className="w-[120px] font-bold text-foreground">Bản dịch</TableHead>
-            <TableHead className="w-[120px] font-bold text-foreground">Vị trí</TableHead>
-            <TableHead className="w-[110px] font-bold text-foreground">Loại</TableHead>
-            <TableHead className="font-bold text-foreground">Liên kết</TableHead>
-            <TableHead className="w-[80px] text-center font-bold text-foreground">Thứ tự</TableHead>
-            <TableHead className="w-[100px] font-bold text-foreground">Hiển thị</TableHead>
-            <TableHead className="w-[100px] text-right font-bold text-foreground">Thao tác</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {menus.map((menu) => (
-            <MenuTableRow
-              key={menu.id}
-              menu={menu}
-              depth={0}
-              expandedItems={expandedItems}
-              toggleExpand={toggleExpand}
-              displayLang={displayLang}
-              languages={languages}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onToggleActive={onToggleActive}
-            />
-          ))}
-        </TableBody>
-      </Table>
+    <div className="overflow-hidden">
+      <ResponsiveTable
+        loading={loading}
+        data={visibleMenus}
+        keyExtractor={(menu) => menu.id}
+        emptyMessage="Không có menu nào được định nghĩa cho vị trí này."
+        columns={[
+          {
+            header: "Tên Menu / Mô tả",
+            className: "w-[350px]",
+            cell: (menu: any) => {
+              const { depth, hasChildren, isExpanded } = menu._treeInfo;
+              const trans = getMenuTranslation(menu, displayLang);
+              const isTranslated = displayLang === "vi" || !!trans.name;
+              const displayName = trans.name || menu.name;
+              const displayDescription = trans.description || menu.description;
+
+              return (
+                <div
+                  className="flex items-center min-h-[52px]"
+                  style={{ paddingLeft: `${depth * 28 + 12}px` }}
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    {hasChildren ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 p-0 hover:bg-primary/20 text-primary transition-transform duration-200"
+                        onClick={() => toggleExpand(menu.id)}
+                        style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <div className="w-6" /> // Spacer for alignment
+                    )}
+
+                    {depth > 0 && <div className="w-4 h-[2px] bg-border -ml-2 mr-1" />}
+
+                    <div
+                      className={`p-1.5 rounded ${!menu.isActive ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"
+                        }`}
+                    >
+                      {menu.type === "CATEGORY" && <Layers className="w-3.5 h-3.5" />}
+                      {menu.type === "POST" && <FileText className="w-3.5 h-3.5" />}
+                      {menu.type === "URL" && <ExternalLink className="w-3.5 h-3.5" />}
+                      {menu.type === "STATIC_PAGE" && <Layout className="w-3.5 h-3.5" />}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <Text as="span"
+                        className={` ${!menu.isActive ? "text-muted-foreground line-through" : "text-foreground font-semibold" } ${!isTranslated ? "italic text-muted-foreground font-medium" : ""}`}
+                      >
+                        {displayName}
+                        {!isTranslated && (
+                          <Text as="span"
+                            className="text-[9px] text-amber-600 font-bold ml-1.5 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase"
+                            title="Mục này chưa được cấu hình bản dịch"
+                          >
+                            Chưa dịch
+                          </Text>
+                        )}
+                      </Text>
+                      {displayDescription && (
+                        <Text as="span" className="text-[10px] text-muted-foreground truncate max-w-[200px] italic">
+                          {displayDescription}
+                        </Text>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+          },
+          {
+            header: "Bản dịch",
+            className: "w-[120px]",
+            cell: (menu: any) => (
+              <div className="flex items-center gap-1">
+                <Text as="span"
+                  className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-primary/10 text-primary border border-primary/20 cursor-default"
+                  title="Tiếng Việt (Gốc)"
+                >
+                  VI
+                </Text>
+                {(languages.length > 0 ? languages : [{ code: "en", name: "English" }])
+                  .filter((l) => l.code !== "vi")
+                  .map((lang) => {
+                    const hasTrans = !!getMenuTranslation(menu, lang.code).name;
+                    return hasTrans ? (
+                      <Text as="span"
+                        key={lang.code}
+                        className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
+                        title={`Đã dịch sang ${lang.name}`}
+                      >
+                        {lang.code.toUpperCase()}
+                      </Text>
+                    ) : (
+                      <Text as="span"
+                        key={lang.code}
+                        className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full border border-dashed border-border bg-muted/50 text-muted-foreground cursor-default"
+                        title={`Chưa dịch sang ${lang.name}`}
+                      >
+                        {lang.code.toUpperCase()}
+                      </Text>
+                    );
+                  })}
+              </div>
+            )
+          },
+          {
+            header: "Vị trí",
+            className: "w-[120px]",
+            cell: (menu: any) => (
+              <Badge
+                variant="secondary"
+                className={`text-[10px] uppercase font-bold py-0 h-5 ${menu.position === "HORIZONTAL"
+                    ? "bg-primary/10 text-primary border-primary/20"
+                    : menu.position === "VERTICAL"
+                      ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                      : "bg-muted text-muted-foreground border-border"
+                  }`}
+              >
+                {menu.position === "HORIZONTAL"
+                  ? "Ngang"
+                  : menu.position === "VERTICAL"
+                    ? "Dọc"
+                    : "Chân trang"}
+              </Badge>
+            )
+          },
+          {
+            header: "Loại",
+            className: "w-[110px]",
+            cell: (menu: any) => (
+              <Badge
+                variant="outline"
+                className="flex items-center w-fit gap-1 uppercase text-[9px] font-bold px-1.5 h-5 bg-background shadow-sm border-border text-muted-foreground"
+              >
+                {menu.type}
+              </Badge>
+            )
+          },
+          {
+            header: "Liên kết",
+            cell: (menu: any) => (
+              <div className="flex items-center gap-1.5 text-muted-foreground group">
+                <Text as="span" className="text-[11px] font-mono truncate bg-muted px-1.5 py-0.5 rounded border border-border group-hover:border-primary/50 group-hover:bg-primary/10 transition-colors">
+                  {menu.link || "—"}
+                </Text>
+              </div>
+            )
+          },
+          {
+            header: "Thứ tự",
+            className: "w-[80px] text-center",
+            cell: (menu: any) => (
+              <div className="text-center">
+                <Text as="span" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted/50 text-[11px] font-bold text-muted-foreground border border-border">
+                  {menu.order}
+                </Text>
+              </div>
+            )
+          },
+          {
+            header: "Hiển thị",
+            className: "w-[100px]",
+            cell: (menu: any) => (
+              <Switch
+                checked={menu.isActive}
+                className="data-[state=checked]:bg-primary scale-90"
+                onCheckedChange={() => onToggleActive(menu.id, menu.isActive)}
+              />
+            )
+          },
+          {
+            header: "Thao tác",
+            className: "w-[100px] text-right",
+            cell: (menu: any) => (
+              <div className="flex justify-end gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => onEdit(menu)}
+                  title="Chỉnh sửa"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => onDelete(menu.id)}
+                  title="Xóa"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            )
+          }
+        ]}
+      />
     </div>
   );
 }

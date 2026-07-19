@@ -17,7 +17,7 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 
 interface ChartRendererProps {
   type: 'bar' | 'line' | 'pie' | 'table';
@@ -43,27 +43,15 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, height = 300 }: 
     // If table, we can just render the raw data.
     const columns = Object.keys(data[0] || {}).slice(0, 6);
     return (
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-auto bg-white dark:bg-slate-950" style={{ maxHeight: height }}>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columns.map(col => (
-                <TableHead key={col} className="font-semibold text-slate-700 dark:text-slate-300">
-                  {col}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((row, i) => (
-              <TableRow key={i}>
-                {columns.map(col => (
-                  <TableCell key={col} className="text-slate-600 dark:text-slate-400">{String(row[col])}</TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950" style={{ maxHeight: height }}>
+        <ResponsiveTable
+          data={data}
+          keyExtractor={(_, i) => String(i)}
+          columns={columns.map(col => ({
+            header: col,
+            cell: (row: any) => <span className="text-slate-600 dark:text-slate-400">{String(row[col])}</span>
+          }))}
+        />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 import { Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,21 +121,7 @@ const TreeLines = ({
 
 // ── Loading skeleton ───────────────────────────────────────────────────────────
 
-const TaskListSkeleton = () => (
-  <>
-    {Array.from({ length: 6 }).map((_, i) => (
-      <TableRow key={i}>
-        <TableCell><Skeleton className="h-4 w-[280px]" /></TableCell>
-        <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-        <TableCell><Skeleton className="h-5 w-12" /></TableCell>
-        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-        <TableCell><Skeleton className="h-2 w-20" /></TableCell>
-        <TableCell><Skeleton className="h-7 w-16 ml-auto" /></TableCell>
-      </TableRow>
-    ))}
-  </>
-);
+
 
 // ── Map tree from backend ──────────────────────────────────────────────────────────
 
@@ -184,108 +170,29 @@ export function TaskList() {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
-  const renderTaskRow = (task: HrmTask, depth: number, isLastChild: boolean = false, ancestorsLast: boolean[] = []) => {
-    const isOverdue = new Date(task.dueDate) < new Date() && task.status?.toUpperCase() !== "HOÀN THÀNH";
-    const hasSubTasks = task.subTasks && task.subTasks.length > 0;
-    const isExpanded = expandedTasks[task.id];
+  const getVisibleTasks = React.useCallback(() => {
+    const flatten = (items: HrmTask[], depth = 0, ancestorsLast: boolean[] = []): any[] => {
+      let result: any[] = [];
+      items.forEach((task, index) => {
+        const isLastChild = index === items.length - 1;
+        const hasSubTasks = task.subTasks && task.subTasks.length > 0;
+        const isExpanded = !!expandedTasks[task.id];
 
-    return (
-      <React.Fragment key={task.id}>
-        <TableRow className={`hover:bg-slate-50/80 transition-colors ${depth > 0 ? "bg-slate-50/40" : ""}`}>
-          <TableCell className="font-medium relative" style={{ paddingLeft: `${depth * 2 + 1}rem` }}>
+        result.push({
+          ...task,
+          _treeInfo: { depth, isLastChild, ancestorsLast, hasSubTasks, isExpanded }
+        });
 
-            <TreeLines
-              depth={depth}
-              isLastChild={isLastChild}
-              ancestorsLast={ancestorsLast}
-              isExpanded={!!isExpanded}
-              hasSubTasks={!!hasSubTasks}
-            />
+        if (isExpanded && hasSubTasks) {
+          result = result.concat(flatten(task.subTasks!, depth + 1, [...ancestorsLast, isLastChild]));
+        }
+      });
+      return result;
+    };
+    return flatten(tasks);
+  }, [tasks, expandedTasks]);
 
-            <div className="flex items-center gap-1.5 relative z-10">
-              {hasSubTasks && (
-                <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white">
-                  <Button
-                    variant="ghost"
-                    onClick={() => toggleExpand(task.id)}
-                    className="w-5 h-5 p-0 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors"
-                  >
-                    {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                  </Button>
-                </div>
-              )}
-
-              <div className="flex flex-col py-1">
-                <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>
-                  {task.title}
-                </span>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  {task.metadata?.taskType === "REGULAR" && (
-                    <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-amber-50 text-amber-700 font-normal text-[10px] border-amber-200">
-                      <Briefcase className="w-3 h-3 mr-1" /> Thường xuyên
-                    </Badge>
-                  )}
-                  {task.metadata?.taskType === "PERIODIC" && (
-                    <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-emerald-50 text-emerald-700 font-normal text-[10px] border-emerald-200">
-                      <Repeat className="w-3 h-3 mr-1" /> Định kỳ
-                    </Badge>
-                  )}
-                  {task.sourceDocumentRef && depth === 0 && (
-                    <Badge variant="secondary" className="flex items-center px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
-                      <Clock className="w-3 h-3 mr-1" />
-                      VB: {task.sourceDocumentRef}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </TableCell>
-          <TableCell>{getStatusBadge(task.status)}</TableCell>
-          <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-          <TableCell>
-            <div className="flex flex-col">
-              <Text as="span" variant="small" weight="medium">
-                {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
-              </Text>
-              {task.coassigneeNames && task.coassigneeNames.length > 0 && (
-                <Text as="span" className="text-slate-500 mt-0.5">
-                  Phối hợp: {task.coassigneeNames.join(", ")}
-                </Text>
-              )}
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
-              {safeFormatDate(task.dueDate, "dd/MM/yyyy")}
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="flex flex-col gap-1 w-24">
-              <Text as="span" className="text-[10px] font-semibold text-slate-600 leading-none">{task.progress}%</Text>
-              <Progress value={task.progress} className="h-1.5" />
-            </div>
-          </TableCell>
-          <TableCell className="text-right">
-            <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
-              <Eye className="w-3 h-3 mr-1" />
-              Chi tiết
-            </Button>
-          </TableCell>
-        </TableRow>
-
-        {isExpanded && hasSubTasks && (
-          task.subTasks!.map((subTask, index) =>
-            renderTaskRow(
-              subTask,
-              depth + 1,
-              index === task.subTasks!.length - 1,
-              [...ancestorsLast, isLastChild]
-            )
-          )
-        )}
-      </React.Fragment>
-    );
-  };
+  const visibleTasks = getVisibleTasks();
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
@@ -314,55 +221,126 @@ export function TaskList() {
         <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
       </div>
 
-      <div className="flex-1 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col min-h-0 relative">
-        <div className="w-full flex-1 overflow-auto [&_[data-slot=table-container]]:overflow-visible [&_[data-slot=table-container]]:min-w-full relative scroll-smooth">
-          <Table className="min-w-[1100px] w-full border-collapse">
-            <TableHeader className="bg-slate-50 sticky top-0 z-30 shadow-sm border-b-0 after:absolute after:inset-x-0 after:bottom-0 after:border-b after:border-slate-200">
-              <TableRow className="bg-slate-50 hover:bg-slate-50">
-                <TableHead className="w-[400px] pl-6 font-semibold bg-slate-50">Tên công việc</TableHead>
-                <TableHead className="font-semibold bg-slate-50">Trạng thái</TableHead>
-                <TableHead className="font-semibold bg-slate-50">Mức độ</TableHead>
-                <TableHead className="font-semibold bg-slate-50">Người xử lý</TableHead>
-                <TableHead className="font-semibold bg-slate-50">Thời hạn</TableHead>
-                <TableHead className="font-semibold bg-slate-50">Tiến độ</TableHead>
-                <TableHead className="text-right font-semibold bg-slate-50 pr-6">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(() => {
-                if (isLoading) return <TaskListSkeleton />;
-
-                if (isError) return (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center h-32">
-                      <div className="flex flex-col items-center gap-2 text-slate-500">
-                        <AlertCircle className="w-8 h-8 text-red-400" />
-                        <Text as="span">Không thể tải danh sách công việc.</Text>
-                        <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
+      <div className="flex-1 min-h-0 relative bg-white rounded-lg shadow-sm border border-slate-200">
+        <ResponsiveTable
+          loading={isLoading}
+          data={visibleTasks}
+          keyExtractor={(task) => task.id}
+          emptyMessage={isError ? "Không thể tải danh sách công việc." : "Không tìm thấy công việc nào"}
+          columns={[
+            {
+              header: "Tên công việc",
+              className: "w-[400px]",
+              cell: (task: any) => {
+                const { depth, isLastChild, ancestorsLast, isExpanded, hasSubTasks } = task._treeInfo;
+                return (
+                  <div className="flex relative" style={{ paddingLeft: `${depth * 2}rem` }}>
+                    <TreeLines
+                      depth={depth}
+                      isLastChild={isLastChild}
+                      ancestorsLast={ancestorsLast}
+                      isExpanded={isExpanded}
+                      hasSubTasks={hasSubTasks}
+                    />
+                    <div className="flex items-center gap-1.5 relative z-10 w-full pl-6">
+                      {hasSubTasks && (
+                        <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white absolute -left-[2px]">
+                          <Button
+                            variant="ghost"
+                            onClick={() => toggleExpand(task.id)}
+                            className="w-5 h-5 p-0 flex items-center justify-center rounded-sm hover:bg-slate-200 transition-colors"
+                          >
+                            {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex flex-col py-1">
+                        <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>
+                          {task.title}
+                        </span>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          {task.metadata?.taskType === "REGULAR" && (
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-amber-50 text-amber-700 font-normal text-[10px] border-amber-200">
+                              <Briefcase className="w-3 h-3 mr-1" /> Thường xuyên
+                            </Badge>
+                          )}
+                          {task.metadata?.taskType === "PERIODIC" && (
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-emerald-50 text-emerald-700 font-normal text-[10px] border-emerald-200">
+                              <Repeat className="w-3 h-3 mr-1" /> Định kỳ
+                            </Badge>
+                          )}
+                          {task.sourceDocumentRef && depth === 0 && (
+                            <Badge variant="secondary" className="flex items-center px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
+                              <Clock className="w-3 h-3 mr-1" />
+                              VB: {task.sourceDocumentRef}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 );
-
-                if (tasks.length === 0) return (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-                      Không tìm thấy công việc nào
-                    </TableCell>
-                  </TableRow>
+              }
+            },
+            {
+              header: "Trạng thái",
+              cell: (task: any) => getStatusBadge(task.status)
+            },
+            {
+              header: "Mức độ",
+              cell: (task: any) => getPriorityBadge(task.priority)
+            },
+            {
+              header: "Người xử lý",
+              cell: (task: any) => (
+                <div className="flex flex-col">
+                  <Text as="span" variant="small" weight="medium">
+                    {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
+                  </Text>
+                  {task.coassigneeNames && task.coassigneeNames.length > 0 && (
+                    <Text as="span" className="text-slate-500 mt-0.5">
+                      Phối hợp: {task.coassigneeNames.join(", ")}
+                    </Text>
+                  )}
+                </div>
+              )
+            },
+            {
+              header: "Thời hạn",
+              cell: (task: any) => {
+                const isOverdue = new Date(task.dueDate) < new Date() && task.status?.toUpperCase() !== "HOÀN THÀNH";
+                return (
+                  <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
+                    {safeFormatDate(task.dueDate, "dd/MM/yyyy")}
+                  </div>
                 );
-
-                return tasks.map((task) => renderTaskRow(task, 0));
-              })()}
-            </TableBody>
-            <TableFooter className="bg-slate-50 text-slate-600 sticky bottom-0 z-30 shadow-[0_-1px_2px_rgba(0,0,0,0.05)] border-t-0 before:absolute before:inset-x-0 before:top-0 before:border-t before:border-slate-200">
-              <TableRow className="hover:bg-slate-50">
-                <TableCell colSpan={7} className="font-medium text-right pr-6">
-                  Tổng số: {tasks.length} công việc
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
+              }
+            },
+            {
+              header: "Tiến độ",
+              cell: (task: any) => (
+                <div className="flex flex-col gap-1 w-24">
+                  <Text as="span" className="text-[10px] font-semibold text-slate-600 leading-none">{task.progress}%</Text>
+                  <Progress value={task.progress} className="h-1.5" />
+                </div>
+              )
+            },
+            {
+              header: "Thao tác",
+              className: "text-right",
+              cell: (task: any) => (
+                <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
+                  <Eye className="w-3 h-3 mr-1" />
+                  Chi tiết
+                </Button>
+              )
+            }
+          ]}
+        />
+        <div className="bg-slate-50 text-slate-600 p-4 border-t border-slate-200 flex justify-end">
+          <div className="font-medium pr-6">
+            Tổng số: {tasks.length} công việc
+          </div>
         </div>
       </div>
 

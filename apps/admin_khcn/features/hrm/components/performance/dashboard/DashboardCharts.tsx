@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useDashboardStats } from "./useDashboardStats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 import { Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
@@ -65,28 +65,26 @@ export function DashboardCharts({ selectedPeriod }: { selectedPeriod: string }) 
           <CardDescription className="text-muted-foreground">Số liệu cụ thể từng nhóm</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow className="hover:bg-transparent border-border">
-                <TableHead className="text-muted-foreground">Tên Phòng/Ban</TableHead>
-                <TableHead className="text-center text-muted-foreground">Số lượng</TableHead>
-                <TableHead className="text-center text-muted-foreground">Điểm TB</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {chartData.map((row: any, idx: number) => (
-                <TableRow key={idx} className="hover:bg-muted/50 border-border">
-                  <TableCell className="font-semibold text-foreground">{row.departmentName}</TableCell>
-                  <TableCell className="text-center">
-                    <Badge variant="secondary">{row.totalEvaluations} nv</Badge>
-                  </TableCell>
-                  <TableCell className="text-center font-medium">
-                    <Text as="span" weight="bold" className="text-primary">{row.avgScore}</Text>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ResponsiveTable
+            data={chartData}
+            keyExtractor={(_, idx) => String(idx)}
+            columns={[
+              {
+                header: "Tên Phòng/Ban",
+                cell: (row: any) => <span className="font-semibold text-foreground">{row.departmentName}</span>
+              },
+              {
+                header: "Số lượng",
+                className: "text-center",
+                cell: (row: any) => <div className="text-center"><Badge variant="secondary">{row.totalEvaluations} nv</Badge></div>
+              },
+              {
+                header: "Điểm TB",
+                className: "text-center",
+                cell: (row: any) => <div className="text-center font-medium"><Text as="span" weight="bold" className="text-primary">{row.avgScore}</Text></div>
+              }
+            ]}
+          />
         </CardContent>
       </Card>
     </div>

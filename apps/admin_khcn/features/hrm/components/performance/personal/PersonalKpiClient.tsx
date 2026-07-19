@@ -6,7 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calculator, Award, CheckCircle2, Send } from "lucide-react";
@@ -203,46 +203,57 @@ export function PersonalKpiClient() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow>
-                    <TableHead className="w-[30%]">Tiêu chí</TableHead>
-                    <TableHead>Loại</TableHead>
-                    <TableHead className="text-center">Hệ số</TableHead>
-                    <TableHead className="text-center w-[120px]">Điểm tối đa</TableHead>
-                    <TableHead className="text-center w-[150px]">Tự đánh giá</TableHead>
-                    <TableHead className="text-center w-[150px]">Lãnh đạo chấm</TableHead>
-                    <TableHead className="w-[25%]">Giải trình / Ghi chú</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {formDetails.map((detail: any, idx: number) => {
-                    const isAuto = detail.scoringMethod === 'AUTOMATIC';
-                    const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
-                    const isReadonlyItem = isAuto || isIntegration;
-
-                    return (
-                      <TableRow key={idx}>
-                        <TableCell>
-                          <div className="font-semibold">{detail.criteriaName}</div>
-                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{detail.description}</div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={isAuto ? "default" : isIntegration ? "destructive" : "secondary"}>
-                            {isAuto ? "Tự động" : isIntegration ? "Liên thông" : "Thủ công"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-medium text-muted-foreground">{detail.weight}x</TableCell>
-                        <TableCell className="text-center font-bold">{detail.baseScore}</TableCell>
-                        
-                        {/* Tự chấm */}
-                        <TableCell className="text-center">
+              <ResponsiveTable
+                data={formDetails}
+                keyExtractor={(detail) => String(detail.criteriaId)}
+                columns={[
+                  {
+                    header: "Tiêu chí",
+                    className: "w-[30%]",
+                    cell: (detail: any) => (
+                      <div>
+                        <div className="font-semibold">{detail.criteriaName}</div>
+                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{detail.description}</div>
+                      </div>
+                    )
+                  },
+                  {
+                    header: "Loại",
+                    cell: (detail: any) => {
+                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
+                      const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
+                      return (
+                        <Badge variant={isAuto ? "default" : isIntegration ? "destructive" : "secondary"}>
+                          {isAuto ? "Tự động" : isIntegration ? "Liên thông" : "Thủ công"}
+                        </Badge>
+                      );
+                    }
+                  },
+                  {
+                    header: "Hệ số",
+                    className: "text-center",
+                    cell: (detail: any) => <div className="text-center font-medium text-muted-foreground">{detail.weight}x</div>
+                  },
+                  {
+                    header: "Điểm tối đa",
+                    className: "text-center w-[120px]",
+                    cell: (detail: any) => <div className="text-center font-bold">{detail.baseScore}</div>
+                  },
+                  {
+                    header: "Tự đánh giá",
+                    className: "text-center w-[150px]",
+                    cell: (detail: any) => {
+                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
+                      const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
+                      const isReadonlyItem = isAuto || isIntegration;
+                      return (
+                        <div className="flex justify-center">
                           {isReadonlyItem ? (
                             <span className={`font-bold px-3 py-1 rounded-md border ${isIntegration ? 'text-destructive bg-destructive/10 border-destructive/20' : 'text-primary bg-primary/10 border-primary/20'}`}>{detail.selfScore ?? 0}</span>
                           ) : (
                             <Input 
                               type="number" 
-                              className="text-center font-bold"
+                              className="text-center font-bold max-w-[100px]"
                               value={detail.selfScore ?? ''} 
                               onChange={(e) => handleUpdateDetail(detail.criteriaId, 'selfScore', parseFloat(e.target.value))}
                               disabled={isReadonly}
@@ -251,38 +262,47 @@ export function PersonalKpiClient() {
                               min={0}
                             />
                           )}
-                        </TableCell>
-
-                        {/* Lãnh đạo chấm */}
-                        <TableCell className="text-center">
-                          {detail.reviewerScore !== null ? (
-                            <span className="font-black text-primary text-lg">{detail.reviewerScore}</span>
-                          ) : (
-                            <span className="text-muted-foreground italic text-sm">Chưa duyệt</span>
-                          )}
-                        </TableCell>
-
-                        {/* Giải trình */}
-                        <TableCell>
-                          {isReadonlyItem ? (
-                            <div className="text-xs text-muted-foreground italic bg-muted p-2 rounded border">
-                              {detail.notes}
-                            </div>
-                          ) : (
-                            <Textarea 
-                              className="min-h-[60px] text-xs resize-none"
-                              value={detail.notes || ''}
-                              onChange={(e) => handleUpdateDetail(detail.criteriaId, 'notes', e.target.value)}
-                              disabled={isReadonly}
-                              placeholder="Nhập chứng minh..."
-                            />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                        </div>
+                      );
+                    }
+                  },
+                  {
+                    header: "Lãnh đạo chấm",
+                    className: "text-center w-[150px]",
+                    cell: (detail: any) => (
+                      <div className="text-center">
+                        {detail.reviewerScore !== null ? (
+                          <span className="font-black text-primary text-lg">{detail.reviewerScore}</span>
+                        ) : (
+                          <span className="text-muted-foreground italic text-sm">Chưa duyệt</span>
+                        )}
+                      </div>
+                    )
+                  },
+                  {
+                    header: "Giải trình / Ghi chú",
+                    className: "w-[25%]",
+                    cell: (detail: any) => {
+                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
+                      const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
+                      const isReadonlyItem = isAuto || isIntegration;
+                      return isReadonlyItem ? (
+                        <div className="text-xs text-muted-foreground italic bg-muted p-2 rounded border">
+                          {detail.notes}
+                        </div>
+                      ) : (
+                        <Textarea 
+                          className="min-h-[60px] text-xs resize-none"
+                          value={detail.notes || ''}
+                          onChange={(e) => handleUpdateDetail(detail.criteriaId, 'notes', e.target.value)}
+                          disabled={isReadonly}
+                          placeholder="Nhập chứng minh..."
+                        />
+                      );
+                    }
+                  }
+                ]}
+              />
             </CardContent>
             {!isReadonly && (
               <CardFooter className="bg-muted/50 border-t p-4 flex justify-end gap-3">
@@ -306,28 +326,28 @@ export function PersonalKpiClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tên công việc</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Điểm chuẩn</TableHead>
-                      <TableHead>Điểm chốt</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {evalDetail.tasks.map((task: any) => (
-                      <TableRow key={task.taskId}>
-                        <TableCell className="text-xs">{task.title}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-[10px]">{task.status}</Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">{task.baseScore}</TableCell>
-                        <TableCell className="text-xs font-bold text-primary">{task.finalScore}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <ResponsiveTable
+                  data={evalDetail.tasks}
+                  keyExtractor={(task) => String(task.taskId)}
+                  columns={[
+                    {
+                      header: "Tên công việc",
+                      cell: (task: any) => <div className="text-xs">{task.title}</div>
+                    },
+                    {
+                      header: "Trạng thái",
+                      cell: (task: any) => <Badge variant="outline" className="text-[10px]">{task.status}</Badge>
+                    },
+                    {
+                      header: "Điểm chuẩn",
+                      cell: (task: any) => <div className="text-xs">{task.baseScore}</div>
+                    },
+                    {
+                      header: "Điểm chốt",
+                      cell: (task: any) => <div className="text-xs font-bold text-primary">{task.finalScore}</div>
+                    }
+                  ]}
+                />
               </CardContent>
             </Card>
           )}

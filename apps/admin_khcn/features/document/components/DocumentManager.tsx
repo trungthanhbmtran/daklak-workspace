@@ -11,13 +11,49 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 
 interface DocumentManagerProps {
   onOpenUploadModal: () => void;
   onOpenConsultationModal: () => void;
   onOpenFinanceModal: () => void;
 }
+
+const mockDocs = [
+  {
+    id: 1,
+    soKyHieu: "125/QĐ-SKHCN",
+    trichYeu: "Quyết định về việc ban hành quy chế bảo đảm an toàn thông tin mạng trong hoạt động của cơ quan nhà nước.",
+    ngayBanHanh: "20/02/2026",
+    coQuan: "Sở Khoa học và Công nghệ",
+    trangThai: { text: "Đã xác thực VGCA", isVGCA: true }
+  },
+  {
+    id: 2,
+    soKyHieu: "456/UBND-TH",
+    trichYeu: "Công văn đôn đốc thực hiện nhiệm vụ chuyển đổi số quý I năm 2026 trên địa bàn tỉnh.",
+    ngayBanHanh: "18/02/2026",
+    coQuan: "UBND Tỉnh Đắk Lắk",
+    trangThai: { text: "Bản Scan (OCR)", isVGCA: false }
+  }
+];
+
+const mockFinance = [
+  {
+    id: 1,
+    tenBaoCao: "Quyết định công khai dự toán thu - chi ngân sách nhà nước năm 2026 của Sở KH&CN",
+    nam: "2026",
+    phanLoai: "Dự toán",
+    ngay: "05/01/2026"
+  },
+  {
+    id: 2,
+    tenBaoCao: "Báo cáo công khai số liệu quyết toán thu, chi ngân sách nhà nước năm 2025",
+    nam: "2025",
+    phanLoai: "Quyết toán",
+    ngay: "20/02/2026"
+  }
+];
 
 export default function DocumentManager({ onOpenUploadModal, onOpenConsultationModal, onOpenFinanceModal }: DocumentManagerProps) {
   return (
@@ -75,56 +111,50 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
             </div>
 
             <CardContent className="p-0">
-               <div className="overflow-x-auto">
-                 <Table>
-                   <TableHeader className="bg-muted/30">
-                     <TableRow>
-                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Số / Ký hiệu</TableHead>
-                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-[40%]">Trích yếu nội dung</TableHead>
-                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Cơ quan ban hành</TableHead>
-                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Trạng thái tệp</TableHead>
-                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-right">Thao tác</TableHead>
-                     </TableRow>
-                   </TableHeader>
-                   <TableBody className="bg-background">
-                     <TableRow className="hover:bg-muted/30 transition-colors group">
-                       <TableCell className="px-5 py-4 font-mono font-medium text-primary">125/QĐ-SKHCN</TableCell>
-                       <TableCell className="px-5 py-4">
-                         <p className="font-semibold text-foreground line-clamp-2">Quyết định về việc ban hành quy chế bảo đảm an toàn thông tin mạng trong hoạt động của cơ quan nhà nước.</p>
-                         <p className="text-[11px] text-muted-foreground mt-1">Ngày ban hành: 20/02/2026</p>
-                       </TableCell>
-                       <TableCell className="px-5 py-4">Sở Khoa học và Công nghệ</TableCell>
-                       <TableCell className="px-5 py-4">
-                         <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 shadow-none flex items-center gap-1 w-fit">
-                           <ShieldCheck className="h-3 w-3" /> Đã xác thực VGCA
+               <div className="w-full">
+                 <ResponsiveTable
+                   data={mockDocs}
+                   keyExtractor={(item) => item.id}
+                   columns={[
+                     {
+                       header: "Số / Ký hiệu",
+                       cell: (item) => <div className="font-mono font-medium text-primary">{item.soKyHieu}</div>,
+                     },
+                     {
+                       header: "Trích yếu nội dung",
+                       className: "w-[40%]",
+                       cell: (item) => (
+                         <div>
+                           <p className="font-semibold text-foreground line-clamp-2">{item.trichYeu}</p>
+                           <p className="text-[11px] text-muted-foreground mt-1">Ngày ban hành: {item.ngayBanHanh}</p>
+                         </div>
+                       ),
+                     },
+                     {
+                       header: "Cơ quan ban hành",
+                       cell: (item) => <div>{item.coQuan}</div>,
+                     },
+                     {
+                       header: "Trạng thái tệp",
+                       cell: (item) => (
+                         <Badge variant="outline" className={item.trangThai.isVGCA ? "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-none flex items-center gap-1 w-fit" : "bg-blue-50 text-blue-700 border-blue-200 shadow-none flex items-center gap-1 w-fit"}>
+                           {item.trangThai.isVGCA ? <ShieldCheck className="h-3 w-3" /> : <FileText className="h-3 w-3" />} {item.trangThai.text}
                          </Badge>
-                       </TableCell>
-                       <TableCell className="px-5 py-4 text-right">
-                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                       </TableCell>
-                     </TableRow>
-                     <TableRow className="hover:bg-muted/30 transition-colors group">
-                       <TableCell className="px-5 py-4 font-mono font-medium text-primary">456/UBND-TH</TableCell>
-                       <TableCell className="px-5 py-4">
-                         <p className="font-semibold text-foreground line-clamp-2">Công văn đôn đốc thực hiện nhiệm vụ chuyển đổi số quý I năm 2026 trên địa bàn tỉnh.</p>
-                         <p className="text-[11px] text-muted-foreground mt-1">Ngày ban hành: 18/02/2026</p>
-                       </TableCell>
-                       <TableCell className="px-5 py-4">UBND Tỉnh Đắk Lắk</TableCell>
-                       <TableCell className="px-5 py-4">
-                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 shadow-none flex items-center gap-1 w-fit">
-                           <FileText className="h-3 w-3" /> Bản Scan (OCR)
-                         </Badge>
-                       </TableCell>
-                       <TableCell className="px-5 py-4 text-right">
-                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                       </TableCell>
-                     </TableRow>
-                   </TableBody>
-                 </Table>
+                       ),
+                     },
+                     {
+                       header: "Thao tác",
+                       className: "text-right",
+                       cell: () => (
+                         <div className="flex justify-end">
+                           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                             <Eye className="h-4 w-4" />
+                           </Button>
+                         </div>
+                       ),
+                     }
+                   ]}
+                 />
                </div>
             </CardContent>
           </Card>
@@ -251,47 +281,48 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
               </Button>
             </div>
             
-            <div className="overflow-x-auto">
-               <Table>
-                 <TableHeader className="bg-muted/30">
-                   <TableRow>
-                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Tên báo cáo công khai</TableHead>
-                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-32">Năm TC</TableHead>
-                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-40">Phân loại</TableHead>
-                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-40">Ngày công khai</TableHead>
-                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-right w-32">Tệp đính kèm</TableHead>
-                   </TableRow>
-                 </TableHeader>
-                 <TableBody className="bg-background">
-                   <TableRow className="hover:bg-muted/20">
-                     <TableCell className="px-5 py-4 font-medium text-foreground">
-                       Quyết định công khai dự toán thu - chi ngân sách nhà nước năm 2026 của Sở KH&CN
-                     </TableCell>
-                     <TableCell className="px-5 py-4"><Badge variant="outline" className="font-mono">2026</Badge></TableCell>
-                     <TableCell className="px-5 py-4"><Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none">Dự toán</Badge></TableCell>
-                     <TableCell className="px-5 py-4 text-muted-foreground">05/01/2026</TableCell>
-                     <TableCell className="px-5 py-4 text-right">
-                       <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
-                         <Download className="h-4 w-4 mr-1.5" /> PDF
-                       </Button>
-                     </TableCell>
-                   </TableRow>
-                   <TableRow className="hover:bg-muted/20">
-                     <TableCell className="px-5 py-4 font-medium text-foreground">
-                       Báo cáo công khai số liệu quyết toán thu, chi ngân sách nhà nước năm 2025
-                     </TableCell>
-                     <TableCell className="px-5 py-4"><Badge variant="outline" className="font-mono">2025</Badge></TableCell>
-                     <TableCell className="px-5 py-4"><Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none">Quyết toán</Badge></TableCell>
-                     <TableCell className="px-5 py-4 text-muted-foreground">20/02/2026</TableCell>
-                     <TableCell className="px-5 py-4 text-right">
-                       <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
-                         <Download className="h-4 w-4 mr-1.5" /> PDF
-                       </Button>
-                     </TableCell>
-                   </TableRow>
-                 </TableBody>
-               </Table>
-            </div>
+             <div className="w-full">
+               <ResponsiveTable
+                 data={mockFinance}
+                 keyExtractor={(item) => item.id}
+                 columns={[
+                   {
+                     header: "Tên báo cáo công khai",
+                     cell: (item) => <div className="font-medium text-foreground">{item.tenBaoCao}</div>,
+                   },
+                   {
+                     header: "Năm TC",
+                     className: "w-32",
+                     cell: (item) => <Badge variant="outline" className="font-mono">{item.nam}</Badge>,
+                   },
+                   {
+                     header: "Phân loại",
+                     className: "w-40",
+                     cell: (item) => (
+                       <Badge className={item.phanLoai === "Dự toán" ? "bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none" : "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none"}>
+                         {item.phanLoai}
+                       </Badge>
+                     ),
+                   },
+                   {
+                     header: "Ngày công khai",
+                     className: "w-40",
+                     cell: (item) => <div className="text-muted-foreground">{item.ngay}</div>,
+                   },
+                   {
+                     header: "Tệp đính kèm",
+                     className: "text-right w-32",
+                     cell: () => (
+                       <div className="flex justify-end">
+                         <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
+                           <Download className="h-4 w-4 mr-1.5" /> PDF
+                         </Button>
+                       </div>
+                     ),
+                   }
+                 ]}
+               />
+             </div>
           </Card>
         </TabsContent>
       </Tabs>

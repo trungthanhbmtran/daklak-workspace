@@ -21,7 +21,10 @@ export function ResponsiveTable<T>({
   columns,
   data,
   keyExtractor,
-  emptyMessage = "Không có dữ liệu"
+  emptyMessage = "Không có dữ liệu",
+  loading = false,
+  caption,
+  footer
 }: ResponsiveTableProps<T>) {
   const isMobile = useIsMobile();
   const [mounted, setMounted] = useState(false);
@@ -31,9 +34,15 @@ export function ResponsiveTable<T>({
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    // Trạng thái chờ khởi tạo
-    return <div className="animate-pulse h-40 bg-muted/20 rounded-md border w-full"></div>;
+  if (!mounted || loading) {
+    // Trạng thái chờ khởi tạo hoặc đang tải API
+    return (
+      <div className="flex flex-col gap-2 w-full p-4 border rounded-md bg-card">
+         {[1, 2, 3, 4, 5].map(i => (
+           <div key={i} className="animate-pulse h-12 bg-muted/40 rounded-md w-full"></div>
+         ))}
+      </div>
+    );
   }
 
   if (!data || data.length === 0) {
@@ -45,10 +54,10 @@ export function ResponsiveTable<T>({
   }
 
   if (isMobile) {
-    return <MobileTable columns={columns} data={data} keyExtractor={keyExtractor} />;
+    return <MobileTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} footer={footer} />;
   }
 
-  return <DesktopTable columns={columns} data={data} keyExtractor={keyExtractor} />;
+  return <DesktopTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} footer={footer} />;
 }
 
 export * from './types';

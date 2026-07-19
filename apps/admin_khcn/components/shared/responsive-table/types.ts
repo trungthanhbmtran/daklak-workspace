@@ -11,6 +11,9 @@ export interface ColumnDef<T> {
 export interface ResponsiveTableProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
-  keyExtractor: (item: T) => string | number;
+  keyExtractor: (item: T, index: number) => string | number;
   emptyMessage?: string;
+  loading?: boolean;
+  caption?: React.ReactNode;
+  footer?: React.ReactNode;
 }

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
 import { ParsedEndpoint, getMethodColor } from "./EndpointTypes";
 
 interface EndpointEditorProps {
@@ -86,46 +86,52 @@ export const EndpointEditor = memo(({
               <TabsContent value="headers" className="h-full m-0 data-[state=active]:flex flex-col gap-2">
                 <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex-1 flex flex-col">
                   <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <Table>
-                      <TableHeader className="bg-slate-50 dark:bg-slate-900 sticky top-0">
-                        <TableRow>
-                          <TableHead className="w-[40%]">Key</TableHead>
-                          <TableHead className="w-[50%]">Value</TableHead>
-                          <TableHead className="w-[10%] text-center"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(!selectedEndpoint.headers || selectedEndpoint.headers.length === 0) ? (
-                          <TableRow><TableCell colSpan={3} className="h-24 text-center text-slate-400">Không có Headers</TableCell></TableRow>
-                        ) : (
-                          selectedEndpoint.headers.map((h, i) => (
-                            <TableRow key={i}>
-                              <TableCell className="p-2 border-r border-slate-200 dark:border-slate-800">
-                                <Input 
-                                  value={h.key} 
-                                  onChange={(e) => onItemChange('headers', i, 'key', e.target.value)} 
-                                  className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
-                                  placeholder="Header key..."
-                                />
-                              </TableCell>
-                              <TableCell className="p-2">
-                                <Input 
-                                  value={h.value} 
-                                  onChange={(e) => onItemChange('headers', i, 'value', e.target.value)} 
-                                  className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
-                                  placeholder="Header value..."
-                                />
-                              </TableCell>
-                              <TableCell className="p-2 text-center">
-                                <Button variant="ghost" size="icon" onClick={() => onRemoveItem('headers', i)} className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50">
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
+                    <ResponsiveTable
+                      data={selectedEndpoint.headers || []}
+                      keyExtractor={(_, i) => String(i)}
+                      emptyMessage="Không có Headers"
+                      columns={[
+                        {
+                          header: "Key",
+                          className: "w-[40%]",
+                          cell: (h: any, i: number) => (
+                            <div className="p-2 border-r border-slate-200 dark:border-slate-800 h-full flex items-center">
+                              <Input 
+                                value={h.key} 
+                                onChange={(e) => onItemChange('headers', i, 'key', e.target.value)} 
+                                className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
+                                placeholder="Header key..."
+                              />
+                            </div>
+                          )
+                        },
+                        {
+                          header: "Value",
+                          className: "w-[50%]",
+                          cell: (h: any, i: number) => (
+                            <div className="p-2 h-full flex items-center">
+                              <Input 
+                                value={h.value} 
+                                onChange={(e) => onItemChange('headers', i, 'value', e.target.value)} 
+                                className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
+                                placeholder="Header value..."
+                              />
+                            </div>
+                          )
+                        },
+                        {
+                          header: "",
+                          className: "w-[10%] text-center",
+                          cell: (h: any, i: number) => (
+                            <div className="p-2 text-center">
+                              <Button variant="ghost" size="icon" onClick={() => onRemoveItem('headers', i)} className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )
+                        }
+                      ]}
+                    />
                   </div>
                   <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
                     <Button variant="outline" size="sm" onClick={() => onAddItem('headers')} className="w-full text-xs h-8 border-dashed">
@@ -138,46 +144,52 @@ export const EndpointEditor = memo(({
               <TabsContent value="params" className="h-full m-0 data-[state=active]:flex flex-col gap-2">
                 <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex-1 flex flex-col">
                   <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <Table>
-                      <TableHeader className="bg-slate-50 dark:bg-slate-900 sticky top-0">
-                        <TableRow>
-                          <TableHead className="w-[40%]">Key</TableHead>
-                          <TableHead className="w-[50%]">Value</TableHead>
-                          <TableHead className="w-[10%] text-center"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(!selectedEndpoint.params || selectedEndpoint.params.length === 0) ? (
-                          <TableRow><TableCell colSpan={3} className="h-24 text-center text-slate-400">Không có Query Params</TableCell></TableRow>
-                        ) : (
-                          selectedEndpoint.params.map((p, i) => (
-                            <TableRow key={i}>
-                              <TableCell className="p-2 border-r border-slate-200 dark:border-slate-800">
-                                <Input 
-                                  value={p.key} 
-                                  onChange={(e) => onItemChange('params', i, 'key', e.target.value)} 
-                                  className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
-                                  placeholder="Param key..."
-                                />
-                              </TableCell>
-                              <TableCell className="p-2">
-                                <Input 
-                                  value={p.value} 
-                                  onChange={(e) => onItemChange('params', i, 'value', e.target.value)} 
-                                  className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
-                                  placeholder="Param value..."
-                                />
-                              </TableCell>
-                              <TableCell className="p-2 text-center">
-                                <Button variant="ghost" size="icon" onClick={() => onRemoveItem('params', i)} className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50">
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
+                    <ResponsiveTable
+                      data={selectedEndpoint.params || []}
+                      keyExtractor={(_, i) => String(i)}
+                      emptyMessage="Không có Query Params"
+                      columns={[
+                        {
+                          header: "Key",
+                          className: "w-[40%]",
+                          cell: (p: any, i: number) => (
+                            <div className="p-2 border-r border-slate-200 dark:border-slate-800 h-full flex items-center">
+                              <Input 
+                                value={p.key} 
+                                onChange={(e) => onItemChange('params', i, 'key', e.target.value)} 
+                                className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
+                                placeholder="Param key..."
+                              />
+                            </div>
+                          )
+                        },
+                        {
+                          header: "Value",
+                          className: "w-[50%]",
+                          cell: (p: any, i: number) => (
+                            <div className="p-2 h-full flex items-center">
+                              <Input 
+                                value={p.value} 
+                                onChange={(e) => onItemChange('params', i, 'value', e.target.value)} 
+                                className="font-mono h-8 bg-transparent border-transparent hover:border-slate-200 focus-visible:ring-1" 
+                                placeholder="Param value..."
+                              />
+                            </div>
+                          )
+                        },
+                        {
+                          header: "",
+                          className: "w-[10%] text-center",
+                          cell: (p: any, i: number) => (
+                            <div className="p-2 text-center">
+                              <Button variant="ghost" size="icon" onClick={() => onRemoveItem('params', i)} className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )
+                        }
+                      ]}
+                    />
                   </div>
                   <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
                     <Button variant="outline" size="sm" onClick={() => onAddItem('params')} className="w-full text-xs h-8 border-dashed">
