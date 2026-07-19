@@ -113,8 +113,12 @@ export function RoleForm({ roleId }: RoleFormProps) {
     saveMutation.mutate(payload);
   };
 
-  const onDelete = () => {
-    if (roleId) deleteMutation.mutate(roleId);
+  const onDelete = (reason?: string) => {
+    if (roleId) {
+      // In a real scenario, reason could be sent to the API
+      console.log("Deleting role with reason:", reason);
+      deleteMutation.mutate(roleId);
+    }
   };
 
   const onCancel = () => {
@@ -245,13 +249,14 @@ export function RoleForm({ roleId }: RoleFormProps) {
       <ConfirmDeleteModal
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={() => {
-          onDelete();
+        onConfirm={(reason) => {
+          onDelete(reason);
           setIsDeleteDialogOpen(false);
         }}
         title="Xóa vai trò"
         description={`Bạn có chắc chắn muốn xóa vai trò "${roleDetail?.name}"? Hành động này không thể hoàn tác.`}
         isDeleting={deleteMutation.isPending}
+        requireReason={true}
       />
     </Card>
   );

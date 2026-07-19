@@ -47,7 +47,7 @@ export function EmployeeListClient() {
 
   const handleSearch = () => setKeyword(searchInput.trim());
 
-  const handleDelete = () => {
+  const handleDelete = async (reason?: string) => {
     if (!deleteId) return;
     deleteEmployee(deleteId, {
       onSuccess: () => {
@@ -62,7 +62,7 @@ export function EmployeeListClient() {
   };
 
   return (
-    <div className="flex flex-col w-full min-w-0 min-h-[calc(100vh-80px)] bg-background p-6 md:p-10 space-y-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Danh sách nhân sự</h2>
@@ -102,7 +102,7 @@ export function EmployeeListClient() {
               <TableRow className="bg-muted/50 hover:bg-muted/50 border-border">
                 <TableHead className="font-semibold text-muted-foreground h-12">Nhân viên</TableHead>
                 <TableHead className="font-semibold text-muted-foreground">Vị trí công việc</TableHead>
-                <TableHead className="font-semibold text-muted-foreground text-center">Trạng thái</TableHead>
+                <TableHead className="hidden md:table-cell font-semibold text-muted-foreground text-center">Trạng thái</TableHead>
                 <TableHead className="text-right font-semibold text-muted-foreground">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
@@ -188,7 +188,7 @@ export function EmployeeListClient() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="hidden md:table-cell text-center">
                         <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                           Đang làm việc
                         </span>
@@ -263,6 +263,7 @@ export function EmployeeListClient() {
         onConfirm={handleDelete}
         isDeleting={isDeleting}
         description="Thao tác này sẽ xóa hoàn toàn hồ sơ nhân sự khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
+        requireReason={true}
       />
     </div>
   );

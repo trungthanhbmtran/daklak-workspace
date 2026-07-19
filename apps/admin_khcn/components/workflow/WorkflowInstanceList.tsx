@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import {
   Pagination,
@@ -79,46 +80,46 @@ const WorkflowInstanceList = () => {
       <Search placeholder="Tìm theo ID hoặc tên quy trình..." className="max-w-sm" />
 
       <div className="border border-border/60 rounded-xl overflow-x-auto bg-card w-full">
-        <table className="w-full table-fixed text-sm text-left">
-          <thead className="text-xs text-muted-foreground uppercase bg-muted/40 border-b">
-            <tr>
-              <th className="px-4 py-3 font-semibold w-[20%]">Mã Instance</th>
-              <th className="px-4 py-3 font-semibold w-[35%]">Quy trình</th>
-              <th className="px-4 py-3 font-semibold w-[20%]">Trạng thái</th>
-              <th className="px-4 py-3 font-semibold w-[15%]">Bắt đầu lúc</th>
-              <th className="px-4 py-3 font-semibold text-right w-[10%]">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/40">
+        <Table className="min-w-[800px]">
+          <TableHeader className="bg-muted/40">
+            <TableRow>
+              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Mã Instance</TableHead>
+              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Quy trình</TableHead>
+              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Trạng thái</TableHead>
+              <TableHead className="px-4 py-3 font-semibold text-xs uppercase">Bắt đầu lúc</TableHead>
+              <TableHead className="px-4 py-3 font-semibold text-xs uppercase text-right">Thao tác</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-border/40">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i} className="animate-pulse">
-                  <td colSpan={5} className="px-4 py-4"><div className="h-4 bg-muted rounded w-full" /></td>
-                </tr>
+                <TableRow key={i} className="animate-pulse">
+                  <TableCell colSpan={5} className="px-4 py-4"><div className="h-4 bg-muted rounded w-full" /></TableCell>
+                </TableRow>
               ))
             ) : instances.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground italic">
+              <TableRow>
+                <TableCell colSpan={5} className="px-4 py-12 text-center text-muted-foreground italic">
                   Chưa có dữ liệu thực thi nào được ghi nhận.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               instances.map((instance) => {
                 return (
-                  <tr key={instance.id} className="hover:bg-muted/20 transition-colors group">
-                    <td className="px-4 py-4 font-mono text-xs text-muted-foreground whitespace-normal wrap-break-words">
+                  <TableRow key={instance.id} className="hover:bg-muted/20 transition-colors group">
+                    <TableCell className="px-4 py-4 font-mono text-xs text-muted-foreground whitespace-normal wrap-break-words">
                       {instance.id.substring(0, 13)}...
-                    </td>
-                    <td className="px-4 py-4 font-medium whitespace-normal wrap-break-words">
+                    </TableCell>
+                    <TableCell className="px-4 py-4 font-medium whitespace-normal wrap-break-words">
                       {instance.workflowName || "Quy trình không xác định"}
-                    </td>
-                    <td className="px-4 py-4">
+                    </TableCell>
+                    <TableCell className="px-4 py-4">
                       <WorkflowStatusBadge status={instance.status} />
-                    </td>
-                    <td className="px-4 py-4 text-xs text-muted-foreground">
+                    </TableCell>
+                    <TableCell className="px-4 py-4 text-xs text-muted-foreground">
                       {instance.createdAt ? format(new Date(instance.createdAt), "HH:mm dd/MM/yyyy", { locale: vi }) : "N/A"}
-                    </td>
-                    <td className="px-4 py-4 text-right">
+                    </TableCell>
+                    <TableCell className="px-4 py-4 text-right">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -128,13 +129,13 @@ const WorkflowInstanceList = () => {
                       >
                         <Clock className="h-4 w-4" />
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {totalPages > 1 && (

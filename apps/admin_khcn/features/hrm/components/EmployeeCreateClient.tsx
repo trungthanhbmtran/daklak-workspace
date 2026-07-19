@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react"; // 1. Bỏ useEffect không cần thiết
+import { useState, useMemo, useRef } from "react";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import {
   ArrowLeft, Save, User, Camera,
   Loader2, Mail, Phone, CreditCard, Calendar,
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { hrmApi, hrmKeys } from "@/features/hrm";
@@ -21,6 +21,40 @@ import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const formSchema = z.object({
+  firstname: z.string().min(1, "Họ và đệm không được để trống"),
+  lastname: z.string().min(1, "Tên không được để trống"),
+  employeeCode: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  identityCard: z.string().optional(),
+  departmentId: z.number({ message: "Vui lòng chọn đơn vị" }),
+  jobTitleId: z.number().optional(),
+  civilServantRankId: z.number({ message: "Vui lòng chọn ngạch công chức" }),
+  partyTitleId: z.number().optional(),
+  startDate: z.string().optional(),
+  birthday: z.string().optional(),
+  avatar: z.string().optional(),
+});
 
 function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): any[] {
   for (const node of nodes || []) {
@@ -40,23 +74,28 @@ export function EmployeeCreateClient() {
   const searchTerm = searchParams.get('search') || "";
   const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    firstname: "", lastname: "", employeeCode: "", email: "",
-    phone: "", identityCard: "", 
-    departmentId: undefined as number | undefined, 
-    jobTitleId: undefined as number | undefined,
-    civilServantRankId: undefined as number | undefined, 
-    partyTitleId: undefined as number | undefined,
-    startDate: new Date().toISOString().slice(0, 10), birthday: "",
-    avatar: "", // Đây sẽ lưu File ID/Path sau khi upload thành công
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstname: "",
+      lastname: "",
+      employeeCode: "",
+      email: "",
+      phone: "",
+      identityCard: "",
+      startDate: new Date().toISOString().slice(0, 10),
+      birthday: "",
+      avatar: "",
+    },
   });
+
+  const departmentId = form.watch("departmentId");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 2. Sử dụng hook chuẩn: onSuccess lưu ID, previewUrl dùng để hiển thị UI
   const { isUploading, previewUrl, handleImageUpload } = useImageUpload({
     onSuccess: (fileId) => {
-      setForm(prev => ({ ...prev, avatar: fileId }));
+      form.setValue("avatar", fileId);
     }
   });
 
@@ -68,34 +107,29 @@ export function EmployeeCreateClient() {
   const units = useMemo(() => flattenUnits(Array.isArray(treeNodes) ? treeNodes : []), [treeNodes]);
 
   const { data: jobTitlesRes, isLoading: isLoadingJobs } = useQuery({
-    queryKey: ["organizations", "job-titles", form.departmentId],
-    queryFn: () => organizationApi.getJobTitles(form.departmentId),
-    enabled: !!form.departmentId,
+    queryKey: ["organizations", "job-titles", departmentId],
+    queryFn: () => organizationApi.getJobTitles(departmentId!),
+    enabled: !!departmentId,
   });
 
   const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
 
-  const selectedUnit = units.find(u => u.id === form.departmentId);
+  const selectedUnit = units.find(u => u.id === departmentId);
   const jobTitles = jobTitlesRes?.items ?? [];
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
   const partyTitles = useMemo(() => jobTitles.filter(j => j.type === "PARTY"), [jobTitles]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.departmentId || !form.civilServantRankId) {
-      toast.error("Vui lòng chọn Đơn vị và Ngạch công chức");
-      return;
-    }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSubmitting(true);
     try {
-      const finalJobTitleId = form.jobTitleId || form.civilServantRankId;
+      const finalJobTitleId = values.jobTitleId || values.civilServantRankId;
       await hrmApi.create({
-        ...form,
-        departmentId: form.departmentId,
+        ...values,
+        departmentId: values.departmentId,
         jobTitleId: finalJobTitleId,
-        civilServantRankId: form.civilServantRankId,
-        partyTitleId: form.partyTitleId || 0,
+        civilServantRankId: values.civilServantRankId,
+        partyTitleId: values.partyTitleId || 0,
       });
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
       toast.success("Thêm nhân sự thành công");
@@ -107,240 +141,355 @@ export function EmployeeCreateClient() {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] p-6 md:p-10 text-slate-900">
-      <form onSubmit={handleSubmit} className="max-w-[1200px] mx-auto space-y-6">
-
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex items-center gap-4">
-            <Button type="button" variant="outline" size="icon" onClick={() => router.back()} className="rounded-full border-slate-300">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h2 className="text-2xl font-black tracking-tight text-slate-900">Tạo hồ sơ nhân sự</h2>
-              <p className="text-sm text-slate-500 font-medium italic">Thiết lập vị trí và thông tin định danh hệ thống iDesk</p>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1200px] mx-auto space-y-6">
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center gap-4">
+              <Button type="button" variant="outline" size="icon" onClick={() => router.back()} className="rounded-full border-slate-300">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h2 className="text-2xl font-black tracking-tight text-slate-900">Tạo hồ sơ nhân sự</h2>
+                <p className="text-sm text-slate-500 font-medium italic">Thiết lập vị trí và thông định danh hệ thống iDesk</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="ghost" onClick={() => router.back()} className="font-bold text-slate-600">Hủy</Button>
+              <Button type="submit" disabled={submitting || isUploading} className="rounded-xl bg-blue-700 hover:bg-blue-800 px-8 h-11 font-bold shadow-lg shadow-blue-200">
+                {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                LƯU HỒ SƠ
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button type="button" variant="ghost" onClick={() => router.back()} className="font-bold text-slate-600">Hủy</Button>
-            <Button type="submit" disabled={submitting || isUploading} className="rounded-xl bg-blue-700 hover:bg-blue-800 px-8 h-11 font-bold shadow-lg shadow-blue-200">
-              {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              LƯU HỒ SƠ
-            </Button>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* CỘT PHẢI: VỊ TRÍ CÔNG TÁC */}
-          <div className="lg:col-span-5 space-y-6">
-            <Card className="rounded-2xl border-slate-300 shadow-md overflow-hidden bg-white ring-1 ring-slate-200">
-              <CardHeader className="border-b border-slate-100 bg-slate-50">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-700" />
-                  <CardTitle className="text-lg font-bold">Vị trí công tác</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                {/* Tìm đơn vị */}
-                <div className="space-y-3">
-                  <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">1. Tìm đơn vị (Sở/Phòng/Ban)</Label>
-                  <Search placeholder="Gõ tên đơn vị cần tìm..." className="w-full" />
-                  <div className="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
-                    <div className="max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
-                      {units.filter(u => u.fullPath.toLowerCase().includes(searchTerm.toLowerCase())).map((u) => (
-                        <button
-                          key={u.id}
-                          type="button"
-                          onClick={() => setForm({ ...form, departmentId: u.id, jobTitleId: undefined })}
-                          className={cn(
-                            "w-full text-left p-3 rounded-lg mb-1 transition-all border border-transparent",
-                            form.departmentId === u.id
-                              ? "bg-blue-700 text-white border-blue-800 shadow-md"
-                              : "hover:bg-white hover:border-slate-200 text-slate-700"
-                          )}
-                        >
-                          <div className="font-bold text-[13px]">{u.name}</div>
-                          <div className={cn("text-[10px] truncate font-medium", form.departmentId === u.id ? "text-blue-100" : "text-slate-400")}>
-                            {u.fullPath}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* CỘT PHẢI: VỊ TRÍ CÔNG TÁC */}
+            <div className="lg:col-span-5 space-y-6">
+              <Card className="rounded-2xl border-slate-300 shadow-md overflow-hidden bg-white ring-1 ring-slate-200">
+                <CardHeader className="border-b border-slate-100 bg-slate-50">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-blue-700" />
+                    <CardTitle className="text-lg font-bold">Vị trí công tác</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  {/* Tìm đơn vị */}
+                  <FormField
+                    control={form.control}
+                    name="departmentId"
+                    render={() => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">1. Tìm đơn vị (Sở/Phòng/Ban) *</FormLabel>
+                        <Search placeholder="Gõ tên đơn vị cần tìm..." className="w-full" />
+                        <div className="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
+                          <div className="max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
+                            {units.filter(u => u.fullPath.toLowerCase().includes(searchTerm.toLowerCase())).map((u) => (
+                              <button
+                                key={u.id}
+                                type="button"
+                                onClick={() => {
+                                  form.setValue("departmentId", u.id, { shouldValidate: true });
+                                  form.setValue("jobTitleId", undefined as any);
+                                }}
+                                className={cn(
+                                  "w-full text-left p-3 rounded-lg mb-1 transition-all border border-transparent",
+                                  departmentId === u.id
+                                    ? "bg-blue-700 text-white border-blue-800 shadow-md"
+                                    : "hover:bg-white hover:border-slate-200 text-slate-700"
+                                )}
+                              >
+                                <div className="font-bold text-[13px]">{u.name}</div>
+                                <div className={cn("text-[10px] truncate font-medium", departmentId === u.id ? "text-blue-100" : "text-slate-400")}>
+                                  {u.fullPath}
+                                </div>
+                              </button>
+                            ))}
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Hiển thị đơn vị đã chọn */}
-                {selectedUnit && (
-                  <div className="bg-slate-900 rounded-xl p-4 text-white shadow-lg border-l-4 border-blue-500">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-blue-600 p-1.5 rounded-lg shrink-0"><Check size={16} /></div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Đơn vị đã chọn:</p>
-                        <p className="text-sm font-bold leading-snug">{selectedUnit.fullPath}</p>
-                        <p className="text-[10px] text-slate-400 font-mono italic">Mã: {selectedUnit.code || 'None'}</p>
+                  {/* Hiển thị đơn vị đã chọn */}
+                  {selectedUnit && (
+                    <div className="bg-slate-900 rounded-xl p-4 text-white shadow-lg border-l-4 border-blue-500">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-blue-600 p-1.5 rounded-lg shrink-0"><Check size={16} /></div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Đơn vị đã chọn:</p>
+                          <p className="text-sm font-bold leading-snug">{selectedUnit.fullPath}</p>
+                          <p className="text-[10px] text-slate-400 font-mono italic">Mã: {selectedUnit.code || 'None'}</p>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Chức danh */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">2. Chức vụ chính quyền (Không bắt buộc)</Label>
-                    <div className="relative">
-                      <select
-                        className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                        value={form.jobTitleId || ""}
-                        onChange={(e) => setForm({ ...form, jobTitleId: e.target.value ? Number(e.target.value) : undefined })}
-                        disabled={!form.departmentId}
-                      >
-                        <option value="">-- Chọn chức vụ chính quyền --</option>
-                        {govtTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">3. Ngạch công chức *</Label>
-                    <div className="relative">
-                      <select
-                        className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                        value={form.civilServantRankId || ""}
-                        onChange={(e) => setForm({ ...form, civilServantRankId: e.target.value ? Number(e.target.value) : undefined })}
-                        disabled={!form.departmentId}
-                      >
-                        <option value="">-- Chọn ngạch công chức --</option>
-                        {rankTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">4. Chức vụ Đảng (Không bắt buộc)</Label>
-                    <div className="relative">
-                      <select
-                        className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                        value={form.partyTitleId || ""}
-                        onChange={(e) => setForm({ ...form, partyTitleId: e.target.value ? Number(e.target.value) : undefined })}
-                        disabled={!form.departmentId}
-                      >
-                        <option value="">-- Chọn chức vụ Đảng --</option>
-                        {partyTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
-                    </div>
-                  </div>
-
-                  {isLoadingJobs && (
-                    <div className="flex items-center gap-2 text-xs text-blue-600 font-semibold mt-1">
-                      <Loader2 className="h-3 w-3 animate-spin" /> Đang tải danh sách chức danh...
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* CỘT TRÁI: THÔNG TIN CÁ NHÂN */}
-          <div className="lg:col-span-7 space-y-6">
-            <Card className="rounded-2xl border-slate-300 shadow-md bg-white ring-1 ring-slate-200">
-              <CardHeader className="border-b border-slate-100 bg-slate-50">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-blue-700" />
-                  <CardTitle className="text-lg font-bold">Thông tin cá nhân & Tài khoản</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                  {/* PHOTO SECTION - Đã đồng nhất */}
-                  <div className="col-span-full flex items-center gap-6 pb-4 border-b border-slate-100 mb-2">
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer overflow-hidden relative group"
-                    >
-                      {isUploading ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                          <span className="text-[10px] font-bold text-blue-600 uppercase">Đang tải</span>
-                        </div>
-                      ) : previewUrl ? ( // 3. Ưu tiên hiển thị previewUrl từ hook
-                        <>
-                          <img src={previewUrl} alt="Avatar" className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Camera size={20} className="text-white" />
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex flex-col items-center gap-1">
-                          <Camera size={24} />
-                          <span className="text-[10px] font-bold uppercase">Ảnh thẻ</span>
-                        </div>
+                  {/* Chức danh */}
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="jobTitleId"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">2. Chức vụ chính quyền (Không bắt buộc)</FormLabel>
+                          <Select
+                            disabled={!departmentId}
+                            onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                            value={field.value ? String(field.value) : undefined}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                <SelectValue placeholder="-- Chọn chức vụ chính quyền --" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {govtTitles.map((j: any) => (
+                                <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </div>
-
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageUpload}
                     />
 
-                    <div className="flex-1 grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <Label className="font-bold text-slate-700 text-sm">Họ và đệm *</Label>
-                        <Input value={form.firstname} onChange={e => setForm({ ...form, firstname: e.target.value })} className="border-slate-300 font-medium" />
+                    <FormField
+                      control={form.control}
+                      name="civilServantRankId"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">3. Ngạch công chức *</FormLabel>
+                          <Select
+                            disabled={!departmentId}
+                            onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                            value={field.value ? String(field.value) : undefined}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                <SelectValue placeholder="-- Chọn ngạch công chức --" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {rankTitles.map((j: any) => (
+                                <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="partyTitleId"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">4. Chức vụ Đảng (Không bắt buộc)</FormLabel>
+                          <Select
+                            disabled={!departmentId}
+                            onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                            value={field.value ? String(field.value) : undefined}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                <SelectValue placeholder="-- Chọn chức vụ Đảng --" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {partyTitles.map((j: any) => (
+                                <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {isLoadingJobs && (
+                      <div className="flex items-center gap-2 text-xs text-blue-600 font-semibold mt-1">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Đang tải danh sách chức danh...
                       </div>
-                      <div className="space-y-1.5">
-                        <Label className="font-bold text-slate-700 text-sm">Tên *</Label>
-                        <Input value={form.lastname} onChange={e => setForm({ ...form, lastname: e.target.value })} className="border-slate-300 font-medium" />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* CỘT TRÁI: THÔNG TIN CÁ NHÂN */}
+            <div className="lg:col-span-7 space-y-6">
+              <Card className="rounded-2xl border-slate-300 shadow-md bg-white ring-1 ring-slate-200">
+                <CardHeader className="border-b border-slate-100 bg-slate-50">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-blue-700" />
+                    <CardTitle className="text-lg font-bold">Thông tin cá nhân & Tài khoản</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* PHOTO SECTION */}
+                    <div className="col-span-full flex items-center gap-6 pb-4 border-b border-slate-100 mb-2">
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer overflow-hidden relative group shrink-0"
+                      >
+                        {isUploading ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                            <span className="text-[10px] font-bold text-blue-600 uppercase">Đang tải</span>
+                          </div>
+                        ) : previewUrl ? (
+                          <>
+                            <Image src={previewUrl} alt="Avatar" fill unoptimized className="object-cover transition-transform group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Camera size={20} className="text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1">
+                            <Camera size={24} />
+                            <span className="text-[10px] font-bold uppercase">Ảnh thẻ</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                      />
+
+                      <div className="flex-1 grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="firstname"
+                          render={({ field }) => (
+                            <FormItem className="space-y-1.5">
+                              <FormLabel className="font-bold text-slate-700 text-sm">Họ và đệm *</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="border-slate-300 font-medium" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="lastname"
+                          render={({ field }) => (
+                            <FormItem className="space-y-1.5">
+                              <FormLabel className="font-bold text-slate-700 text-sm">Tên *</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="border-slate-300 font-medium" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </div>
-                  </div>
 
-                  {/* CÁC TRƯỜNG NHẬP LIỆU KHÁC */}
-                  <div className="space-y-1.5">
-                    <Label className="font-bold text-slate-700 text-sm flex items-center gap-2"><CreditCard size={14} /> CCCD/Định danh</Label>
-                    <Input value={form.identityCard} onChange={e => setForm({ ...form, identityCard: e.target.value })} className="border-slate-300" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="font-bold text-slate-700 text-sm flex items-center gap-2"><Calendar size={14} /> Ngày sinh</Label>
-                    <Input type="date" value={form.birthday} onChange={e => setForm({ ...form, birthday: e.target.value })} className="border-slate-300" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="font-bold text-slate-700 text-sm flex items-center gap-2"><Mail size={14} /> Email liên hệ</Label>
-                    <Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="border-slate-300" placeholder="user@daklak.gov.vn" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="font-bold text-slate-700 text-sm flex items-center gap-2"><Phone size={14} /> Số điện thoại</Label>
-                    <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="border-slate-300" />
-                  </div>
+                    {/* CÁC TRƯỜNG NHẬP LIỆU KHÁC */}
+                    <FormField
+                      control={form.control}
+                      name="identityCard"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="font-bold text-slate-700 text-sm flex items-center gap-2"><CreditCard size={14} /> CCCD/Định danh</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="border-slate-300" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="birthday"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="font-bold text-slate-700 text-sm flex items-center gap-2"><Calendar size={14} /> Ngày sinh</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} className="border-slate-300" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="font-bold text-slate-700 text-sm flex items-center gap-2"><Mail size={14} /> Email liên hệ</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="border-slate-300" placeholder="user@daklak.gov.vn" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="font-bold text-slate-700 text-sm flex items-center gap-2"><Phone size={14} /> Số điện thoại</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="border-slate-300" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <Separator className="col-span-full my-2" />
+                    <Separator className="col-span-full my-2" />
 
-                  <div className="space-y-1.5">
-                    <Label className="font-bold text-slate-700 text-sm flex items-center gap-2"><Hash size={14} /> Mã nhân viên</Label>
-                    <Input value={form.employeeCode} onChange={e => setForm({ ...form, employeeCode: e.target.value })} className="border-slate-300 font-mono text-sm uppercase" placeholder="HỆ THỐNG TỰ TẠO" />
+                    <FormField
+                      control={form.control}
+                      name="employeeCode"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="font-bold text-slate-700 text-sm flex items-center gap-2"><Hash size={14} /> Mã nhân viên</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="border-slate-300 font-mono text-sm uppercase" placeholder="HỆ THỐNG TỰ TẠO" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="startDate"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="font-bold text-slate-700 text-sm flex items-center gap-2"><Calendar size={14} /> Ngày gia nhập</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} className="border-slate-300" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="font-bold text-slate-700 text-sm flex items-center gap-2"><Calendar size={14} /> Ngày gia nhập</Label>
-                    <Input type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} className="border-slate-300" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <div className="p-4 rounded-xl bg-slate-900 text-white flex gap-4 items-center shadow-lg ring-1 ring-slate-800">
-              <AlertCircle size={24} className="text-blue-500 shrink-0" />
-              <p className="text-xs font-medium leading-relaxed">
-                Hồ sơ nhân sự sẽ được liên kết trực tiếp với <strong>Trục liên thông văn bản (LGSP)</strong> của tỉnh. Vui lòng kiểm tra kỹ đơn vị công tác trước khi Lưu.
-              </p>
+              <div className="p-4 rounded-xl bg-slate-900 text-white flex gap-4 items-center shadow-lg ring-1 ring-slate-800">
+                <AlertCircle size={24} className="text-blue-500 shrink-0" />
+                <p className="text-xs font-medium leading-relaxed">
+                  Hồ sơ nhân sự sẽ được liên kết trực tiếp với <strong>Trục liên thông văn bản (LGSP)</strong> của tỉnh. Vui lòng kiểm tra kỹ đơn vị công tác trước khi Lưu.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 }

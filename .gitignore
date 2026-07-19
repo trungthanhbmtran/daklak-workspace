@@ -39,3 +39,7 @@ logs/
 # Prisma
 /apps/*/prisma/*.db
 /apps/*/prisma/*.db-journal
+
+# AI Agents & Docs
+.agents/
+docs/

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface DocumentManagerProps {
   onOpenUploadModal: () => void;
@@ -75,55 +76,55 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
 
             <CardContent className="p-0">
                <div className="overflow-x-auto">
-                 <table className="w-full text-sm text-left">
-                   <thead className="text-xs text-muted-foreground uppercase bg-muted/30 border-b">
-                     <tr>
-                       <th className="px-5 py-3 font-semibold">Số / Ký hiệu</th>
-                       <th className="px-5 py-3 font-semibold w-[40%]">Trích yếu nội dung</th>
-                       <th className="px-5 py-3 font-semibold">Cơ quan ban hành</th>
-                       <th className="px-5 py-3 font-semibold">Trạng thái tệp</th>
-                       <th className="px-5 py-3 font-semibold text-right">Thao tác</th>
-                     </tr>
-                   </thead>
-                   <tbody className="divide-y divide-border/50 bg-background">
-                     <tr className="hover:bg-muted/30 transition-colors group">
-                       <td className="px-5 py-4 font-mono font-medium text-primary">125/QĐ-SKHCN</td>
-                       <td className="px-5 py-4">
+                 <Table>
+                   <TableHeader className="bg-muted/30">
+                     <TableRow>
+                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Số / Ký hiệu</TableHead>
+                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-[40%]">Trích yếu nội dung</TableHead>
+                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Cơ quan ban hành</TableHead>
+                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Trạng thái tệp</TableHead>
+                       <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-right">Thao tác</TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody className="bg-background">
+                     <TableRow className="hover:bg-muted/30 transition-colors group">
+                       <TableCell className="px-5 py-4 font-mono font-medium text-primary">125/QĐ-SKHCN</TableCell>
+                       <TableCell className="px-5 py-4">
                          <p className="font-semibold text-foreground line-clamp-2">Quyết định về việc ban hành quy chế bảo đảm an toàn thông tin mạng trong hoạt động của cơ quan nhà nước.</p>
                          <p className="text-[11px] text-muted-foreground mt-1">Ngày ban hành: 20/02/2026</p>
-                       </td>
-                       <td className="px-5 py-4">Sở Khoa học và Công nghệ</td>
-                       <td className="px-5 py-4">
+                       </TableCell>
+                       <TableCell className="px-5 py-4">Sở Khoa học và Công nghệ</TableCell>
+                       <TableCell className="px-5 py-4">
                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 shadow-none flex items-center gap-1 w-fit">
                            <ShieldCheck className="h-3 w-3" /> Đã xác thực VGCA
                          </Badge>
-                       </td>
-                       <td className="px-5 py-4 text-right">
+                       </TableCell>
+                       <TableCell className="px-5 py-4 text-right">
                           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
                             <Eye className="h-4 w-4" />
                           </Button>
-                       </td>
-                     </tr>
-                     <tr className="hover:bg-muted/30 transition-colors group">
-                       <td className="px-5 py-4 font-mono font-medium text-primary">456/UBND-TH</td>
-                       <td className="px-5 py-4">
+                       </TableCell>
+                     </TableRow>
+                     <TableRow className="hover:bg-muted/30 transition-colors group">
+                       <TableCell className="px-5 py-4 font-mono font-medium text-primary">456/UBND-TH</TableCell>
+                       <TableCell className="px-5 py-4">
                          <p className="font-semibold text-foreground line-clamp-2">Công văn đôn đốc thực hiện nhiệm vụ chuyển đổi số quý I năm 2026 trên địa bàn tỉnh.</p>
                          <p className="text-[11px] text-muted-foreground mt-1">Ngày ban hành: 18/02/2026</p>
-                       </td>
-                       <td className="px-5 py-4">UBND Tỉnh Đắk Lắk</td>
-                       <td className="px-5 py-4">
+                       </TableCell>
+                       <TableCell className="px-5 py-4">UBND Tỉnh Đắk Lắk</TableCell>
+                       <TableCell className="px-5 py-4">
                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 shadow-none flex items-center gap-1 w-fit">
                            <FileText className="h-3 w-3" /> Bản Scan (OCR)
                          </Badge>
-                       </td>
-                       <td className="px-5 py-4 text-right">
+                       </TableCell>
+                       <TableCell className="px-5 py-4 text-right">
                           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
                             <Eye className="h-4 w-4" />
                           </Button>
-                       </td>
-                     </tr>
-                   </tbody>
-                 </table>
+                       </TableCell>
+                     </TableRow>
+                   </TableBody>
+                 </Table>
                </div>
             </CardContent>
           </Card>
@@ -251,45 +252,45 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Tên báo cáo công khai</th>
-                    <th className="px-5 py-3 font-semibold w-32">Năm TC</th>
-                    <th className="px-5 py-3 font-semibold w-40">Phân loại</th>
-                    <th className="px-5 py-3 font-semibold w-40">Ngày công khai</th>
-                    <th className="px-5 py-3 font-semibold text-right w-32">Tệp đính kèm</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50 bg-background">
-                  <tr className="hover:bg-muted/20">
-                    <td className="px-5 py-4 font-medium text-foreground">
-                      Quyết định công khai dự toán thu - chi ngân sách nhà nước năm 2026 của Sở KH&CN
-                    </td>
-                    <td className="px-5 py-4"><Badge variant="outline" className="font-mono">2026</Badge></td>
-                    <td className="px-5 py-4"><Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none">Dự toán</Badge></td>
-                    <td className="px-5 py-4 text-muted-foreground">05/01/2026</td>
-                    <td className="px-5 py-4 text-right">
-                      <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
-                        <Download className="h-4 w-4 mr-1.5" /> PDF
-                      </Button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-muted/20">
-                    <td className="px-5 py-4 font-medium text-foreground">
-                      Báo cáo công khai số liệu quyết toán thu, chi ngân sách nhà nước năm 2025
-                    </td>
-                    <td className="px-5 py-4"><Badge variant="outline" className="font-mono">2025</Badge></td>
-                    <td className="px-5 py-4"><Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none">Quyết toán</Badge></td>
-                    <td className="px-5 py-4 text-muted-foreground">20/02/2026</td>
-                    <td className="px-5 py-4 text-right">
-                      <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
-                        <Download className="h-4 w-4 mr-1.5" /> PDF
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+               <Table>
+                 <TableHeader className="bg-muted/30">
+                   <TableRow>
+                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase">Tên báo cáo công khai</TableHead>
+                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-32">Năm TC</TableHead>
+                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-40">Phân loại</TableHead>
+                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase w-40">Ngày công khai</TableHead>
+                     <TableHead className="px-5 py-3 font-semibold text-xs uppercase text-right w-32">Tệp đính kèm</TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody className="bg-background">
+                   <TableRow className="hover:bg-muted/20">
+                     <TableCell className="px-5 py-4 font-medium text-foreground">
+                       Quyết định công khai dự toán thu - chi ngân sách nhà nước năm 2026 của Sở KH&CN
+                     </TableCell>
+                     <TableCell className="px-5 py-4"><Badge variant="outline" className="font-mono">2026</Badge></TableCell>
+                     <TableCell className="px-5 py-4"><Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 shadow-none">Dự toán</Badge></TableCell>
+                     <TableCell className="px-5 py-4 text-muted-foreground">05/01/2026</TableCell>
+                     <TableCell className="px-5 py-4 text-right">
+                       <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
+                         <Download className="h-4 w-4 mr-1.5" /> PDF
+                       </Button>
+                     </TableCell>
+                   </TableRow>
+                   <TableRow className="hover:bg-muted/20">
+                     <TableCell className="px-5 py-4 font-medium text-foreground">
+                       Báo cáo công khai số liệu quyết toán thu, chi ngân sách nhà nước năm 2025
+                     </TableCell>
+                     <TableCell className="px-5 py-4"><Badge variant="outline" className="font-mono">2025</Badge></TableCell>
+                     <TableCell className="px-5 py-4"><Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shadow-none">Quyết toán</Badge></TableCell>
+                     <TableCell className="px-5 py-4 text-muted-foreground">20/02/2026</TableCell>
+                     <TableCell className="px-5 py-4 text-right">
+                       <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
+                         <Download className="h-4 w-4 mr-1.5" /> PDF
+                       </Button>
+                     </TableCell>
+                   </TableRow>
+                 </TableBody>
+               </Table>
             </div>
           </Card>
         </TabsContent>

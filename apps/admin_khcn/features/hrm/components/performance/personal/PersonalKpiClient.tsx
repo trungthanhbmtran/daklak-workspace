@@ -9,8 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calculator, Award, CheckCircle2, Send } from "lucide-react";
-import { hrmKpiEvaluationsApi } from "@/features/hrm/api/kpis.api";
-import apiClient from "@/lib/axiosInstance";
+import { hrmKpiEvaluationsApi, hrmKpiPeriodsApi } from "@/features/hrm/api/kpis.api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,7 +23,7 @@ export function PersonalKpiClient() {
   // Fetch periods
   const { data: periodsData } = useQuery({
     queryKey: ["hrm-kpi-periods"],
-    queryFn: () => apiClient.get("/hrm/kpis/periods").then((res: any) => res.data || []),
+    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data || []),
   });
 
   // Fetch evaluation details when evaluationId changes

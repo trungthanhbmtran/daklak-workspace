@@ -23,7 +23,7 @@ export function ServiceHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <div className="h-4 w-px bg-border" />
-        <h1 className="text-sm font-semibold tracking-tight text-foreground ml-2">
+        <h1 className="text-base md:text-lg font-semibold tracking-tight text-foreground ml-2">
           {activePageName}
         </h1>
       </div>

@@ -11,6 +11,34 @@ import { toast } from "sonner";
 import { Plus, Edit, Trash2, Library, ChevronLeft, ChevronRight } from "lucide-react";
 import { useKpiCriteriaListPaginated, useCreateKpiCriterion, useUpdateKpiCriterion, useDeleteKpiCriterion } from "@/features/hrm/hooks/useKpis";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Vui lòng nhập tên tiêu chí"),
+  description: z.string().optional(),
+  weight: z.number().min(0, "Trọng số không hợp lệ"),
+  baseScore: z.number().min(0, "Điểm chuẩn không hợp lệ"),
+  scoringMethod: z.string(),
+  difficulty: z.string(),
+  difficultyMultiplier: z.number().min(0),
+  bonusThresholdDays: z.number().min(0),
+  bonusPerDay: z.number().min(0),
+  penaltyPerDay: z.number().min(0),
+  integrationCode: z.string().optional(),
+  formula: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function KpiCriteriaClient() {
   const [page, setPage] = useState(1);
@@ -30,25 +58,28 @@ export function KpiCriteriaClient() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    weight: 10,
-    baseScore: 100,
-    scoringMethod: "MANUAL",
-    difficulty: "NORMAL",
-    difficultyMultiplier: 1.0,
-    bonusThresholdDays: 0,
-    bonusPerDay: 0,
-    penaltyPerDay: 0,
-    integrationCode: "",
-    formula: "",
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      weight: 10,
+      baseScore: 100,
+      scoringMethod: "MANUAL",
+      difficulty: "NORMAL",
+      difficultyMultiplier: 1.0,
+      bonusThresholdDays: 0,
+      bonusPerDay: 0,
+      penaltyPerDay: 0,
+      integrationCode: "",
+      formula: "",
+    },
   });
 
   const openModal = (item?: any) => {
     if (item) {
       setEditingId(item.id);
-      setFormData({
+      form.reset({
         name: item.name,
         description: item.description || "",
         weight: item.weight || 10,
@@ -64,7 +95,7 @@ export function KpiCriteriaClient() {
       });
     } else {
       setEditingId(null);
-      setFormData({
+      form.reset({
         name: "",
         description: "",
         weight: 10,
@@ -82,18 +113,13 @@ export function KpiCriteriaClient() {
     setIsModalOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!formData.name.trim()) {
-      toast.error("Vui lòng nhập tên tiêu chí");
-      return;
-    }
-
+  const onSubmit = async (values: FormValues) => {
     try {
       if (editingId) {
-        await updateMutation.mutateAsync({ id: editingId, payload: formData });
+        await updateMutation.mutateAsync({ id: editingId, payload: values });
         toast.success("Cập nhật tiêu chí thành công");
       } else {
-        await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(values);
         toast.success("Tạo tiêu chí mới thành công");
       }
       setIsModalOpen(false);
@@ -107,7 +133,7 @@ export function KpiCriteriaClient() {
     setIsDeleteDialogOpen(true);
   };
 
-  const executeDelete = async () => {
+  const executeDelete = async (reason?: string) => {
     if (!itemToDelete) return;
     try {
       await deleteMutation.mutateAsync(itemToDelete);
@@ -129,10 +155,10 @@ export function KpiCriteriaClient() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 p-4 md:p-8 font-sans">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Library className="w-6 h-6 text-primary" />
             Khung Tiêu chí & KPI
           </h1>
@@ -151,7 +177,7 @@ export function KpiCriteriaClient() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[300px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 min-h-[300px]">
             {criteriaList.map((item: any) => (
               <Card key={item.id} className="shadow-sm border border-border bg-card hover:border-primary/50 transition-colors h-[240px]">
                 <CardContent className="p-5 flex flex-col h-full">
@@ -265,111 +291,181 @@ export function KpiCriteriaClient() {
             </DialogTitle>
           </DialogHeader>
           
-          <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-            <div className="space-y-2">
-              <Label>Tên tiêu chí <span className="text-red-500">*</span></Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="rounded-md"
-              />
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Tên tiêu chí <span className="text-red-500">*</span></FormLabel>
+                      <FormControl>
+                        <Input {...field} className="rounded-md" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Trọng số (%)</Label>
-                <Input
-                  type="number"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
-                  className="rounded-md"
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel>Trọng số (%)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} className="rounded-md" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="baseScore"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel>Điểm chuẩn (Base)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} className="rounded-md" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="difficulty"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel>Độ khó</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="rounded-md">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="EASY">Cơ bản / Dễ</SelectItem>
+                            <SelectItem value="NORMAL">Bình thường</SelectItem>
+                            <SelectItem value="HARD">Nâng cao / Khó</SelectItem>
+                            <SelectItem value="COMPLEX">Phức tạp</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="difficultyMultiplier"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel>Hệ số độ khó</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.1" {...field} onChange={e => field.onChange(Number(e.target.value))} className="rounded-md" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="scoringMethod"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Mô hình tính điểm</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-md">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="MANUAL">Đánh giá thủ công</SelectItem>
+                          <SelectItem value="AUTOMATIC">Tính tự động</SelectItem>
+                          <SelectItem value="INTEGRATION_API">Kết nối API</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="bonusThresholdDays"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs">Số ngày sớm</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} className="h-9" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bonusPerDay"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs">Thưởng/ngày</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} className="h-9" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="penaltyPerDay"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs">Phạt/ngày trễ</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} className="h-9" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Mô tả chi tiết</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} className="resize-none h-24 rounded-md" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Điểm chuẩn (Base)</Label>
-                <Input
-                  type="number"
-                  value={formData.baseScore}
-                  onChange={(e) => setFormData({ ...formData, baseScore: Number(e.target.value) })}
-                  className="rounded-md"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Độ khó</Label>
-                <Select value={formData.difficulty} onValueChange={(val) => setFormData({ ...formData, difficulty: val })}>
-                  <SelectTrigger className="rounded-md">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EASY">Cơ bản / Dễ</SelectItem>
-                    <SelectItem value="NORMAL">Bình thường</SelectItem>
-                    <SelectItem value="HARD">Nâng cao / Khó</SelectItem>
-                    <SelectItem value="COMPLEX">Phức tạp</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Hệ số độ khó</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={formData.difficultyMultiplier}
-                  onChange={(e) => setFormData({ ...formData, difficultyMultiplier: Number(e.target.value) })}
-                  className="rounded-md"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Mô hình tính điểm</Label>
-              <Select value={formData.scoringMethod} onValueChange={(val) => setFormData({ ...formData, scoringMethod: val })}>
-                <SelectTrigger className="rounded-md">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MANUAL">Đánh giá thủ công</SelectItem>
-                  <SelectItem value="AUTOMATIC">Tính tự động</SelectItem>
-                  <SelectItem value="INTEGRATION_API">Kết nối API</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs">Số ngày sớm</Label>
-                <Input type="number" value={formData.bonusThresholdDays} onChange={(e) => setFormData({ ...formData, bonusThresholdDays: Number(e.target.value) })} className="h-9" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Thưởng/ngày</Label>
-                <Input type="number" value={formData.bonusPerDay} onChange={(e) => setFormData({ ...formData, bonusPerDay: Number(e.target.value) })} className="h-9" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Phạt/ngày trễ</Label>
-                <Input type="number" value={formData.penaltyPerDay} onChange={(e) => setFormData({ ...formData, penaltyPerDay: Number(e.target.value) })} className="h-9" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Mô tả chi tiết</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="resize-none h-24 rounded-md"
-              />
-            </div>
-          </div>
-          
-          <DialogFooter className="px-6 py-4 border-t bg-muted/30">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Hủy
-            </Button>
-            <Button onClick={handleSave}>
-              Lưu cấu hình
-            </Button>
-          </DialogFooter>
+              
+              <DialogFooter className="px-6 py-4 border-t bg-muted/30">
+                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+                  Hủy
+                </Button>
+                <Button type="submit">
+                  Lưu cấu hình
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
@@ -380,6 +476,7 @@ export function KpiCriteriaClient() {
         title="Xóa tiêu chí KPI"
         description="Bạn có chắc chắn muốn xóa tiêu chí đánh giá này? Dữ liệu đã xóa không thể khôi phục."
         isDeleting={deleteMutation.isPending}
+        requireReason={true}
       />
     </div>
   );

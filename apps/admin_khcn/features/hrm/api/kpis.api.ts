@@ -45,3 +45,9 @@ export const hrmKpiEvaluationsApi = {
     return apiClient.get('/hrm/kpis/dashboard-stats', { params }) as any;
   }
 };
+
+export const hrmKpiPeriodsApi = {
+  getPeriods: (): Promise<ApiResponse<any[]>> => {
+    return apiClient.get('/hrm/kpis/periods') as any;
+  }
+};

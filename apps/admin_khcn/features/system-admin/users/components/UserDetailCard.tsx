@@ -178,7 +178,7 @@ export function UserDetailSheet({
                   <section>
                     <Collapsible open={policiesOpen} onOpenChange={setPoliciesOpen}>
                       <CollapsibleTrigger asChild>
-                        <button className="w-full flex items-center justify-between group">
+                        <Button variant="ghost" className="w-full flex items-center justify-between group px-0 hover:bg-transparent">
                           <span className="font-semibold flex items-center gap-2 text-sm">
                             <AlertTriangle className="w-4 h-4 text-amber-500" />
                             Chính sách hiệu lực
@@ -188,10 +188,8 @@ export function UserDetailSheet({
                               </Badge>
                             )}
                           </span>
-                          <ChevronDown
-                            className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${policiesOpen ? "rotate-180" : ""}`}
-                          />
-                        </button>
+                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${policiesOpen ? 'rotate-180' : ''}`} />
+                        </Button>
                       </CollapsibleTrigger>
 
                       <CollapsibleContent className="mt-3">

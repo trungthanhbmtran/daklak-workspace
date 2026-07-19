@@ -7,4 +7,7 @@ export const endpointApi = {
   assignPermission: async (endpointId: number, permissionId: number) => {
     return apiClient.put(`/roles/endpoints/${endpointId}/permission`, { permissionId });
   },
+  getPermissionsMatrix: async () => {
+    return apiClient.get('/roles/permissions/matrix');
+  }
 };

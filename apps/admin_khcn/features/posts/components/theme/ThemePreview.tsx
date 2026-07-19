@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import { useThemeConfig } from "./ThemeProvider";
 
 export function ThemePreview() {
@@ -110,8 +112,8 @@ export function ThemePreview() {
             </nav>
           )}
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60" alt="Avatar" className="w-full h-full object-cover" />
+            <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
+              <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60" alt="Avatar" fill unoptimized className="object-cover" />
             </div>
           </div>
         </header>
@@ -125,9 +127,9 @@ export function ThemePreview() {
               <h4 className="font-bold text-xs">🎉 Phiên bản CMS 5.0!</h4>
               <p className="text-[11px] text-slate-100 font-light">Tối ưu render vượt trội bằng Core mới.</p>
             </div>
-            <button className="px-2.5 py-1 bg-white text-slate-900 text-[10px] font-bold rounded shadow-sm whitespace-nowrap hover:bg-slate-50 transition-colors">
+            <Button className="h-6 px-2.5 bg-white text-slate-900 text-[10px] font-bold rounded shadow-sm whitespace-nowrap hover:bg-slate-50 transition-colors">
               Cập nhật
-            </button>
+            </Button>
           </div>
 
           {/* Grid Khối số liệu (Chuyển thành 1 cột trên Mobile để không bị vỡ) */}

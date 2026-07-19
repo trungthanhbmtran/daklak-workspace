@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Network, Plus, Trash2, Loader2 } from "lucide-react";
 
 export function ServicesTab() {
@@ -91,35 +93,35 @@ export function ServicesTab() {
             </div>
             <div className="space-y-2 md:col-span-3">
               <Label className="text-foreground">Chiến lược Cân bằng tải</Label>
-              <select 
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              <Select
                 value={newService.loadBalanceStrategy}
-                onChange={e => setNewService({ ...newService, loadBalanceStrategy: e.target.value })}
+                onValueChange={(val) => setNewService({ ...newService, loadBalanceStrategy: val })}
               >
-                <option value="ROUND_ROBIN">Round Robin</option>
-                <option value="RANDOM">Random</option>
-                <option value="NONE">None</option>
-              </select>
+                <SelectTrigger className="h-10 w-full bg-background border-input focus:ring-primary">
+                  <SelectValue placeholder="Chọn chiến lược" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ROUND_ROBIN">Round Robin</SelectItem>
+                  <SelectItem value="RANDOM">Random</SelectItem>
+                  <SelectItem value="NONE">None</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="md:col-span-9 flex items-center gap-6 mt-2 mb-2 p-3 bg-muted/30 rounded-md border border-border">
               <div className="flex items-center gap-2">
-                <input 
-                  type="checkbox" 
+                <Checkbox
                   id="useSsl"
-                  className="w-4 h-4 text-primary rounded border-input"
-                  checked={newService.useSsl} 
-                  onChange={e => setNewService({ ...newService, useSsl: e.target.checked })} 
+                  checked={newService.useSsl}
+                  onCheckedChange={(checked) => setNewService({ ...newService, useSsl: !!checked })}
                 />
                 <Label htmlFor="useSsl" className="text-foreground cursor-pointer">Dùng SSL (HTTPS)</Label>
               </div>
               <div className="flex items-center gap-2">
-                <input 
-                  type="checkbox" 
+                <Checkbox
                   id="ignoreTlsVerify"
-                  className="w-4 h-4 text-primary rounded border-input"
-                  checked={newService.ignoreTlsVerify} 
-                  onChange={e => setNewService({ ...newService, ignoreTlsVerify: e.target.checked })} 
+                  checked={newService.ignoreTlsVerify}
+                  onCheckedChange={(checked) => setNewService({ ...newService, ignoreTlsVerify: !!checked })}
                 />
                 <Label htmlFor="ignoreTlsVerify" className="text-foreground cursor-pointer">Bỏ qua lỗi chứng chỉ (Self-signed)</Label>
               </div>

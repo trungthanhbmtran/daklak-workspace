@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { usePreviewSimulator } from "../hooks/usePreviewSimulator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,9 +49,9 @@ export const PortalPreviewSimulator = ({ activeLangTab, setActiveLangTab, langua
         <div className="bg-amber-50/30 border border-amber-100 rounded-lg p-3 shadow-inner space-y-2">
           <span className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none block border-b pb-1 border-amber-100/50">Mô phỏng Đỉnh Trang (Header)</span>
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-white border flex items-center justify-center p-1 shadow-sm shrink-0">
+            <div className="w-10 h-10 rounded-full bg-white border flex items-center justify-center p-1 shadow-sm shrink-0 relative overflow-hidden">
               {activeLogo ? (
-                <img src={resolveLogoUrl(activeLogo)} alt="Logo" className="w-full h-full object-contain" />
+                <Image src={resolveLogoUrl(activeLogo)} alt="Logo" fill unoptimized className="object-contain p-1" />
               ) : (
                 <span className="text-[8px] font-black text-slate-400">LOGO</span>
               )}

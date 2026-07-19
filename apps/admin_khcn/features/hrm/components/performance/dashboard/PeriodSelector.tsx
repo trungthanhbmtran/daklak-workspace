@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import apiClient from "@/lib/axiosInstance";
+import { hrmKpiPeriodsApi } from "@/features/hrm/api/kpis.api";
 
 export function PeriodSelector({ selectedPeriod, onSelect }: { selectedPeriod: string, onSelect: (v: string) => void }) {
   const { data: periodsData } = useQuery({
     queryKey: ["hrm-kpi-periods"],
-    queryFn: () => apiClient.get("/hrm/kpis/periods").then((res: any) => res.data || []),
+    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data || []),
   });
 
   return (

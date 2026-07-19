@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 // Import hook cấu hình hệ thống
 import { useThemeConfig } from "./ThemeProvider";
 
@@ -130,7 +131,7 @@ export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () =>
 
                         {/* Thumbnail */}
                         <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-                            <img src={theme.thumbnail} alt={theme.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <Image src={theme.thumbnail} alt={theme.name} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-300" />
                             {theme.isLive && (
                                 <span className="absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold bg-emerald-500 text-white rounded-full shadow-sm flex items-center gap-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Đang kích hoạt

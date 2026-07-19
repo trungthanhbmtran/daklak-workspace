@@ -1,4 +1,5 @@
 import * as React from "react";
+import Image from "next/image";
 import {
   Palette, Type, Sparkles, Upload, Loader2, Layers, Info
 } from "lucide-react";
@@ -208,7 +209,7 @@ export function SloganCustomizer({
                       </div>
                     ) : customStyles.bgImage && customStyles.bgImage.startsWith("http") ? (
                       <div className="relative rounded-xl overflow-hidden border shadow-inner">
-                        <img src={customStyles.bgImage} className="w-full h-24 object-cover" alt="Custom BG" />
+                        <Image src={customStyles.bgImage} fill unoptimized className="object-cover" alt="Custom BG" />
                         <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-all flex items-center justify-center">
                           <Button type="button" variant="secondary" size="sm" onClick={() => document.getElementById("bg-image-uploader")?.click()}>Thay đổi hình ảnh</Button>
                         </div>
@@ -367,7 +368,7 @@ export function SloganCustomizer({
                           </div>
                         ) : customStyles.watermarkUrl ? (
                           <div className="relative rounded-xl overflow-hidden border p-2 flex items-center justify-between bg-slate-50">
-                            <img src={customStyles.watermarkUrl} className="w-12 h-12 object-contain" alt="Custom Watermark" />
+                            <Image src={customStyles.watermarkUrl} width={48} height={48} unoptimized className="object-contain" alt="Custom Watermark" />
                             <Button type="button" variant="secondary" size="xs" onClick={() => document.getElementById("watermark-uploader")?.click()}>Thay đổi</Button>
                           </div>
                         ) : (
