@@ -4,7 +4,6 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
 import { PropertiesPanelComponentProps } from "./types";
-import { Plus, Trash2 } from "lucide-react";
 
 export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge }: PropertiesPanelComponentProps) => {
   if (!selectedEdge) return null;

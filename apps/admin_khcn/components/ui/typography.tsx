@@ -19,7 +19,7 @@ const headingVariants = cva("text-foreground", {
 
 export interface HeadingProps
   extends React.HTMLAttributes<HTMLHeadingElement>,
-    VariantProps<typeof headingVariants> {
+  VariantProps<typeof headingVariants> {
   as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span";
 }
 
@@ -28,9 +28,10 @@ const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
     const Comp = as ? as : level || "h1";
     return (
       <Comp
-        ref={ref as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ref={ref as React.Ref<any>}
         className={cn(headingVariants({ level, className }))}
-        {...(props as any)}
+        {...props}
       />
     );
   }
@@ -66,18 +67,19 @@ const textVariants = cva("text-foreground", {
 
 export interface TextProps
   extends React.HTMLAttributes<HTMLParagraphElement>,
-    VariantProps<typeof textVariants> {
+  VariantProps<typeof textVariants> {
   as?: "p" | "span" | "div" | "label" | "code" | "a";
 }
 
 const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
   ({ className, variant, weight, as = "p", ...props }, ref) => {
-    const Comp = as;
+    const Comp = as as any;
     return (
       <Comp
-        ref={ref as any}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ref={ref as React.Ref<any>}
         className={cn(textVariants({ variant, weight, className }))}
-        {...(props as any)}
+        {...props}
       />
     );
   }

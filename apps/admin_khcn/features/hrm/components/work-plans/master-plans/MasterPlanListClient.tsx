@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Edit, Trash2, FolderKanban } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Search, Edit, FolderKanban } from "lucide-react";
 import { hrmPlansApi } from "@/features/hrm/api/plans.api";
 import { hrmKeys } from "@/features/hrm/keys";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MasterPlanCreateEditDialog } from "./MasterPlanCreateEditDialog";
 import { format } from "date-fns";
 import type { HrmMasterPlan } from "@/features/hrm/types";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Text } from "@/components/ui/typography";
 

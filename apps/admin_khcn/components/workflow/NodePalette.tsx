@@ -3,7 +3,6 @@ import {
   Play, 
   UserCheck, 
   Split, 
-  Zap, 
   CircleStop,
   GripVertical
 } from "lucide-react";

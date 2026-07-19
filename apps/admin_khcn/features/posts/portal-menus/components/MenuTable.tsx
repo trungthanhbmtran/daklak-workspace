@@ -6,7 +6,7 @@ import { CategoryItem } from "@/features/system-admin/categories/types";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MenuTableRow } from "./MenuTableRow";
 import { Loader2 } from "lucide-react";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 interface MenuTableProps {

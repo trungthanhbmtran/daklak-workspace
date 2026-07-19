@@ -1,6 +1,6 @@
 "use client";
 import { useThemeConfig, LayoutSettings } from "./ThemeProvider";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 export function LayoutConfig() {

@@ -6,7 +6,7 @@ import { useThemeConfig } from "./ThemeProvider";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 export function BrandingConfig() {

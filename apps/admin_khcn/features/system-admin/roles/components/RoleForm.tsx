@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, Loader2 } from "lucide-react";
+import { Plus, Trash2, ShieldCheck, Lock, Loader2 } from "lucide-react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/typography";
 
-import { Role, Permission } from "../types";
+import { Permission } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { roleApi } from "../api";

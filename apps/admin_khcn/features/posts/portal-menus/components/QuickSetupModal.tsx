@@ -9,7 +9,7 @@ import {
   Zap, FolderTree, BookOpen, ShieldCheck, Layout,
   Loader2, Sparkles, Layers, ArrowRight, FileText, Plus
 } from "lucide-react";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 interface QuickSetupModalProps {

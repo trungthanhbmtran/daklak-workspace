@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { portalLanguagesApi } from "@/features/portal-config/api";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 interface BannerBasicInfoProps {

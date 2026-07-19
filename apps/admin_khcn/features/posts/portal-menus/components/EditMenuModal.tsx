@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
 import { portalConfigApi } from "@/features/portal-config/api";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 interface EditMenuModalProps {

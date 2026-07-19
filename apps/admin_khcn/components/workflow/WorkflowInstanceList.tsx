@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Clock,
   RefreshCcw
@@ -32,17 +32,14 @@ const WorkflowInstanceList = () => {
     setSelectedInstance(instance);
   };
 
-  const loadInstances = async (currentPage: number) => {
-    const isLoadMore = currentPage > 1;
-    if (isLoadMore) {
-      setIsFetchingNextPage(true);
-    } else {
-      setIsLoading(true);
-    }
-    
+  const loadInstances = useCallback(async (targetPage: number) => {
     try {
+      const isLoadMore = targetPage > 1;
+      if (isLoadMore) setIsFetchingNextPage(true);
+      else setIsLoading(true);
+
       const res = await workflowApi.listInstances({
-        skip: (currentPage - 1) * pageSize,
+        skip: (targetPage - 1) * pageSize,
         take: pageSize,
         search: searchTerm || undefined
       });
@@ -59,18 +56,18 @@ const WorkflowInstanceList = () => {
       setIsLoading(false);
       setIsFetchingNextPage(false);
     }
-  };
+  }, [searchTerm]);
 
   useEffect(() => {
     setPage(1);
     loadInstances(1);
-  }, [searchTerm]);
+  }, [searchTerm, loadInstances]);
 
   useEffect(() => {
     if (page > 1) {
       loadInstances(page);
     }
-  }, [page]);
+  }, [page, loadInstances]);
 
   return (
     <div className="space-y-6">

@@ -12,7 +12,7 @@ export const StatsGridRender: React.FC<StatsGridRenderProps> = ({ widget, active
   const items = widget.data?.items || [];
 
   // Reusable icons for visual richness
-  const icons = [<Award className="w-5 h-5 text-indigo-500" />, <Target className="w-5 h-5 text-emerald-500" />, <TrendingUp className="w-5 h-5 text-blue-500" />, <Users className="w-5 h-5 text-amber-500" />];
+  const icons = [<Award key="award" className="w-5 h-5 text-indigo-500" />, <Target key="target" className="w-5 h-5 text-emerald-500" />, <TrendingUp key="trending" className="w-5 h-5 text-blue-500" />, <Users key="users" className="w-5 h-5 text-amber-500" />];
 
   return (
     <div className="w-full">
@@ -29,8 +29,8 @@ export const StatsGridRender: React.FC<StatsGridRenderProps> = ({ widget, active
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {items.map((item, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className="relative overflow-hidden group p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col items-center text-center space-y-3"
             >
               {/* Soft decorative blur circle */}
@@ -42,7 +42,7 @@ export const StatsGridRender: React.FC<StatsGridRenderProps> = ({ widget, active
               </div>
 
               <div className="space-y-1 z-10">
-                <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-indigo-500 transition-colors">
+                <span className="text-2xl font-black  dark:text-white tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-indigo-500 transition-colors">
                   {item.value}
                 </span>
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-relaxed">

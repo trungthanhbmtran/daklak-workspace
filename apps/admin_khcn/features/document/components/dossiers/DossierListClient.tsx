@@ -4,7 +4,7 @@ import React, { useCallback, useState } from "react";
 import Link from "next/link";
 import {
   FolderOpen, Search, Filter, Plus,
-  Calendar, Clock, ChevronRight, Loader2,
+  Calendar, Clock, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

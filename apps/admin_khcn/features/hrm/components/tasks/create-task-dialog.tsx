@@ -5,11 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Text } from "@/components/ui/typography";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X, Loader2, Repeat, CalendarClock } from "lucide-react";
+import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X, Loader2, Repeat } from "lucide-react";
 import { useCreateTask, useCreateSubTask } from "../../hooks/useTasks";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useThemeConfig } from "./ThemeProvider";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 export function ThemeSaveButton() {

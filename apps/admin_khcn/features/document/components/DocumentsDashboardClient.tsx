@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Inbox, Send, FileText, AlertTriangle, Clock,
   CheckCircle2, TrendingUp, BarChart3, Activity,

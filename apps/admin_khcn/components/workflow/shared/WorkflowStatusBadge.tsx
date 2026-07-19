@@ -13,7 +13,7 @@ interface WorkflowStatusBadgeProps {
 export const WorkflowStatusBadge = ({ status, className = "", showIcon = true }: WorkflowStatusBadgeProps) => {
   const { data: statuses } = useWorkflowStatuses();
 
-  let normalizedStatus = status?.toUpperCase() || "UNKNOWN";
+  const normalizedStatus = status?.toUpperCase() || "UNKNOWN";
 
 
   const config = useMemo(() => {

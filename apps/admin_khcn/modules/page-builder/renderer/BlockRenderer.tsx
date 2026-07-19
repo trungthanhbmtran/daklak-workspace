@@ -24,7 +24,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ widget, activeLang
         <div className="flex flex-col gap-0.5">
           <span className="text-[10px] font-black uppercase text-rose-500 tracking-wider">Lỗi hiển thị Widget</span>
           <span className="text-[10px] text-slate-500 font-bold leading-normal">
-            Không tìm thấy kiểu cấu hình đăng ký cho: "{widget.type}"
+            Không tìm thấy kiểu cấu hình đăng ký cho: &quot;{widget.type}&quot;
           </span>
         </div>
       </div>

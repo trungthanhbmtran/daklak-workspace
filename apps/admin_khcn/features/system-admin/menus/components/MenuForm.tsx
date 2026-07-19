@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus, Edit, Trash2, LayoutDashboard, CornerDownRight,
+  Plus, Edit, Trash2, CornerDownRight,
   ExternalLink, Shield, ShieldCheck, Loader2
 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";

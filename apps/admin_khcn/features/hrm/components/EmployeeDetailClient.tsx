@@ -2,11 +2,11 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, Briefcase, Calendar, ShieldCheck, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Briefcase, Calendar, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heading, Text } from "@/components/ui/typography";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useHrmEmployee } from "@/features/hrm";
 import { EmployeeInfoTab } from "./employee-tabs/EmployeeInfoTab";

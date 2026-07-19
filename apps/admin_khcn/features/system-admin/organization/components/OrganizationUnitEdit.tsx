@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash2, ArrowLeftCircleIcon, Info } from "lucide-react";
+import { Trash2, ArrowLeftCircleIcon } from "lucide-react";
 
 import { UnitTypeSelector } from "./UnitTypeSelector";
 import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";

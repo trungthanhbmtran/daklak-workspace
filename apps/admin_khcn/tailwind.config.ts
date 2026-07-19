@@ -1,9 +1,8 @@
-// tailwind.config.js hoặc tailwind.config.ts
-const { fontFamily } = require("tailwindcss/defaultTheme")
+import type { Config } from "tailwindcss";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { fontFamily } = require("tailwindcss/defaultTheme");
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  // ... các cấu hình khác
+const config: Config = {
   theme: {
     extend: {
       fontFamily: {

@@ -28,6 +28,21 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
+const MenuItem = ({ icon: Icon, label, onClick, disabled, isDestructive }: any) => (
+  <button
+    type="button"
+    disabled={disabled}
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
+    className={cn(
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50",
+      isDestructive && "text-destructive hover:bg-destructive/10 focus:bg-destructive/10 font-medium"
+    )}
+  >
+    <Icon className="mr-2 h-4 w-4" />
+    {label}
+  </button>
+);
+
 export function TableContextMenuPlugin() {
   const [editor] = useLexicalComposerContext();
   const [menuState, setMenuState] = useState<{ x: number; y: number } | null>(null);
@@ -86,25 +101,11 @@ export function TableContextMenuPlugin() {
     setMenuState(null);
   };
 
-  const MenuItem = ({ icon: Icon, label, onClick, disabled, isDestructive }: any) => (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
-      className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50",
-        isDestructive && "text-destructive hover:bg-destructive/10 focus:bg-destructive/10 font-medium"
-      )}
-    >
-      <Icon className="mr-2 h-4 w-4" />
-      {label}
-    </button>
-  );
 
   const menu = (
     <div
       ref={menuRef}
-      className="fixed z-[9999] min-w-[14rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-80 zoom-in-95"
+      className="fixed z-9999 min-w-56 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-80 zoom-in-95"
       style={{ top: menuState.y, left: menuState.x }}
       onContextMenu={(e) => e.preventDefault()}
     >

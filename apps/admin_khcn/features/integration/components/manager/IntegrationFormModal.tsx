@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { Server, ShieldAlert, Plus, Trash2, KeyRound, Link as LinkIcon } from "lucide-react";
+import { Server, ShieldAlert, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";

@@ -1,5 +1,4 @@
 import { Building2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 
 export const metadata = {
   title: "Cơ cấu tổ chức | Quản trị Hệ thống",

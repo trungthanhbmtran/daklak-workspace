@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 interface StageOption {

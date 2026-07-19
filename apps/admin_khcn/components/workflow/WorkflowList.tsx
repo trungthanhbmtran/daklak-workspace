@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Plus,
   MoreHorizontal,
@@ -11,7 +11,6 @@ import {
   Calendar,
   Layers,
   ChevronRight,
-  Settings2,
   CheckCircle2,
   Link2
 } from "lucide-react";
@@ -51,7 +50,6 @@ import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,

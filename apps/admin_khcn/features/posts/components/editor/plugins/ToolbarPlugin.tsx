@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch"; 
 import { Label } from "@/components/ui/label"; 
 import { cn } from "@/lib/utils";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 // ============================================================================

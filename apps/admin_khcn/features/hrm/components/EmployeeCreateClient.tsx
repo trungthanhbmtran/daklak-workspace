@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
   ArrowLeft, Save, User, Camera,
   Loader2, Mail, Phone, CreditCard, Calendar,
-  Building2, Check, ChevronRight, Hash, AlertCircle
+  Building2, Check, Hash, AlertCircle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Heading, Text } from "@/components/ui/typography";
-import { useHrmEmployeeForm } from "@/features/hrm/hooks/useHrmEmployeeForm";
 import {
   Select,
   SelectContent,

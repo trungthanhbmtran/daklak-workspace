@@ -94,7 +94,7 @@ export function ThemePreview() {
 
       {/* THÀNH PHẦN KHUNG THIẾT BỊ ĐỘNG */}
       <div
-        className={`w-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-y-auto custom-scrollbar select-none transition-all duration-300 bg-white shadow-sm ${getDeviceViewportClass()} ${getFontFamilyClass()}`}
+        className={`w-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-y-auto custom-scrollbar select-none transition-all duration-300 shadow-sm ${getDeviceViewportClass()} ${getFontFamilyClass()}`}
         style={{ fontSize: `${typography.size}px` }}
       >
 
@@ -121,7 +121,7 @@ export function ThemePreview() {
         </header>
 
         {/* MOCKUP BODY CONTENT */}
-        <div className={`p-4 space-y-4 max-w-4xl mx-auto transition-all duration-200 ${layout.isCompact ? 'space-y-3 !p-3' : ''}`}>
+        <div className={`p-4 space-y-4 max-w-4xl mx-auto transition-all duration-200 ${layout.isCompact ? 'space-y-3 p-3' : ''}`}>
 
           {/* Banner Thông báo */}
           <div className={`p-4 bg-gradient-to-r ${colors.gradient} text-white shadow-sm ${getRadiusClass()} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all duration-200`}>

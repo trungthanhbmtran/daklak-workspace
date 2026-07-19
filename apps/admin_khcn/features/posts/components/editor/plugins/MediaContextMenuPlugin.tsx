@@ -24,6 +24,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
+const MenuItem = ({ icon: Icon, label, onClick, isDestructive }: any) => (
+  <button
+    type="button"
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
+    className={cn(
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
+      isDestructive && "text-destructive hover:bg-destructive/10 font-medium"
+    )}
+  >
+    <Icon className="mr-2 h-4 w-4" />
+    {label}
+  </button>
+);
+
 export function MediaContextMenuPlugin() {
   const [editor] = useLexicalComposerContext();
   
@@ -185,19 +199,7 @@ export function MediaContextMenuPlugin() {
     setIsDialogOpen(false);
   };
 
-  const MenuItem = ({ icon: Icon, label, onClick, isDestructive }: any) => (
-    <button
-      type="button"
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
-      className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
-        isDestructive && "text-destructive hover:bg-destructive/10 font-medium"
-      )}
-    >
-      <Icon className="mr-2 h-4 w-4" />
-      {label}
-    </button>
-  );
+
 
   return (
     <>

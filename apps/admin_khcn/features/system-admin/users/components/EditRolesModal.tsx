@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Text } from "@/components/ui/typography";
 import {
   Dialog,

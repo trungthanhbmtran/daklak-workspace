@@ -11,7 +11,7 @@ import {
   FormItem,
   FormLabel
 } from "@/components/ui/form";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 interface BannerConfigProps {

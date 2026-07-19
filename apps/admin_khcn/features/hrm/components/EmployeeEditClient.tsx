@@ -7,14 +7,13 @@ import Image from "next/image";
 import {
   ArrowLeft, Save, User, Camera,
   Loader2, Mail, Phone, CreditCard, Calendar,
-  Building2, Check, ChevronRight, Hash, AlertCircle
+  Building2, Check, Hash, AlertCircle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useHrmEmployee, useUpdateHrmEmployee } from "@/features/hrm/hooks/useHrmEmployees";

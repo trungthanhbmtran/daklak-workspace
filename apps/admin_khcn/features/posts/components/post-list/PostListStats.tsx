@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { FileText, CheckCircle2, BarChart3, Star } from "lucide-react";
 
 import { usePostStats } from "../../hooks/usePostStats";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 
 export function PostListStats() {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Plus, Search, Server, Upload } from "lucide-react";
+import { Plus, Search, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIntegrationList, IntegrationConfig } from "../api";

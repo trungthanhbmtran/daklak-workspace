@@ -6,7 +6,6 @@ import { Search, Plus, Building2, Loader2, Eye, Edit, Trash2 } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
 import { Heading, Text } from "@/components/ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useHrmEmployeesList, useDeleteHrmEmployee } from "@/features/hrm/hooks/useHrmEmployees";

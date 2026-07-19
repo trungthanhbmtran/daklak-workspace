@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, MapPin, Users, Building2 } from "lucide-react";
+import { FileText, MapPin, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrganizationUnitEdit } from "./OrganizationUnitEdit";
 import { UnitScopePanel } from "./UnitScopePanel";

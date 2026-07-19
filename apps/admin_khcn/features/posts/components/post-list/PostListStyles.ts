@@ -1,6 +1,6 @@
 import {
   FileEdit, Send, Activity, CheckCircle2,
-  EyeOff, FileText, X, ShieldAlert, FileMinus
+  EyeOff, FileText, X, ShieldAlert
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 

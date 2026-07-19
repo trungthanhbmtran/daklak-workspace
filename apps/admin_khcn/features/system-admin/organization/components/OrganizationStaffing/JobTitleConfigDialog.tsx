@@ -64,7 +64,7 @@ export function JobTitleConfigDialog({
             <div className="flex gap-3 items-start bg-blue-50 text-blue-800 p-3.5 rounded-lg border border-blue-100 text-sm">
               <Info className="h-5 w-5 shrink-0 text-blue-500 mt-0.5" />
               <p className="leading-relaxed">
-                Đây là cấu hình <strong>khung tiêu chuẩn chung</strong> cho toàn bộ các vị trí thuộc chức danh <em>{jobTitle.name}</em>. Bạn có thể tinh chỉnh lại chi tiết nhiệm vụ cho từng cá nhân cụ thể ở phần <strong>"Phân công nhiệm vụ chi tiết"</strong> bên ngoài.
+                Đây là cấu hình <strong>khung tiêu chuẩn chung</strong> cho toàn bộ các vị trí thuộc chức danh <em>{jobTitle.name}</em>. Bạn có thể tinh chỉnh lại chi tiết nhiệm vụ cho từng cá nhân cụ thể ở phần <strong>&quot;Phân công nhiệm vụ chi tiết&quot;</strong> bên ngoài.
               </p>
             </div>
 
