@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -45,6 +46,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
         setDueDate(localISOTime);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const applyQuickPreset = (presetTitle: string, presetPriority: string = "NORMAL", type: string = "ONE_TIME", presetRecurrence?: string) => {

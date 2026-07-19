@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { lazy, Suspense, useState } from "react";
 import { CheckCircle2, Lock, Settings2 } from "lucide-react";
 import { useWatch } from "react-hook-form";

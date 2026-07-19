@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 
 export const DEFAULT_STYLES = {
@@ -179,6 +180,7 @@ export const renderBannerWatermark = (styles: any) => {
 
   if (styles.watermarkType === "custom" && styles.watermarkUrl) {
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img 
         src={styles.watermarkUrl} 
         alt="Custom Watermark" 

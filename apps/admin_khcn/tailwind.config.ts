@@ -2,6 +2,7 @@ import type { Config } from "tailwindcss";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { fontFamily } = require("tailwindcss/defaultTheme");
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const config: Config = {
   theme: {
     extend: {

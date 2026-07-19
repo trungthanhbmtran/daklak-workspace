@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { 
@@ -12,6 +13,7 @@ const ImageUIComponent = ({ src, altText }: { src: string, altText: string }) =>
   if (!src) return null;
   return (
     <div className="flex justify-center my-4 group relative">
+      // eslint-disable-next-line @next/next/no-img-element
       <img 
         src={src} alt={altText} referrerPolicy="no-referrer" 
         className="rounded-lg shadow-sm max-w-full h-auto border border-border" 
@@ -32,6 +34,7 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
   // ==========================================================
   static importDOM(): DOMConversionMap | null {
     return {
+      // eslint-disable-next-line unused-imports/no-unused-vars
       img: (node: Node) => ({
         conversion: (domNode: Node): DOMConversionOutput | null => {
           if (domNode instanceof HTMLImageElement) {

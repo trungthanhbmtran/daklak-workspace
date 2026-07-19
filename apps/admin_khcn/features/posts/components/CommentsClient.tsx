@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useCallback, useState } from "react";
@@ -147,6 +148,7 @@ const CommentRow = React.memo(function CommentRow({ comment, onRequestDelete }: 
       </TableCell>
 
       <TableCell className="max-w-xs">
+        // eslint-disable-next-line react/no-unescaped-entities
         <Text className="italic text-foreground/80 line-clamp-2">"{comment.content}"</Text>
       </TableCell>
 

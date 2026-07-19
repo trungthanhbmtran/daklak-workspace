@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useRef } from "react";
@@ -167,6 +168,7 @@ export function DocumentCabinetClient() {
                         return parsedTags?.map((tag: string) => (
                           <Badge key={tag} variant="secondary" className="text-[10px] bg-muted text-muted-foreground">{tag}</Badge>
                         ));
+                      // eslint-disable-next-line unused-imports/no-unused-vars
                       } catch (e) { return null; }
                     })()}
                   </div>

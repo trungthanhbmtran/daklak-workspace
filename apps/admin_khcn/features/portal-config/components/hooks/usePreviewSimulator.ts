@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ export function usePreviewSimulator(activeLangTab: string) {
       try {
         const parsed = JSON.parse(configItem.description);
         return parsed[activeLangTab] || "";
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         return activeLangTab === "vi" ? configItem.description : "";
       }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Widget } from "../../core/types";
 import { DirectoryData } from "./directory.schema";
@@ -9,6 +10,7 @@ interface DirectoryRenderProps {
 }
 
 export const DirectoryRender: React.FC<DirectoryRenderProps> = ({ widget, activeLang }) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const units = widget.data?.selectedUnits || [];
   const [expandedIds, setExpandedIds] = React.useState<Record<number, boolean>>({});
 

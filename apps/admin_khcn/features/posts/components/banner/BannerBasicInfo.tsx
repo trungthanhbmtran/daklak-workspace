@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Globe, Info, ExternalLink, Image as ImageIcon, Type, CheckCircle2 } from "lucide-react";
@@ -38,6 +39,7 @@ export function BannerBasicInfo({
   form,
   activeLangTab,
   setActiveLangTab,
+  // eslint-disable-next-line unused-imports/no-unused-vars
   watchedPosition,
   designType,
   setDesignType

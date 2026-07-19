@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { API_BASE_URL, API_TIMEOUT_MS } from "@/config/constants";

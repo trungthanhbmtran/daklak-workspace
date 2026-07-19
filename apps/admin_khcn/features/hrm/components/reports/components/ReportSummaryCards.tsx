@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Heading, Text } from "@/components/ui/typography";

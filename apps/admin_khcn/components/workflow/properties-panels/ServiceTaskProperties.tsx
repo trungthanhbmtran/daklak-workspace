@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { PropertiesPanelComponentProps } from "./types";

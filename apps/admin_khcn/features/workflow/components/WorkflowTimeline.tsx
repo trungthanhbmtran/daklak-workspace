@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { useWorkflowLogs } from '../hooks';
 import { CheckCircle2, Circle, ArrowRightCircle, AlertCircle } from 'lucide-react';

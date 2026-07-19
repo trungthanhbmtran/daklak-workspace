@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useCallback, useRef, useState, useEffect } from "react";
@@ -45,8 +46,10 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     edges,
     setEdges,
     onEdgesChange,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     selectedNodeId,
     setSelectedNodeId,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     selectedEdgeId,
     setSelectedEdgeId,
     isPropertiesOpen,

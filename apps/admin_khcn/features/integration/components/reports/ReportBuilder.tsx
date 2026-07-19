@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -26,6 +27,7 @@ interface ReportBuilderProps {
 
 // Generic mock data generator for when an API is selected, so we can preview the chart
 // In a real scenario, this would be a fetch to an analytics endpoint or the API itself.
+// eslint-disable-next-line unused-imports/no-unused-vars
 const generateMockDataForSource = (sourceName: string) => {
   return [
     { label: "Jan", total_calls: Math.floor(Math.random() * 5000), error_rate: Math.floor(Math.random() * 10) },

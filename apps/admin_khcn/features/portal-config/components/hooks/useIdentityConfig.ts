@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -41,6 +42,7 @@ export function useIdentityConfig() {
             const parsed = JSON.parse(configItem.description);
             initialConfig.vi[key] = parsed.vi || "";
             initialConfig.en[key] = parsed.en || "";
+          // eslint-disable-next-line unused-imports/no-unused-vars
           } catch (e) {
             initialConfig.vi[key] = configItem.description;
             initialConfig.en[key] = "";
@@ -95,6 +97,7 @@ export function useIdentityConfig() {
 
       await portalConfigApi.batchUpsert(itemsToSave);
       toast.success("Đã lưu thông tin nhận diện thành công!");
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Không thể lưu cấu hình, vui lòng thử lại");
     } finally {

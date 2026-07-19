@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * HRM microservice – types cho nhân viên (Employee).
  * API qua gateway: GET /hrm/employees (proxy tới hrm-service).

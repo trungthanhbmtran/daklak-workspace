@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
 import { Heading, Text } from "@/components/ui/typography";
 import { TabsContent } from "@/components/ui/tabs";

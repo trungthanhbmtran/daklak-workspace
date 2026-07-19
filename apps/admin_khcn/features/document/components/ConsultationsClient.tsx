@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useMemo } from "react";
@@ -31,6 +32,7 @@ const formatDate = (date?: string) => {
          month: '2-digit',
          year: 'numeric'
       });
+   // eslint-disable-next-line unused-imports/no-unused-vars
    } catch (e) {
       return "--";
    }

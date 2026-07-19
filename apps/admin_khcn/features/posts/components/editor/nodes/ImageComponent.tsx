@@ -77,6 +77,7 @@ export default function ImageComponent({
 
       setIsSuccess(true);
       setTimeout(() => setIsHovered(false), 2000);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Đã xảy ra lỗi khi tải ảnh về máy chủ!");
     } finally {
@@ -95,6 +96,7 @@ export default function ImageComponent({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ẢNH GỐC */}
+      // eslint-disable-next-line @next/next/no-img-element
       <img 
         src={src} 
         alt={altText || "Hình ảnh minh họa"} 

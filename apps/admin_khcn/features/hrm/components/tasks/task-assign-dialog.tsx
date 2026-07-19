@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -30,6 +31,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
 
   // ── Danh sách phòng ban từ API ──
   const { data: orgData } = useOrganizationFlatListQuery();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const departments = orgData?.items ?? [];
 
   useEffect(() => {

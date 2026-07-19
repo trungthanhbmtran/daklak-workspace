@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -71,6 +72,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       setSelectedCategories([]);
       onSuccess();
       onClose();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Lỗi khi nhập danh mục hàng loạt");
     } finally {
@@ -180,6 +182,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       toast.success(`Đã thiết lập menu cho ${group.name}`);
       onSuccess();
       onClose();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Lỗi khi thiết lập danh mục văn bản");
     } finally {

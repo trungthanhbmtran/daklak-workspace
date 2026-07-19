@@ -14,8 +14,10 @@ export type GovClassification = 'CONG_CHUC' | 'VIEN_CHUC';
 
 export function ConfigureRankTasksClient() {
     const {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         selectedClass, setSelectedClass, isSaved, isSaving, handleSave,
         units, congChucRanks, vienChucRanks,
+        // eslint-disable-next-line unused-imports/no-unused-vars
         congChucTemplates, vienChucTemplates, isLoading
     } = useConfigureRankTasks();
 

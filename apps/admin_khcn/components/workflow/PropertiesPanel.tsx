@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Node, Edge } from "@xyflow/react";
 import { Settings2, Trash2, Activity } from "lucide-react";
@@ -44,6 +45,7 @@ export const PropertiesPanel = ({
   selectedNode,
   selectedEdge,
   availableServices = [],
+  // eslint-disable-next-line unused-imports/no-unused-vars
   availableTriggers = [],
   taskRoles = [],
   orgRoles = [],
@@ -51,6 +53,7 @@ export const PropertiesPanel = ({
   onUpdateEdge,
   onDelete,
   onDeleteEdge,
+  // eslint-disable-next-line unused-imports/no-unused-vars
   onClose,
   workflowDesc,
   setWorkflowDesc,

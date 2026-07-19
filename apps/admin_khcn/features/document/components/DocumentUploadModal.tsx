@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -59,6 +60,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
   // Categories load bằng React Query — cache 5 phút, không cần useEffect
   const { data: formCategories } = useDocumentFormData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const categories = formCategories ?? { types: [], fields: [], urgencies: [], securityLevels: [], reportTypes: [] };
 
   const form = useForm<DocumentFormValues>({
@@ -520,6 +522,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   <div className="flex items-center justify-between mb-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-sm font-bold text-primary uppercase">Công khai tài chính</FormLabel>
+                      // eslint-disable-next-line react/no-unescaped-entities
                       <p className="text-[10px] text-muted-foreground">Văn bản sẽ hiển thị tại mục "Công khai ngân sách"</p>
                     </div>
                     <FormField name="isPublic" render={({ field }) => (

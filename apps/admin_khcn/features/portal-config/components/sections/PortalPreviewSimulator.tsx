@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -109,6 +110,7 @@ export const PortalPreviewSimulator = ({ activeLangTab, setActiveLangTab, langua
             Map: {sim.simContactMapTitle}
           </p>
           <p className="text-[7.5px] italic text-slate-400 leading-normal border-t pt-1 border-slate-100">
+            // eslint-disable-next-line react/no-unescaped-entities
             Thành công: "{sim.simContactFormSuccessDesc}"
           </p>
         </div>

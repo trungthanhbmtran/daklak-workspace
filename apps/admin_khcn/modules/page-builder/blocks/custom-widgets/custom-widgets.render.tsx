@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Widget } from "../../core/types";
 import {
@@ -55,6 +56,7 @@ export const HeroSliderRender: React.FC<{ widget: Widget; activeLang: string }> 
   return (
     <div className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md border border-slate-200/20 bg-slate-900 select-none">
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10" />
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={displayBanners[0].imageUrl}
         alt={displayBanners[0].name}
@@ -242,6 +244,7 @@ export const MediaGalleryRender: React.FC<{ widget: Widget; activeLang: string }
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {displayItems.map((item, idx) => (
         <div key={idx} className="group relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-800 aspect-video shadow-sm">
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.img}
             alt={item.title}

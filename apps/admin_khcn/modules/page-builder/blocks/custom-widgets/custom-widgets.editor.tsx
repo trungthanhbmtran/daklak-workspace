@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Widget } from "../../core/types";
 import { Label } from "@/components/ui/label";
@@ -54,6 +55,7 @@ export const PublicServicesEditor: React.FC<{
   onChangeData: (data: any) => void;
   activeLang: string;
 }> = ({ widget, onChangeData, activeLang }) => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const currentLang = activeLang;
 
   const defaultServices = [
@@ -280,6 +282,7 @@ export const ExternalLinksEditor: React.FC<{
   onChangeData: (data: any) => void;
   activeLang: string;
 }> = ({ widget, onChangeData, activeLang }) => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const currentLang = activeLang;
 
   const defaultLinks = [

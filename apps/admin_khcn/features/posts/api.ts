@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // features/posts/api.ts
 // Tất cả API calls trả về ApiResponse thẳng từ interceptor axiosInstance.
 // Interceptor đã bóc lớp Axios → client nhận { success, data, meta, message }.

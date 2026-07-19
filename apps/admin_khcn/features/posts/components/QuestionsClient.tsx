@@ -240,6 +240,7 @@ const QuestionRow = React.memo(function QuestionRow({
       <TableCell className="max-w-sm">
         <Text className="font-semibold line-clamp-1">{question.title}</Text>
         <Text className="text-muted-foreground line-clamp-2 mt-0.5 italic">
+          // eslint-disable-next-line react/no-unescaped-entities
           "{question.content}"
         </Text>
       </TableCell>

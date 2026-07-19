@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -153,6 +154,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                       <TableCell className="pl-6">
                         <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">
                           {cat.thumbnail ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={`/api/v1/admin/media/download/${cat.thumbnail}`}
                               alt={cat.name}

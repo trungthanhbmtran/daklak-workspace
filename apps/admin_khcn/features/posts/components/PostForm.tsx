@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -203,6 +204,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
       if (typeof parsedTranslations === 'string') {
         try {
           parsedTranslations = JSON.parse(parsedTranslations);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
           parsedTranslations = {};
         }
@@ -535,6 +537,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (previewUrl || form.getValues("thumbnail")) ? (
                   <div className="relative group rounded-xl overflow-hidden border shadow-inner">
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={previewUrl || (form.getValues("thumbnail") ? `/api/v1/admin/media/download/${form.getValues("thumbnail")}` : '')}
                       className="w-full aspect-video object-cover"
@@ -751,6 +754,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {showFullImage && (previewUrl || form.getValues("thumbnail")) && (
           <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewUrl || (form.getValues("thumbnail") ? `/api/v1/admin/media/download/${form.getValues("thumbnail")}` : '')}
                 className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20"

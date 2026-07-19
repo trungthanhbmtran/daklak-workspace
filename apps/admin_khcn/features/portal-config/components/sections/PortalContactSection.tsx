@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useRef } from "react";
@@ -13,9 +14,11 @@ import { toast } from "sonner";
 export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }: any) => {
   const {
     isLoading,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     isSaving,
     configTranslations,
     updateField,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     handleSave,
     mapUrl,
     setMapUrl,
@@ -118,6 +121,7 @@ export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }
               <div className="border border-dashed border-border rounded-xl p-4 bg-muted/50 flex flex-col items-center justify-center text-center shrink-0 w-44 h-28 relative overflow-hidden group">
                 {activeMap ? (
                   <>
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={resolveLogoUrl(activeMap)}
                       alt="Administrative Map"

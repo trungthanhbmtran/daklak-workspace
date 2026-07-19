@@ -19,6 +19,7 @@ export function useVisualEditor(initialLayout: Row[], languages: PageLanguage[],
             store.initStore(initialLayout, languages);
             isInitialized.current = true;
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialLayout, languages, store.initStore]);
 
     // 2. Đồng bộ ngược dữ liệu ra database khi layout trong store biến động

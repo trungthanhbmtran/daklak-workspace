@@ -35,6 +35,7 @@ export const LeadershipRender: React.FC<LeadershipRenderProps> = ({ widget, acti
               {/* Profile Avatar Wrapper */}
               <div className="relative w-20 h-20 rounded-full bg-slate-50 dark:bg-slate-950 p-1 border border-slate-100 dark:border-slate-800/50 shadow-inner group-hover:scale-105 transition-transform duration-300">
                 {leader.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img 
                     src={leader.avatarUrl} 
                     alt={leader.fullName} 

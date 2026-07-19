@@ -15,6 +15,7 @@ export function BrandingConfig() {
     // 1. Logo Upload Hook
     const {
         isUploading: isUploadingLogo,
+        // eslint-disable-next-line unused-imports/no-unused-vars
         previewUrl: previewLogoUrl,
         handleImageUpload: handleLogoUpload,
         removeImage: removeLogoImage
@@ -32,6 +33,7 @@ export function BrandingConfig() {
     // 2. Favicon Upload Hook
     const {
         isUploading: isUploadingFavicon,
+        // eslint-disable-next-line unused-imports/no-unused-vars
         previewUrl: previewFaviconUrl,
         handleImageUpload: handleFaviconUpload,
         removeImage: removeFaviconImage
@@ -57,6 +59,7 @@ export function BrandingConfig() {
                 <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col items-center bg-slate-50/50 dark:bg-slate-800/50 relative">
                     {branding.logo ? (
                         <div className="flex flex-col items-center gap-3">
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={branding.logo}
                                 alt="Logo Preview"
@@ -105,6 +108,7 @@ export function BrandingConfig() {
                 <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-lg p-4 flex flex-col items-center bg-slate-50/50 dark:bg-slate-800/50 relative">
                     {branding.favicon ? (
                         <div className="flex flex-col items-center gap-3">
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={branding.favicon}
                                 alt="Favicon Preview"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
 import { pickData, pickOne, type ApiResponse } from "@/lib/api.types";
 

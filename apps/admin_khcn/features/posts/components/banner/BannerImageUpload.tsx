@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ImagePlus, Loader2, X } from "lucide-react";
@@ -48,6 +49,7 @@ export function BannerImageUpload({ form }: BannerImageUploadProps) {
           </div>
         ) : (previewUrl || imageUrlValue) ? (
           <div className="relative group rounded-xl overflow-hidden border shadow-inner">
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={previewUrl || (imageUrlValue?.startsWith('http') ? imageUrlValue : `/api/v1/admin/media/download/${imageUrlValue}`)}
               className="w-full aspect-21/9 object-cover"

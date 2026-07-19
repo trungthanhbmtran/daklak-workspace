@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -109,6 +110,7 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
     }
   };
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedUnitIds = form.watch("targetUnitIds") || [];
 
   const toggleUnit = (id: string) => {

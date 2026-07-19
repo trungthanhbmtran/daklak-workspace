@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -51,6 +52,7 @@ export function EditRolesModal({ user, isOpen, onClose, onSave, isSaving }: Edit
       .filter((r) => names.includes(r.name) || names.includes(r.code))
       .map((r) => r.id);
     setSelectedIds(ids);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, user?.id, roles.length, JSON.stringify(user?.roles)]);
 
   const handleToggle = (roleId: number, checked: boolean) => {

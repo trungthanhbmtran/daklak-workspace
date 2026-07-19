@@ -48,6 +48,7 @@ export function EmployeeListClient() {
 
   const handleSearch = () => setKeyword(searchInput.trim());
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const handleDelete = async (reason?: string) => {
     if (!deleteId) return;
     deleteEmployee(deleteId, {

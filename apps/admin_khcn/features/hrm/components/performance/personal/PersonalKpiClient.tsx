@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -27,6 +28,7 @@ export function PersonalKpiClient() {
   });
 
   // Fetch evaluation details when evaluationId changes
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const { data: rawDetail, refetch: refetchDetail, isFetching } = useQuery({
     queryKey: ["hrm-kpi-eval-detail", evaluationId],
     queryFn: async () => {

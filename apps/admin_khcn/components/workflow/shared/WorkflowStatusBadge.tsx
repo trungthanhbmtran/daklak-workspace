@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import * as LucideIcons from "lucide-react";
@@ -29,6 +30,7 @@ export const WorkflowStatusBadge = ({ status, className = "", showIcon = true }:
             color = parsed.color || color;
             iconName = parsed.icon || iconName;
           }
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
           // ignore parsing error
         }

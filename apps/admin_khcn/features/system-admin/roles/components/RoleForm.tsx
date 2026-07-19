@@ -214,6 +214,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
                   <Lock className="h-3.5 w-3.5 text-primary" /> 2. Chính sách truy cập tài nguyên (Policies)
                 </Text>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background">
+                  // eslint-disable-next-line react-hooks/incompatible-library
                   Đã cấu hình: {form.watch("policies").length} chính sách
                 </Badge>
               </div>

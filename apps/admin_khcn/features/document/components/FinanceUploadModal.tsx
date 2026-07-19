@@ -46,6 +46,7 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
   });
 
   // Tự động sinh tên Quyết định theo chuẩn hành chính khi đổi loại báo cáo/năm
+  // eslint-disable-next-line react-hooks/incompatible-library
   const watchCategory = form.watch("category");
   const watchYear = form.watch("year");
   const watchPeriod = form.watch("period");

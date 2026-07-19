@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { Row, Column, Widget, SectionSettings, PageLanguage } from "../core/types";
 

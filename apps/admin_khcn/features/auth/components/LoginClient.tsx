@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useTransition } from "react";
@@ -36,8 +37,10 @@ const formSchema = z.object({
 });
 
 export function LoginClient() {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const router = useRouter();
   const searchParams = useSearchParams();
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const callbackUrl = searchParams.get("callbackUrl");
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);

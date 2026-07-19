@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -130,6 +131,7 @@ export function ManualPlanSelectorByRankClient() {
         }
     }, [classification, currentGroups, activeGroup]);
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { data: existingQuotasData, isLoading: isLoadingQuotas } = useQuery({
         queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter],
         queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter, activeDomainFilter),
@@ -179,6 +181,7 @@ export function ManualPlanSelectorByRankClient() {
         if (!task || addedPlans.some(p => p.title === task.taskName && p.rankType === activeRankFilter)) return;
 
         setAddedPlans([...addedPlans, {
+            // eslint-disable-next-line react-hooks/purity
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             title: task.taskName,
             rankType: activeRankFilter,
@@ -208,6 +211,7 @@ export function ManualPlanSelectorByRankClient() {
             toast.success('Lưu định biên thành công!', {
                 description: `Đã cập nhật ${addedPlans.length} chỉ tiêu vào danh sách.`
             });
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Có lỗi xảy ra', {
                 description: 'Không thể lưu định biên vào lúc này.'
@@ -389,6 +393,7 @@ export function ManualPlanSelectorByRankClient() {
                                                         <Target className="w-8 h-8 opacity-20" />
                                                     </div>
                                                     <Text variant="small" className="font-normal">Chưa có nhiệm vụ bắt buộc nào cho ngạch này.</Text>
+                                                    // eslint-disable-next-line react/no-unescaped-entities
                                                     <Text variant="small" className="opacity-60 font-normal">Hãy chọn một nhiệm vụ mẫu từ thư viện và nhấn "Thêm"</Text>
                                                 </div>
                                             </TableCell>

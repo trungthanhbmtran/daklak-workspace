@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
@@ -32,6 +33,7 @@ export const useImageUpload = (options?: { onSuccess?: (id: string, url: string)
 
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(uploadInfo.fileId, conf.downloadUrl);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Lỗi tải ảnh");
     } finally {

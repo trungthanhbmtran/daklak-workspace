@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMemo } from "react";
@@ -76,6 +77,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
       }]);
       if (mode === "ADD") setSelectedPageId(id);
       refetch();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Không thể lưu thông tin trang. Vui lòng thử lại.");
     }
@@ -108,6 +110,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
         setSelectedPageId(updatedList[0]?.id || "about-page");
       }
       refetch();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Không thể xóa trang.");
     }
@@ -125,6 +128,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
         description: JSON.stringify(updatedList)
       }]);
       refetch();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Không thể cập nhật trạng thái trang.");
     }

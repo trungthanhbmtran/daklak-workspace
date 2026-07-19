@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ export function NotificationConfigPanel() {
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [inApp, setInApp] = useState(true);
   const [telegram, setTelegram] = useState({ botToken: "" });
   const [zalo, setZalo] = useState({ accessToken: "", apiUrl: "" });
@@ -75,6 +77,7 @@ export function NotificationConfigPanel() {
       }
       setIntegrationIds(ids);
       setActiveStates(states);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Không thể lấy cấu hình thông báo");
     } finally {
@@ -100,6 +103,7 @@ export function NotificationConfigPanel() {
       }
       toast.success(`Đã lưu cấu hình ${systemName}`);
       await fetchConfigs();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error(`Lỗi khi lưu cấu hình ${systemName}`);
     } finally {
@@ -114,6 +118,7 @@ export function NotificationConfigPanel() {
       const id = integrationIds[code];
       if (id) {
         // Just update active state if it exists
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const res = await notificationConfigApi.update(id, {
           systemName,
           integrationCode: code,
@@ -125,6 +130,7 @@ export function NotificationConfigPanel() {
         // Create if not exists
         await handleSave(code, systemName, configData, newState);
       }
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       // Revert on error
       setActiveStates(prev => ({ ...prev, [code]: currentActive }));

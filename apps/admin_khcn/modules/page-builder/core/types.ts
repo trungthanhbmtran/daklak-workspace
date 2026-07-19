@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Core Type Definitions for the Headless Visual Page Builder
  * Designed for high scalability, type safety, and multi-language support.

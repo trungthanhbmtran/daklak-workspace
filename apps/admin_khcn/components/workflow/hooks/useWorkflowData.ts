@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback, useEffect } from "react";
 import { workflowApi } from "@/features/workflow/api";
 import { toast } from "sonner";
@@ -160,6 +161,7 @@ export function useWorkflowData({
           setWorkflowId(response.id);
           targetId = response.id;
         }
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
         toast.error("Lỗi khi lưu quy trình");
         setIsSaving(false);

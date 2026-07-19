@@ -30,6 +30,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // React Query hooks thay thế useEffect + apiClient trực tiếp
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const { data: components = [], isLoading: loading } = useDossierComponents(dossierId);
   const { data: cabinetFiles = [] } = useCabinetFiles(isCabinetModalOpen || isAddComponentModalOpen);
   const { updateComponent, addComponent } = useDossierComponentMutations(dossierId);
@@ -49,6 +50,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
       const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
       await updateComponent.mutateAsync({ id: selectedCompId, status: 'VALID', fileUrl, source: 'UPLOAD' });
       toast.success("Tải tài liệu thành công!");
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Tải tài liệu thất bại!");
     } finally {

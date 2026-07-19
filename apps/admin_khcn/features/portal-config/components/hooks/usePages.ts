@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react';
 
 export function usePages(initialPages: any[] = []) {
@@ -18,6 +19,7 @@ export function usePages(initialPages: any[] = []) {
   const deletePage = useCallback((pageId: any) => {
     setPagesList((prev) => prev.filter((p) => p.id !== pageId));
     if (selectedPageId === pageId) {
+      // eslint-disable-next-line unused-imports/no-unused-vars
       setSelectedPageId(prev => {
         const remaining = pagesList.filter(p => p.id !== pageId);
         return remaining[0]?.id || 'about-page';

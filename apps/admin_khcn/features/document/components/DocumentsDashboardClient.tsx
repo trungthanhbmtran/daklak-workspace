@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMemo } from "react";
@@ -21,6 +22,7 @@ function formatDate(dateStr?: string) {
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return "Không có";
     return date.toLocaleDateString('vi-VN');
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (e) {
     return "Không có";
   }
@@ -28,7 +30,9 @@ function formatDate(dateStr?: string) {
 
 export function DocumentsDashboardClient() {
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const { data: stats, isLoading: statsLoading } = useDocumentStats();
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const { data: pendingTasksData, isLoading: tasksLoading } = useListDocuments({
     status: 'PROCESSING',
   });

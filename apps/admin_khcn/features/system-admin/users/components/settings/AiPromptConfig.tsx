@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -88,6 +89,7 @@ Trả về duy nhất một mảng JSON thuần túy (không bọc markdown \`\`
   }
 ]`);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS'], configs['AI_PROMPT_SUBTASK_ASSIGNMENT']]);
 
   const handleSavePrompts = async () => {

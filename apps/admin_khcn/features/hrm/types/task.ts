@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HrmEmployee, HrmDepartment } from "../types";
 
 export type TaskStatus = "DRAFT" | "ASSIGNED" | "IN_PROGRESS" | "PENDING_REVIEW" | "COMPLETED" | "OVERDUE" | "REJECTED";

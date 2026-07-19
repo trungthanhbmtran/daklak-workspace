@@ -32,7 +32,6 @@ export function UserClient() {
 
   // Reset page khi search thay đổi
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [ui.state.searchTerm]);
   const { data: detailUser, isLoading: isLoadingDetail } = useUserDetail(ui.state.detailId);

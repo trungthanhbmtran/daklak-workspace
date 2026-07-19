@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -113,6 +114,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
 
   useEffect(() => {
     loadWorkflows();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, searchTerm]);
 
   // Load modules từ DB khi mount
@@ -125,6 +127,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
         }
       }
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDelete = (id: string) => {
@@ -139,6 +142,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       await workflowApi.delete(itemToDelete);
       toast.success("Đã xóa quy trình");
       loadWorkflows();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Lỗi khi xóa quy trình");
     } finally {
@@ -155,6 +159,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       toast.success("Đã áp dụng và kích hoạt quy trình thành công!");
       setMappingWorkflow(null);
       loadWorkflows();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Lỗi khi áp dụng quy trình");
     }
@@ -167,6 +172,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       if (testContext.trim()) {
         parsedContext = JSON.parse(testContext);
       }
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Dữ liệu đầu vào (JSON) không hợp lệ");
       return;

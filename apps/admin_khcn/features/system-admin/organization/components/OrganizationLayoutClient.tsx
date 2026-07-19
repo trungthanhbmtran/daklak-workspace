@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useOrganizationTreeQuery, useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";

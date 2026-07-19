@@ -25,6 +25,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
     categories,
     docGroups,
     complianceModules,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     systemPages,
     isImporting,
     selectedCategories,

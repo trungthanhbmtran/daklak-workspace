@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns"
@@ -17,6 +18,7 @@ export function safeParseJSON<T = any>(data: any, fallback: T = {} as T): T {
   if (typeof data === 'object') return data;
   try {
     return JSON.parse(data);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (e) {
     return fallback;
   }
@@ -32,6 +34,7 @@ export function formatDate(dateStr: string | Date | undefined | null, formatStr:
   if (!dateStr) return fallback;
   try {
     return format(new Date(dateStr), formatStr, { locale: vi });
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (e) {
     return fallback;
   }

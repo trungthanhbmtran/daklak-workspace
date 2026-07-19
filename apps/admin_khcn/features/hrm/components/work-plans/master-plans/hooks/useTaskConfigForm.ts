@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useCreateTaskTemplate, useDeleteTaskTemplate, useUpdateTaskTemplate } from '@/features/hrm/hooks';

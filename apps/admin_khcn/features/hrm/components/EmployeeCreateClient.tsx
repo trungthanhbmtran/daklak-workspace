@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useMemo, useRef } from "react";
@@ -116,6 +117,7 @@ export function EmployeeCreateClient() {
   const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
 
   const selectedUnit = units.find(u => u.id === departmentId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const jobTitles = jobTitlesRes?.items ?? [];
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);

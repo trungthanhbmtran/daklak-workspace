@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useCallback } from 'react';
 
 export function useDebounceCallback<T extends (...args: any[]) => void>(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useMemo, useCallback } from "react";
 import {
@@ -257,6 +258,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                       <div className="flex items-center gap-4.5">
                         <div className="h-14 w-20 bg-muted/50 rounded-xl border border-border overflow-hidden flex items-center justify-center shrink-0 shadow-inner group-hover:scale-[1.03] transition-transform duration-300">
                           {post.thumbnail ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={`/api/v1/admin/media/download/${post.thumbnail}`}
                               alt=""

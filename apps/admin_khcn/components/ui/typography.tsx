@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,6 @@ const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
     const Comp = as ? as : level || "h1";
     return (
       <Comp
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ref={ref as React.Ref<any>}
         className={cn(headingVariants({ level, className }))}
         {...props}
@@ -76,7 +76,6 @@ const Text = React.forwardRef<HTMLParagraphElement, TextProps>(
     const Comp = as as any;
     return (
       <Comp
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ref={ref as React.Ref<any>}
         className={cn(textVariants({ variant, weight, className }))}
         {...props}

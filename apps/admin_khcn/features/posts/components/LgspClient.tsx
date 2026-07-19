@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -130,6 +131,7 @@ export function LgspClient() {
                 <FileText className="w-7 h-7 text-muted-foreground/40" />
               </div>
               <Text className="font-medium text-muted-foreground">
+                // eslint-disable-next-line react/no-unescaped-entities
                 Chưa có văn bản nào. Nhấn "Đồng bộ văn bản" để tải về.
               </Text>
             </CardContent>

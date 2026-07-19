@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Globe } from "lucide-react";

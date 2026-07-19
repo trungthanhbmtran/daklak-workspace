@@ -36,6 +36,7 @@ export function OrganizationForm() {
     form.reset({ code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" });
   }, [parentId, form]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const categoryCode = form.watch("categoryCode");
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
   const selectedCat  = categoryItems.find((c) => c.code === categoryCode);

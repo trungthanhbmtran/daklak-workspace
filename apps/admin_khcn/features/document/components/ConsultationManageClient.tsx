@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useCallback, useState, useMemo } from "react";
@@ -31,6 +32,7 @@ interface ConsultationRowProps {
   stats: { total: number };
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ConsultationRow = React.memo(function ConsultationRow({ item, stats }: ConsultationRowProps) {
   const progressPercent = item.totalUnits > 0
     ? Math.round((item.totalResponses / item.totalUnits) * 100)

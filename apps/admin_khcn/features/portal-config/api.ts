@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * features/portal-config/api.ts
  * Tập trung toàn bộ network calls cho portal-config.

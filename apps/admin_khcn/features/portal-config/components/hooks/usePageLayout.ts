@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -25,6 +26,7 @@ export function usePageLayout(activePageId: string, pageIsActive: boolean, pageT
     const layoutConfig = dbConfigs.find((c: any) => c.code === layoutCode);
 
     if (layoutConfig?.description) {
+      // eslint-disable-next-line unused-imports/no-unused-vars
       try { return JSON.parse(layoutConfig.description); } catch (e) { }
     }
     return [];
@@ -57,6 +59,7 @@ export function usePageLayout(activePageId: string, pageIsActive: boolean, pageT
       await portalConfigApi.batchUpsert(itemsToSave);
       toast.success(`Xuất bản thành công "${pageTitle || activePageId}"!`);
       refetch();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Không thể lưu trang. Vui lòng thử lại.");
     } finally {

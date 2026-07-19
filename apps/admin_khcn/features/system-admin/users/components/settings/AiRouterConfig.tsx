@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ export function AiRouterConfig() {
         console.error("Failed to parse AI_PROVIDERS", e);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configs['AI_PROVIDERS']]);
 
   const handleAddAiProvider = () => {

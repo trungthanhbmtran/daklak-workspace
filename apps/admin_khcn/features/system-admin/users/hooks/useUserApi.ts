@@ -4,6 +4,7 @@ import { userApi } from "../api";
 import type { UserCreatePayload, UserItem } from "../types";
 import { USER_KEYS } from "../keys";
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PAGE_SIZE = 10;
 
 export function useUserList(params: { page: number; limit: number; search: string }) {

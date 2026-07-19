@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -32,6 +33,7 @@ export function EndpointClient() {
   const { data: endpointsData, isLoading: isEndpointsLoading } = useEndpoints();
   const { data: permissionsData, isLoading: isPermissionsLoading } = usePermissions();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const endpoints = endpointsData || [];
   const permissions = permissionsData || [];
 

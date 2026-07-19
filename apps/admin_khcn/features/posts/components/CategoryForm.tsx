@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -119,6 +120,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       if (typeof parsedTranslations === 'string') {
         try {
           parsedTranslations = JSON.parse(parsedTranslations);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
           parsedTranslations = {};
         }

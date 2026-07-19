@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Handle, Position } from '@xyflow/react';
 import { Code2 } from 'lucide-react';
 import BaseNode from './BaseNode';

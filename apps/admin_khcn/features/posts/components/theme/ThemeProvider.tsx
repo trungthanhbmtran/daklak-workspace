@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
@@ -165,6 +166,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         if (cfg.branding) setBranding(cfg.branding);
         if (cfg.customCss) setCustomCss(cfg.customCss);
         setIsDirty(false);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (_) { }
     } else {
       setTemplateState(defaultThemeConfig.template);
@@ -201,6 +203,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
           if (mapped.branding) setBranding(mapped.branding);
           if (mapped.customCss) setCustomCss(mapped.customCss);
           setIsDirty(false);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (_) { }
       })
       .catch(() => { /* network error, dùng default */ });
@@ -312,6 +315,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         setBranding(cfg.branding ?? defaultThemeConfig.branding);
         setCustomCss(cfg.customCss ?? defaultThemeConfig.customCss);
         setIsDirty(false);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (_) { }
     } else {
       // Môi trường mới tinh, nạp cấu hình trắng

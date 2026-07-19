@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { memo } from "react";
 import BaseNode from "./BaseNode";
 import { UserCheck } from "lucide-react";

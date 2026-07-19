@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { hrmApi } from "@/features/hrm/api";

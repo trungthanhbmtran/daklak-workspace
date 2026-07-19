@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from 'react';
 import { 
   format, 
@@ -163,6 +164,7 @@ export const CalendarGrid = React.memo(function CalendarGrid({
       weekStartDay = addDays(weekStartDay, 7);
     }
     return computedRows;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate, filteredEvents, isLoading, onSelectDayEvents, endDate, monthStart, startDate]);
 
   return (

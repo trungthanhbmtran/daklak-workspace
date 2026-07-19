@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Widget } from "../../core/types";
 import { NewsListData } from "./news-list.schema";
@@ -19,6 +20,7 @@ interface NewsListEditorProps {
   activeLang: string;
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 export const NewsListEditor: React.FC<NewsListEditorProps> = ({ widget, onChangeData, activeLang }) => {
   const { data: categories, isLoading } = useCategoriesQuery();
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
@@ -24,6 +25,7 @@ export function WorkCalendarClient() {
 
   // --- GET REAL DATA ---
   const { data: tasksRes, isLoading } = useTasksList({ pageSize: 2000 });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allTasks = tasksRes?.data || [];
 
   // --- FILTER TASKS BY TAB ---

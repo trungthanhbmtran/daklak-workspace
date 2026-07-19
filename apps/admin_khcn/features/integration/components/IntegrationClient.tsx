@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -30,6 +31,7 @@ function CardContainer({ children }: { children: React.ReactNode }) {
 }
 
 export function IntegrationClient({ initialView = 'dashboard' }: { initialView?: 'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports' }) {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);

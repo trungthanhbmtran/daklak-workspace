@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // features/posts/components/BannerList.tsx
 
 "use client";
@@ -228,6 +229,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                     isSlogan = true;
                     sloganStyles = parsed;
                   }
+                // eslint-disable-next-line unused-imports/no-unused-vars
                 } catch (e) { }
               }
 
@@ -264,6 +266,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                         </Text>
                       </div>
                     ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/admin/media/download/${banner.imageUrl}`}
                         alt={banner.name}

@@ -159,6 +159,7 @@ function ScopePicker({
   }));
 
   const selectedItems = displayItems.filter(i => i.selected);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const restItems = displayItems.filter(i => !i.selected);
   const isEmpty = displayItems.length === 0 && !isFetching;
 

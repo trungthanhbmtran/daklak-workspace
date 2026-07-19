@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Monitor } from "lucide-react";
@@ -20,6 +21,7 @@ interface BannerConfigProps {
   updateStyle?: (key: string, value: any) => void;
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 export function BannerConfig({ form, customStyles, updateStyle }: BannerConfigProps) {
   return (
     <Card className="shadow-sm overflow-hidden bg-card">

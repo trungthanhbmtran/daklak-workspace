@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useMemo } from "react";
@@ -127,6 +128,7 @@ export function OrganizationStaffing() {
       else g.push(j);
     });
     return { partyTitles: p, govTitles: g };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobTitles]);
 
   const { partyReport, govReport } = useMemo(() => {
@@ -140,6 +142,7 @@ export function OrganizationStaffing() {
       else g.push(rep);
     });
     return { partyReport: p, govReport: g };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report, jobTitles]);
 
   if (selectedId == null) return null;

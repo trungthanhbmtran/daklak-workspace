@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -34,6 +35,7 @@ function isLexicalJson(str: string): boolean {
   try {
     const parsed = JSON.parse(str);
     return parsed && typeof parsed === "object" && "root" in parsed;
+  // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (e) {
     return false;
   }

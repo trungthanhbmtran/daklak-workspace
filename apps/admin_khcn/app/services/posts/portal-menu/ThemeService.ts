@@ -13,6 +13,7 @@ export const ThemeService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       // ignore errors, localStorage already saved
     }

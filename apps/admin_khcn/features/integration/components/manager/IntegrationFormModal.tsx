@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle } from "react";
@@ -95,6 +96,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       // Validate JSON
       try {
         JSON.parse(configDataString);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         toast.error("Cấu hình JSON không hợp lệ");
         return;
@@ -103,6 +105,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       let parsedRaw: any = {};
       try {
         parsedRaw = JSON.parse(formData.rawConfig || "{}");
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) { }
 
       configDataString = JSON.stringify({

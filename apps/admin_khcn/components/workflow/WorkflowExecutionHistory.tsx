@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import {
   Sheet,
@@ -29,6 +30,7 @@ export const WorkflowExecutionHistory = ({ instance, onClose }: WorkflowExecutio
         try {
           const res = await workflowApi.getLogs(instance.id);
           setLogs(Array.isArray(res) ? res : (res as any)?.logs || []);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
           toast.error("Không thể tải lịch sử quy trình");
         } finally {

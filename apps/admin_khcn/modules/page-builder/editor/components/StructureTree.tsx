@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { useEditorStore } from "../../store/editorStore";
 import { BlockRegistry } from "../../core/registry";

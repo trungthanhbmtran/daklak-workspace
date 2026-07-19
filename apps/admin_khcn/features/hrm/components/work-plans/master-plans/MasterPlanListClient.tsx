@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Text } from "@/components/ui/typography";
 
 export function MasterPlanListClient() {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);

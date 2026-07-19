@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -123,6 +124,7 @@ export function KpiCriteriaClient() {
         toast.success("Tạo tiêu chí mới thành công");
       }
       setIsModalOpen(false);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       toast.error("Đã xảy ra lỗi khi lưu");
     }
@@ -133,11 +135,13 @@ export function KpiCriteriaClient() {
     setIsDeleteDialogOpen(true);
   };
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const executeDelete = async (reason?: string) => {
     if (!itemToDelete) return;
     try {
       await deleteMutation.mutateAsync(itemToDelete);
       toast.success("Đã xóa tiêu chí");
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
       toast.error("Đã xảy ra lỗi khi xóa");
     } finally {

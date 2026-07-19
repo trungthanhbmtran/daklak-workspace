@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ParsedEndpoint {
   id: string;
   name: string;
@@ -133,6 +134,7 @@ function extractPostmanBaseUrl(data: any): string {
       const rawUrl = data.item[0].request.url.raw as string;
       const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
       if (match) return match[1];
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) { }
   }
   return "";

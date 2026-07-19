@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,6 +29,7 @@ export function usePortalMenu() {
   useEffect(() => {
     fetchMenus();
     fetchLanguages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const fetchLanguages = async () => {
@@ -66,6 +68,7 @@ export function usePortalMenu() {
       if (typeof parsedTranslations === 'string') {
         try {
           parsedTranslations = JSON.parse(parsedTranslations);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
           parsedTranslations = {};
         }

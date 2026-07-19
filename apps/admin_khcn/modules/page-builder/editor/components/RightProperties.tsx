@@ -28,6 +28,7 @@ export const RightProperties: React.FC = () => {
     selectedRowId,
     selectedWidgetId,
     activeLang,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     activeTab,
     updateRowSettings,
     updateWidgetTitle,
@@ -73,6 +74,7 @@ export const RightProperties: React.FC = () => {
       const optimized = await AiService.rewriteText(titleVal, "informative");
       updateWidgetTitle(widget.id, optimized);
       toast.success("AI đã tối ưu hóa nội dung tiêu đề!");
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Trợ lý AI bận. Vui lòng thử lại sau.");
     } finally {
@@ -123,6 +125,7 @@ export const RightProperties: React.FC = () => {
       });
 
       toast.success(`Đã dịch tự động sang tiếng ${targetLang === "en" ? "Anh" : "Việt"}!`);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Không thể dịch tự động.");
     } finally {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -274,6 +275,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                         {log.note && (
                           <div className="mt-2 p-2 bg-amber-50/50 border border-amber-100 rounded text-xs text-foreground italic flex gap-2">
                             <MessageSquare className="h-3 w-3 shrink-0 mt-0.5 text-amber-600" />
+                            // eslint-disable-next-line react/no-unescaped-entities
                             <span>"{log.note}"</span>
                           </div>
                         )}

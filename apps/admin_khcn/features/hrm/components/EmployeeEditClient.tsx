@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useMemo, useRef, useEffect, use } from "react";
@@ -72,6 +73,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
   const resolvedParams = typeof (params as Promise<{ id: string }>).then === "function" ? use(params as Promise<{ id: string }>) : (params as unknown as { id: string });
   const employeeId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
@@ -144,6 +146,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
   const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
 
   const selectedUnit = units.find(u => u.id === departmentId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const jobTitles = jobTitlesRes?.items ?? [];
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);

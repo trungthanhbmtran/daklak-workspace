@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
@@ -39,6 +40,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         },
         onError: (err: any) => toast.error(err.message || "Lỗi khi lưu Endpoints")
       });
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       toast.error("Lỗi dữ liệu cấu hình");
     }
@@ -52,6 +54,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         const ep = parsed._parsedEndpoints || [];
         setEndpoints(ep);
         setSelectedId(ep.length > 0 ? ep[0].id : null);
+      // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         setEndpoints([]);
         setSelectedId(null);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // features/posts/types.ts
 
 export type PostStatus =

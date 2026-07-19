@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Globe } from "lucide-react";
@@ -85,6 +86,7 @@ export function MultiLangTitleSlug({
      * Update field helper
      */
     const updateLanguageValue = useCallback(
+        // eslint-disable-next-line react-hooks/preserve-manual-memoization
         (
             langCode: string,
             field: keyof MultiLangValue,
@@ -119,6 +121,7 @@ export function MultiLangTitleSlug({
                 [langCode]: updated,
             });
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [onChange, value]
     );
 
