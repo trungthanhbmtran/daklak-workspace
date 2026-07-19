@@ -32,6 +32,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Heading, Text } from "@/components/ui/typography";
+import { useHrmEmployeeForm } from "@/features/hrm/hooks/useHrmEmployeeForm";
 import {
   Select,
   SelectContent,
@@ -150,8 +152,8 @@ export function EmployeeCreateClient() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h2 className="text-2xl font-black tracking-tight text-slate-900">Tạo hồ sơ nhân sự</h2>
-                <p className="text-sm text-slate-500 font-medium italic">Thiết lập vị trí và thông định danh hệ thống iDesk</p>
+                <Heading level="h2" className="font-black tracking-tight text-slate-900">Tạo hồ sơ nhân sự</Heading>
+                <Text variant="small" weight="medium" className="text-slate-500 italic">Thiết lập vị trí và thông định danh hệ thống iDesk</Text>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -218,9 +220,9 @@ export function EmployeeCreateClient() {
                       <div className="flex items-start gap-3">
                         <div className="bg-blue-600 p-1.5 rounded-lg shrink-0"><Check size={16} /></div>
                         <div className="space-y-1">
-                          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Đơn vị đã chọn:</p>
-                          <p className="text-sm font-bold leading-snug">{selectedUnit.fullPath}</p>
-                          <p className="text-[10px] text-slate-400 font-mono italic">Mã: {selectedUnit.code || 'None'}</p>
+                          <Text variant="small" className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Đơn vị đã chọn:</Text>
+                          <Text weight="bold" className="leading-snug">{selectedUnit.fullPath}</Text>
+                          <Text variant="code" className="text-[10px] text-slate-400 italic font-normal bg-transparent p-0">Mã: {selectedUnit.code || 'None'}</Text>
                         </div>
                       </div>
                     </div>
@@ -482,9 +484,9 @@ export function EmployeeCreateClient() {
 
               <div className="p-4 rounded-xl bg-slate-900 text-white flex gap-4 items-center shadow-lg ring-1 ring-slate-800">
                 <AlertCircle size={24} className="text-blue-500 shrink-0" />
-                <p className="text-xs font-medium leading-relaxed">
+                <Text variant="small" weight="medium" className="leading-relaxed">
                   Hồ sơ nhân sự sẽ được liên kết trực tiếp với <strong>Trục liên thông văn bản (LGSP)</strong> của tỉnh. Vui lòng kiểm tra kỹ đơn vị công tác trước khi Lưu.
-                </p>
+                </Text>
               </div>
             </div>
           </div>

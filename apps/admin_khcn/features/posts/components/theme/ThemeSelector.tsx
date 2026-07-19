@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function ThemeSelector() {
   const { theme, setThemeMode } = useThemeConfig();
@@ -45,7 +47,7 @@ export function ThemeSelector() {
               }`}
           >
             {opt.icon}
-            <span>{opt.name}</span>
+            <Text as="span">{opt.name}</Text>
           </button>
         );
       })}

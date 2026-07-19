@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Text } from "@/components/ui/typography";
 import { Label } from "@/components/ui/label";
 import { UserCircle2, UsersIcon, X, Loader2, BriefcaseIcon } from "lucide-react";
 import { useAssignTask } from "../../hooks/useTasks";
@@ -117,7 +118,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
         <form onSubmit={handleSubmit} className="flex flex-col p-6 space-y-6">
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              <UserCircle2 className="w-4 h-4 text-slate-400"/> Người xử lý chính <span className="text-red-500">*</span>
+              <UserCircle2 className="w-4 h-4 text-slate-400"/> Người xử lý chính <Text as="span" className="text-red-500">*</Text>
             </Label>
             <Select required value={assignee} onValueChange={setAssignee}>
               <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm">

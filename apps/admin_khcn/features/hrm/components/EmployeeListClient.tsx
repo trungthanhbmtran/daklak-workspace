@@ -6,6 +6,8 @@ import { Search, Plus, Building2, Loader2, Eye, Edit, Trash2 } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useHrmEmployeesList, useDeleteHrmEmployee } from "@/features/hrm/hooks/useHrmEmployees";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
@@ -65,10 +67,10 @@ export function EmployeeListClient() {
     <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Danh sách nhân sự</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          <Heading level="h2" className="tracking-tight">Danh sách nhân sự</Heading>
+          <Text variant="muted" className="mt-1">
             {total > 0 ? `Quản lý ${total} nhân sự trên toàn hệ thống.` : "Dữ liệu từ API HRM (gateway)."}
-          </p>
+          </Text>
         </div>
         {allowedActions.includes('CREATE') && (
           <Link href="/services/hrm/employees/create">
@@ -146,9 +148,9 @@ export function EmployeeListClient() {
                               href={`/services/hrm/employees/${emp.id}`}
                               className="font-semibold text-foreground group-hover:text-primary transition-colors"
                             >
-                              {fullName} <span className="text-muted-foreground font-normal text-xs ml-1">#{emp.employeeCode || emp.id}</span>
+                              {fullName} <Text as="span" variant="small" weight="normal" className="text-muted-foreground ml-1">#{emp.employeeCode || emp.id}</Text>
                             </Link>
-                            <div className="text-sm text-muted-foreground">{emp.email || "—"}</div>
+                            <Text variant="muted">{emp.email || "—"}</Text>
                           </div>
                         </div>
                       </TableCell>
@@ -176,16 +178,16 @@ export function EmployeeListClient() {
                                   )}
                                 </div>
                                 {rank && rank !== govt && (
-                                  <div className="flex items-center text-xs text-muted-foreground">
-                                    Ngạch: <span className="font-medium text-foreground ml-1">{rank}</span>
-                                  </div>
+                                  <Text variant="small" className="flex items-center text-muted-foreground font-normal">
+                                    Ngạch: <Text as="span" variant="small" weight="medium" className="text-foreground ml-1">{rank}</Text>
+                                  </Text>
                                 )}
                               </div>
                             );
                           })()}
-                          <div className="flex items-center text-xs text-muted-foreground pt-2 mt-1 border-t border-border">
+                          <Text variant="small" className="flex items-center text-muted-foreground font-normal pt-2 mt-1 border-t border-border">
                             <Building2 className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> {getUnitName(emp)}
-                          </div>
+                          </Text>
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-center">
@@ -230,9 +232,9 @@ export function EmployeeListClient() {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-            <p className="text-sm text-muted-foreground">
+            <Text variant="muted">
               Trang {page}/{totalPages} · Tổng {total} nhân viên
-            </p>
+            </Text>
             <div className="flex gap-2">
               <Button
                 variant="outline"

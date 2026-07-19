@@ -3,6 +3,8 @@ import { useWorkflowLogs } from '../hooks';
 import { CheckCircle2, Circle, ArrowRightCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface WorkflowTimelineProps {
   instanceId?: string;
@@ -53,24 +55,24 @@ export function WorkflowTimeline({ instanceId }: WorkflowTimelineProps) {
 
   return (
     <div className="space-y-4 py-4">
-      <h3 className="text-sm font-semibold text-slate-700 uppercase">Lịch sử kiểm duyệt</h3>
+      <Heading level="h3" className="font-semibold text-slate-700 uppercase">Lịch sử kiểm duyệt</Heading>
       <div className="relative border-l border-slate-200 ml-3 space-y-6">
         {logs.map((log: any, index: number) => (
           <div key={log.id || index} className="relative pl-6">
-            <span className="absolute -left-[11px] top-1 bg-white">
+            <Text as="span" className="absolute -left-[11px] top-1 bg-white">
               {getIcon(log.action)}
-            </span>
+            </Text>
             <div className="flex flex-col space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-900">
+                <Text as="span" className="font-medium text-slate-900">
                   {getActionName(log.action)}
-                </span>
-                <span className="text-xs text-slate-500">
+                </Text>
+                <Text as="span" className="text-slate-500">
                   {format(new Date(log.createdAt), 'HH:mm dd/MM/yyyy', { locale: vi })}
-                </span>
+                </Text>
               </div>
               <div className="text-xs text-slate-600">
-                Tại bước: <span className="font-medium">{log.nodeLabel || 'Bắt đầu'}</span>
+                Tại bước: <Text as="span" className="font-medium">{log.nodeLabel || 'Bắt đầu'}</Text>
               </div>
               {log.data?.rejectReason && (
                 <div className="text-xs text-red-600 mt-1 bg-red-50 p-2 rounded">

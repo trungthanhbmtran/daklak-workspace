@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import type { HrmMasterPlan } from "@/features/hrm/types";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Text } from "@/components/ui/typography";
 
 export function MasterPlanListClient() {
   const queryClient = useQueryClient();
@@ -139,7 +140,7 @@ export function MasterPlanListClient() {
                             {plan.workflowCode}
                           </code>
                         ) : (
-                          <span className="text-xs text-muted-foreground italic">Mặc định</span>
+                          <Text as="span" variant="small" className="text-muted-foreground italic font-normal">Mặc định</Text>
                         )}
                       </TableCell>
                       <TableCell>{renderStatus(plan.status)}</TableCell>

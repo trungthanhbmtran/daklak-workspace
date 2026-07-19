@@ -2,6 +2,7 @@
 
 import { useTaskHistory } from "../../hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/typography";
 import { History, Clock, ArrowRightCircle, FileText, AlertCircle, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { translateTaskStatus } from "./task-utils";
@@ -90,12 +91,12 @@ export function TaskHistoryTab({ taskId, currentTask }: { taskId: number; curren
             <div className="absolute -left-[33px] bg-white p-1">
               <Icon className={`w-4 h-4 ${event.iconColor}`} />
             </div>
-            <p className="text-sm font-medium">{event.title}</p>
-            <p className="text-xs text-slate-500 mt-1">{safeFormatDate(event.time, "dd/MM/yyyy HH:mm")}</p>
+            <Text variant="small" weight="medium">{event.title}</Text>
+            <Text variant="small" className="text-slate-500 mt-1 font-normal">{safeFormatDate(event.time, "dd/MM/yyyy HH:mm")}</Text>
             {event.content && (
-              <p className={`text-sm mt-2 p-3 rounded-md border whitespace-pre-wrap ${index === 0 ? 'bg-slate-50 text-slate-600' : 'bg-white'}`}>
+              <Text variant="small" className={`mt-2 p-3 rounded-md border whitespace-pre-wrap font-normal ${index === 0 ? 'bg-slate-50 text-slate-600' : 'bg-white'}`}>
                 {event.content}
-              </p>
+              </Text>
             )}
           </div>
         );

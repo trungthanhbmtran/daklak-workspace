@@ -11,6 +11,8 @@ import {
   FormItem,
   FormLabel
 } from "@/components/ui/form";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface BannerConfigProps {
   form: UseFormReturn<any>;
@@ -47,7 +49,7 @@ export function BannerConfig({ form, customStyles, updateStyle }: BannerConfigPr
             <div className="flex items-center justify-between p-3 rounded-xl border bg-slate-50/50 dark:bg-slate-900">
               <div className="space-y-0.5">
                 <Label className="text-sm font-semibold">Kích hoạt</Label>
-                <p className="text-[10px] text-muted-foreground italic">Hiển thị trên trang chủ</p>
+                <Text className="text-[10px] text-muted-foreground italic">Hiển thị trên trang chủ</Text>
               </div>
               <Switch checked={field.value} onCheckedChange={field.onChange} />
             </div>

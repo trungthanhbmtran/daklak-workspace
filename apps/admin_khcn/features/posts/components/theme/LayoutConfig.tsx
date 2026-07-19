@@ -1,5 +1,7 @@
 "use client";
 import { useThemeConfig, LayoutSettings } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function LayoutConfig() {
     // Lấy dữ liệu layout và hàm setter từ Context toàn cục
@@ -57,9 +59,9 @@ export function LayoutConfig() {
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                         Giao diện cô đọng (Compact Mode)
                     </label>
-                    <p className="text-[11px] text-slate-400">
+                    <Text className="text-[11px] text-slate-400">
                         Giảm padding của các bảng và danh sách để hiển thị nhiều data hơn.
-                    </p>
+                    </Text>
                 </div>
                 <input
                     type="checkbox"

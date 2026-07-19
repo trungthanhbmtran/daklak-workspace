@@ -17,6 +17,8 @@ import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
 import { portalConfigApi } from "@/features/portal-config/api";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface EditMenuModalProps {
   isOpen: boolean;
@@ -524,18 +526,18 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                       })
                       .map((p) => (
                         <SelectItem key={p.id} value={p.slug || p.id} className="text-xs">
-                          <span className="font-semibold block text-slate-700 max-w-[280px] truncate">
+                          <Text as="span" className="font-semibold block text-slate-700 max-w-[280px] truncate">
                             {p.title}
-                          </span>
+                          </Text>
                         </SelectItem>
                       ))}
                   </SelectContent>
                 </Select>
 
                 {editingMenu.referenceId && (
-                  <p className="text-[11px] text-muted-foreground bg-slate-50 border px-2 py-1 rounded-md font-mono truncate">
+                  <Text className="text-[11px] text-muted-foreground bg-slate-50 border px-2 py-1 rounded-md font-mono truncate">
                     Slug liên kết: {editingMenu.referenceId}
-                  </p>
+                  </Text>
                 )}
               </div>
             </div>
@@ -655,9 +657,9 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
           <div className="grid grid-cols-4 items-center gap-4 border-t pt-4">
             <div className="col-span-3 flex flex-col">
               <Label className="font-bold text-sm text-slate-700">Trạng thái hiển thị</Label>
-              <p className="text-[10px] text-muted-foreground italic">
+              <Text className="text-[10px] text-muted-foreground italic">
                 Cho phép người dân nhìn thấy mục menu này trên Portal.
-              </p>
+              </Text>
             </div>
             <div className="flex justify-end">
               <Switch

@@ -6,6 +6,8 @@ import { useThemeConfig } from "./ThemeProvider";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function BrandingConfig() {
     const { branding, setBranding } = useThemeConfig();
@@ -75,7 +77,7 @@ export function BrandingConfig() {
                     ) : (
                         <div className="flex flex-col items-center gap-2 py-3 select-none">
                             <UploadCloud className="w-8 h-8 text-slate-400 animate-pulse" />
-                            <span className="text-xs text-slate-500 font-medium">Bấm để tải Logo chính thức lên</span>
+                            <Text as="span" className="text-slate-500 font-medium">Bấm để tải Logo chính thức lên</Text>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -84,14 +86,14 @@ export function BrandingConfig() {
                                 disabled={isUploadingLogo}
                             />
                             {isUploadingLogo && (
-                                <span className="text-[10px] text-blue-600 font-bold flex items-center gap-1 mt-1">
+                                <Text as="span" className="text-[10px] text-blue-600 font-bold flex items-center gap-1 mt-1">
                                     <Loader2 className="w-3 h-3 animate-spin" /> Đang tải ảnh lên...
-                                </span>
+                                </Text>
                             )}
                         </div>
                     )}
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">Logo hiển thị ở Header của trang chủ (khuyên dùng định dạng PNG trong suốt, chiều cao ~80px).</p>
+                <Text className="text-[10px] text-slate-400 mt-1">Logo hiển thị ở Header của trang chủ (khuyên dùng định dạng PNG trong suốt, chiều cao ~80px).</Text>
             </div>
 
             {/* Favicon Upload Section */}
@@ -123,7 +125,7 @@ export function BrandingConfig() {
                     ) : (
                         <div className="flex flex-col items-center gap-2 py-2 select-none">
                             <UploadCloud className="w-6 h-6 text-slate-400 animate-pulse" />
-                            <span className="text-[11px] text-slate-500 font-medium">Bấm tải Favicon lên</span>
+                            <Text as="span" className="text-[11px] text-slate-500 font-medium">Bấm tải Favicon lên</Text>
                             <input
                                 type="file"
                                 accept="image/x-icon, image/png, image/jpeg"
@@ -132,14 +134,14 @@ export function BrandingConfig() {
                                 disabled={isUploadingFavicon}
                             />
                             {isUploadingFavicon && (
-                                <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
+                                <Text as="span" className="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
                                     <Loader2 className="w-3 h-3 animate-spin" /> Tải lên...
-                                </span>
+                                </Text>
                             )}
                         </div>
                     )}
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">Favicon là biểu tượng nhỏ trên tab trình duyệt (Khuyên dùng hình vuông, 32x32px hoặc 64x64px).</p>
+                <Text className="text-[10px] text-slate-400 mt-1">Favicon là biểu tượng nhỏ trên tab trình duyệt (Khuyên dùng hình vuông, 32x32px hoặc 64x64px).</Text>
             </div>
         </div>
     );

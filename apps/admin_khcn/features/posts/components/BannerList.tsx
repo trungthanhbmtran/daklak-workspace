@@ -15,6 +15,7 @@ import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heading, Text } from "@/components/ui/typography";
 import { Switch } from "@/components/ui/switch";
 import {
   Pagination,
@@ -106,7 +107,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Đang tải danh sách banner...</span>
+        <Text as="span" className="ml-3 text-muted-foreground font-normal">Đang tải danh sách banner...</Text>
       </div>
     );
   }
@@ -116,8 +117,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
       <div className="w-full h-full flex flex-col p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 bg-background">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Quản lý Banner/Quảng cáo</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Phân phối banner hình ảnh và thiết kế khẩu hiệu tuyên truyền đồng bộ</p>
+            <Heading level="h2" className="font-bold tracking-tight">Quản lý Banner/Quảng cáo</Heading>
+            <Text variant="small" className="text-muted-foreground mt-0.5 font-normal">Phân phối banner hình ảnh và thiết kế khẩu hiệu tuyên truyền đồng bộ</Text>
           </div>
           <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-xl px-5 font-bold transition-all transform hover:scale-[1.02]">
             <Plus className="h-4 w-4 mr-2" /> Thêm banner mới
@@ -135,10 +136,10 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                 <Sliders className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-foreground">Cấu hình chế độ Trình chiếu (Slideshow) theo Vị trí</h3>
-                <p className="text-xs text-muted-foreground/90 mt-0.5">
-                  Bật để tự động xoay vòng (slideshow) các banner hoạt động tại vị trí, tắt để hiển thị cố định theo chiến dịch (banner ưu tiên cao nhất)
-                </p>
+                <Heading level="h3" className="font-bold text-foreground">Cấu hình chế độ Trình chiếu (Slideshow) theo Vị trí</Heading>
+                <Text variant="small" className="text-muted-foreground/90 mt-0.5 font-normal">
+                  Chỉ các Banner (có trạng thái Hiển thị) thuộc cùng 1 Danh mục phân loại mới được gộp vào cùng Slide.
+                </Text>
               </div>
             </div>
             <Button variant="ghost" size="sm" className="rounded-xl font-bold text-xs text-primary hover:text-primary bg-primary/10 hover:bg-primary/20">
@@ -160,17 +161,14 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       key={cat.id}
                       className="flex items-center justify-between p-4 bg-card border border-border rounded-2xl shadow-sm hover:shadow transition-shadow"
                     >
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-foreground">{cat.name}</p>
-                        <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider">{cat.code}</p>
+                      <div>
+                        <Text variant="small" className="font-bold text-foreground">{cat.name}</Text>
+                        <Text variant="small" className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider">{cat.code}</Text>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${isSlideshow
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground bg-muted"
-                          }`}>
+                        <Text as="span" className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${isSlideshow ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted" }`}>
                           {isSlideshow ? "Slideshow" : "Chiến dịch"}
-                        </span>
+                        </Text>
                         <Switch
                           checked={isSlideshow}
                           onCheckedChange={(checked) => {
@@ -214,12 +212,10 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         {/* Grid of Banners */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBanners.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-muted-foreground bg-muted/50 rounded-2xl border-2 border-dashed border-border">
-              <div className="bg-background border border-border shadow-sm p-3.5 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 text-muted-foreground">
-                <Layers className="h-5 w-5" />
-              </div>
-              <p className="font-bold text-foreground">Không tìm thấy banner nào</p>
-              <p className="text-xs text-muted-foreground mt-1">Vui lòng thử đổi từ khóa tìm kiếm hoặc đổi danh mục phân loại</p>
+            <div className="flex flex-col items-center justify-center p-16 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 shadow-sm col-span-full">
+              <Layers className="h-12 w-12 text-slate-200 mb-3" />
+              <Text variant="small" className="font-bold text-foreground">Không tìm thấy banner nào</Text>
+              <Text variant="small" className="text-muted-foreground mt-1 font-normal">Vui lòng thử đổi từ khóa tìm kiếm hoặc đổi danh mục phân loại</Text>
             </div>
           ) : (
             filteredBanners.map((banner: Banner) => {
@@ -251,21 +247,21 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                             : `linear-gradient(to right, ${sloganStyles.gradientColorStart || "#cc0000"}, ${sloganStyles.gradientColorMiddle || "#cc0000"}, ${sloganStyles.gradientColorEnd || "#990000"})`,
                         }}
                       >
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-25">
-                          <span className="text-5xl text-amber-300 select-none">★</span>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Text as="span" className="text-amber-300 select-none">★</Text>
                         </div>
-                        <span
+                        <Text as="span"
                           style={{ color: sloganStyles.titleColor || "#fef08a" }}
                           className="text-[9px] font-black uppercase tracking-widest line-clamp-1 z-10 select-none opacity-90"
                         >
                           {banner.name}
-                        </span>
-                        <p
+                        </Text>
+                        <Text
                           style={{ color: sloganStyles.textColor || "#ffffff" }}
                           className="text-[11px] font-serif font-black leading-snug line-clamp-2 mt-1 px-4 z-10"
                         >
                           {banner.description || "Khẩu hiệu cổ động"}
-                        </p>
+                        </Text>
                       </div>
                     ) : (
                       <img
@@ -317,13 +313,13 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                   <div className="p-5 flex-1 flex flex-col space-y-4">
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-[14px] text-foreground leading-snug line-clamp-1">{banner.name}</h3>
+                        <Heading level="h3" className="font-bold text-[14px] text-foreground leading-snug line-clamp-1">{banner.name}</Heading>
                         <Badge variant="outline" className="text-[10px] font-mono font-bold text-muted-foreground bg-muted/50 px-1.5 py-0 border-border">
                           Thứ tự: {banner.orderIndex}
                         </Badge>
                       </div>
                       {banner.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1">{banner.description}</p>
+                        <Text variant="small" className="text-muted-foreground line-clamp-1 font-normal">{banner.description}</Text>
                       )}
                     </div>
 
@@ -353,16 +349,16 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                     <div className="flex flex-col gap-1.5 text-xs text-muted-foreground flex-1 border-t border-border pt-3.5">
                       <div className="flex items-center gap-2">
                         {banner.linkType === "external" ? <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/70" /> : <LinkIcon className="h-3.5 w-3.5 text-muted-foreground/70" />}
-                        <span className="truncate text-[11px] font-mono text-muted-foreground/70" title={banner.customUrl || "/" + banner.slug}>
+                        <Text as="span" className="truncate text-[11px] font-mono text-muted-foreground/70 font-normal" title={banner.customUrl || "/" + banner.slug}>
                           {banner.customUrl || "/" + banner.slug}
-                        </span>
+                        </Text>
                       </div>
                       {(banner.startAt || banner.endAt) && (
                         <div className="flex items-center gap-2">
                           <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
-                          <span className="text-[11px] text-muted-foreground/70">
+                          <Text as="span" className="text-[11px] text-muted-foreground/70 font-normal">
                             {banner.startAt ? new Date(banner.startAt).toLocaleDateString("vi-VN") : "—"} → {banner.endAt ? new Date(banner.endAt).toLocaleDateString("vi-VN") : "—"}
-                          </span>
+                          </Text>
                         </div>
                       )}
                     </div>

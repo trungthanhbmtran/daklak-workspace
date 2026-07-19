@@ -5,6 +5,8 @@ import {
   getBannerBackgroundStyle, 
   renderBannerWatermark 
 } from "./banner-helpers";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface BannerClientPreviewModalProps {
   isOpen: boolean;
@@ -33,16 +35,16 @@ export function BannerClientPreviewModal({
         <div className="bg-slate-850 px-4 py-3 border-b border-slate-700/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
-              <span onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 hover:scale-105 transition-transform cursor-pointer" />
-              <span className="w-3 h-3 rounded-full bg-yellow-500" />
-              <span className="w-3 h-3 rounded-full bg-green-500" />
+              <Text as="span" onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 hover:scale-105 transition-transform cursor-pointer" />
+              <Text as="span" className="w-3 h-3 rounded-full bg-yellow-500" />
+              <Text as="span" className="w-3 h-3 rounded-full bg-green-500" />
             </div>
             <div className="bg-slate-900/60 text-[10px] text-slate-400 font-mono px-3 py-1 rounded-md border border-slate-700/50 ml-4 flex items-center gap-1.5">
-              <span className="text-emerald-500">🔒</span> https://portal.daklak.gov.vn
+              <Text as="span" className="text-emerald-500">🔒</Text> https://portal.daklak.gov.vn
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-bold">Chế độ xem trước: Cổng Dân Cư Client</span>
+            <Text as="span" className="text-slate-400 font-bold">Chế độ xem trước: Cổng Dân Cư Client</Text>
             <Button type="button" variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg h-7 w-7">
               <X className="h-4 w-4" />
             </Button>
@@ -60,15 +62,15 @@ export function BannerClientPreviewModal({
                   ĐL
                 </div>
                 <div>
-                  <h1 className="text-xs font-black tracking-tight uppercase text-red-600">ỦY BAN NHÂN DÂN TỈNH ĐẮK LẮK</h1>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">CỔNG THÔNG TIN ĐIỆN TỬ BAN NGHÀNH</p>
+                  <Heading level="h1" className="font-black tracking-tight uppercase text-red-600">ỦY BAN NHÂN DÂN TỈNH ĐẮK LẮK</Heading>
+                  <Text className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">CỔNG THÔNG TIN ĐIỆN TỬ BAN NGHÀNH</Text>
                 </div>
               </div>
               <nav className="hidden md:flex items-center gap-4 text-xs font-bold text-slate-700 uppercase">
-                <span className="text-red-600">Trang chủ</span>
-                <span>Tin tức</span>
-                <span>Dịch vụ công</span>
-                <span>Liên hệ</span>
+                <Text as="span" className="text-red-600">Trang chủ</Text>
+                <Text as="span">Tin tức</Text>
+                <Text as="span">Dịch vụ công</Text>
+                <Text as="span">Liên hệ</Text>
               </nav>
             </div>
           </header>
@@ -78,20 +80,20 @@ export function BannerClientPreviewModal({
             
             {/* Hero / Portal Title Block */}
             <div className="text-center space-y-2 py-4">
-              <span className="text-[10px] font-black tracking-widest uppercase bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
+              <Text as="span" className="text-[10px] font-black tracking-widest uppercase bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
                 Tin tức &amp; Sự kiện Nổi bật
-              </span>
-              <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Cổng thông tin Dân cư Quốc gia</h2>
-              <p className="text-xs text-slate-500 max-w-lg mx-auto">
+              </Text>
+              <Heading level="h2" className="font-black text-slate-900 uppercase tracking-tight">Cổng thông tin Dân cư Quốc gia</Heading>
+              <Text className="text-slate-500 max-w-lg mx-auto">
                 Kênh truyền thông chính thống cung cấp thông tin, hướng dẫn thủ tục hành chính công và các hoạt động tuyên truyền của cơ quan nhà nước.
-              </p>
+              </Text>
             </div>
 
             {/* Simulated Custom Slogan Banner (The Subject!) */}
             <div className="space-y-2">
               <div className="flex justify-between items-center px-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Khẩu hiệu Tuyên truyền của bạn sẽ được hiển thị tại đây:</span>
-                <span className="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded font-black uppercase">Live</span>
+                <Text as="span" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Khẩu hiệu Tuyên truyền của bạn sẽ được hiển thị tại đây:</Text>
+                <Text as="span" className="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded font-black uppercase">Live</Text>
               </div>
 
               <div 
@@ -113,21 +115,18 @@ export function BannerClientPreviewModal({
                 )}
 
                 <div className="z-10 flex flex-col gap-2 flex-1">
-                  <span 
+                  <Text as="span" 
                     style={{ color: customStyles.titleColor || "#fbc02d" }}
-                    className={`text-xs md:text-sm font-black tracking-widest uppercase flex items-center gap-2 drop-shadow-md ${
-                      customStyles.alignment === "center" ? "justify-center" : 
-                      customStyles.alignment === "right" ? "justify-end" : "justify-start"
-                    }`}
+                    className={` font-black tracking-widest uppercase flex items-center gap-2 drop-shadow-md ${ customStyles.alignment === "center" ? "justify-center" : customStyles.alignment === "right" ? "justify-end" : "justify-start" }`}
                   >
-                    <span>⭐</span> {watchedName || "TIÊU ĐỀ KHẨU HIỆU TUYÊN TRUYỀN"}
-                  </span>
-                  <h3 
+                    <Text as="span">⭐</Text> {watchedName || "TIÊU ĐỀ KHẨU HIỆU TUYÊN TRUYỀN"}
+                  </Text>
+                  <Heading level="h3" 
                     style={{ color: customStyles.textColor || "#fff7ed" }}
-                    className="text-base md:text-lg font-black tracking-wide leading-snug uppercase drop-shadow-md"
+                    className="font-black tracking-wide leading-snug uppercase drop-shadow-md"
                   >
                     &quot;{watchedDescription || "Nội dung khẩu hiệu chi tiết, slogan hành động của cơ quan nhà nước."}&quot;
-                  </h3>
+                  </Heading>
                 </div>
                 <div className="z-10 shrink-0">
                   <div
@@ -157,8 +156,8 @@ export function BannerClientPreviewModal({
 
           {/* Portal Footer */}
           <footer className="bg-slate-950 text-slate-400 py-8 px-4 text-center text-xs mt-12 border-t border-slate-800">
-            <p className="font-bold text-slate-200">© 2026 Bản quyền thuộc về Ủy ban Nhân dân tỉnh Đắk Lắk</p>
-            <p className="text-[11px] text-slate-500 mt-1">Đường Lê Duẩn, Thành phố Buôn Ma Thuột, Tỉnh Đắk Lắk</p>
+            <Text className="font-bold text-slate-200">© 2026 Bản quyền thuộc về Ủy ban Nhân dân tỉnh Đắk Lắk</Text>
+            <Text className="text-[11px] text-slate-500 mt-1">Đường Lê Duẩn, Thành phố Buôn Ma Thuột, Tỉnh Đắk Lắk</Text>
           </footer>
 
         </div>

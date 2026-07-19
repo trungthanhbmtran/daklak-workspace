@@ -9,6 +9,8 @@ import {
   Zap, FolderTree, BookOpen, ShieldCheck, Layout,
   Loader2, Sparkles, Layers, ArrowRight, FileText, Plus
 } from "lucide-react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface QuickSetupModalProps {
   isOpen: boolean;
@@ -70,7 +72,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-sm text-amber-600 dark:text-amber-400 flex gap-3 mb-4 items-center justify-between">
                 <div className="flex gap-3">
                   <Sparkles className="w-5 h-5 flex-shrink-0 text-amber-500" />
-                  <p>Chọn một hoặc nhiều chuyên mục. Hệ thống sẽ tự động tạo menu cho chuyên mục đó và toàn bộ các chuyên mục con.</p>
+                  <Text>Chọn một hoặc nhiều chuyên mục. Hệ thống sẽ tự động tạo menu cho chuyên mục đó và toàn bộ các chuyên mục con.</Text>
                 </div>
                 {selectedCategories.length > 0 && (
                   <Button
@@ -106,8 +108,8 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                         <Layers className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-slate-800">{cat.name}</p>
-                        <p className="text-[10px] text-slate-500">{cat.children?.length || 0} chuyên mục con</p>
+                        <Text className="font-semibold text-slate-800">{cat.name}</Text>
+                        <Text className="text-[10px] text-slate-500">{cat.children?.length || 0} chuyên mục con</Text>
                       </div>
                     </div>
                     <Button
@@ -130,7 +132,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
             <TabsContent value="documents" className="space-y-4">
               <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-800 flex gap-3 mb-4">
                 <BookOpen className="w-5 h-5 flex-shrink-0 text-blue-600" />
-                <p>Tạo menu cho các nhóm văn bản. Hệ thống sẽ tự động thêm các loại văn bản (danh mục) thuộc nhóm này vào menu con.</p>
+                <Text>Tạo menu cho các nhóm văn bản. Hệ thống sẽ tự động thêm các loại văn bản (danh mục) thuộc nhóm này vào menu con.</Text>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {docGroups.map(group => (
@@ -138,7 +140,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                     <div className="p-2 bg-blue-50 text-blue-600 rounded-lg w-fit">
                       <FileText className="w-5 h-5" />
                     </div>
-                    <p className="font-bold text-slate-800">{group.name}</p>
+                    <Text className="font-bold text-slate-800">{group.name}</Text>
                     <Button
                       size="sm"
                       className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 transition-all font-semibold"
@@ -155,7 +157,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
             <TabsContent value="compliance" className="space-y-4">
               <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 text-sm text-emerald-800 flex gap-3 mb-4">
                 <ShieldCheck className="w-5 h-5 flex-shrink-0 text-emerald-600" />
-                <p>Các module bắt buộc theo Nghị định 42/2022 và Thông tư 22/2023 của Bộ TT&TT về Cổng thông tin điện tử cơ quan nhà nước.</p>
+                <Text>Các module bắt buộc theo Nghị định 42/2022 và Thông tư 22/2023 của Bộ TT&TT về Cổng thông tin điện tử cơ quan nhà nước.</Text>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {complianceModules.map(module => (
@@ -164,7 +166,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                       <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded">
                         <Plus className="w-3 h-3" />
                       </div>
-                      <span className="text-xs font-semibold text-slate-800">{module.name}</span>
+                      <Text as="span" className="font-semibold text-slate-800">{module.name}</Text>
                     </div>
                     <Button
                       size="sm"
@@ -185,8 +187,8 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                 <Layout className="w-10 h-10 text-slate-400" />
               </div>
               <div className="text-center space-y-1">
-                <p className="font-bold text-slate-800">Khởi tạo nhanh các trang cơ bản</p>
-                <p className="text-sm text-muted-foreground">Trang chủ, Tin tức, Tra cứu văn bản, Liên hệ...</p>
+                <Text className="font-bold text-slate-800">Khởi tạo nhanh các trang cơ bản</Text>
+                <Text className="text-muted-foreground">Trang chủ, Tin tức, Tra cứu văn bản, Liên hệ...</Text>
               </div>
               <Button
                 onClick={addDefaultPages}

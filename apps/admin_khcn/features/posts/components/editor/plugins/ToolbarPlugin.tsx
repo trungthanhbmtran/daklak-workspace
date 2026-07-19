@@ -32,6 +32,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch"; 
 import { Label } from "@/components/ui/label"; 
 import { cn } from "@/lib/utils";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 // ============================================================================
 // 1. NÚT BẤM DÙNG CHUNG (Giữ nguyên style phẳng của Mạnh)
@@ -118,8 +120,8 @@ const BlockFormatPlugin = () => {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="paragraph">Đoạn văn</SelectItem>
-        <SelectItem value="h1"><span className="font-bold text-lg">Tiêu đề 1</span></SelectItem>
-        <SelectItem value="h2"><span className="font-bold text-base">Tiêu đề 2</span></SelectItem>
+        <SelectItem value="h1"><Text as="span" className="font-bold">Tiêu đề 1</Text></SelectItem>
+        <SelectItem value="h2"><Text as="span" className="font-bold">Tiêu đề 2</Text></SelectItem>
         <SelectItem value="quote">Trích dẫn</SelectItem>
       </SelectContent>
     </Select>
@@ -143,11 +145,11 @@ const FontFormatPlugin = () => {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="Arial"><span style={{ fontFamily: "Arial" }}>Arial</span></SelectItem>
-        <SelectItem value="Times New Roman"><span style={{ fontFamily: "Times New Roman" }}>Times New Roman</span></SelectItem>
-        <SelectItem value="Roboto"><span style={{ fontFamily: "Roboto" }}>Roboto</span></SelectItem>
-        <SelectItem value="Courier New"><span style={{ fontFamily: "Courier New" }}>Courier New</span></SelectItem>
-        <SelectItem value="Georgia"><span style={{ fontFamily: "Georgia" }}>Georgia</span></SelectItem>
+        <SelectItem value="Arial"><Text as="span" style={{ fontFamily: "Arial" }}>Arial</Text></SelectItem>
+        <SelectItem value="Times New Roman"><Text as="span" style={{ fontFamily: "Times New Roman" }}>Times New Roman</Text></SelectItem>
+        <SelectItem value="Roboto"><Text as="span" style={{ fontFamily: "Roboto" }}>Roboto</Text></SelectItem>
+        <SelectItem value="Courier New"><Text as="span" style={{ fontFamily: "Courier New" }}>Courier New</Text></SelectItem>
+        <SelectItem value="Georgia"><Text as="span" style={{ fontFamily: "Georgia" }}>Georgia</Text></SelectItem>
       </SelectContent>
     </Select>
   );
@@ -268,7 +270,7 @@ const ColorAndLinkPlugin = () => {
         <PopoverTrigger asChild><ToolbarIconButton icon={PaintBucket} title="Màu nền" className="text-amber-600 hover:bg-amber-50" /></PopoverTrigger>
         <PopoverContent className="w-[280px] p-3 shadow-xl rounded-xl" align="start">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase">Màu nền</span>
+            <Text as="span" className="font-semibold text-slate-500 uppercase">Màu nền</Text>
             <button type="button" className="text-[10px] text-blue-600 hover:underline" onClick={() => applyStyleText({ "background-color": "transparent" })}>Xóa nền</button>
           </div>
           <div className="grid grid-cols-10 gap-1">
@@ -285,7 +287,7 @@ const ColorAndLinkPlugin = () => {
         </PopoverTrigger>
         <PopoverContent className="w-80 p-4 shadow-xl border-slate-200 rounded-xl" align="center">
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-bold text-slate-700 uppercase">{isLink ? "Sửa Liên Kết" : "Chèn Liên Kết"}</span>
+            <Text as="span" className="font-bold text-slate-700 uppercase">{isLink ? "Sửa Liên Kết" : "Chèn Liên Kết"}</Text>
             <Input placeholder="Dán URL vào đây..." className="h-8 text-sm" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && insertLink()} autoFocus />
             <div className="flex items-center space-x-2 py-1">
               <Switch id="target-blank" checked={isTargetBlank} onCheckedChange={setIsTargetBlank} />
@@ -375,13 +377,13 @@ const InsertMediaPlugin = () => {
         </PopoverTrigger>
         <PopoverContent className="w-72 p-4 shadow-xl rounded-xl" align="center">
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-bold text-slate-700 uppercase">Chèn Hình Ảnh</span>
+            <Text as="span" className="font-bold text-slate-700 uppercase">Chèn Hình Ảnh</Text>
             <div className="flex gap-2">
               <Input placeholder="Dán link (https://...)" className="h-8 text-xs" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src: imageUrl, altText: "Img" })} />
               <Button type="button" size="sm" className="h-8 bg-emerald-600 text-xs text-white" onClick={() => { editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src: imageUrl, altText: "Img" }); setIsImageOpen(false);}}>Chèn</Button>
             </div>
             <div className="relative flex items-center py-1">
-              <div className="grow border-t"></div><span className="mx-2 text-[10px] text-slate-400 uppercase">Hoặc</span><div className="grow border-t"></div>
+              <div className="grow border-t"></div><Text as="span" className="mx-2 text-[10px] text-slate-400 uppercase">Hoặc</Text><div className="grow border-t"></div>
             </div>
             <Button type="button" variant="outline" size="sm" className="h-8 text-xs text-slate-600" onClick={() => imageInputRef.current?.click()}>
               <Upload className="h-3.5 w-3.5 mr-2 text-emerald-600" /> Tải lên từ máy
@@ -397,10 +399,10 @@ const InsertMediaPlugin = () => {
         <PopoverContent className="w-auto p-4 shadow-xl rounded-xl" align="center">
           <div className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-700 uppercase">Chèn bảng</span>
-              <span className="text-xs font-bold px-2 bg-blue-100 text-blue-700 rounded-sm">
+              <Text as="span" className="font-bold text-slate-700 uppercase">Chèn bảng</Text>
+              <Text as="span" className="font-bold px-2 bg-blue-100 text-blue-700 rounded-sm">
                 {gridSize.rows > 0 ? `${gridSize.cols} x ${gridSize.rows}` : "0 x 0"}
-              </span>
+              </Text>
             </div>
             <div className="grid grid-cols-10 gap-1 p-1 bg-white" onMouseLeave={() => setGridSize({ rows: 0, cols: 0 })}>
               {Array.from({ length: 10 }).map((_, rIdx) => Array.from({ length: 10 }).map((_, cIdx) => {

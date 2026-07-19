@@ -15,6 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function PortalMenuClient() {
   const [deletingMenuId, setDeletingMenuId] = useState<string | null>(null);
@@ -48,9 +50,9 @@ export function PortalMenuClient() {
             <div className="p-2 bg-primary rounded-lg text-primary-foreground">
               <Globe className="w-5 h-5" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">Cấu hình Menu Portal</h1>
+            <Heading level="h1" className="font-extrabold tracking-tight text-foreground">Cấu hình Menu Portal</Heading>
           </div>
-          <p className="text-sm sm:text-base text-muted-foreground">Thiết lập sơ đồ điều hướng cho cổng thông tin công cộng (Người dân)</p>
+          <Text className="text-muted-foreground">Thiết lập sơ đồ điều hướng cho cổng thông tin công cộng (Người dân)</Text>
         </div>
         <div className="flex gap-3">
           <Button
@@ -78,9 +80,9 @@ export function PortalMenuClient() {
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                <Text as="span" className="font-semibold text-muted-foreground flex items-center gap-1">
                   <Languages className="w-3.5 h-3.5 text-primary" /> Xem ngôn ngữ:
-                </span>
+                </Text>
                 <Tabs value={displayLang} onValueChange={setDisplayLang} className="w-auto">
                   <TabsList className="bg-muted p-0.5 h-8 gap-0.5 rounded-lg border border-border">
                     {(languages.length > 0 ? languages : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }]).map(lang => (

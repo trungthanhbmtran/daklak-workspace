@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Layers, FileText, ExternalLink, Layout, Edit, Trash2 } from "lucide-react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface MenuTableRowProps {
   menu: PortalMenu;
@@ -95,24 +97,23 @@ export const MenuTableRow = React.memo(function MenuTableRow({
               </div>
 
               <div className="flex flex-col">
-                <span
-                  className={`text-sm ${!menu.isActive ? "text-muted-foreground line-through" : "text-foreground font-semibold"
-                    } ${!isTranslated ? "italic text-muted-foreground font-medium" : ""}`}
+                <Text as="span"
+                  className={` ${!menu.isActive ? "text-muted-foreground line-through" : "text-foreground font-semibold" } ${!isTranslated ? "italic text-muted-foreground font-medium" : ""}`}
                 >
                   {displayName}
                   {!isTranslated && (
-                    <span
+                    <Text as="span"
                       className="text-[9px] text-amber-600 font-bold ml-1.5 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase"
                       title="Mục này chưa được cấu hình bản dịch"
                     >
                       Chưa dịch
-                    </span>
+                    </Text>
                   )}
-                </span>
+                </Text>
                 {displayDescription && (
-                  <span className="text-[10px] text-muted-foreground truncate max-w-[200px] italic">
+                  <Text as="span" className="text-[10px] text-muted-foreground truncate max-w-[200px] italic">
                     {displayDescription}
-                  </span>
+                  </Text>
                 )}
               </div>
             </div>
@@ -120,32 +121,32 @@ export const MenuTableRow = React.memo(function MenuTableRow({
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-1">
-            <span
+            <Text as="span"
               className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-primary/10 text-primary border border-primary/20 cursor-default"
               title="Tiếng Việt (Gốc)"
             >
               VI
-            </span>
+            </Text>
             {(languages.length > 0 ? languages : [{ code: "en", name: "English" }])
               .filter((l) => l.code !== "vi")
               .map((lang) => {
                 const hasTrans = !!getMenuTranslation(menu, lang.code).name;
                 return hasTrans ? (
-                  <span
+                  <Text as="span"
                     key={lang.code}
                     className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
                     title={`Đã dịch sang ${lang.name}`}
                   >
                     {lang.code.toUpperCase()}
-                  </span>
+                  </Text>
                 ) : (
-                  <span
+                  <Text as="span"
                     key={lang.code}
                     className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full border border-dashed border-border bg-muted/50 text-muted-foreground cursor-default"
                     title={`Chưa dịch sang ${lang.name}`}
                   >
                     {lang.code.toUpperCase()}
-                  </span>
+                  </Text>
                 );
               })}
           </div>
@@ -177,15 +178,15 @@ export const MenuTableRow = React.memo(function MenuTableRow({
         </TableCell>
         <TableCell className="max-w-[180px]">
           <div className="flex items-center gap-1.5 text-muted-foreground group">
-            <span className="text-[11px] font-mono truncate bg-muted px-1.5 py-0.5 rounded border border-border group-hover:border-primary/50 group-hover:bg-primary/10 transition-colors">
+            <Text as="span" className="text-[11px] font-mono truncate bg-muted px-1.5 py-0.5 rounded border border-border group-hover:border-primary/50 group-hover:bg-primary/10 transition-colors">
               {menu.link || "—"}
-            </span>
+            </Text>
           </div>
         </TableCell>
         <TableCell className="text-center">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted/50 text-[11px] font-bold text-muted-foreground border border-border">
+          <Text as="span" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted/50 text-[11px] font-bold text-muted-foreground border border-border">
             {menu.order}
-          </span>
+          </Text>
         </TableCell>
         <TableCell>
           <Switch

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useHrmEmployeesSearch } from '../hooks/useHrmEmployees';
+import { Text } from "@/components/ui/typography";
 
 interface MentionInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: string;
@@ -102,9 +103,9 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
     <div className="relative flex-1 flex">
       {mentionQuery && (
         <div className="absolute bottom-full left-0 mb-2 w-64 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-50 p-1">
-          {isLoading && <div className="p-3 text-xs text-slate-500 text-center">Đang tìm...</div>}
+          {isLoading && <Text variant="small" className="p-3 text-slate-500 text-center font-normal">Đang tìm...</Text>}
           {!isLoading && employees.length === 0 && (
-            <div className="p-3 text-xs text-slate-500 text-center">Không tìm thấy</div>
+            <Text variant="small" className="p-3 text-slate-500 text-center font-normal">Không tìm thấy</Text>
           )}
           {!isLoading && employees.map((emp: any, idx: number) => (
             <div
@@ -116,8 +117,8 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
                 {(emp.fullName || emp.lastname || '?').charAt(0)}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold truncate">{emp.fullName}</p>
-                <p className="text-[10px] opacity-70 truncate">{emp.jobTitle?.name || emp.department?.name}</p>
+                <Text variant="small" weight="bold" className="truncate">{emp.fullName}</Text>
+                <Text variant="small" className="text-[10px] opacity-70 truncate font-normal">{emp.jobTitle?.name || emp.department?.name}</Text>
               </div>
             </div>
           ))}

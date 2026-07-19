@@ -64,6 +64,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface PostListTableProps {
   onNavigateToEdit: (id: string) => void;
@@ -224,7 +226,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                 <TableCell colSpan={5} className="px-6 py-24 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-                    <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Đang tải danh sách bài viết...</p>
+                    <Text className="text-muted-foreground font-bold uppercase tracking-wider">Đang tải danh sách bài viết...</Text>
                   </div>
                 </TableCell>
               </TableRow>
@@ -233,8 +235,8 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                 <TableCell colSpan={5} className="px-6 py-24 text-center">
                   <div className="flex flex-col items-center gap-3 text-rose-600 dark:text-rose-400">
                     <AlertCircle className="h-10 w-10" />
-                    <p className="font-black uppercase tracking-wider text-sm">Không thể tải dữ liệu</p>
-                    <p className="text-xs text-muted-foreground">{(error as Error)?.message || "Vui lòng thử lại sau"}</p>
+                    <Text className="font-black uppercase tracking-wider">Không thể tải dữ liệu</Text>
+                    <Text className="text-muted-foreground">{(error as Error)?.message || "Vui lòng thử lại sau"}</Text>
                   </div>
                 </TableCell>
               </TableRow>
@@ -274,12 +276,12 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
 
                         <div className="space-y-1.5 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span
+                            <Text as="span"
                               onClick={() => onNavigateToEdit(post.id)}
-                              className="font-bold text-foreground text-xs sm:text-sm line-clamp-2 leading-snug hover:text-primary transition-colors cursor-pointer"
+                              className="font-bold text-foreground line-clamp-2 leading-snug hover:text-primary transition-colors cursor-pointer"
                             >
                               {post.title}
-                            </span>
+                            </Text>
                             {post.isFeatured && (
                               <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 shrink-0 flex items-center gap-0.5">
                                 <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500 shrink-0" /> Nổi bật
@@ -288,24 +290,24 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                           </div>
 
                           <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold flex-wrap">
-                            <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border">
+                            <Text as="span" className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border">
                               ID: {post.id?.substring(0, 8)}
-                            </span>
+                            </Text>
 
-                            <span className="flex items-center gap-1 font-sans text-slate-500 bg-muted dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
+                            <Text as="span" className="flex items-center gap-1 font-sans text-slate-500 bg-muted dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
                               <Eye className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                               {post.viewCount || 0} lượt xem
-                            </span>
+                            </Text>
 
                             {(() => {
                               const translationsObj = safeParseJSON(post.translations);
                               const langKeys = Object.keys(translationsObj);
                               if (langKeys.length === 0) return null;
                               return (
-                                <span className="flex items-center gap-1 bg-blue-50/60 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-lg border border-blue-100/40 dark:border-blue-900/30 text-[9px] uppercase tracking-wide">
+                                <Text as="span" className="flex items-center gap-1 bg-blue-50/60 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-lg border border-blue-100/40 dark:border-blue-900/30 text-[9px] uppercase tracking-wide">
                                   <Globe className="h-3 w-3 shrink-0 text-blue-500" />
                                   {langKeys.join(", ")}
-                                </span>
+                                </Text>
                               );
                             })()}
                           </div>
@@ -321,38 +323,35 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
 
                     <TableCell className="px-6 py-4.5 align-middle">
                       <div className="flex flex-col gap-1.5 w-fit">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10.5px] font-bold ${statusObj.bg} ${statusObj.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${statusObj.dot} shrink-0`} />
+                        <Text as="span" className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10.5px] font-bold ${statusObj.bg} ${statusObj.text}`}>
+                          <Text as="span" className={`w-1.5 h-1.5 rounded-full ${statusObj.dot} shrink-0`} />
                           <StatusIcon className="h-3.5 w-3.5 shrink-0" />
                           {getStatusLabel(post.status)}
-                        </span>
+                        </Text>
 
-                        <span className="inline-flex items-center gap-1 text-[9px] font-mono text-muted-foreground font-extrabold uppercase px-2">
+                        <Text as="span" className="inline-flex items-center gap-1 text-[9px] font-mono text-muted-foreground font-extrabold uppercase px-2">
                           Phiên bản v{post.currentVersion || 1}
-                        </span>
+                        </Text>
 
                         {post.autoModerationStatus && (
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9.5px] font-bold ${post.autoModerationStatus === 'SAFE'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/10'
-                            }`}>
+                          <Text as="span" className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9.5px] font-bold ${post.autoModerationStatus === 'SAFE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/10' }`}>
                             <AlertCircle className="h-3 w-3 shrink-0" />
                             {post.autoModerationStatus === 'SAFE' ? 'AI An toàn' : 'AI Nghi ngờ'}
-                          </span>
+                          </Text>
                         )}
                       </div>
                     </TableCell>
 
                     <TableCell className="px-6 py-4.5 align-middle">
                       <div className="space-y-1">
-                        <p className="font-extrabold text-foreground text-xs flex items-center gap-1">
+                        <Text className="font-extrabold text-foreground flex items-center gap-1">
                           <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           {post.authorId?.substring(0, 8) || 'Ẩn danh'}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+                        </Text>
+                        <Text className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           {formatDate(post.publishedAt || post.createdAt)}
-                        </p>
+                        </Text>
                       </div>
                     </TableCell>
 
@@ -449,15 +448,15 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
         <div className="px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-muted/50">
           <div className="text-xs font-bold text-muted-foreground">
             Hiển thị từ{" "}
-            <span className="text-foreground">
+            <Text as="span" className="text-foreground">
               {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
-            </span>{" "}
+            </Text>{" "}
             đến{" "}
-            <span className="text-foreground">
+            <Text as="span" className="text-foreground">
               {Math.min(page * pageSize, totalItems)}
-            </span>{" "}
+            </Text>{" "}
             trong tổng số{" "}
-            <span className="text-foreground">{totalItems}</span>{" "}
+            <Text as="span" className="text-foreground">{totalItems}</Text>{" "}
             bài viết
           </div>
 

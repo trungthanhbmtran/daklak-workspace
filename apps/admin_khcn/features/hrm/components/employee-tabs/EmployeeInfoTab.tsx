@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import { TabsContent } from "@/components/ui/tabs";
 import { useEmployeeTitles } from "./useEmployeeTitles";
 
@@ -12,39 +13,39 @@ export function EmployeeInfoTab({ employee }: EmployeeInfoTabProps) {
     <TabsContent value="info" className="outline-none">
       <Card className="rounded-2xl shadow-sm overflow-hidden">
         <div className="p-6 md:p-8">
-          <h4 className="text-lg md:text-xl font-semibold text-foreground mb-6">Thông tin định danh</h4>
+          <Heading level="h4" className="mb-6">Thông tin định danh</Heading>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 lg:gap-x-12 text-sm md:text-base">
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Mã nhân viên</span>
-              <span className="font-semibold text-foreground">{employee.employeeCode || employee.id}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Mã nhân viên</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{employee.employeeCode || employee.id}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Số CCCD</span>
-              <span className="font-semibold text-foreground">{employee.identityCard || "—"}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Số CCCD</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{employee.identityCard || "—"}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Email</span>
-              <span className="font-semibold text-foreground">{employee.email || "—"}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Email</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{employee.email || "—"}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Số điện thoại</span>
-              <span className="font-semibold text-foreground">{employee.phone || "—"}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Số điện thoại</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{employee.phone || "—"}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Đơn vị</span>
-              <span className="font-semibold text-foreground">{unitName}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Đơn vị</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{unitName}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Chức vụ chính quyền</span>
-              <span className="font-semibold text-foreground">{govtTitleName}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Chức vụ chính quyền</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{govtTitleName}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Ngạch công chức</span>
-              <span className="font-semibold text-foreground">{rankTitleName}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Ngạch công chức</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{rankTitleName}</Text>
             </div>
             <div className="flex flex-col space-y-1.5">
-              <span className="text-muted-foreground text-xs md:text-sm">Chức vụ Đảng</span>
-              <span className="font-semibold text-foreground">{partyTitleName}</span>
+              <Text as="span" variant="small" className="text-muted-foreground font-normal">Chức vụ Đảng</Text>
+              <Text as="span" weight="semibold" className="text-foreground">{partyTitleName}</Text>
             </div>
           </div>
         </div>

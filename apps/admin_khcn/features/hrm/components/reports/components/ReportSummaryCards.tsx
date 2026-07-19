@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import { CheckCircle2, AlertTriangle, Clock, ListTodo } from "lucide-react";
 
 interface ReportSummaryCardsProps {
@@ -45,8 +46,8 @@ export const ReportSummaryCards = React.memo(function ReportSummaryCards({ isLoa
             <ListTodo className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Tổng công việc {titlePrefix}</p>
-            <h4 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{totalTasks}</h4>
+            <Text variant="small" weight="medium" className="text-slate-500">Tổng công việc {titlePrefix}</Text>
+            <Heading level="h4" className="text-slate-900 dark:text-slate-100">{totalTasks}</Heading>
           </div>
         </CardContent>
       </Card>
@@ -56,8 +57,8 @@ export const ReportSummaryCards = React.memo(function ReportSummaryCards({ isLoa
             <CheckCircle2 className="h-6 w-6 text-emerald-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Đã hoàn thành</p>
-            <h4 className="text-2xl font-bold text-emerald-600">{completedTasks}</h4>
+            <Text variant="small" weight="medium" className="text-slate-500">Đã hoàn thành</Text>
+            <Heading level="h4" className="text-emerald-600">{completedTasks}</Heading>
           </div>
         </CardContent>
       </Card>
@@ -67,8 +68,8 @@ export const ReportSummaryCards = React.memo(function ReportSummaryCards({ isLoa
             <Clock className="h-6 w-6 text-amber-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Đang xử lý</p>
-            <h4 className="text-2xl font-bold text-amber-600">{pendingTasks}</h4>
+            <Text variant="small" weight="medium" className="text-slate-500">Đang xử lý</Text>
+            <Heading level="h4" className="text-amber-600">{pendingTasks}</Heading>
           </div>
         </CardContent>
       </Card>
@@ -78,8 +79,8 @@ export const ReportSummaryCards = React.memo(function ReportSummaryCards({ isLoa
             <AlertTriangle className="h-6 w-6 text-rose-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Trễ hạn</p>
-            <h4 className="text-2xl font-bold text-rose-600">{overdueTasks}</h4>
+            <Text variant="small" weight="medium" className="text-slate-500">Trễ hạn</Text>
+            <Heading level="h4" className="text-rose-600">{overdueTasks}</Heading>
           </div>
         </CardContent>
       </Card>

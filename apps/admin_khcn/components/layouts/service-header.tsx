@@ -7,6 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useServiceMenus } from "@/hooks/useServiceMenus";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { HeaderUserProfile } from "./header-user-profile";
+import { Heading } from "@/components/ui/typography";
 
 import { ThemeToggle } from "./theme-toggle";
 
@@ -23,9 +24,9 @@ export function ServiceHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <div className="h-4 w-px bg-border" />
-        <h1 className="text-base md:text-lg font-semibold tracking-tight text-foreground ml-2">
+        <Heading level="h4" className="ml-2 tracking-tight">
           {activePageName}
-        </h1>
+        </Heading>
       </div>
 
       {/* PHẢI: Công cụ & User Profile */}

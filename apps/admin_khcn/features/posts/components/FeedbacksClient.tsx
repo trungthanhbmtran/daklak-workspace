@@ -34,6 +34,8 @@ import {
   User,
   MessageSquareDot,
 } from "lucide-react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 // ─── Pure UI helpers (không state, không side-effect) ────────────────────────
 
@@ -119,13 +121,13 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
           <div className="space-y-4 py-2">
             <div className="flex items-start justify-between pb-3 border-b">
               <div>
-                <h3 className="font-bold text-lg">{feedback.title}</h3>
+                <Heading level="h3" className="font-bold">{feedback.title}</Heading>
                 <div className="flex items-center gap-3 mt-2">
                   <TypeBadge type={feedback.feedbackType} />
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Text as="span" className="text-muted-foreground flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {new Date(feedback.createdAt).toLocaleString("vi-VN")}
-                  </span>
+                  </Text>
                 </div>
               </div>
               <StatusBadge status={feedback.status} />
@@ -133,14 +135,14 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/40 p-3 rounded-lg border">
-                <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Người gửi</p>
+                <Text className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Người gửi</Text>
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <User className="w-4 h-4 text-muted-foreground" />
                   {feedback.senderName}
                 </div>
               </div>
               <div className="bg-muted/40 p-3 rounded-lg border">
-                <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Email liên hệ</p>
+                <Text className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Email liên hệ</Text>
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <Mail className="w-4 h-4 text-muted-foreground" />
                   {feedback.senderEmail}
@@ -149,7 +151,7 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-bold">Nội dung góp ý:</p>
+              <Text className="font-bold">Nội dung góp ý:</Text>
               <div className="p-4 bg-muted/30 rounded-xl border text-foreground leading-relaxed min-h-[100px] text-sm">
                 {feedback.content}
               </div>
@@ -157,9 +159,9 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
 
             {feedback.referenceId && (
               <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-xs font-semibold text-blue-700 dark:text-blue-400">
+                <Text className="font-semibold text-blue-700 dark:text-blue-400">
                   ID tham chiếu tài liệu: {feedback.referenceId}
-                </p>
+                </Text>
               </div>
             )}
           </div>
@@ -221,11 +223,11 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-medium">{feedback.senderName}</p>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+            <Text className="font-medium">{feedback.senderName}</Text>
+            <Text className="text-muted-foreground flex items-center gap-1 mt-0.5">
               <Mail className="w-3 h-3" />
               {feedback.senderEmail}
-            </p>
+            </Text>
           </div>
         </div>
       </TableCell>
@@ -233,7 +235,7 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
       <TableCell>
         <div className="space-y-1">
           <TypeBadge type={feedback.feedbackType} />
-          <p className="text-sm font-semibold line-clamp-1">{feedback.title}</p>
+          <Text className="font-semibold line-clamp-1">{feedback.title}</Text>
         </div>
       </TableCell>
 
@@ -242,10 +244,10 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
       </TableCell>
 
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        <span className="flex items-center gap-1">
+        <Text as="span" className="flex items-center gap-1">
           <Calendar className="w-3 h-3" />
           {new Date(feedback.createdAt).toLocaleDateString("vi-VN")}
-        </span>
+        </Text>
       </TableCell>
 
       <TableCell>
@@ -312,9 +314,9 @@ const FeedbackTable = React.memo(function FeedbackTable({
                 <TableCell colSpan={5} className="py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <FileText className="w-10 h-10 text-muted-foreground/30" />
-                    <p className="text-sm text-muted-foreground italic">
+                    <Text className="text-muted-foreground italic">
                       Chưa có góp ý nào từ người dân gửi đến hệ thống.
-                    </p>
+                    </Text>
                   </div>
                 </TableCell>
               </TableRow>
@@ -372,10 +374,10 @@ export function FeedbacksClient() {
       {/* Header — chỉ re-render khi feedbacks thay đổi */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Góp ý công dân</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <Heading level="h1" className="font-bold tracking-tight">Góp ý công dân</Heading>
+          <Text className="text-muted-foreground mt-1">
             Quản lý ý kiến đóng góp cho dự thảo văn bản và chất lượng dịch vụ
-          </p>
+          </Text>
         </div>
         <Badge variant="secondary" className="px-3 py-1 text-sm">
           <MessageSquareDot className="w-3.5 h-3.5 mr-1.5" />

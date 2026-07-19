@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, Send, FileText, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function LgspClient() {
   const queryClient = useQueryClient();
@@ -78,10 +80,10 @@ export function LgspClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Quản lý văn bản liên thông (LGSP)</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <Heading level="h1" className="font-bold tracking-tight">Quản lý văn bản liên thông (LGSP)</Heading>
+          <Text className="text-muted-foreground mt-1">
             Giao tiếp, nhận và gửi văn bản qua trục liên thông quốc gia.
-          </p>
+          </Text>
         </div>
         <div className="flex gap-2">
           <Button
@@ -127,9 +129,9 @@ export function LgspClient() {
               <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
                 <FileText className="w-7 h-7 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground">
+              <Text className="font-medium text-muted-foreground">
                 Chưa có văn bản nào. Nhấn "Đồng bộ văn bản" để tải về.
-              </p>
+              </Text>
             </CardContent>
           </Card>
         ) : (
@@ -145,9 +147,9 @@ export function LgspClient() {
                       </div>
                       <div className="min-w-0">
                         <CardTitle className="text-sm font-semibold line-clamp-1">{doc.title}</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <Text className="text-muted-foreground mt-0.5">
                           Nguồn: {doc.source} &bull; Ngày: {doc.date}
-                        </p>
+                        </Text>
                       </div>
                     </div>
                     <Badge className={`shrink-0 gap-1 ${statusCfg.className}`}>

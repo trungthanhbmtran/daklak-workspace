@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -158,13 +159,13 @@ export function KpiCriteriaClient() {
     <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0 font-sans">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <Heading level="h1" className="flex items-center gap-2">
             <Library className="w-6 h-6 text-primary" />
             Khung Tiêu chí & KPI
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          </Heading>
+          <Text variant="small" className="text-muted-foreground mt-1 font-normal">
             Quản lý tập trung các bộ tiêu chí đánh giá KPI để áp dụng thống nhất cho toàn bộ hệ thống.
-          </p>
+          </Text>
         </div>
         <Button onClick={() => openModal()} className="h-10 px-4">
           <Plus className="w-4 h-4 mr-2" /> Tạo Tiêu chí
@@ -182,9 +183,9 @@ export function KpiCriteriaClient() {
               <Card key={item.id} className="shadow-sm border border-border bg-card hover:border-primary/50 transition-colors h-[240px]">
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-foreground line-clamp-2 leading-snug flex-1 mr-3">
+                    <Heading level="h4" className="line-clamp-2 leading-snug flex-1 mr-3">
                       {item.name}
-                    </h3>
+                    </Heading>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => openModal(item)}>
                         <Edit className="w-4 h-4" />
@@ -195,26 +196,26 @@ export function KpiCriteriaClient() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+                  <Text variant="small" className="text-muted-foreground line-clamp-2 mb-4 flex-1 font-normal">
                     {item.description || "Chưa có mô tả."}
-                  </p>
+                  </Text>
 
                   <div className="space-y-3 pt-4 border-t border-border mt-auto">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Điểm chuẩn:</span>
-                      <span className="font-medium text-foreground">{item.baseScore}</span>
+                      <Text as="span" variant="small" className="text-muted-foreground font-normal">Điểm chuẩn:</Text>
+                      <Text as="span" variant="small" weight="medium" className="text-foreground">{item.baseScore}</Text>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Độ khó:</span>
-                      <span className="font-medium text-foreground">
+                      <Text as="span" variant="small" className="text-muted-foreground font-normal">Độ khó:</Text>
+                      <Text as="span" variant="small" weight="medium" className="text-foreground">
                         {item.difficulty} (x{item.difficultyMultiplier})
-                      </span>
+                      </Text>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Phương pháp:</span>
-                      <span className="font-medium text-foreground text-[11px] px-2 py-0.5 bg-muted rounded-md">
+                      <Text as="span" variant="small" className="text-muted-foreground font-normal">Phương pháp:</Text>
+                      <Text as="span" weight="medium" className="text-foreground text-[11px] px-2 py-0.5 bg-muted rounded-md">
                         {item.scoringMethod}
-                      </span>
+                      </Text>
                     </div>
                   </div>
                 </CardContent>
@@ -224,16 +225,16 @@ export function KpiCriteriaClient() {
 
           {criteriaList.length === 0 && (
             <div className="text-center py-16 border border-border rounded-lg bg-muted/10">
-              <p className="text-muted-foreground">Chưa có tiêu chí nào.</p>
+              <Text variant="muted">Chưa có tiêu chí nào.</Text>
             </div>
           )}
 
           {/* Pagination Controls */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <p>
-                Hiển thị <span className="font-medium text-foreground">{meta?.total ? Math.min((meta.page - 1) * limit + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * limit, meta.total) : 0}</span> trong tổng số <span className="font-medium text-foreground">{meta?.total || 0}</span> bản ghi
-              </p>
+              <Text variant="small" className="font-normal text-muted-foreground">
+                Hiển thị <Text as="span" weight="medium" className="text-foreground">{meta?.total ? Math.min((meta.page - 1) * limit + 1, meta.total) : 0} - {meta?.total ? Math.min(meta.page * limit, meta.total) : 0}</Text> trong tổng số <Text as="span" weight="medium" className="text-foreground">{meta?.total || 0}</Text> bản ghi
+              </Text>
               <div className="flex items-center gap-2">
                 <span>Số dòng:</span>
                 <Select
@@ -265,9 +266,9 @@ export function KpiCriteriaClient() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="px-3 py-1 font-medium text-foreground">
+              <Text as="span" variant="small" weight="medium" className="px-3 py-1 text-foreground">
                 Trang {meta?.page || 1} / {meta?.totalPages || 1}
-              </span>
+              </Text>
               <Button
                 variant="outline"
                 size="icon"
@@ -299,7 +300,7 @@ export function KpiCriteriaClient() {
                   name="name"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel>Tên tiêu chí <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Tên tiêu chí <Text as="span" className="text-red-500">*</Text></FormLabel>
                       <FormControl>
                         <Input {...field} className="rounded-md" />
                       </FormControl>

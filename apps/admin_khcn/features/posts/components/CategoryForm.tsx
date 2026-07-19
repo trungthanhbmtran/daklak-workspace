@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heading, Text } from "@/components/ui/typography";
 import { Label as UILabel } from "@/components/ui/label";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -206,8 +207,8 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa chuyên mục" : "Tạo chuyên mục mới"}</h1>
-            <p className="text-sm text-muted-foreground">Phân loại nội dung để người dùng dễ dàng tìm kiếm.</p>
+            <Heading level="h1" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa chuyên mục" : "Tạo chuyên mục mới"}</Heading>
+            <Text className="text-muted-foreground font-normal">Phân loại nội dung để người dùng dễ dàng tìm kiếm.</Text>
           </div>
         </div>
         <Button onClick={form.handleSubmit(((v: any) => onSubmit(v)) as any)} className="bg-blue-600 hover:bg-blue-700 shadow-md min-w-[140px]" disabled={mutation.isPending}>
@@ -244,7 +245,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                           <FormField name="name" render={({ field }) => (
                             <FormItem>
                               <FormLabel className="font-semibold text-slate-700 flex items-center gap-2">
-                                Tên chuyên mục (VN) <span className="text-destructive">*</span>
+                                Tên chuyên mục (VN) <Text as="span" className="text-destructive">*</Text>
                               </FormLabel>
                               <FormControl><Input placeholder="VD: Tin tức nổi bật..." {...field} className="rounded-lg border-slate-200" /></FormControl>
                               <FormMessage />
@@ -286,7 +287,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     <TabsContent value="vi" className="space-y-4">
                       <FormField name="name" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="font-semibold">Tên chuyên mục <span className="text-destructive">*</span></FormLabel>
+                          <FormLabel className="font-semibold">Tên chuyên mục <Text as="span" className="text-destructive">*</Text></FormLabel>
                           <FormControl><Input placeholder="VD: Tin tức nổi bật..." {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
@@ -305,7 +306,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                   <FormField name="slug" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold text-slate-700 flex items-center gap-2">
-                        Slug (Đường dẫn tĩnh) <span className="text-destructive">*</span>
+                        Slug (Đường dẫn tĩnh) <Text as="span" className="text-destructive">*</Text>
                       </FormLabel>
                       <FormControl><Input className="font-mono bg-slate-50 rounded-lg" {...field} /></FormControl>
                       <FormMessage />
@@ -427,7 +428,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
                       <ImagePlus className="h-6 w-6 text-slate-400" />
                     </div>
-                    <span className="text-xs font-semibold text-slate-500">Tải lên icon/ảnh</span>
+                    <Text as="span" className="font-semibold text-slate-500">Tải lên icon/ảnh</Text>
                   </div>
                 )}
               </CardContent>

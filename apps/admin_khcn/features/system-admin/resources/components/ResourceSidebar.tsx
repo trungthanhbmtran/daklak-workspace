@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
+import { Heading, Text } from "@/components/ui/typography";
 import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -112,7 +113,7 @@ function ResourceSidebarInner() {
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-10 w-10 animate-spin" />
-          <p className="text-sm font-medium">Đang tải danh sách tài nguyên...</p>
+          <Text weight="medium">Đang tải danh sách tài nguyên...</Text>
         </div>
       </div>
     );
@@ -122,8 +123,8 @@ function ResourceSidebarInner() {
     return (
       <div className="flex items-center justify-center h-full">
         <Card className="p-8 max-w-md border-destructive/50">
-          <p className="text-destructive font-medium text-center">Không thể tải dữ liệu từ máy chủ.</p>
-          <p className="text-sm text-muted-foreground mt-2 text-center">Vui lòng kiểm tra kết nối và thử lại.</p>
+          <Text variant="error" weight="medium" className="text-center">Không thể tải dữ liệu từ máy chủ.</Text>
+          <Text variant="muted" className="mt-2 text-center">Vui lòng kiểm tra kết nối và thử lại.</Text>
         </Card>
       </div>
     );
@@ -134,9 +135,9 @@ function ResourceSidebarInner() {
       {/* Header + Search */}
       <div className="p-4 space-y-4 border-b bg-muted/20 shrink-0">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <Heading level="h4" className="flex items-center gap-2">
             <Database className="h-4 w-4 text-primary" /> Quản lý Module / Tài nguyên
-          </h3>
+          </Heading>
           <Badge variant="secondary" className="font-mono">{resources.length}</Badge>
         </div>
         <Search placeholder="Tìm theo tên hoặc mã..." className="w-full h-9" />
@@ -144,7 +145,7 @@ function ResourceSidebarInner() {
 
       {/* Form thêm tài nguyên */}
       <div className="p-4 border-b bg-background shrink-0 space-y-3">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Thêm mới</p>
+        <Text variant="small" weight="semibold" className="text-muted-foreground uppercase tracking-wider">Thêm mới</Text>
         <Select value={newServiceCode} onValueChange={setNewServiceCode}>
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder="Chọn Dịch vụ" />
@@ -187,7 +188,7 @@ function ResourceSidebarInner() {
               }, {} as Record<string, Resource[]>)
             ).map(([svc, group]) => (
               <div key={svc} className="space-y-2">
-                <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 flex items-center gap-2">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 flex items-center gap-2">
                   <div className="h-px bg-border flex-1" />
                   {DEFAULT_SERVICE_LIST_FALLBACK.find((s) => s.code === svc)?.name || svc}
                   <div className="h-px bg-border flex-1" />
@@ -210,8 +211,8 @@ function ResourceSidebarInner() {
                             <Component className="h-4 w-4 shrink-0" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium truncate ${isSelected ? "text-primary" : "text-foreground"}`}>{res.name}</p>
-                            <p className="text-[11px] font-mono truncate text-muted-foreground">{res.code}</p>
+                            <p className={`text-sm md:text-base font-medium truncate ${isSelected ? "text-primary" : "text-foreground"}`}>{res.name}</p>
+                            <p className="text-xs font-mono truncate text-muted-foreground">{res.code}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0 ml-2">

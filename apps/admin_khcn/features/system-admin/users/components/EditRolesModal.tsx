@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Text } from "@/components/ui/typography";
 import {
   Dialog,
   DialogContent,
@@ -35,12 +37,6 @@ export function EditRolesModal({ user, isOpen, onClose, onSave, isSaving }: Edit
     queryFn: () => roleApi.getRoles(),
     enabled: isOpen,
   });
-
-  const roleNames = Array.isArray(user?.roles)
-    ? (user.roles as (string | { name?: string; code?: string })[]).map((r) =>
-        typeof r === "string" ? r : r?.name ?? r?.code ?? ""
-      )
-    : [];
 
   useEffect(() => {
     if (!isOpen || !user || roles.length === 0) {
@@ -83,9 +79,10 @@ export function EditRolesModal({ user, isOpen, onClose, onSave, isSaving }: Edit
         </DialogHeader>
 
         {rolesLoading ? (
-          <div className="flex items-center justify-center py-8 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" /> Đang tải danh sách vai trò...
-          </div>
+          <Text variant="muted" className="flex items-center justify-center py-8">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            Đang tải dữ liệu vai trò...
+          </Text>
         ) : roles.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Chưa có vai trò nào. Thiết lập Roles trước (Chính sách phân quyền PBAC).
@@ -96,22 +93,27 @@ export function EditRolesModal({ user, isOpen, onClose, onSave, isSaving }: Edit
               {roles.map((role) => {
                 const checked = selectedIds.includes(role.id);
                 return (
-                  <label
+                  <div
                     key={role.id}
                     className={cn(
                       "flex items-center gap-3 cursor-pointer p-2 rounded-lg border transition-colors",
                       checked ? "bg-primary/5 border-primary/30" : "hover:bg-muted/50"
                     )}
                   >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={(c) => handleToggle(role.id, c === true)}
-                    />
-                    <span className="font-medium text-sm">{role.name || role.code}</span>
-                    {role.code && (
-                      <span className="text-xs text-muted-foreground font-mono">{role.code}</span>
-                    )}
-                  </label>
+                    <div className="flex items-center gap-3">
+                      <Checkbox 
+                        id={`role-${role.id}`} 
+                        checked={checked} 
+                        onCheckedChange={(c) => handleToggle(role.id, c === true)} 
+                      />
+                      <div className="grid leading-tight cursor-pointer" onClick={() => handleToggle(role.id, !checked)}>
+                        <Text as="span" variant="small" weight="medium">{role.name || role.code}</Text>
+                        {role.name && role.code !== role.name && (
+                          <Text as="span" variant="code" className="text-[10px] text-muted-foreground">{role.code}</Text>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </div>

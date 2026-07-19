@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/typography";
 import { Label } from "@/components/ui/label";
 import { ListChecksIcon, CheckCircle2, Loader2 } from "lucide-react";
 
@@ -67,7 +68,7 @@ export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogP
         <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-slate-50/50 dark:bg-slate-900/20">
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Tên bước / Công việc cần làm <span className="text-red-500">*</span>
+              Tên bước / Công việc cần làm <Text as="span" className="text-red-500">*</Text>
             </Label>
             <Input 
               required 
@@ -111,9 +112,9 @@ export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogP
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">
+            <Text variant="small" className="text-slate-500 font-normal">
               Bạn có thể phân bước này cho một người phối hợp trong công việc.
-            </p>
+            </Text>
           </div>
           
           <div className="pt-4 flex justify-end gap-3 sm:space-x-0">

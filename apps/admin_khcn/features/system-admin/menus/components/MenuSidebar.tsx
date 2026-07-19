@@ -10,6 +10,7 @@ import { useSidebarLogic } from "../hooks/useSidebarLogic";
 import { useMenuTreeQuery } from "../hooks/useMenuQueries";
 import { useParams, useSearchParams } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Heading, Text } from "@/components/ui/typography";
 import { MenuItem } from "../types";
 
 export function MenuSidebar() {
@@ -55,24 +56,24 @@ export function MenuSidebar() {
                     <LayoutList className={`h-3.5 w-3.5 ml-1 ${isSelected ? "opacity-90" : "text-muted-foreground/50"}`} />
                   )}
                   <div className="flex-1 min-w-0 leading-tight">
-                    <p className={`text-[13px] truncate transition-colors ${isSelected ? "font-bold" : "font-medium"}`}>
+                    <Text className={`truncate transition-colors ${isSelected ? "font-bold" : "font-medium"}`}>
                       {menu.name}
-                    </p>
+                    </Text>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <p className={`text-[10px] font-mono truncate uppercase ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground/60"}`}>
+                      <Text variant="small" className={`font-mono truncate uppercase ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground/60"}`}>
                         {menu.code}
-                      </p>
+                      </Text>
                       {menu.type && (
                         <>
-                          <span className={`text-[8px] ${isSelected ? "text-primary-foreground/30" : "text-muted-foreground/30"}`}>•</span>
+                          <span className={`text-[10px] ${isSelected ? "text-primary-foreground/30" : "text-muted-foreground/30"}`}>•</span>
                           <Badge
                             variant={menu.type === 'SERVICE_ITEM' ? 'default' : 'secondary'}
-                            className={`text-[9px] px-1.5 py-0 h-4 min-h-0 font-bold rounded-sm ${isSelected
+                            className={`text-xs px-1.5 py-0 h-5 min-h-0 font-medium rounded-sm ${isSelected
                               ? (menu.type === 'SERVICE_ITEM' ? 'bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30' : 'bg-white/10 text-white hover:bg-white/20')
                               : ''
                               }`}
                           >
-                            {menu.type === 'SERVICE_ITEM' ? 'SERVICE_ITEM' : 'MENU'}
+                            {menu.type === 'SERVICE_ITEM' ? 'SERVICE' : 'MENU'}
                           </Badge>
                         </>
                       )}
@@ -100,13 +101,13 @@ export function MenuSidebar() {
   };
 
   return (
-    <Card className="w-full lg:w-[350px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0 rounded-xl bg-background p-0 gap-0">
+    <Card className="w-full lg:w-4/12 xl:w-3/12 2xl:w-1/5 flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0 rounded-xl bg-background p-0 gap-0">
       <div className="p-4 border-b bg-muted/30 shrink-0">
         <div className="flex items-center justify-between">
-          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <Layers className="h-3.5 w-3.5 text-primary" /> Quản lý Menu
-          </h3>
-          <Button size="sm" variant="ghost" className="h-7 px-2 text-primary hover:bg-primary/10" asChild>
+          <Heading level="h4" className="uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <Layers className="h-4 w-4 text-primary" /> Quản lý Menu
+          </Heading>
+          <Button size="sm" variant="ghost" className="h-8 px-2 md:px-3 text-xs md:text-sm font-medium text-primary hover:bg-primary/10" asChild>
             <Link href="/services/admin/menus/create">
               <Plus className="h-4 w-4 mr-1" /> Thêm gốc
             </Link>
@@ -134,8 +135,8 @@ export function MenuSidebar() {
                   <LayoutList className="h-6 w-6 text-muted-foreground/40" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Chưa có menu</p>
-                  <p className="text-xs mt-1">Bấm nút + để tạo mới</p>
+                  <Text weight="medium">Chưa có menu</Text>
+                  <Text variant="muted" className="mt-1">Bấm nút + để tạo mới</Text>
                 </div>
               </div>
             ) : (

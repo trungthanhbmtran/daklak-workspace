@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Text } from "@/components/ui/typography";
 import { MOCK_TASKS } from "./mock-data";
 import { CheckCircle, Clock, AlertTriangle, FileText } from "lucide-react";
 
@@ -22,9 +23,9 @@ export function TaskDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalTasks}</div>
-            <p className="text-xs text-muted-foreground">
+            <Text variant="small" className="text-muted-foreground font-normal">
               Tất cả công việc trong tháng
-            </p>
+            </Text>
           </CardContent>
         </Card>
         <Card>
@@ -34,9 +35,9 @@ export function TaskDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inProgressTasks}</div>
-            <p className="text-xs text-muted-foreground">
+            <Text variant="small" className="text-muted-foreground font-normal">
               Công việc đang thực hiện
-            </p>
+            </Text>
           </CardContent>
         </Card>
         <Card>
@@ -46,9 +47,9 @@ export function TaskDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{completedTasks}</div>
-            <p className="text-xs text-muted-foreground">
+            <Text variant="small" className="text-muted-foreground font-normal">
               {Math.round((completedTasks / totalTasks) * 100) || 0}% hoàn thành
-            </p>
+            </Text>
           </CardContent>
         </Card>
         <Card>
@@ -58,9 +59,9 @@ export function TaskDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-500">{overdueTasks}</div>
-            <p className="text-xs text-muted-foreground">
+            <Text variant="small" className="text-muted-foreground font-normal">
               Cần ưu tiên xử lý ngay
-            </p>
+            </Text>
           </CardContent>
         </Card>
       </div>

@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ImageNode } from './ImageNode';
 import { toast } from 'sonner';
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export default function ImageComponent({
   src,
@@ -38,7 +40,7 @@ export default function ImageComponent({
         }}
       >
         <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-        <span className="text-xs font-medium uppercase tracking-wider">Đang xử lý hình ảnh...</span>
+        <Text as="span" className="font-medium uppercase tracking-wider">Đang xử lý hình ảnh...</Text>
       </div>
     );
   }

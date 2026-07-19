@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { useRef } from "react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface BannerImageUploadProps {
   form: UseFormReturn<any>;
@@ -62,7 +64,7 @@ export function BannerImageUpload({ form }: BannerImageUploadProps) {
             className="aspect-21/9 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
           >
             <ImagePlus className="h-8 w-8 text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
-            <span className="text-[13px] font-semibold text-slate-500">Tải lên ảnh Banner</span>
+            <Text as="span" className="text-[13px] font-semibold text-slate-500">Tải lên ảnh Banner</Text>
           </div>
         )}
       </CardContent>

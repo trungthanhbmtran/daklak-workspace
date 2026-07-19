@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
+import { Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,13 +243,13 @@ export function TaskList() {
           <TableCell>{getPriorityBadge(task.priority)}</TableCell>
           <TableCell>
             <div className="flex flex-col">
-              <span className="text-sm font-medium">
+              <Text as="span" variant="small" weight="medium">
                 {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
-              </span>
+              </Text>
               {task.coassigneeNames && task.coassigneeNames.length > 0 && (
-                <span className="text-xs text-slate-500 mt-0.5">
+                <Text as="span" className="text-slate-500 mt-0.5">
                   Phối hợp: {task.coassigneeNames.join(", ")}
-                </span>
+                </Text>
               )}
             </div>
           </TableCell>
@@ -259,7 +260,7 @@ export function TaskList() {
           </TableCell>
           <TableCell>
             <div className="flex flex-col gap-1 w-24">
-              <span className="text-[10px] font-semibold text-slate-600 leading-none">{task.progress}%</span>
+              <Text as="span" className="text-[10px] font-semibold text-slate-600 leading-none">{task.progress}%</Text>
               <Progress value={task.progress} className="h-1.5" />
             </div>
           </TableCell>
@@ -335,7 +336,7 @@ export function TaskList() {
                     <TableCell colSpan={7} className="text-center h-32">
                       <div className="flex flex-col items-center gap-2 text-slate-500">
                         <AlertCircle className="w-8 h-8 text-red-400" />
-                        <span>Không thể tải danh sách công việc.</span>
+                        <Text as="span">Không thể tải danh sách công việc.</Text>
                         <Button variant="outline" size="sm" onClick={() => refetch()}>Thử lại</Button>
                       </div>
                     </TableCell>

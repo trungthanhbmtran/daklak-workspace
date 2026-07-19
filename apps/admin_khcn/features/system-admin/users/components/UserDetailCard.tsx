@@ -19,6 +19,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Text } from "@/components/ui/typography";
 import { EditRolesModal } from "./EditRolesModal";
 import { useUserPolicies } from "../hooks/useUserApi";
 import type { UserDetail } from "../types";
@@ -114,13 +115,13 @@ export function UserDetailSheet({
           </SheetHeader>
 
           {isLoading ? (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2">
+            <Text variant="muted" className="flex-1 flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" /> Đang tải...
-            </div>
+            </Text>
           ) : !user ? (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+            <Text variant="muted" className="flex-1 flex items-center justify-center">
               Không tìm thấy thông tin người dùng.
-            </div>
+            </Text>
           ) : (
             <div className="flex-1 min-h-0">
               <ScrollArea className="h-full">
@@ -132,8 +133,8 @@ export function UserDetailSheet({
                       <User className="h-5 w-5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-bold truncate">{user.fullName ?? user.email ?? "—"}</h4>
-                      <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                      <Text weight="bold" className="truncate">{user.fullName ?? user.email ?? "—"}</Text>
+                      <Text variant="muted" className="truncate">{user.email}</Text>
                       <Badge
                         variant={isActive ? "default" : "destructive"}
                         className="mt-1 text-xs px-2 py-0 h-5"
@@ -147,10 +148,10 @@ export function UserDetailSheet({
 
                   {/* Roles */}
                   <section>
-                    <h5 className="font-semibold mb-2.5 flex items-center gap-2 text-sm">
+                    <Text weight="semibold" className="mb-2.5 flex items-center gap-2">
                       <Key className="w-4 h-4 text-muted-foreground" />
                       Vai trò ({roles.length})
-                    </h5>
+                    </Text>
                     <div className="flex flex-wrap gap-1.5">
                       {roles.length > 0 ? roles.map((role, i) => {
                         const name = typeof role === "string" ? role
@@ -162,12 +163,12 @@ export function UserDetailSheet({
                           <Badge key={i} variant="secondary" className="px-2.5 py-0.5 font-medium border text-xs flex items-center gap-1">
                             {name}
                             {code && code !== name && (
-                              <span className="text-muted-foreground font-mono opacity-70">({code})</span>
+                              <Text as="span" variant="code" className="text-muted-foreground opacity-70">({code})</Text>
                             )}
                           </Badge>
                         );
                       }) : (
-                        <span className="text-sm text-muted-foreground italic">Chưa gán vai trò nào.</span>
+                        <Text as="span" variant="muted" className="italic">Chưa gán vai trò nào.</Text>
                       )}
                     </div>
                   </section>
@@ -179,7 +180,7 @@ export function UserDetailSheet({
                     <Collapsible open={policiesOpen} onOpenChange={setPoliciesOpen}>
                       <CollapsibleTrigger asChild>
                         <Button variant="ghost" className="w-full flex items-center justify-between group px-0 hover:bg-transparent">
-                          <span className="font-semibold flex items-center gap-2 text-sm">
+                          <Text as="span" weight="semibold" className="flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4 text-amber-500" />
                             Chính sách hiệu lực
                             {policiesData && policiesData.length > 0 && (
@@ -187,7 +188,7 @@ export function UserDetailSheet({
                                 {policiesData.length}
                               </Badge>
                             )}
-                          </span>
+                          </Text>
                           <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${policiesOpen ? 'rotate-180' : ''}`} />
                         </Button>
                       </CollapsibleTrigger>
@@ -195,13 +196,13 @@ export function UserDetailSheet({
                       <CollapsibleContent className="mt-3">
                         <div className="bg-muted/30 rounded-lg border p-3">
                           {isPoliciesLoading ? (
-                            <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground text-sm">
+                            <Text variant="muted" className="flex items-center justify-center gap-2 py-6">
                               <Loader2 className="w-4 h-4 animate-spin" /> Đang tải chính sách...
-                            </div>
+                            </Text>
                           ) : !policiesData || policiesData.length === 0 ? (
-                            <p className="text-xs text-muted-foreground italic text-center py-4">
+                            <Text variant="small" className="text-muted-foreground italic text-center py-4">
                               Chưa có chính sách nào được áp dụng.
-                            </p>
+                            </Text>
                           ) : (
                             <div className="pt-1">
                               <ul className="text-xs space-y-2.5">
@@ -209,7 +210,7 @@ export function UserDetailSheet({
                                   <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0">
                                     <div className="flex items-center gap-2">
                                       <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                                      <span className="font-medium flex-1 truncate">{policy.description ?? "—"}</span>
+                                      <Text as="span" weight="medium" className="flex-1 truncate">{policy.description ?? "—"}</Text>
                                       {policy.effect && (
                                         <Badge
                                           variant={policy.effect === "ALLOW" ? "default" : "destructive"}
@@ -245,11 +246,11 @@ export function UserDetailSheet({
                   </section>
 
                   {/* Last login */}
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Text variant="small" className="text-muted-foreground flex items-center gap-1.5">
                     <CalendarDays className="w-3.5 h-3.5" />
                     Đăng nhập lần cuối:{" "}
                     {lastLogin != null ? new Date(lastLogin).toLocaleString("vi-VN") : "Chưa từng đăng nhập"}
-                  </p>
+                  </Text>
                 </div>
               </ScrollArea>
             </div>

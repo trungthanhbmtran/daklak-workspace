@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Heading } from "@/components/ui/typography";
 
 import { useTaskConfigForm } from './hooks/useTaskConfigForm';
 
@@ -44,7 +45,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
             {/* Left Sidebar: Ranks */}
             <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-full border rounded-xl overflow-hidden bg-background shadow-sm">
                 <div className="p-4 bg-muted/30 border-b flex-shrink-0">
-                    <h3 className="font-semibold text-sm uppercase tracking-wider">Chức danh nghề nghiệp</h3>
+                    <Heading level="h4" className="font-semibold uppercase tracking-wider">Chức danh nghề nghiệp</Heading>
                 </div>
                 <ScrollArea className="flex-1 w-full">
                     <div className="flex flex-col gap-1 p-3">
@@ -69,7 +70,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                 
                 {/* Add Template Form */}
                 <div className="p-4 bg-muted/10 border-b flex-shrink-0 space-y-3">
-                    <h3 className="font-semibold text-sm">Thêm nhiệm vụ mẫu</h3>
+                    <Heading level="h4" className="font-semibold">Thêm nhiệm vụ mẫu</Heading>
                     <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
                         <div className="flex-1 w-full space-y-1.5">
                             <label className="text-[10px] font-bold text-muted-foreground uppercase">Nội dung nhiệm vụ</label>

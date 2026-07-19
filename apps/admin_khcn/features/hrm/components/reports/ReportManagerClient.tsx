@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Tabs } from "@/components/ui/tabs";
+import { Heading, Text } from "@/components/ui/typography";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Presentation } from "lucide-react";
 import { isThisWeek, isThisMonth, isThisQuarter, isThisYear, parseISO } from "date-fns";
@@ -47,13 +48,13 @@ export function ReportManagerClient() {
     <div className="p-6 md:p-8 min-h-screen bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-3">
+          <Heading level="h1" className="text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <Presentation className="h-8 w-8 text-indigo-600" />
             Quản lý báo cáo công việc
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">
+          </Heading>
+          <Text variant="muted" className="mt-2">
             Tổng hợp và phân tích hiệu suất xử lý công việc theo các mốc thời gian.
-          </p>
+          </Text>
         </div>
       </div>
 

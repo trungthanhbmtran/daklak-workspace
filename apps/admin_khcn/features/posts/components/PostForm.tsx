@@ -30,6 +30,8 @@ import { postsApi } from "../api";
 import { Category } from "../types";
 import dynamic from "next/dynamic";
 import { convertToSlug } from "@/lib/slug";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 const LexicalEditorDynamic = dynamic(
   () => import("./editor/LexicalEditor").then((mod) => mod.LexicalEditor),
@@ -275,8 +277,8 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa nội dung" : "Tạo bài viết mới"}</h1>
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Bản thảo nội dung & cấu hình</p>
+              <Heading level="h1" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa nội dung" : "Tạo bài viết mới"}</Heading>
+              <Text className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Bản thảo nội dung & cấu hình</Text>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -340,8 +342,8 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       <AlertCircle className="h-5 w-5 text-rose-500 mt-0.5" />
                     )}
                     <div>
-                      <p className="text-sm font-bold uppercase tracking-tight">Kiểm duyệt tự động: {postData.autoModerationStatus === 'SAFE' ? 'Hợp lệ' : 'Cảnh báo'}</p>
-                      <p className="text-xs mt-1 opacity-90">{postData.autoModerationNote}</p>
+                      <Text className="font-bold uppercase tracking-tight">Kiểm duyệt tự động: {postData.autoModerationStatus === 'SAFE' ? 'Hợp lệ' : 'Cảnh báo'}</Text>
+                      <Text className="mt-1 opacity-90">{postData.autoModerationNote}</Text>
                     </div>
                   </div>
                 )}
@@ -361,7 +363,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   <TabsContent value="vi" className="space-y-6">
                     <FormField control={form.control} name="title" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="font-semibold">Tiêu đề chính <span className="text-destructive">*</span></FormLabel>
+                        <FormLabel className="font-semibold">Tiêu đề chính <Text as="span" className="text-destructive">*</Text></FormLabel>
                         <FormControl>
                           <Input
                             placeholder="VD: Bí quyết học lập trình hiệu quả..."
@@ -393,7 +395,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute left-3 top-2.5 text-muted-foreground text-sm font-mono">/</span>
+                              <Text as="span" className="absolute left-3 top-2.5 text-muted-foreground font-mono">/</Text>
                               <Input className="font-mono text-sm bg-muted/30 pl-6" {...field} />
                             </div>
                           </FormControl>
@@ -423,7 +425,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <LexicalEditorDynamic key={`vi-wysiwyg-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />
                         )}
                       />
-                      {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
+                      {form.formState.errors.content && <Text className="text-destructive font-medium">{form.formState.errors.content.message}</Text>}
                     </div>
                   </TabsContent>
 
@@ -435,8 +437,8 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                             <Globe className="h-4 w-4 text-blue-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-blue-900">Phiên bản dịch: {lang.name}</p>
-                            <p className="text-xs text-blue-700/70 italic text-[11px]">Nhập nội dung tương ứng cho ngôn ngữ này</p>
+                            <Text className="font-bold text-blue-900">Phiên bản dịch: {lang.name}</Text>
+                            <Text className="text-blue-700/70 italic text-[11px]">Nhập nội dung tương ứng cho ngôn ngữ này</Text>
                           </div>
                         </div>
                         <Button
@@ -549,7 +551,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
                       <ImagePlus className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <span className="text-[13px] font-semibold text-muted-foreground">Tải lên ảnh tiêu đề</span>
+                    <Text as="span" className="text-[13px] font-semibold text-muted-foreground">Tải lên ảnh tiêu đề</Text>
                   </div>
                 )}
               </CardContent>
@@ -586,7 +588,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="f-mode"><Star className={`h-3.5 w-3.5 ${field.value ? 'fill-yellow-400 text-yellow-500' : ''}`} /> Tin nổi bật</Label>
-                        <p className="text-[10px] text-muted-foreground italic">Ghim lên đầu trang chủ</p>
+                        <Text className="text-[10px] text-muted-foreground italic">Ghim lên đầu trang chủ</Text>
                       </div>
                       <Switch id="f-mode" checked={field.value} onCheckedChange={field.onChange} />
                     </div>
@@ -596,7 +598,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="n-mode"><Bell className={`h-3.5 w-3.5 ${field.value ? 'fill-blue-400 text-blue-500' : ''}`} /> Gửi thông báo</Label>
-                        <p className="text-[10px] text-muted-foreground italic">Gửi Notify cho khách hàng</p>
+                        <Text className="text-[10px] text-muted-foreground italic">Gửi Notify cho khách hàng</Text>
                       </div>
                       <Switch id="n-mode" checked={field.value} onCheckedChange={field.onChange} />
                     </div>
@@ -614,18 +616,18 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               <CardContent className="p-5 space-y-4">
                 {isEdit && editId ? (
                   <div className="space-y-4">
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <Text className="text-muted-foreground leading-relaxed">
                       Tùy thuộc vào mục đích sử dụng, hãy sao chép đường dẫn tương ứng dưới đây để gán vào Menu:
-                    </p>
+                    </Text>
 
                     <div className="space-y-3">
                       <div className="border-t pt-3 first:border-0 first:pt-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">
+                        <Text as="span" className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">
                           1. Dạng Trang tĩnh CMS (Giới thiệu, Liên hệ...)
-                        </span>
+                        </Text>
                         <div className="space-y-2">
                           <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-foreground">Tiếng Việt</span>
+                            <Text as="span" className="font-semibold text-foreground">Tiếng Việt</Text>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <code className="text-[11px] font-mono text-muted-foreground break-all">/trang/{currentSlug}</code>
                               <Button
@@ -644,7 +646,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           </div>
 
                           <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-foreground">Tiếng Anh (English)</span>
+                            <Text as="span" className="font-semibold text-foreground">Tiếng Anh (English)</Text>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <code className="text-[11px] font-mono text-muted-foreground break-all">/en/page/{currentEnSlug}</code>
                               <Button
@@ -665,12 +667,12 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       </div>
 
                       <div className="border-t pt-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
+                        <Text as="span" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
                           2. Dạng Tin tức / Bài viết thông thường
-                        </span>
+                        </Text>
                         <div className="space-y-2">
                           <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-foreground">Tiếng Việt</span>
+                            <Text as="span" className="font-semibold text-foreground">Tiếng Việt</Text>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <code className="text-[11px] font-mono text-muted-foreground break-all">/tin-tuc/{currentSlug}</code>
                               <Button
@@ -689,7 +691,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           </div>
 
                           <div className="flex flex-col gap-1 bg-muted p-2 rounded border border-slate-100 text-xs">
-                            <span className="font-semibold text-foreground">Tiếng Anh (English)</span>
+                            <Text as="span" className="font-semibold text-foreground">Tiếng Anh (English)</Text>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
                               <code className="text-[11px] font-mono text-muted-foreground break-all">/en/news/{currentEnSlug}</code>
                               <Button
@@ -711,9 +713,9 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic text-center py-2">
+                  <Text className="text-muted-foreground italic text-center py-2">
                     Đường dẫn liên kết cấu hình Menu sẽ khả dụng sau khi lưu bài viết lần đầu.
-                  </p>
+                  </Text>
                 )}
               </CardContent>
             </Card>
@@ -739,7 +741,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       {tag}
                       <X className="h-3 w-3 cursor-pointer hover:text-red-500" onClick={() => form.setValue("tags", form.getValues("tags").filter(t => t !== tag))} />
                     </Badge>
-                  )) : <p className="text-[11px] text-muted-foreground italic px-1 text-center w-full">Thêm từ khóa để SEO bài viết tốt hơn</p>}
+                  )) : <Text className="text-[11px] text-muted-foreground italic px-1 text-center w-full">Thêm từ khóa để SEO bài viết tốt hơn</Text>}
                 </div>
               </CardContent>
             </Card>

@@ -32,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Heading, Text } from "@/components/ui/typography";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { postsApi } from "../api";
@@ -115,8 +116,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Chuyên mục bài viết</h1>
-            <p className="text-muted-foreground">Quản lý cấu trúc phân cấp các bài viết trên hệ thống.</p>
+            <Heading level="h1" className="font-bold tracking-tight">Chuyên mục bài viết</Heading>
+            <Text className="text-muted-foreground">Quản lý cấu trúc phân cấp các bài viết trên hệ thống.</Text>
           </div>
           <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="mr-2 h-4 w-4" /> Thêm chuyên mục
@@ -186,7 +187,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                             <FileText className="h-4 w-4 mr-1" /> Xem
                           </Button>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">N/A</span>
+                          <Text as="span" variant="small" className="text-slate-400 italic font-normal">N/A</Text>
                         )}
                       </TableCell>
                       <TableCell className="text-sm font-medium text-slate-600">{cat.orderIndex}</TableCell>
@@ -232,15 +233,15 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
         <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 dark:bg-slate-950/20 rounded-b-xl">
           <div className="text-xs font-bold text-slate-400 dark:text-slate-500">
             Hiển thị từ{" "}
-            <span className="text-slate-700 dark:text-slate-300">
+            <Text as="span" className="text-slate-700 dark:text-slate-300 font-normal">
               {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
-            </span>{" "}
+            </Text>{" "}
             đến{" "}
-            <span className="text-slate-700 dark:text-slate-300">
+            <Text as="span" className="text-slate-700 dark:text-slate-300 font-normal">
               {Math.min(page * pageSize, totalItems)}
-            </span>{" "}
+            </Text>{" "}
             trong tổng số{" "}
-            <span className="text-slate-700 dark:text-slate-300">{totalItems}</span>{" "}
+            <Text as="span" className="text-slate-700 dark:text-slate-300 font-normal">{totalItems}</Text>{" "}
             chuyên mục
           </div>
 

@@ -11,6 +11,7 @@ import { CheckCircle2, Search, FileText, UserCheck, Award } from "lucide-react";
 import { hrmKpiEvaluationsApi } from "@/features/hrm/api/kpis.api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Heading, Text } from "@/components/ui/typography";
 
 export function ReviewKpiClient() {
   const [selectedEvalId, setSelectedEvalId] = useState<number | null>(null);
@@ -79,12 +80,12 @@ export function ReviewKpiClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Duyệt KPI Nhân viên
-          </h2>
-          <p className="text-muted-foreground mt-2">
-            Danh sách các phiếu đánh giá KPI đang chờ Lãnh đạo nghiệm thu
-          </p>
+          <Heading level="h1">
+            Duyệt Đánh Giá KPI
+          </Heading>
+          <Text variant="muted" className="mt-2">
+            Danh sách phiếu đánh giá đang chờ phê duyệt.
+          </Text>
         </div>
       </div>
 
@@ -139,7 +140,9 @@ export function ReviewKpiClient() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Award className="w-6 h-6 text-primary" />
-              Chấm điểm chính thức: <span className="text-primary">{evalDetail?.employee?.fullName || evalDetail?.employeeCode}</span>
+              <CardDescription className="text-sm">
+                Chấm điểm chính thức: <Text as="span" className="text-primary">{evalDetail?.employee?.fullName || evalDetail?.employeeCode}</Text>
+              </CardDescription>
             </DialogTitle>
           </DialogHeader>
 
@@ -167,22 +170,22 @@ export function ReviewKpiClient() {
                         <TableRow key={idx} className="hover:bg-muted/50">
                           <TableCell>
                             <div className="font-semibold">{detail.criteriaName}</div>
-                            <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{detail.description}</div>
+                            <Text variant="small" className="text-[11px] text-muted-foreground mt-1 line-clamp-2 font-normal">{detail.description}</Text>
                             {isAuto && <Badge variant="secondary" className="mt-2">Tự động (Máy tính)</Badge>}
                             {detail.scoringMethod === 'INTEGRATION_API' && <Badge variant="destructive" className="mt-2 bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">Liên thông (LGSP)</Badge>}
                           </TableCell>
                           <TableCell className="text-center font-bold text-muted-foreground">{detail.baseScore}</TableCell>
                           
                           <TableCell>
-                            <div className="text-xs bg-background p-3 rounded-md border min-h-[60px] whitespace-pre-wrap leading-relaxed shadow-sm">
-                              {detail.notes || <span className="text-muted-foreground italic">Không có giải trình</span>}
-                            </div>
+                            <Text variant="small" className="bg-background p-3 rounded-md border min-h-[60px] whitespace-pre-wrap leading-relaxed shadow-sm font-normal block">
+                              {detail.notes || <Text as="span" variant="small" className="text-muted-foreground italic font-normal">Không có giải trình</Text>}
+                            </Text>
                           </TableCell>
 
                           <TableCell className="text-center">
-                            <span className="text-lg font-bold px-3 py-1 rounded-md text-primary bg-primary/10">
-                              {detail.selfScore ?? 0}
-                            </span>
+                            <Text as="span" weight="bold" className="px-3 py-1 rounded-md text-primary bg-primary/10">
+                              {detail.selfScore || 0}
+                            </Text>
                           </TableCell>
 
                           <TableCell className="text-center border-l bg-muted/30">
@@ -206,10 +209,10 @@ export function ReviewKpiClient() {
               {/* Chi tiết Task */}
               {evalDetail.tasks && evalDetail.tasks.length > 0 && (
                 <div className="border rounded-xl overflow-hidden">
-                  <div className="bg-muted/50 p-3 border-b font-bold text-sm flex items-center gap-2">
+                  <Text variant="small" weight="bold" className="bg-muted/50 p-3 border-b flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-primary" />
                     Bảng đối chiếu Công việc (Dùng cho Tiêu chí Tự động)
-                  </div>
+                  </Text>
                   <Table>
                     <TableHeader>
                       <TableRow>

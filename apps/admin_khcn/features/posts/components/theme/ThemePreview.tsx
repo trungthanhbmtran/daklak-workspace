@@ -4,6 +4,8 @@ import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function ThemePreview() {
   // Lấy thêm trạng thái thiết bị previewDevice từ Context toàn cục
@@ -102,13 +104,13 @@ export function ThemePreview() {
             <div className={`w-5 h-5 rounded-lg ${colors.bgPrimary} flex items-center justify-center text-white font-bold text-[10px] transition-colors duration-200`}>
               Ω
             </div>
-            <span className="font-bold text-xs tracking-tight">Portal</span>
+            <Text as="span" className="font-bold tracking-tight">Portal</Text>
           </div>
           {/* Ẩn bớt menu điều hướng khi màn hình là Mobile để chuẩn UI/UX */}
           {previewDevice !== "mobile" && (
             <nav className="flex items-center gap-4 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-              <span className={`${colors.textPrimary} font-semibold cursor-pointer`}>Tổng quan</span>
-              <span className="hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Bài viết</span>
+              <Text as="span" className={`${colors.textPrimary} font-semibold cursor-pointer`}>Tổng quan</Text>
+              <Text as="span" className="hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Bài viết</Text>
             </nav>
           )}
           <div className="flex items-center gap-2">
@@ -124,8 +126,8 @@ export function ThemePreview() {
           {/* Banner Thông báo */}
           <div className={`p-4 bg-gradient-to-r ${colors.gradient} text-white shadow-sm ${getRadiusClass()} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all duration-200`}>
             <div className="space-y-0.5">
-              <h4 className="font-bold text-xs">🎉 Phiên bản CMS 5.0!</h4>
-              <p className="text-[11px] text-slate-100 font-light">Tối ưu render vượt trội bằng Core mới.</p>
+              <Heading level="h4" className="font-bold">🎉 Phiên bản CMS 5.0!</Heading>
+              <Text className="text-[11px] text-slate-100 font-light">Tối ưu render vượt trội bằng Core mới.</Text>
             </div>
             <Button className="h-6 px-2.5 bg-white text-slate-900 text-[10px] font-bold rounded shadow-sm whitespace-nowrap hover:bg-slate-50 transition-colors">
               Cập nhật
@@ -140,10 +142,10 @@ export function ThemePreview() {
               { title: "Bình luận", value: "9", trend: "-2.1%", isPositive: false }
             ].map((stat, idx) => (
               <div key={idx} className={`p-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-200 ${getRadiusClass()}`}>
-                <span className="text-[11px] text-slate-400 font-medium">{stat.title}</span>
+                <Text as="span" className="text-[11px] text-slate-400 font-medium">{stat.title}</Text>
                 <div className="flex items-baseline justify-between mt-0.5">
-                  <span className="text-base font-bold tracking-tight">{stat.value}</span>
-                  <span className={`text-[10px] font-bold ${stat.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>{stat.trend}</span>
+                  <Text as="span" className="font-bold tracking-tight">{stat.value}</Text>
+                  <Text as="span" className={`text-[10px] font-bold ${stat.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>{stat.trend}</Text>
                 </div>
               </div>
             ))}
@@ -152,8 +154,8 @@ export function ThemePreview() {
           {/* Khu vực Danh sách bài viết mẫu */}
           <div className={`bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all duration-200 ${getRadiusClass()}`}>
             <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Bài viết gần đây</span>
-              <span className={`text-[10px] ${colors.textPrimary} font-medium hover:underline cursor-pointer`}>Tất cả</span>
+              <Text as="span" className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Bài viết gần đây</Text>
+              <Text as="span" className={`text-[10px] ${colors.textPrimary} font-medium hover:underline cursor-pointer`}>Tất cả</Text>
             </div>
 
             <div className="divide-y divide-slate-100 dark:divide-slate-900">
@@ -163,10 +165,10 @@ export function ThemePreview() {
               ].map((post, i) => (
                 <div key={i} className="p-3 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors">
                   <div className="space-y-0.5 max-w-[80%]">
-                    <h5 className={`text-xs font-semibold line-clamp-1 hover:${colors.textPrimary} cursor-pointer`}>{post.title}</h5>
-                    <p className="text-[10px] text-slate-400">{post.author} • {post.date}</p>
+                    <Heading level="h4" className={` font-semibold line-clamp-1 hover:${colors.textPrimary} cursor-pointer`}>{post.title}</Heading>
+                    <Text className="text-[10px] text-slate-400">{post.author} • {post.date}</Text>
                   </div>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <Text as="span" className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTaskComments, useAddComment } from "../../hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/typography";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2 } from "lucide-react";
@@ -53,12 +54,12 @@ export function TaskDiscussionTab({ taskId, allowedActions }: { taskId: number; 
               </div>
               <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="font-medium text-sm">{comment.authorName || comment.user?.fullName || "Người dùng"}</span>
-                  <span className="text-xs text-slate-500">
-                    {safeFormatDate(comment.createdAt, "dd/MM HH:mm")}
-                  </span>
+                  <Text as="span" variant="small" weight="medium">{comment.authorName || comment.user?.fullName || "Người dùng"}</Text>
+                  <Text as="span" className="text-slate-500">
+                    {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
+                  </Text>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+                <Text variant="small" className="whitespace-pre-wrap font-normal">{comment.content}</Text>
               </div>
             </div>
           ))

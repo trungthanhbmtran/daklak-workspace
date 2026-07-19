@@ -11,6 +11,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
+import { Heading, Text } from "@/components/ui/typography";
 
 import { bannerSchema } from "../schemas";
 import { postsApi } from "../api";
@@ -175,7 +176,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Đang tải dữ liệu banner...</span>
+        <Text as="span" className="ml-3 text-muted-foreground font-normal">Đang tải dữ liệu banner...</Text>
       </div>
     );
   }
@@ -190,8 +191,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h2 className="text-xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa Banner" : "Thêm Banner mới"}</h2>
-            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Cấu hình trình chiếu & liên kết</p>
+            <Heading level="h2" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa Banner" : "Thêm Banner mới"}</Heading>
+            <Text variant="small" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Cấu hình trình chiếu & liên kết</Text>
           </div>
         </div>
         <div className="flex items-center gap-3">

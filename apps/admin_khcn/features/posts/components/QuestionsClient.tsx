@@ -40,6 +40,8 @@ import {
   Mail,
   HelpCircle,
 } from "lucide-react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 // ─── Pure UI ──────────────────────────────────────────────────────────────────
 
@@ -121,22 +123,22 @@ const AnswerDialog = React.memo(function AnswerDialog({
             <div className="grid grid-cols-2 gap-3 p-3 bg-muted/40 rounded-lg border text-sm">
               <div className="flex items-center gap-2 text-foreground">
                 <User className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="font-semibold mr-1">Người gửi:</span>
+                <Text as="span" className="font-semibold mr-1">Người gửi:</Text>
                 {question.askedByName}
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="font-semibold mr-1">SĐT:</span>
+                <Text as="span" className="font-semibold mr-1">SĐT:</Text>
                 {question.askedByPhone || "N/A"}
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="font-semibold mr-1">Email:</span>
+                <Text as="span" className="font-semibold mr-1">Email:</Text>
                 {question.askedByEmail || "N/A"}
               </div>
               <div className="flex items-center gap-2 text-foreground">
                 <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="font-semibold mr-1">Địa chỉ:</span>
+                <Text as="span" className="font-semibold mr-1">Địa chỉ:</Text>
                 {question.address || "N/A"}
               </div>
             </div>
@@ -145,10 +147,10 @@ const AnswerDialog = React.memo(function AnswerDialog({
 
             {/* Question content */}
             <div>
-              <p className="text-sm font-bold mb-2">Nội dung câu hỏi:</p>
+              <Text className="font-bold mb-2">Nội dung câu hỏi:</Text>
               <div className="p-4 rounded-xl border bg-blue-50/30 dark:bg-blue-950/10 border-blue-100 dark:border-blue-900">
-                <p className="font-semibold text-sm mb-1">{question.title}</p>
-                <p className="text-sm italic text-foreground/80">{question.content}</p>
+                <Text className="font-semibold mb-1">{question.title}</Text>
+                <Text className="italic text-foreground/80">{question.content}</Text>
               </div>
             </div>
 
@@ -227,19 +229,19 @@ const QuestionRow = React.memo(function QuestionRow({
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-medium">{question.askedByName}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <Text className="font-medium">{question.askedByName}</Text>
+            <Text className="text-muted-foreground mt-0.5">
               {question.askedByPhone || question.askedByEmail}
-            </p>
+            </Text>
           </div>
         </div>
       </TableCell>
 
       <TableCell className="max-w-sm">
-        <p className="text-sm font-semibold line-clamp-1">{question.title}</p>
-        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 italic">
+        <Text className="font-semibold line-clamp-1">{question.title}</Text>
+        <Text className="text-muted-foreground line-clamp-2 mt-0.5 italic">
           "{question.content}"
-        </p>
+        </Text>
       </TableCell>
 
       <TableCell>
@@ -254,10 +256,10 @@ const QuestionRow = React.memo(function QuestionRow({
       </TableCell>
 
       <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-        <span className="flex items-center gap-1">
+        <Text as="span" className="flex items-center gap-1">
           <Calendar className="w-3 h-3" />
           {new Date(question.createdAt).toLocaleDateString("vi-VN")}
-        </span>
+        </Text>
       </TableCell>
 
       <TableCell className="text-right">
@@ -319,9 +321,9 @@ const QuestionsTable = React.memo(function QuestionsTable({
                     <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                       <Check className="w-6 h-6 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <Text className="text-muted-foreground">
                       Tuyệt vời! Hệ thống không có câu hỏi nào chưa xử lý.
-                    </p>
+                    </Text>
                   </div>
                 </TableCell>
               </TableRow>
@@ -370,10 +372,10 @@ export function QuestionsClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Hỏi đáp công dân</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <Heading level="h1" className="font-bold tracking-tight">Hỏi đáp công dân</Heading>
+          <Text className="text-muted-foreground mt-1">
             Hệ thống tiếp nhận và trả lời ý kiến, vướng mắc của người dân
-          </p>
+          </Text>
         </div>
         {pendingCount > 0 && (
           <Badge variant="secondary" className="px-3 py-1 text-sm">

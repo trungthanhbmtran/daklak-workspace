@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useUpdateStatus, useAddComment } from "../../hooks/useTasks";
 import { HrmTask } from "../../types/task";
 import { Button } from "@/components/ui/button";
+import { Heading, Text } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, Clock, Loader2 } from "lucide-react";
@@ -79,7 +80,7 @@ export function TaskProcessingTab({
       {/* Nhiệm vụ con */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="font-medium text-sm">Nhiệm vụ con (Phân rã công việc)</h3>
+          <Heading level="h4" className="font-medium">Nhiệm vụ con (Phân rã công việc)</Heading>
           {currentTask.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
             <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
               + Tạo nhiệm vụ con
@@ -109,20 +110,20 @@ export function TaskProcessingTab({
                     </p>
                     <div className="flex items-center gap-3 mt-1">
                       {subTask.dueDate && (
-                        <p className="text-xs text-slate-500 flex items-center">
+                        <Text variant="small" className="text-slate-500 flex items-center font-normal">
                           <Clock className="w-3 h-3 mr-1" />
                           Hạn: {safeFormatDate(subTask.dueDate, "dd/MM/yyyy")}
-                        </p>
+                        </Text>
                       )}
                       {(subTask.assignee || subTask.assigneeDepartment) && (
-                        <p className="text-xs text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full">
+                        <Text variant="small" className="text-blue-600 flex items-center bg-blue-50 px-2 py-0.5 rounded-full font-normal">
                           {subTask.assigneeDepartment ? "🏢 " + subTask.assigneeDepartment.name : "👤 " + subTask.assignee?.fullName}
-                        </p>
+                        </Text>
                       )}
                       {subTask.status?.toUpperCase() !== "COMPLETED" && subTask.progress !== undefined && (
-                        <p className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium">
+                        <Text variant="small" weight="medium" className="text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
                           Tiến độ: {subTask.progress}%
-                        </p>
+                        </Text>
                       )}
                     </div>
                   </div>
@@ -131,16 +132,16 @@ export function TaskProcessingTab({
             ))}
           </div>
         ) : (
-          <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
+          <Text variant="small" className="text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50 font-normal">
             Chưa có nhiệm vụ con nào.
-          </div>
+          </Text>
         )}
       </div>
 
       {/* Bước thực hiện */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="font-medium text-sm">Các bước thực hiện (Checklist nội bộ)</h3>
+          <Heading level="h4" className="font-medium">Các bước thực hiện (Checklist nội bộ)</Heading>
           {currentTask.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
             <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
               + Thêm bước
@@ -174,14 +175,14 @@ export function TaskProcessingTab({
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       {step.assigneeName && (
-                        <span className="text-[11px] text-slate-500 flex items-center">
+                        <Text as="span" className="text-[11px] text-slate-500 flex items-center font-normal">
                           👤 {step.assigneeName}
-                        </span>
+                        </Text>
                       )}
                       {step.baseScore > 0 && (
-                        <span className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded font-medium">
+                        <Text as="span" weight="medium" className="text-[11px] text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded">
                           +{step.baseScore} điểm KPI
-                        </span>
+                        </Text>
                       )}
                     </div>
                   </div>
@@ -190,28 +191,28 @@ export function TaskProcessingTab({
             ))}
           </div>
         ) : (
-          <div className="text-sm text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50">
+          <Text variant="small" className="text-slate-500 italic p-4 border border-dashed rounded-md text-center bg-slate-50 font-normal block">
             Chưa có kế hoạch chi tiết (Các bước thực hiện nội bộ).
-          </div>
+          </Text>
         )}
       </div>
 
       {/* Cập nhật tiến độ */}
       {!isCompleted && (
         <div className="space-y-4 bg-white p-4 rounded-lg border">
-          <h3 className="font-medium text-sm">Báo cáo & Cập nhật</h3>
+          <Heading level="h4" className="font-medium">Báo cáo & Cập nhật</Heading>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-slate-500">
               <span>Tiến độ hiện tại (Tự động đánh giá)</span>
-              <span className="font-semibold text-blue-600">{currentTask.progress ?? 0}%</span>
+              <Text as="span" weight="bold" className="text-blue-600">{currentTask.progress ?? 0}%</Text>
             </div>
             <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
               <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${currentTask.progress ?? 0}%` }} />
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">
+            <Text variant="small" className="text-[10px] text-slate-400 mt-1 font-normal">
               Tiến độ được hệ thống tự động tính toán dựa trên mức độ hoàn thành của các Bước thực hiện và Nhiệm vụ con.
-            </p>
+            </Text>
           </div>
 
           <Textarea
@@ -247,8 +248,8 @@ export function TaskProcessingTab({
 
       {/* Tài liệu đính kèm */}
       <div className="space-y-2">
-        <h3 className="font-medium text-sm text-slate-500">Tài liệu đính kèm</h3>
-        <div className="text-sm text-slate-500 italic">Chưa có tài liệu nào</div>
+        <Heading level="h4" className="font-medium text-slate-500">Tài liệu đính kèm</Heading>
+        <Text variant="small" className="text-slate-500 italic font-normal">Chưa có tài liệu nào</Text>
       </div>
 
       <CreateTaskDialog

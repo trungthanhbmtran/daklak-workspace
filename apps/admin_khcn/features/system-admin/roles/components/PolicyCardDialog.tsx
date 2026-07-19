@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FormLabel } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Text } from "@/components/ui/typography";
 
 import { Permission, Policy } from "../types";
 import { usePolicyHandlers } from "../hooks/usePolicyHandlers";
@@ -41,15 +42,15 @@ export default function PolicyCardDialog({ resourceName, perms, form }: PolicyCa
       <DialogTrigger asChild>
         <div className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group min-h-[100px]">
           <div className="flex items-start justify-between gap-2">
-            <span className="font-bold text-[13px] flex items-center gap-2 leading-tight">
+            <Text variant="small" weight="bold" className="flex items-center gap-2 leading-tight">
               <CheckCircle2
                 className={`h-4 w-4 shrink-0 ${hasPolicies ? "text-primary" : "text-muted-foreground opacity-40"}`}
               />
               <span className="line-clamp-2">{resourceName}</span>
-            </span>
-            <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60 shrink-0 bg-muted/50 px-1.5 py-0.5 rounded">
+            </Text>
+            <Text as="code" variant="code" className="text-[9px] text-muted-foreground uppercase opacity-60 shrink-0 px-1.5 py-0.5 bg-muted/50 rounded">
               {resourceCode}
-            </code>
+            </Text>
           </div>
 
           <div className="flex flex-wrap gap-1.5 items-center pr-8 mt-auto">
@@ -68,9 +69,9 @@ export default function PolicyCardDialog({ resourceName, perms, form }: PolicyCa
                 </Badge>
               ))
             ) : (
-              <span className="text-[11px] text-muted-foreground/60 italic">
+              <Text variant="small" className="text-muted-foreground/60 italic">
                 Chưa cấu hình chính sách...
-              </span>
+              </Text>
             )}
           </div>
 

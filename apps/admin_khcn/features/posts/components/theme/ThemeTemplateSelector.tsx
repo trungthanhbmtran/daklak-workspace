@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface ColorOption {
   id: string;
@@ -38,8 +40,8 @@ export function ThemeTemplateSelector() {
                 }`}
             >
               {/* Vòng tròn màu sắc đại diện */}
-              <span className={`w-4 h-4 rounded-full shrink-0 ${item.colorClass} shadow-sm`} />
-              <span className="truncate">{item.name}</span>
+              <Text as="span" className={`w-4 h-4 rounded-full shrink-0 ${item.colorClass} shadow-sm`} />
+              <Text as="span" className="truncate">{item.name}</Text>
             </button>
           );
         })}

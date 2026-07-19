@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Text } from "@/components/ui/typography";
 
 import { Role, Permission } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
@@ -129,7 +130,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
     return (
       <Card className="flex-1 w-full min-h-0 shadow-sm border-border flex flex-col items-center justify-center p-12 text-center rounded-xl bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
-        <p className="text-sm font-medium">Đang tải dữ liệu vai trò...</p>
+        <Text weight="medium">Đang tải dữ liệu vai trò...</Text>
       </Card>
     );
   }
@@ -147,7 +148,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
               {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${roleDetail?.name}`}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Mô hình phân quyền:</span>
+              <Text variant="small" className="text-muted-foreground uppercase tracking-tight">Mô hình phân quyền:</Text>
               <Badge variant="outline" className="text-[9px] h-4 font-mono uppercase bg-background border-primary/50 text-primary">PBAC</Badge>
             </div>
           </div>
@@ -165,9 +166,9 @@ export function RoleForm({ roleId }: RoleFormProps) {
 
             {/* 1. THÔNG TIN ĐỊNH DANH */}
             <div className="p-6 space-y-5">
-              <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+              <Text variant="small" className="flex items-center gap-2 text-muted-foreground uppercase tracking-widest">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 1. Định danh vai trò
-              </div>
+              </Text>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
@@ -209,9 +210,9 @@ export function RoleForm({ roleId }: RoleFormProps) {
             {/* 2. CHÍNH SÁCH TRUY CẬP (POLICIES) */}
             <div className="p-6 space-y-6 bg-muted/5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                <Text variant="small" className="flex items-center gap-2 text-muted-foreground uppercase tracking-widest">
                   <Lock className="h-3.5 w-3.5 text-primary" /> 2. Chính sách truy cập tài nguyên (Policies)
-                </div>
+                </Text>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background">
                   Đã cấu hình: {form.watch("policies").length} chính sách
                 </Badge>

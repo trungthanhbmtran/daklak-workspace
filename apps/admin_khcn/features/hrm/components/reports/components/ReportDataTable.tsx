@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -54,9 +55,9 @@ export const ReportDataTable = React.memo(function ReportDataTable({ isLoading, 
             ))}
           </div>
         ) : tasks.length === 0 ? (
-          <div className="py-20 text-center text-slate-500 dark:text-slate-400">
+          <Text className="py-20 text-center text-slate-500 dark:text-slate-400 block">
             Không có dữ liệu công việc trong kỳ báo cáo này.
-          </div>
+          </Text>
         ) : (
           <Table>
             <TableHeader>
@@ -74,11 +75,11 @@ export const ReportDataTable = React.memo(function ReportDataTable({ isLoading, 
                 const assigneeName = assignee?.employee?.fullName || assignee?.employeeCode || "Chưa phân công";
                 const isCompleted = task.status === 'COMPLETED' || task.progress === 100;
                 
-                let statusBadge = <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-medium">Chờ xử lý</span>;
+                let statusBadge = <Text as="span" variant="small" weight="medium" className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded">Chờ xử lý</Text>;
                 if (isCompleted) {
-                  statusBadge = <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs font-medium">Hoàn thành</span>;
+                  statusBadge = <Text as="span" variant="small" weight="medium" className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded">Hoàn thành</Text>;
                 } else if (task.status === 'IN_PROGRESS') {
-                  statusBadge = <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">Đang xử lý</span>;
+                  statusBadge = <Text as="span" variant="small" weight="medium" className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Đang xử lý</Text>;
                 }
 
                 return (
@@ -95,7 +96,7 @@ export const ReportDataTable = React.memo(function ReportDataTable({ isLoading, 
                             style={{ width: `${task.progress || 0}%` }}
                           />
                         </div>
-                        <span className="text-xs font-medium text-slate-500">{task.progress || 0}%</span>
+                        <Text as="span" variant="small" weight="medium" className="text-slate-500">{task.progress || 0}%</Text>
                       </div>
                     </TableCell>
                     <TableCell className="text-slate-500 text-sm">

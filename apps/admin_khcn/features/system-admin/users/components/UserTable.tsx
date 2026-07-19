@@ -10,6 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Text } from "@/components/ui/typography";
 import type { UserItem } from "../types";
 
 // ─── UserRow — memoized ───────────────────────────────────────────────────────
@@ -88,10 +89,10 @@ export const UserTable = React.memo(function UserTable({
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-40 text-center">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <Text variant="muted" className="flex flex-col items-center justify-center">
                     <Loader2 className="h-7 w-7 animate-spin mx-auto mb-3 text-primary" />
                     Đang tải...
-                  </div>
+                  </Text>
                 </TableCell>
               </TableRow>
             ) : isError ? (
@@ -107,10 +108,10 @@ export const UserTable = React.memo(function UserTable({
             ) : (
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Text variant="muted" className="flex flex-col items-center gap-2">
                     <UserIcon className="h-9 w-9 opacity-40" />
-                    <p className="text-sm">Không có người dùng nào.</p>
-                  </div>
+                    <span>Không có người dùng nào.</span>
+                  </Text>
                 </TableCell>
               </TableRow>
             )}
@@ -122,16 +123,16 @@ export const UserTable = React.memo(function UserTable({
       {/* Pagination */}
       {!isLoading && !isError && total > 0 && (
         <div className="flex items-center justify-between px-4 py-2.5 border-t bg-muted/20 shrink-0">
-          <span className="text-xs text-muted-foreground">
+          <Text as="span" variant="small" className="text-muted-foreground">
             {start}–{end} / {total} người dùng
-          </span>
+          </Text>
           <div className="flex items-center gap-1">
             <Button variant="outline" size="icon" className="h-7 w-7" disabled={page <= 1} onClick={handlePrev}>
               <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
-            <span className="text-xs font-medium px-2 min-w-[60px] text-center">
+            <Text as="span" variant="small" weight="medium" className="px-2 min-w-[60px] text-center">
               {page} / {totalPages}
-            </span>
+            </Text>
             <Button variant="outline" size="icon" className="h-7 w-7" disabled={page >= totalPages} onClick={handleNext}>
               <ChevronRight className="h-3.5 w-3.5" />
             </Button>

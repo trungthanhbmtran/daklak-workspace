@@ -15,6 +15,7 @@ import { TypographyConfig } from "./theme/TypographyConfig";
 import { LayoutConfig } from "./theme/LayoutConfig";
 import { BrandingConfig } from "./theme/BrandingConfig";
 import { AdvancedCssEditor } from "./theme/AdvancedCssEditor";
+import { Heading, Text } from "@/components/ui/typography";
 
 export function AppearanceClient() {
     const [activeTab, setActiveTab] = useState<"library" | "customize" | "advanced">("customize");
@@ -26,16 +27,16 @@ export function AppearanceClient() {
                 {/* 1. TOP HEADER BAR (Chuẩn CMS: Tách biệt tiêu đề và thanh action cố định) */}
                 <div className="shrink-0 max-w-7xl w-full mx-auto flex flex-col md:flex-row md:items-center md:justify-between pb-6 mb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight">Quản lý Giao diện</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            Cấu hình, tùy chỉnh thiết kế hệ thống và quản lý kho giao diện CMS của bạn.
-                        </p>
+                        <Heading level="h2" className="font-bold tracking-tight">Quản lý Giao diện</Heading>
+                        <Text variant="small" className="text-slate-500 dark:text-slate-400 mt-1 font-normal">
+                            Tùy chỉnh diện mạo, màu sắc, font chữ và nhận diện thương hiệu cho CMS.
+                        </Text>
                     </div>
                     {/* Nút hành động chính (Save/Publish) */}
                     <div className="flex items-center gap-3 self-end md:self-center">
-                        <span className="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
-                            Có thay đổi chưa lưu
-                        </span>
+                        <Text as="span" className="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 font-medium text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
+                            Beta
+                        </Text>
                         <ThemeSaveButton />
                     </div>
                 </div>
@@ -82,32 +83,32 @@ export function AppearanceClient() {
                                     <div className="space-y-6 animate-in fade-in duration-300">
                                         {/* Phân đoạn 1: Theme Mode cơ bản */}
                                         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Chế độ hiển thị</h3>
+                                            <Heading level="h4" className="font-bold uppercase tracking-wider text-slate-400">Chế độ hiển thị</Heading>
                                             <ThemeSelector />
                                         </div>
 
                                         {/* Phân đoạn 2: Cấu hình Màu sắc chủ đạo & Template */}
                                         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Bảng màu hệ thống</h3>
+                                            <Heading level="h4" className="font-bold uppercase tracking-wider text-slate-400">Bảng màu hệ thống</Heading>
                                             <ThemeTemplateSelector />
                                             <ThemeStageSelector />
                                         </div>
 
                                         {/* Phân đoạn 3: Typography & Fonts (Tính năng CMS lớn) */}
                                         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Font chữ & Định dạng</h3>
+                                            <Heading level="h4" className="font-bold uppercase tracking-wider text-slate-400">Font chữ & Định dạng</Heading>
                                             <TypographyConfig />
                                         </div>
 
                                         {/* Phân đoạn 4: Layout & Components Style (Tính năng CMS lớn) */}
                                         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Bố cục & Bo góc (Radius)</h3>
+                                            <Heading level="h4" className="font-bold uppercase tracking-wider text-slate-400">Bố cục & Bo góc (Radius)</Heading>
                                             <LayoutConfig />
                                         </div>
 
                                         {/* Phân đoạn 5: Nhận diện thương hiệu (Logo & Favicon) */}
                                         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Nhận diện thương hiệu</h3>
+                                            <Heading level="h4" className="font-bold uppercase tracking-wider text-slate-400">Nhận diện thương hiệu</Heading>
                                             <BrandingConfig />
                                         </div>
                                     </div>
@@ -115,8 +116,8 @@ export function AppearanceClient() {
 
                                 {activeTab === "advanced" && (
                                     <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 animate-in slide-in-from-bottom-4 duration-300">
-                                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Custom CSS / Tùy biến mã</h3>
-                                        <p className="text-xs text-slate-500">Thêm mã CSS tùy chỉnh để ghi đè giao diện mặc định của hệ thống CMS.</p>
+                                        <Heading level="h4" className="font-bold uppercase tracking-wider text-slate-400">Custom CSS / Tùy biến mã</Heading>
+                                        <Text variant="small" className="text-slate-500 font-normal">Thêm mã CSS tùy chỉnh để ghi đè giao diện mặc định của hệ thống CMS.</Text>
                                         <AdvancedCssEditor />
                                     </div>
                                 )}
@@ -125,10 +126,10 @@ export function AppearanceClient() {
                             {/* CỘT PHẢI: REAL-TIME LIVE PREVIEW (Chiếm 7/12 cột) */}
                             <div className="lg:col-span-7 h-full flex flex-col space-y-3 pb-2">
                                 <div className="shrink-0 flex items-center justify-between px-2">
-                                    <span className="text-xs font-semibold text-slate-400 flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <Text as="span" className="font-semibold text-slate-400 flex items-center gap-2">
+                                        <Text as="span" className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></Text>
                                         Xem trước thời gian thực
-                                    </span>
+                                    </Text>
                                     {/* Giả lập đổi kích thước màn hình để test Responsive */}
                                     <div className="flex items-center gap-1 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-lg text-xs">
                                         <button className="px-2 py-1 rounded bg-white dark:bg-slate-700 shadow-sm">Desktop</button>

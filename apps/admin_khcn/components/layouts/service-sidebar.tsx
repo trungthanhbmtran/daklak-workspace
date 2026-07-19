@@ -17,6 +17,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Text } from "@/components/ui/typography";
 
 import { useServiceMenus } from "@/hooks/useServiceMenus";
 
@@ -40,9 +41,9 @@ export function AppSidebar({
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   {isLoading ? <Loader2 className="size-4 animate-spin" /> : <ServiceIcon className="size-4" />}
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{isLoading ? "Đang tải..." : serviceName}</span>
-                  <span className="truncate text-xs text-muted-foreground">Sở KH&CN Đắk Lắk</span>
+                <div className="grid flex-1 text-left leading-tight">
+                  <Text weight="semibold" className="truncate">{isLoading ? "Đang tải..." : serviceName}</Text>
+                  <Text variant="muted" className="truncate">Sở KH&CN Đắk Lắk</Text>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -79,9 +80,9 @@ export function AppSidebar({
           <SidebarMenu>
             {isLoading ? (
               <SidebarMenuItem>
-                <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground">
+                <Text variant="muted" className="flex items-center gap-2 px-2 py-2">
                   <Loader2 className="size-4 animate-spin" /> Đang tải menu...
-                </div>
+                </Text>
               </SidebarMenuItem>
             ) : (
               items.map((item) => {
@@ -116,11 +117,11 @@ export function AppSidebar({
           </SidebarMenuItem>
           <SidebarMenuItem>
             {/* class "group-data-[collapsible=icon]:hidden" giúp dòng chữ này tự biến mất khi Sidebar thu gọn thành icon */}
-            <div className="flex items-center gap-2 px-2 py-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
+            <div className="flex items-center gap-2 px-2 py-2 group-data-[collapsible=icon]:hidden text-muted-foreground">
               <Info className="size-4 shrink-0" />
               <div className="grid flex-1 text-left leading-tight">
-                <span className="font-medium">Phiên bản 1.0.0</span>
-                <span className="text-[10px]">© 2026 Admin Module</span>
+                <Text weight="medium">Phiên bản 1.0.0</Text>
+                <Text variant="small">© 2026 Admin Module</Text>
               </div>
             </div>
           </SidebarMenuItem>

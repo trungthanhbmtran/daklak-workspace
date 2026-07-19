@@ -16,6 +16,8 @@ import {
 } from "./banner-helpers";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { toast } from "sonner";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface SloganCustomizerProps {
   customStyles: any;
@@ -73,7 +75,7 @@ export function SloganCustomizer({
                   style={{ background: `linear-gradient(to right, ${preset.bgGradientStart}, ${preset.bgGradientMiddle || preset.bgGradientStart}, ${preset.bgGradientEnd})` }}
                   className="w-full h-3 rounded border border-black/10"
                 />
-                <span>{preset.name}</span>
+                <Text as="span">{preset.name}</Text>
               </button>
             ))}
           </div>
@@ -167,21 +169,21 @@ export function SloganCustomizer({
                     <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Màu sắc dốc phía dưới hoa văn (Gradient Colors)</Label>
                     <div className="grid grid-cols-3 gap-2 mt-1.5">
                       <div>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase">Bắt đầu</span>
+                        <Text as="span" className="text-[9px] text-slate-400 font-bold uppercase">Bắt đầu</Text>
                         <div className="flex gap-1 mt-0.5">
                           <Input type="color" value={customStyles.bgGradientStart || "#990000"} onChange={(e) => updateStyle("bgGradientStart", e.target.value)} className="w-8 h-8 p-0 border-none rounded cursor-pointer" />
                           <Input type="text" value={customStyles.bgGradientStart || "#990000"} onChange={(e) => updateStyle("bgGradientStart", e.target.value)} className="font-mono text-[9px] uppercase h-8 px-1" />
                         </div>
                       </div>
                       <div>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase">Giữa</span>
+                        <Text as="span" className="text-[9px] text-slate-400 font-bold uppercase">Giữa</Text>
                         <div className="flex gap-1 mt-0.5">
                           <Input type="color" value={customStyles.bgGradientMiddle || "#cc0000"} onChange={(e) => updateStyle("bgGradientMiddle", e.target.value)} className="w-8 h-8 p-0 border-none rounded cursor-pointer" />
                           <Input type="text" value={customStyles.bgGradientMiddle || "#cc0000"} onChange={(e) => updateStyle("bgGradientMiddle", e.target.value)} className="font-mono text-[9px] uppercase h-8 px-1" />
                         </div>
                       </div>
                       <div>
-                        <span className="text-[9px] text-slate-400 font-bold uppercase">Kết thúc</span>
+                        <Text as="span" className="text-[9px] text-slate-400 font-bold uppercase">Kết thúc</Text>
                         <div className="flex gap-1 mt-0.5">
                           <Input type="color" value={customStyles.bgGradientEnd || "#800000"} onChange={(e) => updateStyle("bgGradientEnd", e.target.value)} className="w-8 h-8 p-0 border-none rounded cursor-pointer" />
                           <Input type="text" value={customStyles.bgGradientEnd || "#800000"} onChange={(e) => updateStyle("bgGradientEnd", e.target.value)} className="font-mono text-[9px] uppercase h-8 px-1" />
@@ -220,8 +222,8 @@ export function SloganCustomizer({
                         className="h-24 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
                       >
                         <Upload className="w-5 h-5 text-slate-400 group-hover:scale-110 transition-transform mb-1" />
-                        <span className="text-xs font-semibold text-slate-500">Tải lên ảnh nền của bạn</span>
-                        <p className="text-[10px] text-slate-400 italic mt-0.5">Tệp tối đa 1MB, khuyến nghị tỷ lệ rộng (landscape)</p>
+                        <Text as="span" className="font-semibold text-slate-500">Tải lên ảnh nền của bạn</Text>
+                        <Text className="text-[10px] text-slate-400 italic mt-0.5">Tệp tối đa 1MB, khuyến nghị tỷ lệ rộng (landscape)</Text>
                       </div>
                     )}
                   </div>
@@ -230,7 +232,7 @@ export function SloganCustomizer({
                     <div className="space-y-2 p-3 bg-slate-50 rounded-lg border">
                       <div className="flex justify-between items-center">
                         <Label className="text-[11px] font-bold text-slate-600 uppercase">Độ tối lớp phủ nền (Overlay Dimmer)</Label>
-                        <span className="text-xs font-mono font-bold text-blue-600">{Math.round((customStyles.bgOpacity !== undefined ? customStyles.bgOpacity : 0.45) * 100)}%</span>
+                        <Text as="span" className="font-mono font-bold text-blue-600">{Math.round((customStyles.bgOpacity !== undefined ? customStyles.bgOpacity : 0.45) * 100)}%</Text>
                       </div>
                       <input
                         type="range" min="0" max="0.90" step="0.05"
@@ -238,7 +240,7 @@ export function SloganCustomizer({
                         onChange={(e) => updateStyle("bgOpacity", parseFloat(e.target.value))}
                         className="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer accent-blue-600"
                       />
-                      <p className="text-[10px] text-slate-400 italic">Tăng độ tối giúp chữ tuyên truyền hiển thị sắc nét hơn trên ảnh nền phức tạp.</p>
+                      <Text className="text-[10px] text-slate-400 italic">Tăng độ tối giúp chữ tuyên truyền hiển thị sắc nét hơn trên ảnh nền phức tạp.</Text>
                     </div>
                   )}
                 </div>
@@ -377,7 +379,7 @@ export function SloganCustomizer({
                             className="h-16 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer group"
                           >
                             <Upload className="w-4 h-4 text-slate-400 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-semibold text-slate-500">Tải biểu tượng PNG riêng</span>
+                            <Text as="span" className="text-[10px] font-semibold text-slate-500">Tải biểu tượng PNG riêng</Text>
                           </div>
                         )}
                       </div>
@@ -394,7 +396,7 @@ export function SloganCustomizer({
                       <div>
                         <div className="flex justify-between items-center">
                           <Label className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 ">Độ đậm</Label>
-                          <span className="text-[9px] font-mono font-bold text-slate-400">{Math.round((customStyles.starOpacity || 0.08) * 100)}%</span>
+                          <Text as="span" className="text-[9px] font-mono font-bold text-slate-400">{Math.round((customStyles.starOpacity || 0.08) * 100)}%</Text>
                         </div>
                         <input
                           type="range" min="0" max="0.30" step="0.01"
@@ -466,20 +468,18 @@ export function SloganCustomizer({
             )}
 
             <div className="z-10 flex flex-col gap-1 flex-1">
-              <span
+              <Text as="span"
                 style={{ color: customStyles.titleColor || "#fbc02d" }}
-                className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${customStyles.alignment === "center" ? "justify-center" :
-                  customStyles.alignment === "right" ? "justify-end" : "justify-start"
-                  }`}
+                className={` font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${customStyles.alignment === "center" ? "justify-center" : customStyles.alignment === "right" ? "justify-end" : "justify-start" }`}
               >
-                <span>⭐</span> {watchedName || "TIÊU ĐỀ KHẨU HIỆU TUYÊN TRUYỀN"}
-              </span>
-              <h3
+                <Text as="span">⭐</Text> {watchedName || "TIÊU ĐỀ KHẨU HIỆU TUYÊN TRUYỀN"}
+              </Text>
+              <Heading level="h3"
                 style={{ color: customStyles.textColor || "#fff7ed" }}
-                className="text-sm md:text-base font-black tracking-wide leading-snug uppercase drop-shadow"
+                className="font-black tracking-wide leading-snug uppercase drop-shadow"
               >
                 &quot;{watchedDescription || "Nội dung khẩu hiệu chi tiết, slogan hành động của cơ quan nhà nước."}&quot;
-              </h3>
+              </Heading>
             </div>
             <div className="z-10 shrink-0">
               <div

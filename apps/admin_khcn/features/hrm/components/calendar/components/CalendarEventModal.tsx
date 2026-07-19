@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, CheckCircle2, Clock, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Text } from '@/components/ui/typography';
 
 interface CalendarEventModalProps {
   selectedDayEvents: { day: Date, events: any[] } | null;
@@ -23,7 +24,7 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-2 mt-4">
           {selectedDayEvents?.events.length === 0 ? (
-            <p className="text-slate-500 text-sm italic">Không có sự kiện nào.</p>
+            <Text variant="small" className="text-slate-500 italic font-normal">Không có sự kiện nào.</Text>
           ) : (
             selectedDayEvents?.events.map((evt) => (
               <div 
@@ -33,11 +34,11 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
                 <div className="flex items-start gap-2">
                   {evt.type === 'meeting' ? <Video className="w-4 h-4 shrink-0 mt-0.5" /> : 
                   evt.isCompleted ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <Clock className="w-4 h-4 shrink-0 mt-0.5" />}
-                  <span className="font-semibold text-sm leading-tight">{evt.title}</span>
+                  <Text as="span" variant="small" weight="semibold" className="leading-tight">{evt.title}</Text>
                 </div>
-                <span className="text-xs opacity-80 ml-6">
+                <Text as="span" variant="small" className="opacity-80 ml-6 font-normal">
                   {evt.type === 'meeting' ? 'Lịch họp' : (evt.isCompleted ? 'Hoàn thành' : 'Đang xử lý / Trễ hạn')}
-                </span>
+                </Text>
               </div>
             ))
           )}

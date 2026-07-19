@@ -34,6 +34,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Check, X, ShieldAlert, Trash2, MessageSquare, Clock } from "lucide-react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 // ─── DeleteConfirmDialog — tự quản lý delete mutation ────────────────────────
 
@@ -136,16 +138,16 @@ const CommentRow = React.memo(function CommentRow({ comment, onRequestDelete }: 
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-medium leading-none">{comment.authorName || "Ẩn danh"}</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <Text className="font-medium leading-none">{comment.authorName || "Ẩn danh"}</Text>
+            <Text className="text-muted-foreground mt-1">
               {comment.authorEmail || comment.authorIp}
-            </p>
+            </Text>
           </div>
         </div>
       </TableCell>
 
       <TableCell className="max-w-xs">
-        <p className="text-sm italic text-foreground/80 line-clamp-2">"{comment.content}"</p>
+        <Text className="italic text-foreground/80 line-clamp-2">"{comment.content}"</Text>
       </TableCell>
 
       <TableCell>
@@ -270,9 +272,9 @@ const CommentsTable = React.memo(function CommentsTable({
                     <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                       <MessageSquare className="w-6 h-6 text-muted-foreground" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <Text className="font-medium text-muted-foreground">
                       Tuyệt vời! Không có bình luận nào đang chờ duyệt.
-                    </p>
+                    </Text>
                   </div>
                 </TableCell>
               </TableRow>
@@ -316,10 +318,10 @@ export function CommentsClient() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Kiểm duyệt bình luận</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <Heading level="h1" className="font-bold tracking-tight">Kiểm duyệt bình luận</Heading>
+            <Text className="text-muted-foreground mt-1">
               Đang hiển thị các bình luận chờ duyệt (PENDING)
-            </p>
+            </Text>
           </div>
           <Badge variant="secondary" className="text-sm px-3 py-1">
             <Clock className="w-3.5 h-3.5 mr-1.5" />

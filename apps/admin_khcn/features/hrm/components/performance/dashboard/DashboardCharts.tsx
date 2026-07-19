@@ -1,6 +1,7 @@
 import { useDashboardStats } from "./useDashboardStats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
@@ -78,8 +79,8 @@ export function DashboardCharts({ selectedPeriod }: { selectedPeriod: string }) 
                   <TableCell className="text-center">
                     <Badge variant="secondary">{row.totalEvaluations} nv</Badge>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <span className="font-bold text-primary">{row.avgScore}</span>
+                  <TableCell className="text-center font-medium">
+                    <Text as="span" weight="bold" className="text-primary">{row.avgScore}</Text>
                   </TableCell>
                 </TableRow>
               ))}

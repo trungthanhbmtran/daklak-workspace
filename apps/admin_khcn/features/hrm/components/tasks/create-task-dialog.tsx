@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Text } from "@/components/ui/typography";
 import { Label } from "@/components/ui/label";
 import { CalendarIcon, FlagIcon, UserIcon, AlignLeftIcon, TypeIcon, CheckCircle2, UserCircle2, BriefcaseIcon, UsersIcon, X, Loader2, Repeat, CalendarClock } from "lucide-react";
 import { useCreateTask, useCreateSubTask } from "../../hooks/useTasks";
@@ -167,7 +168,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
         <form onSubmit={handleSubmit} className="flex flex-col">
           {/* Gợi ý nhanh (Quick presets) */}
           <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2 overflow-x-auto">
-            <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Gợi ý nhanh:</span>
+            <Text as="span" variant="small" weight="medium" className="text-slate-500 whitespace-nowrap">Gợi ý nhanh:</Text>
             <Badge variant="outline" className="cursor-pointer hover:bg-blue-50 hover:text-blue-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Báo cáo tuần theo quyết định", "NORMAL", "PERIODIC", "WEEKLY")}>Báo cáo tuần</Badge>
             <Badge variant="outline" className="cursor-pointer hover:bg-amber-50 hover:text-amber-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Báo cáo tháng theo quyết định", "NORMAL", "PERIODIC", "MONTHLY")}>Báo cáo tháng</Badge>
             <Badge variant="outline" className="cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 transition-colors whitespace-nowrap" onClick={() => applyQuickPreset("Báo cáo năm theo quyết định", "NORMAL", "PERIODIC", "YEARLY")}>Báo cáo năm</Badge>
@@ -179,7 +180,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
             <div className="flex-1 p-6 space-y-6">
               <div className="space-y-3">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  <TypeIcon className="w-4 h-4 text-slate-400"/> Tiêu đề công việc <span className="text-red-500">*</span>
+                  <TypeIcon className="w-4 h-4 text-slate-400"/> Tiêu đề công việc <Text as="span" className="text-red-500">*</Text>
                 </Label>
                 <Input 
                   required 
@@ -259,7 +260,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
 
               <div className="space-y-3 pt-2 border-t border-slate-200 border-dashed">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  <UserIcon className="w-4 h-4 text-slate-400"/> Người / Đơn vị nhận việc <span className="text-red-500">*</span>
+                  <UserIcon className="w-4 h-4 text-slate-400"/> Người / Đơn vị nhận việc <Text as="span" className="text-red-500">*</Text>
                 </Label>
                 <Select value={assignee} onValueChange={setAssignee} required>
                   <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm">
@@ -354,7 +355,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
 
               <div className="space-y-3">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  <CalendarIcon className="w-4 h-4 text-slate-400"/> Thời hạn <span className="text-red-500">*</span>
+                  <CalendarIcon className="w-4 h-4 text-slate-400"/> Thời hạn <Text as="span" className="text-red-500">*</Text>
                 </Label>
                 <Input 
                   required 

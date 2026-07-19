@@ -7,6 +7,7 @@ import {
   parseISO
 } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import { Tabs } from "@/components/ui/tabs";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -107,13 +108,13 @@ export function WorkCalendarClient() {
     <div className="p-6 md:p-8 h-[calc(100vh-64px)] flex flex-col bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-500 overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 shrink-0">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-3">
+          <Heading level="h1" className="text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <CalendarIcon className="h-8 w-8 text-indigo-600" />
             Lịch công tác
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">
+          </Heading>
+          <Text variant="muted" className="mt-2">
             Quản lý công việc và cuộc họp trực quan theo mốc thời gian.
-          </p>
+          </Text>
         </div>
       </div>
 

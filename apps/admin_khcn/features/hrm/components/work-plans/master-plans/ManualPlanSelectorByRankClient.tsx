@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { Heading, Text } from "@/components/ui/typography";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Table,
@@ -237,7 +238,7 @@ export function ManualPlanSelectorByRankClient() {
                     <div className="p-4 border-b bg-muted/30 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-6 bg-primary rounded-full" />
-                            <h3 className="font-bold text-sm tracking-tight text-foreground">Danh sách chỉ tiêu bắt buộc</h3>
+                            <Heading level="h4" className="font-bold tracking-tight text-foreground">Danh sách chỉ tiêu bắt buộc</Heading>
                         </div>
                         <div className="w-full sm:w-[300px]">
                             <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
@@ -286,7 +287,7 @@ export function ManualPlanSelectorByRankClient() {
                                         return (
                                             <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm">
                                                 <div className="truncate max-w-[300px] sm:max-w-[400px] md:max-w-[600px]">
-                                                    {task.taskName} {isAdded ? <span className="text-muted-foreground ml-1 italic">(Đã thêm)</span> : ''}
+                                                    {task.taskName} {isAdded ? <Text as="span" variant="small" className="text-muted-foreground ml-1 italic font-normal">(Đã thêm)</Text> : ''}
                                                 </div>
                                             </SelectItem>
                                         );
@@ -331,10 +332,10 @@ export function ManualPlanSelectorByRankClient() {
                                         <TableRow key={plan.id} className="group transition-colors hover:bg-muted/10">
                                             <TableCell className="font-medium text-foreground py-3 pr-4">
                                                 <div className="flex items-start gap-3">
-                                                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-semibold text-muted-foreground shrink-0 mt-0.5">
+                                                    <Text as="span" className="flex items-center justify-center w-6 h-6 rounded-full bg-muted font-semibold text-muted-foreground shrink-0 mt-0.5">
                                                         {idx + 1}
-                                                    </span>
-                                                    <span className="mt-0.5 leading-relaxed line-clamp-3 overflow-hidden text-ellipsis break-words">{plan.title}</span>
+                                                    </Text>
+                                                    <Text as="span" className="mt-0.5 leading-relaxed line-clamp-3 overflow-hidden text-ellipsis break-words font-normal">{plan.title}</Text>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center text-muted-foreground">
@@ -387,8 +388,8 @@ export function ManualPlanSelectorByRankClient() {
                                                     <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
                                                         <Target className="w-8 h-8 opacity-20" />
                                                     </div>
-                                                    <p className="text-sm">Chưa có nhiệm vụ bắt buộc nào cho ngạch này.</p>
-                                                    <p className="text-xs opacity-60">Hãy chọn một nhiệm vụ mẫu từ thư viện và nhấn "Thêm"</p>
+                                                    <Text variant="small" className="font-normal">Chưa có nhiệm vụ bắt buộc nào cho ngạch này.</Text>
+                                                    <Text variant="small" className="opacity-60 font-normal">Hãy chọn một nhiệm vụ mẫu từ thư viện và nhấn "Thêm"</Text>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -479,7 +480,7 @@ export function ManualPlanSelectorByRankClient() {
                                             <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-foreground'}`}>
                                                 {rank.nameVi || rank.name}
                                             </h4>
-                                            <p className="text-[11px] text-muted-foreground font-mono mt-1">{rank.code}</p>
+                                            <Text variant="small" className="text-[11px] text-muted-foreground font-mono mt-1 font-normal">{rank.code}</Text>
                                         </div>
                                     ))}
                                 </div>

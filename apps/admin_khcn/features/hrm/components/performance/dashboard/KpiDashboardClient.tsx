@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import { BarChart2, Target } from "lucide-react";
 import { PeriodSelector } from "./PeriodSelector";
 import { DashboardStatsCards } from "./DashboardStatsCards";
@@ -14,13 +15,13 @@ export function KpiDashboardClient() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
+          <Heading level="h1" className="flex items-center gap-2 font-black">
             <BarChart2 className="w-7 h-7 md:w-8 md:h-8 text-primary" />
             Dashboard KPI Tổng Hợp
-          </h2>
-          <p className="text-muted-foreground font-medium text-sm md:text-base mt-2">
+          </Heading>
+          <Text variant="muted" className="font-medium mt-2">
             Báo cáo kết quả thực hiện, điểm KPI trung bình theo từng Phòng/Ban/Đơn vị
-          </p>
+          </Text>
         </div>
 
         <div className="w-full md:w-[300px]">
@@ -32,10 +33,10 @@ export function KpiDashboardClient() {
         <Card className="shadow-sm bg-card border-dashed border-2 border-border mt-8">
           <CardContent className="flex flex-col items-center justify-center py-16 md:py-24 text-center">
             <Target className="h-14 w-14 md:h-16 md:w-16 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg md:text-xl font-bold text-foreground">Vui lòng chọn Kỳ đánh giá</h3>
-            <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-sm mx-auto">
+            <Heading level="h4">Vui lòng chọn Kỳ đánh giá</Heading>
+            <Text variant="muted" className="mt-2 max-w-sm mx-auto font-normal">
               Dữ liệu thống kê KPI sẽ được tính toán và hiển thị tự động dựa trên kỳ đánh giá bạn chọn.
-            </p>
+            </Text>
           </CardContent>
         </Card>
       ) : (

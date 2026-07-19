@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Text } from "@/components/ui/typography";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -105,7 +106,7 @@ export function MasterPlanCreateEditDialog({ open, onOpenChange, planToEdit }: P
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Tên Kế hoạch / Dự án <span className="text-red-500">*</span></Label>
+              <Label htmlFor="title">Tên Kế hoạch / Dự án <Text as="span" className="text-red-500">*</Text></Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -144,9 +145,9 @@ export function MasterPlanCreateEditDialog({ open, onOpenChange, planToEdit }: P
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-1">
+              <Text variant="small" className="text-muted-foreground mt-1 font-normal">
                 Các công việc trong dự án này sẽ tự động áp dụng luồng xử lý theo quy trình được chọn.
-              </p>
+              </Text>
             </div>
 
             <div className="grid gap-2">

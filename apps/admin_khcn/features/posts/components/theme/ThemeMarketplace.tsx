@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 // Import hook cấu hình hệ thống
 import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface ThemeItem {
     id: string;
@@ -106,8 +108,8 @@ export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () =>
             {/* TOAST NOTIFICATION (Thông báo nổi góc màn hình khi kích hoạt thành công) */}
             {notification && (
                 <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-slate-800 dark:border-slate-200 animate-in slide-in-from-bottom-5 duration-300">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-sm font-medium">{notification}</span>
+                    <Text as="span" className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <Text as="span" className="font-medium">{notification}</Text>
                 </div>
             )}
 
@@ -133,22 +135,22 @@ export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () =>
                         <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
                             <Image src={theme.thumbnail} alt={theme.name} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-300" />
                             {theme.isLive && (
-                                <span className="absolute top-3 left-3 px-2.5 py-1 text-xs font-semibold bg-emerald-500 text-white rounded-full shadow-sm flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Đang kích hoạt
-                                </span>
+                                <Text as="span" className="absolute top-3 left-3 px-2.5 py-1 font-semibold bg-emerald-500 text-white rounded-full shadow-sm flex items-center gap-1.5">
+                                    <Text as="span" className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Đang kích hoạt
+                                </Text>
                             )}
                         </div>
 
                         {/* Content */}
                         <div className="p-5">
                             <div className="flex justify-between items-start mb-1">
-                                <h4 className="font-bold text-base line-clamp-1">{theme.name}</h4>
-                                <span className="text-xs text-slate-400">v{theme.version}</span>
+                                <Heading level="h4" className="font-bold line-clamp-1">{theme.name}</Heading>
+                                <Text as="span" className="text-slate-400">v{theme.version}</Text>
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 min-h-[32px]">{theme.description}</p>
+                            <Text className="text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 min-h-[32px]">{theme.description}</Text>
 
                             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
-                                <span className="text-xs text-slate-400">Bởi <span className="font-medium text-slate-600 dark:text-slate-300">{theme.author}</span></span>
+                                <Text as="span" className="text-slate-400">Bởi <Text as="span" className="font-medium text-slate-600 dark:text-slate-300">{theme.author}</Text></Text>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleCustomize(theme.templateKey)}

@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { portalLanguagesApi } from "@/features/portal-config/api";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface BannerBasicInfoProps {
   form: UseFormReturn<any>;
@@ -91,8 +93,8 @@ export function BannerBasicInfo({
                 <ImageIcon className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-sm">Ảnh đồ họa thiết kế sẵn</p>
-                <p className="text-[11px] opacity-80 mt-0.5">Tải lên tệp hình ảnh PNG, JPG hoặc WebP đã thiết kế hoàn chỉnh</p>
+                <Text className="font-bold">Ảnh đồ họa thiết kế sẵn</Text>
+                <Text className="text-[11px] opacity-80 mt-0.5">Tải lên tệp hình ảnh PNG, JPG hoặc WebP đã thiết kế hoàn chỉnh</Text>
               </div>
               {designType === "image" && (
                 <div className="absolute top-3 right-3 text-blue-600">
@@ -113,8 +115,8 @@ export function BannerBasicInfo({
                 <Type className="h-6 w-6" />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-sm">Khẩu hiệu Tuyên truyền</p>
-                <p className="text-[11px] opacity-80 mt-0.5">Thiết kế trực tiếp biểu ngữ dạng chữ đỏ vàng chìm trống đồng, sao vàng truyền thống</p>
+                <Text className="font-bold">Khẩu hiệu Tuyên truyền</Text>
+                <Text className="text-[11px] opacity-80 mt-0.5">Thiết kế trực tiếp biểu ngữ dạng chữ đỏ vàng chìm trống đồng, sao vàng truyền thống</Text>
               </div>
               {designType === "slogan" && (
                 <div className="absolute top-3 right-3 text-amber-600">
@@ -151,7 +153,7 @@ export function BannerBasicInfo({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">Tiêu đề Banner <span className="text-destructive">*</span></FormLabel>
+                    <FormLabel className="font-semibold">Tiêu đề Banner <Text as="span" className="text-destructive">*</Text></FormLabel>
                     <FormControl>
                       <Input placeholder="Ví dụ: Banner Chào mừng năm mới..." className="text-lg py-6 focus-visible:ring-blue-500 bg-slate-50/50 dark:bg-slate-900" {...field} />
                     </FormControl>
@@ -184,8 +186,8 @@ export function BannerBasicInfo({
                 <div className="p-4 rounded-xl bg-blue-50/30 border border-blue-100/50 mb-6 flex items-center gap-3">
                   <div className="bg-blue-100 p-2 rounded-lg"><Globe className="h-4 w-4 text-blue-600" /></div>
                   <div>
-                    <p className="text-sm font-bold text-blue-900">Phiên bản dịch: {lang.name}</p>
-                    <p className="text-xs text-blue-700/70 italic">Nhập tên và mô tả bằng {lang.name}</p>
+                    <Text className="font-bold text-blue-900">Phiên bản dịch: {lang.name}</Text>
+                    <Text className="text-blue-700/70 italic">Nhập tên và mô tả bằng {lang.name}</Text>
                   </div>
                 </div>
 
@@ -260,10 +262,10 @@ export function BannerBasicInfo({
           </div>
 
           <div className="p-3.5 bg-rose-50/60 dark:bg-rose-950/20 rounded-xl border border-rose-100/70 dark:border-rose-900/30 text-[11px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed flex items-start gap-2.5 mt-4 shadow-sm">
-            <span className="text-xs shrink-0 mt-0.5 select-none">💡</span>
+            <Text as="span" className="shrink-0 mt-0.5 select-none">💡</Text>
             <div>
-              <p className="font-bold mb-0.5">Lưu ý về thiết kế:</p>
-              Chế độ <span className="font-black text-amber-800 dark:text-amber-200 underline">Khẩu hiệu Tuyên truyền</span> sẽ tự động sinh giao diện biểu ngữ cổ động màu đỏ vàng rực rỡ với hoa văn trống đồng, mây sóng hoặc hoa sen nét vẽ chìm cực kỳ trang trọng, sử dụng Tiêu đề làm nhãn cổ động nhỏ và Mô tả làm Slogan chính.
+              <Text className="font-bold mb-0.5">Lưu ý về thiết kế:</Text>
+              Chế độ <Text as="span" className="font-black text-amber-800 dark:text-amber-200 underline">Khẩu hiệu Tuyên truyền</Text> sẽ tự động sinh giao diện biểu ngữ cổ động màu đỏ vàng rực rỡ với hoa văn trống đồng, mây sóng hoặc hoa sen nét vẽ chìm cực kỳ trang trọng, sử dụng Tiêu đề làm nhãn cổ động nhỏ và Mô tả làm Slogan chính.
             </div>
           </div>
         </CardContent>

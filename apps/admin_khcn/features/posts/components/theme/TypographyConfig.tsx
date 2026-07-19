@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function TypographyConfig() {
     // Lấy state hiện tại và hàm setter thông minh từ Context toàn cục
@@ -45,10 +47,10 @@ export function TypographyConfig() {
             {/* 3. Thanh trượt Kích thước chữ nền (Font Size Scale) */}
             <div>
                 <div className="flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                    <span>Kích thước chữ mặc định</span>
-                    <span className="font-bold text-blue-500 dark:text-blue-400">
+                    <Text as="span">Kích thước chữ mặc định</Text>
+                    <Text as="span" className="font-bold text-blue-500 dark:text-blue-400">
                         {typography.size}px
-                    </span>
+                    </Text>
                 </div>
                 <input
                     type="range"

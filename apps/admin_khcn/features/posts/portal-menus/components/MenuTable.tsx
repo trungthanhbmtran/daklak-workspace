@@ -6,6 +6,8 @@ import { CategoryItem } from "@/features/system-admin/categories/types";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MenuTableRow } from "./MenuTableRow";
 import { Loader2 } from "lucide-react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface MenuTableProps {
   menus: PortalMenu[];
@@ -34,7 +36,7 @@ export function MenuTable({
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-sm text-muted-foreground font-semibold">Đang tải danh sách menu...</p>
+        <Text className="text-muted-foreground font-semibold">Đang tải danh sách menu...</Text>
       </div>
     );
   }

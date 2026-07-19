@@ -28,6 +28,7 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import { Heading, Text } from "@/components/ui/typography";
 
 import { MenuItem, PbacResource } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";
@@ -169,9 +170,9 @@ export function MenuForm({ menuId }: MenuFormProps) {
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             {/* SECTION 1: THÔNG TIN CƠ BẢN */}
             <div className="p-6 space-y-4 border-b border-border/50">
-              <h3 className="text-[13px] font-bold text-foreground border-b pb-2 flex items-center gap-2">
+              <Text variant="small" weight="bold" className="border-b pb-2 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 1. Thông tin cơ bản
-              </h3>
+              </Text>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField control={form.control} name="name" render={({ field }) => (
@@ -252,7 +253,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
                 </div>
                 <div className="flex items-center gap-1.5 px-1 mt-2 text-muted-foreground">
                   <CornerDownRight className="h-3.5 w-3.5" />
-                  <span className="text-[11px] font-mono">Full Path: <span className="font-bold text-foreground bg-muted/50 px-1.5 py-0.5 rounded">{parentPathPrefix}{watchPath}</span></span>
+                  <Text variant="small" className="font-mono">Full Path: <Text as="span" weight="bold" className="text-foreground bg-muted/50 px-1.5 py-0.5 rounded">{parentPathPrefix}{watchPath}</Text></Text>
                 </div>
               </div>
             </div>
@@ -261,9 +262,9 @@ export function MenuForm({ menuId }: MenuFormProps) {
 
             {/* SECTION 2: HIỂN THỊ */}
             <div className="p-6 space-y-4 bg-muted/5 border-b border-border/50">
-              <h3 className="text-[13px] font-bold text-foreground border-b pb-2 flex items-center gap-2">
+              <Text variant="small" weight="bold" className="border-b pb-2 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 2. Cài đặt hiển thị
-              </h3>
+              </Text>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <FormField control={form.control} name="icon" render={({ field }) => (
@@ -294,7 +295,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
                         <Input className="h-10 font-mono text-sm bg-background flex-1" placeholder="#3b82f6 hoặc trống" {...field} />
                       </div>
                     </FormControl>
-                    <p className="text-[10px] text-muted-foreground">Để trống = giữ màu gốc</p>
+                    <Text variant="small" className="text-muted-foreground text-[10px]">Để trống = giữ màu gốc</Text>
                   </FormItem>
                 )} />
 
@@ -317,12 +318,12 @@ export function MenuForm({ menuId }: MenuFormProps) {
             {/* SECTION 3: KIỂM SOÁT TRUY CẬP — PBAC CHUẨN */}
             <div className="p-6 space-y-4 bg-background">
               <div className="flex items-center gap-2 mb-4 border-b pb-2">
-                <h3 className="text-sm font-bold flex items-center gap-2">
+                <Heading level="h4" className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-primary" /> 3. Kiểm soát truy cập (PBAC)
-                </h3>
-                <p className="text-[11px] text-muted-foreground mt-1 ml-auto">
+                </Heading>
+                <Text variant="small" className="text-muted-foreground mt-1 ml-auto">
                   (Phân quyền hiển thị Menu theo Tài nguyên)
-                </p>
+                </Text>
               </div>
               {watchLinkedResource && selectedResource && (
                 <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20 font-mono shrink-0 mb-4 inline-flex">
@@ -336,9 +337,9 @@ export function MenuForm({ menuId }: MenuFormProps) {
                   <FormLabel className="text-[12px] font-bold text-foreground">
                     Tài nguyên PBAC bảo vệ Menu này
                   </FormLabel>
-                  <p className="text-[11px] text-muted-foreground mb-1">
+                  <Text variant="muted" className="mb-1 text-[11px]">
                     Chỉ những người dùng được cấp quyền trên Tài nguyên bạn chọn dưới đây mới có thể nhìn thấy Menu này trên thanh Sidebar.
-                  </p>
+                  </Text>
                   {isLoadingResources ? (
                     <div className="flex items-center gap-2 h-10 text-muted-foreground text-sm">
                       <Loader2 className="h-4 w-4 animate-spin" /> Đang tải danh sách tài nguyên...
@@ -364,7 +365,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
                               {(items as PbacResource[]).map((r) => (
                                 <ComboboxItem key={r.code} value={r.code}>
                                   <span className="flex items-center gap-2">
-                                    <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">{r.code}</span>
+                                    <Text as="span" variant="code" className="text-[10px] text-muted-foreground shrink-0">{r.code}</Text>
                                     <span>{r.name}</span>
                                   </span>
                                 </ComboboxItem>

@@ -29,6 +29,7 @@ import {
   Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Heading, Text } from "@/components/ui/typography";
 import {
   BarChart,
   Bar,
@@ -133,21 +134,21 @@ export function HrmDashboardClient() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <h3 className="text-4xl font-bold tracking-tight text-slate-950 dark:text-slate-100">
+                <Heading level="h1" className="text-slate-950 dark:text-slate-100">
                   {isLoading ? <Loader2 className="animate-spin h-6 w-6 text-slate-400" /> : totalTasks}
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm text-[var(--gov-safe-green)] mt-1.5 font-medium">
+                </Heading>
+                <Text variant="small" weight="medium" className="flex items-center gap-1.5 text-[var(--gov-safe-green)] mt-1.5">
                   <TrendingUp className="h-4 w-4" />
                   <span>Realtime</span>
-                </div>
+                </Text>
               </div>
               <div className="h-14 w-14 rounded-xl bg-blue-50 dark:bg-slate-800 flex items-center justify-center border border-blue-100 dark:border-slate-700">
                 <Briefcase className="h-7 w-7 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-light border-t pt-3 border-slate-100 dark:border-slate-800">
+            <Text variant="muted" className="font-light border-t pt-3 border-slate-100 dark:border-slate-800">
               Tổng số lượng công việc được quản lý
-            </div>
+            </Text>
           </div>
         );
       case 'COMPLETED_TASKS':
@@ -155,21 +156,21 @@ export function HrmDashboardClient() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <h3 className="text-4xl font-bold tracking-tight text-emerald-600 dark:text-emerald-500">
+                <Heading level="h1" className="text-emerald-600 dark:text-emerald-500">
                   {isLoading ? <Loader2 className="animate-spin h-6 w-6 text-slate-400" /> : completedTasks}
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm text-emerald-600 mt-1.5 font-medium">
+                </Heading>
+                <Text variant="small" weight="medium" className="flex items-center gap-1.5 text-emerald-600 mt-1.5">
                   <TrendingUp className="h-4 w-4" />
                   <span>{totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% <span className="font-light text-slate-500">tổng số</span></span>
-                </div>
+                </Text>
               </div>
               <div className="h-14 w-14 rounded-xl bg-emerald-50 dark:bg-slate-800 flex items-center justify-center border border-emerald-100 dark:border-slate-700">
                 <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-light border-t pt-3 border-slate-100 dark:border-slate-800">
+            <Text variant="muted" className="font-light border-t pt-3 border-slate-100 dark:border-slate-800">
               Đang xử lý: {pendingTasks} công việc
-            </div>
+            </Text>
           </div>
         );
       case 'APPROACHING_TASKS':
@@ -177,21 +178,21 @@ export function HrmDashboardClient() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <h3 className="text-4xl font-bold tracking-tight text-amber-500">
+                <Heading level="h1" className="text-amber-500">
                   {isLoading ? <Loader2 className="animate-spin h-6 w-6 text-slate-400" /> : approachingTasks}
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm text-amber-600 mt-1.5 font-medium">
+                </Heading>
+                <Text variant="small" weight="medium" className="flex items-center gap-1.5 text-amber-600 mt-1.5">
                   <Clock className="h-4 w-4" />
                   <span>Trong 3 ngày tới</span>
-                </div>
+                </Text>
               </div>
               <div className="h-14 w-14 rounded-xl bg-amber-50 dark:bg-slate-800 flex items-center justify-center border border-amber-100 dark:border-slate-700">
                 <Clock className="h-7 w-7 text-amber-500" />
               </div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-light border-t pt-3 border-slate-100 dark:border-slate-800">
+            <Text variant="muted" className="font-light border-t pt-3 border-slate-100 dark:border-slate-800">
               Công việc có nguy cơ bị trễ hạn
-            </div>
+            </Text>
           </div>
         );
       case 'OVERDUE_TASKS':
@@ -199,21 +200,21 @@ export function HrmDashboardClient() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <h3 className="text-4xl font-bold tracking-tight text-rose-600">
+                <Heading level="h1" className="text-rose-600">
                   {isLoading ? <Loader2 className="animate-spin h-6 w-6 text-slate-400" /> : overdueTasks}
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm text-rose-600 mt-1.5 font-medium">
+                </Heading>
+                <Text variant="small" weight="medium" className="flex items-center gap-1.5 text-rose-600 mt-1.5">
                   <TrendingDown className="h-4 w-4" />
                   <span>Chưa hoàn thành</span>
-                </div>
+                </Text>
               </div>
               <div className="h-14 w-14 rounded-xl bg-rose-50 dark:bg-slate-800 flex items-center justify-center border border-rose-100 dark:border-slate-700 animate-pulse">
                 <AlertTriangle className="h-7 w-7 text-rose-600" />
               </div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-light border-t pt-3 border-slate-100 dark:border-slate-800 text-rose-600/80">
+            <Text variant="muted" className="font-light border-t pt-3 border-slate-100 dark:border-slate-800 text-rose-600/80">
               Cần đôn đốc xử lý ngay
-            </div>
+            </Text>
           </div>
         );
       case 'PROGRESS_BY_UNIT':
@@ -222,7 +223,7 @@ export function HrmDashboardClient() {
             {isLoading ? (
               <div className="h-full flex items-center justify-center text-slate-400"><Loader2 className="animate-spin h-6 w-6" /></div>
             ) : progressByUnitData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-slate-400 text-sm">Chưa có dữ liệu</div>
+              <Text variant="muted" className="h-full flex items-center justify-center">Chưa có dữ liệu</Text>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -250,7 +251,7 @@ export function HrmDashboardClient() {
             {isLoading ? (
               <div className="h-full flex items-center justify-center text-slate-400"><Loader2 className="animate-spin h-6 w-6" /></div>
             ) : statsByLeaderData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-slate-400 text-sm">Chưa có dữ liệu</div>
+              <Text variant="muted" className="h-full flex items-center justify-center">Chưa có dữ liệu</Text>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -294,14 +295,14 @@ export function HrmDashboardClient() {
       {/* Executive Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-slate-100">Tổng quan Công việc (Task Dashboard)</h2>
-          <div className="flex items-center gap-2 mt-2.5 text-base text-slate-600 dark:text-slate-400 font-light">
+          <Heading level="h1" className="text-slate-950 dark:text-slate-100">Tổng quan Công việc (Task Dashboard)</Heading>
+          <Text variant="lead" className="flex items-center gap-2 mt-2.5 font-light">
             <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 dark:bg-emerald-950 border border-emerald-100 dark:border-emerald-800 px-2 py-0.5 rounded-md font-medium text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Live Tracking
             </span>
-            | Thống kê tiến độ công việc toàn cơ quan. Có thể kéo thả widget để cá nhân hóa giao diện.
-          </div>
+            <span>| Thống kê tiến độ công việc toàn cơ quan. Có thể kéo thả widget để cá nhân hóa giao diện.</span>
+          </Text>
         </div>
         <div className="text-sm text-slate-500 font-light flex items-center gap-2">Trạng thái: <span className="font-semibold text-slate-800 dark:text-slate-200">Đã kết nối API thực tế</span></div>
       </div>

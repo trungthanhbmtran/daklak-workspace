@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 export function AdvancedCssEditor() {
     const [code, setCode] = useState(`/* Thêm CSS tùy biến của bạn tại đây */\n.cms-custom-header {\n    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n    color: #ffffff;\n}`);
@@ -10,8 +12,8 @@ export function AdvancedCssEditor() {
             <div className="relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-200 font-mono text-xs">
                 {/* Thanh header nhỏ của editor mô phỏng IDE */}
                 <div className="bg-slate-900 px-4 py-2 border-b border-slate-800/80 flex justify-between items-center text-[11px] text-slate-400">
-                    <span>custom-styles.css</span>
-                    <span className="text-emerald-400 text-xs">● CSS Validated</span>
+                    <Text as="span">custom-styles.css</Text>
+                    <Text as="span" className="text-emerald-400">● CSS Validated</Text>
                 </div>
 
                 {/* Khu vực gõ Code */}

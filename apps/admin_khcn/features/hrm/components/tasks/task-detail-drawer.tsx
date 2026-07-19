@@ -1,6 +1,7 @@
 "use client";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Heading, Text } from "@/components/ui/typography";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HrmTask } from "../../types/task";
 import { Badge } from "@/components/ui/badge";
@@ -88,10 +89,10 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               <div>
                 {currentTask.parentId && (
                   <div className="mb-2">
-                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 flex items-center w-fit cursor-pointer hover:bg-blue-100 transition-colors">
+                    <Text as="span" className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 flex items-center w-fit cursor-pointer hover:bg-blue-100 transition-colors">
                       <ArrowRightCircle className="w-3 h-3 mr-1 inline" />
                       Thuộc nhiệm vụ: {currentTask.parentId}
-                    </span>
+                    </Text>
                   </div>
                 )}
                 <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -140,18 +141,18 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
 
           <div className="grid grid-cols-2 gap-4 mt-6 text-sm">
             <div>
-              <p className="text-slate-500 mb-1">Người giao</p>
+              <Text variant="small" className="text-slate-500 mb-1 font-normal">Người giao</Text>
               <p className="font-medium">{currentTask.assignerName || currentTask.assigner?.fullName || "Chưa xác định"}</p>
             </div>
             <div>
-              <p className="text-slate-500 mb-1">Đơn vị / Người xử lý</p>
+              <Text variant="small" className="text-slate-500 mb-1 font-normal">Đơn vị / Người xử lý</Text>
               <p className="font-medium">
                 {currentTask.assigneeName || currentTask.assigneeDepartment?.name || currentTask.assignee?.fullName || "Chưa phân công"}
               </p>
             </div>
             {currentTask.coassigneeNames && currentTask.coassigneeNames.length > 0 && (
               <div className="col-span-2">
-                <p className="text-slate-500 mb-1">Người phối hợp xử lý</p>
+                <Text variant="small" className="text-slate-500 mb-1 font-normal">Người phối hợp xử lý</Text>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {currentTask.coassigneeNames.map((name: string, idx: number) => (
                     <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200">
@@ -162,17 +163,17 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               </div>
             )}
             <div>
-              <p className="text-slate-500 mb-1">Thời hạn</p>
+              <Text variant="small" className="text-slate-500 mb-1 font-normal">Thời hạn</Text>
               <p className={`font-medium ${new Date(currentTask.dueDate) < new Date() && !isCompleted ? "text-red-500" : ""}`}>
                 {safeFormatDate(currentTask.dueDate, "dd/MM/yyyy HH:mm")}
               </p>
             </div>
             {currentTask.sourceDocumentRef && (
               <div>
-                <p className="text-slate-500 mb-1">Căn cứ văn bản</p>
-                <p className="font-medium text-blue-600 cursor-pointer hover:underline">
+                <Text variant="small" className="text-slate-500 mb-1 font-normal">Căn cứ văn bản</Text>
+                <Text variant="small" weight="medium" className="text-blue-600 cursor-pointer hover:underline">
                   {currentTask.sourceDocumentRef}
-                </p>
+                </Text>
               </div>
             )}
           </div>
@@ -181,13 +182,13 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
         {/* Box tiếp nhận công việc - Đưa lên trên cùng */}
         {isAssigned && (
           <div className="bg-amber-50 p-4 border-b border-amber-200 flex-shrink-0">
-            <h3 className="font-medium text-amber-900 flex items-center">
+            <Heading level="h4" className="font-medium text-amber-900 flex items-center">
               <BellRing className="w-4 h-4 mr-2" />
               Xác nhận tiếp nhận công việc
-            </h3>
-            <p className="text-sm text-amber-700 mt-1 mb-3">
+            </Heading>
+            <Text variant="small" className="text-amber-700 mt-1 mb-3 font-normal">
               Công việc này vừa được giao. Vui lòng xác nhận tiếp nhận để có thể bắt đầu xử lý (phân rã công việc, cập nhật tiến độ, v.v.), hoặc từ chối nếu không đúng thẩm quyền.
-            </p>
+            </Text>
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleAcceptTask} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -249,34 +250,34 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             <TabsContent value="kpi" className="mt-0 h-full">
               {currentTask.kpi ? (
                 <div className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
-                  <h3 className="font-semibold text-sm">Kết quả đánh giá KPI</h3>
+                  <Heading level="h4" className="font-semibold">Kết quả đánh giá KPI</Heading>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-slate-500 mb-1">Xếp loại chất lượng</p>
+                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Xếp loại chất lượng</Text>
                       <Badge variant="default" className="bg-green-500">{currentTask.kpi.qualityGrade}</Badge>
                     </div>
                     <div>
-                      <p className="text-slate-500 mb-1">Tổng điểm</p>
-                      <p className="font-bold text-lg">{currentTask.kpi.totalScore} / 100</p>
+                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm</Text>
+                      <Text variant="large" weight="bold">{currentTask.kpi.totalScore} / 100</Text>
                     </div>
                     <div>
-                      <p className="text-slate-500 mb-1">Điểm tiến độ</p>
+                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm tiến độ</Text>
                       <p className="font-medium">{currentTask.kpi.timelinessScore}</p>
                     </div>
                     <div>
-                      <p className="text-slate-500 mb-1">Điểm chất lượng</p>
+                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm chất lượng</Text>
                       <p className="font-medium">{currentTask.kpi.qualityScore}</p>
                     </div>
                     {currentTask.kpi.note && (
                       <div className="col-span-2">
-                        <p className="text-slate-500 mb-1">Ghi chú</p>
-                        <p className="text-sm italic bg-slate-50 p-2 rounded">{currentTask.kpi.note}</p>
+                        <Text variant="small" className="text-slate-500 mb-1 font-normal">Ghi chú</Text>
+                        <Text variant="small" className="italic bg-slate-50 p-2 rounded font-normal">{currentTask.kpi.note}</Text>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400">
-                    Đánh giá lúc: {safeFormatDate(currentTask.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")}
-                  </p>
+                  <Text variant="small" className="text-slate-400 font-normal">
+                    Đánh giá lúc {safeFormatDate(currentTask.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")} bởi {currentTask.kpi.evaluator?.fullName || "Quản lý"}
+                  </Text>
                 </div>
               ) : (
                 <div className="text-sm text-slate-500 italic p-8 text-center">

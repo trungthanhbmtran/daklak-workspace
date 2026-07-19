@@ -2,6 +2,8 @@
 
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
 
 interface StageOption {
   id: string;
@@ -47,18 +49,18 @@ export function ThemeStageSelector() {
                 }`}
             >
               <div className="flex items-center justify-between w-full">
-                <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <Text as="span" className="font-semibold text-slate-900 dark:text-slate-100">
                   {item.name}
-                </span>
+                </Text>
                 {isSelected && (
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badgeClass}`}>
+                  <Text as="span" className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badgeClass}`}>
                     Đang mở
-                  </span>
+                  </Text>
                 )}
               </div>
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-light">
+              <Text className="text-slate-400 dark:text-slate-500 font-light">
                 {item.description}
-              </p>
+              </Text>
             </button>
           );
         })}

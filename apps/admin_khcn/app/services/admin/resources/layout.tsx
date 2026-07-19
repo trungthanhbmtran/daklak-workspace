@@ -15,7 +15,7 @@ export default function ResourcesLayout({ children }: { children: React.ReactNod
       {/* 2-column layout: Sidebar + Detail */}
       <div className="flex flex-1 gap-6 min-h-0">
         {/* Sidebar — cố định, KHÔNG re-render khi navigate [id] */}
-        <div className="w-full lg:w-[420px] shrink-0 h-full flex flex-col min-h-0">
+        <div className="w-full lg:w-4/12 xl:w-3/12 2xl:w-1/5 shrink-0 h-full flex flex-col min-h-0">
           <ResourceSidebar />
         </div>
 

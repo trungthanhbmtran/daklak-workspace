@@ -12,6 +12,7 @@ import {
   differenceInDays
 } from "date-fns";
 import { CheckCircle2, Clock, Video } from 'lucide-react';
+import { Text } from '@/components/ui/typography';
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -107,11 +108,9 @@ export const CalendarGrid = React.memo(function CalendarGrid({
             >
               {isSameMonth(cloneDay, monthStart) && (
                 <div className="flex items-center justify-between shrink-0 z-10 relative">
-                  <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full
-                    ${isToday(cloneDay) ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"}
-                  `}>
+                  <Text as="span" variant="small" weight="medium" className={`w-7 h-7 flex items-center justify-center rounded-full ${isToday(cloneDay) ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"} `}>
                     {formattedDate}
-                  </span>
+                  </Text>
                   {dayEvents.length > 0 && (
                     <button 
                       onClick={() => onSelectDayEvents({ day: cloneDay, events: dayEvents })}
@@ -154,7 +153,7 @@ export const CalendarGrid = React.memo(function CalendarGrid({
                       >
                           {evt.type === 'meeting' ? <Video className="w-3 h-3 shrink-0" /> : 
                           evt.isCompleted ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <Clock className="w-3 h-3 shrink-0" />}
-                          <span className="truncate font-medium">{evt.title}</span>
+                          <Text as="span" weight="medium" className="truncate">{evt.title}</Text>
                       </div>
                   ))}
               </div>
@@ -170,9 +169,9 @@ export const CalendarGrid = React.memo(function CalendarGrid({
     <div className="flex flex-col w-full h-full bg-white dark:bg-slate-900">
       <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
         {WEEK_DAYS.map((wd) => (
-          <div key={wd} className="py-3 text-center text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider border-r border-slate-200 dark:border-slate-800 last:border-0">
+          <Text as="div" variant="small" weight="semibold" key={wd} className="py-3 text-center text-slate-600 dark:text-slate-300 uppercase tracking-wider border-r border-slate-200 dark:border-slate-800 last:border-0">
             {wd}
-          </div>
+          </Text>
         ))}
       </div>
       

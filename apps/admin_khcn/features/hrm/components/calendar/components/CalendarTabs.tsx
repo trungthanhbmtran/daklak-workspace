@@ -1,5 +1,6 @@
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Text } from '@/components/ui/typography';
 import { Briefcase, User, Users, Video } from 'lucide-react';
 
 export const CalendarTabs = React.memo(function CalendarTabs() {
@@ -26,18 +27,18 @@ export const CalendarTabs = React.memo(function CalendarTabs() {
       
       {/* Chú thích màu sắc */}
       <div className="flex items-center gap-6 pt-2 pb-1 px-2 shrink-0">
-        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+        <Text variant="small" className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-normal">
           <span className="w-3 h-3 rounded-full bg-blue-400"></span> Đang xử lý
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+        </Text>
+        <Text variant="small" className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-normal">
           <span className="w-3 h-3 rounded-full bg-emerald-400"></span> Hoàn thành
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+        </Text>
+        <Text variant="small" className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-normal">
           <span className="w-3 h-3 rounded-full bg-rose-400"></span> Trễ hạn
-        </div>
-        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+        </Text>
+        <Text variant="small" className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-normal">
           <span className="w-3 h-3 rounded-full bg-purple-400"></span> Cuộc họp
-        </div>
+        </Text>
       </div>
     </>
   );

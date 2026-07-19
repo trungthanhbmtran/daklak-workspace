@@ -14,6 +14,7 @@ import {
 import { useLogout } from "@/hooks/useLogout";
 import { useUser } from "@/hooks/useUser";
 import { cn } from "@/lib/utils";
+import { Text } from "@/components/ui/typography";
 
 interface HeaderUserProfileProps {
   showName?: boolean;
@@ -47,12 +48,12 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
           </Avatar>
           {showName && (
             <div className="hidden md:flex flex-col items-start text-left">
-              <span className="text-xs text-muted-foreground font-medium mb-1 leading-none">
+              <Text variant="muted" weight="medium" className="mb-1 leading-none">
                 Xin chào,
-              </span>
-              <span className="text-sm font-semibold leading-none truncate max-w-[200px]">
+              </Text>
+              <Text weight="semibold" className="leading-none truncate max-w-[200px]">
                 {fullName}
-              </span>
+              </Text>
             </div>
           )}
         </Button>
@@ -60,16 +61,16 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
       <DropdownMenuContent className="w-56 border-border" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1.5 pb-1">
-            <p className="text-sm font-semibold leading-none text-foreground">{fullName}</p>
-            <p className="text-xs text-muted-foreground leading-none">{email}</p>
+            <Text weight="semibold" className="leading-none">{fullName}</Text>
+            <Text variant="muted" className="leading-none">{email}</Text>
             
             {(user?.jobTitleName || user?.unitName) && (
               <div className="mt-2 flex flex-col space-y-1 border-t border-border/50 pt-2">
                 {user?.jobTitleName && (
-                  <span className="text-xs font-medium text-foreground/80">{user.jobTitleName}</span>
+                  <Text variant="small" weight="medium" className="text-foreground/80">{user.jobTitleName}</Text>
                 )}
                 {user?.unitName && (
-                  <span className="text-[11px] text-muted-foreground leading-snug">{user.unitName}</span>
+                  <Text variant="small" className="text-muted-foreground leading-snug">{user.unitName}</Text>
                 )}
               </div>
             )}
