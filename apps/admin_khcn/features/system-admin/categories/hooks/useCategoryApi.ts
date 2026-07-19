@@ -79,13 +79,34 @@ export function useDeleteCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: categoryApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CATEGORY_KEYS.all });
-      toast.success("Đã xóa danh mục.");
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: CATEGORY_KEYS.all });
+      const previous = queryClient.getQueriesData({ queryKey: CATEGORY_KEYS.all });
+      
+      // Optimistic delete across all category queries
+      queryClient.setQueriesData({ queryKey: CATEGORY_KEYS.all }, (oldData: any) => {
+        if (!oldData) return oldData;
+        if (Array.isArray(oldData)) return oldData.filter((item: any) => item.id !== id);
+        if (oldData.data && Array.isArray(oldData.data)) return { ...oldData, data: oldData.data.filter((item: any) => item.id !== id) };
+        return oldData;
+      });
+
+      return { previous };
     },
-    onError: (err: any) => {
+    onError: (err: any, id, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
       const msg = err?.response?.data?.message || err?.message || "Không thể xóa danh mục.";
       toast.error(msg);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: CATEGORY_KEYS.all });
+    },
+    onSuccess: () => {
+      toast.success("Đã xóa danh mục.");
     },
   });
 }

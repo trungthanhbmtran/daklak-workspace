@@ -94,31 +94,6 @@ export class WorkflowController implements OnModuleInit {
 
   // --- Workflow Definitions ---
 
-  private mapEdges(edges: any[], id: string, code: string) {
-    return (edges || []).map((e: any, i: number) => {
-      let source = e.sourceNodeId;
-      let target = e.targetNodeId;
-
-      if (source) {
-        if (source.startsWith(`${id}_`)) source = source.replace(`${id}_`, '');
-        else if (source.startsWith(`${code}_`)) source = source.replace(`${code}_`, '');
-      }
-
-      if (target) {
-        if (target.startsWith(`${id}_`)) target = target.replace(`${id}_`, '');
-        else if (target.startsWith(`${code}_`)) target = target.replace(`${code}_`, '');
-      }
-
-      return {
-        id: e.id || `edge-${i}`,
-        source,
-        target,
-        label: e.condition || '',
-        data: { ...(e.properties || {}), expression: e.condition }
-      };
-    });
-  }
-
   @Post()
   @ApiOperation({ summary: 'Tạo quy trình mới/phiên bản mới' })
   async create(@Body() body: any) {
@@ -126,43 +101,12 @@ export class WorkflowController implements OnModuleInit {
       name: body.name,
       description: body.description,
       code: body.trigger || body.code,
-      nodes: (body.definition?.nodes || []).map((n: any) => ({
-        nodeKey: n.id,
-        type: n.type,
-        name: n.data?.label || '',
-        x: Math.round(n.position?.x || 0),
-        y: Math.round(n.position?.y || 0),
-        properties: n.data || {}
-      })),
-      edges: (body.definition?.edges || []).map((e: any) => ({
-        sourceNodeId: e.source,
-        targetNodeId: e.target,
-        condition: e.data?.expression || e.label || '',
-        properties: e.data || {}
-      })),
-      variables: body.definition?.variables || [],
+      definition: body.definition || {},
     };
     const result = (await firstValueFrom(
           this.workflowService.CreateWorkflow(payload),
         ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
 
-    // Map response back to frontend expected format
-    if (result) {
-      result.trigger = result.code;
-      result.definition = {
-        nodes: (result.nodes || []).map((n: any) => ({
-          id: n.nodeKey || n.id,
-          type: n.type,
-          position: { x: n.x || 0, y: n.y || 0 },
-          data: { ...n.properties, label: n.name }
-        })),
-        edges: this.mapEdges(result.edges, result.id, result.code),
-        variables: result.variables || [],
-      };
-      delete result.nodes;
-      delete result.edges;
-      delete result.variables;
-    }
     return { data: result };
   }
 
@@ -174,47 +118,13 @@ export class WorkflowController implements OnModuleInit {
       name: body.name,
       description: body.description,
       code: body.trigger || body.code,
+      definition: body.definition || {},
     };
-    if (body.definition) {
-      payload.nodes = (body.definition.nodes || []).map((n: any) => ({
-        nodeKey: n.id,
-        type: n.type,
-        name: n.data?.label || '',
-        x: Math.round(n.position?.x || 0),
-        y: Math.round(n.position?.y || 0),
-        properties: n.data || {}
-      }));
-      payload.edges = (body.definition.edges || []).map((e: any) => ({
-        sourceNodeId: e.source,
-        targetNodeId: e.target,
-        condition: e.data?.expression || e.label || '',
-        properties: e.data || {}
-      }));
-      payload.variables = body.definition.variables || [];
-    }
 
     const result = (await firstValueFrom(
           this.workflowService.UpdateWorkflow(payload),
         ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
 
-    // Map response back to frontend expected format
-    if (result) {
-      result.trigger = result.code;
-      result.definition = {
-        nodes: (result.nodes || []).map((n: any) => ({
-          id: n.nodeKey || n.id,
-          type: n.type,
-          position: { x: n.x || 0, y: n.y || 0 },
-          data: { ...n.properties, label: n.name }
-        })),
-        edges: this.mapEdges(result.edges, result.id, result.code),
-        variables: result.variables || [],
-      };
-      delete result.nodes;
-      delete result.edges;
-      delete result.variables;
-      delete result.code;
-    }
     return { data: result };
   }
 
@@ -227,25 +137,9 @@ export class WorkflowController implements OnModuleInit {
     const result = (await firstValueFrom(
           this.workflowService.ListWorkflows({ skip, take, search }),
         ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
-    const items = (result.items || []).map((item: any) => {
-      item.trigger = item.code;
-      item.definition = {
-        nodes: (item.nodes || []).map((n: any) => ({
-          id: n.nodeKey || n.id,
-          type: n.type,
-          position: { x: n.x || 0, y: n.y || 0 },
-          data: { ...n.properties, label: n.name }
-        })),
-        edges: this.mapEdges(item.edges, item.id, item.code),
-        variables: item.variables || [],
-      };
-      delete item.nodes;
-      delete item.edges;
-      delete item.variables;
-      return item;
-    });
+
     return {
-      data: items,
+      data: result.items || [],
       meta: { total: result.total || 0 },
     };
   }
@@ -256,22 +150,7 @@ export class WorkflowController implements OnModuleInit {
     const result = (await firstValueFrom(
           this.workflowService.FindOneWorkflow({ id }),
         ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
-    if (result) {
-      result.trigger = result.code;
-      result.definition = {
-        nodes: (result.nodes || []).map((n: any) => ({
-          id: n.nodeKey || n.id,
-          type: n.type,
-          position: { x: n.x || 0, y: n.y || 0 },
-          data: { ...n.properties, label: n.name }
-        })),
-        edges: this.mapEdges(result.edges, result.id, result.code),
-        variables: result.variables || [],
-      };
-      delete result.nodes;
-      delete result.edges;
-      delete result.variables;
-    }
+    
     return { data: result };
   }
 
@@ -290,22 +169,6 @@ export class WorkflowController implements OnModuleInit {
     const result = (await firstValueFrom(
           this.workflowService.PublishWorkflow({ id }),
         ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
-    if (result) {
-      result.trigger = result.code;
-      result.definition = {
-        nodes: (result.nodes || []).map((n: any) => ({
-          id: n.nodeKey || n.id,
-          type: n.type,
-          position: { x: n.x || 0, y: n.y || 0 },
-          data: { ...n.properties, label: n.name }
-        })),
-        edges: this.mapEdges(result.edges, result.id, result.code),
-        variables: result.variables || [],
-      };
-      delete result.nodes;
-      delete result.edges;
-      delete result.variables;
-    }
     return { data: result };
   }
 
@@ -315,22 +178,6 @@ export class WorkflowController implements OnModuleInit {
     const result = (await firstValueFrom(
           this.workflowService.ApplyModule({ id, moduleCode: body.moduleCode }),
         ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
-    if (result) {
-      result.trigger = result.code;
-      result.definition = {
-        nodes: (result.nodes || []).map((n: any) => ({
-          id: n.nodeKey || n.id,
-          type: n.type,
-          position: { x: n.x || 0, y: n.y || 0 },
-          data: { ...n.properties, label: n.name }
-        })),
-        edges: this.mapEdges(result.edges, result.id, result.code),
-        variables: result.variables || [],
-      };
-      delete result.nodes;
-      delete result.edges;
-      delete result.variables;
-    }
     return { data: result };
   }
 

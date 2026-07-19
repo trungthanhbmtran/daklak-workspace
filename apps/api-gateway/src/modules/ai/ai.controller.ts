@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AiService } from './ai.service';
-import { ClientProxy, EventPattern } from '@nestjs/microservices';
+import { ClientProxy, EventPattern, RmqContext } from '@nestjs/microservices';
 import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MICROSERVICES } from '../../core/constants/services';

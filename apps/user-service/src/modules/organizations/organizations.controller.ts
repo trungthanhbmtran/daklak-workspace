@@ -192,6 +192,14 @@ export class OrganizationsController {
     };
   }
 
+  @GrpcMethod('OrganizationService', 'GetDescendants')
+  async getDescendants(data: { id: number }) {
+    const res = await this.orgService.getDescendants(data.id);
+    return {
+      ids: res.data || []
+    };
+  }
+
   @GrpcMethod('OrganizationService', 'SetStaffing')
   async setStaffing(data: {
     unitId: number;

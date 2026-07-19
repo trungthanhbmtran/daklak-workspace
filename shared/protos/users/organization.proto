@@ -10,6 +10,7 @@ service OrganizationService {
   rpc DeleteUnit (DeleteUnitRequest) returns (DeleteUnitResponse);
   rpc GetFullTree (Empty) returns (OrganizationTreeResponse);
   rpc GetSubTree (GetSubTreeRequest) returns (OrganizationTreeResponse);
+  rpc GetDescendants (GetDescendantsRequest) returns (GetDescendantsResponse);
   rpc GetOrganizations (GetOrganizationsRequest) returns (OrganizationTreeResponse);
   rpc SetStaffing (SetStaffingRequest) returns (StaffingResponse);
   rpc GetStaffingReport (GetStaffingReportRequest) returns (StaffingReportResponse);
@@ -205,4 +206,12 @@ message ListUnitTypesResponse {
 
 message ListJobTitlesResponse {
   repeated JobTitleItem items = 1;
+}
+
+message GetDescendantsRequest {
+  int32 id = 1;
+}
+
+message GetDescendantsResponse {
+  repeated int32 ids = 1;
 }

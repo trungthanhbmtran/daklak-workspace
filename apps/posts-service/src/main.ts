@@ -52,6 +52,8 @@ async function bootstrap() {
       options: {
         urls: [rabbitUrl],
         queue: 'translation_response',
+        prefetchCount: 10,
+        noAck: false,
         queueOptions: {
           durable: false,
         },

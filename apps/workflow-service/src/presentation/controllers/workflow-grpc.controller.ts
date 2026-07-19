@@ -21,12 +21,15 @@ export class WorkflowGrpcController {
     version?: number;
     status?: string;
     createdBy?: string;
-    nodes?: any[];
-    edges?: any[];
-    variables?: any[];
+    definition?: any;
   }) {
     try {
       console.log('[WorkflowService] Creating workflow:', data.code);
+
+      const parsed = this.parseProtoStruct(data.definition || {});
+      const nodes = parsed.nodes || [];
+      const edges = parsed.edges || [];
+      const variables = parsed.variables || [];
 
       const workflow = await this.prisma.workflowDefinition.create({
         data: {
@@ -37,23 +40,23 @@ export class WorkflowGrpcController {
           status: data.status || 'Draft',
           createdBy: data.createdBy,
           nodes: {
-            create: (data.nodes || []).map(n => ({
-              id: `${data.code}_${n.nodeKey}`,
-              nodeKey: n.nodeKey,
+            create: nodes.map((n: any) => ({
+              id: `${data.code}_${n.id}`,
+              nodeKey: n.id,
               type: n.type,
-              name: n.name,
-              x: n.x || 0,
-              y: n.y || 0,
-              properties: n.properties || {},
+              name: n.data?.label || '',
+              x: Math.round(n.position?.x || 0),
+              y: Math.round(n.position?.y || 0),
+              properties: n.data || {},
               order: n.order || 0,
               assignments: {
-                create: (n.assignments || []).map(a => ({
+                create: (n.assignments || []).map((a: any) => ({
                   type: a.type,
                   value: a.value
                 }))
               },
               actions: {
-                create: (n.actions || []).map(a => ({
+                create: (n.actions || []).map((a: any) => ({
                   actionType: a.actionType,
                   service: a.service,
                   action: a.action,
@@ -64,17 +67,17 @@ export class WorkflowGrpcController {
             }))
           },
           edges: {
-            create: (data.edges || []).map(e => ({
-              sourceNodeId: `${data.code}_${e.sourceNodeId}`,
-              targetNodeId: `${data.code}_${e.targetNodeId}`,
-              condition: e.condition,
-              properties: e.properties || {},
+            create: edges.map((e: any) => ({
+              sourceNodeId: `${data.code}_${e.source}`,
+              targetNodeId: `${data.code}_${e.target}`,
+              condition: e.data?.expression || e.label || '',
+              properties: e.data || {},
               priority: e.priority || 0,
               defaultFlow: e.defaultFlow || false
             }))
           },
           variables: {
-            create: (data.variables || []).map(v => ({
+            create: variables.map((v: any) => ({
               key: v.key,
               type: v.type,
               defaultValue: v.defaultValue || {}
@@ -102,15 +105,17 @@ export class WorkflowGrpcController {
     description?: string;
     version?: number;
     status?: string;
-    nodes?: any[];
-    edges?: any[];
-    variables?: any[];
+    definition?: any;
   }) {
     try {
       console.log('[WorkflowService] Updating workflow:', data.id);
 
-      // Simple implementation: delete related and recreate if nodes/edges provided
-      if ((data.nodes && data.nodes.length > 0) || (data.edges && data.edges.length > 0)) {
+      const parsed = this.parseProtoStruct(data.definition || {});
+      const nodes = parsed.nodes;
+      const edges = parsed.edges;
+      const variables = parsed.variables;
+
+      if ((nodes && nodes.length > 0) || (edges && edges.length > 0)) {
         await this.prisma.workflowNode.deleteMany({ where: { workflowId: data.id } });
         await this.prisma.workflowEdge.deleteMany({ where: { workflowId: data.id } });
         await this.prisma.workflowVariable.deleteMany({ where: { workflowId: data.id } });
@@ -124,25 +129,25 @@ export class WorkflowGrpcController {
           description: data.description || undefined,
           version: data.version || undefined,
           status: data.status || undefined,
-          ...(data.nodes && data.nodes.length > 0 ? {
+          ...(nodes && nodes.length > 0 ? {
             nodes: {
-              create: data.nodes.map(n => ({
-                id: `${data.id}_${n.nodeKey}`,
-                nodeKey: n.nodeKey,
+              create: nodes.map((n: any) => ({
+                id: `${data.id}_${n.id}`,
+                nodeKey: n.id,
                 type: n.type,
-                name: n.name,
-                x: n.x || 0,
-                y: n.y || 0,
-                properties: n.properties || {},
+                name: n.data?.label || '',
+                x: Math.round(n.position?.x || 0),
+                y: Math.round(n.position?.y || 0),
+                properties: n.data || {},
                 order: n.order || 0,
                 assignments: {
-                  create: (n.assignments || []).map(a => ({
+                  create: (n.assignments || []).map((a: any) => ({
                     type: a.type,
                     value: a.value
                   }))
                 },
                 actions: {
-                  create: (n.actions || []).map(a => ({
+                  create: (n.actions || []).map((a: any) => ({
                     actionType: a.actionType,
                     service: a.service,
                     action: a.action,
@@ -153,21 +158,21 @@ export class WorkflowGrpcController {
               }))
             }
           } : {}),
-          ...(data.edges && data.edges.length > 0 ? {
+          ...(edges && edges.length > 0 ? {
             edges: {
-              create: data.edges.map(e => ({
-                sourceNodeId: `${data.id}_${e.sourceNodeId}`,
-                targetNodeId: `${data.id}_${e.targetNodeId}`,
-                condition: e.condition,
-                properties: e.properties || {},
+              create: edges.map((e: any) => ({
+                sourceNodeId: `${data.id}_${e.source}`,
+                targetNodeId: `${data.id}_${e.target}`,
+                condition: e.data?.expression || e.label || '',
+                properties: e.data || {},
                 priority: e.priority || 0,
                 defaultFlow: e.defaultFlow || false
               }))
             }
           } : {}),
-          ...(data.variables ? {
+          ...(variables ? {
             variables: {
-              create: data.variables.map(v => ({
+              create: variables.map((v: any) => ({
                 key: v.key,
                 type: v.type,
                 defaultValue: v.defaultValue || {}
@@ -382,8 +387,6 @@ export class WorkflowGrpcController {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
   }
-
-
 
   @GrpcMethod('WorkflowService', 'ListInstances')
   async listInstances(data: { skip?: number; take?: number; workflowId?: string; status?: string; search?: string }) {
@@ -656,10 +659,52 @@ export class WorkflowGrpcController {
     return value;
   }
 
+  private mapEdges(edges: any[], id: string, code: string) {
+    return (edges || []).map((e: any, i: number) => {
+      let source = e.sourceNodeId;
+      let target = e.targetNodeId;
+
+      if (source) {
+        if (source.startsWith(`${id}_`)) source = source.replace(`${id}_`, '');
+        else if (source.startsWith(`${code}_`)) source = source.replace(`${code}_`, '');
+      }
+
+      if (target) {
+        if (target.startsWith(`${id}_`)) target = target.replace(`${id}_`, '');
+        else if (target.startsWith(`${code}_`)) target = target.replace(`${code}_`, '');
+      }
+
+      return {
+        id: e.id || `edge-${i}`,
+        source,
+        target,
+        label: e.condition || '',
+        data: { ...(e.properties || {}), expression: e.condition }
+      };
+    });
+  }
+
   private mapWorkflow(w: any): any {
+    const definition = {
+      nodes: (w.nodes || []).map((n: any) => ({
+        id: n.nodeKey || n.id,
+        type: n.type,
+        position: { x: n.x || 0, y: n.y || 0 },
+        data: { ...n.properties, label: n.name }
+      })),
+      edges: this.mapEdges(w.edges, w.id, w.code),
+      variables: (w.variables || []).map((v: any) => ({
+        id: v.id,
+        key: v.key,
+        type: v.type,
+        defaultValue: v.defaultValue || {}
+      }))
+    };
+
     return {
       id: w.id,
       code: w.code,
+      trigger: w.code, // trigger = code
       name: w.name,
       description: w.description || '',
       version: w.version || 1,
@@ -667,33 +712,7 @@ export class WorkflowGrpcController {
       createdBy: w.createdBy || '',
       createdAt: w.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: w.updatedAt?.toISOString() || new Date().toISOString(),
-      nodes: (w.nodes || []).map((n: any) => ({
-        id: n.id,
-        nodeKey: n.nodeKey,
-        type: n.type,
-        name: n.name,
-        x: n.x,
-        y: n.y,
-        propertiesJson: n.properties ? JSON.stringify(n.properties) : '{}',
-        order: n.order,
-        assignments: (n.assignments || []).map((a: any) => ({ id: a.id, type: a.type, value: a.value })),
-        actions: (n.actions || []).map((a: any) => ({ id: a.id, actionType: a.actionType, service: a.service, action: a.action, payloadTemplate: a.payloadTemplate || {}, order: a.order }))
-      })),
-      edges: (w.edges || []).map((e: any) => ({
-        id: e.id,
-        sourceNodeId: e.sourceNodeId,
-        targetNodeId: e.targetNodeId,
-        condition: e.condition || '',
-        propertiesJson: e.properties ? JSON.stringify(e.properties) : '{}',
-        priority: e.priority,
-        defaultFlow: e.defaultFlow
-      })),
-      variables: (w.variables || []).map((v: any) => ({
-        id: v.id,
-        key: v.key,
-        type: v.type,
-        defaultValue: v.defaultValue || {}
-      }))
+      definition: definition
     };
   }
 }

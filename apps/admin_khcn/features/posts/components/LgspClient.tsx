@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, Send, FileText, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import apiClient from "@/lib/axiosInstance";
 import { Heading, Text } from "@/components/ui/typography";
 
 
@@ -23,28 +23,28 @@ export function LgspClient() {
   } = useQuery({
     queryKey: ["lgsp-documents"],
     queryFn: async () => {
-      const res = await axios.get("/api/admin/integrations/documents/sync", {
+      const res: any = await apiClient.get("/admin/integrations/documents/sync", {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" },
       });
-      if (res.data?.success) {
-        return res.data.data || [];
+      if (res.success) {
+        return res.data || [];
       }
-      throw new Error(res.data?.message || "Không thể đồng bộ văn bản.");
+      throw new Error(res.message || "Không thể đồng bộ văn bản.");
     },
     staleTime: 60_000,
   });
 
   const sendMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const response = await axios.post(
-        "/api/admin/integrations/documents/send",
+      const response: any = await apiClient.post(
+        "/admin/integrations/documents/send",
         payload,
         { params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" } }
       );
-      if (!response.data?.success) {
-        throw new Error(response.data?.message || "Không thể gửi văn bản.");
+      if (!response.success) {
+        throw new Error(response.message || "Không thể gửi văn bản.");
       }
-      return response.data;
+      return response;
     },
     onSuccess: () => {
       toast.success("Gửi thành công: Văn bản đã được đẩy lên trục LGSP.");

@@ -49,32 +49,27 @@ export class KpisController implements OnModuleInit {
     );
   }
 
+  // Gateway Aggregation: Chỉ dùng để map departmentName
   private async getUnitMap(): Promise<Record<number, any>> {
     if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
       return this.unitMapCache.data;
     try {
-      const treeRes: any = await firstValueFrom(
-        this.orgService.GetFullTree({}),
+      const orgRes: any = await firstValueFrom(
+        this.orgService.GetOrganizations({}),
       );
       const unitMap: Record<number, any> = {};
-      const flattenNodes = (nodes: any[]) => {
-        for (const n of nodes) {
-          const nId = parseInt(n.id, 10);
-          if (nId) {
-            unitMap[nId] = {
-              id: nId,
-              name: n.name || n.title || `Đơn vị #${nId}`,
-              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
-              isLeaf: n.isLeaf ?? !n.children?.length,
-              directChildIds: (n.children || [])
-                .map((c: any) => parseInt(c.id, 10))
-                .filter(Boolean),
-            };
-          }
-          if (n.children && n.children.length > 0) flattenNodes(n.children);
+      
+      (orgRes?.nodes || []).forEach((n: any) => {
+        const nId = parseInt(n.id, 10);
+        if (nId) {
+          unitMap[nId] = {
+            id: nId,
+            name: n.name,
+            code: n.code,
+          };
         }
-      };
-      flattenNodes(treeRes?.nodes || []);
+      });
+
       this.unitMapCache = {
         data: unitMap,
         expiresAt: Date.now() + 5 * 60 * 1000,
@@ -83,22 +78,6 @@ export class KpisController implements OnModuleInit {
     } catch {
       return {};
     }
-  }
-
-  private getDescendantUnitIds(
-    unitMap: Record<number, any>,
-    unitId: number,
-  ): Set<number> {
-    const ids = new Set<number>();
-    const dfs = (id: number) => {
-      ids.add(id);
-      const node = unitMap[id];
-      if (node && node.directChildIds) {
-        for (const childId of node.directChildIds) dfs(childId);
-      }
-    };
-    dfs(unitId);
-    return ids;
   }
 
   @Get('periods')
@@ -190,12 +169,16 @@ export class KpisController implements OnModuleInit {
     const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE');
 
     let callerDescendantUnitIds: number[] = [];
+    
+    // GỌI TRỰC TIẾP MICROSERVICE (GetDescendants) thay vì tính toán DFS trong API Gateway
     if (!isAdmin && user?.unitId) {
       const callerUnitId = parseInt(user.unitId, 10);
-      const unitMap = await this.getUnitMap();
-      callerDescendantUnitIds = Array.from(
-        this.getDescendantUnitIds(unitMap, callerUnitId),
-      );
+      try {
+        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: callerUnitId }));
+        callerDescendantUnitIds = descRes.ids || [];
+      } catch (e) {
+        callerDescendantUnitIds = [];
+      }
     }
 
     return firstValueFrom(
@@ -223,11 +206,15 @@ export class KpisController implements OnModuleInit {
       console.error('Failed to get unit map', e);
     }
 
+    // GỌI TRỰC TIẾP MICROSERVICE (GetDescendants) thay vì tính toán DFS trong API Gateway
     if (!isAdmin && user?.unitId) {
       const callerUnitId = parseInt(user.unitId, 10);
-      callerDescendantUnitIds = Array.from(
-        this.getDescendantUnitIds(unitMap, callerUnitId),
-      );
+      try {
+        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: callerUnitId }));
+        callerDescendantUnitIds = descRes.ids || [];
+      } catch (e) {
+        callerDescendantUnitIds = [];
+      }
     }
 
     const res: any = await firstValueFrom(

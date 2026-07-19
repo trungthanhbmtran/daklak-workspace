@@ -356,6 +356,33 @@ export class OrganizationsService {
     return result;
   }
 
+  // Lấy tất cả IDs của con cháu (bao gồm chính nó)
+  async getDescendants(rootId: number) {
+    const root = await this.prisma.organizationUnit.findUnique({
+      where: { id: rootId },
+      select: { code: true, hierarchyPath: true, id: true }
+    });
+    if (!root) {
+      return { data: [] };
+    }
+
+    const units = await this.prisma.organizationUnit.findMany({
+      where: {
+        OR: [
+          { id: rootId },
+          {
+            hierarchyPath: {
+              startsWith: (root.code || root.hierarchyPath || '') + '.',
+            },
+          },
+        ],
+      },
+      select: { id: true }
+    });
+
+    return { data: units.map(u => u.id) };
+  }
+
   // --- 2. QUẢN LÝ ĐỊNH BIÊN (STAFFING) ---
 
   // Thiết lập định biên cho đơn vị

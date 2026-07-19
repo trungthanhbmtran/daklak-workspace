@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import axios from "axios";
+import apiClient from "@/lib/axiosInstance";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -56,12 +56,9 @@ export function LoginClient() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       try {
-        // Gọi trực tiếp API qua proxy để Gateway set cookies
-        await axios.post(`${API_BASE_URL}/auth/login`, {
+        await apiClient.post(`/auth/login`, {
           username: values.username,
           password: values.password,
-        }, {
-          withCredentials: true // Quan trọng để nhận cookies
         });
 
         toast.success("Đăng nhập thành công! Đang chuyển hướng...");

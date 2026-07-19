@@ -80,8 +80,12 @@ async function bootstrap() {
         process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672',
       ],
       queue: 'ai_tasks_queue',
+      noAck: false,
+      prefetchCount: 10,
       queueOptions: {
         durable: true,
+        deadLetterExchange: 'dlx_exchange',
+        deadLetterRoutingKey: 'ai_tasks_queue',
       },
     },
   });
@@ -93,8 +97,12 @@ async function bootstrap() {
         process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672',
       ],
       queue: 'gateway_queue',
+      noAck: false,
+      prefetchCount: 50,
       queueOptions: {
         durable: true,
+        deadLetterExchange: 'dlx_exchange',
+        deadLetterRoutingKey: 'gateway_queue',
       },
     },
   });

@@ -1,5 +1,5 @@
-import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
-import { EventPattern, Payload } from '@nestjs/microservices';
+import { Controller, Get, Patch, Param, Req, UseGuards, Query } from '@nestjs/common';
+import { EventPattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -23,16 +23,25 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Danh sách thông báo in-app cho user đăng nhập' })
   @ApiResponse({
     status: 200,
-    description: 'Mảng thông báo (id, title, body, createdAt, read)',
+    description: 'Mảng thông báo (id, title, body, createdAt, read) kèm pagination',
   })
-  list(@Req() req: { user?: { id?: string | number; employeeCode?: string; email?: string } }) {
+  list(
+    @Req() req: { user?: { id?: string | number; employeeCode?: string; email?: string } },
+    @Query('page') pageStr?: string,
+    @Query('limit') limitStr?: string,
+  ) {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
     const email = req.user?.email;
+    const page = pageStr ? parseInt(pageStr, 10) : 1;
+    const limit = limitStr ? parseInt(limitStr, 10) : 50;
+    
     return this.notificationsService.listByUserOrEmployeeCode(
       userId,
       employeeCode,
       email,
+      page,
+      limit
     );
   }
 

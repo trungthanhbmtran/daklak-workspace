@@ -175,39 +175,20 @@ export class DocumentService {
   async getStatistics() {
     const now = new Date();
     
-    // Thuật toán Single-Pass Bucketing: Lấy các trường tối giản và duyệt 1 lần trên RAM
-    const documents = await this.prisma.document.findMany({
-      select: {
-        isIncoming: true,
-        status: true,
-        urgency: true,
-        processingDeadline: true,
-      }
-    });
-
-    let incomingTotal = 0;
-    let incomingPending = 0;
-    let incomingLate = 0;
-    let outgoingTotal = 0;
-    let urgentTotal = 0;
-
-    for (const doc of documents) {
-      if (doc.isIncoming) {
-        incomingTotal++;
-        if (doc.status === 'PROCESSING') {
-          incomingPending++;
-          if (doc.processingDeadline && doc.processingDeadline < now) {
-            incomingLate++;
-          }
-        }
-      } else {
-        outgoingTotal++;
-      }
-
-      if (doc.status === 'PROCESSING' && (doc.urgency === 'URGENT' || doc.urgency === 'FLASH')) {
-        urgentTotal++;
-      }
-    }
+    // Tối ưu thuật toán: Đẩy việc đếm (count) xuống tầng Database thay vì kéo toàn bộ dữ liệu lên RAM
+    const [
+      incomingTotal,
+      incomingPending,
+      incomingLate,
+      outgoingTotal,
+      urgentTotal
+    ] = await Promise.all([
+      this.prisma.document.count({ where: { isIncoming: true } }),
+      this.prisma.document.count({ where: { isIncoming: true, status: 'PROCESSING' } }),
+      this.prisma.document.count({ where: { isIncoming: true, status: 'PROCESSING', processingDeadline: { lt: now } } }),
+      this.prisma.document.count({ where: { isIncoming: false } }),
+      this.prisma.document.count({ where: { status: 'PROCESSING', urgency: { in: ['URGENT', 'FLASH'] } } })
+    ]);
 
     return {
       incomingTotal,

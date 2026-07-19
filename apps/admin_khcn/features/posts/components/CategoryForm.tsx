@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import apiClient from "@/lib/axiosInstance";
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heading, Text } from "@/components/ui/typography";
@@ -157,18 +158,11 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       // For now, let's assume postsApi has a generic upload request or we use the specific media one
       // Since postsApi doesn't have it, we use a custom one or add it to postsApi
 
-      const res: any = await axios.post("/api/v1/admin/media/request-upload", {
+      const uploadInfo: any = await apiClient.post("/admin/media/request-upload", {
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
-      }, {
-        headers: {
-          // Auth is handled by axiosInstance if we used it, but here we use base axios
-          // In this project, apiClient (axiosInstance) should be used
-        }
       });
-
-      const uploadInfo = res.data;
 
       // 2. Upload to MinIO (via Nginx proxy /media)
       await axios.put(uploadInfo.uploadUrl, file, {
@@ -177,11 +171,11 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       });
 
       // 3. Confirm
-      const confirmRes = await axios.post("/api/v1/admin/media/confirm-upload", {
+      const confirmRes: any = await apiClient.post("/admin/media/confirm-upload", {
         fileId: uploadInfo.fileId
       });
 
-      form.setValue("attachmentId", confirmRes.data.id, { shouldDirty: true });
+      form.setValue("attachmentId", confirmRes.id, { shouldDirty: true });
       toast.success("Tải lên văn bản thành công!");
     } catch (error) {
       console.error(error);

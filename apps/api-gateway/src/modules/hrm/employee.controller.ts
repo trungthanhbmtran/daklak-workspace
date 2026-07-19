@@ -49,9 +49,6 @@ export class EmployeeController implements OnModuleInit {
     );
   }
 
-  /**
-   * Lấy danh sách map của JobTitle và Unit từ user-service
-   */
   private async fetchDictionaries() {
     if (this.dictCache && this.dictCache.expiresAt > Date.now()) {
       return this.dictCache.data;
@@ -59,13 +56,13 @@ export class EmployeeController implements OnModuleInit {
     try {
       const results = await Promise.allSettled([
         firstValueFrom(this.orgService.ListJobTitles({})),
-        firstValueFrom(this.orgService.GetFullTree({})),
+        firstValueFrom(this.orgService.GetOrganizations({})),
         firstValueFrom(this.catService.GetAllCategories({})),
       ]);
 
       const jobTitlesRes: any =
         results[0].status === 'fulfilled' ? results[0].value : { items: [] };
-      const treeRes: any =
+      const orgRes: any =
         results[1].status === 'fulfilled' ? results[1].value : { nodes: [] };
       const catRes: any =
         results[2].status === 'fulfilled' ? results[2].value : { data: [] };
@@ -86,29 +83,17 @@ export class EmployeeController implements OnModuleInit {
         catMap[c.id] = { name: c.name, code: c.code };
       });
 
-      // unitMap: lưu thông tin node kèm isLeaf + directChildIds từ proto (không cần tự tính)
       const unitMap: Record<number, any> = {};
-      const flattenNodes = (nodes: any[]) => {
-        for (const n of nodes) {
-          const nId = parseInt(n.id, 10);
-          if (nId) {
-            unitMap[nId] = {
-              id: nId, // BUG FIX: cần field id để filter descendantUnitIds
-              name: n.name,
-              code: n.code,
-              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
-              domainIds: n.domainIds || [],
-              isLeaf: n.isLeaf ?? !n.children?.length,
-              depth: n.depth ?? 0,
-              directChildIds: (n.children || [])
-                .map((c: any) => parseInt(c.id, 10))
-                .filter(Boolean),
-            };
-          }
-          if (n.children?.length) flattenNodes(n.children);
+      (orgRes?.nodes || []).forEach((n: any) => {
+        const nId = parseInt(n.id, 10);
+        if (nId) {
+          unitMap[nId] = {
+            id: nId,
+            name: n.name,
+            code: n.code,
+          };
         }
-      };
-      flattenNodes(treeRes?.nodes || []);
+      });
 
       const data = { jtMap, unitMap, catMap };
       this.dictCache = {
@@ -122,9 +107,6 @@ export class EmployeeController implements OnModuleInit {
     }
   }
 
-  /**
-   * Ánh xạ thông tin chức danh, phòng ban vào nhân viên
-   */
   private enrichEmployee(
     emp: any,
     jtMap: Record<string, any>,
@@ -152,28 +134,6 @@ export class EmployeeController implements OnModuleInit {
     };
   }
 
-  /**
-   * Lấy tất cả unitId cấp dưới (bao gồm cả chính nó) từ một unitId cho trước.
-   * Duyệt theo mã đơn vị (code prefix) hoặc theo parentId.
-   */
-  private getDescendantUnitIds(
-    unitMap: Record<number, any>,
-    unitId: number,
-  ): Set<number> {
-    const callerUnit = unitMap[unitId];
-    if (!callerUnit) return new Set();
-    const callerCode: string = callerUnit.code || '';
-    return new Set<number>(
-      Object.values(unitMap)
-        .filter(
-          (u: any) =>
-            u.code === callerCode || u.code.startsWith(callerCode + '.'),
-        )
-        .map((u: any) => u.id)
-        .filter(Boolean),
-    );
-  }
-
   @Get()
   async list(@Query() query: any, @Req() request: any) {
     const req = { ...query };
@@ -184,7 +144,6 @@ export class EmployeeController implements OnModuleInit {
       req.civilServantRankId = parseInt(req.civilServantRankId);
     if (req.partyTitleId) req.partyTitleId = parseInt(req.partyTitleId);
 
-    // Truyền ngữ cảnh người dùng hiện tại từ access token (PBAC)
     const user = request.user;
     if (user) {
       req.callerEmail = user.email;
@@ -194,38 +153,33 @@ export class EmployeeController implements OnModuleInit {
       req.callerUserId = user.id;
     }
 
-    // Convert boolean flag
     if (req.assignableOnly === 'true' || req.assignableOnly === true)
       req.assignableOnly = true;
     if (req.crossDepartment === 'true' || req.crossDepartment === true)
       req.crossDepartment = true;
 
     const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
-    let descendantUnitIdsArray: number[] = [];
     
-    // Fetch dictionaries early to get unitMap for descendant calculation
-    const dicts = await this.fetchDictionaries();
-
+    // GỌI TRỰC TIẾP MICROSERVICE (GetDescendants) thay vì Gateway Aggregation & Tính toán
     if (req.callerUnitId && !isAdmin) {
       const callerUnitId = parseInt(req.callerUnitId, 10);
-      const descendantUnitIds = this.getDescendantUnitIds(
-        dicts.unitMap,
-        callerUnitId,
-      );
-      descendantUnitIdsArray = Array.from(descendantUnitIds);
-      
-      req.descendantUnitIds = descendantUnitIdsArray;
+      try {
+        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: callerUnitId }));
+        req.descendantUnitIds = descRes.ids || [];
+      } catch (e) {
+        req.descendantUnitIds = [];
+      }
       req.excludeEmployeeCode = req.callerEmployeeCode;
     }
 
-    const res: any = await firstValueFrom(this.employeeService.ListEmployees(req)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    const dicts = await this.fetchDictionaries();
+
+    const res: any = await firstValueFrom(this.employeeService.ListEmployees(req)).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; });
 
     if (res && res.data) {
       res.data = res.data.map((e: any) =>
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
-
-
     }
 
     if (res) {
@@ -243,10 +197,10 @@ export class EmployeeController implements OnModuleInit {
     return res;
   }
 
-  @Get(':id')
-  async getDetail(@Param('id') id: string) {
+  @Get(":id")
+  async getDetail(@Param("id") id: string) {
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; }),
+      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; }),
       this.fetchDictionaries(),
     ]);
 
@@ -264,7 +218,7 @@ export class EmployeeController implements OnModuleInit {
   @Post()
   async create(@Body() body: any) {
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.CreateEmployee(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; }),
+      firstValueFrom(this.employeeService.CreateEmployee(body)).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; }),
       this.fetchDictionaries(),
     ]);
 
@@ -279,11 +233,11 @@ export class EmployeeController implements OnModuleInit {
     return res;
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
+  @Put(":id")
+  async update(@Param("id") id: string, @Body() body: any) {
     const payload = { ...body, id: parseInt(id) };
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.UpdateEmployee(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; }),
+      firstValueFrom(this.employeeService.UpdateEmployee(payload)).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; }),
       this.fetchDictionaries(),
     ]);
 
@@ -298,10 +252,10 @@ export class EmployeeController implements OnModuleInit {
     return res;
   }
 
-  @Delete(':id')
-  async delete(@Param('id') id: string) {
+  @Delete(":id")
+  async delete(@Param("id") id: string) {
     return firstValueFrom(
           this.employeeService.DeleteEmployee({ id: parseInt(id) }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+        ).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

@@ -148,16 +148,32 @@ async function startConsumer() {
     throw lastErr || new Error('RabbitMQ connection failed');
   }
   channel = await connection.createChannel();
-  await channel.assertQueue(queueName, { durable: true });
+  
+  // Tối ưu hoá RabbitMQ: Cấu hình DLX (Dead Letter Exchange)
+  const dlxExchange = 'dlx_notifications';
+  const dlxQueue = 'dlx_notifications_queue';
+  await channel.assertExchange(dlxExchange, 'direct', { durable: true });
+  await channel.assertQueue(dlxQueue, { durable: true });
+  await channel.bindQueue(dlxQueue, dlxExchange, queueName);
+
+  await channel.assertQueue(queueName, { 
+    durable: true,
+    deadLetterExchange: dlxExchange,
+    deadLetterRoutingKey: queueName
+  });
+  
+  // Tối ưu hoá RabbitMQ: Cấu hình Prefetch
   channel.prefetch(50);
-  console.log(`[Notification] Consuming queue: ${queueName}`);
+  console.log(`[Notification] Consuming queue: ${queueName} with DLX enabled`);
   channel.consume(queueName, async (msg) => {
     if (!msg) return;
     try {
       await handleMessage(msg);
-      channel.ack(msg);
+      channel.ack(msg); // Manual ACK
     } catch (err) {
-      channel.nack(msg, false, true);
+      console.error('[Notification] Error handling message, sending to DLX:', err.message);
+      // NACK với requeue=false để đẩy message sang DLX
+      channel.nack(msg, false, false);
     }
   }, { noAck: false });
   connection.on('close', () => { connection = null; channel = null; });

@@ -58,9 +58,7 @@ message CreateWorkflowRequest {
   int32 version = 4;
   string status = 5;
   string createdBy = 6;
-  repeated WorkflowNode nodes = 7;
-  repeated WorkflowEdge edges = 8;
-  repeated WorkflowVariable variables = 9;
+  google.protobuf.Struct definition = 7;
 }
 
 message UpdateWorkflowRequest {
@@ -70,9 +68,7 @@ message UpdateWorkflowRequest {
   string description = 4;
   int32 version = 5;
   string status = 6;
-  repeated WorkflowNode nodes = 7;
-  repeated WorkflowEdge edges = 8;
-  repeated WorkflowVariable variables = 9;
+  google.protobuf.Struct definition = 7;
 }
 
 message FindOneWorkflowRequest {
@@ -112,9 +108,8 @@ message WorkflowResponse {
   string createdBy = 7;
   string createdAt = 8;
   string updatedAt = 9;
-  repeated WorkflowNode nodes = 10;
-  repeated WorkflowEdge edges = 11;
-  repeated WorkflowVariable variables = 12;
+  google.protobuf.Struct definition = 10;
+  string trigger = 11;
 }
 
 message WorkflowNode {
