@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo } from 'react';
 import { 
   format, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
+  startOfMonth, endOfMonth, 
+  startOfQuarter, endOfQuarter,
+  startOfYear, endOfYear,
+  startOfWeek, endOfWeek, 
   isSameMonth, 
   isToday,
   addDays,
@@ -14,12 +13,15 @@ import {
 } from "date-fns";
 import { CheckCircle2, Clock, Video } from 'lucide-react';
 import { Text } from '@/components/ui/typography';
+import { isHoliday } from '@/lib/holidays';
 
 interface CalendarGridProps {
   currentDate: Date;
   filteredEvents: any[];
   isLoading: boolean;
+  viewMode?: 'month' | 'quarter' | 'year' | 'week' | 'day';
   onSelectDayEvents: (data: { day: Date, events: any[] }) => void;
+  onDateClick?: (date: Date) => void;
 }
 
 const WEEK_DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -28,13 +30,25 @@ export const CalendarGrid = React.memo(function CalendarGrid({
   currentDate,
   filteredEvents,
   isLoading,
-  onSelectDayEvents
+  viewMode = 'month',
+  onSelectDayEvents,
+  onDateClick
 }: CalendarGridProps) {
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday start
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  let viewStart: Date, viewEnd: Date;
+  if (viewMode === 'quarter') {
+    viewStart = startOfQuarter(currentDate);
+    viewEnd = endOfQuarter(currentDate);
+  } else if (viewMode === 'year') {
+    viewStart = startOfYear(currentDate);
+    viewEnd = endOfYear(currentDate);
+  } else {
+    viewStart = startOfMonth(currentDate);
+    viewEnd = endOfMonth(currentDate);
+  }
+
+  const startDate = startOfWeek(viewStart, { weekStartsOn: 1 }); // Monday start
+  const endDate = endOfWeek(viewEnd, { weekStartsOn: 1 });
   const dateFormat = "d";
 
   const rows = useMemo(() => {
@@ -99,26 +113,42 @@ export const CalendarGrid = React.memo(function CalendarGrid({
                return eS <= cur && cur <= eE;
           });
 
+          const holiday = isHoliday(cloneDay);
+          // For quarter and year, we consider the whole view as "current"
+          const isCurrentView = cloneDay >= startOfDay(viewStart) && cloneDay <= startOfDay(viewEnd);
+
           days.push(
             <div 
               key={cloneDay.toString()} 
-              className={`flex flex-col p-2 border-r border-b border-slate-200 dark:border-slate-800 transition-colors
-                ${!isSameMonth(cloneDay, monthStart) ? "bg-slate-50/50 dark:bg-slate-900/20" : "bg-white dark:bg-slate-900"}
-                ${isToday(cloneDay) && isSameMonth(cloneDay, monthStart) ? "bg-indigo-50/30 dark:bg-indigo-900/10" : ""}
+              className={`flex flex-col p-2 border-r border-b border-border transition-colors cursor-pointer hover:bg-muted/50
+                ${!isCurrentView ? "bg-muted/30" : 
+                  holiday ? "bg-rose-50/50 dark:bg-rose-900/10" : "bg-background"}
+                ${isToday(cloneDay) && isCurrentView ? "bg-primary/5 ring-1 ring-inset ring-primary/20" : ""}
               `}
+              onClick={() => onDateClick && onDateClick(cloneDay)}
             >
-              {isSameMonth(cloneDay, monthStart) && (
-                <div className="flex items-center justify-between shrink-0 z-10 relative">
-                  <Text as="span" variant="small" weight="medium" className={`w-7 h-7 flex items-center justify-center rounded-full ${isToday(cloneDay) ? "bg-indigo-600 text-white" : "text-slate-700 dark:text-slate-300"} `}>
-                    {formattedDate}
-                  </Text>
-                  {dayEvents.length > 0 && (
-                    <button 
-                      onClick={() => onSelectDayEvents({ day: cloneDay, events: dayEvents })}
-                      className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/50 dark:text-indigo-300 transition-colors cursor-pointer"
-                    >
-                      Xem chi tiết ({dayEvents.length})
-                    </button>
+              {isCurrentView && (
+                <div className="flex flex-col z-10 relative h-full">
+                  <div className="flex items-center justify-between shrink-0">
+                    <Text as="span" variant="small" weight="medium" className={`w-7 h-7 flex items-center justify-center rounded-full ${
+                      isToday(cloneDay) ? "bg-primary text-primary-foreground" : 
+                      holiday ? "text-rose-600 dark:text-rose-400 font-bold" :
+                      "text-foreground"} `}>
+                      {formattedDate}
+                    </Text>
+                    {dayEvents.length > 0 && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onSelectDayEvents({ day: cloneDay, events: dayEvents }); }}
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                      >
+                        Xem ({dayEvents.length})
+                      </button>
+                    )}
+                  </div>
+                  {holiday && (
+                    <div className="text-[10px] text-rose-500/80 font-medium truncate mt-1 pointer-events-none" title={holiday.name}>
+                      {holiday.name}
+                    </div>
                   )}
                 </div>
               )}
@@ -128,7 +158,7 @@ export const CalendarGrid = React.memo(function CalendarGrid({
 
       const maxTrackIndex = Math.max(0, tracks.length);
       const ROW_HEIGHT = 26; 
-      const TOP_PADDING = 36; 
+      const TOP_PADDING = 48; // increased to accommodate holiday names
 
       computedRows.push(
         <div 
@@ -150,7 +180,7 @@ export const CalendarGrid = React.memo(function CalendarGrid({
                               height: '22px'
                           }}
                           title={evt.title}
-                          onClick={() => onSelectDayEvents({ day: evt.startDate, events: [evt] })}
+                          onClick={(e) => { e.stopPropagation(); onSelectDayEvents({ day: evt.startDate, events: [evt] }); }}
                       >
                           {evt.type === 'meeting' ? <Video className="w-3 h-3 shrink-0" /> : 
                           evt.isCompleted ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <Clock className="w-3 h-3 shrink-0" />}
@@ -165,13 +195,13 @@ export const CalendarGrid = React.memo(function CalendarGrid({
     }
     return computedRows;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate, filteredEvents, isLoading, onSelectDayEvents, endDate, monthStart, startDate]);
+  }, [currentDate, filteredEvents, isLoading, onSelectDayEvents, onDateClick, endDate, startDate, viewMode, viewStart, viewEnd]);
 
   return (
-    <div className="flex flex-col w-full h-full bg-white dark:bg-slate-900">
-      <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+    <div className="flex flex-col w-full h-full bg-background">
+      <div className="grid grid-cols-7 border-b border-border bg-muted/50 shrink-0">
         {WEEK_DAYS.map((wd) => (
-          <Text as="div" variant="small" weight="semibold" key={wd} className="py-3 text-center text-slate-600 dark:text-slate-300 uppercase tracking-wider border-r border-slate-200 dark:border-slate-800 last:border-0">
+          <Text as="div" variant="small" weight="semibold" key={wd} className="py-3 text-center text-muted-foreground uppercase tracking-wider border-r border-border last:border-0">
             {wd}
           </Text>
         ))}
@@ -182,13 +212,13 @@ export const CalendarGrid = React.memo(function CalendarGrid({
           // Skeleton Loading state
           <div className="absolute inset-0 grid grid-rows-5 opacity-50 pointer-events-none animate-pulse">
             {[...Array(5)].map((_, rIdx) => (
-              <div key={rIdx} className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800">
+              <div key={rIdx} className="grid grid-cols-7 border-b border-border">
                 {[...Array(7)].map((_, cIdx) => (
-                  <div key={cIdx} className="border-r border-slate-200 dark:border-slate-800 p-2">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 mb-2"></div>
+                  <div key={cIdx} className="border-r border-border p-2">
+                    <div className="w-6 h-6 rounded-full bg-muted mb-2"></div>
                     {/* Random skeleton lines */}
-                    {Math.random() > 0.5 && <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full mb-1"></div>}
-                    {Math.random() > 0.7 && <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>}
+                    {Math.random() > 0.5 && <div className="h-4 bg-muted rounded w-full mb-1"></div>}
+                    {Math.random() > 0.7 && <div className="h-4 bg-muted rounded w-2/3"></div>}
                   </div>
                 ))}
               </div>

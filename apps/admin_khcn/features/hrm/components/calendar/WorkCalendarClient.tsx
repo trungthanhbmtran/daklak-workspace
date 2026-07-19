@@ -2,9 +2,17 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { 
-  addMonths, 
-  subMonths, 
+import {
+  addMonths, subMonths,
+  addDays, subDays,
+  addWeeks, subWeeks,
+  addQuarters, subQuarters,
+  addYears, subYears,
+  startOfDay, endOfDay,
+  startOfWeek, endOfWeek,
+  startOfMonth, endOfMonth,
+  startOfQuarter, endOfQuarter,
+  startOfYear, endOfYear,
   parseISO
 } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,25 +21,89 @@ import { Tabs } from "@/components/ui/tabs";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import { CalendarHeader } from "./components/CalendarHeader";
+import { CalendarHeader, CalendarViewMode } from "./components/CalendarHeader";
 import { CalendarTabs } from "./components/CalendarTabs";
-import { CalendarGrid } from "./components/CalendarGrid";
-import { CalendarEventModal } from "./components/CalendarEventModal";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+// Tối ưu Code Splitting (Lazy Loading) cho các Grid và Modal nặng
+const CalendarGrid = dynamic(
+  () => import("./components/CalendarGrid").then(mod => mod.CalendarGrid), 
+  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center min-h-[500px]"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div> }
+);
+
+const CalendarTimeGrid = dynamic(
+  () => import("./components/CalendarTimeGrid").then(mod => mod.CalendarTimeGrid), 
+  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center min-h-[500px]"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div> }
+);
+
+const CalendarEventModal = dynamic(
+  () => import("./components/CalendarEventModal").then(mod => mod.CalendarEventModal),
+  { ssr: false }
+);
+
+const CalendarCreateEventModal = dynamic(
+  () => import("./components/CalendarCreateEventModal").then(mod => mod.CalendarCreateEventModal),
+  { ssr: false }
+);
 
 export function WorkCalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState("all"); 
+  const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [selectedDayEvents, setSelectedDayEvents] = useState<{ day: Date, events: any[] } | null>(null);
 
+  const [createEventDate, setCreateEventDate] = useState<Date | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Calculate fetch boundaries based on viewMode to optimize data fetching
+  const { fetchStartDate, fetchEndDate } = useMemo(() => {
+    let start, end;
+    switch(viewMode) {
+      case 'day':
+        start = startOfDay(currentDate);
+        end = endOfDay(currentDate);
+        break;
+      case 'week':
+        start = startOfWeek(currentDate, { weekStartsOn: 1 });
+        end = endOfWeek(currentDate, { weekStartsOn: 1 });
+        break;
+      case 'month':
+        start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 });
+        end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 });
+        break;
+      case 'quarter':
+        start = startOfWeek(startOfQuarter(currentDate), { weekStartsOn: 1 });
+        end = endOfWeek(endOfQuarter(currentDate), { weekStartsOn: 1 });
+        break;
+      case 'year':
+        start = startOfWeek(startOfYear(currentDate), { weekStartsOn: 1 });
+        end = endOfWeek(endOfYear(currentDate), { weekStartsOn: 1 });
+        break;
+      default:
+        start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 });
+        end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 });
+        break;
+    }
+    return {
+      fetchStartDate: start.toISOString(),
+      fetchEndDate: end.toISOString()
+    };
+  }, [currentDate, viewMode]);
+
   // --- GET REAL DATA ---
-  const { data: tasksRes, isLoading } = useTasksList({ pageSize: 2000 });
+  const { data: tasksRes, isLoading } = useTasksList({ 
+    pageSize: 500,
+    startDate: fetchStartDate,
+    endDate: fetchEndDate
+  });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const allTasks = tasksRes?.data || [];
 
   // --- FILTER TASKS BY TAB ---
   const filteredEvents = useMemo(() => {
     let tasksToMap: any[] = [];
-    
+
     if (activeTab === "all") {
       tasksToMap = allTasks;
     } else if (activeTab === "personal") {
@@ -39,8 +111,8 @@ export function WorkCalendarClient() {
     } else if (activeTab === "unit") {
       tasksToMap = allTasks.filter((task: any) => {
         const assignee = task.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
-        return assignee?.employee?.department?.name?.includes("Kỹ Thuật") || 
-               assignee?.departmentName?.includes("Phòng");
+        return assignee?.employee?.department?.name?.includes("Kỹ Thuật") ||
+          assignee?.departmentName?.includes("Phòng");
       });
       if (tasksToMap.length === 0) tasksToMap = allTasks.slice(0, 50);
     }
@@ -87,31 +159,60 @@ export function WorkCalendarClient() {
     }
 
     if (activeTab === "all") {
-        const mDate = new Date(new Date().getFullYear(), new Date().getMonth(), 15);
-        events.push({
-            id: `meet-all`,
-            title: `Họp phòng chuyên môn`,
-            startDate: mDate,
-            endDate: mDate,
-            type: "meeting",
-            colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
-            isCompleted: false
-        });
+      const mDate = new Date(new Date().getFullYear(), new Date().getMonth(), 15);
+      events.push({
+        id: `meet-all`,
+        title: `Họp phòng chuyên môn`,
+        startDate: mDate,
+        endDate: mDate,
+        type: "meeting",
+        colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
+        isCompleted: false
+      });
     }
 
     return events;
   }, [allTasks, activeTab]);
 
-  const nextMonth = useCallback(() => setCurrentDate(prev => addMonths(prev, 1)), []);
-  const prevMonth = useCallback(() => setCurrentDate(prev => subMonths(prev, 1)), []);
+  const nextDate = useCallback(() => {
+    setCurrentDate((prev) => {
+      switch (viewMode) {
+        case 'day': return addDays(prev, 1);
+        case 'week': return addWeeks(prev, 1);
+        case 'month': return addMonths(prev, 1);
+        case 'quarter': return addQuarters(prev, 1);
+        case 'year': return addYears(prev, 1);
+        default: return addMonths(prev, 1);
+      }
+    });
+  }, [viewMode]);
+
+  const prevDate = useCallback(() => {
+    setCurrentDate((prev) => {
+      switch (viewMode) {
+        case 'day': return subDays(prev, 1);
+        case 'week': return subWeeks(prev, 1);
+        case 'month': return subMonths(prev, 1);
+        case 'quarter': return subQuarters(prev, 1);
+        case 'year': return subYears(prev, 1);
+        default: return subMonths(prev, 1);
+      }
+    });
+  }, [viewMode]);
+
   const goToToday = useCallback(() => setCurrentDate(new Date()), []);
 
+  const handleDateClick = useCallback((date: Date) => {
+    setCreateEventDate(date);
+    setIsCreateModalOpen(true);
+  }, []);
+
   return (
-    <div className="p-6 md:p-8 h-[calc(100vh-64px)] flex flex-col bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-500 overflow-hidden">
+    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto h-[calc(100vh-64px)] flex flex-col bg-background animate-in fade-in duration-500 overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 shrink-0">
         <div>
-          <Heading level="h1" className="text-slate-900 dark:text-slate-100 flex items-center gap-3">
-            <CalendarIcon className="h-8 w-8 text-indigo-600" />
+          <Heading level="h1" className="text-foreground flex items-center gap-3">
+            <CalendarIcon className="h-8 w-8 text-primary" />
             Lịch công tác
           </Heading>
           <Text variant="muted" className="mt-2">
@@ -123,29 +224,50 @@ export function WorkCalendarClient() {
       <Tabs defaultValue="all" className="flex flex-col flex-1 min-h-0 space-y-4" onValueChange={setActiveTab}>
         <CalendarTabs />
 
-        <Card className="flex flex-col flex-1 min-h-0 border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          <CalendarHeader 
-            currentDate={currentDate} 
-            isLoading={isLoading} 
-            onGoToToday={goToToday} 
-            onPrevMonth={prevMonth} 
-            onNextMonth={nextMonth} 
+        <Card className="flex flex-col flex-1 min-h-0 border-border shadow-sm overflow-hidden bg-card">
+          <CalendarHeader
+            currentDate={currentDate}
+            isLoading={isLoading}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            onGoToToday={goToToday}
+            onPrevDate={prevDate}
+            onNextDate={nextDate}
           />
-          
+
           <CardContent className="flex flex-col flex-1 min-h-0 p-0 relative">
-            <CalendarGrid 
-              currentDate={currentDate}
-              filteredEvents={filteredEvents}
-              isLoading={isLoading}
-              onSelectDayEvents={setSelectedDayEvents}
-            />
+            {viewMode === "month" || viewMode === "quarter" || viewMode === "year" ? (
+              <CalendarGrid
+                currentDate={currentDate}
+                filteredEvents={filteredEvents}
+                isLoading={isLoading}
+                viewMode={viewMode}
+                onSelectDayEvents={setSelectedDayEvents}
+                onDateClick={handleDateClick}
+              />
+            ) : (
+              <CalendarTimeGrid
+                currentDate={currentDate}
+                filteredEvents={filteredEvents}
+                isLoading={isLoading}
+                viewMode={viewMode}
+                onSelectDayEvents={setSelectedDayEvents}
+                onTimeSlotClick={handleDateClick}
+              />
+            )}
           </CardContent>
         </Card>
       </Tabs>
 
-      <CalendarEventModal 
-        selectedDayEvents={selectedDayEvents} 
-        onClose={() => setSelectedDayEvents(null)} 
+      <CalendarEventModal
+        selectedDayEvents={selectedDayEvents}
+        onClose={() => setSelectedDayEvents(null)}
+      />
+
+      <CalendarCreateEventModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        initialDate={createEventDate}
       />
     </div>
   );

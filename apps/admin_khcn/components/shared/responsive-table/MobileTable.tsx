@@ -30,12 +30,6 @@ export default function MobileTable<T>({ columns, data, keyExtractor, caption, f
           </CardContent>
         </Card>
       ))}
-      
-      {footer && (
-        <div className="mt-4">
-          {footer}
-        </div>
-      )}
     </div>
   );
 }
