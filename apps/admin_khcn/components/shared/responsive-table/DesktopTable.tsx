@@ -40,7 +40,15 @@ export default function DesktopTable<T>({ columns, data, keyExtractor, caption, 
             </TableRow>
           ))}
         </TableBody>
-        {footer && <TableFooter>{footer}</TableFooter>}
+        {footer && (
+          <TableFooter>
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="p-0">
+                {footer}
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        )}
       </Table>
     </div>
   );

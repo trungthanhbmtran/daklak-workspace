@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { ResponsiveTable } from "@/components/shared/responsive-table";
 import { Heading, Text } from "@/components/ui/typography";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TableRow, TableCell } from "@/components/ui/table";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { useEmployeeListClient, getUnitName, getJobTitleGroups } from "@/features/hrm/hooks/useEmployeeListClient";
 
@@ -73,35 +72,31 @@ export function EmployeeListClient() {
             emptyMessage={isError ? "Lỗi tải dữ liệu. Kiểm tra kết nối API và gateway." : "Không có nhân viên. Thêm nhân sự hoặc thử từ khóa tìm kiếm khác."}
             footer={
               total > 0 && (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={4} className="p-0 border-t border-border">
-                    <div className="flex items-center justify-between px-4 py-3 bg-card rounded-b-md">
-                      <Text variant="muted">
-                        Trang {page}/{totalPages} · Tổng {total} nhân viên
-                      </Text>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={page <= 1}
-                          onClick={() => setPage((p) => Math.max(1, p - 1))}
-                          className="rounded-xl"
-                        >
-                          Trước
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={page >= totalPages}
-                          onClick={() => setPage((p) => p + 1)}
-                          className="rounded-xl"
-                        >
-                          Sau
-                        </Button>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <div className="flex items-center justify-between px-4 py-3 bg-card border-t border-border rounded-b-md">
+                  <Text variant="muted">
+                    Trang {page}/{totalPages} · Tổng {total} nhân viên
+                  </Text>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="rounded-xl"
+                    >
+                      Trước
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page >= totalPages}
+                      onClick={() => setPage((p) => p + 1)}
+                      className="rounded-xl"
+                    >
+                      Sau
+                    </Button>
+                  </div>
+                </div>
               )
             }
             columns={[

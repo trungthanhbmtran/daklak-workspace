@@ -32,10 +32,8 @@ export default function MobileTable<T>({ columns, data, keyExtractor, caption, f
       ))}
       
       {footer && (
-        <div className="mt-4 overflow-hidden rounded-md border shadow-sm">
-          <Table>
-            <TableFooter>{footer}</TableFooter>
-          </Table>
+        <div className="mt-4">
+          {footer}
         </div>
       )}
     </div>
