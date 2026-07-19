@@ -13,14 +13,14 @@ export default function ResourcesLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* 2-column layout: Sidebar + Detail */}
-      <div className="flex flex-1 gap-6 items-start min-h-0">
+      <div className="flex flex-1 gap-6 min-h-0">
         {/* Sidebar — cố định, KHÔNG re-render khi navigate [id] */}
-        <div className="w-full lg:w-[420px] shrink-0 h-full">
+        <div className="w-full lg:w-[420px] shrink-0 h-full flex flex-col min-h-0">
           <ResourceSidebar />
         </div>
 
         {/* Detail panel — chỉ phần này re-render */}
-        <div className="flex-1 h-full min-w-0 hidden lg:block overflow-y-auto p-1">
+        <div className="flex-1 h-full min-w-0 hidden lg:block overflow-hidden p-1">
           {children}
         </div>
       </div>

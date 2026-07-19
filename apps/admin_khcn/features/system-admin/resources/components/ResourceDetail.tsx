@@ -103,7 +103,7 @@ function ResourceDetailInner({ resourceId }: ResourceDetailProps) {
   }
 
   return (
-    <Card className="w-full h-fit shadow-sm border-border overflow-hidden flex flex-col transition-all">
+    <Card className="w-full h-full shadow-sm border-border overflow-hidden flex flex-col transition-all">
       <CardHeader className="bg-muted/20 border-b px-8 py-6 shrink-0">
         <div className="flex items-center gap-4">
           <div className="p-3.5 rounded-2xl bg-primary/10 text-primary shadow-inner">
@@ -123,7 +123,7 @@ function ResourceDetailInner({ resourceId }: ResourceDetailProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 p-8">
+      <CardContent className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-xl space-y-6">
           <div>
             <h3 className="text-base font-semibold text-foreground mb-1">Cập nhật thông tin</h3>
