@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class CategoriesService {
@@ -77,18 +77,18 @@ export class CategoriesService {
         : {}),
     };
 
-    const allSearchItems = await this.prisma.category.findMany({
-      where,
-      orderBy: { order: 'asc' },
-      include: { translations: { where: { langCode: targetLang } } },
-    });
-
     const actualLimit = limit && limit > 0 ? Math.max(limit - selectedItems.length, 0) : 0;
-    const page = actualLimit > 0 && skip ? Math.floor(skip / actualLimit) + 1 : 1;
-    
-    const paginated = paginateArray(allSearchItems, page, actualLimit);
-    const searchItems = paginated.data;
-    const totalCount = paginated.meta.pagination.total;
+
+    const [totalCount, searchItems] = await Promise.all([
+      this.prisma.category.count({ where }),
+      this.prisma.category.findMany({
+        where,
+        orderBy: { order: 'asc' },
+        include: { translations: { where: { langCode: targetLang } } },
+        ...(actualLimit > 0 ? { take: actualLimit } : {}),
+        ...(skip ? { skip } : {}),
+      })
+    ]);
 
     // 3. Merge: selected first, rồi search results
     const mapItem = (item: any, selected: boolean) => {

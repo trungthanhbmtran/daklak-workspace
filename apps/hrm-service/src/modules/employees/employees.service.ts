@@ -2,7 +2,7 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { firstValueFrom } from 'rxjs';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class EmployeesService implements OnModuleInit {

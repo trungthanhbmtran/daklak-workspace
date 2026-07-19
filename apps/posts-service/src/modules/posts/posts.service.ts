@@ -5,7 +5,7 @@ import { WorkflowService, PostStatus } from '../workflow/workflow.service';
 import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { generateSlug } from '../../utils/slug.util';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class PostsService implements OnModuleInit {
@@ -493,23 +493,32 @@ export class PostsService implements OnModuleInit {
       orderBy = { [sortBy]: sortOrder || 'desc' };
     }
 
-    const allPosts = await this.prisma.post.findMany({
+    let findArgs: any = {
       where,
       orderBy,
       include: {
         tags: true,
         category: true,
         translations_rel: {
-          // Nếu có lang, ưu tiên lấy bản dịch của ngôn ngữ đó
           where: lang ? { langCode: lang, isPublished: true } : undefined,
           orderBy: { version: 'desc' },
           take: 1
         }
       },
-    });
+      take: limit,
+    };
 
-    const paginated = paginateArray(allPosts, page, limit);
-    const items = paginated.data;
+    if (query.cursor) {
+      findArgs.cursor = { id: parseInt(query.cursor, 10) || query.cursor };
+      findArgs.skip = 1;
+    } else {
+      findArgs.skip = (page - 1) * limit;
+    }
+
+    const [totalCount, items] = await Promise.all([
+      query.cursor ? Promise.resolve(0) : this.prisma.post.count({ where }),
+      this.prisma.post.findMany(findArgs) as Promise<any[]>
+    ]);
 
     // Format và Merge bản dịch nếu được yêu cầu
     const formattedItems = items.map(post => {
@@ -538,9 +547,16 @@ export class PostsService implements OnModuleInit {
 
     return {
       data: formattedItems,
-      meta: {
-        ...paginated.meta
-      },
+      meta: query.cursor ? {
+        nextCursor: items.length > 0 ? items[items.length - 1].id : null,
+        hasNextPage: items.length === limit,
+        limit,
+      } : {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit)
+      }
     };
   }
 

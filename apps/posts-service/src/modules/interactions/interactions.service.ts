@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class InteractionsService {
@@ -23,20 +23,34 @@ export class InteractionsService {
   }
 
   async listComments(query: any) {
-    const { postId, status, page = 1, limit = 10 } = query;
+    const { postId, status } = query;
+    const page = Number(query.page) > 0 ? Number(query.page) : 1;
+    const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
+    
     const where = {
       ...(postId && { postId }),
       ...(status && { status }),
     };
-    const allItems = await this.prisma.comment.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: { replies: true },
-    });
+    
+    let paginationArgs: any = { take: limit };
+    if (query.cursor) {
+      paginationArgs.cursor = { id: query.cursor };
+      paginationArgs.skip = 1;
+    } else {
+      paginationArgs.skip = (page - 1) * limit;
+    }
 
-    const paginated = paginateArray(allItems, page, limit);
+    const [total, items] = await Promise.all([
+      query.cursor ? Promise.resolve(0) : this.prisma.comment.count({ where }),
+      this.prisma.comment.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include: { replies: true },
+        ...paginationArgs,
+      })
+    ]);
 
-    return { items: paginated.data, total: paginated.meta.pagination.total };
+    return { items, total };
   }
 
   async updateCommentStatus(id: string, status: string) {
@@ -68,20 +82,34 @@ export class InteractionsService {
   }
 
   async listQuestions(query: any) {
-    const { status, onlyPublic, categoryId, page = 1, limit = 10 } = query;
+    const { status, onlyPublic, categoryId } = query;
+    const page = Number(query.page) > 0 ? Number(query.page) : 1;
+    const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
+    
     const where = {
       ...(status && { status }),
       ...(onlyPublic && { isPublic: true }),
       ...(categoryId && { categoryId }),
     };
-    const allItems = await this.prisma.citizenQuestion.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    
+    let paginationArgs: any = { take: limit };
+    if (query.cursor) {
+      paginationArgs.cursor = { id: query.cursor };
+      paginationArgs.skip = 1;
+    } else {
+      paginationArgs.skip = (page - 1) * limit;
+    }
 
-    const paginated = paginateArray(allItems, page, limit);
+    const [total, items] = await Promise.all([
+      query.cursor ? Promise.resolve(0) : this.prisma.citizenQuestion.count({ where }),
+      this.prisma.citizenQuestion.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        ...paginationArgs,
+      })
+    ]);
 
-    return { items: paginated.data, total: paginated.meta.pagination.total };
+    return { items, total };
   }
 
   async answerQuestion(data: any) {
@@ -118,19 +146,33 @@ export class InteractionsService {
   }
 
   async listFeedbacks(query: any) {
-    const { feedbackType, status, page = 1, limit = 10 } = query;
+    const { feedbackType, status } = query;
+    const page = Number(query.page) > 0 ? Number(query.page) : 1;
+    const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
+    
     const where = {
       ...(feedbackType && { feedbackType }),
       ...(status && { status }),
     };
-    const allItems = await this.prisma.citizenFeedback.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
 
-    const paginated = paginateArray(allItems, page, limit);
+    let paginationArgs: any = { take: limit };
+    if (query.cursor) {
+      paginationArgs.cursor = { id: query.cursor };
+      paginationArgs.skip = 1;
+    } else {
+      paginationArgs.skip = (page - 1) * limit;
+    }
 
-    return { items: paginated.data, total: paginated.meta.pagination.total };
+    const [total, items] = await Promise.all([
+      query.cursor ? Promise.resolve(0) : this.prisma.citizenFeedback.count({ where }),
+      this.prisma.citizenFeedback.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        ...paginationArgs,
+      })
+    ]);
+
+    return { items, total };
   }
 
   async updateFeedbackStatus(id: string, status: string) {

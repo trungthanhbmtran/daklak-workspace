@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class DocumentService {
@@ -90,17 +90,25 @@ export class DocumentService {
       if (endDate) where.issueDate.lte = new Date(endDate);
     }
 
-    const allItems = await this.prisma.document.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const paginated = paginateArray(allItems, page, limit);
+    const [total, items] = await Promise.all([
+      this.prisma.document.count({ where }),
+      this.prisma.document.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      })
+    ]);
 
     return {
-      data: paginated.data.map(item => this.mapToProto(item)),
+      data: items.map(item => this.mapToProto(item)),
       meta: {
-        ...paginated.meta
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
       },
     };
   }
@@ -387,17 +395,25 @@ export class DocumentService {
       where.category = query.category;
     }
 
-    const allItems = await this.prisma.administrativeProcedure.findMany({
-      where,
-      orderBy: { code: 'asc' },
-    });
-
-    const paginated = paginateArray(allItems, page, limit);
+    const [total, items] = await Promise.all([
+      this.prisma.administrativeProcedure.count({ where }),
+      this.prisma.administrativeProcedure.findMany({
+        where,
+        orderBy: { code: 'asc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      })
+    ]);
 
     return {
-      data: paginated.data.map(item => this.mapProcedureToProto(item)),
+      data: items.map(item => this.mapProcedureToProto(item)),
       meta: {
-        ...paginated.meta
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
       },
     };
   }
@@ -516,17 +532,25 @@ export class DocumentService {
       where.status = query.status;
     }
 
-    const allItems = await this.prisma.oneStopDossier.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const paginated = paginateArray(allItems, page, limit);
+    const [total, items] = await Promise.all([
+      this.prisma.oneStopDossier.count({ where }),
+      this.prisma.oneStopDossier.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      })
+    ]);
 
     return {
-      data: paginated.data.map(item => this.mapDossierToProto(item)),
+      data: items.map(item => this.mapDossierToProto(item)),
       meta: {
-        ...paginated.meta
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
       },
     };
   }

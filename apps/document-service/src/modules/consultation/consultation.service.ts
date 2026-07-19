@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class ConsultationService {
@@ -64,30 +64,38 @@ export class ConsultationService {
     }
     if (status) where.status = status;
 
-    const allItems = await this.prisma.consultation.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: { responses: true }
+    const [total, items] = await Promise.all([
+      this.prisma.consultation.count({ where }),
+      this.prisma.consultation.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          _count: {
+            select: { responses: true }
+          },
+          responses: {
+            where: { status: 'RESPONDED' },
+            select: { id: true }
+          }
         },
-        responses: {
-          where: { status: 'RESPONDED' },
-          select: { id: true }
-        }
-      },
-    });
-
-    const paginated = paginateArray(allItems, page, limit);
+      })
+    ]);
 
     return {
-      data: paginated.data.map(item => ({
+      data: items.map(item => ({
         ...this.mapToProto(item),
         totalResponses: item.responses.length,
         totalUnits: item._count.responses,
       })),
       meta: {
-        ...paginated.meta
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
       },
     };
   }

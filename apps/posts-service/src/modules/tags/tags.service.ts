@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class TagsService {
@@ -19,11 +19,25 @@ export class TagsService {
   }
 
   async findAll(page: number = 1, limit: number = 10) {
-    const allTags = await this.prisma.tag.findMany({
-      orderBy: { name: 'asc' },
-    });
+    const [total, data] = await Promise.all([
+      this.prisma.tag.count(),
+      this.prisma.tag.findMany({
+        orderBy: { name: 'asc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      })
+    ]);
 
-    const paginated = paginateArray(allTags, page, limit);
-    return { data: paginated.data, meta: paginated.meta };
+    return { 
+      data, 
+      meta: {
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      } 
+    };
   }
 }

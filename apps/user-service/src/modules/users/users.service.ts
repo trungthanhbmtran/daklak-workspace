@@ -9,7 +9,6 @@ import { randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { paginateArray } from '@/utils/pagination.util';
 
 const GRPC = {
   INVALID_ARGUMENT: 3,
@@ -551,33 +550,42 @@ export class UsersService implements OnModuleInit {
       ];
     }
 
-    const allUsers = await this.prisma.user.findMany({
-      where: whereCondition,
-      orderBy: { id: 'asc' },
-      include: {
-        roles: { select: { id: true, code: true, name: true } },
-        jobPositions: {
-          where: { endDate: null },
-          include: {
-            unit: { select: { id: true, code: true, name: true } },
-            jobTitle: {
-              select: { id: true, code: true, name: true, rank: true },
+    const [total, allUsers] = await Promise.all([
+      this.prisma.user.count({ where: whereCondition }),
+      this.prisma.user.findMany({
+        where: whereCondition,
+        orderBy: { id: 'asc' },
+        skip,
+        take,
+        include: {
+          roles: { select: { id: true, code: true, name: true } },
+          jobPositions: {
+            where: { endDate: null },
+            include: {
+              unit: { select: { id: true, code: true, name: true } },
+              jobTitle: {
+                select: { id: true, code: true, name: true, rank: true },
+              },
             },
           },
         },
-      },
-    });
+      })
+    ]);
 
     const page = Math.floor(skip / take) + 1;
-    const paginated = paginateArray(allUsers, page, take);
 
     return {
-      data: paginated.data.map((u) => this.toUserResponse(u)),
+      data: allUsers.map((u) => this.toUserResponse(u)),
       meta: {
-        total: paginated.meta.pagination.total,
+        total,
         skip,
         take,
-        ...paginated.meta
+        pagination: {
+          total,
+          page,
+          limit: take,
+          totalPages: Math.ceil(total / take)
+        }
       },
     };
   }

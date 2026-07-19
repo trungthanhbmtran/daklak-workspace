@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class KpiEvaluationsService {
@@ -37,18 +37,25 @@ export class KpiEvaluationsService {
       await this.cache.set('periods', periods);
     }
 
-    const paginated = paginateArray(periods, page, limit);
-
+    const actualLimit = limit > 0 ? limit : periods.length;
+    const skip = (page - 1) * actualLimit;
+    const paginatedItems = actualLimit > 0 ? periods.slice(skip, skip + actualLimit) : periods;
+    
     return {
       success: true,
       message: 'Lấy danh sách kỳ đánh giá thành công',
-      data: paginated.data.map((p: any) => ({
+      data: paginatedItems.map((p: any) => ({
         ...p,
         startDate: p.startDate ? new Date(p.startDate).toISOString() : '',
         endDate: p.endDate ? new Date(p.endDate).toISOString() : '',
       })),
       meta: {
-        ...paginated.meta
+        pagination: {
+          total: periods.length,
+          page,
+          limit: actualLimit,
+          totalPages: Math.ceil(periods.length / actualLimit)
+        }
       }
     };
   }

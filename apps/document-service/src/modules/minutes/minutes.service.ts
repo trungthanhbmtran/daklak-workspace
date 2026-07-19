@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class MinutesService {
@@ -38,17 +38,25 @@ export class MinutesService {
     }
     if (status) where.status = status;
 
-    const allItems = await this.prisma.minutes.findMany({
-      where,
-      orderBy: { startTime: 'desc' },
-    });
-
-    const paginated = paginateArray(allItems, page, limit);
+    const [total, items] = await Promise.all([
+      this.prisma.minutes.count({ where }),
+      this.prisma.minutes.findMany({
+        where,
+        orderBy: { startTime: 'desc' },
+        skip,
+        take: limit,
+      })
+    ]);
 
     return {
-      data: paginated.data.map(item => this.mapToProto(item)),
+      data: items.map(item => this.mapToProto(item)),
       meta: {
-        ...paginated.meta
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
       },
     };
   }

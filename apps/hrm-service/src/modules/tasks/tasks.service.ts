@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 import { TaskWorkflowService } from '../task-workflow/task-workflow.service';
 import { TaskNotificationService } from '../task-workflow/task-notification.service';
-import { paginateArray } from '@/utils/pagination.util';
+
 
 @Injectable()
 export class TasksService {
@@ -183,17 +183,40 @@ export class TasksService {
       totalPages: Math.ceil(totalCount / limitNum) 
     };
 
-    // JS-side filter for done in/overdue (column-vs-column comparison)
     if (isJsFilter) {
-      tasks = tasks.filter((t: any) => {
-        const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
-        const completedTime = new Date(t.completedAt || t.updatedAt || Date.now()).setHours(0, 0, 0, 0);
-        const late = dueTime ? completedTime > dueTime : false;
-        return query.statsFilter === 'doneOverdue' ? late : !late;
+      const operator = query.statsFilter === 'doneOverdue' ? '>' : '<=';
+      // Mẹo: Đẩy logic xuống DB thay vì lọc trên mảng
+      // Tạm thời lấy các ID thỏa mãn (Do Prisma chưa hỗ trợ so sánh 2 cột trực tiếp trong where)
+      const lateIds = await this.prisma.$queryRawUnsafe<{id: string}[]>(
+        `SELECT id FROM Task WHERE dueDate IS NOT NULL AND (completedAt > dueDate OR (completedAt IS NULL AND updatedAt > dueDate))`
+      );
+      const ids = lateIds.map(x => x.id);
+      if (query.statsFilter === 'doneOverdue') {
+        where.id = { ...where.id, in: ids };
+      } else {
+        where.id = { ...where.id, notIn: ids };
+      }
+      
+      // Tính lại totalCount sau khi áp dụng JS filter
+      totalCount = await this.prisma.task.count({ where });
+      limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
+      skip = limit > 0 ? (page - 1) * limitNum : undefined;
+      take = limit > 0 ? limitNum : undefined;
+      
+      tasks = await this.prisma.task.findMany({ 
+        where, 
+        orderBy: { createdAt: 'desc' }, 
+        skip, 
+        take, 
+        include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true } 
       });
-      const paginated = paginateArray(tasks, page, limit);
-      tasks = paginated.data;
-      paginatedMeta = paginated.meta;
+      
+      paginatedMeta = { 
+        total: totalCount, 
+        page, 
+        limit: limitNum, 
+        totalPages: Math.ceil(totalCount / limitNum) 
+      };
     }
 
     const enriched = await this.shared.enrichTasks(tasks);
