@@ -31,7 +31,10 @@ export const EndpointRow = React.memo(function EndpointRow({
         { endpointId: ep.id, permissionId: Number(val) },
         {
           onSuccess: () => toast.success("Cập nhật quyền thành công"),
-          onError: () => toast.error("Có lỗi xảy ra khi cập nhật"),
+          onError: (error: any) => {
+      const message = error.response?.data?.message || "Có lỗi xảy ra khi cập nhật";
+      toast.error(message);
+    },
         }
       );
     },

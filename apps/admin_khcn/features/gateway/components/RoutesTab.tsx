@@ -38,7 +38,10 @@ const RouteRow = React.memo(function RouteRow({ r }: RouteRowProps) {
       toast.success("Đã xóa Route");
       queryClient.invalidateQueries({ queryKey: ["gateway", "routes"] });
     },
-    onError: () => toast.error("Lỗi khi xóa"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi xóa";
+      toast.error(message);
+    },
   });
 
   const handleDelete = useCallback(() => {
@@ -123,7 +126,10 @@ export function RoutesTab() {
       setNewRoute({ path: "", serviceId: "", methods: "GET,POST,PUT,DELETE,PATCH", stripPath: true });
       queryClient.invalidateQueries({ queryKey: ["gateway", "routes"] });
     },
-    onError: () => toast.error("Lỗi khi thêm Route"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi thêm Route";
+      toast.error(message);
+    },
   });
 
   const handleCreate = useCallback(() => {

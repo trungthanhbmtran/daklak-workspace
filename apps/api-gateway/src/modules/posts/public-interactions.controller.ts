@@ -41,8 +41,8 @@ export class PublicInteractionsController implements OnModuleInit {
     if (req.limit) req.limit = parseInt(req.limit);
 
     const response: any = await firstValueFrom(
-      this.interactionService.listQuestions(req),
-    );
+          this.interactionService.listQuestions(req),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return {
       success: true,
       data: response.data || [],
@@ -58,8 +58,8 @@ export class PublicInteractionsController implements OnModuleInit {
   @ApiOperation({ summary: 'Gửi câu hỏi của công dân' })
   async createQuestion(@Body() dto: any) {
     const res = await firstValueFrom(
-      this.interactionService.createQuestion(dto),
-    );
+          this.interactionService.createQuestion(dto),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return {
       success: true,
       data: res,

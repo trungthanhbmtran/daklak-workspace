@@ -33,17 +33,17 @@ export class PublicDocumentsController implements OnModuleInit {
       search: query.search || '',
       category: query.category || 'ALL',
     };
-    return firstValueFrom(this.documentService.ListProcedures(req));
+    return firstValueFrom(this.documentService.ListProcedures(req)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('procedures/:id')
   async getProcedure(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetProcedure({ id }));
+    return firstValueFrom(this.documentService.GetProcedure({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('dossiers/:code')
   async getDossierByCode(@Param('code') code: string) {
-    return firstValueFrom(this.documentService.GetDossier({ code }));
+    return firstValueFrom(this.documentService.GetDossier({ code })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get()
@@ -61,11 +61,11 @@ export class PublicDocumentsController implements OnModuleInit {
       req.fiscalYear = parseInt(query.fiscalYear.toString());
     if (query.transparencyCategory)
       req.transparencyCategory = query.transparencyCategory;
-    return firstValueFrom(this.documentService.ListDocuments(req));
+    return firstValueFrom(this.documentService.ListDocuments(req)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
   async getDocument(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetDocument({ id }));
+    return firstValueFrom(this.documentService.GetDocument({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

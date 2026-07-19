@@ -29,28 +29,28 @@ export class PostsBannerController {
 
   @Post()
   async create(@Body() createDto: any) {
-    return firstValueFrom(this.bannerService.createBanner(createDto));
+    return firstValueFrom(this.bannerService.createBanner(createDto)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.bannerService.listBanners(query));
+    return firstValueFrom(this.bannerService.listBanners(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.bannerService.getBanner({ id }));
+    return firstValueFrom(this.bannerService.getBanner({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateDto: any) {
     return firstValueFrom(
-      this.bannerService.updateBanner({ id, ...updateDto }),
-    );
+          this.bannerService.updateBanner({ id, ...updateDto }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return firstValueFrom(this.bannerService.deleteBanner({ id }));
+    return firstValueFrom(this.bannerService.deleteBanner({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

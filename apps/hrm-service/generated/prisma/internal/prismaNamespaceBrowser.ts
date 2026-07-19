@@ -112,7 +112,8 @@ export const EmployeeScalarFieldEnum = {
   partyTitleId: 'partyTitleId',
   startDate: 'startDate',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
@@ -286,7 +287,8 @@ export const TaskScalarFieldEnum = {
   metadata: 'metadata',
   creatorEmployeeCode: 'creatorEmployeeCode',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
@@ -302,7 +304,8 @@ export const TaskStepScalarFieldEnum = {
   baseScore: 'baseScore',
   completedAt: 'completedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type TaskStepScalarFieldEnum = (typeof TaskStepScalarFieldEnum)[keyof typeof TaskStepScalarFieldEnum]
@@ -313,7 +316,8 @@ export const TaskAttachmentScalarFieldEnum = {
   taskId: 'taskId',
   documentId: 'documentId',
   type: 'type',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type TaskAttachmentScalarFieldEnum = (typeof TaskAttachmentScalarFieldEnum)[keyof typeof TaskAttachmentScalarFieldEnum]
@@ -346,7 +350,8 @@ export const TaskCommentScalarFieldEnum = {
   content: 'content',
   isSystemMessage: 'isSystemMessage',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]

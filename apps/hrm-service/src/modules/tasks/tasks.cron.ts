@@ -28,6 +28,7 @@ export class TasksCronService {
       while (hasMore) {
         const tasks = await this.prisma.task.findMany({
           where: {
+            isDeleted: false,
             status: { notIn: ['COMPLETED', 'CANCELLED', 'REJECTED', 'DONE', 'TEMPLATE'] },
             dueDate: { not: null },
             OR: [
@@ -41,68 +42,14 @@ export class TasksCronService {
           include: { participants: true }
         });
 
-        if (tasks.length === 0) { hasMore = false; break; }
+        if (tasks.length === 0) {
+          hasMore = false;
+          break;
+        }
         cursorId = tasks[tasks.length - 1].id;
 
         for (const task of tasks) {
-          let warnType: 'DEADLINE' | 'RISK' | null = null;
-          let warnTitle = '';
-          let warnMessage = '';
-
-          const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-          const startDate = task.startDate ? new Date(task.startDate) : null;
-
-          if (dueDate) {
-            if (!task.isDeadlineWarned && dueDate <= futureDate && dueDate >= now) {
-              warnType = 'DEADLINE';
-              warnTitle = 'Cảnh báo hạn chót công việc';
-              warnMessage = `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`;
-            } else if (!task.isRiskWarned && dueDate > futureDate && startDate && task.progress != null) {
-              const totalDuration = dueDate.getTime() - startDate.getTime();
-              const elapsed = now.getTime() - startDate.getTime();
-              if (totalDuration > 0 && elapsed > 0) {
-                const expectedProgress = (elapsed / totalDuration) * 100;
-                if (expectedProgress > 50 && (expectedProgress - task.progress > 20)) {
-                  warnType = 'RISK';
-                  warnTitle = 'Cảnh báo nguy cơ chậm tiến độ';
-                  warnMessage = `Công việc "${task.title}" có nguy cơ chậm tiến độ (Thời gian đã qua: ${Math.round(expectedProgress)}%, Tiến độ thực tế: ${task.progress}%).`;
-                }
-              }
-            }
-          }
-
-          if (warnType) {
-            const assigneeCodes = task.participants
-              .filter(p => p.participantRole === 'ASSIGNEE')
-              .map(p => p.employeeCode)
-              .filter(Boolean) as string[];
-
-            if (assigneeCodes.length > 0) {
-              // Lookup userId batch — không gửi theo employeeCode
-              const emps = await this.prisma.employee.findMany({
-                where: { employeeCode: { in: assigneeCodes } },
-                select: { userId: true }
-              });
-              const userIds = emps.map(e => e.userId).filter(Boolean) as string[];
-              if (userIds.length > 0) {
-                this.taskShared.sendTaskNotification(userIds, warnTitle, warnMessage, task);
-              }
-            }
-
-            const updateData: any = {};
-            if (warnType === 'DEADLINE') updateData.isDeadlineWarned = true;
-            if (warnType === 'RISK') updateData.isRiskWarned = true;
-
-            await this.prisma.task.update({ where: { id: task.id }, data: updateData });
-            await this.prisma.taskComment.create({
-              data: {
-                taskId: task.id,
-                authorCode: null,
-                content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}`,
-                isSystemMessage: true,
-              }
-            });
-          }
+          await this.processTask(task, now, futureDate);
         }
 
         // Nhường lại event loop 50ms để các request khác không bị block
@@ -112,5 +59,73 @@ export class TasksCronService {
     } catch (err) {
       this.logger.error('Error in due task scanner', err);
     }
+  }
+
+  private async processTask(task: any, now: Date, futureDate: Date) {
+    if (!task.dueDate) return;
+
+    const dueDate = new Date(task.dueDate);
+    const startDate = task.startDate ? new Date(task.startDate) : null;
+
+    let warnType: 'DEADLINE' | 'RISK' | null = null;
+    let warnTitle = '';
+    let warnMessage = '';
+
+    // 1. Kiểm tra Deadline (Sắp đến hạn)
+    if (!task.isDeadlineWarned && dueDate <= futureDate && dueDate >= now) {
+      warnType = 'DEADLINE';
+      warnTitle = 'Cảnh báo hạn chót công việc';
+      warnMessage = `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`;
+    }
+
+    // 2. Kiểm tra Risk (Nguy cơ chậm tiến độ)
+    if (!warnType && !task.isRiskWarned && dueDate > futureDate && startDate && task.progress != null) {
+      const totalDuration = dueDate.getTime() - startDate.getTime();
+      const elapsed = now.getTime() - startDate.getTime();
+      
+      if (totalDuration > 0 && elapsed > 0) {
+        const expectedProgress = (elapsed / totalDuration) * 100;
+        if (expectedProgress > 50 && (expectedProgress - task.progress > 20)) {
+          warnType = 'RISK';
+          warnTitle = 'Cảnh báo nguy cơ chậm tiến độ';
+          warnMessage = `Công việc "${task.title}" có nguy cơ chậm tiến độ (Thời gian đã qua: ${Math.round(expectedProgress)}%, Tiến độ thực tế: ${task.progress}%).`;
+        }
+      }
+    }
+
+    // Early return nếu không có cảnh báo
+    if (!warnType) return;
+
+    // Gửi thông báo
+    const assigneeCodes = task.participants
+      .filter((p: any) => p.participantRole === 'ASSIGNEE')
+      .map((p: any) => p.employeeCode)
+      .filter(Boolean) as string[];
+
+    if (assigneeCodes.length > 0) {
+      const emps = await this.prisma.employee.findMany({
+        where: { employeeCode: { in: assigneeCodes } },
+        select: { userId: true }
+      });
+      const userIds = emps.map(e => e.userId).filter(Boolean) as string[];
+      if (userIds.length > 0) {
+        this.taskShared.sendTaskNotification(userIds, warnTitle, warnMessage, task);
+      }
+    }
+
+    // Cập nhật DB
+    const updateData: any = {};
+    if (warnType === 'DEADLINE') updateData.isDeadlineWarned = true;
+    if (warnType === 'RISK') updateData.isRiskWarned = true;
+
+    await this.prisma.task.update({ where: { id: task.id }, data: updateData });
+    await this.prisma.taskComment.create({
+      data: {
+        taskId: task.id,
+        authorCode: null,
+        content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}`,
+        isSystemMessage: true,
+      }
+    });
   }
 }

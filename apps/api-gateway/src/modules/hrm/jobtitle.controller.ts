@@ -44,10 +44,10 @@ export class JobTitleController implements OnModuleInit {
         ? parseInt(query.unitId, 10)
         : undefined;
     const res = await firstValueFrom(
-      this.orgService.ListJobTitles({
-        unitId: Number.isNaN(unitId as number) ? undefined : unitId,
-      }),
-    );
+          this.orgService.ListJobTitles({
+            unitId: Number.isNaN(unitId as number) ? undefined : unitId,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     const items = (res as any).items ?? [];
     return { data: items, items };
   }
@@ -57,7 +57,7 @@ export class JobTitleController implements OnModuleInit {
     summary: 'Chi tiết chức danh (lấy từ danh sách user-service)',
   })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
-    const res = await firstValueFrom(this.orgService.ListJobTitles({}));
+    const res = await firstValueFrom(this.orgService.ListJobTitles({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     const items = (res as any).items ?? [];
     const found = items.find((j: any) => j.id === id);
     if (!found) throw new NotFoundException('Không tìm thấy chức danh');
@@ -76,6 +76,6 @@ export class JobTitleController implements OnModuleInit {
       geographicAreaId: body.geographicAreaId,
       monitoredUnitIds: body.monitoredUnitIds ?? body.monitored_unit_ids,
     };
-    return firstValueFrom(this.orgService.UpdateJobTitle(payload));
+    return firstValueFrom(this.orgService.UpdateJobTitle(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

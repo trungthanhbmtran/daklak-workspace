@@ -91,7 +91,7 @@ export default function DocumentPublishingPage() {
       toast.success("Cập nhật thiết lập xuất bản thành công!");
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Không thể cập nhật thiết lập xuất bản");
+      toast.error((error as any)?.response?.data?.message || "Không thể cập nhật thiết lập xuất bản");
     }
   };
 

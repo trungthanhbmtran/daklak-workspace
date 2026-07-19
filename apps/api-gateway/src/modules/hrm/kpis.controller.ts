@@ -103,12 +103,12 @@ export class KpisController implements OnModuleInit {
 
   @Get('periods')
   async findPeriods() {
-    return firstValueFrom(this.kpiService.FindPeriods({}));
+    return firstValueFrom(this.kpiService.FindPeriods({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('periods')
   async createPeriod(@Body() body: any) {
-    return firstValueFrom(this.kpiService.CreatePeriod(body));
+    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('criteria')
@@ -123,12 +123,12 @@ export class KpisController implements OnModuleInit {
     const hasGlobalAccess =
       checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
     const res: any = await firstValueFrom(
-      this.kpiService.FindCriteria({ 
-        isAdmin: hasGlobalAccess,
-        page: page ? Number(page) : 1,
-        limit: limit ? Number(limit) : 0,
-      }),
-    );
+          this.kpiService.FindCriteria({ 
+            isAdmin: hasGlobalAccess,
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 0,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     if (res) {
       res.meta = res.meta || {};
@@ -150,21 +150,21 @@ export class KpisController implements OnModuleInit {
   @Post('criteria')
   @Roles(Role.ADMIN)
   async createCriterion(@Body() body: any) {
-    return firstValueFrom(this.kpiService.CreateCriterion(body));
+    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put('criteria/:id')
   @Roles(Role.ADMIN)
   async updateCriterion(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(
-      this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
-    );
+          this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete('criteria/:id')
   @Roles(Role.ADMIN)
   async deleteCriterion(@Param('id') id: string) {
-    return firstValueFrom(this.kpiService.DeleteCriterion({ id: Number(id) }));
+    return firstValueFrom(this.kpiService.DeleteCriterion({ id: Number(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('evaluations')
@@ -172,7 +172,7 @@ export class KpisController implements OnModuleInit {
     if (req.user) {
       body.evaluatorCode = req.user.employeeCode || req.user.username;
     }
-    return firstValueFrom(this.kpiService.CreateEvaluation(body));
+    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('evaluations')
@@ -199,14 +199,14 @@ export class KpisController implements OnModuleInit {
     }
 
     return firstValueFrom(
-      this.kpiService.FindEvaluations({
-        employeeCode: targetCode,
-        currentEmployeeCode: callerCode,
-        isAdmin,
-        isFetchingOwn,
-        callerDescendantUnitIds,
-      }),
-    );
+          this.kpiService.FindEvaluations({
+            employeeCode: targetCode,
+            currentEmployeeCode: callerCode,
+            isAdmin,
+            isFetchingOwn,
+            callerDescendantUnitIds,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('dashboard-stats')
@@ -231,12 +231,12 @@ export class KpisController implements OnModuleInit {
     }
 
     const res: any = await firstValueFrom(
-      this.kpiService.GetEvaluationStats({
-        periodId,
-        isAdmin,
-        callerDescendantUnitIds,
-      }),
-    );
+          this.kpiService.GetEvaluationStats({
+            periodId,
+            isAdmin,
+            callerDescendantUnitIds,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     if (res?.success && res.data?.statsByUnit) {
       // Map departmentId to departmentName
@@ -262,25 +262,25 @@ export class KpisController implements OnModuleInit {
     const targetCode = body.employeeCode || user?.employeeCode || user?.username;
     
     return firstValueFrom(
-      this.kpiService.CalculatePersonalKpi({
-        periodId: Number(body.periodId),
-        employeeCode: targetCode,
-        staffingSlotId: body.staffingSlotId ? Number(body.staffingSlotId) : undefined
-      })
-    );
+          this.kpiService.CalculatePersonalKpi({
+            periodId: Number(body.periodId),
+            employeeCode: targetCode,
+            staffingSlotId: body.staffingSlotId ? Number(body.staffingSlotId) : undefined
+          })
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('evaluations/:id')
   async getEvaluationDetail(@Param('id') id: string) {
-    return firstValueFrom(this.kpiService.GetEvaluationDetail({ id: Number(id) }));
+    return firstValueFrom(this.kpiService.GetEvaluationDetail({ id: Number(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('evaluations/:id/submit')
   async submitSelfScore(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(this.kpiService.SubmitEvaluation({
-      id: Number(id),
-      data: JSON.stringify(body)
-    }));
+          id: Number(id),
+          data: JSON.stringify(body)
+        })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('evaluations/:id/approve')
@@ -288,9 +288,9 @@ export class KpisController implements OnModuleInit {
     const user = req.user;
     const reviewerCode = user?.employeeCode || user?.username;
     return firstValueFrom(this.kpiService.ApproveEvaluation({
-      id: Number(id),
-      data: JSON.stringify(body),
-      reviewerCode
-    }));
+          id: Number(id),
+          data: JSON.stringify(body),
+          reviewerCode
+        })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

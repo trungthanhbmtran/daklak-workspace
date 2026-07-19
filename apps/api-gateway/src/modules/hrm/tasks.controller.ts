@@ -185,8 +185,8 @@ export class TasksController implements OnModuleInit {
     }
     
     const response: any = await firstValueFrom(
-      this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
-    );
+          this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -255,8 +255,8 @@ export class TasksController implements OnModuleInit {
     );
 
     const response: any = await firstValueFrom(
-      this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
-    );
+          this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     console.log(
       '[TasksController] ListTasks Raw Response Data Length:',
@@ -343,8 +343,8 @@ export class TasksController implements OnModuleInit {
     );
 
     const response: any = await firstValueFrom(
-      this.taskService.GetTaskStats(requestPayload, this.getGrpcMetadata(req)),
-    );
+          this.taskService.GetTaskStats(requestPayload, this.getGrpcMetadata(req)),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     return response;
   }
@@ -356,20 +356,20 @@ export class TasksController implements OnModuleInit {
     @Body() body: any,
   ) {
     const response: any = await firstValueFrom(
-      this.taskService.UpdateTask(
-        {
-          id,
-          weight: body.weight,
-          startDate: body.startDate,
-          dueDate: body.dueDate,
-          priority: body.priority,
-          baseScore: body.baseScore,
-          title: body.title,
-          description: body.description,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.UpdateTask(
+            {
+              id,
+              weight: body.weight,
+              startDate: body.startDate,
+              dueDate: body.dueDate,
+              priority: body.priority,
+              baseScore: body.baseScore,
+              title: body.title,
+              description: body.description,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -384,20 +384,20 @@ export class TasksController implements OnModuleInit {
   ) {
     const user = req.user;
     const response: any = await firstValueFrom(
-      this.taskService.UpdateTaskStatus(
-        {
-          id,
-          status,
-          rejectReason,
-          actionName,
-          actorCode: user?.employeeCode || '',
-          currentUserPermissions: user?.permissionsFlatten || [],
-          currentUserId: user?.id,
-          currentEmployeeCode: user?.employeeCode || user?.username,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.UpdateTaskStatus(
+            {
+              id,
+              status,
+              rejectReason,
+              actionName,
+              actorCode: user?.employeeCode || '',
+              currentUserPermissions: user?.permissionsFlatten || [],
+              currentUserId: user?.id,
+              currentEmployeeCode: user?.employeeCode || user?.username,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -491,20 +491,20 @@ export class TasksController implements OnModuleInit {
     const assignerCode = user?.employeeCode;
 
     const response: any = await firstValueFrom(
-      this.taskService.AssignTask(
-        {
-          id,
-          assigneeCode,
-          coassigneeCodes: coassigneeCodes || [],
-          departmentId,
-          assignerCode,
-          currentUserPermissions: user?.permissionsFlatten || [],
-          currentUserId: user?.id,
-          currentEmployeeCode: user?.employeeCode || user?.username,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.AssignTask(
+            {
+              id,
+              assigneeCode,
+              coassigneeCodes: coassigneeCodes || [],
+              departmentId,
+              assignerCode,
+              currentUserPermissions: user?.permissionsFlatten || [],
+              currentUserId: user?.id,
+              currentEmployeeCode: user?.employeeCode || user?.username,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -520,36 +520,36 @@ export class TasksController implements OnModuleInit {
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
     const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask(
-        {
-          id: id,
-          currentEmployeeCode: assignerCode,
-          isAdmin: isAdmin,
-          isLeader:
-            isAdmin ||
-            user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
-            user?.permissionsFlatten?.includes('TASK.*'),
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.GetTask(
+            {
+              id: id,
+              currentEmployeeCode: assignerCode,
+              isAdmin: isAdmin,
+              isLeader:
+                isAdmin ||
+                user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
+                user?.permissionsFlatten?.includes('TASK.*'),
+              currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
     }
 
     const breakdownResponse: any = await firstValueFrom(
-      this.taskService.BreakdownTask(
-        {
-          ...body,
-          coassigneeCodes: body.coassigneeCodes || body.coAssigneeCodes,
-          id: id,
-          parentId: id,
-          assignerCode,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.BreakdownTask(
+            {
+              ...body,
+              coassigneeCodes: body.coassigneeCodes || body.coAssigneeCodes,
+              id: id,
+              parentId: id,
+              assignerCode,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (breakdownResponse?.data) this.translateTaskData(breakdownResponse.data);
     return breakdownResponse;
   }
@@ -564,17 +564,17 @@ export class TasksController implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.*');
 
     return firstValueFrom(
-      this.taskService.GetComments(
-        {
-          taskId: id,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin,
-          isLeader,
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.GetComments(
+            {
+              taskId: id,
+              currentEmployeeCode: user?.employeeCode,
+              isAdmin,
+              isLeader,
+              currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post(':id/comments')
@@ -590,20 +590,20 @@ export class TasksController implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
     return firstValueFrom(
-      this.taskService.AddComment(
-        {
-          taskId: id,
-          authorCode: req.user?.employeeCode || '',
-          content: body.content,
-          isSystemMessage: body.isSystemMessage || false,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin,
-          isLeader,
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.AddComment(
+            {
+              taskId: id,
+              authorCode: req.user?.employeeCode || '',
+              content: body.content,
+              isSystemMessage: body.isSystemMessage || false,
+              currentEmployeeCode: user?.employeeCode,
+              isAdmin,
+              isLeader,
+              currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post(':id/coordinate')
@@ -622,38 +622,38 @@ export class TasksController implements OnModuleInit {
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
     const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask(
-        {
-          id: id,
-          currentEmployeeCode: requesterCode,
-          isAdmin: isAdmin,
-          isLeader:
-            isAdmin ||
-            user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
-            user?.permissionsFlatten?.includes('TASK.*'),
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.GetTask(
+            {
+              id: id,
+              currentEmployeeCode: requesterCode,
+              isAdmin: isAdmin,
+              isLeader:
+                isAdmin ||
+                user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
+                user?.permissionsFlatten?.includes('TASK.*'),
+              currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (!taskResponse) throw new Error('Task not found.');
     const isOwner = taskResponse.assigneeCode === requesterCode;
     const isAssigner = taskResponse.assignerCode === requesterCode;
 
     return firstValueFrom(
-      this.taskService.RequestCoordination(
-        {
-          taskId: id,
-          requesterCode,
-          message: message || '',
-          leadId: leadCode || '',
-          coordinatorIds: coordinatorCodes || [],
-          leadCode: leadCode || '',
-          coordinatorCodes: coordinatorCodes || [],
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.RequestCoordination(
+            {
+              taskId: id,
+              requesterCode,
+              message: message || '',
+              leadId: leadCode || '',
+              coordinatorIds: coordinatorCodes || [],
+              leadCode: leadCode || '',
+              coordinatorCodes: coordinatorCodes || [],
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id/progress')
@@ -663,15 +663,15 @@ export class TasksController implements OnModuleInit {
     @Body('progress') progress: number,
   ) {
     return firstValueFrom(
-      this.taskService.UpdateTaskProgress(
-        {
-          id,
-          progress,
-          actorCode: req.user?.employeeCode || '',
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.UpdateTaskProgress(
+            {
+              id,
+              progress,
+              actorCode: req.user?.employeeCode || '',
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id/subtasks')
@@ -684,17 +684,17 @@ export class TasksController implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.*');
 
     const response: any = await firstValueFrom(
-      this.taskService.GetSubTasks(
-        {
-          taskId: id,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin,
-          isLeader,
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    );
+          this.taskService.GetSubTasks(
+            {
+              taskId: id,
+              currentEmployeeCode: user?.employeeCode,
+              isAdmin,
+              isLeader,
+              currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+            },
+            this.getGrpcMetadata(req),
+          ),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     if (response?.data) {
       if (Array.isArray(response.data)) {
         await this.populateUsers(response.data);
@@ -709,32 +709,32 @@ export class TasksController implements OnModuleInit {
 
   @Get(':id/history')
   async getTaskHistory(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.taskService.GetTaskHistory({ taskId: id }));
+    return firstValueFrom(this.taskService.GetTaskHistory({ taskId: id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id/kpi-setting')
   async upsertTaskKpiSetting(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
-    return firstValueFrom(this.taskService.UpsertTaskKpiSetting({ taskId: id, ...body }));
+    return firstValueFrom(this.taskService.UpsertTaskKpiSetting({ taskId: id, ...body })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id/kpi-setting')
   async getTaskKpiSetting(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.taskService.GetTaskKpiSetting({ taskId: id }));
+    return firstValueFrom(this.taskService.GetTaskKpiSetting({ taskId: id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
   async getTask(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const user = req.user;
     const response = (await firstValueFrom(
-      this.taskService.getTask(
-        {
-          id,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin: user?.permissionsFlatten?.includes('TASK:MANAGE') || false,
-        },
-        this.getGrpcMetadata(req),
-      )
-    )) as any;
+          this.taskService.getTask(
+            {
+              id,
+              currentEmployeeCode: user?.employeeCode,
+              isAdmin: user?.permissionsFlatten?.includes('TASK:MANAGE') || false,
+            },
+            this.getGrpcMetadata(req),
+          )
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -743,12 +743,12 @@ export class TasksController implements OnModuleInit {
 
   @Get(':id/steps')
   async listSteps(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req)));
+    return firstValueFrom(this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req))).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post(':id/steps')
   async createStep(@Req() req: any, @Param('id', ParseIntPipe) id: number, @Body() body: any) {
-    return firstValueFrom(this.taskService.CreateStep({ taskId: id, ...body }, this.getGrpcMetadata(req)));
+    return firstValueFrom(this.taskService.CreateStep({ taskId: id, ...body }, this.getGrpcMetadata(req))).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id/steps/:stepId')
@@ -758,7 +758,7 @@ export class TasksController implements OnModuleInit {
     @Param('stepId', ParseIntPipe) stepId: number,
     @Body() body: any,
   ) {
-    return firstValueFrom(this.taskService.UpdateStep({ taskId: id, stepId, ...body }, this.getGrpcMetadata(req)));
+    return firstValueFrom(this.taskService.UpdateStep({ taskId: id, stepId, ...body }, this.getGrpcMetadata(req))).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id/steps/:stepId')
@@ -767,6 +767,6 @@ export class TasksController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Param('stepId', ParseIntPipe) stepId: number,
   ) {
-    return firstValueFrom(this.taskService.DeleteStep({ taskId: id, stepId }, this.getGrpcMetadata(req)));
+    return firstValueFrom(this.taskService.DeleteStep({ taskId: id, stepId }, this.getGrpcMetadata(req))).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

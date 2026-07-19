@@ -70,7 +70,7 @@ export function ProcedureConfigClient() {
       toast.success("Đã tải biểu mẫu lên!");
     } catch (error) {
       console.error(error);
-      toast.error("Tải biểu mẫu thất bại!");
+      toast.error((error as any)?.response?.data?.message || "Tải biểu mẫu thất bại!");
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
       setUploadingCompId(null);

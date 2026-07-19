@@ -51,8 +51,8 @@ export class WorkflowController implements OnModuleInit {
   })
   async getMicroservices() {
     const result = (await firstValueFrom(
-      this.categoryService.GetByGroup({ group: 'MICROSERVICE' }),
-    )) as any;
+          this.categoryService.GetByGroup({ group: 'MICROSERVICE' }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { data: result.data || [] };
   }
 
@@ -60,8 +60,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách các trigger khả dụng' })
   async getTriggers() {
     const result = (await firstValueFrom(
-      this.categoryService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
-    )) as any;
+          this.categoryService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { data: result.data || [] };
   }
 
@@ -69,8 +69,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách module nghiệp vụ đang active (workflow Published)' })
   async getModules() {
     const result = (await firstValueFrom(
-      this.workflowService.ListModules({}),
-    )) as any;
+          this.workflowService.ListModules({}),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { data: result.items || [] };
   }
 
@@ -78,8 +78,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách chức danh/vị trí trong tổ chức (JobTitle) để thiết kế quyền workflow' })
   async getOrgRoles() {
     const result = (await firstValueFrom(
-      this.orgService.ListJobTitles({}),
-    )) as any;
+          this.orgService.ListJobTitles({}),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     const items = (result.items ?? []).map((j: any) => ({
       code: j.code,
       name: j.name,
@@ -143,8 +143,8 @@ export class WorkflowController implements OnModuleInit {
       variables: body.definition?.variables || [],
     };
     const result = (await firstValueFrom(
-      this.workflowService.CreateWorkflow(payload),
-    )) as any;
+          this.workflowService.CreateWorkflow(payload),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
 
     // Map response back to frontend expected format
     if (result) {
@@ -194,8 +194,8 @@ export class WorkflowController implements OnModuleInit {
     }
 
     const result = (await firstValueFrom(
-      this.workflowService.UpdateWorkflow(payload),
-    )) as any;
+          this.workflowService.UpdateWorkflow(payload),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
 
     // Map response back to frontend expected format
     if (result) {
@@ -225,8 +225,8 @@ export class WorkflowController implements OnModuleInit {
     const take = parseInt(query.take) || 20;
     const search = query.search;
     const result = (await firstValueFrom(
-      this.workflowService.ListWorkflows({ skip, take, search }),
-    )) as any;
+          this.workflowService.ListWorkflows({ skip, take, search }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     const items = (result.items || []).map((item: any) => {
       item.trigger = item.code;
       item.definition = {
@@ -254,8 +254,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Chi tiết quy trình' })
   async findOne(@Param('id') id: string) {
     const result = (await firstValueFrom(
-      this.workflowService.FindOneWorkflow({ id }),
-    )) as any;
+          this.workflowService.FindOneWorkflow({ id }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     if (result) {
       result.trigger = result.code;
       result.definition = {
@@ -279,8 +279,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Xóa quy trình' })
   async delete(@Param('id') id: string) {
     const result = (await firstValueFrom(
-      this.workflowService.DeleteWorkflow({ id }),
-    )) as any;
+          this.workflowService.DeleteWorkflow({ id }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { success: result.success || true };
   }
 
@@ -288,8 +288,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Publish quy trình (kích hoạt để sẵn sàng dùng)' })
   async publish(@Param('id') id: string) {
     const result = (await firstValueFrom(
-      this.workflowService.PublishWorkflow({ id }),
-    )) as any;
+          this.workflowService.PublishWorkflow({ id }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     if (result) {
       result.trigger = result.code;
       result.definition = {
@@ -313,8 +313,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
   async applyModule(@Param('id') id: string, @Body() body: { moduleCode: string }) {
     const result = (await firstValueFrom(
-      this.workflowService.ApplyModule({ id, moduleCode: body.moduleCode }),
-    )) as any;
+          this.workflowService.ApplyModule({ id, moduleCode: body.moduleCode }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     if (result) {
       result.trigger = result.code;
       result.definition = {
@@ -341,12 +341,12 @@ export class WorkflowController implements OnModuleInit {
   async start(@Param('id') id: string, @Body() body: any, @Req() req: any) {
     const initiatorId = req.user?.id?.toString() || 'system';
     const result = (await firstValueFrom(
-      this.workflowService.StartWorkflow({
-        workflowId: id,
-        initialContext: body.initialContext || body,
-        initiatorId,
-      }),
-    )) as any;
+          this.workflowService.StartWorkflow({
+            workflowId: id,
+            initialContext: body.initialContext || body,
+            initiatorId,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { data: result };
   }
 
@@ -360,13 +360,13 @@ export class WorkflowController implements OnModuleInit {
   ) {
     const userRoles = req.user?.roles || [];
     const result = (await firstValueFrom(
-      this.workflowService.ResumeWorkflow({
-        instanceId,
-        nodeId,
-        actionData: body.actionData || body,
-        userRoles,
-      }),
-    )) as any;
+          this.workflowService.ResumeWorkflow({
+            instanceId,
+            nodeId,
+            actionData: body.actionData || body,
+            userRoles,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { data: result };
   }
 
@@ -380,14 +380,14 @@ export class WorkflowController implements OnModuleInit {
     @Query('search') search?: string,
   ) {
     const result = (await firstValueFrom(
-      this.workflowService.ListInstances({
-        skip: skip ? parseInt(skip, 10) : undefined,
-        take: take ? parseInt(take, 10) : undefined,
-        workflowId,
-        status,
-        search,
-      }),
-    )) as any;
+          this.workflowService.ListInstances({
+            skip: skip ? parseInt(skip, 10) : undefined,
+            take: take ? parseInt(take, 10) : undefined,
+            workflowId,
+            status,
+            search,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return { data: result.items, meta: { total: result.total } };
   }
 
@@ -395,8 +395,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Trạng thái hiện tại của workflow instance' })
   async getInstance(@Param('id') id: string) {
     const result = await firstValueFrom(
-      this.workflowService.GetInstance({ id }),
-    );
+          this.workflowService.GetInstance({ id }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return { data: result };
   }
 
@@ -404,8 +404,8 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Lịch sử thực thi của workflow instance' })
   async getLogs(@Param('instanceId') instanceId: string) {
     const response = (await firstValueFrom(
-      this.workflowService.GetLogs({ instanceId }),
-    )) as any;
+          this.workflowService.GetLogs({ instanceId }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return {
       data: response.logs || [],
     };

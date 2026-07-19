@@ -135,19 +135,19 @@ export class CategoriesController implements OnModuleInit {
 
     if (!group) {
       const result: any = await firstValueFrom(
-        this.categoryService.GetAllCategories({}),
-      );
+              this.categoryService.GetAllCategories({}),
+            ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
       return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
     }
     const result: any = await firstValueFrom(
-      this.categoryService.GetByGroup({
-        group: group || '',
-        search: q || '',
-        take: limitNum,
-        skip: skipNum,
-        selectedIds: selectedIdsArr,
-      }),
-    );
+          this.categoryService.GetByGroup({
+            group: group || '',
+            search: q || '',
+            take: limitNum,
+            skip: skipNum,
+            selectedIds: selectedIdsArr,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
   }
 
@@ -167,14 +167,14 @@ export class CategoriesController implements OnModuleInit {
     },
   ) {
     const res = await firstValueFrom(
-      this.categoryService.Create({
-        group: body.group,
-        code: body.code,
-        name: body.name,
-        description: body.description,
-        order: body.order,
-      }),
-    );
+          this.categoryService.Create({
+            group: body.group,
+            code: body.code,
+            name: body.name,
+            description: body.description,
+            order: body.order,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return { success: true, data: toFrontendItem(res as any) };
   }
 
@@ -202,7 +202,7 @@ export class CategoriesController implements OnModuleInit {
       order: body.order ?? body.sort,
       isActive: body.active !== undefined ? !!body.active : undefined,
     };
-    const res = await firstValueFrom(this.categoryService.Update(payload));
+    const res = await firstValueFrom(this.categoryService.Update(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return { success: true, data: toFrontendItem(res as any) };
   }
 
@@ -212,8 +212,8 @@ export class CategoriesController implements OnModuleInit {
   @ApiResponse({ status: 404, description: 'Danh mục không tồn tại' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(
-      this.categoryService.Delete({ id }),
-    )) as any;
+          this.categoryService.Delete({ id }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return {
       success: res?.success ?? true,
       message: res?.message ?? 'Đã xóa danh mục',
@@ -258,19 +258,19 @@ export class PublicCategoriesController implements OnModuleInit {
 
     if (!group) {
       const result: any = await firstValueFrom(
-        this.categoryService.GetAllCategories({ lang }),
-      );
+              this.categoryService.GetAllCategories({ lang }),
+            ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
       return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
     }
     const result: any = await firstValueFrom(
-      this.categoryService.GetByGroup({
-        group: group || '',
-        lang,
-        search: query.q || '',
-        take: limitNum,
-        skip: skipNum,
-      }),
-    );
+          this.categoryService.GetByGroup({
+            group: group || '',
+            lang,
+            search: query.q || '',
+            take: limitNum,
+            skip: skipNum,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return { success: true, data: result?.data || [], meta: { total: result?.total || result?.data?.length || 0 } };
   }
 }

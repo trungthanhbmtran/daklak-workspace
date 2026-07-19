@@ -57,6 +57,10 @@ export const CalendarGrid = React.memo(function CalendarGrid({
     const computedRows = [];
     let weekStartDay = startDate;
 
+    const MAX_TRACKS = 3;
+    const ROW_HEIGHT = 28; 
+    const TOP_PADDING = 48; // enough space for day number and holiday
+
     while (weekStartDay <= endDate) {
       const weekEndDay = endOfWeek(weekStartDay, { weekStartsOn: 1 });
       
@@ -100,6 +104,18 @@ export const CalendarGrid = React.memo(function CalendarGrid({
           return { ...evt, colStart, colEnd, span, trackIndex };
       });
 
+      // Calculate hidden events per day column
+      const hiddenCounts = new Array(7).fill(0);
+      positionedEvents.forEach(evt => {
+        if (evt.trackIndex >= MAX_TRACKS) {
+          for (let i = evt.colStart; i <= evt.colEnd; i++) {
+            hiddenCounts[i]++;
+          }
+        }
+      });
+      
+      const visibleEvents = positionedEvents.filter(evt => evt.trackIndex < MAX_TRACKS);
+
       // 3. Render days background
       const days = [];
       for (let i = 0; i < 7; i++) {
@@ -116,39 +132,45 @@ export const CalendarGrid = React.memo(function CalendarGrid({
           const holiday = isHoliday(cloneDay);
           // For quarter and year, we consider the whole view as "current"
           const isCurrentView = cloneDay >= startOfDay(viewStart) && cloneDay <= startOfDay(viewEnd);
+          const isTodayFlag = isToday(cloneDay);
 
           days.push(
             <div 
               key={cloneDay.toString()} 
-              className={`flex flex-col p-2 border-r border-b border-border transition-colors cursor-pointer hover:bg-muted/50
-                ${!isCurrentView ? "bg-muted/30" : 
-                  holiday ? "bg-rose-50/50 dark:bg-rose-900/10" : "bg-background"}
-                ${isToday(cloneDay) && isCurrentView ? "bg-primary/5 ring-1 ring-inset ring-primary/20" : ""}
+              className={`relative flex flex-col p-2 border-r border-b border-border transition-colors cursor-pointer group
+                ${!isCurrentView ? "bg-muted/30 hover:bg-muted/40" : 
+                  holiday ? "bg-rose-50/30 hover:bg-rose-50/60 dark:bg-rose-900/10 dark:hover:bg-rose-900/20" : 
+                  "bg-background hover:bg-muted/30"}
+                ${isTodayFlag && isCurrentView ? "ring-1 ring-inset ring-primary/40 bg-primary/[0.02]" : ""}
               `}
               onClick={() => onDateClick && onDateClick(cloneDay)}
             >
               {isCurrentView && (
                 <div className="flex flex-col z-10 relative h-full">
                   <div className="flex items-center justify-between shrink-0">
-                    <Text as="span" variant="small" weight="medium" className={`w-7 h-7 flex items-center justify-center rounded-full ${
-                      isToday(cloneDay) ? "bg-primary text-primary-foreground" : 
-                      holiday ? "text-rose-600 dark:text-rose-400 font-bold" :
-                      "text-foreground"} `}>
+                    <Text as="span" variant="small" weight="medium" className={`w-7 h-7 flex items-center justify-center rounded-full transition-all ${
+                      isTodayFlag ? "bg-primary text-primary-foreground shadow-sm" : 
+                      holiday ? "text-rose-600 dark:text-rose-400 font-bold bg-rose-100/50 dark:bg-rose-900/50" :
+                      "text-foreground group-hover:bg-muted"} `}>
                       {formattedDate}
                     </Text>
-                    {dayEvents.length > 0 && (
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); onSelectDayEvents({ day: cloneDay, events: dayEvents }); }}
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
-                      >
-                        Xem ({dayEvents.length})
-                      </button>
-                    )}
                   </div>
                   {holiday && (
-                    <div className="text-[10px] text-rose-500/80 font-medium truncate mt-1 pointer-events-none" title={holiday.name}>
+                    <div className="text-[10px] text-rose-500/90 dark:text-rose-400/90 font-medium truncate mt-1 pointer-events-none" title={holiday.name}>
                       {holiday.name}
                     </div>
+                  )}
+
+                  {/* +X more button pinned to bottom */}
+                  {hiddenCounts[i] > 0 && (
+                     <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-1">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onSelectDayEvents({ day: cloneDay, events: dayEvents }); }}
+                          className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary font-medium transition-colors cursor-pointer shadow-sm border border-transparent hover:border-primary/20"
+                        >
+                          +{hiddenCounts[i]} sự kiện
+                        </button>
+                     </div>
                   )}
                 </div>
               )}
@@ -156,35 +178,34 @@ export const CalendarGrid = React.memo(function CalendarGrid({
           );
       }
 
-      const maxTrackIndex = Math.max(0, tracks.length);
-      const ROW_HEIGHT = 26; 
-      const TOP_PADDING = 48; // increased to accommodate holiday names
-
+      // Height of a row: For month view, flex-1 allows it to grow to fill screen.
+      // But we need a minimum height so tracks and +X button fit.
+      // TOP_PADDING + (MAX_TRACKS * ROW_HEIGHT) + BOTTOM_PADDING
+      // 48 + (3 * 28) + 24 = 156px min height.
       computedRows.push(
         <div 
-          className="relative grid grid-cols-7 flex-1 border-b-0 border-r-0" 
+          className="relative grid grid-cols-7 flex-1 border-b-0 border-r-0 min-h-[140px] lg:min-h-[156px]" 
           key={weekStartDay.toString()}
-          style={{ minHeight: Math.max(100, maxTrackIndex * ROW_HEIGHT + TOP_PADDING + 10) + 'px' }}
         >
           {days}
-          <div className="absolute inset-0 pointer-events-none" style={{ paddingTop: TOP_PADDING }}>
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ paddingTop: TOP_PADDING, paddingBottom: 24 }}>
               <div className="relative w-full h-full">
-                  {positionedEvents.map(evt => (
+                  {visibleEvents.map(evt => (
                       <div 
                           key={evt.id}
-                          className={`absolute ${evt.colorClass} border rounded px-1.5 py-0.5 text-xs truncate pointer-events-auto cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm`}
+                          className={`absolute ${evt.colorClass} border px-2 py-0.5 text-xs truncate pointer-events-auto cursor-pointer hover:brightness-95 hover:shadow-md transition-all flex items-center gap-1.5 shadow-sm rounded-md`}
                           style={{
-                              left: `calc(${(evt.colStart * 100) / 7}% + 4px)`,
-                              width: `calc(${(evt.span * 100) / 7}% - 8px)`,
+                              left: `calc(${(evt.colStart * 100) / 7}% + 6px)`,
+                              width: `calc(${(evt.span * 100) / 7}% - 12px)`,
                               top: `${evt.trackIndex * ROW_HEIGHT}px`,
-                              height: '22px'
+                              height: '24px'
                           }}
                           title={evt.title}
                           onClick={(e) => { e.stopPropagation(); onSelectDayEvents({ day: evt.startDate, events: [evt] }); }}
                       >
-                          {evt.type === 'meeting' ? <Video className="w-3 h-3 shrink-0" /> : 
-                          evt.isCompleted ? <CheckCircle2 className="w-3 h-3 shrink-0" /> : <Clock className="w-3 h-3 shrink-0" />}
-                          <Text as="span" weight="medium" className="truncate">{evt.title}</Text>
+                          {evt.type === 'meeting' ? <Video className="w-3.5 h-3.5 shrink-0 opacity-80" /> : 
+                          evt.isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0 opacity-80" /> : <Clock className="w-3.5 h-3.5 shrink-0 opacity-80" />}
+                          <Text as="span" weight="medium" className="truncate tracking-tight">{evt.title}</Text>
                       </div>
                   ))}
               </div>
@@ -198,33 +219,37 @@ export const CalendarGrid = React.memo(function CalendarGrid({
   }, [currentDate, filteredEvents, isLoading, onSelectDayEvents, onDateClick, endDate, startDate, viewMode, viewStart, viewEnd]);
 
   return (
-    <div className="flex flex-col w-full h-full bg-background">
-      <div className="grid grid-cols-7 border-b border-border bg-muted/50 shrink-0">
+    <div className="flex flex-col w-full h-full bg-card rounded-b-xl border-t-0 border-0">
+      <div className="grid grid-cols-7 border-b border-border bg-muted/40 shrink-0 shadow-sm z-10 relative">
         {WEEK_DAYS.map((wd) => (
-          <Text as="div" variant="small" weight="semibold" key={wd} className="py-3 text-center text-muted-foreground uppercase tracking-wider border-r border-border last:border-0">
+          <Text as="div" variant="small" weight="bold" key={wd} className="py-3 text-center text-foreground/80 uppercase tracking-wider border-r border-border/50 last:border-0">
             {wd}
           </Text>
         ))}
       </div>
       
-      <div className="flex flex-col flex-1 min-h-0 relative">
+      <div className="flex flex-col flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden rounded-b-xl bg-background/50 border-r border-l border-b border-border">
         {isLoading ? (
           // Skeleton Loading state
           <div className="absolute inset-0 grid grid-rows-5 opacity-50 pointer-events-none animate-pulse">
             {[...Array(5)].map((_, rIdx) => (
               <div key={rIdx} className="grid grid-cols-7 border-b border-border">
                 {[...Array(7)].map((_, cIdx) => (
-                  <div key={cIdx} className="border-r border-border p-2">
-                    <div className="w-6 h-6 rounded-full bg-muted mb-2"></div>
-                    {/* Random skeleton lines */}
-                    {Math.random() > 0.5 && <div className="h-4 bg-muted rounded w-full mb-1"></div>}
-                    {Math.random() > 0.7 && <div className="h-4 bg-muted rounded w-2/3"></div>}
+                  <div key={cIdx} className="border-r border-border p-3">
+                    <div className="w-7 h-7 rounded-full bg-muted mb-3"></div>
+                    <div className="h-4 bg-muted rounded-md w-full mb-2"></div>
+                    <div className="h-4 bg-muted rounded-md w-4/5 mb-2"></div>
+                    <div className="h-4 bg-muted rounded-md w-2/3"></div>
                   </div>
                 ))}
               </div>
             ))}
           </div>
-        ) : rows}
+        ) : (
+          <div className="flex flex-col min-h-full">
+            {rows}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -55,26 +55,20 @@ export const CalendarCreateEventModal = React.memo(function CalendarCreateEventM
 
         <div className="grid gap-4 py-4">
           <div className="flex justify-center gap-4 mb-2">
-            <button
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                eventType === 'task' 
-                ? 'bg-primary/10 text-primary ring-2 ring-primary/30' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
+            <Button
+              variant={eventType === 'task' ? 'default' : 'outline'}
+              className={`w-32 ${eventType === 'task' ? 'bg-primary/10 text-primary hover:bg-primary/20 ring-2 ring-primary/30' : 'text-muted-foreground'}`}
               onClick={() => setEventType('task')}
             >
               Công việc
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                eventType === 'meeting' 
-                ? 'bg-primary/10 text-primary ring-2 ring-primary/30' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
+            </Button>
+            <Button
+              variant={eventType === 'meeting' ? 'default' : 'outline'}
+              className={`w-40 ${eventType === 'meeting' ? 'bg-primary/10 text-primary hover:bg-primary/20 ring-2 ring-primary/30' : 'text-muted-foreground'}`}
               onClick={() => setEventType('meeting')}
             >
-              Lịch hẹn / Cuộc họp
-            </button>
+              Lịch hẹn / Họp
+            </Button>
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">

@@ -34,7 +34,7 @@ export class PostsCategoryController {
 
   @Post()
   async create(@Body() createDto: any) {
-    return firstValueFrom(this.categoryService.createCategory(createDto));
+    return firstValueFrom(this.categoryService.createCategory(createDto)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get()
@@ -51,26 +51,26 @@ export class PostsCategoryController {
 
     console.log('Gateway: Calling ListCategories with payload:', payload);
     const result: any = await firstValueFrom(
-      this.categoryService.listCategories(payload),
-    );
+          this.categoryService.listCategories(payload),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     console.log('Gateway: ListCategories response received');
     return { success: true, data: result?.data || [], meta: result?.meta || {} };
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.categoryService.getCategory({ id }));
+    return firstValueFrom(this.categoryService.getCategory({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateDto: any) {
     return firstValueFrom(
-      this.categoryService.updateCategory({ id, ...updateDto }),
-    );
+          this.categoryService.updateCategory({ id, ...updateDto }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return firstValueFrom(this.categoryService.deleteCategory({ id }));
+    return firstValueFrom(this.categoryService.deleteCategory({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

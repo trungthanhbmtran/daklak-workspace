@@ -185,7 +185,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       toast.success("Tải lên văn bản thành công!");
     } catch (error) {
       console.error(error);
-      toast.error("Lỗi khi tải văn bản!");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi tải văn bản!");
     } finally {
       setIsUploadingDoc(false);
     }

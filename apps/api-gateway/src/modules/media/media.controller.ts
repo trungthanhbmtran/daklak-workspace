@@ -85,7 +85,7 @@ export class MediaGatewayController implements OnModuleInit {
   async requestUpload(@Req() req: any, @Body() body: RequestUploadDto) {
     const ownerId = req.user?.id || req.user?.sub || 'anonymous';
     const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaService.RequestUpload(payload));
+    return await firstValueFrom(this.mediaService.RequestUpload(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('confirm-upload')
@@ -96,7 +96,7 @@ export class MediaGatewayController implements OnModuleInit {
     description: 'Returns media info and download URL',
   })
   async confirmUpload(@Body() body: ConfirmUploadDto) {
-    return await firstValueFrom(this.mediaService.ConfirmUpload(body));
+    return await firstValueFrom(this.mediaService.ConfirmUpload(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('init-multipart-upload')
@@ -108,7 +108,7 @@ export class MediaGatewayController implements OnModuleInit {
   ) {
     const ownerId = req.user?.id || req.user?.sub || 'anonymous';
     const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
+    return await firstValueFrom(this.mediaService.InitMultipartUpload(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('get-multipart-urls')
@@ -116,8 +116,8 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
   async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
     return await firstValueFrom(
-      this.mediaService.GetMultipartPreSignedUrls(body),
-    );
+          this.mediaService.GetMultipartPreSignedUrls(body),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post('complete-multipart-upload')
@@ -127,8 +127,8 @@ export class MediaGatewayController implements OnModuleInit {
   })
   async completeMultipartUpload(@Body() body: CompleteMultipartUploadDto) {
     return await firstValueFrom(
-      this.mediaService.CompleteMultipartUpload(body),
-    );
+          this.mediaService.CompleteMultipartUpload(body),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
@@ -136,6 +136,6 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Get media metadata and download link' })
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {
-    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

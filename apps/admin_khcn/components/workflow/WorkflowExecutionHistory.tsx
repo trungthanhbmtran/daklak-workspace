@@ -32,7 +32,7 @@ export const WorkflowExecutionHistory = ({ instance, onClose }: WorkflowExecutio
           setLogs(Array.isArray(res) ? res : (res as any)?.logs || []);
         // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
-          toast.error("Không thể tải lịch sử quy trình");
+          toast.error((error as any)?.response?.data?.message || "Không thể tải lịch sử quy trình");
         } finally {
           setIsLoadingLogs(false);
         }

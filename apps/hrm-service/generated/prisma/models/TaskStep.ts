@@ -51,6 +51,7 @@ export type TaskStepMinAggregateOutputType = {
   completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  isDeleted: boolean | null
 }
 
 export type TaskStepMaxAggregateOutputType = {
@@ -64,6 +65,7 @@ export type TaskStepMaxAggregateOutputType = {
   completedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  isDeleted: boolean | null
 }
 
 export type TaskStepCountAggregateOutputType = {
@@ -77,6 +79,7 @@ export type TaskStepCountAggregateOutputType = {
   completedAt: number
   createdAt: number
   updatedAt: number
+  isDeleted: number
   _all: number
 }
 
@@ -106,6 +109,7 @@ export type TaskStepMinAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  isDeleted?: true
 }
 
 export type TaskStepMaxAggregateInputType = {
@@ -119,6 +123,7 @@ export type TaskStepMaxAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  isDeleted?: true
 }
 
 export type TaskStepCountAggregateInputType = {
@@ -132,6 +137,7 @@ export type TaskStepCountAggregateInputType = {
   completedAt?: true
   createdAt?: true
   updatedAt?: true
+  isDeleted?: true
   _all?: true
 }
 
@@ -232,6 +238,7 @@ export type TaskStepGroupByOutputType = {
   completedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  isDeleted: boolean
   _count: TaskStepCountAggregateOutputType | null
   _avg: TaskStepAvgAggregateOutputType | null
   _sum: TaskStepSumAggregateOutputType | null
@@ -268,6 +275,7 @@ export type TaskStepWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"TaskStep"> | boolean
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
 }
 
@@ -282,6 +290,7 @@ export type TaskStepOrderByWithRelationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
   _relevance?: Prisma.TaskStepOrderByRelevanceInput
 }
@@ -300,6 +309,7 @@ export type TaskStepWhereUniqueInput = Prisma.AtLeast<{
   completedAt?: Prisma.DateTimeNullableFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"TaskStep"> | boolean
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
 }, "id">
 
@@ -314,6 +324,7 @@ export type TaskStepOrderByWithAggregationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   _count?: Prisma.TaskStepCountOrderByAggregateInput
   _avg?: Prisma.TaskStepAvgOrderByAggregateInput
   _max?: Prisma.TaskStepMaxOrderByAggregateInput
@@ -335,6 +346,7 @@ export type TaskStepScalarWhereWithAggregatesInput = {
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TaskStep"> | Date | string
+  isDeleted?: Prisma.BoolWithAggregatesFilter<"TaskStep"> | boolean
 }
 
 export type TaskStepCreateInput = {
@@ -346,6 +358,7 @@ export type TaskStepCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   task: Prisma.TaskCreateNestedOneWithoutStepsInput
 }
 
@@ -360,6 +373,7 @@ export type TaskStepUncheckedCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskStepUpdateInput = {
@@ -371,6 +385,7 @@ export type TaskStepUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   task?: Prisma.TaskUpdateOneRequiredWithoutStepsNestedInput
 }
 
@@ -385,6 +400,7 @@ export type TaskStepUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskStepCreateManyInput = {
@@ -398,6 +414,7 @@ export type TaskStepCreateManyInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskStepUpdateManyMutationInput = {
@@ -409,6 +426,7 @@ export type TaskStepUpdateManyMutationInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskStepUncheckedUpdateManyInput = {
@@ -422,6 +440,7 @@ export type TaskStepUncheckedUpdateManyInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskStepListRelationFilter = {
@@ -451,6 +470,7 @@ export type TaskStepCountOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type TaskStepAvgOrderByAggregateInput = {
@@ -471,6 +491,7 @@ export type TaskStepMaxOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type TaskStepMinOrderByAggregateInput = {
@@ -484,6 +505,7 @@ export type TaskStepMinOrderByAggregateInput = {
   completedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type TaskStepSumOrderByAggregateInput = {
@@ -544,6 +566,7 @@ export type TaskStepCreateWithoutTaskInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskStepUncheckedCreateWithoutTaskInput = {
@@ -556,6 +579,7 @@ export type TaskStepUncheckedCreateWithoutTaskInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskStepCreateOrConnectWithoutTaskInput = {
@@ -598,6 +622,7 @@ export type TaskStepScalarWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"TaskStep"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaskStep"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"TaskStep"> | boolean
 }
 
 export type TaskStepCreateManyTaskInput = {
@@ -610,6 +635,7 @@ export type TaskStepCreateManyTaskInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskStepUpdateWithoutTaskInput = {
@@ -621,6 +647,7 @@ export type TaskStepUpdateWithoutTaskInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskStepUncheckedUpdateWithoutTaskInput = {
@@ -633,6 +660,7 @@ export type TaskStepUncheckedUpdateWithoutTaskInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskStepUncheckedUpdateManyWithoutTaskInput = {
@@ -645,6 +673,7 @@ export type TaskStepUncheckedUpdateManyWithoutTaskInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -660,6 +689,7 @@ export type TaskStepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isDeleted?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["taskStep"]>
 
@@ -676,9 +706,10 @@ export type TaskStepSelectScalar = {
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isDeleted?: boolean
 }
 
-export type TaskStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "status" | "order" | "assigneeCode" | "baseScore" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["taskStep"]>
+export type TaskStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "status" | "order" | "assigneeCode" | "baseScore" | "completedAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["taskStep"]>
 export type TaskStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }
@@ -699,6 +730,7 @@ export type $TaskStepPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     completedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    isDeleted: boolean
   }, ExtArgs["result"]["taskStep"]>
   composites: {}
 }
@@ -1079,6 +1111,7 @@ export interface TaskStepFieldRefs {
   readonly completedAt: Prisma.FieldRef<"TaskStep", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"TaskStep", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TaskStep", 'DateTime'>
+  readonly isDeleted: Prisma.FieldRef<"TaskStep", 'Boolean'>
 }
     
 

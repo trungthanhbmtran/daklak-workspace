@@ -30,7 +30,7 @@ export class PublicConsultationsController implements OnModuleInit {
   ) {
     const payload = { consultationId, ...body };
     return firstValueFrom(
-      this.consultationService.SubmitPublicComment(payload),
-    );
+          this.consultationService.SubmitPublicComment(payload),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

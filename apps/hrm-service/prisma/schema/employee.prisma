@@ -30,6 +30,7 @@ model Employee {
   startDate          DateTime @map("start_date") @db.Date
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
+  isDeleted          Boolean  @default(false) @map("is_deleted")
 
   // Relations (Đã gỡ bỏ các relation trực tiếp với Task cũ)
   kpiEvaluations     KpiEvaluation[]     @relation("KpiEmployee")

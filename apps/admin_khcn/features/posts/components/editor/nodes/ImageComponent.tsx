@@ -79,7 +79,7 @@ export default function ImageComponent({
       setTimeout(() => setIsHovered(false), 2000);
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Đã xảy ra lỗi khi tải ảnh về máy chủ!");
+      toast.error((error as any)?.response?.data?.message || "Đã xảy ra lỗi khi tải ảnh về máy chủ!");
     } finally {
       setIsUploading(false);
     }

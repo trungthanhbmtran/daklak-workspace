@@ -183,8 +183,8 @@ export class AuthController implements OnModuleInit {
     }
 
     const user: any = await firstValueFrom(
-      this.userService.FindOne({ id: Number(userId) }),
-    );
+          this.userService.FindOne({ id: Number(userId) }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     let hrm: any = null;
 
     if (employeeId) {

@@ -65,6 +65,7 @@ export type EmployeeMinAggregateOutputType = {
   startDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  isDeleted: boolean | null
 }
 
 export type EmployeeMaxAggregateOutputType = {
@@ -90,6 +91,7 @@ export type EmployeeMaxAggregateOutputType = {
   startDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  isDeleted: boolean | null
 }
 
 export type EmployeeCountAggregateOutputType = {
@@ -116,6 +118,7 @@ export type EmployeeCountAggregateOutputType = {
   startDate: number
   createdAt: number
   updatedAt: number
+  isDeleted: number
   _all: number
 }
 
@@ -159,6 +162,7 @@ export type EmployeeMinAggregateInputType = {
   startDate?: true
   createdAt?: true
   updatedAt?: true
+  isDeleted?: true
 }
 
 export type EmployeeMaxAggregateInputType = {
@@ -184,6 +188,7 @@ export type EmployeeMaxAggregateInputType = {
   startDate?: true
   createdAt?: true
   updatedAt?: true
+  isDeleted?: true
 }
 
 export type EmployeeCountAggregateInputType = {
@@ -210,6 +215,7 @@ export type EmployeeCountAggregateInputType = {
   startDate?: true
   createdAt?: true
   updatedAt?: true
+  isDeleted?: true
   _all?: true
 }
 
@@ -323,6 +329,7 @@ export type EmployeeGroupByOutputType = {
   startDate: Date
   createdAt: Date
   updatedAt: Date
+  isDeleted: boolean
   _count: EmployeeCountAggregateOutputType | null
   _avg: EmployeeAvgAggregateOutputType | null
   _sum: EmployeeSumAggregateOutputType | null
@@ -372,6 +379,7 @@ export type EmployeeWhereInput = {
   startDate?: Prisma.DateTimeFilter<"Employee"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"Employee"> | boolean
   kpiEvaluations?: Prisma.KpiEvaluationListRelationFilter
   kpiReviews?: Prisma.KpiEvaluationListRelationFilter
   taskParticipants?: Prisma.TaskParticipantListRelationFilter
@@ -402,6 +410,7 @@ export type EmployeeOrderByWithRelationInput = {
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   kpiEvaluations?: Prisma.KpiEvaluationOrderByRelationAggregateInput
   kpiReviews?: Prisma.KpiEvaluationOrderByRelationAggregateInput
   taskParticipants?: Prisma.TaskParticipantOrderByRelationAggregateInput
@@ -436,6 +445,7 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   startDate?: Prisma.DateTimeFilter<"Employee"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"Employee"> | boolean
   kpiEvaluations?: Prisma.KpiEvaluationListRelationFilter
   kpiReviews?: Prisma.KpiEvaluationListRelationFilter
   taskParticipants?: Prisma.TaskParticipantListRelationFilter
@@ -466,6 +476,7 @@ export type EmployeeOrderByWithAggregationInput = {
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   _count?: Prisma.EmployeeCountOrderByAggregateInput
   _avg?: Prisma.EmployeeAvgOrderByAggregateInput
   _max?: Prisma.EmployeeMaxOrderByAggregateInput
@@ -500,6 +511,7 @@ export type EmployeeScalarWhereWithAggregatesInput = {
   startDate?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
+  isDeleted?: Prisma.BoolWithAggregatesFilter<"Employee"> | boolean
 }
 
 export type EmployeeCreateInput = {
@@ -525,6 +537,7 @@ export type EmployeeCreateInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
   taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
@@ -555,6 +568,7 @@ export type EmployeeUncheckedCreateInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
   taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
@@ -584,6 +598,7 @@ export type EmployeeUpdateInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
   taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
@@ -614,6 +629,7 @@ export type EmployeeUncheckedUpdateInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
   taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -644,6 +660,7 @@ export type EmployeeCreateManyInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type EmployeeUpdateManyMutationInput = {
@@ -669,6 +686,7 @@ export type EmployeeUpdateManyMutationInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type EmployeeUncheckedUpdateManyInput = {
@@ -695,6 +713,7 @@ export type EmployeeUncheckedUpdateManyInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type EmployeeOrderByRelevanceInput = {
@@ -727,6 +746,7 @@ export type EmployeeCountOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type EmployeeAvgOrderByAggregateInput = {
@@ -760,6 +780,7 @@ export type EmployeeMaxOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type EmployeeMinOrderByAggregateInput = {
@@ -785,6 +806,7 @@ export type EmployeeMinOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type EmployeeSumOrderByAggregateInput = {
@@ -827,6 +849,10 @@ export type NullableIntFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -918,6 +944,7 @@ export type EmployeeCreateWithoutEmployeeKpiTargetsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
   taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
@@ -947,6 +974,7 @@ export type EmployeeUncheckedCreateWithoutEmployeeKpiTargetsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
   taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
@@ -991,6 +1019,7 @@ export type EmployeeUpdateWithoutEmployeeKpiTargetsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
   taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
@@ -1020,6 +1049,7 @@ export type EmployeeUncheckedUpdateWithoutEmployeeKpiTargetsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
   taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1048,6 +1078,7 @@ export type EmployeeCreateWithoutKpiEvaluationsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
   taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
@@ -1077,6 +1108,7 @@ export type EmployeeUncheckedCreateWithoutKpiEvaluationsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
   taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
@@ -1110,6 +1142,7 @@ export type EmployeeCreateWithoutKpiReviewsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
   taskParticipants?: Prisma.TaskParticipantCreateNestedManyWithoutEmployeeInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
@@ -1139,6 +1172,7 @@ export type EmployeeUncheckedCreateWithoutKpiReviewsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
   taskParticipants?: Prisma.TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
@@ -1183,6 +1217,7 @@ export type EmployeeUpdateWithoutKpiEvaluationsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
   taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
@@ -1212,6 +1247,7 @@ export type EmployeeUncheckedUpdateWithoutKpiEvaluationsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
   taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1251,6 +1287,7 @@ export type EmployeeUpdateWithoutKpiReviewsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
   taskParticipants?: Prisma.TaskParticipantUpdateManyWithoutEmployeeNestedInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
@@ -1280,6 +1317,7 @@ export type EmployeeUncheckedUpdateWithoutKpiReviewsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
   taskParticipants?: Prisma.TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1308,6 +1346,7 @@ export type EmployeeCreateWithoutTaskParticipantsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationCreateNestedManyWithoutReviewerInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
@@ -1337,6 +1376,7 @@ export type EmployeeUncheckedCreateWithoutTaskParticipantsInput = {
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  isDeleted?: boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
@@ -1381,6 +1421,7 @@ export type EmployeeUpdateWithoutTaskParticipantsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUpdateManyWithoutReviewerNestedInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
@@ -1410,6 +1451,7 @@ export type EmployeeUncheckedUpdateWithoutTaskParticipantsInput = {
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   kpiEvaluations?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
   kpiReviews?: Prisma.KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
   employeeKpiTargets?: Prisma.EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1497,6 +1539,7 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   startDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isDeleted?: boolean
   kpiEvaluations?: boolean | Prisma.Employee$kpiEvaluationsArgs<ExtArgs>
   kpiReviews?: boolean | Prisma.Employee$kpiReviewsArgs<ExtArgs>
   taskParticipants?: boolean | Prisma.Employee$taskParticipantsArgs<ExtArgs>
@@ -1530,9 +1573,10 @@ export type EmployeeSelectScalar = {
   startDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  isDeleted?: boolean
 }
 
-export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstname" | "lastname" | "fullName" | "employeeCode" | "email" | "phone" | "gender" | "birthday" | "identityCard" | "employmentType" | "employmentStatus" | "contractInfo" | "address" | "avatar" | "departmentId" | "jobTitleId" | "civilServantRankId" | "partyTitleId" | "startDate" | "createdAt" | "updatedAt", ExtArgs["result"]["employee"]>
+export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstname" | "lastname" | "fullName" | "employeeCode" | "email" | "phone" | "gender" | "birthday" | "identityCard" | "employmentType" | "employmentStatus" | "contractInfo" | "address" | "avatar" | "departmentId" | "jobTitleId" | "civilServantRankId" | "partyTitleId" | "startDate" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["employee"]>
 export type EmployeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   kpiEvaluations?: boolean | Prisma.Employee$kpiEvaluationsArgs<ExtArgs>
   kpiReviews?: boolean | Prisma.Employee$kpiReviewsArgs<ExtArgs>
@@ -1573,6 +1617,7 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     startDate: Date
     createdAt: Date
     updatedAt: Date
+    isDeleted: boolean
   }, ExtArgs["result"]["employee"]>
   composites: {}
 }
@@ -1969,6 +2014,7 @@ export interface EmployeeFieldRefs {
   readonly startDate: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Employee", 'DateTime'>
+  readonly isDeleted: Prisma.FieldRef<"Employee", 'Boolean'>
 }
     
 

@@ -136,7 +136,7 @@ export class MenusController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách menu (flat) cho trang quản lý menu' })
   @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
   async getAll(@Query('app') app?: string) {
-    const res = (await firstValueFrom(this.menuService.GetAll({}))) as any;
+    const res = (await firstValueFrom(this.menuService.GetAll({})).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     const items = res?.items ?? [];
     return items.map(toFrontendItem);
   }
@@ -145,7 +145,7 @@ export class MenusController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách menu dưới dạng cây' })
   @ApiResponse({ status: 200, description: 'Cây menu' })
   async getMenuTree(@Query('app') app?: string) {
-    const res = (await firstValueFrom(this.menuService.GetAll({}))) as any;
+    const res = (await firstValueFrom(this.menuService.GetAll({})).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     const items = res?.items ?? [];
     const frontendItems = items.map(toFrontendItem);
     const tree = buildMenuTree(frontendItems);
@@ -170,10 +170,10 @@ export class MenusController implements OnModuleInit {
           : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
-      this.menuService.GetMyMenus({
-        userId: Number.isNaN(userId) ? 0 : userId,
-      }),
-    );
+          this.menuService.GetMyMenus({
+            userId: Number.isNaN(userId) ? 0 : userId,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     if (response) {
       if (!response.meta) response.meta = {};
@@ -200,10 +200,10 @@ export class MenusController implements OnModuleInit {
           : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
-      this.menuService.GetMyMenus({
-        userId: Number.isNaN(userId) ? 0 : userId,
-      }),
-    );
+          this.menuService.GetMyMenus({
+            userId: Number.isNaN(userId) ? 0 : userId,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     const branches = getRealBranches(response?.items ?? []);
     return { apps: this.buildHubApps(branches) };
   }
@@ -233,10 +233,10 @@ export class MenusController implements OnModuleInit {
           : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
-      this.menuService.GetMyMenus({
-        userId: Number.isNaN(userId) ? 0 : userId,
-      }),
-    );
+          this.menuService.GetMyMenus({
+            userId: Number.isNaN(userId) ? 0 : userId,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     const branches = getRealBranches(response?.items ?? []);
     const sidebarMenus = this.buildSidebarMenus(branches);
     const sidebar =
@@ -375,7 +375,7 @@ export class MenusController implements OnModuleInit {
   @ApiOperation({ summary: 'Xóa menu' })
   @ApiResponse({ status: 200, description: 'Đã xóa' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
+    const res = (await firstValueFrom(this.menuService.Delete({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     return {
       success: res?.success ?? true,
       message: res?.message ?? 'Đã xóa menu',

@@ -138,9 +138,10 @@ export function useAddComment(taskId: number | undefined) {
     },
 
     // Rollback nếu lỗi
-    onError: (_err, _vars, ctx: any) => {
+    onError: (error: any, _vars, ctx: any) => {
       qc.setQueryData(key, ctx?.previous);
-      toast.error("Gửi tin nhắn thất bại");
+      const message = error.response?.data?.message || "Gửi tin nhắn thất bại";
+      toast.error(message);
     },
 
     // Sync lại data thật từ server
@@ -170,8 +171,9 @@ export function useUpdateStatus(taskId: number | undefined) {
         qc.invalidateQueries({ queryKey: hrmKeys.taskComments(taskId) });
       }
     },
-    onError: () => {
-      toast.error("Thao tác thất bại, vui lòng thử lại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Thao tác thất bại, vui lòng thử lại";
+      toast.error(message);
     },
   });
 }
@@ -209,8 +211,9 @@ export function useCreateStep(taskId: number | undefined) {
       if (taskId) qc.invalidateQueries({ queryKey: hrmKeys.taskSteps(taskId) });
       toast.success("Đã thêm bước thực hiện");
     },
-    onError: () => {
-      toast.error("Thêm bước thất bại, vui lòng thử lại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Thêm bước thất bại, vui lòng thử lại";
+      toast.error(message);
     },
   });
 }
@@ -226,8 +229,9 @@ export function useUpdateStep(taskId: number | undefined) {
     onSuccess: () => {
       if (taskId) qc.invalidateQueries({ queryKey: hrmKeys.taskSteps(taskId) });
     },
-    onError: () => {
-      toast.error("Cập nhật bước thất bại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Cập nhật bước thất bại";
+      toast.error(message);
     },
   });
 }
@@ -250,8 +254,9 @@ export function useCreateSubTask() {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       toast.success("Đã tạo nhiệm vụ con thành công");
     },
-    onError: () => {
-      toast.error("Tạo nhiệm vụ con thất bại, vui lòng thử lại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Tạo nhiệm vụ con thất bại, vui lòng thử lại";
+      toast.error(message);
     },
   });
 }
@@ -268,8 +273,9 @@ export function useUpdateProgress(taskId: number | undefined) {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       toast.success("Đã cập nhật tiến độ");
     },
-    onError: () => {
-      toast.error("Cập nhật tiến độ thất bại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Cập nhật tiến độ thất bại";
+      toast.error(message);
     },
   });
 }
@@ -294,8 +300,9 @@ export function useAssignTask() {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       toast.success("Giao việc thành công");
     },
-    onError: () => {
-      toast.error("Giao việc thất bại, vui lòng thử lại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Giao việc thất bại, vui lòng thử lại";
+      toast.error(message);
     },
   });
 }
@@ -318,8 +325,9 @@ export function useRequestCoordination(taskId: number | undefined) {
       }
       toast.success("Đã gửi yêu cầu phối hợp");
     },
-    onError: () => {
-      toast.error("Gửi yêu cầu phối hợp thất bại, vui lòng thử lại");
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Gửi yêu cầu phối hợp thất bại, vui lòng thử lại";
+      toast.error(message);
     },
   });
 }

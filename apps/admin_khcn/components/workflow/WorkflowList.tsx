@@ -101,7 +101,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       setTotalItems(res?.meta?.total || (res?.data?.length || 0));
     } catch (error) {
       console.error("Failed to load workflows:", error);
-      toast.error("Không thể tải danh sách quy trình");
+      toast.error((error as any)?.response?.data?.message || "Không thể tải danh sách quy trình");
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +144,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       loadWorkflows();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Lỗi khi xóa quy trình");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi xóa quy trình");
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
@@ -161,7 +161,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       loadWorkflows();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-      toast.error("Lỗi khi áp dụng quy trình");
+      toast.error((e as any)?.response?.data?.message || "Lỗi khi áp dụng quy trình");
     }
   };
 
@@ -174,7 +174,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       }
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-      toast.error("Dữ liệu đầu vào (JSON) không hợp lệ");
+      toast.error((e as any)?.response?.data?.message || "Dữ liệu đầu vào (JSON) không hợp lệ");
       return;
     }
 
@@ -186,7 +186,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       setSelectedWorkflow(null); // Optional: close the details sheet if open
     } catch (error) {
       console.error("Test run error:", error);
-      toast.error("Lỗi khi khởi chạy quy trình");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi khởi chạy quy trình");
     } finally {
       setIsTestRunning(false);
     }

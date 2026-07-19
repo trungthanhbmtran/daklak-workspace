@@ -61,7 +61,7 @@ export function usePageLayout(activePageId: string, pageIsActive: boolean, pageT
       refetch();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Không thể lưu trang. Vui lòng thử lại.");
+      toast.error((error as any)?.response?.data?.message || "Không thể lưu trang. Vui lòng thử lại.");
     } finally {
       setIsSaving(false);
     }

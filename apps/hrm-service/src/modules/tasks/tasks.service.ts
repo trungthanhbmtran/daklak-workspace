@@ -106,7 +106,9 @@ export class TasksService {
           { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: TaskRole.ASSIGNEE } } },
         ]
       });
-    } else if (query.assigneeCode) {
+    }
+    
+    if (query.assigneeCode && query.assigneeCode !== 'UNASSIGNED') {
       conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE } } });
     }
 
@@ -125,35 +127,76 @@ export class TasksService {
     // statsFilter date ranges
     if (query.statsFilter) {
       const now = new Date(); now.setHours(0, 0, 0, 0);
-      if (query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue') {
-        where.isCompleted = true;
-      } else if (query.statsFilter === 'overdue') {
-        where.isCompleted = false; where.dueDate = { lt: now };
-      } else {
-        const t3 = new Date(now); t3.setDate(now.getDate() + 3);
-        where.isCompleted = false;
-        where.dueDate = query.statsFilter === 'warning' ? { gte: now, lte: t3 } : { gt: t3 };
-        if (query.statsFilter === 'inTime') where.OR = [{ dueDate: { gt: t3 } }, { dueDate: null }];
+      switch(query.statsFilter) {
+        case 'doneInTime':
+        case 'doneOverdue':
+          where.isCompleted = true;
+          break;
+        case 'overdue':
+          where.isCompleted = false;
+          where.dueDate = { lt: now };
+          break;
+        case 'warning': {
+          const t3 = new Date(now); t3.setDate(now.getDate() + 3);
+          where.isCompleted = false;
+          where.dueDate = { gte: now, lte: t3 };
+          break;
+        }
+        case 'inTime': {
+          const t3 = new Date(now); t3.setDate(now.getDate() + 3);
+          where.isCompleted = false;
+          where.dueDate = { gt: t3 };
+          where.OR = [{ dueDate: { gt: t3 } }, { dueDate: null }];
+          break;
+        }
       }
     }
 
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 20;
+    const isJsFilter = query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue';
 
-    let tasks = await this.prisma.task.findMany({ where, orderBy: { createdAt: 'desc' }, include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true } });
+    let skip: number | undefined;
+    let take: number | undefined;
+    let totalCount = 0;
+    let limitNum = limit;
+
+    if (!isJsFilter) {
+      totalCount = await this.prisma.task.count({ where });
+      limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
+      skip = limit > 0 ? (page - 1) * limitNum : undefined;
+      take = limit > 0 ? limitNum : undefined;
+    }
+
+    let tasks = await this.prisma.task.findMany({ 
+      where, 
+      orderBy: { createdAt: 'desc' }, 
+      skip, 
+      take, 
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true } 
+    });
+
+    let paginatedMeta: any = { 
+      total: totalCount, 
+      page, 
+      limit: limitNum, 
+      totalPages: Math.ceil(totalCount / limitNum) 
+    };
 
     // JS-side filter for done in/overdue (column-vs-column comparison)
-    if (query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue') {
+    if (isJsFilter) {
       tasks = tasks.filter((t: any) => {
         const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
         const completedTime = new Date(t.completedAt || t.updatedAt || Date.now()).setHours(0, 0, 0, 0);
         const late = dueTime ? completedTime > dueTime : false;
         return query.statsFilter === 'doneOverdue' ? late : !late;
       });
+      const paginated = paginateArray(tasks, page, limit);
+      tasks = paginated.data;
+      paginatedMeta = paginated.meta;
     }
 
-    const paginated = paginateArray(tasks, page, limit);
-    const enriched = await this.shared.enrichTasks(paginated.data);
+    const enriched = await this.shared.enrichTasks(tasks);
 
     const mapped = await Promise.all(enriched.map(async (t: any) => ({
       ...this.shared.toTaskResponse(t),
@@ -169,7 +212,7 @@ export class TasksService {
       else roots.push(t);
     });
 
-    return { success: true, message: 'Lấy danh sách nhiệm vụ thành công', data: roots, meta: paginated.meta };
+    return { success: true, message: 'Lấy danh sách nhiệm vụ thành công', data: roots, meta: paginatedMeta };
   }
 
   async getTask(id: number, query: any) {
@@ -186,17 +229,31 @@ export class TasksService {
     const where: any = {};
     const conditions: any[] = [];
 
-    if (query.role === 'ASSIGNEE' && query.assigneeCode) {
-      conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: 'ASSIGNEE' } } });
-    } else if (query.role === 'OWNER' && query.assignerCode) {
-      conditions.push({ participants: { some: { employeeCode: query.assignerCode, participantRole: 'OWNER' } } });
-    } else if (query.role === 'UNASSIGNED' || query.assigneeCode === 'UNASSIGNED') {
-      conditions.push({
-        OR: [
-          { participants: { none: { participantRole: 'ASSIGNEE' } } },
-          { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' } } },
-        ]
-      });
+    switch(query.role) {
+      case 'ASSIGNEE':
+        if (query.assigneeCode) conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: 'ASSIGNEE' } } });
+        break;
+      case 'OWNER':
+        if (query.assignerCode) conditions.push({ participants: { some: { employeeCode: query.assignerCode, participantRole: 'OWNER' } } });
+        break;
+      case 'UNASSIGNED':
+        conditions.push({
+          OR: [
+            { participants: { none: { participantRole: 'ASSIGNEE' } } },
+            { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' } } },
+          ]
+        });
+        break;
+      default:
+        if (query.assigneeCode === 'UNASSIGNED') {
+          conditions.push({
+            OR: [
+              { participants: { none: { participantRole: 'ASSIGNEE' } } },
+              { participants: { some: { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' } } },
+            ]
+          });
+        }
+        break;
     }
 
     if (!query.role || query.role === 'ALL') {
@@ -232,15 +289,22 @@ export class TasksService {
     allTasks.forEach((t: any) => {
       const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
       const isDone = t.isCompleted === true;
+      
       if (isDone) {
         const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
-        (dueTime && completedTime > dueTime) ? doneOverdue++ : doneInTime++;
-      } else if (!dueTime) {
-        inTime++;
-      } else {
-        const diff = Math.round((dueTime - nowTime) / 86_400_000);
-        diff < 0 ? overdue++ : (diff <= 3 ? warning++ : inTime++);
+        if (dueTime && completedTime > dueTime) { doneOverdue++; } else { doneInTime++; }
+        return; // Early return for forEach callback
       }
+      
+      if (!dueTime) {
+        inTime++;
+        return; // Early return for forEach callback
+      }
+      
+      const diff = Math.round((dueTime - nowTime) / 86_400_000);
+      if (diff < 0) { overdue++; return; }
+      if (diff <= 3) { warning++; return; }
+      inTime++;
     });
 
     return { success: true, message: 'Lấy thống kê nhiệm vụ thành công', data: { overdue, warning, inTime, doneInTime, doneOverdue } };
@@ -399,21 +463,30 @@ export class TasksService {
 
     await this.prisma.task.update({ where: { id }, data: updateData });
 
-    if (rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED')) {
+    const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
+    if (isReject) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || context?.currentEmployeeCode || null, newValue: { reason: rejectReason } } });
       await this.prisma.taskParticipant.deleteMany({
         where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
       });
-    } else if (updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS') {
+    }
+
+    const isStartProgress = !isReject && updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS';
+    if (isStartProgress) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || context?.currentEmployeeCode || null } });
-    } else if (rawTask.status !== updateData.status) {
+    }
+
+    const isStatusChange = !isReject && !isStartProgress && rawTask.status !== updateData.status;
+    if (isStatusChange) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode: actorCode || context?.currentEmployeeCode || null, newValue: { status: updateData.status } } });
     }
 
     // Auto-progress từ workflow node hoặc default khi DONE
     if (transition.nextNodeData?.autoProgress !== undefined) {
       await this.updateTaskProgress(id, transition.nextNodeData.autoProgress, actorCode);
-    } else if (updateData.isCompleted) {
+    }
+    
+    if (transition.nextNodeData?.autoProgress === undefined && updateData.isCompleted) {
       await this.updateTaskProgress(id, 100, actorCode);
     }
 
@@ -571,7 +644,7 @@ export class TasksService {
     if (descendants.some(d => d.depth > 0)) throw new RpcException('Không thể xóa công việc đã có công việc con.');
 
     const ids = descendants.map(d => d.descendantId);
-    if (ids.length > 0) await this.prisma.task.deleteMany({ where: { id: { in: ids } } });
+    if (ids.length > 0) await this.prisma.task.updateMany({ where: { id: { in: ids } }, data: { isDeleted: true } });
 
     return { success: true };
   }
@@ -723,7 +796,7 @@ export class TasksService {
   }
 
   async deleteStep(taskId: number, stepId: number) {
-    await this.prisma.taskStep.delete({ where: { id: stepId, taskId } });
+    await this.prisma.taskStep.updateMany({ where: { id: stepId, taskId }, data: { isDeleted: true } });
     await this.autoComputeTaskProgress(taskId);
     return { success: true, message: 'Xóa bước thành công' };
   }
@@ -746,8 +819,13 @@ export class TasksService {
 
     if (!isAdmin) {
       const allowed = query.allowedEmployeeCodes || [];
-      if (allowed.length > 0) where.employeeCode = { in: allowed };
-      else if (query.currentEmployeeCode) where.employeeCode = query.currentEmployeeCode;
+      if (allowed.length > 0) {
+        where.employeeCode = { in: allowed };
+      }
+      
+      if (allowed.length === 0 && query.currentEmployeeCode) {
+        where.employeeCode = query.currentEmployeeCode;
+      }
     }
 
     const [employees, loadCounts, evaluations] = await Promise.all([

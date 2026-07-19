@@ -115,7 +115,7 @@ export function usePortalMenu() {
       fetchMenus();
     } catch (error) {
       console.error("Error saving menu:", error);
-      toast.error("Lỗi khi lưu dữ liệu");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi lưu dữ liệu");
     }
   };
 

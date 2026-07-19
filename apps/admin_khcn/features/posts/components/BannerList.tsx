@@ -97,7 +97,10 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
       queryClient.invalidateQueries({ queryKey: ["banners"] });
       toast.success("Xóa banner thành công!");
     },
-    onError: () => toast.error("Có lỗi xảy ra khi xóa banner."),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Có lỗi xảy ra khi xóa banner.";
+      toast.error(message);
+    },
   });
 
   const filteredBanners = banners?.items || [];

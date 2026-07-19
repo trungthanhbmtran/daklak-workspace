@@ -200,75 +200,32 @@ export class EmployeeController implements OnModuleInit {
     if (req.crossDepartment === 'true' || req.crossDepartment === true)
       req.crossDepartment = true;
 
-    const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.ListEmployees(req)),
-      this.fetchDictionaries(),
-    ]);
+    const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
+    let descendantUnitIdsArray: number[] = [];
+    
+    // Fetch dictionaries early to get unitMap for descendant calculation
+    const dicts = await this.fetchDictionaries();
+
+    if (req.callerUnitId && !isAdmin) {
+      const callerUnitId = parseInt(req.callerUnitId, 10);
+      const descendantUnitIds = this.getDescendantUnitIds(
+        dicts.unitMap,
+        callerUnitId,
+      );
+      descendantUnitIdsArray = Array.from(descendantUnitIds);
+      
+      req.descendantUnitIds = descendantUnitIdsArray;
+      req.excludeEmployeeCode = req.callerEmployeeCode;
+    }
+
+    const res: any = await firstValueFrom(this.employeeService.ListEmployees(req)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     if (res && res.data) {
       res.data = res.data.map((e: any) =>
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
 
-      const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
 
-      // Luôn lọc theo thẩm quyền của user trong hệ thống tổ chức (trừ khi là Admin toàn quyền)
-      if (req.callerUnitId && !isAdmin) {
-        const callerUnitId = parseInt(req.callerUnitId, 10);
-        const descendantUnitIds = this.getDescendantUnitIds(
-          dicts.unitMap,
-          callerUnitId,
-        );
-
-        res.data = res.data.filter((emp: any) => {
-          // Ngoại trừ chính mình
-          if (
-            emp.employeeCode === req.callerEmployeeCode ||
-            emp.email === req.callerEmail
-          )
-            return false;
-
-          const empUnitId = parseInt(
-            emp.department?.id || emp.departmentId,
-            10,
-          );
-          return descendantUnitIds.has(empUnitId);
-        });
-      }
-
-      // ── TÍNH TOÁN ĐIỀU PHỐI (WORKLOAD & SCORING) ──
-      const RANK_LIMITS: Record<string, number> = {
-        GRADE_1: 200,
-        GRADE_2: 160,
-        GRADE_3: 120,
-        GRADE_4: 80,
-        SENIOR_SPECIALIST: 150,
-        PRINCIPAL_SPECIALIST: 120,
-        SPECIALIST: 100,
-        OFFICER: 80,
-        VIEN_CHUC: 100,
-        NHAN_VIEN: 80,
-        BAO_VE: 60,
-      };
-      res.data = res.data.map((emp: any) => {
-        const rankCode =
-          emp.civilServantRank?.code || emp.civilServantRankCode || '';
-        const rankLimit = RANK_LIMITS[rankCode] || 100;
-        const currentLoad = emp.currentTaskCount || 0;
-        const availableCapacity = Math.max(0, rankLimit - currentLoad);
-        const priorityScore = availableCapacity * 10 + rankLimit * 0.5;
-        return {
-          ...emp,
-          rankLimit,
-          availableCapacity,
-          priorityScore: Math.round(priorityScore),
-          isOverloaded: currentLoad >= rankLimit,
-        };
-      });
-      res.data.sort((a: any, b: any) => {
-        if (a.isOverloaded !== b.isOverloaded) return a.isOverloaded ? 1 : -1;
-        return b.priorityScore - a.priorityScore;
-      });
     }
 
     if (res) {
@@ -289,7 +246,7 @@ export class EmployeeController implements OnModuleInit {
   @Get(':id')
   async getDetail(@Param('id') id: string) {
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })),
+      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; }),
       this.fetchDictionaries(),
     ]);
 
@@ -307,7 +264,7 @@ export class EmployeeController implements OnModuleInit {
   @Post()
   async create(@Body() body: any) {
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.CreateEmployee(body)),
+      firstValueFrom(this.employeeService.CreateEmployee(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; }),
       this.fetchDictionaries(),
     ]);
 
@@ -326,7 +283,7 @@ export class EmployeeController implements OnModuleInit {
   async update(@Param('id') id: string, @Body() body: any) {
     const payload = { ...body, id: parseInt(id) };
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.UpdateEmployee(payload)),
+      firstValueFrom(this.employeeService.UpdateEmployee(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; }),
       this.fetchDictionaries(),
     ]);
 
@@ -344,7 +301,7 @@ export class EmployeeController implements OnModuleInit {
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return firstValueFrom(
-      this.employeeService.DeleteEmployee({ id: parseInt(id) }),
-    );
+          this.employeeService.DeleteEmployee({ id: parseInt(id) }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

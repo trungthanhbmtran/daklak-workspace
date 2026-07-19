@@ -49,8 +49,8 @@ export class PositionController implements OnModuleInit {
       return { data: [], items: [] };
     }
     const res = await firstValueFrom(
-      this.orgService.GetStaffingReport({ unitId }),
-    );
+          this.orgService.GetStaffingReport({ unitId }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     const items = (res as any).items ?? [];
     return { data: items, items };
   }
@@ -77,12 +77,12 @@ export class PositionController implements OnModuleInit {
       throw new NotFoundException('unitId và jobTitleId là bắt buộc');
     }
     return firstValueFrom(
-      this.orgService.SetStaffing({
-        unitId: parseInt(String(unitId), 10),
-        jobTitleId: parseInt(String(jobTitleId), 10),
-        quantity: parseInt(String(quantity), 10) || 1,
-      }),
-    );
+          this.orgService.SetStaffing({
+            unitId: parseInt(String(unitId), 10),
+            jobTitleId: parseInt(String(jobTitleId), 10),
+            quantity: parseInt(String(quantity), 10) || 1,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
@@ -100,12 +100,12 @@ export class PositionController implements OnModuleInit {
       );
     }
     return firstValueFrom(
-      this.orgService.SetStaffing({
-        unitId: parseInt(String(unitId), 10),
-        jobTitleId: parseInt(String(jobTitleId), 10),
-        quantity: parseInt(String(quantity), 10) || 1,
-      }),
-    );
+          this.orgService.SetStaffing({
+            unitId: parseInt(String(unitId), 10),
+            jobTitleId: parseInt(String(jobTitleId), 10),
+            quantity: parseInt(String(quantity), 10) || 1,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')

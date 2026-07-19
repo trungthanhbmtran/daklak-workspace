@@ -126,7 +126,7 @@ export function KpiCriteriaClient() {
       setIsModalOpen(false);
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
-      toast.error("Đã xảy ra lỗi khi lưu");
+      toast.error((err as any)?.response?.data?.message || "Đã xảy ra lỗi khi lưu");
     }
   };
 
@@ -143,7 +143,7 @@ export function KpiCriteriaClient() {
       toast.success("Đã xóa tiêu chí");
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (err) {
-      toast.error("Đã xảy ra lỗi khi xóa");
+      toast.error((err as any)?.response?.data?.message || "Đã xảy ra lỗi khi xóa");
     } finally {
       setIsDeleteDialogOpen(false);
       setItemToDelete(null);

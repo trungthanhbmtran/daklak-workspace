@@ -76,11 +76,18 @@ export class KpiEvaluationsService {
     const page = query?.page ? Number(query.page) : 1;
     const limit = query?.limit ? Number(query.limit) : 0;
 
-    let criteria = await this.prisma.kpiCriteria.findMany({ orderBy: { createdAt: 'desc' }, include: { settings: true } });
+    const totalCount = await this.prisma.kpiCriteria.count();
+    const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 10);
+    const skip = (page - 1) * limitNum;
 
-    const paginated = paginateArray(criteria, page, limit);
+    let criteria = await this.prisma.kpiCriteria.findMany({ 
+      orderBy: { createdAt: 'desc' }, 
+      include: { settings: true },
+      skip: limit > 0 ? skip : undefined,
+      take: limit > 0 ? limitNum : undefined,
+    });
 
-    const mappedCriteria = paginated.data.map((c: any) => ({
+    const mappedCriteria = criteria.map((c: any) => ({
       ...c,
       weight: c.settings?.weight || 1.0,
       baseScore: c.settings?.baseScore || 0,
@@ -104,7 +111,10 @@ export class KpiEvaluationsService {
       message: 'Lấy danh sách tiêu chí thành công',
       data: mappedCriteria,
       meta: {
-        ...paginated.meta,
+        total: totalCount,
+        page,
+        limit: limitNum,
+        totalPages: Math.ceil(totalCount / limitNum),
         allowedActions
       }
     };
@@ -204,39 +214,44 @@ export class KpiEvaluationsService {
 
     if (employeeCode) where.employeeCode = employeeCode;
 
-    if (typeof query === 'object' && !query.isAdmin) {
-      if (!query.isFetchingOwn) {
-        // Must belong to descendant unit
-        const descendantIds = Array.isArray(query.callerDescendantUnitIds)
-          ? query.callerDescendantUnitIds.map(Number).filter(Boolean)
-          : [];
+    if (typeof query === 'object' && !query.isAdmin && !query.isFetchingOwn) {
+      // Must belong to descendant unit
+      const descendantIds = Array.isArray(query.callerDescendantUnitIds)
+        ? query.callerDescendantUnitIds.map(Number).filter(Boolean)
+        : [];
 
-        if (descendantIds.length > 0) {
-          where.employee = { departmentId: { in: descendantIds } };
-        } else {
-          // No descendants -> can't view others
-          where.employeeCode = query.currentEmployeeCode;
-        }
+      if (descendantIds.length > 0) {
+        where.employee = { departmentId: { in: descendantIds } };
+      } else {
+        // No descendants -> can't view others
+        where.employeeCode = query.currentEmployeeCode;
       }
     }
+
+    const totalCount = await this.prisma.kpiEvaluation.count({ where });
+    const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 10);
+    const skip = (page - 1) * limitNum;
 
     const allEvaluations = await this.prisma.kpiEvaluation.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      skip: limit > 0 ? skip : undefined,
+      take: limit > 0 ? limitNum : undefined,
       include: { employee: true }
     });
-    
-    const paginated = paginateArray(allEvaluations, page, limit);
 
     return {
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
-      data: paginated.data.map((e: any) => ({
+      data: allEvaluations.map((e: any) => ({
         ...e,
         employeeName: e.employee ? e.employee.fullName : e.employeeCode
       })),
       meta: {
-        ...paginated.meta
+        total: totalCount,
+        page,
+        limit: limitNum,
+        totalPages: Math.ceil(totalCount / limitNum)
       }
     };
   }
@@ -251,9 +266,6 @@ export class KpiEvaluationsService {
     if (query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
       const descendantIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
       where.employee = { departmentId: { in: descendantIds } };
-    } else if (!query.isAdmin) {
-      // Nếu không phải admin và không có quyền xem cấp dưới -> Không trả về gì hoặc trả về của chính mình
-      // Ở dashboard tổng quan, chúng ta thường yêu cầu quyền quản lý.
     }
 
     const evaluations = await this.prisma.kpiEvaluation.findMany({
@@ -359,7 +371,9 @@ export class KpiEvaluationsService {
         if (diffDays < 0) {
           // Completed early
           finalScore += Math.abs(diffDays) * bonusPerDay;
-        } else if (diffDays > 0) {
+        }
+        
+        if (diffDays > 0) {
           // Completed late
           finalScore -= diffDays * penaltyPerDay;
         }
@@ -511,14 +525,7 @@ export class KpiEvaluationsService {
     let evaluationId = existingEvaluation?.id;
 
     try {
-      if (existingEvaluation) {
-        if (existingEvaluation.status === 'DRAFT' || existingEvaluation.status === 'COMPUTING') {
-          await this.prisma.kpiEvaluation.update({
-            where: { id: existingEvaluation.id },
-            data: { totalScore, status: 'COMPUTING' }
-          });
-        }
-      } else {
+      if (!existingEvaluation) {
         const newEval = await this.prisma.kpiEvaluation.create({
           data: {
             employeeCode,
@@ -528,6 +535,13 @@ export class KpiEvaluationsService {
           }
         });
         evaluationId = newEval.id;
+      }
+      
+      if (existingEvaluation && (existingEvaluation.status === 'DRAFT' || existingEvaluation.status === 'COMPUTING')) {
+        await this.prisma.kpiEvaluation.update({
+          where: { id: existingEvaluation.id },
+          data: { totalScore, status: 'COMPUTING' }
+        });
       }
     } catch (error: any) {
       if (error.code === 'P2003') {
@@ -576,18 +590,21 @@ export class KpiEvaluationsService {
       let autoScore: number | null = null;
       let notes = existingDetail?.notes || '';
 
-      if (crit.settings?.scoringMethod === 'AUTOMATIC') {
-        autoScore = calcResult.groupedScores?.[crit.id] || 0;
-        const count = calcResult.groupedTasksCount?.[crit.id] || 0;
-        notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
-      } else if (crit.settings?.scoringMethod === 'INTEGRATION_API') {
-        autoScore = calcResult.groupedScores?.[crit.id] || 0;
-        const data = calcResult.groupedIntegrationData?.[crit.id];
-        if (data) {
-          notes = `Dữ liệu liên thông: Đạt ${data.actual} / Chỉ tiêu ${data.target}`;
-        } else {
-          notes = `Đang chờ số liệu liên thông.`;
-        }
+      switch(crit.settings?.scoringMethod) {
+        case 'AUTOMATIC':
+          autoScore = calcResult.groupedScores?.[crit.id] || 0;
+          const count = calcResult.groupedTasksCount?.[crit.id] || 0;
+          notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
+          break;
+        case 'INTEGRATION_API':
+          autoScore = calcResult.groupedScores?.[crit.id] || 0;
+          const data = calcResult.groupedIntegrationData?.[crit.id];
+          if (data) {
+            notes = `Dữ liệu liên thông: Đạt ${data.actual} / Chỉ tiêu ${data.target}`;
+          } else {
+            notes = `Đang chờ số liệu liên thông.`;
+          }
+          break;
       }
 
       return {

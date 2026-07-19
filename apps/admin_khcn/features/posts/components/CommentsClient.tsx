@@ -58,7 +58,10 @@ const DeleteConfirmDialog = React.memo(function DeleteConfirmDialog({
       queryClient.invalidateQueries({ queryKey: ["comments"] });
       onClose();
     },
-    onError: () => toast.error("Lỗi khi xóa bình luận"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi xóa bình luận";
+      toast.error(message);
+    },
   });
 
   return (
@@ -107,7 +110,10 @@ const CommentRow = React.memo(function CommentRow({ comment, onRequestDelete }: 
       toast.success(labels[variables.status] ?? `Đã cập nhật trạng thái`);
       queryClient.invalidateQueries({ queryKey: ["comments"] });
     },
-    onError: () => toast.error("Lỗi khi cập nhật trạng thái"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
+      toast.error(message);
+    },
   });
 
   const handleApprove = useCallback(

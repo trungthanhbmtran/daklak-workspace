@@ -93,7 +93,10 @@ const AnswerDialog = React.memo(function AnswerDialog({
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       onClose();
     },
-    onError: () => toast.error("Lỗi khi gửi câu trả lời"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi gửi câu trả lời";
+      toast.error(message);
+    },
   });
 
   const handleAnswer = useCallback(() => {

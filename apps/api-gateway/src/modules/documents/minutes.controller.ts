@@ -32,30 +32,30 @@ export class MinutesController implements OnModuleInit {
   @Get()
   @ApiOperation({ summary: 'List meeting minutes' })
   async listMinutes(@Query() query: any) {
-    return firstValueFrom(this.minutesService.ListMinutes(query));
+    return firstValueFrom(this.minutesService.ListMinutes(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get minutes detail' })
   async getMinutes(@Param('id') id: string) {
-    return firstValueFrom(this.minutesService.GetMinutes({ id }));
+    return firstValueFrom(this.minutesService.GetMinutes({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post()
   @ApiOperation({ summary: 'Create meeting minutes' })
   async createMinutes(@Body() body: any) {
-    return firstValueFrom(this.minutesService.CreateMinutes(body));
+    return firstValueFrom(this.minutesService.CreateMinutes(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update meeting minutes' })
   async updateMinutes(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(this.minutesService.UpdateMinutes({ id, ...body }));
+    return firstValueFrom(this.minutesService.UpdateMinutes({ id, ...body })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete meeting minutes' })
   async deleteMinutes(@Param('id') id: string) {
-    return firstValueFrom(this.minutesService.DeleteMinutes({ id }));
+    return firstValueFrom(this.minutesService.DeleteMinutes({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

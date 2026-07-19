@@ -27,7 +27,7 @@ export function usePostmanParser(onSuccess: (initialData: any) => void) {
         toast.success(`Đã trích xuất cấu hình: ${initialData.systemName}`);
       // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
-        toast.error("Lỗi đọc file JSON Postman");
+        toast.error((error as any)?.response?.data?.message || "Lỗi đọc file JSON Postman");
       }
     };
     reader.readAsText(file);

@@ -79,7 +79,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
       refetch();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-      toast.error("Không thể lưu thông tin trang. Vui lòng thử lại.");
+      toast.error((e as any)?.response?.data?.message || "Không thể lưu thông tin trang. Vui lòng thử lại.");
     }
   };
 
@@ -112,7 +112,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
       refetch();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-      toast.error("Không thể xóa trang.");
+      toast.error((e as any)?.response?.data?.message || "Không thể xóa trang.");
     }
   };
 
@@ -130,7 +130,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
       refetch();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-      toast.error("Không thể cập nhật trạng thái trang.");
+      toast.error((e as any)?.response?.data?.message || "Không thể cập nhật trạng thái trang.");
     }
   };
 

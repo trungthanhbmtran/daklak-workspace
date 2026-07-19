@@ -44,27 +44,27 @@ export class DocumentCategoryController implements OnModuleInit {
       type: query.groupCode || query.type,
       status: query.status,
     };
-    return firstValueFrom(this.categoryService.ListCategories(req));
+    return firstValueFrom(this.categoryService.ListCategories(req)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
   async getCategory(@Param('id') id: string) {
-    return firstValueFrom(this.categoryService.GetCategory({ id }));
+    return firstValueFrom(this.categoryService.GetCategory({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post()
   async createCategory(@Body() body: any) {
-    return firstValueFrom(this.categoryService.CreateCategory(body));
+    return firstValueFrom(this.categoryService.CreateCategory(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
   async updateCategory(@Param('id') id: string, @Body() body: any) {
     const payload = { id, ...body };
-    return firstValueFrom(this.categoryService.UpdateCategory(payload));
+    return firstValueFrom(this.categoryService.UpdateCategory(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')
   async deleteCategory(@Param('id') id: string) {
-    return firstValueFrom(this.categoryService.DeleteCategory({ id }));
+    return firstValueFrom(this.categoryService.DeleteCategory({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

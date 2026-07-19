@@ -129,7 +129,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
       toast.success(`Đã dịch xong sang ${languages.find(l => l.code === langCode)?.name}`);
     } catch (error) {
       console.error("Translation error:", error);
-      toast.error("Lỗi khi dịch tự động");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi dịch tự động");
     } finally {
       setIsTranslating(prev => ({ ...prev, [langCode]: false }));
     }

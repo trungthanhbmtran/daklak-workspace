@@ -53,9 +53,15 @@ export class MasterPlansService {
       where.AND = [{ OR: authConditions }];
     }
 
-    const allMasterPlans = await this.prisma.masterPlan.findMany({
+    const totalCount = await this.prisma.masterPlan.count({ where });
+    const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 10);
+    const skip = (page - 1) * limitNum;
+
+    const masterPlans = await this.prisma.masterPlan.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      skip: limit > 0 ? skip : undefined,
+      take: limit > 0 ? limitNum : undefined,
       include: {
         tasks: {
           include: { participants: true }
@@ -63,17 +69,17 @@ export class MasterPlansService {
       }
     });
 
-    const paginated = paginateArray(allMasterPlans, page, limit);
-    const masterPlans = paginated.data;
-
     const userIds = new Set<number>();
-    masterPlans.forEach((mp: any) => {
-      mp.tasks.forEach((t: any) => {
-        t.participants?.forEach((p: any) => {
-          if (p.userId) userIds.add(p.userId);
-        });
-      });
-    });
+    for (const mp of masterPlans) {
+      for (const t of mp.tasks) {
+        if (t.participants) {
+          for (const p of t.participants) {
+            const pAny = p as any;
+            if (pAny.userId) userIds.add(pAny.userId);
+          }
+        }
+      }
+    }
 
     const userToCodeMap = new Map<number, string>();
     if (userIds.size > 0) {
@@ -81,9 +87,9 @@ export class MasterPlansService {
         where: { userId: { in: Array.from(userIds).map(String) } },
         select: { userId: true, employeeCode: true }
       });
-      emps.forEach(emp => {
+      for (const emp of emps) {
         if (emp.userId) userToCodeMap.set(parseInt(emp.userId, 10), emp.employeeCode);
-      });
+      }
     }
 
     return {
@@ -124,7 +130,10 @@ export class MasterPlansService {
         };
       }),
       meta: {
-        ...paginated.meta
+        total: totalCount,
+        page,
+        limit: limitNum,
+        totalPages: Math.ceil(totalCount / limitNum)
       }
     };
   }

@@ -142,6 +142,18 @@ function buildTaskTree(tasks: HrmTask[]): HrmTask[] {
 export function TaskList() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
+  const { useDebounce } = require("@uidotdev/usehooks") || {}; // Fallback if no local hook
+  
+  // Use debounced search to avoid spamming the API
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
+
   const [selectedTask, setSelectedTask] = useState<HrmTask | null>(null);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
@@ -149,11 +161,11 @@ export function TaskList() {
   // ── API: danh sách task ──
   const { data, isLoading, isError, refetch } = useTasksList({
     status: statusFilter === "ALL" ? undefined : statusFilter,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
   });
 
   const flatTasks: HrmTask[] = (data as any)?.data ?? [];
-  const tasks = buildTaskTree(flatTasks);
+  const tasks = React.useMemo(() => buildTaskTree(flatTasks), [flatTasks]);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -170,7 +182,7 @@ export function TaskList() {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
-  const getVisibleTasks = React.useCallback(() => {
+  const visibleTasks = React.useMemo(() => {
     const flatten = (items: HrmTask[], depth = 0, ancestorsLast: boolean[] = []): any[] => {
       let result: any[] = [];
       items.forEach((task, index) => {
@@ -191,8 +203,6 @@ export function TaskList() {
     };
     return flatten(tasks);
   }, [tasks, expandedTasks]);
-
-  const visibleTasks = getVisibleTasks();
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">

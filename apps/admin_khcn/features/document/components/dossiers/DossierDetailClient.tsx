@@ -52,7 +52,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
       toast.success("Tải tài liệu thành công!");
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Tải tài liệu thất bại!");
+      toast.error((error as any)?.response?.data?.message || "Tải tài liệu thất bại!");
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
       setSelectedCompId(null);

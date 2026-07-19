@@ -104,7 +104,10 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
       queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
       onClose();
     },
-    onError: () => toast.error("Lỗi khi cập nhật trạng thái"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
+      toast.error(message);
+    },
   });
 
   return (
@@ -202,7 +205,10 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
       toast.success("Đã đánh dấu đã xử lý");
       queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
     },
-    onError: () => toast.error("Lỗi khi cập nhật trạng thái"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
+      toast.error(message);
+    },
   });
 
   const handleOpenDetail = useCallback(() => {

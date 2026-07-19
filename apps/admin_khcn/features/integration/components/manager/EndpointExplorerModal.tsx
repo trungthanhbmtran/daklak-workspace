@@ -42,7 +42,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       });
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-      toast.error("Lỗi dữ liệu cấu hình");
+      toast.error((e as any)?.response?.data?.message || "Lỗi dữ liệu cấu hình");
     }
   }, [integration, endpoints, updateMutation]);
 

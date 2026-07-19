@@ -42,6 +42,7 @@ export type TaskAttachmentMinAggregateOutputType = {
   documentId: string | null
   type: string | null
   createdAt: Date | null
+  isDeleted: boolean | null
 }
 
 export type TaskAttachmentMaxAggregateOutputType = {
@@ -50,6 +51,7 @@ export type TaskAttachmentMaxAggregateOutputType = {
   documentId: string | null
   type: string | null
   createdAt: Date | null
+  isDeleted: boolean | null
 }
 
 export type TaskAttachmentCountAggregateOutputType = {
@@ -58,6 +60,7 @@ export type TaskAttachmentCountAggregateOutputType = {
   documentId: number
   type: number
   createdAt: number
+  isDeleted: number
   _all: number
 }
 
@@ -78,6 +81,7 @@ export type TaskAttachmentMinAggregateInputType = {
   documentId?: true
   type?: true
   createdAt?: true
+  isDeleted?: true
 }
 
 export type TaskAttachmentMaxAggregateInputType = {
@@ -86,6 +90,7 @@ export type TaskAttachmentMaxAggregateInputType = {
   documentId?: true
   type?: true
   createdAt?: true
+  isDeleted?: true
 }
 
 export type TaskAttachmentCountAggregateInputType = {
@@ -94,6 +99,7 @@ export type TaskAttachmentCountAggregateInputType = {
   documentId?: true
   type?: true
   createdAt?: true
+  isDeleted?: true
   _all?: true
 }
 
@@ -189,6 +195,7 @@ export type TaskAttachmentGroupByOutputType = {
   documentId: string
   type: string
   createdAt: Date
+  isDeleted: boolean
   _count: TaskAttachmentCountAggregateOutputType | null
   _avg: TaskAttachmentAvgAggregateOutputType | null
   _sum: TaskAttachmentSumAggregateOutputType | null
@@ -220,6 +227,7 @@ export type TaskAttachmentWhereInput = {
   documentId?: Prisma.StringFilter<"TaskAttachment"> | string
   type?: Prisma.StringFilter<"TaskAttachment"> | string
   createdAt?: Prisma.DateTimeFilter<"TaskAttachment"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"TaskAttachment"> | boolean
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
 }
 
@@ -229,6 +237,7 @@ export type TaskAttachmentOrderByWithRelationInput = {
   documentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
   _relevance?: Prisma.TaskAttachmentOrderByRelevanceInput
 }
@@ -242,6 +251,7 @@ export type TaskAttachmentWhereUniqueInput = Prisma.AtLeast<{
   documentId?: Prisma.StringFilter<"TaskAttachment"> | string
   type?: Prisma.StringFilter<"TaskAttachment"> | string
   createdAt?: Prisma.DateTimeFilter<"TaskAttachment"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"TaskAttachment"> | boolean
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
 }, "id">
 
@@ -251,6 +261,7 @@ export type TaskAttachmentOrderByWithAggregationInput = {
   documentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   _count?: Prisma.TaskAttachmentCountOrderByAggregateInput
   _avg?: Prisma.TaskAttachmentAvgOrderByAggregateInput
   _max?: Prisma.TaskAttachmentMaxOrderByAggregateInput
@@ -267,12 +278,14 @@ export type TaskAttachmentScalarWhereWithAggregatesInput = {
   documentId?: Prisma.StringWithAggregatesFilter<"TaskAttachment"> | string
   type?: Prisma.StringWithAggregatesFilter<"TaskAttachment"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TaskAttachment"> | Date | string
+  isDeleted?: Prisma.BoolWithAggregatesFilter<"TaskAttachment"> | boolean
 }
 
 export type TaskAttachmentCreateInput = {
   documentId: string
   type?: string
   createdAt?: Date | string
+  isDeleted?: boolean
   task: Prisma.TaskCreateNestedOneWithoutAttachmentsInput
 }
 
@@ -282,12 +295,14 @@ export type TaskAttachmentUncheckedCreateInput = {
   documentId: string
   type?: string
   createdAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskAttachmentUpdateInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   task?: Prisma.TaskUpdateOneRequiredWithoutAttachmentsNestedInput
 }
 
@@ -297,6 +312,7 @@ export type TaskAttachmentUncheckedUpdateInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskAttachmentCreateManyInput = {
@@ -305,12 +321,14 @@ export type TaskAttachmentCreateManyInput = {
   documentId: string
   type?: string
   createdAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskAttachmentUpdateManyMutationInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskAttachmentUncheckedUpdateManyInput = {
@@ -319,6 +337,7 @@ export type TaskAttachmentUncheckedUpdateManyInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskAttachmentListRelationFilter = {
@@ -343,6 +362,7 @@ export type TaskAttachmentCountOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type TaskAttachmentAvgOrderByAggregateInput = {
@@ -356,6 +376,7 @@ export type TaskAttachmentMaxOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type TaskAttachmentMinOrderByAggregateInput = {
@@ -364,6 +385,7 @@ export type TaskAttachmentMinOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type TaskAttachmentSumOrderByAggregateInput = {
@@ -417,6 +439,7 @@ export type TaskAttachmentCreateWithoutTaskInput = {
   documentId: string
   type?: string
   createdAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskAttachmentUncheckedCreateWithoutTaskInput = {
@@ -424,6 +447,7 @@ export type TaskAttachmentUncheckedCreateWithoutTaskInput = {
   documentId: string
   type?: string
   createdAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskAttachmentCreateOrConnectWithoutTaskInput = {
@@ -461,6 +485,7 @@ export type TaskAttachmentScalarWhereInput = {
   documentId?: Prisma.StringFilter<"TaskAttachment"> | string
   type?: Prisma.StringFilter<"TaskAttachment"> | string
   createdAt?: Prisma.DateTimeFilter<"TaskAttachment"> | Date | string
+  isDeleted?: Prisma.BoolFilter<"TaskAttachment"> | boolean
 }
 
 export type TaskAttachmentCreateManyTaskInput = {
@@ -468,12 +493,14 @@ export type TaskAttachmentCreateManyTaskInput = {
   documentId: string
   type?: string
   createdAt?: Date | string
+  isDeleted?: boolean
 }
 
 export type TaskAttachmentUpdateWithoutTaskInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskAttachmentUncheckedUpdateWithoutTaskInput = {
@@ -481,6 +508,7 @@ export type TaskAttachmentUncheckedUpdateWithoutTaskInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TaskAttachmentUncheckedUpdateManyWithoutTaskInput = {
@@ -488,6 +516,7 @@ export type TaskAttachmentUncheckedUpdateManyWithoutTaskInput = {
   documentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -498,6 +527,7 @@ export type TaskAttachmentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   documentId?: boolean
   type?: boolean
   createdAt?: boolean
+  isDeleted?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["taskAttachment"]>
 
@@ -509,9 +539,10 @@ export type TaskAttachmentSelectScalar = {
   documentId?: boolean
   type?: boolean
   createdAt?: boolean
+  isDeleted?: boolean
 }
 
-export type TaskAttachmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "documentId" | "type" | "createdAt", ExtArgs["result"]["taskAttachment"]>
+export type TaskAttachmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "documentId" | "type" | "createdAt" | "isDeleted", ExtArgs["result"]["taskAttachment"]>
 export type TaskAttachmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }
@@ -527,6 +558,7 @@ export type $TaskAttachmentPayload<ExtArgs extends runtime.Types.Extensions.Inte
     documentId: string
     type: string
     createdAt: Date
+    isDeleted: boolean
   }, ExtArgs["result"]["taskAttachment"]>
   composites: {}
 }
@@ -902,6 +934,7 @@ export interface TaskAttachmentFieldRefs {
   readonly documentId: Prisma.FieldRef<"TaskAttachment", 'String'>
   readonly type: Prisma.FieldRef<"TaskAttachment", 'String'>
   readonly createdAt: Prisma.FieldRef<"TaskAttachment", 'DateTime'>
+  readonly isDeleted: Prisma.FieldRef<"TaskAttachment", 'Boolean'>
 }
     
 

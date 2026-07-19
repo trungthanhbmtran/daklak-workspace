@@ -44,7 +44,7 @@ export class PbacController implements OnModuleInit {
     description: 'Danh sách vai trò (cả số người dùng, số chính sách)',
   })
   async findAll() {
-    return firstValueFrom(this.pbacService.FindAllRoles({}));
+    return firstValueFrom(this.pbacService.FindAllRoles({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
@@ -56,7 +56,7 @@ export class PbacController implements OnModuleInit {
     description: 'Vai trò và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.FindOneRole({ id }));
+    return firstValueFrom(this.pbacService.FindOneRole({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post()
@@ -77,13 +77,13 @@ export class PbacController implements OnModuleInit {
     },
   ) {
     return firstValueFrom(
-      this.pbacService.CreateRole({
-        code: body.code,
-        name: body.name,
-        description: body.description,
-        policies: body.policies,
-      }),
-    );
+          this.pbacService.CreateRole({
+            code: body.code,
+            name: body.name,
+            description: body.description,
+            policies: body.policies,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
@@ -107,13 +107,13 @@ export class PbacController implements OnModuleInit {
     },
   ) {
     return firstValueFrom(
-      this.pbacService.UpdateRole({
-        id,
-        name: body.name,
-        description: body.description,
-        policies: body.policies,
-      }),
-    );
+          this.pbacService.UpdateRole({
+            id,
+            name: body.name,
+            description: body.description,
+            policies: body.policies,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')
@@ -122,6 +122,6 @@ export class PbacController implements OnModuleInit {
   })
   @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.DeleteRole({ id }));
+    return firstValueFrom(this.pbacService.DeleteRole({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

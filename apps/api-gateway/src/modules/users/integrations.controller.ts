@@ -29,8 +29,8 @@ export class IntegrationsController {
   async list(@Req() req: any) {
     const search = req.query?.search || '';
     const { data } = await firstValueFrom(
-      this.httpService.get(this.notificationServiceUrl, { params: { search } })
-    );
+          this.httpService.get(this.notificationServiceUrl, { params: { search } })
+        ).catch(e => { console.error('RPC Call Failed', e.message); return { data: null }; });
     return data;
   }
 
@@ -38,8 +38,8 @@ export class IntegrationsController {
   @ApiOperation({ summary: 'Tạo cấu hình thông báo mới' })
   async create(@Body() body: any) {
     const { data } = await firstValueFrom(
-      this.httpService.post(this.notificationServiceUrl, body)
-    );
+          this.httpService.post(this.notificationServiceUrl, body)
+        ).catch(e => { console.error('RPC Call Failed', e.message); return { data: null }; });
     return data;
   }
 
@@ -47,8 +47,8 @@ export class IntegrationsController {
   @ApiOperation({ summary: 'Cập nhật cấu hình thông báo' })
   async update(@Param('id') id: string, @Body() body: any) {
     const { data } = await firstValueFrom(
-      this.httpService.put(`${this.notificationServiceUrl}/${id}`, body)
-    );
+          this.httpService.put(`${this.notificationServiceUrl}/${id}`, body)
+        ).catch(e => { console.error('RPC Call Failed', e.message); return { data: null }; });
     return data;
   }
 
@@ -56,8 +56,8 @@ export class IntegrationsController {
   @ApiOperation({ summary: 'Cập nhật trạng thái kích hoạt' })
   async toggleActive(@Param('id') id: string, @Body() body: any) {
     const { data } = await firstValueFrom(
-      this.httpService.put(`${this.notificationServiceUrl}/${id}/active`, body)
-    );
+          this.httpService.put(`${this.notificationServiceUrl}/${id}/active`, body)
+        ).catch(e => { console.error('RPC Call Failed', e.message); return { data: null }; });
     return data;
   }
 
@@ -65,8 +65,8 @@ export class IntegrationsController {
   @ApiOperation({ summary: 'Xóa cấu hình thông báo' })
   async delete(@Param('id') id: string) {
     const { data } = await firstValueFrom(
-      this.httpService.delete(`${this.notificationServiceUrl}/${id}`)
-    );
+          this.httpService.delete(`${this.notificationServiceUrl}/${id}`)
+        ).catch(e => { console.error('RPC Call Failed', e.message); return { data: null }; });
     return data;
   }
 }

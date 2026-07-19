@@ -27,22 +27,22 @@ export class PublicPostsController implements OnModuleInit {
   async findAll(@Query() query: any) {
     // Chỉ trả về các bài viết công khai (PUBLISHED)
     return firstValueFrom(
-      this.postService.listPosts({ ...query, status: 'PUBLISHED' }),
-    );
+          this.postService.listPosts({ ...query, status: 'PUBLISHED' }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get('slug/:slug')
   async findBySlug(@Param('slug') slug: string) {
-    return firstValueFrom(this.postService.getPostBySlug({ slug }));
+    return firstValueFrom(this.postService.getPostBySlug({ slug })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.postService.getPost({ id }));
+    return firstValueFrom(this.postService.getPost({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Post(':id/view')
   async incrementView(@Param('id') id: string) {
-    return firstValueFrom(this.postService.incrementViewCount({ id }));
+    return firstValueFrom(this.postService.incrementViewCount({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 }

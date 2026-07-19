@@ -45,12 +45,12 @@ export const CalendarHeader = React.memo(function CalendarHeader({
   };
 
   return (
-    <CardHeader className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4 py-3 px-4 bg-background border-b border-border">
+    <CardHeader className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-5 bg-card border-b border-border z-20 shadow-sm relative">
       <div className="flex items-center gap-4">
-        <CardTitle className="text-xl font-bold text-foreground capitalize">
+        <CardTitle className="text-2xl font-bold tracking-tight text-foreground capitalize">
           {getTitle()}
         </CardTitle>
-        {isLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+        {isLoading && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">

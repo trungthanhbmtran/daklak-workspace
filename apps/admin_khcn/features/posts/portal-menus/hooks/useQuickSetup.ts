@@ -37,7 +37,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       setSystemPages(Array.isArray(defaultPages) ? defaultPages : []);
     } catch (error) {
       console.error("Error fetching quick setup data:", error);
-      toast.error("Không thể tải dữ liệu thiết lập từ hệ thống");
+      toast.error((error as any)?.response?.data?.message || "Không thể tải dữ liệu thiết lập từ hệ thống");
     }
   };
 
@@ -74,7 +74,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       onClose();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Lỗi khi nhập danh mục hàng loạt");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi nhập danh mục hàng loạt");
     } finally {
       setIsImporting(false);
     }
@@ -108,7 +108,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
         onClose();
       }
     } catch (error) {
-      if (finalize) toast.error("Lỗi khi nhập danh mục");
+      if (finalize) toast.error((error as any)?.response?.data?.message || "Lỗi khi nhập danh mục");
       throw error;
     } finally {
       if (finalize) setIsImporting(false);
@@ -184,7 +184,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       onClose();
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
-      toast.error("Lỗi khi thiết lập danh mục văn bản");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi thiết lập danh mục văn bản");
     } finally {
       setIsImporting(false);
     }

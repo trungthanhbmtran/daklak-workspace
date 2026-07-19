@@ -88,7 +88,7 @@ export function useWorkflowData({
       }
     } catch (error) {
       console.error("Failed to load workflow:", error);
-      toast.error("Không thể tải quy trình");
+      toast.error((error as any)?.response?.data?.message || "Không thể tải quy trình");
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +122,7 @@ export function useWorkflowData({
       }
     } catch (error) {
       console.error("Save error:", error);
-      toast.error("Lỗi khi lưu quy trình");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi lưu quy trình");
     } finally {
       setIsSaving(false);
     }
@@ -139,7 +139,7 @@ export function useWorkflowData({
       toast.success("Đã kích hoạt quy trình!");
     } catch (error) {
       console.error("Publish error:", error);
-      toast.error("Lỗi khi kích hoạt quy trình");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi kích hoạt quy trình");
     }
   }, [workflowId]);
 
@@ -163,7 +163,7 @@ export function useWorkflowData({
         }
       // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
-        toast.error("Lỗi khi lưu quy trình");
+        toast.error((error as any)?.response?.data?.message || "Lỗi khi lưu quy trình");
         setIsSaving(false);
         return;
       } finally {
@@ -178,7 +178,7 @@ export function useWorkflowData({
       toast.success(`Đã áp dụng quy trình vào nghiệp vụ ${moduleCode}!`);
     } catch (error) {
       console.error("Apply module error:", error);
-      toast.error("Lỗi khi áp dụng quy trình vào nghiệp vụ");
+      toast.error((error as any)?.response?.data?.message || "Lỗi khi áp dụng quy trình vào nghiệp vụ");
     }
   }, [workflowId, workflowName, workflowDesc, workflowCode, nodes, edges]);
 

@@ -47,7 +47,7 @@ export function useConfigureRankTasks() {
             setTimeout(() => setIsSaved(false), 2000);
         } catch (error) {
             console.error("Lỗi khi lưu cấu hình:", error);
-            toast.error("Có lỗi xảy ra khi đồng bộ thư viện.");
+            toast.error((error as any)?.response?.data?.message || "Có lỗi xảy ra khi đồng bộ thư viện.");
         } finally {
             setIsSaving(false);
         }

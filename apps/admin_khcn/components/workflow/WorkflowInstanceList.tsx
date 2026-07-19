@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Clock,
   RefreshCcw
@@ -9,65 +9,30 @@ import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
 import { ResponsiveTable } from "@/components/shared/responsive-table";
 
-// Xóa Pagination
-import { workflowApi, WorkflowInstance } from "@/features/workflow/api";
+import { WorkflowInstance } from "@/features/workflow/api";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useSearchParams } from "next/navigation";
 import { WorkflowExecutionHistory } from "./WorkflowExecutionHistory";
 import { WorkflowStatusBadge } from "./shared/WorkflowStatusBadge";
+import { useWorkflowInstances } from "@/features/workflow/hooks";
 
 const WorkflowInstanceList = () => {
-  const [instances, setInstances] = useState<WorkflowInstance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<WorkflowInstance | null>(null);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
-  const [page, setPage] = useState(1);
-  const pageSize = 15;
-  const [totalItems, setTotalItems] = useState(0);
+  
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, refetch, isLoading } = useWorkflowInstances({
+    search: searchTerm || undefined
+  });
+
+  const instances = React.useMemo(() => {
+    return data?.pages.flatMap(page => page.data || []) || [];
+  }, [data]);
 
   const handleViewHistory = (instance: WorkflowInstance) => {
     setSelectedInstance(instance);
   };
-
-  const loadInstances = useCallback(async (targetPage: number) => {
-    try {
-      const isLoadMore = targetPage > 1;
-      if (isLoadMore) setIsFetchingNextPage(true);
-      else setIsLoading(true);
-
-      const res = await workflowApi.listInstances({
-        skip: (targetPage - 1) * pageSize,
-        take: pageSize,
-        search: searchTerm || undefined
-      });
-      
-      if (isLoadMore) {
-        setInstances(prev => [...prev, ...(res.data || [])]);
-      } else {
-        setInstances(res.data || []);
-      }
-      setTotalItems(res?.meta?.total || (res?.data?.length || 0));
-    } catch (error) {
-      console.error("Failed to load instances:", error);
-    } finally {
-      setIsLoading(false);
-      setIsFetchingNextPage(false);
-    }
-  }, [searchTerm]);
-
-  useEffect(() => {
-    setPage(1);
-    loadInstances(1);
-  }, [searchTerm, loadInstances]);
-
-  useEffect(() => {
-    if (page > 1) {
-      loadInstances(page);
-    }
-  }, [page, loadInstances]);
 
   return (
     <div className="space-y-6">
@@ -76,8 +41,8 @@ const WorkflowInstanceList = () => {
           <h2 className="text-xl font-bold tracking-tight">Giám sát Thực thi</h2>
           <p className="text-muted-foreground text-xs mt-1"> Theo dõi trạng thái các quy trình đang chạy trong hệ thống. </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => { setPage(1); loadInstances(1); }} disabled={isLoading || isFetchingNextPage} className="rounded-lg">
-          <RefreshCcw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} /> Làm mới
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="rounded-lg">
+          <RefreshCcw className={`h-4 w-4 mr-2 ${isFetching && !isFetchingNextPage ? "animate-spin" : ""}`} /> Làm mới
         </Button>
       </div>
 
@@ -88,8 +53,8 @@ const WorkflowInstanceList = () => {
         onScroll={(e) => {
           const target = e.currentTarget;
           if (target.scrollHeight - target.scrollTop - target.clientHeight < 50) {
-            if (!isLoading && !isFetchingNextPage && instances.length < totalItems) {
-              setPage(prev => prev + 1);
+            if (!isFetching && hasNextPage) {
+              fetchNextPage();
             }
           }
         }}

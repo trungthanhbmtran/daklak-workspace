@@ -34,8 +34,9 @@ export function useEmployeeListClient() {
         toast.success("Xóa nhân sự thành công");
         setDeleteId(null);
       },
-      onError: () => {
-        toast.error("Lỗi khi xóa nhân sự");
+      onError: (error: any) => {
+        const message = error.response?.data?.message || "Lỗi khi xóa nhân sự";
+        toast.error(message);
         setDeleteId(null);
       }
     });

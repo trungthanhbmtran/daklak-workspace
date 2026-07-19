@@ -17,8 +17,8 @@ export class RankQuotasController {
   @Post()
   async saveRankQuotas(@Body() body: any) {
     const data = await firstValueFrom(
-      this.rankQuotaService.SaveRankQuotas(body),
-    );
+          this.rankQuotaService.SaveRankQuotas(body),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return data;
   }
 
@@ -28,8 +28,8 @@ export class RankQuotasController {
     @Query('domainCode') domainCode: string
   ) {
     const data = await firstValueFrom(
-      this.rankQuotaService.GetRankQuotasByRank({ rankCode, domainCode }),
-    );
+          this.rankQuotaService.GetRankQuotasByRank({ rankCode, domainCode }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return data;
   }
 }

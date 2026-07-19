@@ -162,24 +162,24 @@ export class TaskWorkflowService {
     };
 
     const validateRes = await firstValueFrom<any>(this.shared.workflowService.ValidateAction({
-      workflowId: String(workflowId),
-      currentNodeId,
-      actionName,
-      userRoles: actorContext.permissions ?? [],
-      userId: actorContext.actorCode || '',
-      businessData: this.shared.toProtoStruct(businessData),
-    }));
+          workflowId: String(workflowId),
+          currentNodeId,
+          actionName,
+          userRoles: actorContext.permissions ?? [],
+          userId: actorContext.actorCode || '',
+          businessData: this.shared.toProtoStruct(businessData),
+        })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     if (!validateRes.allowed) {
       return { allowed: false, reason: validateRes.reason };
     }
 
     const nextNodeRes = await firstValueFrom<any>(this.shared.workflowService.GetNextNode({
-      workflowId: String(workflowId),
-      currentNodeId,
-      actionName,
-      evalContext: this.shared.toProtoStruct(businessData),
-    }));
+          workflowId: String(workflowId),
+          currentNodeId,
+          actionName,
+          evalContext: this.shared.toProtoStruct(businessData),
+        })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
     const nextNodeId = nextNodeRes.nextNodeId || undefined;
     let nextNodeData: any = undefined;

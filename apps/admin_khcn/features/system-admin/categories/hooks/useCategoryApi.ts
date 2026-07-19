@@ -53,7 +53,10 @@ export function useCreateCategory() {
       queryClient.invalidateQueries({ queryKey: CATEGORY_KEYS.all });
       toast.success("Đã thêm danh mục.");
     },
-    onError: () => toast.error("Không thể thêm danh mục."),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Không thể thêm danh mục.";
+      toast.error(message);
+    },
   });
 }
 
@@ -65,7 +68,10 @@ export function useUpdateCategory() {
       queryClient.invalidateQueries({ queryKey: CATEGORY_KEYS.all });
       toast.success("Đã cập nhật danh mục.");
     },
-    onError: () => toast.error("Không thể cập nhật danh mục."),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Không thể cập nhật danh mục.";
+      toast.error(message);
+    },
   });
 }
 

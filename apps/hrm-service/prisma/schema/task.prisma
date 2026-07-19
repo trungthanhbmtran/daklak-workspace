@@ -27,6 +27,7 @@ model Task {
   creatorEmployeeCode String?  @map("creator_employee_code")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
+  isDeleted           Boolean  @default(false) @map("is_deleted")
 
   plan        MasterPlan?     @relation(fields: [planId], references: [id])
   kpiSettings TaskKpiSetting?
@@ -50,16 +51,17 @@ model Task {
 }
 
 model TaskStep {
-  id           Int      @id @default(autoincrement())
-  taskId       Int      @map("task_id")
-  title        String   @map("title")
-  status       String   @default("TODO") // TODO, COMPLETED
-  order        Int      @default(0)
-  assigneeCode String?  @map("assignee_code")
-  baseScore    Float    @default(0) @map("base_score")
+  id           Int       @id @default(autoincrement())
+  taskId       Int       @map("task_id")
+  title        String    @map("title")
+  status       String    @default("TODO") // TODO, COMPLETED
+  order        Int       @default(0)
+  assigneeCode String?   @map("assignee_code")
+  baseScore    Float     @default(0) @map("base_score")
   completedAt  DateTime? @map("completed_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  isDeleted    Boolean   @default(false) @map("is_deleted")
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
@@ -73,6 +75,7 @@ model TaskAttachment {
   documentId String   @map("document_id")
   type       String   @default("REFERENCE")
   createdAt  DateTime @default(now()) @map("created_at")
+  isDeleted  Boolean  @default(false) @map("is_deleted")
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
@@ -123,6 +126,7 @@ model TaskComment {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  isDeleted Boolean  @default(false) @map("is_deleted")
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 

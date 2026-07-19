@@ -184,7 +184,9 @@ export class EmployeesService implements OnModuleInit {
       updateData.firstname = newFirstname;
       updateData.lastname = newLastname;
       updateData.fullName = `${newLastname} ${newFirstname}`.trim();
-    } else if (data.fullName != null) {
+    }
+    
+    if (data.firstname == null && data.lastname == null && data.fullName != null) {
       updateData.fullName = data.fullName;
     }
 
@@ -226,6 +228,8 @@ export class EmployeesService implements OnModuleInit {
     includeChildren?: boolean;
     assignableOnly?: boolean;
     callerUserId?: number;
+    descendantUnitIds?: number[];
+    excludeEmployeeCode?: string;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
@@ -275,21 +279,40 @@ export class EmployeesService implements OnModuleInit {
     if (params.civilServantRankId != null && params.civilServantRankId > 0) where.civilServantRankId = params.civilServantRankId;
     if (params.partyTitleId != null && params.partyTitleId > 0) where.partyTitleId = params.partyTitleId;
     if (params.employmentStatus) where.employmentStatus = params.employmentStatus;
-    if (params.departmentId != null && params.departmentId > 0) where.departmentId = params.departmentId;
+    
+    if (params.descendantUnitIds && params.descendantUnitIds.length > 0) {
+      where.departmentId = { in: params.descendantUnitIds };
+    } else if (params.departmentId != null && params.departmentId > 0) {
+      where.departmentId = params.departmentId;
+    }
 
-    const allItems = await this.prisma.employee.findMany({
+    if (params.excludeEmployeeCode) {
+      if (typeof where.employeeCode === 'object' && where.employeeCode !== null) {
+        (where.employeeCode as any).not = params.excludeEmployeeCode;
+      } else if (!where.employeeCode) {
+        where.employeeCode = { not: params.excludeEmployeeCode };
+      }
+    }
+
+    const totalCount = await this.prisma.employee.count({ where });
+    const skip = (page - 1) * pageSize;
+
+    const items = await this.prisma.employee.findMany({
       where,
       orderBy: [{ id: 'asc' }],
+      skip,
+      take: pageSize,
     });
-
-    const paginated = paginateArray(allItems, page, pageSize);
 
     return {
       success: true,
       message: 'OK',
-      data: paginated.data.map(e => this.toEmployee(e)),
+      data: items.map(e => this.toEmployee(e)),
       meta: {
-        ...paginated.meta,
+        total: totalCount,
+        page,
+        limit: pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
         sort: { sortBy: 'id', sortOrder: 'asc' },
         filters: params,
         extra: {},

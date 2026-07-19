@@ -98,7 +98,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         JSON.parse(configDataString);
       // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
-        toast.error("Cấu hình JSON không hợp lệ");
+        toast.error((e as any)?.response?.data?.message || "Cấu hình JSON không hợp lệ");
         return;
       }
     } else {

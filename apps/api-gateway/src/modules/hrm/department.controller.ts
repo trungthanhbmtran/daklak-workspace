@@ -53,11 +53,11 @@ export class DepartmentController implements OnModuleInit {
     if (rootId && rootId !== '0') {
       const id = parseInt(rootId, 10);
       if (!Number.isNaN(id)) {
-        const res = await firstValueFrom(this.orgService.GetSubTree({ id }));
+        const res = await firstValueFrom(this.orgService.GetSubTree({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
         return { nodes: (res as any).nodes ?? [] };
       }
     }
-    const res = await firstValueFrom(this.orgService.GetFullTree({}));
+    const res = await firstValueFrom(this.orgService.GetFullTree({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return res;
   }
 
@@ -70,17 +70,17 @@ export class DepartmentController implements OnModuleInit {
     const id = body.id;
     const newParentId = body.newParentId ?? null;
     return firstValueFrom(
-      this.orgService.UpdateUnit({
-        id,
-        parentId: newParentId === 0 ? null : newParentId,
-      }),
-    );
+          this.orgService.UpdateUnit({
+            id,
+            parentId: newParentId === 0 ? null : newParentId,
+          }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách đơn vị (flatten từ cây, user-service)' })
   async list(@Query() query: any) {
-    const res = (await firstValueFrom(this.orgService.GetFullTree({}))) as any;
+    const res = (await firstValueFrom(this.orgService.GetFullTree({})).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     const all = flattenUnits(res.nodes ?? []);
     let list = all;
     const parentId =
@@ -122,8 +122,8 @@ export class DepartmentController implements OnModuleInit {
   @ApiOperation({ summary: 'Chi tiết đơn vị (user-service)' })
   async getDetail(@Param('id') id: string) {
     const res = await firstValueFrom(
-      this.orgService.GetOne({ id: parseInt(id, 10) }),
-    );
+          this.orgService.GetOne({ id: parseInt(id, 10) }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return res;
   }
 
@@ -149,7 +149,7 @@ export class DepartmentController implements OnModuleInit {
       domainIds: body.domainIds ?? [],
       scope: body.scope,
     };
-    return firstValueFrom(this.orgService.CreateUnit(payload));
+    return firstValueFrom(this.orgService.CreateUnit(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Put(':id')
@@ -163,15 +163,15 @@ export class DepartmentController implements OnModuleInit {
     if (body.parentId !== undefined) payload.parentId = body.parentId;
     if (body.domainIds !== undefined) payload.domainIds = body.domainIds;
     if (body.scope !== undefined) payload.scope = body.scope;
-    return firstValueFrom(this.orgService.UpdateUnit(payload));
+    return firstValueFrom(this.orgService.UpdateUnit(payload)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa đơn vị (user-service)' })
   async delete(@Param('id') id: string) {
     const res = await firstValueFrom(
-      this.orgService.DeleteUnit({ id: parseInt(id, 10) }),
-    );
+          this.orgService.DeleteUnit({ id: parseInt(id, 10) }),
+        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
     return res ?? { success: true, message: 'Đã xóa đơn vị' };
   }
 }

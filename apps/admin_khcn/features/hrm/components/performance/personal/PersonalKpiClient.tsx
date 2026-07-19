@@ -55,7 +55,10 @@ export function PersonalKpiClient() {
         toast.error(res?.message || "Có lỗi xảy ra");
       }
     },
-    onError: () => toast.error("Không thể kết nối đến máy chủ"),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Không thể kết nối đến máy chủ";
+      toast.error(message);
+    },
   });
 
   const submitMutation = useMutation({
