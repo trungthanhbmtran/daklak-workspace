@@ -20,7 +20,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Route as RouteIcon, Plus, Trash2, CheckCircle2, Loader2 } from "lucide-react";
 
 // ─── RouteRow — memoized, handles own delete mutation ────────────────────────
@@ -201,9 +200,8 @@ export function RoutesTab() {
         </CardContent>
       </Card>
 
-      {/* Routes table */}
-      <div className="flex-1 flex flex-col min-h-0 bg-card border border-border shadow-sm rounded-md overflow-hidden">
-        <ScrollArea className="flex-1">
+      <div className="flex-1 min-h-0 relative bg-card border border-border shadow-sm rounded-md overflow-hidden">
+        <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-muted/50">
               <TableRow className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">
@@ -238,7 +236,7 @@ export function RoutesTab() {
               )}
             </TableBody>
           </Table>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );
