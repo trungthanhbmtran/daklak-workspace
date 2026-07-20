@@ -84,8 +84,6 @@ async function bootstrap() {
       prefetchCount: 10,
       queueOptions: {
         durable: true,
-        deadLetterExchange: 'dlx_exchange',
-        deadLetterRoutingKey: 'ai_tasks_queue',
       },
     },
   });
@@ -101,8 +99,6 @@ async function bootstrap() {
       prefetchCount: 50,
       queueOptions: {
         durable: true,
-        deadLetterExchange: 'dlx_exchange',
-        deadLetterRoutingKey: 'gateway_queue',
       },
     },
   });

@@ -257,4 +257,57 @@ export class WorkflowController implements OnModuleInit {
       data: response.logs || [],
     };
   }
+
+  // --- API Integrations ---
+
+  @Get('integrations')
+  @ApiOperation({ summary: 'Lấy danh sách các kết nối API' })
+  async listIntegrations() {
+    const result = (await firstValueFrom(
+      this.workflowService.FindAllIntegrations({})
+    ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    
+    // Convert to REST response format { success: true, data: [...] }
+    return { success: true, data: result?.items || [] };
+  }
+
+  @Post('integrations')
+  @ApiOperation({ summary: 'Tạo cấu hình kết nối API' })
+  async createIntegration(@Body() body: any) {
+    const result = (await firstValueFrom(
+      this.workflowService.CreateIntegration(body)
+    ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    
+    return { success: !!result, data: result, message: 'Created successfully' };
+  }
+
+  @Get('integrations/:id')
+  @ApiOperation({ summary: 'Lấy cấu hình kết nối API theo ID' })
+  async getIntegration(@Param('id') id: string) {
+    const result = (await firstValueFrom(
+      this.workflowService.FindOneIntegration({ id })
+    ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    
+    return { success: !!result, data: result };
+  }
+
+  @Put('integrations/:id')
+  @ApiOperation({ summary: 'Cập nhật cấu hình kết nối API' })
+  async updateIntegration(@Param('id') id: string, @Body() body: any) {
+    const result = (await firstValueFrom(
+      this.workflowService.UpdateIntegration({ ...body, id })
+    ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    
+    return { success: !!result, data: result, message: 'Updated successfully' };
+  }
+
+  @Delete('integrations/:id')
+  @ApiOperation({ summary: 'Xóa kết nối API' })
+  async deleteIntegration(@Param('id') id: string) {
+    const result = (await firstValueFrom(
+      this.workflowService.DeleteIntegration({ id })
+    ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    
+    return { success: result?.success || true, message: 'Deleted successfully' };
+  }
 }

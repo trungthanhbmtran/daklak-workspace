@@ -26,6 +26,12 @@ service WorkflowService {
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
   rpc GetInitialNode (GetInitialNodeRequest) returns (GetInitialNodeResponse);
   rpc GetNextNode (GetNextNodeRequest) returns (GetNextNodeResponse);
+  // API Integrations
+  rpc CreateIntegration (CreateIntegrationRequest) returns (IntegrationResponse);
+  rpc UpdateIntegration (UpdateIntegrationRequest) returns (IntegrationResponse);
+  rpc FindOneIntegration (FindOneIntegrationRequest) returns (IntegrationResponse);
+  rpc FindAllIntegrations (EmptyRequest) returns (FindAllIntegrationsResponse);
+  rpc DeleteIntegration (DeleteIntegrationRequest) returns (DeleteIntegrationResponse);
 }
 
 message EmptyRequest {}
@@ -267,4 +273,71 @@ message GetNextNodeResponse {
   string nextNodeId = 1;
   string nextNodeData = 2;
   string type = 3;
+}
+
+// =============================================================================
+// API INTEGRATION MESSAGES
+// =============================================================================
+
+message CreateIntegrationRequest {
+  string name = 1;
+  string code = 2;
+  string description = 3;
+  string protocol = 4;
+  string baseUrl = 5;
+  string authType = 6;
+  google.protobuf.Struct authConfig = 7;
+  google.protobuf.Struct headers = 8;
+  repeated google.protobuf.Struct endpoints = 9;
+  google.protobuf.Struct metadata = 10;
+  bool isActive = 11;
+}
+
+message UpdateIntegrationRequest {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  string description = 4;
+  string protocol = 5;
+  string baseUrl = 6;
+  string authType = 7;
+  google.protobuf.Struct authConfig = 8;
+  google.protobuf.Struct headers = 9;
+  repeated google.protobuf.Struct endpoints = 10;
+  google.protobuf.Struct metadata = 11;
+  bool isActive = 12;
+}
+
+message FindOneIntegrationRequest {
+  string id = 1;
+}
+
+message DeleteIntegrationRequest {
+  string id = 1;
+}
+
+message DeleteIntegrationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message IntegrationResponse {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  string description = 4;
+  string protocol = 5;
+  string baseUrl = 6;
+  string authType = 7;
+  google.protobuf.Struct authConfig = 8;
+  google.protobuf.Struct headers = 9;
+  repeated google.protobuf.Struct endpoints = 10;
+  google.protobuf.Struct metadata = 11;
+  bool isActive = 12;
+  string createdAt = 13;
+  string updatedAt = 14;
+}
+
+message FindAllIntegrationsResponse {
+  repeated IntegrationResponse items = 1;
 }

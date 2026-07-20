@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
 import { IntegrationService } from './integration.service';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
@@ -16,35 +17,47 @@ export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 
   @Post()
+  @GrpcMethod('WorkflowService', 'CreateIntegration')
   async create(@Body() createDto: CreateIntegrationDto) {
     const data = await this.integrationService.create(createDto);
-    return { success: true, data, message: 'Created successfully' };
+    // Return gRPC format (IntegrationResponse) when called via gRPC,
+    // or REST format when called via HTTP.
+    return { ...data, createdAt: data.createdAt?.toISOString(), updatedAt: data.updatedAt?.toISOString() };
   }
 
   @Get()
+  @GrpcMethod('WorkflowService', 'FindAllIntegrations')
   async findAll() {
     const data = await this.integrationService.findAll();
-    return { success: true, data, message: 'OK' };
+    return { items: data.map(d => ({ ...d, createdAt: d.createdAt?.toISOString(), updatedAt: d.updatedAt?.toISOString() })) };
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const data = await this.integrationService.findOne(id);
-    return { success: true, data, message: 'OK' };
+  @GrpcMethod('WorkflowService', 'FindOneIntegration')
+  async findOne(@Param('id') id: string | { id: string }) {
+    const actualId = typeof id === 'object' ? id.id : id;
+    const data = await this.integrationService.findOne(actualId);
+    return { ...data, createdAt: data.createdAt?.toISOString(), updatedAt: data.updatedAt?.toISOString() };
   }
 
   @Put(':id')
+  @GrpcMethod('WorkflowService', 'UpdateIntegration')
   async update(
-    @Param('id') id: string,
+    @Param('id') id: string | { id: string },
     @Body() updateDto: UpdateIntegrationDto,
   ) {
-    const data = await this.integrationService.update(id, updateDto);
-    return { success: true, data, message: 'Updated successfully' };
+    // If called via gRPC, payload contains both id and fields in updateDto
+    const actualId = typeof id === 'object' ? id.id : id;
+    const data = await this.integrationService.update(actualId, updateDto);
+    return { ...data, createdAt: data.createdAt?.toISOString(), updatedAt: data.updatedAt?.toISOString() };
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const data = await this.integrationService.remove(id);
-    return { success: true, data, message: 'Deleted successfully' };
+  @GrpcMethod('WorkflowService', 'DeleteIntegration')
+  async remove(@Param('id') id: string | { id: string }) {
+    const actualId = typeof id === 'object' ? id.id : id;
+    await this.integrationService.remove(actualId);
+    return { success: true, message: 'Deleted successfully' };
   }
 }
+
