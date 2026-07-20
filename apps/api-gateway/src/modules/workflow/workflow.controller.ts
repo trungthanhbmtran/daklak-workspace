@@ -262,9 +262,9 @@ export class WorkflowController implements OnModuleInit {
 
   @Get('integrations')
   @ApiOperation({ summary: 'Lấy danh sách các kết nối API' })
-  async listIntegrations() {
+  async listIntegrations(@Query('search') search?: string) {
     const result = (await firstValueFrom(
-      this.workflowService.FindAllIntegrations({})
+      this.workflowService.FindAllIntegrations({ search: search || '' })
     ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
     
     // Convert to REST response format { success: true, data: [...] }

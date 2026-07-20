@@ -30,7 +30,7 @@ service WorkflowService {
   rpc CreateIntegration (CreateIntegrationRequest) returns (IntegrationResponse);
   rpc UpdateIntegration (UpdateIntegrationRequest) returns (IntegrationResponse);
   rpc FindOneIntegration (FindOneIntegrationRequest) returns (IntegrationResponse);
-  rpc FindAllIntegrations (EmptyRequest) returns (FindAllIntegrationsResponse);
+  rpc FindAllIntegrations (FindAllIntegrationsRequest) returns (FindAllIntegrationsResponse);
   rpc DeleteIntegration (DeleteIntegrationRequest) returns (DeleteIntegrationResponse);
 }
 
@@ -336,6 +336,10 @@ message IntegrationResponse {
   bool isActive = 12;
   string createdAt = 13;
   string updatedAt = 14;
+}
+
+message FindAllIntegrationsRequest {
+  string search = 1;
 }
 
 message FindAllIntegrationsResponse {

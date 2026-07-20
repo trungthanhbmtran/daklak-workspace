@@ -7,7 +7,7 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { IntegrationService } from './integration.service';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
@@ -27,8 +27,9 @@ export class IntegrationController {
 
   @Get()
   @GrpcMethod('WorkflowService', 'FindAllIntegrations')
-  async findAll() {
-    const data = await this.integrationService.findAll();
+  async findAll(@Query('search') search?: string, @Payload() payload?: { search?: string }) {
+    const searchTerm = payload?.search || search;
+    const data = await this.integrationService.findAll(searchTerm);
     return { items: data.map(d => ({ ...d, createdAt: d.createdAt?.toISOString(), updatedAt: d.updatedAt?.toISOString() })) };
   }
 

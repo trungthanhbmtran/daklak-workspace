@@ -12,8 +12,18 @@ export class IntegrationService {
     return this.prisma.integrationConnection.create({ data });
   }
 
-  async findAll() {
+  async findAll(search?: string) {
+    const whereClause = search
+      ? {
+          OR: [
+            { name: { contains: search } },
+            { code: { contains: search } },
+          ],
+        }
+      : {};
+      
     return this.prisma.integrationConnection.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
     });
   }
