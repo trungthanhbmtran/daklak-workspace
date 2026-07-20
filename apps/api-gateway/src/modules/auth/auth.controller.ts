@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
+import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
@@ -49,8 +50,7 @@ export class AuthController implements OnModuleInit {
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({
     status: 200,
-    description:
-      'accessToken, refreshToken, userId, email, username, fullName, unitName (camelCase)',
+    description: 'Trả về sessionId và expiresAt. Token được gán qua HTTP-Only Cookie.',
   })
   async login(
     @Body()
@@ -89,7 +89,12 @@ export class AuthController implements OnModuleInit {
       res.cookie('accessToken', result.accessToken, cookieConfig);
       res.cookie('refreshToken', result.refreshToken, cookieConfig);
 
-      return sanitizeUserForClient(result);
+      const expiresAt = new Date(Date.now() + (result.expiresIn || 86400) * 1000).toISOString();
+
+      return {
+        sessionId: randomUUID(),
+        expiresAt,
+      };
     } catch (err: any) {
       const code = err?.code;
       const message = err?.details || err?.message || 'Đăng nhập thất bại';
@@ -104,8 +109,7 @@ export class AuthController implements OnModuleInit {
   })
   @ApiResponse({
     status: 200,
-    description:
-      'accessToken, refreshToken (rotation), userId, email, username, fullName, unitName',
+    description: 'Trả về sessionId và expiresAt. Token mới được gán qua HTTP-Only Cookie.',
   })
   async refresh(
     @Body() body: { refreshToken?: string },
@@ -134,7 +138,12 @@ export class AuthController implements OnModuleInit {
       res.cookie('accessToken', result.accessToken, cookieConfig);
       res.cookie('refreshToken', result.refreshToken, cookieConfig);
 
-      return sanitizeUserForClient(result);
+      const expiresAt = new Date(Date.now() + (result.expiresIn || 86400) * 1000).toISOString();
+
+      return {
+        sessionId: randomUUID(),
+        expiresAt,
+      };
     } catch (err: any) {
       const message =
         err?.details || err?.message || 'Refresh token không hợp lệ';

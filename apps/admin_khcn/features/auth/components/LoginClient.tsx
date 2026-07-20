@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -42,7 +43,6 @@ export function LoginClient() {
   const searchParams = useSearchParams();
   // eslint-disable-next-line unused-imports/no-unused-vars
   const callbackUrl = searchParams.get("callbackUrl");
-  const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,25 +53,30 @@ export function LoginClient() {
     },
   });
 
+  const loginMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
+      return await apiClient.post(`/auth/login`, {
+        username: values.username,
+        password: values.password,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Đăng nhập thành công! Đang chuyển hướng...");
+      // Thay vì redirect tĩnh, ta gọi reload để Hard Navigation.
+      // Middleware (proxy.ts -> middleware.ts) sẽ nhận thấy cookie và tự động redirect về /hub hoặc callbackUrl,
+      // giữ nguyên basePath và đảm bảo clear sạch memory state.
+      window.location.reload();
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
+      toast.error(message);
+    },
+  });
+
+  const isPending = loginMutation.isPending;
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(async () => {
-      try {
-        await apiClient.post(`/auth/login`, {
-          username: values.username,
-          password: values.password,
-        });
-
-        toast.success("Đăng nhập thành công! Đang chuyển hướng...");
-
-        // Thay vì redirect tĩnh, ta gọi reload để Hard Navigation.
-        // Middleware (proxy.ts -> middleware.ts) sẽ nhận thấy cookie và tự động redirect về /hub hoặc callbackUrl,
-        // giữ nguyên basePath và đảm bảo clear sạch memory state.
-        window.location.reload();
-      } catch (error: any) {
-        const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
-        toast.error(message);
-      }
-    });
+    loginMutation.mutate(values);
   }
 
   return (

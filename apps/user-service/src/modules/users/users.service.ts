@@ -314,12 +314,16 @@ export class UsersService implements OnModuleInit {
       { expiresIn: jwtExpiresIn },
     );
     const expiresIn = this.getAccessTokenExpiresInSeconds();
+    const firstPos = user.jobPositions?.[0];
 
     return {
       accessToken,
       refreshToken,
       expiresIn,
       refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
+      ...this.toUserResponse(user),
+      userId: user.id,
+      unitName: firstPos?.unit?.name ?? '',
     };
   }
 
@@ -388,12 +392,16 @@ export class UsersService implements OnModuleInit {
       { expiresIn: jwtExpiresIn },
     );
     const expiresIn = this.getAccessTokenExpiresInSeconds();
+    const firstPos = user.jobPositions?.[0];
 
     return {
       accessToken,
       refreshToken: newRefreshToken,
       expiresIn,
       refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
+      ...this.toUserResponse(user),
+      userId: user.id,
+      unitName: firstPos?.unit?.name ?? '',
     };
   }
 

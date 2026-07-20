@@ -4,6 +4,44 @@ Chào mừng bạn đến với tài liệu Hướng dẫn sử dụng và giớ
 
 ---
 
+## 🕒 Lịch sử Cập nhật (Changelog / Version History)
+
+- **Version**: `v1.1.0`
+- **Thời gian cập nhật**: `20/07/2026 22:30`
+- **Nội dung cập nhật**: 
+  - Triển khai cấu trúc phản hồi Đăng nhập theo chuẩn Zero-Trust (Bảo mật cấp độ Chính phủ). Tách biệt hoàn toàn Token và dữ liệu cá nhân khỏi JSON payload, sử dụng cơ chế bảo mật HTTP-Only Cookie chống XSS.
+  - Tái cấu trúc (Refactor) Frontend Component `LoginClient.tsx` chuyển sang sử dụng `useMutation` (React Query) quản lý Server State thay cho `useTransition` nội bộ, tuân thủ nghiêm ngặt tiêu chuẩn `api_integration_standard`.
+
+---
+
+## 🔒 Hướng Dẫn Kỹ Thuật: Kiến Trúc Xác Thực (Zero-Trust Authentication)
+
+1. **Tên chức năng / API**: Phản hồi API Đăng nhập (`POST /api/v1/admin/auth/login`) và Làm mới Token (`POST /api/v1/admin/auth/refresh`).
+2. **Mục đích**: 
+   - Chống lại các rủi ro bảo mật nghiêm trọng như XSS (Cross-Site Scripting) chuyên đánh cắp token từ bộ nhớ trình duyệt.
+   - Chống rò rỉ dữ liệu cá nhân (PII) hoặc cấu trúc hệ thống ngay từ khâu đăng nhập.
+   - Chống tấn công dò quét tài khoản (Enumeration) thông qua việc chuẩn hóa thông báo lỗi.
+3. **Cách sử dụng (Luồng hoạt động)**:
+   - **Bước 1**: Frontend gửi yêu cầu đăng nhập kèm `email` và `password`.
+   - **Bước 2**: API Gateway kiểm tra thông qua `user-service`. Nếu thành công, trả về HTTP 200 OK nhưng **tuyệt đối không** kèm token hay thông tin User trong JSON Body.
+   - **Bước 3**: Token (`accessToken` và `refreshToken`) được Gateway tự động gán vào trình duyệt của người dùng thông qua Header `Set-Cookie: HttpOnly; Secure`. Javascript ở Frontend (React/Next.js) không thể đọc được cookie này.
+   - **Bước 4**: Các request tiếp theo (như gọi `GET /api/v1/admin/auth/me` để lấy thông tin cá nhân) sẽ được trình duyệt tự động đính kèm Cookie lên server.
+4. **Ví dụ minh họa (JSON Payload trả về)**:
+   ```json
+   {
+     "success": true,
+     "data": {
+       "sessionId": "a317ddf5-57b2-465f-80ab-0b2b28379df6",
+       "expiresAt": "2026-07-21T15:22:32.334Z"
+     },
+     "meta": null,
+     "timestamp": "2026-07-20T15:22:32.335Z"
+   }
+   ```
+   *Lưu ý: Payload chỉ bao gồm sessionId để truy vết log (SOC tracking) và expiresAt để Frontend làm đồng hồ đếm ngược khóa màn hình.*
+
+---
+
 ## 🌟 1. Điểm Nổi Trội & Kiến Trúc Đột Phá (Highlights)
 
 Hệ thống không chỉ dừng lại ở mức giao việc cơ bản mà là một **Hạ tầng chuyển đổi số toàn diện** được xây dựng trên những công nghệ và kiến trúc tối tân:
