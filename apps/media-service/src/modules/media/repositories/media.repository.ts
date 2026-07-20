@@ -4,7 +4,7 @@ import { Media, Prisma } from '@prisma/client';
 
 @Injectable()
 export class MediaRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async create(data: Prisma.MediaCreateInput): Promise<Media> {
     return this.prisma.media.create({ data });
