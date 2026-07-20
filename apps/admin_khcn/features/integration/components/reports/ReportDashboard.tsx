@@ -115,8 +115,7 @@ export function ReportDashboard() {
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 p-16 text-center">
           <BarChart2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-1">Chưa có báo cáo nào</h3>
-          // eslint-disable-next-line react/no-unescaped-entities
-          <p className="text-slate-500 text-sm mb-6">Nhấn "Thêm Báo Cáo Mới" để bắt đầu thiết kế biểu đồ từ nguồn dữ liệu của bạn.</p>
+          <p className="text-slate-500 text-sm mb-6">Nhấn &quot;Thêm Báo Cáo Mới&quot; để bắt đầu thiết kế biểu đồ từ nguồn dữ liệu của bạn.</p>
           <Button onClick={() => setIsBuilding(true)} variant="outline" className="rounded-xl">Thiết kế ngay</Button>
         </div>
       ) : (
