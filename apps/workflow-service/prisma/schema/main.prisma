@@ -1,12 +1,19 @@
 generator client {
-    provider = "prisma-client"
-    output   = "../../generated/prisma"
-    moduleFormat  = "cjs"
+  provider      = "prisma-client"
+  output        = "../../generated/prisma"
+  moduleFormat  = "cjs"
 }
 
+// LƯU Ý Prisma 7.x:
+// - Datasource URL KHÔNG được khai báo trong schema.prisma.
+// - URL được quản lý hoàn toàn bởi `prisma.config.ts` (datasource.url: env("DATABASE_URL")).
 datasource db {
   provider = "mysql"
 }
+
+// =============================================================================
+// WORKFLOW CORE MODELS
+// =============================================================================
 
 model ProcessDefinition {
   id          String   @id @default(cuid())
@@ -14,112 +21,128 @@ model ProcessDefinition {
   name        String
   description String?  @db.Text
   isActive    Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   versions ProcessVersion[]
 
+  @@index([isActive])
   @@map("process_definitions")
 }
 
 model ProcessVersion {
   id           String   @id @default(cuid())
-  definitionId String
+  definitionId String   @map("definition_id")
   version      Int
-  status       String   // ProcessVersionStatus e.g. DRAFT, PUBLISHED
+  status       String   // DRAFT | PUBLISHED | DEPRECATED
   graph        Json
-  createdAt    DateTime @default(now())
+  createdAt    DateTime @default(now()) @map("created_at")
 
   definition ProcessDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
   instances  ProcessInstance[]
 
   @@unique([definitionId, version])
+  @@index([definitionId, status])
   @@map("process_versions")
 }
 
 model ProcessInstance {
-  id              String   @id @default(cuid())
-  definitionId    String
-  versionId       String
-  businessKey     String?
-  organizationId  String
-  status          String   // ProcessInstanceStatus e.g. RUNNING, COMPLETED, FAILED
-  currentNodeCode String?
+  id              String    @id @default(cuid())
+  definitionId    String    @map("definition_id")
+  versionId       String    @map("version_id")
+  businessKey     String?   @map("business_key")
+  organizationId  String    @map("organization_id")
+  status          String    // RUNNING | COMPLETED | FAILED | CANCELED
+  currentNodeCode String?   @map("current_node_code")
   variables       Json?
-  startedBy       String
-  startedAt       DateTime @default(now())
-  endedAt         DateTime?
+  startedBy       String    @map("started_by")
+  startedAt       DateTime  @default(now()) @map("started_at")
+  endedAt         DateTime? @map("ended_at")
 
   version     ProcessVersion       @relation(fields: [versionId], references: [id])
   tasks       WorkflowTask[]
   transitions WorkflowTransition[]
   events      WorkflowEvent[]
 
+  @@index([organizationId, status])
+  @@index([businessKey])
+  @@index([startedAt])
   @@map("process_instances")
 }
 
 model WorkflowTask {
-  id           String   @id @default(cuid())
-  instanceId   String
-  nodeCode     String
+  id           String    @id @default(cuid())
+  instanceId   String    @map("instance_id")
+  nodeCode     String    @map("node_code")
   title        String
-  assigneeId   String?
-  assigneeUnit String?
-  status       String   // TaskStatus e.g. PENDING, COMPLETED, CANCELED
-  dueAt        DateTime?
-  createdAt    DateTime @default(now())
-  completedAt  DateTime?
+  assigneeId   String?   @map("assignee_id")
+  assigneeUnit String?   @map("assignee_unit")
+  status       String    // PENDING | IN_PROGRESS | COMPLETED | CANCELED
+  dueAt        DateTime? @map("due_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  completedAt  DateTime? @map("completed_at")
 
   instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
+  @@index([instanceId, status])
+  @@index([assigneeId, status])
   @@map("workflow_tasks")
 }
 
 model WorkflowTransition {
   id           String   @id @default(cuid())
-  instanceId   String
-  fromNodeCode String?
-  toNodeCode   String
+  instanceId   String   @map("instance_id")
+  fromNodeCode String?  @map("from_node_code")
+  toNodeCode   String   @map("to_node_code")
   action       String
-  performedBy  String
-  performedAt  DateTime @default(now())
+  performedBy  String   @map("performed_by")
+  performedAt  DateTime @default(now()) @map("performed_at")
   comment      String?  @db.Text
   payload      Json?
 
   instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
+  @@index([instanceId])
   @@map("workflow_transitions")
 }
 
 model WorkflowEvent {
-  id           String   @id @default(cuid())
-  instanceId   String
-  eventType    String
-  payload      Json
-  status       String   // EventStatus e.g. PENDING, PROCESSED, FAILED
-  retryCount   Int      @default(0)
-  nextRetryAt  DateTime?
-  createdAt    DateTime @default(now())
+  id          String    @id @default(cuid())
+  instanceId  String    @map("instance_id")
+  eventType   String    @map("event_type")
+  payload     Json
+  status      String    // PENDING | PROCESSED | FAILED
+  retryCount  Int       @default(0) @map("retry_count")
+  nextRetryAt DateTime? @map("next_retry_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
+  @@index([instanceId, status])
+  @@index([status, nextRetryAt])
   @@map("workflow_events")
 }
 
+// =============================================================================
+// INTEGRATION MODULE MODELS
+// =============================================================================
+
 model IntegrationConnection {
   id          String   @id @default(uuid())
-  name        String   // VD: Cổng DVC Quốc Gia
-  code        String   @unique 
+  name        String
+  code        String   @unique
   description String?  @db.Text
-  protocol    String   @default("REST") // REST, SOAP, GRAPHQL, GRPC
-  baseUrl     String   
-  authType    String   @default("NONE") // NONE, BASIC, BEARER, OAUTH2, API_KEY
-  authConfig  Json?    // Cấu hình username/password, token_url, client_id, v.v.
-  headers     Json?    // Các header tĩnh
-  endpoints   Json?    // Danh sách các endpoints chi tiết (path, method)
-  metadata    Json?    // Chứa WSDL URL (nếu SOAP), OpenAPI spec, v.v.
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  protocol    String   @default("REST")   // REST | SOAP | GRAPHQL | GRPC
+  baseUrl     String   @map("base_url")
+  authType    String   @default("NONE")   // NONE | BASIC | BEARER | OAUTH2 | API_KEY
+  authConfig  Json?    @map("auth_config") // { token_url, client_id, client_secret, username, password, api_key }
+  headers     Json?                        // Các static header gửi kèm mọi request
+  endpoints   Json?                        // Danh sách endpoints: [{path, method, description}]
+  metadata    Json?                        // WSDL URL (SOAP), OpenAPI spec URL (REST), proto URL (gRPC)
+  isActive    Boolean  @default(true)     @map("is_active")
+  createdAt   DateTime @default(now())    @map("created_at")
+  updatedAt   DateTime @updatedAt         @map("updated_at")
 
+  @@index([protocol, isActive])
   @@map("integration_connections")
 }
