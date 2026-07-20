@@ -44,9 +44,9 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
           <Activity className="w-6 h-6 text-violet-600 dark:text-violet-400" />
         </div>
         <div className="flex flex-col gap-1.5 overflow-hidden">
-          <CardTitle className="text-lg truncate">{item.systemName}</CardTitle>
+          <CardTitle className="text-lg truncate">{item.name}</CardTitle>
           <CardDescription className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md w-fit truncate">
-            {item.integrationCode}
+            {item.code}
           </CardDescription>
         </div>
       </CardHeader>

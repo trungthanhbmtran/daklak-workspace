@@ -142,7 +142,6 @@ function buildTaskTree(tasks: HrmTask[]): HrmTask[] {
 export function TaskList() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
-  const { useDebounce } = require("@uidotdev/usehooks") || {}; // Fallback if no local hook
   
   // Use debounced search to avoid spamming the API
   const [debouncedSearch, setDebouncedSearch] = useState(search);

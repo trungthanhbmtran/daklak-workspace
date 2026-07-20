@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from "../../api";
 import { toast } from "sonner";
 
@@ -26,11 +26,12 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
 
   const [formData, setFormData] = useState({
-    systemName: "",
-    integrationCode: "",
+    name: "",
+    code: "",
     isActive: true,
-    type: "LGSP",
-    apiUrl: "",
+    protocol: "REST",
+    baseUrl: "",
+    authType: "NONE",
     authUrl: "",
     apiToken: "",
     clientId: "",
@@ -43,39 +44,35 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     openCreate: (initialData?: any) => {
       setEditingItem(null);
       setFormData({
-        systemName: initialData?.systemName || "",
-        integrationCode: initialData?.integrationCode || "",
+        name: initialData?.name || "",
+        code: initialData?.code || "",
         isActive: true,
-        type: initialData?.type || "LGSP",
-        apiUrl: initialData?.apiUrl || "",
-        authUrl: initialData?.authUrl || "",
-        apiToken: initialData?.apiToken || "",
-        clientId: initialData?.clientId || "",
-        clientSecret: initialData?.clientSecret || "",
-        rawConfig: initialData?.rawConfig || "{}"
+        protocol: initialData?.protocol || "REST",
+        baseUrl: initialData?.baseUrl || "",
+        authType: initialData?.authType || "NONE",
+        authUrl: initialData?.authConfig?.authUrl || "",
+        apiToken: initialData?.authConfig?.apiToken || "",
+        clientId: initialData?.authConfig?.clientId || "",
+        clientSecret: initialData?.authConfig?.clientSecret || "",
+        rawConfig: initialData?.metadata ? JSON.stringify(initialData.metadata) : "{}"
       });
       setIsRawMode(!!initialData?.isRawMode);
       setIsOpen(true);
     },
     openEdit: (item: IntegrationConfig) => {
       setEditingItem(item);
-      let parsedConfig: any = {};
-      try {
-        parsedConfig = JSON.parse(item.configData || "{}");
-      } catch (e) {
-        console.error("Lỗi parse configData:", e);
-      }
       setFormData({
-        systemName: item.systemName || "",
-        integrationCode: item.integrationCode || "",
+        name: item.name || "",
+        code: item.code || "",
         isActive: item.isActive ?? true,
-        type: parsedConfig.type || "LGSP",
-        apiUrl: parsedConfig.apiUrl || "",
-        authUrl: parsedConfig.authUrl || "",
-        apiToken: parsedConfig.apiToken || "",
-        clientId: parsedConfig.keys?.clientId || "",
-        clientSecret: parsedConfig.keys?.clientSecret || "",
-        rawConfig: item.configData || "{}"
+        protocol: item.protocol || "REST",
+        baseUrl: item.baseUrl || "",
+        authType: item.authType || "NONE",
+        authUrl: item.authConfig?.authUrl || "",
+        apiToken: item.authConfig?.apiToken || "",
+        clientId: item.authConfig?.clientId || "",
+        clientSecret: item.authConfig?.clientSecret || "",
+        rawConfig: item.metadata ? JSON.stringify(item.metadata) : "{}"
       });
       setIsRawMode(false);
       setIsOpen(true);
@@ -85,47 +82,41 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   const handleClose = () => setIsOpen(false);
 
   const handleSave = () => {
-    if (!formData.systemName || !formData.integrationCode) {
+    if (!formData.name || !formData.code) {
       toast.error("Vui lòng nhập Tên hệ thống và Mã tích hợp");
       return;
     }
 
-    let configDataString = "";
+    let metadataObj: any = {};
     if (isRawMode) {
-      configDataString = formData.rawConfig;
-      // Validate JSON
       try {
-        JSON.parse(configDataString);
+        metadataObj = JSON.parse(formData.rawConfig);
       // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
         toast.error((e as any)?.response?.data?.message || "Cấu hình JSON không hợp lệ");
         return;
       }
     } else {
-      let parsedRaw: any = {};
       try {
-        parsedRaw = JSON.parse(formData.rawConfig || "{}");
+        metadataObj = JSON.parse(formData.rawConfig || "{}");
       // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) { }
-
-      configDataString = JSON.stringify({
-        ...parsedRaw,
-        type: formData.type,
-        apiUrl: formData.apiUrl,
-        authUrl: formData.authUrl,
-        apiToken: formData.apiToken,
-        keys: {
-          clientId: formData.clientId,
-          clientSecret: formData.clientSecret
-        }
-      });
     }
 
     const payload = {
-      systemName: formData.systemName,
-      integrationCode: formData.integrationCode,
+      name: formData.name,
+      code: formData.code,
       isActive: formData.isActive,
-      configData: configDataString
+      protocol: formData.protocol,
+      baseUrl: formData.baseUrl,
+      authType: formData.authType,
+      authConfig: {
+        authUrl: formData.authUrl,
+        apiToken: formData.apiToken,
+        clientId: formData.clientId,
+        clientSecret: formData.clientSecret
+      },
+      metadata: metadataObj
     };
 
     if (editingItem) {
@@ -148,157 +139,171 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="w-full h-[100dvh] max-w-4xl sm:w-[95vw] sm:h-auto rounded-none sm:rounded-3xl p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 h-full max-h-[100dvh] sm:max-h-[85vh] flex flex-col">
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      maxWidth="max-w-5xl"
+      icon={<Server className="w-6 h-6 text-violet-600" />}
+      title={editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
+      description="Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP)."
+      bodyClassName="space-y-6"
+      footer={
+        <>
+          <Button variant="outline" onClick={handleClose}>Hủy bỏ</Button>
+          <Button onClick={handleSave} className="bg-violet-600 hover:bg-violet-700 text-white min-w-[120px]" disabled={createMutation.isPending || updateMutation.isPending}>
+            {createMutation.isPending || updateMutation.isPending ? "Đang lưu..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
+          </Button>
+        </>
+      }
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label>Tên Hệ thống đối tác <span className="text-red-500">*</span></Label>
+          <Input
+            value={formData.name}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Vd: Hệ thống LGSP Tỉnh..."
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Mã tích hợp (Integration Code) <span className="text-red-500">*</span></Label>
+          <Input
+            value={formData.code}
+            onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+            placeholder="Vd: LGSP_HCM"
+            className="font-mono uppercase"
+          />
+        </div>
+      </div>
 
-          <DialogHeader className="p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950">
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-              <Server className="w-6 h-6 text-violet-600" />
-              {editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
-            </DialogTitle>
-            <DialogDescription>
-              Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP).
-            </DialogDescription>
-          </DialogHeader>
+      <div className="flex items-center justify-between p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10">
+        <div className="flex items-center gap-3 text-amber-800 dark:text-amber-500">
+          <ShieldAlert className="w-5 h-5" />
+          <div>
+            <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
+            <p className="text-xs opacity-80 mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</p>
+          </div>
+        </div>
+        <Switch checked={isRawMode} onCheckedChange={setIsRawMode} />
+      </div>
 
-          <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+      {!isRawMode ? (
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>Giao thức (Protocol)</Label>
+              <Select value={formData.protocol} onValueChange={(val) => setFormData({ ...formData, protocol: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn giao thức" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="REST">REST API</SelectItem>
+                  <SelectItem value="SOAP">SOAP / WSDL</SelectItem>
+                  <SelectItem value="GRAPHQL">GraphQL</SelectItem>
+                  <SelectItem value="GRPC">gRPC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>URL Máy chủ (Base URL)</Label>
+              <Input
+                value={formData.baseUrl}
+                onChange={e => setFormData({ ...formData, baseUrl: e.target.value })}
+                placeholder="https://api.example.com/v1"
+                className="font-mono"
+              />
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label>Tên Hệ thống đối tác <span className="text-red-500">*</span></Label>
-                <Input
-                  value={formData.systemName}
-                  onChange={e => setFormData({ ...formData, systemName: e.target.value })}
-                  placeholder="Vd: Hệ thống LGSP Tỉnh..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Mã tích hợp (Integration Code) <span className="text-red-500">*</span></Label>
-                <Input
-                  value={formData.integrationCode}
-                  onChange={e => setFormData({ ...formData, integrationCode: e.target.value.toUpperCase() })}
-                  placeholder="Vd: LGSP_HCM"
-                  className="font-mono uppercase"
-                />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-violet-50/50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30 rounded-xl">
+            <div className="space-y-4 md:col-span-2">
+              <div className="flex items-center gap-2 text-violet-800 dark:text-violet-400 font-semibold border-b border-violet-100 dark:border-violet-900/50 pb-2">
+                <KeyRound className="w-4 h-4" />
+                Thông tin Xác thực (Authentication)
               </div>
             </div>
-
-            <div className="flex items-center justify-between p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10">
-              <div className="flex items-center gap-3 text-amber-800 dark:text-amber-500">
-                <ShieldAlert className="w-5 h-5" />
-                <div>
-                  <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
-                  <p className="text-xs opacity-80 mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</p>
-                </div>
-              </div>
-              <Switch checked={isRawMode} onCheckedChange={setIsRawMode} />
+            <div className="space-y-2">
+              <Label>Loại xác thực</Label>
+              <Select value={formData.authType} onValueChange={(val) => setFormData({ ...formData, authType: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn loại xác thực" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">Không xác thực</SelectItem>
+                  <SelectItem value="BASIC">Basic Auth</SelectItem>
+                  <SelectItem value="BEARER">Bearer Token</SelectItem>
+                  <SelectItem value="OAUTH2">OAuth 2.0</SelectItem>
+                  <SelectItem value="API_KEY">API Key</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {!isRawMode ? (
-              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>Loại kết nối (Type)</Label>
-                    <Select value={formData.type} onValueChange={(val) => setFormData({ ...formData, type: val })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn loại kết nối" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="LGSP">Trục liên thông (LGSP)</SelectItem>
-                        <SelectItem value="WEBHOOK">Webhook (Pull/Push)</SelectItem>
-                        <SelectItem value="POSTMAN">Bộ sưu tập Postman</SelectItem>
-                        <SelectItem value="SYSTEM">Hệ thống nội bộ (SYSTEM)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>URL Máy chủ (API Endpoint)</Label>
-                    <Input
-                      value={formData.apiUrl}
-                      onChange={e => setFormData({ ...formData, apiUrl: e.target.value })}
-                      placeholder="https://api.example.com/v1"
-                      className="font-mono"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-violet-50/50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30 rounded-xl">
-                  <div className="space-y-4 md:col-span-2">
-                    <div className="flex items-center gap-2 text-violet-800 dark:text-violet-400 font-semibold border-b border-violet-100 dark:border-violet-900/50 pb-2">
-                      <KeyRound className="w-4 h-4" />
-                      Thông tin Xác thực (Authentication)
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>URL lấy Token (Auth URL)</Label>
-                    <Input
-                      value={formData.authUrl}
-                      onChange={e => setFormData({ ...formData, authUrl: e.target.value })}
-                      placeholder="https://sso.example.com/token"
-                      className="font-mono bg-white dark:bg-slate-950"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>API Bearer Token (Nếu dùng Token tĩnh)</Label>
-                    <Input
-                      type="password"
-                      value={formData.apiToken}
-                      onChange={e => setFormData({ ...formData, apiToken: e.target.value })}
-                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
-                      className="font-mono bg-white dark:bg-slate-950"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Client ID (App Key)</Label>
-                    <Input
-                      value={formData.clientId}
-                      onChange={e => setFormData({ ...formData, clientId: e.target.value })}
-                      className="font-mono bg-white dark:bg-slate-950"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Client Secret (App Secret)</Label>
-                    <Input
-                      type="password"
-                      value={formData.clientSecret}
-                      onChange={e => setFormData({ ...formData, clientSecret: e.target.value })}
-                      className="font-mono bg-white dark:bg-slate-950"
-                    />
-                  </div>
-                </div>
-
-
-              </div>
-            ) : (
-              <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200 h-[400px]">
-                <Label>JSON Configuration Data</Label>
-                <Textarea
-                  className="h-full font-mono text-sm p-4 bg-slate-900 text-slate-300 rounded-xl resize-none"
-                  value={formData.rawConfig}
-                  onChange={(e) => setFormData({ ...formData, rawConfig: e.target.value })}
-                  spellCheck={false}
+            {formData.authType === 'OAUTH2' && (
+              <div className="space-y-2">
+                <Label>URL lấy Token (Auth URL)</Label>
+                <Input
+                  value={formData.authUrl}
+                  onChange={e => setFormData({ ...formData, authUrl: e.target.value })}
+                  placeholder="https://sso.example.com/token"
+                  className="font-mono bg-white dark:bg-slate-950"
                 />
               </div>
             )}
 
-            <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-              <Label className="text-sm font-semibold">Bật / Tắt kết nối ngay lập tức</Label>
-              <Switch checked={formData.isActive} onCheckedChange={v => setFormData({ ...formData, isActive: v })} />
-            </div>
+            {formData.authType === 'BEARER' && (
+              <div className="space-y-2">
+                <Label>API Bearer Token (Nếu dùng Token tĩnh)</Label>
+                <Input
+                  type="password"
+                  value={formData.apiToken}
+                  onChange={e => setFormData({ ...formData, apiToken: e.target.value })}
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
+                  className="font-mono bg-white dark:bg-slate-950"
+                />
+              </div>
+            )}
 
+            {(formData.authType === 'BASIC' || formData.authType === 'OAUTH2' || formData.authType === 'API_KEY') && (
+              <div className="space-y-2">
+                <Label>{formData.authType === 'BASIC' ? 'Username' : 'Client ID (App Key)'}</Label>
+                <Input
+                  value={formData.clientId}
+                  onChange={e => setFormData({ ...formData, clientId: e.target.value })}
+                  className="font-mono bg-white dark:bg-slate-950"
+                />
+              </div>
+            )}
+
+            {(formData.authType === 'BASIC' || formData.authType === 'OAUTH2') && (
+              <div className="space-y-2">
+                <Label>{formData.authType === 'BASIC' ? 'Password' : 'Client Secret (App Secret)'}</Label>
+                <Input
+                  type="password"
+                  value={formData.clientSecret}
+                  onChange={e => setFormData({ ...formData, clientSecret: e.target.value })}
+                  className="font-mono bg-white dark:bg-slate-950"
+                />
+              </div>
+            )}
           </div>
-
-          <DialogFooter className="p-6 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950">
-            <Button variant="outline" onClick={handleClose}>Hủy bỏ</Button>
-            <Button onClick={handleSave} className="bg-violet-600 hover:bg-violet-700 text-white min-w-[120px]" disabled={createMutation.isPending || updateMutation.isPending}>
-              {createMutation.isPending || updateMutation.isPending ? "Đang lưu..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
-            </Button>
-          </DialogFooter>
-
         </div>
-      </DialogContent>
-    </Dialog>
+      ) : (
+        <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200 h-[400px]">
+          <Label>JSON Configuration Data</Label>
+          <Textarea
+            className="h-full font-mono text-sm p-4 bg-slate-900 text-slate-300 rounded-xl resize-none"
+            value={formData.rawConfig}
+            onChange={(e) => setFormData({ ...formData, rawConfig: e.target.value })}
+            spellCheck={false}
+          />
+        </div>
+      )}
+
+      <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+        <Label className="text-sm font-semibold">Bật / Tắt kết nối ngay lập tức</Label>
+        <Switch checked={formData.isActive} onCheckedChange={v => setFormData({ ...formData, isActive: v })} />
+      </div>
+    </ResponsiveModal>
   );
 });
 

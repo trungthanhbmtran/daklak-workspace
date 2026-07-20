@@ -59,10 +59,17 @@ export interface PostmanConfigData extends LGSPConfigData {
 }
 
 export interface IntegrationConfig {
-  id: number;
-  systemName: string;
-  integrationCode: string;
-  configData: string;
+  id: string; // Updated to string (uuid)
+  name: string;
+  code: string;
+  description?: string;
+  protocol: string;
+  baseUrl: string;
+  authType: string;
+  authConfig?: any;
+  headers?: any;
+  endpoints?: any;
+  metadata?: any;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -75,27 +82,27 @@ export const integrationKeys = {
 
 export const integrationApi = {
   getList: async (search?: string) => {
-    const res = await apiClient.get('/integrations', { params: { search } }) as any;
+    const res = await apiClient.get('/workflow/integrations', { params: { search } }) as any;
     if (res.success) return res.data as IntegrationConfig[];
     throw new Error(res.message || 'Lỗi lấy dữ liệu');
   },
   create: async (data: any) => {
-    const res = await apiClient.post('/integrations', data) as any;
+    const res = await apiClient.post('/workflow/integrations', data) as any;
     if (res.success) return res.data;
     throw new Error(res.message || 'Lỗi khi tạo');
   },
   update: async (data: any) => {
-    const res = await apiClient.put(`/integrations/${data.id}`, data) as any;
+    const res = await apiClient.put(`/workflow/integrations/${data.id}`, data) as any;
     if (res.success) return res.data;
     throw new Error(res.message || 'Lỗi khi cập nhật');
   },
-  delete: async (id: number) => {
-    const res = await apiClient.delete(`/integrations/${id}`) as any;
+  delete: async (id: string) => { // Updated to string
+    const res = await apiClient.delete(`/workflow/integrations/${id}`) as any;
     if (res.success) return res.data;
     throw new Error(res.message || 'Lỗi khi xóa');
   },
-  toggleActive: async ({ id, isActive }: { id: number, isActive: boolean }) => {
-    const res = await apiClient.put(`/integrations/${id}/active`, { isActive }) as any;
+  toggleActive: async ({ id, isActive }: { id: string, isActive: boolean }) => {
+    const res = await apiClient.put(`/workflow/integrations/${id}`, { isActive }) as any;
     if (res.success) return res.data;
     throw new Error(res.message || 'Lỗi khi cập nhật trạng thái');
   },

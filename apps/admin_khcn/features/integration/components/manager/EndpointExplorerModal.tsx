@@ -4,7 +4,7 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
 import { Plug, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { IntegrationConfig, useUpdateIntegration } from "../../api";
 import { toast } from "sonner";
 import { ParsedEndpoint } from "./EndpointTypes";
@@ -26,17 +26,16 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
   const handleSave = useCallback(() => {
     if (!integration) return;
     try {
-      const parsed = JSON.parse(integration.configData || "{}");
+      const parsed = integration.metadata || {};
       parsed._parsedEndpoints = endpoints;
-      const newConfigData = JSON.stringify(parsed);
       
       updateMutation.mutate({
         ...integration,
-        configData: newConfigData
+        metadata: parsed
       }, {
         onSuccess: () => {
           toast.success("Đã lưu các Endpoints thành công");
-          setIntegration({ ...integration, configData: newConfigData });
+          setIntegration({ ...integration, metadata: parsed });
         },
         onError: (err: any) => toast.error(err.message || "Lỗi khi lưu Endpoints")
       });
@@ -50,7 +49,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     open: (item: IntegrationConfig) => {
       setIntegration(item);
       try {
-        const parsed = JSON.parse(item.configData || "{}");
+        const parsed = item.metadata || {};
         const ep = parsed._parsedEndpoints || [];
         setEndpoints(ep);
         setSelectedId(ep.length > 0 ? ep[0].id : null);
@@ -118,51 +117,44 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
   const selectedEndpoint = endpoints.find(ep => ep.id === selectedId);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-[1200px] w-full h-[100dvh] sm:w-[95vw] sm:h-[85vh] p-0 overflow-hidden border-0 bg-transparent shadow-2xl flex flex-col rounded-none sm:rounded-2xl">
-        <div className="bg-white dark:bg-slate-950 flex flex-col h-full rounded-none sm:rounded-2xl border-0 sm:border border-slate-200 dark:border-slate-800">
-          
-          <DialogHeader className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900/50">
-            <div>
-              <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                <Plug className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-                Quản lý Endpoints - {integration?.systemName}
-              </DialogTitle>
-              <DialogDescription className="mt-1 text-sm">
-                Trích xuất từ cấu hình {integration?.integrationCode} ({endpoints.length} APIs)
-              </DialogDescription>
-            </div>
-            <Button 
-              onClick={handleSave} 
-              disabled={updateMutation.isPending}
-              className="bg-violet-600 hover:bg-violet-700 text-white mr-8"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
-            </Button>
-          </DialogHeader>
-
-          <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
-            <EndpointSidebar 
-              endpoints={endpoints}
-              selectedId={selectedId}
-              search={search}
-              setSearch={setSearch}
-              onSelect={handleSelect}
-              onAdd={handleAddEndpoint}
-            />
-
-            <EndpointEditor 
-              selectedEndpoint={selectedEndpoint}
-              onChange={handleEndpointChange}
-              onItemChange={handleItemChange}
-              onAddItem={handleAddItem}
-              onRemoveItem={handleRemoveItem}
-            />
-          </div>
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      maxWidth="max-w-6xl"
+      icon={<Plug className="w-5 h-5 text-violet-600 dark:text-violet-400" />}
+      title={`Quản lý Endpoints - ${integration?.name}`}
+      description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
+      bodyClassName="p-0 flex flex-col sm:flex-row h-[75vh]"
+      footer={
+        <div className="w-full flex justify-end">
+          <Button 
+            onClick={handleSave} 
+            disabled={updateMutation.isPending}
+            className="bg-violet-600 hover:bg-violet-700 text-white"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      }
+    >
+      <EndpointSidebar 
+        endpoints={endpoints}
+        selectedId={selectedId}
+        search={search}
+        setSearch={setSearch}
+        onSelect={handleSelect}
+        onAdd={handleAddEndpoint}
+      />
+
+      <EndpointEditor 
+        selectedEndpoint={selectedEndpoint}
+        onChange={handleEndpointChange}
+        onItemChange={handleItemChange}
+        onAddItem={handleAddItem}
+        onRemoveItem={handleRemoveItem}
+      />
+    </ResponsiveModal>
   );
 });
 

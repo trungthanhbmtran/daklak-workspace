@@ -8,148 +8,118 @@ datasource db {
   provider = "mysql"
 }
 
-model WorkflowDefinition {
-  id          String   @id @default(uuid())
+model ProcessDefinition {
+  id          String   @id @default(cuid())
   code        String   @unique
   name        String
-  version     Int      @default(1)
-  status      String   @default("Draft") // Draft | Published | Archived
   description String?  @db.Text
-  createdBy   String?
+  isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  nodes     WorkflowNode[]
-  edges     WorkflowEdge[]
-  variables WorkflowVariable[]
-  instances WorkflowInstance[]
+  versions ProcessVersion[]
 
-  @@map("workflow_definitions")
+  @@map("process_definitions")
 }
 
-model WorkflowNode {
-  id         String @id @default(uuid())
-  workflowId String
-  nodeKey    String // Unique key inside the workflow (e.g. node_1)
-  type       String // StartEvent, UserTask, ServiceTask, etc.
-  name       String
-  x          Float
-  y          Float
-  properties Json?
-  order      Int    @default(0)
+model ProcessVersion {
+  id           String   @id @default(cuid())
+  definitionId String
+  version      Int
+  status       String   // ProcessVersionStatus e.g. DRAFT, PUBLISHED
+  graph        Json
+  createdAt    DateTime @default(now())
 
-  workflow   WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  assignments AssignmentRule[]
-  actions     NodeAction[]
+  definition ProcessDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  instances  ProcessInstance[]
 
-  // For WorkflowEdge relations
-  sourceEdges WorkflowEdge[] @relation("SourceNode")
-  targetEdges WorkflowEdge[] @relation("TargetNode")
-
-  @@map("workflow_nodes")
+  @@unique([definitionId, version])
+  @@map("process_versions")
 }
 
-model WorkflowEdge {
-  id           String  @id @default(uuid())
-  workflowId   String
-  sourceNodeId String
-  targetNodeId String
-  condition    String? @db.Text
-  properties   Json?
-  priority     Int     @default(0)
-  defaultFlow  Boolean @default(false)
+model ProcessInstance {
+  id              String   @id @default(cuid())
+  definitionId    String
+  versionId       String
+  businessKey     String?
+  organizationId  String
+  status          String   // ProcessInstanceStatus e.g. RUNNING, COMPLETED, FAILED
+  currentNodeCode String?
+  variables       Json?
+  startedBy       String
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
 
-  workflow   WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  sourceNode WorkflowNode       @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
-  targetNode WorkflowNode       @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+  version     ProcessVersion       @relation(fields: [versionId], references: [id])
+  tasks       WorkflowTask[]
+  transitions WorkflowTransition[]
+  events      WorkflowEvent[]
 
-  @@map("workflow_edges")
-}
-
-model AssignmentRule {
-  id     String @id @default(uuid())
-  nodeId String
-  type   String // creator, role, position, user, etc.
-  value  String
-
-  node WorkflowNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
-
-  @@map("assignment_rules")
-}
-
-model NodeAction {
-  id              String @id @default(uuid())
-  nodeId          String
-  actionType      String // Command, Event
-  service         String
-  action          String
-  payloadTemplate Json?
-  order           Int    @default(0)
-
-  node WorkflowNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
-
-  @@map("node_actions")
-}
-
-model WorkflowVariable {
-  id           String @id @default(uuid())
-  workflowId   String
-  key          String
-  type         String
-  defaultValue Json?
-
-  workflow WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-
-  @@unique([workflowId, key])
-  @@map("workflow_variables")
-}
-
-model WorkflowInstance {
-  id            String   @id @default(uuid())
-  workflowId    String
-  version       Int      @default(1)
-  entityType    String   @default("TASK")
-  entityId      String   @default("UNKNOWN")
-  currentNodeId String?
-  status        String   // Running, Completed, Failed, Pending
-  variables     Json?
-  startedAt     DateTime @default(now())
-  finishedAt    DateTime?
-
-  workflow WorkflowDefinition @relation(fields: [workflowId], references: [id])
-  tasks    WorkflowTask[]
-
-  @@map("workflow_instances")
+  @@map("process_instances")
 }
 
 model WorkflowTask {
-  id          String    @id @default(uuid())
-  instanceId  String
-  nodeId      String
-  assigneeId  String?
-  status      String    // Pending, Completed, Canceled
-  startedAt   DateTime  @default(now())
-  completedAt DateTime?
+  id           String   @id @default(cuid())
+  instanceId   String
+  nodeCode     String
+  title        String
+  assigneeId   String?
+  assigneeUnit String?
+  status       String   // TaskStatus e.g. PENDING, COMPLETED, CANCELED
+  dueAt        DateTime?
+  createdAt    DateTime @default(now())
+  completedAt  DateTime?
 
-  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
   @@map("workflow_tasks")
 }
 
+model WorkflowTransition {
+  id           String   @id @default(cuid())
+  instanceId   String
+  fromNodeCode String?
+  toNodeCode   String
+  action       String
+  performedBy  String
+  performedAt  DateTime @default(now())
+  comment      String?  @db.Text
+  payload      Json?
+
+  instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_transitions")
+}
+
+model WorkflowEvent {
+  id           String   @id @default(cuid())
+  instanceId   String
+  eventType    String
+  payload      Json
+  status       String   // EventStatus e.g. PENDING, PROCESSED, FAILED
+  retryCount   Int      @default(0)
+  nextRetryAt  DateTime?
+  createdAt    DateTime @default(now())
+
+  instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_events")
+}
+
 model IntegrationConnection {
   id          String   @id @default(uuid())
-  name        String   // Tên hệ thống (VD: Cổng DVC Quốc Gia)
-  code        String   @unique // Mã liên thông (VD: DVCQG_SYNC)
+  name        String   // VD: Cổng DVC Quốc Gia
+  code        String   @unique 
   description String?  @db.Text
-  type        String   @default("REST") // REST hoặc SOAP
+  protocol    String   @default("REST") // REST, SOAP, GRAPHQL, GRPC
   baseUrl     String   
-  authConfig  Json?    
-  headers     Json?    
-  endpoints   Json?    
+  authType    String   @default("NONE") // NONE, BASIC, BEARER, OAUTH2, API_KEY
+  authConfig  Json?    // Cấu hình username/password, token_url, client_id, v.v.
+  headers     Json?    // Các header tĩnh
+  endpoints   Json?    // Danh sách các endpoints chi tiết (path, method)
+  metadata    Json?    // Chứa WSDL URL (nếu SOAP), OpenAPI spec, v.v.
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("integration_connections")
 }
-

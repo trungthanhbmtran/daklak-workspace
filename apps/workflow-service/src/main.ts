@@ -3,12 +3,8 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-
 async function bootstrap() {
   const logger = new Logger('WorkflowService');
-
-  // 1. Create the main Nest application (REST)
   const app = await NestFactory.create(AppModule);
 
   // 2. Configure Global Middlewares/Pipes for REST
@@ -19,7 +15,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.useGlobalInterceptors(new TransformInterceptor());
   app.enableCors();
 
   // 3. Connect as a gRPC microservice (Hybrid mode)
