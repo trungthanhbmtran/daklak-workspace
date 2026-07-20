@@ -157,3 +157,8 @@ Dưới đây là danh sách các tài khoản tiêu biểu dùng để test cá
   - Username: `admin` / Email: `admin@sys.com` (Mật khẩu: `Admin@123`)
 - **Quản trị viên Đơn vị** (Giới hạn trong đơn vị)
   - Username: `orgadmin` / Email: `orgadmin@daklak.gov.vn` (Mật khẩu: `Admin@123`)
+
+
+docker run --rm -e DATABASE_URL=... workflow-service sh -c "npx prisma migrate deploy"
+# Seed dữ liệu
+docker run --rm -e DATABASE_URL=... workflow-service sh -c "npx ts-node -r tsconfig-paths/register prisma/seed.ts"
