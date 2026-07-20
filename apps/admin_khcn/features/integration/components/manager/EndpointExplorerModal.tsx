@@ -120,11 +120,12 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     <ResponsiveModal
       open={isOpen}
       onOpenChange={setIsOpen}
-      maxWidth="max-w-6xl"
-      icon={<Plug className="w-5 h-5 text-violet-600 dark:text-violet-400" />}
+      maxWidth="max-w-7xl"
+      fullHeight={true}
+      icon={<Plug className="w-6 h-6 text-violet-500" />}
       title={`Quản lý Endpoints - ${integration?.name}`}
       description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
-      bodyClassName="p-0 flex flex-col sm:flex-row h-[75vh]"
+      bodyClassName="p-0 bg-slate-50/50 dark:bg-slate-900/50"
       footer={
         <div className="w-full flex justify-end">
           <Button 
@@ -138,22 +139,24 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         </div>
       }
     >
-      <EndpointSidebar 
-        endpoints={endpoints}
-        selectedId={selectedId}
-        search={search}
-        setSearch={setSearch}
-        onSelect={handleSelect}
-        onAdd={handleAddEndpoint}
-      />
+      <div className="flex flex-col sm:flex-row h-full">
+        <EndpointSidebar 
+          endpoints={endpoints}
+          selectedId={selectedId}
+          search={search}
+          setSearch={setSearch}
+          onSelect={handleSelect}
+          onAdd={handleAddEndpoint}
+        />
 
-      <EndpointEditor 
-        selectedEndpoint={selectedEndpoint}
-        onChange={handleEndpointChange}
-        onItemChange={handleItemChange}
-        onAddItem={handleAddItem}
-        onRemoveItem={handleRemoveItem}
-      />
+        <EndpointEditor 
+          selectedEndpoint={selectedEndpoint}
+          onChange={handleEndpointChange}
+          onItemChange={handleItemChange}
+          onAddItem={handleAddItem}
+          onRemoveItem={handleRemoveItem}
+        />
+      </div>
     </ResponsiveModal>
   );
 });

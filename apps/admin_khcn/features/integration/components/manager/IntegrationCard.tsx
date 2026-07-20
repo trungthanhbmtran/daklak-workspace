@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDeleteIntegration, useToggleActiveIntegration, IntegrationConfig } from "../../api";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils";
 
 interface IntegrationCardProps {
   item: IntegrationConfig;
@@ -62,7 +62,7 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
 
         <div className="text-xs text-slate-500 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
           <span>Cập nhật lần cuối:</span>
-          <span className="font-medium">{item.updatedAt ? format(new Date(item.updatedAt), "dd/MM/yyyy HH:mm") : "-"}</span>
+          <span className="font-medium">{formatDate(item.updatedAt, "dd/MM/yyyy HH:mm")}</span>
         </div>
       </CardContent>
 
