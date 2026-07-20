@@ -24,4 +24,4 @@ import { GrpcModule } from './grpc/grpc.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
