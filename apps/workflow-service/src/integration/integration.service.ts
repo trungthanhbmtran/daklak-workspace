@@ -15,13 +15,10 @@ export class IntegrationService {
   async findAll(search?: string) {
     const whereClause = search
       ? {
-          OR: [
-            { name: { contains: search } },
-            { code: { contains: search } },
-          ],
+          OR: [{ name: { contains: search } }, { code: { contains: search } }],
         }
       : {};
-      
+
     return this.prisma.integrationConnection.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' },

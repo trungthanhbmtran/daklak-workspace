@@ -19,7 +19,12 @@ export class PublicPortalConfigController {
 
   @Get()
   async findAll() {
-    const res: any = await firstValueFrom(this.configService.getAll({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    const res: any = await firstValueFrom(this.configService.getAll({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
     return { success: true, data: res.data || [] };
   }
 }

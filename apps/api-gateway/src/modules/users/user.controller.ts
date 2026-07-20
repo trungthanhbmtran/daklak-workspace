@@ -92,8 +92,11 @@ export class UserController implements OnModuleInit {
     }
 
     const response = (await firstValueFrom(
-          this.userService.ListUsers({ skip, take, search, unitCodeStartsWith }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+      this.userService.ListUsers({ skip, take, search, unitCodeStartsWith }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
     return {
       success: true,
       data: response.data || [],
@@ -109,7 +112,12 @@ export class UserController implements OnModuleInit {
       'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
   })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
-    const data: any = await firstValueFrom(this.userService.FindOne({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    const data: any = await firstValueFrom(
+      this.userService.FindOne({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     if (!data) return { success: true, data: null };
 
     return {
@@ -137,7 +145,12 @@ export class UserController implements OnModuleInit {
     description: 'Danh sách policies từ tất cả roles của user',
   })
   async getUserPolicies(@Param('id', ParseIntPipe) id: number) {
-    const data: any = await firstValueFrom(this.userService.FindOne({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    const data: any = await firstValueFrom(
+      this.userService.FindOne({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     if (!data) return { success: true, data: [] };
 
     const policies: any[] = Array.isArray(data.policies) ? data.policies : [];
@@ -230,13 +243,16 @@ export class UserController implements OnModuleInit {
     @Body() body: { unitId: number; jobTitleId: number; isPrimary?: boolean },
   ) {
     const result = await firstValueFrom(
-          this.userService.AssignPosition({
-            userId: id,
-            unitId: body.unitId,
-            jobTitleId: body.jobTitleId,
-            isPrimary: body.isPrimary ?? false,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.userService.AssignPosition({
+        userId: id,
+        unitId: body.unitId,
+        jobTitleId: body.jobTitleId,
+        isPrimary: body.isPrimary ?? false,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
@@ -253,11 +269,14 @@ export class UserController implements OnModuleInit {
     @Body() body: { isActive: boolean },
   ) {
     const result = await firstValueFrom(
-          this.userService.SetUserActive({
-            userId: id,
-            isActive: body.isActive ?? false,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.userService.SetUserActive({
+        userId: id,
+        isActive: body.isActive ?? false,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
@@ -275,8 +294,11 @@ export class UserController implements OnModuleInit {
   ) {
     const roleIds = Array.isArray(body?.roleIds) ? body.roleIds : [];
     const result = await firstValueFrom(
-          this.userService.AssignRoles({ userId: id, roleIds }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.userService.AssignRoles({ userId: id, roleIds }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {

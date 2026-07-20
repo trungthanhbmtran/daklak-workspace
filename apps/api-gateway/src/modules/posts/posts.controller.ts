@@ -33,16 +33,22 @@ export class PostsController {
   @Roles(Role.AUTHOR, Role.EDITOR, Role.ADMIN)
   async create(@Body() createPostDto: any, @Req() req: any) {
     return firstValueFrom(
-          this.postService.createPost({
-            ...createPostDto,
-            authorId: req.user.id,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.createPost({
+        ...createPostDto,
+        authorId: req.user.id,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.postService.listPosts(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.postService.listPosts(query)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   /**
@@ -51,12 +57,18 @@ export class PostsController {
    */
   @Get('stats')
   async getStats(@Query() query: any) {
-    return firstValueFrom(this.postService.getPostStats(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.postService.getPostStats(query)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.postService.getPost({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.postService.getPost({ id })).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Put(':id')
@@ -67,20 +79,26 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.updatePost({
-            id,
-            ...updatePostDto,
-            actorId: req.user.id,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.updatePost({
+        id,
+        ...updatePostDto,
+        actorId: req.user.id,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
   async remove(@Param('id') id: string, @Req() req: any) {
     return firstValueFrom(
-          this.postService.deletePost({ id, actorId: req.user.id }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.deletePost({ id, actorId: req.user.id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post(':id/submit')
@@ -91,8 +109,11 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.submitPost({ id, actorId: req.user.id, note }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.submitPost({ id, actorId: req.user.id, note }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post(':id/review')
@@ -103,8 +124,11 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.reviewPost({ id, reviewerId: req.user.id, note }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.reviewPost({ id, reviewerId: req.user.id, note }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post(':id/approve')
@@ -115,8 +139,11 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.approvePost({ id, reviewerId: req.user.id, note }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.approvePost({ id, reviewerId: req.user.id, note }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post(':id/reject')
@@ -127,8 +154,11 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.rejectPost({ id, reviewerId: req.user.id, note }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.rejectPost({ id, reviewerId: req.user.id, note }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post(':id/publish')
@@ -139,8 +169,11 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.publishPost({ id, actorId: req.user.id, note }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.publishPost({ id, actorId: req.user.id, note }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post(':id/unpublish')
@@ -151,12 +184,20 @@ export class PostsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.postService.unpublishPost({ id, actorId: req.user.id, note }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.postService.unpublishPost({ id, actorId: req.user.id, note }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get(':id/history')
   async getHistory(@Param('id') id: string) {
-    return firstValueFrom(this.postService.getPostHistory({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.postService.getPostHistory({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
   }
 }

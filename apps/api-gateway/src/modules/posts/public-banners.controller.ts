@@ -21,6 +21,9 @@ export class PublicBannersController implements OnModuleInit {
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.bannerService.listBanners(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.bannerService.listBanners(query)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

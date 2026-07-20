@@ -34,15 +34,21 @@ export class AiController implements OnModuleInit {
     @Inject('AI_QUEUE_SERVICE') private readonly rmqClient: ClientProxy,
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly taskClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-    @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly sysConfigClient: any,
-    @Inject(MICROSERVICES.MASTER_PLAN.SYMBOL) private readonly masterPlanClient: any,
+    @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL)
+    private readonly sysConfigClient: any,
+    @Inject(MICROSERVICES.MASTER_PLAN.SYMBOL)
+    private readonly masterPlanClient: any,
   ) {}
 
   onModuleInit() {
     this.taskService = this.taskClient.getService(MICROSERVICES.TASK.SERVICE);
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    this.sysConfigService = this.sysConfigClient.getService(MICROSERVICES.SYS_CONFIG.SERVICE);
-    this.masterPlanService = this.masterPlanClient.getService(MICROSERVICES.MASTER_PLAN.SERVICE);
+    this.sysConfigService = this.sysConfigClient.getService(
+      MICROSERVICES.SYS_CONFIG.SERVICE,
+    );
+    this.masterPlanService = this.masterPlanClient.getService(
+      MICROSERVICES.MASTER_PLAN.SERVICE,
+    );
   }
 
   private getGrpcMetadata(req: any) {
@@ -101,7 +107,8 @@ export class AiController implements OnModuleInit {
     try {
       const { action, payload } = body;
       const user = req.user;
-      const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
+      const isAdmin =
+        user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
       // 1. Fetch System Config for Prompt
       const sysConfigRes: any = await firstValueFrom(
@@ -112,10 +119,14 @@ export class AiController implements OnModuleInit {
         (c: any) => c.key === `AI_PROMPT_${action}`,
       );
 
-      let promptTemplate = promptConfig?.value || '';
+      const promptTemplate = promptConfig?.value || '';
 
       if (!promptTemplate) {
-        return { success: false, data: null, message: `Chưa cấu hình AI Prompt cho hành động: ${action}` };
+        return {
+          success: false,
+          data: null,
+          message: `Chưa cấu hình AI Prompt cho hành động: ${action}`,
+        };
       }
 
       let prompt = promptTemplate;
@@ -134,14 +145,20 @@ export class AiController implements OnModuleInit {
                   isAdmin ||
                   user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
                   user?.permissionsFlatten?.includes('TASK.*'),
-                currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+                currentUserDept: user?.unitId
+                  ? parseInt(user.unitId, 10)
+                  : undefined,
               },
               this.getGrpcMetadata(req),
             ),
           );
 
           if (!taskResponse) {
-            return { success: false, data: null, message: 'Không tìm thấy công việc' };
+            return {
+              success: false,
+              data: null,
+              message: 'Không tìm thấy công việc',
+            };
           }
 
           const usersRes: any = await firstValueFrom(
@@ -160,8 +177,14 @@ export class AiController implements OnModuleInit {
 
           prompt = promptTemplate
             .replace(/{parentTitle}/g, taskResponse.title || 'Không có')
-            .replace(/{parentDescription}/g, taskResponse.description || 'Không có')
-            .replace(/{employeesContext}/g, employeesContext || 'Không có dữ liệu nhân sự');
+            .replace(
+              /{parentDescription}/g,
+              taskResponse.description || 'Không có',
+            )
+            .replace(
+              /{employeesContext}/g,
+              employeesContext || 'Không có dữ liệu nhân sự',
+            );
           break;
         }
         case 'MASTER_PLAN_TASKS': {
@@ -181,19 +204,23 @@ export class AiController implements OnModuleInit {
           break;
         }
         case 'EVALUATE_FEASIBILITY': {
-          let historyStr = "Không tìm thấy dữ liệu lịch sử tương tự.";
+          let historyStr = 'Không tìm thấy dữ liệu lịch sử tương tự.';
           try {
             const histRes: any = await firstValueFrom(
               this.masterPlanService.GetHistoricalFeasibility(
-                { title: payload.title, type: payload.type, durationDays: payload.durationDays },
-                this.getGrpcMetadata(req)
-              )
+                {
+                  title: payload.title,
+                  type: payload.type,
+                  durationDays: payload.durationDays,
+                },
+                this.getGrpcMetadata(req),
+              ),
             );
             if (histRes && histRes.pastPlansCount > 0) {
               historyStr = `Dữ liệu lịch sử: Có ${histRes.pastPlansCount} kế hoạch tương tự.\nTổng số phân việc: ${histRes.totalTasks}, đã hoàn thành: ${histRes.completedTasks}, trễ hạn: ${histRes.overdueTasks}.\nTỷ lệ khả thi trung bình trong quá khứ: ${histRes.feasibilityScore}%.`;
             }
           } catch (e) {
-            this.logger.warn("Could not fetch historical feasibility data", e);
+            this.logger.warn('Could not fetch historical feasibility data', e);
           }
 
           prompt = promptTemplate
@@ -212,7 +239,11 @@ export class AiController implements OnModuleInit {
           break;
         }
         default:
-          return { success: false, data: null, message: `Hành động AI không được hỗ trợ: ${action}` };
+          return {
+            success: false,
+            data: null,
+            message: `Hành động AI không được hỗ trợ: ${action}`,
+          };
       }
 
       // 5. Emit to RabbitMQ (reuse logic)
@@ -227,7 +258,10 @@ export class AiController implements OnModuleInit {
 
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
-      this.logger.error(`Error in executeAiFeature for action ${body?.action}`, err);
+      this.logger.error(
+        `Error in executeAiFeature for action ${body?.action}`,
+        err,
+      );
       return {
         success: false,
         data: null,

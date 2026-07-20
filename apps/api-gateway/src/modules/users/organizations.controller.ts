@@ -91,9 +91,12 @@ export class OrganizationsController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách loại đơn vị (UBND, Sở, Phòng...)' })
   @ApiResponse({ status: 200, description: 'Danh sách loại đơn vị' })
   async getUnitTypes() {
-    const res = (await firstValueFrom(
-          this.orgService.ListUnitTypes({}),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    const res = (await firstValueFrom(this.orgService.ListUnitTypes({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    )) as any;
     return { success: true, data: res.items || [] };
   }
 
@@ -104,7 +107,12 @@ export class OrganizationsController implements OnModuleInit {
     description: 'Cây đơn vị (root nodes có children)',
   })
   async getFullTree(@Req() request: any) {
-    const res = (await firstValueFrom(this.orgService.GetFullTree({})).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    const res = (await firstValueFrom(this.orgService.GetFullTree({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    )) as any;
     let nodes = res.nodes || [];
 
     // Gọi FindOne để lấy roles và unitCode của người đang đăng nhập
@@ -155,30 +163,37 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách phẳng đơn vị tổ chức (theo phân quyền)' })
+  @ApiOperation({
+    summary: 'Lấy danh sách phẳng đơn vị tổ chức (theo phân quyền)',
+  })
   @ApiResponse({ status: 200, description: 'Danh sách phẳng đơn vị tổ chức' })
   async getOrganizations(@Req() request: any, @Query('q') q?: string) {
     const res = (await firstValueFrom(
-          this.orgService.GetOrganizations({ q: q || '' })
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
-    
+      this.orgService.GetOrganizations({ q: q || '' }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
+
     let flatList = res.nodes || [];
 
     const userId = request?.user?.id;
     const userInfo: any = userId
-      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(() => null)
+      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(
+          () => null,
+        )
       : null;
 
     const isAdmin: boolean = !!userInfo?.roles?.some(
-      (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN'
+      (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN',
     );
 
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
         flatList = [];
       } else {
-        flatList = flatList.filter((node: any) => 
-          node.code && node.code.startsWith(userInfo.unitCode)
+        flatList = flatList.filter(
+          (node: any) => node.code && node.code.startsWith(userInfo.unitCode),
         );
       }
     }
@@ -196,10 +211,13 @@ export class OrganizationsController implements OnModuleInit {
     const unitIdNum =
       unitId != null && unitId !== '' ? parseInt(unitId, 10) : undefined;
     const res = (await firstValueFrom(
-          this.orgService.ListJobTitles({
-            unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+      this.orgService.ListJobTitles({
+        unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
     return { success: true, data: res.items || [] };
   }
 
@@ -219,11 +237,14 @@ export class OrganizationsController implements OnModuleInit {
     },
   ) {
     const result = await firstValueFrom(
-          this.orgService.UpdateJobTitle({
-            id,
-            domainId: body.domainId,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.orgService.UpdateJobTitle({
+        id,
+        domainId: body.domainId,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return { success: true, data: result };
   }
 
@@ -349,9 +370,12 @@ export class OrganizationsController implements OnModuleInit {
   @ApiOperation({ summary: 'Cây con của một đơn vị' })
   @ApiResponse({ status: 200, description: 'Cây con từ đơn vị id' })
   async getSubTree(@Param('id', ParseIntPipe) id: number) {
-    const res = (await firstValueFrom(
-          this.orgService.GetSubTree({ id }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    const res = (await firstValueFrom(this.orgService.GetSubTree({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    )) as any;
     return { success: true, data: res.nodes || [] };
   }
 
@@ -364,12 +388,15 @@ export class OrganizationsController implements OnModuleInit {
     @Body() body: { unitId: number; jobTitleId: number; quantity: number },
   ) {
     const result = await firstValueFrom(
-          this.orgService.SetStaffing({
-            unitId: body.unitId,
-            jobTitleId: body.jobTitleId,
-            quantity: body.quantity,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.orgService.SetStaffing({
+        unitId: body.unitId,
+        jobTitleId: body.jobTitleId,
+        quantity: body.quantity,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return { success: true, data: result };
   }
 
@@ -385,8 +412,11 @@ export class OrganizationsController implements OnModuleInit {
   })
   async getStaffingReport(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(
-          this.orgService.GetStaffingReport({ unitId: id }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+      this.orgService.GetStaffingReport({ unitId: id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
     return { success: true, data: res.items || [] };
   }
 
@@ -421,15 +451,18 @@ export class OrganizationsController implements OnModuleInit {
     }
 
     const result = await firstValueFrom(
-          this.orgService.SetStaffingSlot({
-            staffingId: body.staffingId,
-            slotOrder: body.slotOrder,
-            description: body.description,
-            domainIds: body.domainIds,
-            geographicAreaIds: body.geographicAreaIds,
-            monitoredUnitIds: body.monitoredUnitIds,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.orgService.SetStaffingSlot({
+        staffingId: body.staffingId,
+        slotOrder: body.slotOrder,
+        description: body.description,
+        domainIds: body.domainIds,
+        geographicAreaIds: body.geographicAreaIds,
+        monitoredUnitIds: body.monitoredUnitIds,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return { success: true, data: result };
   }
 }

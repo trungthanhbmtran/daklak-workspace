@@ -36,13 +36,23 @@ export class PortalConfigController {
   async create(
     @Body() dto: { code: string; name: string; description?: string },
   ) {
-    const res: any = await firstValueFrom(this.configService.create(dto)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    const res: any = await firstValueFrom(this.configService.create(dto)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
     return { success: true, data: res.data };
   }
 
   @Get()
   async findAll() {
-    const res: any = await firstValueFrom(this.configService.getAll({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    const res: any = await firstValueFrom(this.configService.getAll({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
     return { success: true, data: res.data || [] };
   }
 
@@ -53,8 +63,11 @@ export class PortalConfigController {
     @Body() dto: { code?: string; name?: string; description?: string },
   ) {
     const res: any = await firstValueFrom(
-          this.configService.update({ id, ...dto }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.configService.update({ id, ...dto }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return { success: true, data: res.data };
   }
 
@@ -64,12 +77,15 @@ export class PortalConfigController {
     @Body() dto: { code: string; name: string; description?: string },
   ) {
     const res: any = await firstValueFrom(
-          this.configService.upsertByCode({
-            code: dto.code,
-            name: dto.name,
-            description: dto.description,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.configService.upsertByCode({
+        code: dto.code,
+        name: dto.name,
+        description: dto.description,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return { success: true, data: res.data };
   }
 
@@ -86,8 +102,11 @@ export class PortalConfigController {
     },
   ) {
     const res: any = await firstValueFrom(
-          this.configService.batchUpsert({ items: dto.items }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.configService.batchUpsert({ items: dto.items }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return { success: true, data: res.data };
   }
 }

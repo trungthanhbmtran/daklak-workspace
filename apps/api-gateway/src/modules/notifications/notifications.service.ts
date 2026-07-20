@@ -27,7 +27,7 @@ export class NotificationsService {
     const id = `n-${Date.now()}-${randomUUID()}`;
     const timestamp = Date.now();
     const uid = String(userId);
-    
+
     const n: InAppNotification = {
       id,
       userId: uid,
@@ -46,14 +46,28 @@ export class NotificationsService {
     // 2. Thêm vào ZSET của User
     pipeline.zadd(`notifications:user:${uid}`, timestamp, id);
     // 3. Auto-Trim giữ lại 500 item mới nhất tránh tràn RAM Redis
-    pipeline.zremrangebyrank(`notifications:user:${uid}`, 0, -(this.MAX_FEED_ITEMS + 1));
+    pipeline.zremrangebyrank(
+      `notifications:user:${uid}`,
+      0,
+      -(this.MAX_FEED_ITEMS + 1),
+    );
 
     await pipeline.exec();
     return n;
   }
 
-  async listByUser(userId: string | number, page: number = 1, limit: number = 50) {
-    return this.listByUserOrEmployeeCode(userId, undefined, undefined, page, limit);
+  async listByUser(
+    userId: string | number,
+    page: number = 1,
+    limit: number = 50,
+  ) {
+    return this.listByUserOrEmployeeCode(
+      userId,
+      undefined,
+      undefined,
+      page,
+      limit,
+    );
   }
 
   async listByUserOrEmployeeCode(
@@ -62,18 +76,23 @@ export class NotificationsService {
     email?: string,
     page: number = 1,
     limit: number = 50,
-  ): Promise<{ data: InAppNotification[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
+  ): Promise<{
+    data: InAppNotification[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  }> {
     const uid = String(userId);
     const redis = this.redisService.getClient();
-    
+
     const userZset = `notifications:user:${uid}`;
-    const employeeZset = employeeCode ? `notifications:user:${employeeCode}` : null;
+    const employeeZset = employeeCode
+      ? `notifications:user:${employeeCode}`
+      : null;
     const emailZset = email ? `notifications:user:${email}` : null;
 
     const fetchZset = async (key: string) => {
       // Lấy toàn bộ IDs (tối đa 500) từ mỗi mảng cùng score
       const result = await redis.zrevrange(key, 0, -1, 'WITHSCORES');
-      const pairs: { id: string, score: number }[] = [];
+      const pairs: { id: string; score: number }[] = [];
       for (let i = 0; i < result.length; i += 2) {
         pairs.push({ id: result[i], score: parseInt(result[i + 1], 10) });
       }
@@ -95,7 +114,7 @@ export class NotificationsService {
     // Merge các thông báo (nếu có user thuộc nhiều id/email) và sort giảm dần
     const sortedIds = Array.from(mergedMap.entries())
       .sort((a, b) => b[1] - a[1])
-      .map(entry => entry[0]);
+      .map((entry) => entry[0]);
 
     const totalCount = sortedIds.length;
     const start = (page - 1) * limit;
@@ -104,13 +123,20 @@ export class NotificationsService {
     if (paginatedIds.length === 0) {
       return {
         data: [],
-        meta: { total: totalCount, page, limit, totalPages: Math.ceil(totalCount / limit) }
+        meta: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit),
+        },
       };
     }
 
     // O(1) query HMGET
     const payloads = await redis.hmget('notifications:data', ...paginatedIds);
-    const notifications = payloads.map(p => (p ? JSON.parse(p) : null)).filter(Boolean);
+    const notifications = payloads
+      .map((p) => (p ? JSON.parse(p) : null))
+      .filter(Boolean);
 
     return {
       data: notifications,
@@ -118,8 +144,8 @@ export class NotificationsService {
         total: totalCount,
         page,
         limit,
-        totalPages: Math.ceil(totalCount / limit)
-      }
+        totalPages: Math.ceil(totalCount / limit),
+      },
     };
   }
 
@@ -132,11 +158,15 @@ export class NotificationsService {
     const redis = this.redisService.getClient();
     const payloadStr = await redis.hget('notifications:data', id);
     if (!payloadStr) return false;
-    
+
     const n = JSON.parse(payloadStr) as InAppNotification;
     const uid = String(userId);
-    
-    if (n.userId === uid || (employeeCode && n.userId === employeeCode) || (email && n.userId === email)) {
+
+    if (
+      n.userId === uid ||
+      (employeeCode && n.userId === employeeCode) ||
+      (email && n.userId === email)
+    ) {
       n.read = true;
       await redis.hset('notifications:data', id, JSON.stringify(n));
       return true;

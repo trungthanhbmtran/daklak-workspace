@@ -11,4 +11,4 @@ import { WorkflowController } from './workflow.controller';
   ],
   controllers: [WorkflowController],
 })
-export class WorkflowModule { }
+export class WorkflowModule {}

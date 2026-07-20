@@ -27,8 +27,11 @@ export class PublicHrmController implements OnModuleInit {
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
 
     const response = await firstValueFrom(
-          this.employeeService.ListEmployees(req),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.employeeService.ListEmployees(req),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return response;
   }
 }

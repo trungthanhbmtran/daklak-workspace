@@ -21,6 +21,11 @@ export class PublicPortalMenuController implements OnModuleInit {
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
   }
 }

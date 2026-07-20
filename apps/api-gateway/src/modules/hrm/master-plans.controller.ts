@@ -210,19 +210,22 @@ export class MasterPlansController implements OnModuleInit {
     }
 
     const res: any = await firstValueFrom(
-          this.masterPlanService.FindAll({
-            type,
-            status,
-            departmentId: reqDepartmentId
-              ? parseInt(reqDepartmentId, 10)
-              : undefined,
-            currentEmployeeCode: user?.employeeCode,
-            isAdmin,
-            currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-            callerAncestorUnitIds, // Danh sách đơn vị cha để lọc kế hoạch cấp trên
-            isLeader,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.masterPlanService.FindAll({
+        type,
+        status,
+        departmentId: reqDepartmentId
+          ? parseInt(reqDepartmentId, 10)
+          : undefined,
+        currentEmployeeCode: user?.employeeCode,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds, // Danh sách đơn vị cha để lọc kế hoạch cấp trên
+        isLeader,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     if (res?.data) {
       if (Array.isArray(res.data)) {
         await this.populateUsers(res.data);
@@ -240,12 +243,15 @@ export class MasterPlansController implements OnModuleInit {
     @Query('durationDays') durationDays: string,
   ) {
     return firstValueFrom(
-          this.masterPlanService.GetHistoricalFeasibility({
-            type,
-            title,
-            durationDays: parseInt(durationDays || '0', 10),
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.masterPlanService.GetHistoricalFeasibility({
+        type,
+        title,
+        durationDays: parseInt(durationDays || '0', 10),
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get(':id')
@@ -271,15 +277,18 @@ export class MasterPlansController implements OnModuleInit {
     }
 
     const res: any = await firstValueFrom(
-          this.masterPlanService.FindById({
-            id: parseInt(id, 10),
-            currentEmployeeCode: user?.employeeCode,
-            isAdmin,
-            currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-            callerAncestorUnitIds,
-            isLeader,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.masterPlanService.FindById({
+        id: parseInt(id, 10),
+        currentEmployeeCode: user?.employeeCode,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds,
+        isLeader,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     if (res) {
       await this.populateUsers([res]);
     }
@@ -338,21 +347,30 @@ export class MasterPlansController implements OnModuleInit {
     if (req.user?.unitId) {
       body.departmentId = parseInt(req.user.unitId, 10);
     }
-    return firstValueFrom(this.masterPlanService.Create(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.masterPlanService.Create(body)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Put(':id')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
     body.updatedByCode = req.user?.employeeCode || 'system';
     return firstValueFrom(
-          this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return firstValueFrom(
-          this.masterPlanService.Delete({ id: parseInt(id, 10) }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.masterPlanService.Delete({ id: parseInt(id, 10) }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

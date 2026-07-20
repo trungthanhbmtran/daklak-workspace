@@ -7,4 +7,4 @@ import { IntegrationController } from './integration.controller';
   providers: [IntegrationService],
   exports: [IntegrationService],
 })
-export class IntegrationModule { }
+export class IntegrationModule {}

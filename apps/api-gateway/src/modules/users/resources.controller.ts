@@ -47,9 +47,12 @@ export class ResourcesController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách PBAC Resource (dùng cho menu form)' })
   @ApiResponse({ status: 200, description: 'Mảng resources phẳng' })
   async listResources() {
-    const res = (await firstValueFrom(
-          this.pbacService.GetResources({}),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+    const res = (await firstValueFrom(this.pbacService.GetResources({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    )) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
     return (rawResources as any[]).map((r: any) => ({
       id: r.id,
@@ -66,12 +69,15 @@ export class ResourcesController implements OnModuleInit {
     @Body() body: { code: string; name: string; serviceCode?: string },
   ) {
     return firstValueFrom(
-          this.pbacService.CreateResource({
-            code: body.code,
-            name: body.name,
-            serviceCode: body.serviceCode,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.pbacService.CreateResource({
+        code: body.code,
+        name: body.name,
+        serviceCode: body.serviceCode,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Put(':id')
@@ -82,12 +88,15 @@ export class ResourcesController implements OnModuleInit {
     @Body() body: { code?: string; name?: string; serviceCode?: string },
   ) {
     return firstValueFrom(
-          this.pbacService.UpdateResource({
-            id,
-            code: body.code,
-            name: body.name,
-            serviceCode: body.serviceCode,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.pbacService.UpdateResource({
+        id,
+        code: body.code,
+        name: body.name,
+        serviceCode: body.serviceCode,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

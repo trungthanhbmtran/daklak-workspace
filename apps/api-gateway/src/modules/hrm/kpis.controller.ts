@@ -58,7 +58,7 @@ export class KpisController implements OnModuleInit {
         this.orgService.GetOrganizations({}),
       );
       const unitMap: Record<number, any> = {};
-      
+
       (orgRes?.nodes || []).forEach((n: any) => {
         const nId = parseInt(n.id, 10);
         if (nId) {
@@ -82,12 +82,18 @@ export class KpisController implements OnModuleInit {
 
   @Get('periods')
   async findPeriods() {
-    return firstValueFrom(this.kpiService.FindPeriods({})).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.kpiService.FindPeriods({})).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post('periods')
   async createPeriod(@Body() body: any) {
-    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get('criteria')
@@ -102,12 +108,15 @@ export class KpisController implements OnModuleInit {
     const hasGlobalAccess =
       checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
     const res: any = await firstValueFrom(
-          this.kpiService.FindCriteria({ 
-            isAdmin: hasGlobalAccess,
-            page: page ? Number(page) : 1,
-            limit: limit ? Number(limit) : 0,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.kpiService.FindCriteria({
+        isAdmin: hasGlobalAccess,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 0,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
 
     if (res) {
       res.meta = res.meta || {};
@@ -129,21 +138,32 @@ export class KpisController implements OnModuleInit {
   @Post('criteria')
   @Roles(Role.ADMIN)
   async createCriterion(@Body() body: any) {
-    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Put('criteria/:id')
   @Roles(Role.ADMIN)
   async updateCriterion(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(
-          this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Delete('criteria/:id')
   @Roles(Role.ADMIN)
   async deleteCriterion(@Param('id') id: string) {
-    return firstValueFrom(this.kpiService.DeleteCriterion({ id: Number(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.kpiService.DeleteCriterion({ id: Number(id) }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post('evaluations')
@@ -151,7 +171,10 @@ export class KpisController implements OnModuleInit {
     if (req.user) {
       body.evaluatorCode = req.user.employeeCode || req.user.username;
     }
-    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get('evaluations')
@@ -169,12 +192,14 @@ export class KpisController implements OnModuleInit {
     const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE');
 
     let callerDescendantUnitIds: number[] = [];
-    
+
     // GỌI TRỰC TIẾP MICROSERVICE (GetDescendants) thay vì tính toán DFS trong API Gateway
     if (!isAdmin && user?.unitId) {
       const callerUnitId = parseInt(user.unitId, 10);
       try {
-        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: callerUnitId }));
+        const descRes: any = await firstValueFrom(
+          this.orgService.GetDescendants({ id: callerUnitId }),
+        );
         callerDescendantUnitIds = descRes.ids || [];
       } catch (e) {
         callerDescendantUnitIds = [];
@@ -182,20 +207,28 @@ export class KpisController implements OnModuleInit {
     }
 
     return firstValueFrom(
-          this.kpiService.FindEvaluations({
-            employeeCode: targetCode,
-            currentEmployeeCode: callerCode,
-            isAdmin,
-            isFetchingOwn,
-            callerDescendantUnitIds,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.kpiService.FindEvaluations({
+        employeeCode: targetCode,
+        currentEmployeeCode: callerCode,
+        isAdmin,
+        isFetchingOwn,
+        callerDescendantUnitIds,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get('dashboard-stats')
-  async getDashboardStats(@Req() req: any, @Query('periodId') periodId: string) {
+  async getDashboardStats(
+    @Req() req: any,
+    @Query('periodId') periodId: string,
+  ) {
     const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE') || user?.roles?.some((r: any) => r === Role.ADMIN || r?.code === Role.ADMIN);
+    const isAdmin =
+      user?.permissionsFlatten?.includes('KPI:MANAGE') ||
+      user?.roles?.some((r: any) => r === Role.ADMIN || r?.code === Role.ADMIN);
 
     let callerDescendantUnitIds: number[] = [];
     let unitMap: Record<number, any> = {};
@@ -210,7 +243,9 @@ export class KpisController implements OnModuleInit {
     if (!isAdmin && user?.unitId) {
       const callerUnitId = parseInt(user.unitId, 10);
       try {
-        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: callerUnitId }));
+        const descRes: any = await firstValueFrom(
+          this.orgService.GetDescendants({ id: callerUnitId }),
+        );
         callerDescendantUnitIds = descRes.ids || [];
       } catch (e) {
         callerDescendantUnitIds = [];
@@ -218,12 +253,15 @@ export class KpisController implements OnModuleInit {
     }
 
     const res: any = await firstValueFrom(
-          this.kpiService.GetEvaluationStats({
-            periodId,
-            isAdmin,
-            callerDescendantUnitIds,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.kpiService.GetEvaluationStats({
+        periodId,
+        isAdmin,
+        callerDescendantUnitIds,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
 
     if (res?.success && res.data?.statsByUnit) {
       // Map departmentId to departmentName
@@ -244,40 +282,69 @@ export class KpisController implements OnModuleInit {
   }
 
   @Post('evaluations/calculate-personal')
-  async calculatePersonalKpi(@Req() req: any, @Body() body: { periodId: number, employeeCode?: string, staffingSlotId?: number }) {
+  async calculatePersonalKpi(
+    @Req() req: any,
+    @Body()
+    body: { periodId: number; employeeCode?: string; staffingSlotId?: number },
+  ) {
     const user = req.user;
-    const targetCode = body.employeeCode || user?.employeeCode || user?.username;
-    
+    const targetCode =
+      body.employeeCode || user?.employeeCode || user?.username;
+
     return firstValueFrom(
-          this.kpiService.CalculatePersonalKpi({
-            periodId: Number(body.periodId),
-            employeeCode: targetCode,
-            staffingSlotId: body.staffingSlotId ? Number(body.staffingSlotId) : undefined
-          })
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.kpiService.CalculatePersonalKpi({
+        periodId: Number(body.periodId),
+        employeeCode: targetCode,
+        staffingSlotId: body.staffingSlotId
+          ? Number(body.staffingSlotId)
+          : undefined,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get('evaluations/:id')
   async getEvaluationDetail(@Param('id') id: string) {
-    return firstValueFrom(this.kpiService.GetEvaluationDetail({ id: Number(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.kpiService.GetEvaluationDetail({ id: Number(id) }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post('evaluations/:id/submit')
   async submitSelfScore(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(this.kpiService.SubmitEvaluation({
-          id: Number(id),
-          data: JSON.stringify(body)
-        })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.kpiService.SubmitEvaluation({
+        id: Number(id),
+        data: JSON.stringify(body),
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post('evaluations/:id/approve')
-  async approveEvaluation(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+  async approveEvaluation(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
     const user = req.user;
     const reviewerCode = user?.employeeCode || user?.username;
-    return firstValueFrom(this.kpiService.ApproveEvaluation({
-          id: Number(id),
-          data: JSON.stringify(body),
-          reviewerCode
-        })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.kpiService.ApproveEvaluation({
+        id: Number(id),
+        data: JSON.stringify(body),
+        reviewerCode,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

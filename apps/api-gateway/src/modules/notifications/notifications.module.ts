@@ -10,4 +10,3 @@ import { RedisModule } from '../../core/redis/redis.module';
   exports: [NotificationsService],
 })
 export class NotificationsModule {}
-

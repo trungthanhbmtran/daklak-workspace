@@ -1,4 +1,12 @@
-import { Controller, Get, Patch, Param, Req, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Req,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { EventPattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import {
   ApiTags,
@@ -14,19 +22,21 @@ import { NotificationsService } from './notifications.service';
 @Controller('admin/notifications')
 @ApiBearerAuth('JWT-auth')
 export class NotificationsController {
-  constructor(
-    private readonly notificationsService: NotificationsService,
-  ) {}
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Danh sách thông báo in-app cho user đăng nhập' })
   @ApiResponse({
     status: 200,
-    description: 'Mảng thông báo (id, title, body, createdAt, read) kèm pagination',
+    description:
+      'Mảng thông báo (id, title, body, createdAt, read) kèm pagination',
   })
   list(
-    @Req() req: { user?: { id?: string | number; employeeCode?: string; email?: string } },
+    @Req()
+    req: {
+      user?: { id?: string | number; employeeCode?: string; email?: string };
+    },
     @Query('page') pageStr?: string,
     @Query('limit') limitStr?: string,
   ) {
@@ -35,13 +45,13 @@ export class NotificationsController {
     const email = req.user?.email;
     const page = pageStr ? parseInt(pageStr, 10) : 1;
     const limit = limitStr ? parseInt(limitStr, 10) : 50;
-    
+
     return this.notificationsService.listByUserOrEmployeeCode(
       userId,
       employeeCode,
       email,
       page,
-      limit
+      limit,
     );
   }
 
@@ -51,12 +61,20 @@ export class NotificationsController {
   @ApiResponse({ status: 200, description: 'success' })
   markRead(
     @Param('id') id: string,
-    @Req() req: { user?: { id?: string | number; employeeCode?: string; email?: string } },
+    @Req()
+    req: {
+      user?: { id?: string | number; employeeCode?: string; email?: string };
+    },
   ) {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
     const email = req.user?.email;
-    const ok = this.notificationsService.markRead(id, userId, employeeCode, email);
+    const ok = this.notificationsService.markRead(
+      id,
+      userId,
+      employeeCode,
+      email,
+    );
     return { success: ok };
   }
 
@@ -64,7 +82,12 @@ export class NotificationsController {
   async handleInAppNotification(@Payload() data: any) {
     if (!data.recipients || !data.recipients.length) return;
     for (const recipient of data.recipients) {
-      this.notificationsService.push(recipient, data.title, data.message || data.body, data.metadata);
+      this.notificationsService.push(
+        recipient,
+        data.title,
+        data.message || data.body,
+        data.metadata,
+      );
     }
   }
 }

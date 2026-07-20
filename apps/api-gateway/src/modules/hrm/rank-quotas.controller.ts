@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Body, Param, Query, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Query,
+  Inject,
+} from '@nestjs/common';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 
@@ -17,19 +25,25 @@ export class RankQuotasController {
   @Post()
   async saveRankQuotas(@Body() body: any) {
     const data = await firstValueFrom(
-          this.rankQuotaService.SaveRankQuotas(body),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.rankQuotaService.SaveRankQuotas(body),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return data;
   }
 
   @Get(':rankCode')
   async getRankQuotasByRank(
     @Param('rankCode') rankCode: string,
-    @Query('domainCode') domainCode: string
+    @Query('domainCode') domainCode: string,
   ) {
     const data = await firstValueFrom(
-          this.rankQuotaService.GetRankQuotasByRank({ rankCode, domainCode }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.rankQuotaService.GetRankQuotasByRank({ rankCode, domainCode }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return data;
   }
 }

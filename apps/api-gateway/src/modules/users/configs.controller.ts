@@ -30,8 +30,11 @@ export class ConfigsController implements OnModuleInit {
   @Get()
   async getConfigs() {
     const response = (await firstValueFrom(
-          this.configService.GetConfigs({}),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; })) as any;
+      this.configService.GetConfigs({}),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
     return response.configs || [];
   }
 
@@ -39,6 +42,9 @@ export class ConfigsController implements OnModuleInit {
   async updateConfig(
     @Body() body: { key: string; value: string; description?: string },
   ) {
-    return firstValueFrom(this.configService.UpdateConfig(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

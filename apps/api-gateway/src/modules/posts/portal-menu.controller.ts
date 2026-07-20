@@ -35,15 +35,23 @@ export class PortalMenuController {
   @Post()
   @Roles(Role.ADMIN)
   async create(@Body() dto: any) {
-    return firstValueFrom(this.portalMenuService.createPortalMenu(dto)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.portalMenuService.createPortalMenu(dto)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
   }
 
   @Get()
   async findAll(@Query() query: any) {
     console.log('Gateway: Calling ListPortalMenus with query:', query);
     const result = await firstValueFrom(
-          this.portalMenuService.listPortalMenus(query),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.portalMenuService.listPortalMenus(query),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     console.log('Gateway: ListPortalMenus response received');
     return result;
   }
@@ -52,28 +60,44 @@ export class PortalMenuController {
   async getQuickSetupData() {
     console.log('Gateway: Calling GetQuickSetupData');
     const result = await firstValueFrom(
-          this.portalMenuService.getQuickSetupData({}),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.portalMenuService.getQuickSetupData({}),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     console.log('Gateway: GetQuickSetupData response received');
     return result;
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.portalMenuService.getPortalMenu({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.portalMenuService.getPortalMenu({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
   }
 
   @Put(':id')
   @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() dto: any) {
     return firstValueFrom(
-          this.portalMenuService.updatePortalMenu({ id, ...dto }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.portalMenuService.updatePortalMenu({ id, ...dto }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
   async remove(@Param('id') id: string) {
-    return firstValueFrom(this.portalMenuService.deletePortalMenu({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.portalMenuService.deletePortalMenu({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

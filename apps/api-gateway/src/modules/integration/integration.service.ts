@@ -6,7 +6,7 @@ import { PrismaService } from '../../core/prisma/prisma.service';
 export class IntegrationService implements OnModuleInit {
   private readonly logger = new Logger(IntegrationService.name);
   private config: any = { services: [], routes: [], apikeys: [] };
-  
+
   constructor(private readonly prisma: PrismaService) {}
 
   // Custom router function for http-proxy-middleware
@@ -22,8 +22,8 @@ export class IntegrationService implements OnModuleInit {
     on: {
       error: (err, req, res) => {
         this.logger.error(`Proxy Error: ${err.message}`);
-      }
-    }
+      },
+    },
   });
 
   async onModuleInit() {
@@ -34,14 +34,23 @@ export class IntegrationService implements OnModuleInit {
 
   private async fetchConfig() {
     try {
-      const services = await this.prisma.gatewayService.findMany({ where: { isActive: true } });
-      const routes = await this.prisma.gatewayRoute.findMany({ where: { isActive: true }, include: { service: true } });
-      const apikeys = await this.prisma.apiKey.findMany({ where: { isActive: true } });
-      
+      const services = await this.prisma.gatewayService.findMany({
+        where: { isActive: true },
+      });
+      const routes = await this.prisma.gatewayRoute.findMany({
+        where: { isActive: true },
+        include: { service: true },
+      });
+      const apikeys = await this.prisma.apiKey.findMany({
+        where: { isActive: true },
+      });
+
       this.config = { services, routes, apikeys };
       this.logger.log('Loaded dynamic gateway configuration from database');
     } catch (err) {
-      this.logger.error(`Failed to load gateway config from database: ${err.message}`);
+      this.logger.error(
+        `Failed to load gateway config from database: ${err.message}`,
+      );
     }
   }
 
@@ -55,8 +64,11 @@ export class IntegrationService implements OnModuleInit {
     const route = this.matchRoute(req.originalUrl || req.url);
     if (route && route.service) {
       const service = route.service;
-      const urls = service.url.split(',').map((u: string) => u.trim()).filter(Boolean);
-      
+      const urls = service.url
+        .split(',')
+        .map((u: string) => u.trim())
+        .filter(Boolean);
+
       if (urls.length === 0) return undefined;
 
       let targetUrl = urls[0];
@@ -99,14 +111,14 @@ export class IntegrationService implements OnModuleInit {
   public matchRoute(url: string): any {
     if (!url) return null;
     const cleanUrl = url.split('?')[0];
-    
+
     // Find matching route
     for (const route of this.config.routes) {
-      let pathPattern = route.path;
-      
+      const pathPattern = route.path;
+
       // Exact match
       if (pathPattern === cleanUrl) return route;
-      
+
       // Wildcard match
       if (pathPattern.endsWith('/*')) {
         const prefix = pathPattern.slice(0, -2);

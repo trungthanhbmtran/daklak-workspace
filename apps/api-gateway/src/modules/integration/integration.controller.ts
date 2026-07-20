@@ -1,19 +1,37 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
 
 @Controller('admin/integration')
 export class IntegrationController {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   @Get('services')
   async getServices() {
-    const data = await this.prisma.gatewayService.findMany({ include: { routes: true } });
+    const data = await this.prisma.gatewayService.findMany({
+      include: { routes: true },
+    });
     return { success: true, data };
   }
 
   @Post('services')
   async createService(@Body() data: any) {
-    const { name, url, description, isActive, loadBalanceStrategy, useSsl, ignoreTlsVerify } = data;
+    const {
+      name,
+      url,
+      description,
+      isActive,
+      loadBalanceStrategy,
+      useSsl,
+      ignoreTlsVerify,
+    } = data;
     const service = await this.prisma.gatewayService.create({
       data: {
         name,
@@ -22,15 +40,23 @@ export class IntegrationController {
         loadBalanceStrategy: loadBalanceStrategy ?? 'ROUND_ROBIN',
         useSsl: useSsl ?? false,
         ignoreTlsVerify: ignoreTlsVerify ?? true,
-        isActive: isActive ?? true
-      } as any
+        isActive: isActive ?? true,
+      } as any,
     });
     return { success: true, data: service };
   }
 
   @Put('services/:id')
   async updateService(@Param('id') id: string, @Body() data: any) {
-    const { name, url, description, isActive, loadBalanceStrategy, useSsl, ignoreTlsVerify } = data;
+    const {
+      name,
+      url,
+      description,
+      isActive,
+      loadBalanceStrategy,
+      useSsl,
+      ignoreTlsVerify,
+    } = data;
     const service = await this.prisma.gatewayService.update({
       where: { id: parseInt(id) },
       data: {
@@ -40,8 +66,8 @@ export class IntegrationController {
         loadBalanceStrategy,
         useSsl,
         ignoreTlsVerify,
-        isActive
-      } as any
+        isActive,
+      } as any,
     });
     return { success: true, data: service };
   }
@@ -54,7 +80,9 @@ export class IntegrationController {
 
   @Get('routes')
   async getRoutes() {
-    const data = await this.prisma.gatewayRoute.findMany({ include: { service: true } });
+    const data = await this.prisma.gatewayRoute.findMany({
+      include: { service: true },
+    });
     return { success: true, data };
   }
 
@@ -62,7 +90,13 @@ export class IntegrationController {
   async createRoute(@Body() data: any) {
     const { path, stripPath, serviceId, methods, isActive } = data;
     const route = await this.prisma.gatewayRoute.create({
-      data: { path, stripPath, serviceId: parseInt(serviceId), methods, isActive: isActive ?? true }
+      data: {
+        path,
+        stripPath,
+        serviceId: parseInt(serviceId),
+        methods,
+        isActive: isActive ?? true,
+      },
     });
     return { success: true, data: route };
   }
@@ -72,7 +106,13 @@ export class IntegrationController {
     const { path, stripPath, serviceId, methods, isActive } = data;
     const route = await this.prisma.gatewayRoute.update({
       where: { id: parseInt(id) },
-      data: { path, stripPath, serviceId: serviceId ? parseInt(serviceId) : undefined, methods, isActive }
+      data: {
+        path,
+        stripPath,
+        serviceId: serviceId ? parseInt(serviceId) : undefined,
+        methods,
+        isActive,
+      },
     });
     return { success: true, data: route };
   }
@@ -95,7 +135,7 @@ export class IntegrationController {
     const key = crypto.randomBytes(32).toString('hex');
     const { name, description, isActive } = data;
     const apikey = await this.prisma.apiKey.create({
-      data: { name, description, isActive: isActive ?? true, key }
+      data: { name, description, isActive: isActive ?? true, key },
     });
     return { success: true, data: apikey };
   }
@@ -105,7 +145,7 @@ export class IntegrationController {
     const { name, description, isActive } = data;
     const apikey = await this.prisma.apiKey.update({
       where: { id: parseInt(id) },
-      data: { name, description, isActive }
+      data: { name, description, isActive },
     });
     return { success: true, data: apikey };
   }

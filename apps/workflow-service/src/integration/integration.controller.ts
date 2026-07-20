@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { IntegrationService } from './integration.service';
@@ -22,15 +23,28 @@ export class IntegrationController {
     const data = await this.integrationService.create(createDto);
     // Return gRPC format (IntegrationResponse) when called via gRPC,
     // or REST format when called via HTTP.
-    return { ...data, createdAt: data.createdAt?.toISOString(), updatedAt: data.updatedAt?.toISOString() };
+    return {
+      ...data,
+      createdAt: data.createdAt?.toISOString(),
+      updatedAt: data.updatedAt?.toISOString(),
+    };
   }
 
   @Get()
   @GrpcMethod('WorkflowService', 'FindAllIntegrations')
-  async findAll(@Query('search') search?: string, @Payload() payload?: { search?: string }) {
+  async findAll(
+    @Query('search') search?: string,
+    @Payload() payload?: { search?: string },
+  ) {
     const searchTerm = payload?.search || search;
     const data = await this.integrationService.findAll(searchTerm);
-    return { items: data.map(d => ({ ...d, createdAt: d.createdAt?.toISOString(), updatedAt: d.updatedAt?.toISOString() })) };
+    return {
+      items: data.map((d) => ({
+        ...d,
+        createdAt: d.createdAt?.toISOString(),
+        updatedAt: d.updatedAt?.toISOString(),
+      })),
+    };
   }
 
   @Get(':id')
@@ -38,7 +52,11 @@ export class IntegrationController {
   async findOne(@Param('id') id: string | { id: string }) {
     const actualId = typeof id === 'object' ? id.id : id;
     const data = await this.integrationService.findOne(actualId);
-    return { ...data, createdAt: data.createdAt?.toISOString(), updatedAt: data.updatedAt?.toISOString() };
+    return {
+      ...data,
+      createdAt: data.createdAt?.toISOString(),
+      updatedAt: data.updatedAt?.toISOString(),
+    };
   }
 
   @Put(':id')
@@ -50,7 +68,11 @@ export class IntegrationController {
     // If called via gRPC, payload contains both id and fields in updateDto
     const actualId = typeof id === 'object' ? id.id : id;
     const data = await this.integrationService.update(actualId, updateDto);
-    return { ...data, createdAt: data.createdAt?.toISOString(), updatedAt: data.updatedAt?.toISOString() };
+    return {
+      ...data,
+      createdAt: data.createdAt?.toISOString(),
+      updatedAt: data.updatedAt?.toISOString(),
+    };
   }
 
   @Delete(':id')
@@ -61,4 +83,3 @@ export class IntegrationController {
     return { success: true, message: 'Deleted successfully' };
   }
 }
-

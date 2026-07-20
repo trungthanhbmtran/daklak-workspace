@@ -159,12 +159,14 @@ export class EmployeeController implements OnModuleInit {
       req.crossDepartment = true;
 
     const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
-    
+
     // GỌI TRỰC TIẾP MICROSERVICE (GetDescendants) thay vì Gateway Aggregation & Tính toán
     if (req.callerUnitId && !isAdmin) {
       const callerUnitId = parseInt(req.callerUnitId, 10);
       try {
-        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: callerUnitId }));
+        const descRes: any = await firstValueFrom(
+          this.orgService.GetDescendants({ id: callerUnitId }),
+        );
         req.descendantUnitIds = descRes.ids || [];
       } catch (e) {
         req.descendantUnitIds = [];
@@ -174,7 +176,12 @@ export class EmployeeController implements OnModuleInit {
 
     const dicts = await this.fetchDictionaries();
 
-    const res: any = await firstValueFrom(this.employeeService.ListEmployees(req)).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; });
+    const res: any = await firstValueFrom(
+      this.employeeService.ListEmployees(req),
+    ).catch((e: any) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
 
     if (res && res.data) {
       res.data = res.data.map((e: any) =>
@@ -197,10 +204,15 @@ export class EmployeeController implements OnModuleInit {
     return res;
   }
 
-  @Get(":id")
-  async getDetail(@Param("id") id: string) {
+  @Get(':id')
+  async getDetail(@Param('id') id: string) {
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; }),
+      firstValueFrom(
+        this.employeeService.GetEmployee({ id: parseInt(id) }),
+      ).catch((e: any) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      }),
       this.fetchDictionaries(),
     ]);
 
@@ -218,7 +230,12 @@ export class EmployeeController implements OnModuleInit {
   @Post()
   async create(@Body() body: any) {
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.CreateEmployee(body)).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; }),
+      firstValueFrom(this.employeeService.CreateEmployee(body)).catch(
+        (e: any) => {
+          console.error('RPC Call Failed', e.message);
+          return null;
+        },
+      ),
       this.fetchDictionaries(),
     ]);
 
@@ -233,11 +250,16 @@ export class EmployeeController implements OnModuleInit {
     return res;
   }
 
-  @Put(":id")
-  async update(@Param("id") id: string, @Body() body: any) {
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() body: any) {
     const payload = { ...body, id: parseInt(id) };
     const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.UpdateEmployee(payload)).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; }),
+      firstValueFrom(this.employeeService.UpdateEmployee(payload)).catch(
+        (e: any) => {
+          console.error('RPC Call Failed', e.message);
+          return null;
+        },
+      ),
       this.fetchDictionaries(),
     ]);
 
@@ -252,10 +274,13 @@ export class EmployeeController implements OnModuleInit {
     return res;
   }
 
-  @Delete(":id")
-  async delete(@Param("id") id: string) {
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
     return firstValueFrom(
-          this.employeeService.DeleteEmployee({ id: parseInt(id) }),
-        ).catch((e: any) => { console.error('RPC Call Failed', e.message); return null; });
+      this.employeeService.DeleteEmployee({ id: parseInt(id) }),
+    ).catch((e: any) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

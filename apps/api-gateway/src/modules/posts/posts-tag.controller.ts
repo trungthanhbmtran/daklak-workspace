@@ -19,11 +19,17 @@ export class PostsTagController {
 
   @Post()
   async create(@Body() createDto: any) {
-    return firstValueFrom(this.tagService.createTag(createDto)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.tagService.createTag(createDto)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.tagService.listTags(query)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.tagService.listTags(query)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

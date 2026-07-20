@@ -38,31 +38,52 @@ export class TaskTemplatesController implements OnModuleInit {
     @Query('rank') rank?: string,
   ) {
     return firstValueFrom(
-          this.taskTemplateService.FindTaskTemplates({ classification, rank }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.taskTemplateService.FindTaskTemplates({ classification, rank }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post()
   async create(@Body() body: any) {
-    return firstValueFrom(this.taskTemplateService.CreateTaskTemplate(body)).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.taskTemplateService.CreateTaskTemplate(body),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Post('bulk')
   async bulkUpdate(@Body() body: any) {
     return firstValueFrom(
-          this.taskTemplateService.BulkUpdateTaskTemplates({ templates: body.templates }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.taskTemplateService.BulkUpdateTaskTemplates({
+        templates: body.templates,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(
-          this.taskTemplateService.UpdateTaskTemplate({ id: Number(id), ...body }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.taskTemplateService.UpdateTaskTemplate({ id: Number(id), ...body }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return firstValueFrom(this.taskTemplateService.DeleteTaskTemplate({ id: Number(id) })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(
+      this.taskTemplateService.DeleteTaskTemplate({ id: Number(id) }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }

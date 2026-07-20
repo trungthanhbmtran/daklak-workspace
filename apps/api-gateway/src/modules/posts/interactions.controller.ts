@@ -38,8 +38,11 @@ export class InteractionsController {
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listComments(@Query() query: any) {
     const response: any = await firstValueFrom(
-          this.interactionService.listComments(query),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.interactionService.listComments(query),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return {
       success: true,
       data: response.data || [],
@@ -58,14 +61,22 @@ export class InteractionsController {
     @Body('status') status: string,
   ) {
     return firstValueFrom(
-          this.interactionService.updateCommentStatus({ id, status }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.interactionService.updateCommentStatus({ id, status }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Delete('comments/:id')
   @Roles(Role.ADMIN)
   async deleteComment(@Param('id') id: string) {
-    return firstValueFrom(this.interactionService.deleteComment({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.interactionService.deleteComment({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
   }
 
   // --- Citizen Questions (Hỏi đáp) ---
@@ -73,8 +84,11 @@ export class InteractionsController {
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listQuestions(@Query() query: any) {
     const response: any = await firstValueFrom(
-          this.interactionService.listQuestions(query),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.interactionService.listQuestions(query),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return {
       success: true,
       data: response.data || [],
@@ -94,17 +108,25 @@ export class InteractionsController {
     @Req() req: any,
   ) {
     return firstValueFrom(
-          this.interactionService.answerQuestion({
-            id,
-            ...dto,
-            answeredById: req.user.id,
-          }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.interactionService.answerQuestion({
+        id,
+        ...dto,
+        answeredById: req.user.id,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   @Get('questions/:id')
   async getQuestion(@Param('id') id: string) {
-    return firstValueFrom(this.interactionService.getQuestion({ id })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+    return firstValueFrom(this.interactionService.getQuestion({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
   }
 
   // --- Citizen Feedback (Góp ý) ---
@@ -112,8 +134,11 @@ export class InteractionsController {
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listFeedbacks(@Query() query: any) {
     const response: any = await firstValueFrom(
-          this.interactionService.listFeedbacks(query),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.interactionService.listFeedbacks(query),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
     return {
       success: true,
       data: response.data || [],
@@ -132,7 +157,10 @@ export class InteractionsController {
     @Body('status') status: string,
   ) {
     return firstValueFrom(
-          this.interactionService.updateFeedbackStatus({ id, status }),
-        ).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+      this.interactionService.updateFeedbackStatus({ id, status }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 }
