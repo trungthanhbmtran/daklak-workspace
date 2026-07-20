@@ -1,9 +1,10 @@
 syntax = "proto3";
 
 package document;
+import "common/common.proto";
 
 service DossierService {
-  rpc GetDossiers (EmptyRequest) returns (DossierListResponse) {}
+  rpc GetDossiers (common.EmptyRequest) returns (DossierListResponse) {}
   rpc GetDossier (DossierIdRequest) returns (DossierInfoResponse) {}
   rpc GetComponents (DossierIdRequest) returns (ComponentListResponse) {}
   rpc UpdateComponent (UpdateComponentRequest) returns (ComponentResponse) {}
@@ -28,7 +29,6 @@ message AddComponentRequest {
   string fileUrl = 3;
 }
 
-message EmptyRequest {}
 
 message DossierIdRequest {
   string id = 1;

@@ -3,6 +3,7 @@ syntax = "proto3";
 package workflow;
 
 import "google/protobuf/struct.proto";
+import "common/common.proto";
 
 service WorkflowService {
   rpc CreateWorkflow (CreateWorkflowRequest) returns (WorkflowResponse);
@@ -12,7 +13,7 @@ service WorkflowService {
   rpc DeleteWorkflow (DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
 
   rpc FindWorkflowByCode (FindWorkflowByCodeRequest) returns (WorkflowResponse);
-  rpc ListModules (EmptyRequest) returns (ListModulesResponse);
+  rpc ListModules (common.EmptyRequest) returns (ListModulesResponse);
   rpc PublishWorkflow (PublishWorkflowRequest) returns (WorkflowResponse);
   rpc ApplyModule (ApplyModuleRequest) returns (WorkflowResponse);
 
@@ -34,7 +35,6 @@ service WorkflowService {
   rpc DeleteIntegration (DeleteIntegrationRequest) returns (DeleteIntegrationResponse);
 }
 
-message EmptyRequest {}
 
 message ListModulesResponse {
   repeated WorkflowModule data = 1;

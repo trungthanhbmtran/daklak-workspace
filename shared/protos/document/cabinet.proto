@@ -1,11 +1,12 @@
 syntax = "proto3";
 
 package document;
+import "common/common.proto";
 
 service CabinetService {
   rpc ListFiles (ListFilesRequest) returns (CabinetListResponse) {}
   rpc AddFile (AddFileRequest) returns (CabinetFileResponse) {}
-  rpc DeleteFile (DeleteFileRequest) returns (EmptyResponse) {}
+  rpc DeleteFile (DeleteFileRequest) returns (common.EmptyResponse) {}
 }
 
 message ListFilesRequest {
@@ -43,4 +44,3 @@ message CabinetListResponse {
   repeated CabinetFileResponse data = 1;
 }
 
-message EmptyResponse {}

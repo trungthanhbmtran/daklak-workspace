@@ -1,17 +1,18 @@
 syntax = "proto3";
 
 package pbac;
+import "common/common.proto";
 
 // PBAC: Chính sách phân quyền (Policy-Based) – Vai trò + Ma trận quyền
 service PbacService {
   // --- Vai trò (Roles) ---
   rpc CreateRole (CreateRoleRequest) returns (RoleResponse);
-  rpc FindAllRoles (Empty) returns (FindAllRolesResponse);
+  rpc FindAllRoles (common.Empty) returns (FindAllRolesResponse);
   rpc FindOneRole (FindOneRoleRequest) returns (RoleDetailResponse);
   rpc UpdateRole (UpdateRoleRequest) returns (RoleResponse);
   rpc DeleteRole (DeleteRoleRequest) returns (RoleResponse);
   // --- Tài nguyên & Quyền CRUD ---
-  rpc GetResources (Empty) returns (GetResourcesResponse);
+  rpc GetResources (common.Empty) returns (GetResourcesResponse);
   rpc CreateResource (CreateResourceRequest) returns (ResourceResponse);
   rpc UpdateResource (UpdateResourceRequest) returns (ResourceResponse);
   rpc DeleteResource (DeleteResourceRequest) returns (ResourceResponse);
@@ -45,7 +46,6 @@ message GetResourcesResponse {
   repeated ResourceResponse resources = 1;
 }
 
-message Empty {}
 
 message PolicyItem {
   int32 id = 1;

@@ -67,3 +67,5 @@ message DeleteResponse {
 }
 
 message Empty {}
+message EmptyRequest {}
+message EmptyResponse {}
