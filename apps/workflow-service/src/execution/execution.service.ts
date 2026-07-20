@@ -26,7 +26,9 @@ export class ExecutionService {
     });
 
     if (!def || def.versions.length === 0) {
-      throw new NotFoundException(`Active process definition ${code} not found`);
+      throw new NotFoundException(
+        `Active process definition ${code} not found`,
+      );
     }
 
     const version = def.versions[0];
@@ -43,10 +45,12 @@ export class ExecutionService {
       },
     });
 
-    this.eventEmitter.emit('workflow.instance.started', { instanceId: instance.id });
+    this.eventEmitter.emit('workflow.instance.started', {
+      instanceId: instance.id,
+    });
 
     // Start execution loop async
-    this.advanceProcess(instance.id, 'start').catch(err => {
+    this.advanceProcess(instance.id, 'start').catch((err) => {
       this.logger.error(`Failed to advance process ${instance.id}`, err);
     });
 
@@ -94,9 +98,10 @@ export class ExecutionService {
       };
 
       const result = await this.integrationAction.execute(ctx, node.payload);
-      
+
       if (result.success) {
-        const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
+        const nextEdges =
+          graph.edges?.filter((e: any) => e.source === node.id) || [];
         if (nextEdges.length > 0) {
           await this.advanceProcess(instanceId, nextEdges[0].target);
         }
@@ -111,9 +116,12 @@ export class ExecutionService {
         where: { id: instanceId },
         data: { status: 'COMPLETED', endedAt: new Date() },
       });
-      this.eventEmitter.emit('workflow.instance.completed', { instanceId: instance.id });
+      this.eventEmitter.emit('workflow.instance.completed', {
+        instanceId: instance.id,
+      });
     } else if (node.type === 'start') {
-      const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
+      const nextEdges =
+        graph.edges?.filter((e: any) => e.source === node.id) || [];
       if (nextEdges.length > 0) {
         await this.advanceProcess(instanceId, nextEdges[0].target);
       }
@@ -135,9 +143,9 @@ export class ExecutionService {
       orderBy: { startedAt: 'desc' },
       include: {
         version: {
-          include: { definition: true }
-        }
-      }
+          include: { definition: true },
+        },
+      },
     });
   }
 
@@ -147,10 +155,10 @@ export class ExecutionService {
       include: {
         instance: {
           include: {
-            version: { include: { definition: true } }
-          }
-        }
-      }
+            version: { include: { definition: true } },
+          },
+        },
+      },
     });
   }
 
@@ -170,14 +178,20 @@ export class ExecutionService {
     });
 
     const graph: any = task.instance.version.graph;
-    
-    const node = graph.nodes?.find((n: any) => (n.code || n.id) === task.nodeCode);
-    const nextEdges = graph.edges?.filter((e: any) => e.source === node?.id && (!e.action || e.action === payload.action)) || [];
+
+    const node = graph.nodes?.find(
+      (n: any) => (n.code || n.id) === task.nodeCode,
+    );
+    const nextEdges =
+      graph.edges?.filter(
+        (e: any) =>
+          e.source === node?.id && (!e.action || e.action === payload.action),
+      ) || [];
 
     if (nextEdges.length > 0) {
       await this.advanceProcess(task.instanceId, nextEdges[0].target);
     }
-    
+
     return { success: true };
   }
 }

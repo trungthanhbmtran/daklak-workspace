@@ -22,7 +22,7 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(data: any) {
+  async updateWorkflow(_data: unknown) {
     // In our new schema, Update might mean creating a new version or updating definition
     // For simplicity, we just create a new process if code doesn't exist, or fail
     // We should implement an update method in DefinitionService if needed.
@@ -30,23 +30,27 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
-  async listWorkflows(data: any) {
+  async listWorkflows(_data: unknown) {
     const processes = await this.definitionService.getProcesses();
     return {
-      items: processes.map(p => this.mapToWorkflowResponse(p, p.versions[0])),
+      items: processes.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
       total: processes.length,
     };
   }
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
-  async findOneWorkflow(data: { id: string }) {
+  async findOneWorkflow(_data: { id: string }) {
     // Note: getDefinition uses 'code', while proto uses 'id'.
     // Need to adjust logic in Gateway or here to search by ID or Code.
-    return { success: true }; 
+    return { success: true };
   }
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
-  async startWorkflow(data: { workflowId: string, initialContext: any, initiatorId: string }) {
+  async startWorkflow(data: {
+    workflowId: string;
+    initialContext: any;
+    initiatorId: string;
+  }) {
     // workflowId in new schema is definition code
     const instance = await this.executionService.startProcess(data.workflowId, {
       variables: data.initialContext,
@@ -62,7 +66,7 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'ListInstances')
-  async listInstances(data: any) {
+  async listInstances(_data: unknown) {
     const instances = await this.executionService.getInstances();
     return {
       items: instances.map((i: any) => ({

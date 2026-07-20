@@ -22,18 +22,26 @@ export class DynamicSdkService {
     }
 
     try {
-      this.logger.log(`Executing dynamic integration for ${connectionCode} to ${connection.baseUrl}`);
-      
+      this.logger.log(
+        `Executing dynamic integration for ${connectionCode} to ${connection.baseUrl}`,
+      );
+
       const response = await axios({
         method: 'POST', // Assuming POST for now, could be dynamic
         url: connection.baseUrl,
-        headers: (connection.headers as Record<string, string>) || { 'Content-Type': 'application/json' },
+        headers: (connection.headers as Record<string, string>) || {
+          'Content-Type': 'application/json',
+        },
         data: payload,
       });
 
       return response.data;
-    } catch (error: any) {
-      this.logger.error(`Failed to execute integration ${connectionCode}: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Failed to execute integration ${connectionCode}: ${errorMessage}`,
+      );
       throw error;
     }
   }

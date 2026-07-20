@@ -11,7 +11,10 @@ import { PrismaMariaDb } from '@prisma/adapter-mariadb';
  * DATABASE_URL format: mysql://user:password@host:port/dbname
  */
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {

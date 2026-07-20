@@ -5,4 +5,4 @@ import { DynamicSdkService } from './sdk.service';
   providers: [DynamicSdkService],
   exports: [DynamicSdkService],
 })
-export class SdkModule { }
+export class SdkModule {}

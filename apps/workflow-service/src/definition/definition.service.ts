@@ -43,8 +43,8 @@ export class DefinitionService {
         versions: {
           orderBy: { version: 'desc' },
           take: 1,
-        }
-      }
+        },
+      },
     });
   }
 

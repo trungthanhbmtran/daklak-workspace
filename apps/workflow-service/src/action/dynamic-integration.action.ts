@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { WorkflowServiceAction, WorkflowContext, WorkflowActionResult } from './action.interface';
+import {
+  WorkflowServiceAction,
+  WorkflowContext,
+  WorkflowActionResult,
+} from './action.interface';
 import { DynamicSdkService } from '../sdk/sdk.service';
 
 @Injectable()
@@ -8,7 +12,10 @@ export class DynamicIntegrationAction implements WorkflowServiceAction {
 
   constructor(private readonly sdkService: DynamicSdkService) {}
 
-  async execute(ctx: WorkflowContext, payload?: any): Promise<WorkflowActionResult> {
+  async execute(
+    ctx: WorkflowContext,
+    payload?: any,
+  ): Promise<WorkflowActionResult> {
     if (!payload || !payload.connectionCode) {
       return {
         success: false,
@@ -17,10 +24,13 @@ export class DynamicIntegrationAction implements WorkflowServiceAction {
     }
 
     try {
-      const result = await this.sdkService.executeIntegration(payload.connectionCode, {
-        ...payload.data,
-        ...ctx.variables, // merge context variables
-      });
+      const result = await this.sdkService.executeIntegration(
+        payload.connectionCode,
+        {
+          ...payload.data,
+          ...ctx.variables, // merge context variables
+        },
+      );
 
       return {
         success: true,

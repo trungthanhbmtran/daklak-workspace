@@ -51,4 +51,7 @@ async function bootstrap() {
     `📡 gRPC Service listening on: ${process.env.GRPC_URL ?? '0.0.0.0:50060'}`,
   );
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Error starting WorkflowService', err);
+  process.exit(1);
+});

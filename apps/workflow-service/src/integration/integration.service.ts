@@ -19,7 +19,9 @@ export class IntegrationService {
   }
 
   async findOne(id: string) {
-    const conn = await this.prisma.integrationConnection.findUnique({ where: { id } });
+    const conn = await this.prisma.integrationConnection.findUnique({
+      where: { id },
+    });
     if (!conn) throw new NotFoundException('Integration Connection not found');
     return conn;
   }

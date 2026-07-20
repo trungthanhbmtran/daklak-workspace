@@ -72,7 +72,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const systemSources = useMemo(() => {
     const apiSources = (integrations || []).map(int => ({
       id: `api-${int.id}`,
-      name: `API: ${int.systemName}`,
+      name: `API: ${int.name}`,
       type: 'api',
       icon: Server
     }));
