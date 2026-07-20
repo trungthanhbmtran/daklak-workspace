@@ -1,19 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../infra/prisma.service';
 
-export interface CreateIntegrationDto {
-  name: string;
-  code: string;
-  description?: string;
-  protocol?: string;
-  baseUrl: string;
-  authType?: string;
-  authConfig?: any;
-  headers?: any;
-  endpoints?: any;
-  metadata?: any;
-  isActive?: boolean;
-}
+import { CreateIntegrationDto } from './dto/create-integration.dto';
+import { UpdateIntegrationDto } from './dto/update-integration.dto';
 
 @Injectable()
 export class IntegrationService {
@@ -35,7 +24,7 @@ export class IntegrationService {
     return conn;
   }
 
-  async update(id: string, data: Partial<CreateIntegrationDto>) {
+  async update(id: string, data: UpdateIntegrationDto) {
     return this.prisma.integrationConnection.update({
       where: { id },
       data,

@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
-import { IntegrationService, CreateIntegrationDto } from './integration.service';
+import { IntegrationService } from './integration.service';
+import { CreateIntegrationDto } from './dto/create-integration.dto';
+import { UpdateIntegrationDto } from './dto/update-integration.dto';
 
 @Controller('workflow/integrations')
 export class IntegrationController {
@@ -24,7 +26,7 @@ export class IntegrationController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateDto: Partial<CreateIntegrationDto>) {
+  async update(@Param('id') id: string, @Body() updateDto: UpdateIntegrationDto) {
     const data = await this.integrationService.update(id, updateDto);
     return { success: true, data, message: 'Updated successfully' };
   }
