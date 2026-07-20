@@ -13,7 +13,7 @@ import { ResponsiveTableProps } from './types';
 
 export default function DesktopTable<T>({ columns, data, keyExtractor, caption, footer }: ResponsiveTableProps<T>) {
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       <Table>
         {caption && <TableCaption>{caption}</TableCaption>}
         <TableHeader>
@@ -40,15 +40,6 @@ export default function DesktopTable<T>({ columns, data, keyExtractor, caption, 
             </TableRow>
           ))}
         </TableBody>
-        {footer && (
-          <TableFooter>
-            <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={columns.length} className="p-0">
-                {footer}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        )}
       </Table>
     </div>
   );

@@ -30,8 +30,8 @@ export function EmployeeListClient() {
   } = useEmployeeListClient();
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="flex flex-col h-full gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div>
           <Heading level="h2" className="tracking-tight">Danh sách nhân sự</Heading>
           <Text variant="muted" className="mt-1">
@@ -47,8 +47,8 @@ export function EmployeeListClient() {
         )}
       </div>
 
-      <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col min-w-0">
-        <div className="p-4 md:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="p-4 md:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -59,12 +59,12 @@ export function EmployeeListClient() {
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
-          <Button variant="secondary" onClick={handleSearch} className="rounded-xl">
+          <Button variant="secondary" onClick={handleSearch} className="rounded-xl shrink-0">
             Tìm kiếm
           </Button>
         </div>
 
-        <div className="w-full">
+        <div className="w-full flex flex-col flex-1 min-h-0">
           <ResponsiveTable
             loading={isLoading}
             data={employees || []}

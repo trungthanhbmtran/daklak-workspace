@@ -34,30 +34,45 @@ export function ResponsiveTable<T>({
     setMounted(true);
   }, []);
 
-  if (!mounted || loading) {
-    // Trạng thái chờ khởi tạo hoặc đang tải API
-    return (
-      <div className="flex flex-col gap-2 w-full p-4 border rounded-md bg-card">
-         {[1, 2, 3, 4, 5].map(i => (
-           <div key={i} className="animate-pulse h-12 bg-muted/40 rounded-md w-full"></div>
-         ))}
+  const renderContent = () => {
+    if (!mounted || loading) {
+      // Trạng thái chờ khởi tạo hoặc đang tải API
+      return (
+        <div className="flex flex-col gap-2 w-full p-4 border rounded-md bg-card">
+           {[1, 2, 3, 4, 5].map(i => (
+             <div key={i} className="animate-pulse h-12 bg-muted/40 rounded-md w-full"></div>
+           ))}
+        </div>
+      );
+    }
+
+    if (!data || data.length === 0) {
+      return (
+        <div className="flex justify-center items-center p-8 border rounded-md text-muted-foreground bg-muted/20">
+          <Text variant="small">{emptyMessage}</Text>
+        </div>
+      );
+    }
+
+    if (isMobile) {
+      return <MobileTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} />;
+    }
+
+    return <DesktopTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} />;
+  };
+
+  return (
+    <div className="flex flex-col flex-1 min-h-0 w-full h-full">
+      <div className="flex-1 overflow-y-auto custom-scrollbar w-full min-h-0">
+        {renderContent()}
       </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex justify-center items-center p-8 border rounded-md text-muted-foreground bg-muted/20">
-        <Text variant="small">{emptyMessage}</Text>
-      </div>
-    );
-  }
-
-  if (isMobile) {
-    return <MobileTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} footer={footer} />;
-  }
-
-  return <DesktopTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} footer={footer} />;
+      {footer && (
+        <div className="shrink-0 w-full mt-auto">
+          {footer}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export * from './types';
