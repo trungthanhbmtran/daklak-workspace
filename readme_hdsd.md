@@ -6,6 +6,13 @@ Chào mừng bạn đến với tài liệu Hướng dẫn sử dụng và giớ
 
 ## 🕒 Lịch sử Cập nhật (Changelog / Version History)
 
+- **Version**: `v1.2.0`
+- **Thời gian cập nhật**: `20/07/2026 22:58`
+- **Nội dung cập nhật**: 
+  - Đã fix lỗi "Client-side exception" trên trang Quản lý API Integration bằng cách sửa API Client để dự phòng (fallback) các chuẩn trả về cũ của gRPC, giúp UI không bị crash khi call API.
+  - Fix lỗi bảng danh sách Routes (API Gateway) không thể cuộn khi dữ liệu quá dài (Bằng cách điều chỉnh class overflow trong UI).
+  - Xác nhận API Gateway đã được refactor chuẩn theo `backend_microservice_standard` với payload `{ success, data, meta }`.
+
 - **Version**: `v1.1.0`
 - **Thời gian cập nhật**: `20/07/2026 22:30`
 - **Nội dung cập nhật**: 

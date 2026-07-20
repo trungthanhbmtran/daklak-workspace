@@ -79,9 +79,9 @@ export class PortalConfigController {
    * Batch upsert nhiều config trong 1 gRPC call — client không cần gọi N lần.
    */
   @GrpcMethod('PortalConfigService', 'BatchUpsert')
-  async batchUpsert(data: { items: { code: string; name: string; description?: string }[] }) {
+  async batchUpsert(payload: { data: { code: string; name: string; description?: string }[] }) {
     try {
-      const result = await this.configService.batchUpsert(data.items || []);
+      const result = await this.configService.batchUpsert(payload.data || []);
       return { data: result, success: true, message: `Đã lưu ${result.count} cấu hình` };
     } catch (e: any) {
       throw new RpcException({

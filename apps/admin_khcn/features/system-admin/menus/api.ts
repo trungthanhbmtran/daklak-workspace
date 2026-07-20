@@ -29,10 +29,10 @@ export interface MenuNode {
 
 export const menuApi = {
   getMenus: (q?: string) => apiClient.get<MenuItem[]>("/menus", { params: { q: q || undefined } }),
-  getMenuTree: (q?: string) => apiClient.get<{ items: MenuItem[] }>("/menus/tree", { params: { q: q || undefined } }).then((r: any) => r.data?.items ?? []),
+  getMenuTree: (q?: string) => apiClient.get<{ data: MenuItem[] }>("/menus/tree", { params: { q: q || undefined } }).then((r: any) => r.data ?? []),
   /** Menu sidebar theo user đăng nhập (cây, chỉ mục user có quyền) */
   getMyMenus: (app = "ADMIN_PORTAL") =>
-    apiClient.get<{ items: MenuNode[] }>("/menus/me", { params: { app } }),
+    apiClient.get<{ data: MenuNode[] }>("/menus/me", { params: { app } }),
 
   /** Hub Apps: Danh sách phân hệ (card Hub) theo PBAC của user */
   getHubApps: (app = "ADMIN_PORTAL") =>

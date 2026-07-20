@@ -33,8 +33,8 @@ export class GrpcWorkflowController {
   async listWorkflows(_data: unknown) {
     const processes = await this.definitionService.getProcesses();
     return {
-      items: processes.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
-      total: processes.length,
+      data: processes.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
+      meta: { total: processes.length },
     };
   }
 
@@ -69,7 +69,7 @@ export class GrpcWorkflowController {
   async listInstances(_data: unknown) {
     const instances = await this.executionService.getInstances();
     return {
-      items: instances.map((i: any) => ({
+      data: instances.map((i: any) => ({
         id: i.id,
         workflowId: i.definitionId,
         status: i.status,
@@ -77,7 +77,7 @@ export class GrpcWorkflowController {
         context: i.variables,
         createdAt: i.startedAt?.toISOString(),
       })),
-      total: instances.length,
+      meta: { total: instances.length },
     };
   }
 

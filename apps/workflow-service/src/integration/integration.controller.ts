@@ -39,7 +39,7 @@ export class IntegrationController {
     const searchTerm = payload?.search || search;
     const data = await this.integrationService.findAll(searchTerm);
     return {
-      items: data.map((d) => ({
+      data: data.map((d) => ({
         ...d,
         createdAt: d.createdAt?.toISOString(),
         updatedAt: d.updatedAt?.toISOString(),

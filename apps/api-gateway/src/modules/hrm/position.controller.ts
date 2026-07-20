@@ -46,7 +46,7 @@ export class PositionController implements OnModuleInit {
     const unitId =
       departmentId != null ? parseInt(String(departmentId), 10) : undefined;
     if (unitId == null || Number.isNaN(unitId)) {
-      return { data: [], items: [] };
+      return [];
     }
     const res = await firstValueFrom(
       this.orgService.GetStaffingReport({ unitId }),
@@ -54,8 +54,8 @@ export class PositionController implements OnModuleInit {
       console.error('RPC Call Failed', e.message);
       return null;
     });
-    const items = (res as any).items ?? [];
-    return { data: items, items };
+    const items = (res as any).data ?? [];
+    return items;
   }
 
   @Get(':id')

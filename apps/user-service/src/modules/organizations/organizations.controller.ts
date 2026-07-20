@@ -224,7 +224,7 @@ export class OrganizationsController {
     const res = await this.orgService.getStaffingReport(data.unitId);
     const list = res?.data ?? [];
     return {
-      items: list.map((s: any) => {
+      data: list.map((s: any) => {
         const j = s.jobTitle;
         return {
           id: s.id,
@@ -337,7 +337,7 @@ export class OrganizationsController {
     const res = await this.orgService.listJobTitles(data?.unitId);
     const list = res?.data ?? [];
     return {
-      items: list.map((j: any) => this.mapJobTitleItem(j)),
+      data: list.map((j: any) => this.mapJobTitleItem(j)),
     };
   }
 
@@ -354,7 +354,7 @@ export class OrganizationsController {
     const res = await this.orgService.listUnitTypes();
     const list = res?.data ?? [];
     return {
-      items: list.map((ut: any) => ({
+      data: list.map((ut: any) => ({
         id: ut.id,
         code: ut.code,
         name: ut.name,

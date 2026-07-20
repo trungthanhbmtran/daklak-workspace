@@ -84,14 +84,14 @@ function normalizeStaffingReportItem(r: any): StaffingReportItem {
 }
 
 export const organizationApi = {
-  getOrganizations: (q?: string): Promise<{ items: OrganizationUnitNode[] }> =>
+  getOrganizations: (q?: string): Promise<{ data: OrganizationUnitNode[] }> =>
     apiClient.get("/organizations", { params: { q: q || undefined } }).then((r: any) => ({
-      items: (r.data ?? []).map(normalizeUnitNode),
+      data: (r.data ?? []).map(normalizeUnitNode),
     })),
 
-  getTree: (q?: string): Promise<{ items: OrganizationUnitNode[] }> =>
+  getTree: (q?: string): Promise<{ data: OrganizationUnitNode[] }> =>
     apiClient.get("/organizations/tree", { params: { q: q || undefined } }).then((r: any) => ({
-      items: (r.data ?? []).map(normalizeUnitNode),
+      data: (r.data ?? []).map(normalizeUnitNode),
     })),
 
   getOne: (id: number) =>
@@ -135,12 +135,12 @@ export const organizationApi = {
   updateScope: (id: number, payload: { domainIds?: number[] }) =>
     apiClient.put(`/organizations/${id}/scope`, payload).then(r => unwrapData<any>(r)),
 
-  getJobTitles: (unitId?: number): Promise<{ items: JobTitleItem[] }> =>
+  getJobTitles: (unitId?: number): Promise<{ data: JobTitleItem[] }> =>
     apiClient
       .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
       .then((r: any) => {
         const data = unwrapData<any[]>(r);
-        return { items: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem) };
+        return { data: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem) };
       }),
 
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>

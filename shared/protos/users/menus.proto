@@ -32,14 +32,14 @@ message MenuNode {
 }
 
 message GetMyMenusResponse {
-  repeated MenuNode items = 1;
+  repeated MenuNode data = 1;
 }
 
 message GetAllRequest {
   string app = 1;  // ADMIN_PORTAL | CITIZEN_PORTAL, default ADMIN_PORTAL
 }
 message GetAllResponse {
-  repeated MenuItemFlat items = 1;
+  repeated MenuItemFlat data = 1;
 }
 
 message GetOneRequest {

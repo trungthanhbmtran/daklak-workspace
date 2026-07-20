@@ -326,8 +326,8 @@ export class WorkflowController implements OnModuleInit {
       return null;
     })) as any;
 
-    // Convert to REST response format { success: true, data: [...] }
-    return { success: true, data: result?.items || [] };
+    // Return result directly, the interceptor will map { items } to { data }
+    return result;
   }
 
   @Post('integrations')

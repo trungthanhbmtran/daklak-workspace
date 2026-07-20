@@ -38,7 +38,7 @@ export const portalConfigApi = {
    * Giảm save latency từ ~3.4s → ~200ms (17 items × 200ms → parallel 1 request).
    */
   batchUpsert: (items: { code: string; name: string; description?: string }[]): Promise<ApiResponse<any>> =>
-    apiClient.post("/portal-configs/batch-upsert", { items }) as any,
+    apiClient.post("/portal-configs/batch-upsert", { data: items }) as any,
 };
 
 // ─── Languages ─────────────────────────────────────────────────────────────

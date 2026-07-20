@@ -142,7 +142,7 @@ export class MenusController implements OnModuleInit {
         return null;
       },
     )) as any;
-    const items = res?.items ?? [];
+    const items = res?.data ?? [];
     return items.map(toFrontendItem);
   }
 
@@ -156,10 +156,10 @@ export class MenusController implements OnModuleInit {
         return null;
       },
     )) as any;
-    const items = res?.items ?? [];
+    const items = res?.data ?? [];
     const frontendItems = items.map(toFrontendItem);
     const tree = buildMenuTree(frontendItems);
-    return { items: tree };
+    return tree;
   }
 
   @Get('me')
@@ -191,7 +191,7 @@ export class MenusController implements OnModuleInit {
     if (response) {
       if (!response.meta) response.meta = {};
       response.meta.currentUser = sanitizeUserForClient(req.user);
-      const branches = getRealBranches(response.items ?? []);
+      const branches = getRealBranches(response.data ?? []);
       response.hubApps = this.buildHubApps(branches);
       response.sidebarMenus = this.buildSidebarMenus(branches);
     }
@@ -220,7 +220,7 @@ export class MenusController implements OnModuleInit {
       console.error('RPC Call Failed', e.message);
       return null;
     });
-    const branches = getRealBranches(response?.items ?? []);
+    const branches = getRealBranches(response?.data ?? []);
     return { apps: this.buildHubApps(branches) };
   }
 
@@ -256,7 +256,7 @@ export class MenusController implements OnModuleInit {
       console.error('RPC Call Failed', e.message);
       return null;
     });
-    const branches = getRealBranches(response?.items ?? []);
+    const branches = getRealBranches(response?.data ?? []);
     const sidebarMenus = this.buildSidebarMenus(branches);
     const sidebar =
       sidebarMenus.find((s: any) => s.serviceCode === code) ?? null;

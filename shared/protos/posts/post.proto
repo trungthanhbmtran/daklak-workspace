@@ -86,7 +86,7 @@ message PostHistory {
 }
 
 message HistoryResponse {
-  repeated PostHistory items = 1;
+  repeated PostHistory data = 1;
 }
 
 message PostResponse {

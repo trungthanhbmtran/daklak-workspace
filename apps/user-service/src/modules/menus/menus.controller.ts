@@ -36,14 +36,14 @@ export class MenusController {
       typeof userId === 'number' ? userId : Number(userId),
     );
     return {
-      items: tree.map((node: any) => this.mapMenuNode(node)),
+      data: tree.map((node: any) => this.mapMenuNode(node)),
     };
   }
 
   @GrpcMethod('MenuService', 'GetAll')
   async getAll() {
     const items = await this.menusService.getAll();
-    return { items };
+    return { data: items };
   }
 
   @GrpcMethod('MenuService', 'GetOne')

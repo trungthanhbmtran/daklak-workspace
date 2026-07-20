@@ -37,7 +37,7 @@ service WorkflowService {
 message EmptyRequest {}
 
 message ListModulesResponse {
-  repeated WorkflowModule items = 1;
+  repeated WorkflowModule data = 1;
 }
 
 message WorkflowModule {
@@ -92,8 +92,8 @@ message ListWorkflowsRequest {
 }
 
 message ListWorkflowsResponse {
-  repeated WorkflowResponse items = 1;
-  int32 total = 2;
+  repeated WorkflowResponse data = 1;
+  google.protobuf.Struct meta = 2;
 }
 
 message DeleteWorkflowRequest {
@@ -239,8 +239,8 @@ message ListInstancesRequest {
 }
 
 message ListInstancesResponse {
-  repeated WorkflowInstanceResponse items = 1;
-  int32 total = 2;
+  repeated WorkflowInstanceResponse data = 1;
+  google.protobuf.Struct meta = 2;
 }
 
 message WorkflowTask {
@@ -343,5 +343,5 @@ message FindAllIntegrationsRequest {
 }
 
 message FindAllIntegrationsResponse {
-  repeated IntegrationResponse items = 1;
+  repeated IntegrationResponse data = 1;
 }

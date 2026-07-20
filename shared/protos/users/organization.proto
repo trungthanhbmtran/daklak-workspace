@@ -172,7 +172,7 @@ message SetStaffingSlotRequest {
 }
 
 message StaffingReportResponse {
-  repeated StaffingReportItem items = 1;
+  repeated StaffingReportItem data = 1;
 }
 
 message JobTitleItem {
@@ -201,11 +201,11 @@ message UnitTypeItem {
 }
 
 message ListUnitTypesResponse {
-  repeated UnitTypeItem items = 1;
+  repeated UnitTypeItem data = 1;
 }
 
 message ListJobTitlesResponse {
-  repeated JobTitleItem items = 1;
+  repeated JobTitleItem data = 1;
 }
 
 message GetDescendantsRequest {

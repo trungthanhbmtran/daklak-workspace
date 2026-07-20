@@ -98,11 +98,11 @@ export class PortalConfigController {
   async batchUpsert(
     @Body()
     dto: {
-      items: { code: string; name: string; description?: string }[];
+      data: { code: string; name: string; description?: string }[];
     },
   ) {
     const res: any = await firstValueFrom(
-      this.configService.batchUpsert({ items: dto.items }),
+      this.configService.batchUpsert({ data: dto.data }),
     ).catch((e) => {
       console.error('RPC Call Failed', e.message);
       return null;

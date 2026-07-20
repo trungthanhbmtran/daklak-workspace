@@ -200,8 +200,7 @@ export function RoutesTab() {
         </CardContent>
       </Card>
 
-      <div className="flex-1 min-h-0 relative bg-card border border-border shadow-sm rounded-md overflow-hidden">
-        <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 min-h-0 bg-card border border-border shadow-sm rounded-md overflow-y-auto custom-scrollbar">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-muted/50">
               <TableRow className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">
@@ -236,7 +235,6 @@ export function RoutesTab() {
               )}
             </TableBody>
           </Table>
-        </div>
       </div>
     </div>
   );

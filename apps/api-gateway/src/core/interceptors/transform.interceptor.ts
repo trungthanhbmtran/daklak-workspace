@@ -138,31 +138,7 @@ export class TransformInterceptor implements NestInterceptor {
       };
     }
 
-    // gRPC list: { items, total }
-    if ('items' in response && 'total' in response) {
-      const page = response.page ?? response.meta?.page ?? 1;
-      const pageSize =
-        response.pageSize ?? response.meta?.pageSize ?? response.limit ?? 20;
-      const total = Number(response.total) || 0;
-      const meta = {
-        pagination: {
-          total,
-          page: Number(page),
-          pageSize: Number(pageSize),
-          totalPages: pageSize > 0 ? Math.ceil(total / Number(pageSize)) : 1,
-        },
-        ...(response.meta && typeof response.meta === 'object'
-          ? response.meta
-          : {}),
-      };
-      return {
-        success: true,
-        // items luôn là array — nếu null/undefined trả []
-        data: Array.isArray(response.items) ? response.items : [],
-        meta,
-        timestamp,
-      };
-    }
+
 
     // { data, meta } từ microservice
     if ('data' in response) {
