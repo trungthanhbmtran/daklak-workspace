@@ -31,7 +31,7 @@ export class WorkflowController implements OnModuleInit {
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.workflowService = this.client.getService(
@@ -170,76 +170,7 @@ export class WorkflowController implements OnModuleInit {
     };
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Chi tiết quy trình' })
-  async findOne(@Param('id') id: string) {
-    const result = (await firstValueFrom(
-      this.workflowService.FindOneWorkflow({ id }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    })) as any;
-
-    return { data: result };
-  }
-
-  @Delete(':id')
-  @ApiOperation({ summary: 'Xóa quy trình' })
-  async delete(@Param('id') id: string) {
-    const result = (await firstValueFrom(
-      this.workflowService.DeleteWorkflow({ id }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    })) as any;
-    return { success: result?.success ?? true };
-  }
-
-  @Post(':id/publish')
-  @ApiOperation({ summary: 'Publish quy trình (kích hoạt để sẵn sàng dùng)' })
-  async publish(@Param('id') id: string) {
-    const result = (await firstValueFrom(
-      this.workflowService.PublishWorkflow({ id }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    })) as any;
-    return { data: result };
-  }
-
-  @Post(':id/apply-module')
-  @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
-  async applyModule(
-    @Param('id') id: string,
-    @Body() body: { moduleCode: string },
-  ) {
-    const result = (await firstValueFrom(
-      this.workflowService.ApplyModule({ id, moduleCode: body.moduleCode }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    })) as any;
-    return { data: result };
-  }
-
   // --- Execution Engine ---
-
-  @Post(':id/start')
-  @ApiOperation({ summary: 'Kích hoạt chạy một quy trình' })
-  async start(@Param('id') id: string, @Body() body: any, @Req() req: any) {
-    const initiatorId = req.user?.id?.toString() || 'system';
-    const result = (await firstValueFrom(
-      this.workflowService.StartWorkflow({
-        workflowId: id,
-        initialContext: body.initialContext || body,
-        initiatorId,
-      }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    })) as any;
-    return { data: result };
-  }
 
   @Post('instances/:instanceId/resume/:nodeId')
   @ApiOperation({ summary: 'Xử lý bước chờ (User Task) trong quy trình' })
@@ -326,7 +257,6 @@ export class WorkflowController implements OnModuleInit {
       return null;
     })) as any;
 
-    // Return result directly, the interceptor will map { items } to { data }
     return result;
   }
 
@@ -383,5 +313,76 @@ export class WorkflowController implements OnModuleInit {
       success: result?.success || true,
       message: 'Deleted successfully',
     };
+  }
+
+  // --- Routes with :id wildcard LAST (prevents shadowing specific routes above) ---
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Chi tiết quy trình' })
+  async findOne(@Param('id') id: string) {
+    const result = (await firstValueFrom(
+      this.workflowService.FindOneWorkflow({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
+
+    return { data: result };
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Xóa quy trình' })
+  async delete(@Param('id') id: string) {
+    const result = (await firstValueFrom(
+      this.workflowService.DeleteWorkflow({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
+    return { success: result?.success ?? true };
+  }
+
+  @Post(':id/publish')
+  @ApiOperation({ summary: 'Publish quy trình (kích hoạt để sẵn sàng dùng)' })
+  async publish(@Param('id') id: string) {
+    const result = (await firstValueFrom(
+      this.workflowService.PublishWorkflow({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
+    return { data: result };
+  }
+
+  @Post(':id/apply-module')
+  @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
+  async applyModule(
+    @Param('id') id: string,
+    @Body() body: { moduleCode: string },
+  ) {
+    const result = (await firstValueFrom(
+      this.workflowService.ApplyModule({ id, moduleCode: body.moduleCode }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
+    return { data: result };
+  }
+
+  @Post(':id/start')
+  @ApiOperation({ summary: 'Kích hoạt chạy một quy trình' })
+  async start(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    const initiatorId = req.user?.id?.toString() || 'system';
+    const result = (await firstValueFrom(
+      this.workflowService.StartWorkflow({
+        workflowId: id,
+        initialContext: body.initialContext || body,
+        initiatorId,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    })) as any;
+    return { data: result };
   }
 }
