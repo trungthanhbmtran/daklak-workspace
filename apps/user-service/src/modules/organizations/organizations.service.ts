@@ -239,7 +239,7 @@ export class OrganizationsService {
   async getFullTree(q?: string) {
     const cacheKey = 'FULL_TREE';
     const cached = this.treeCache.get(cacheKey);
-    let fullTree = [];
+    let fullTree: any[] = [];
 
     if (cached && cached.expiresAt > Date.now()) {
       fullTree = cached.data.data;
