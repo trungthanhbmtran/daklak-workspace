@@ -1,6 +1,7 @@
 import { Injectable, Inject, OnModuleInit, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { type ClientGrpc, ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, interval, from } from 'rxjs';
+import { switchMap, map, distinctUntilChanged, takeWhile, filter } from 'rxjs/operators';
 import { MICROSERVICES } from '../../core/constants/services';
 import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,6 +57,20 @@ export class TranslateService implements OnModuleInit {
     }
   }
 
+  streamJobStatus(jobId: string): Observable<{ data: any }> {
+    return interval(1500).pipe(
+      switchMap(() => from(this.redisService.get(`translate_job_${jobId}`))),
+      map((jobData) => {
+        if (!jobData) return null;
+        return JSON.parse(jobData);
+      }),
+      filter((job) => job !== null),
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+      takeWhile((job) => job.status !== 'COMPLETED' && job.status !== 'FAILED', true),
+      map((job) => ({ data: job }))
+    );
+  }
+
   async getJobStatus(jobId: string) {
     try {
       const jobData = await this.redisService.get(`translate_job_${jobId}`);
@@ -69,24 +84,7 @@ export class TranslateService implements OnModuleInit {
     }
   }
 
-  async translateSyncDirect(text: string, targetLang: string) {
-    if (!text || !targetLang) {
-      throw new BadRequestException('Missing text or targetLang');
-    }
-    try {
-      const result = await firstValueFrom(
-        this.translateGrpcService.translateSync({
-          text,
-          target_lang: targetLang,
-        }) as any,
-      ) as { translated_text: string };
 
-      return { success: true, data: result };
-    } catch (err: any) {
-      this.logger.error('Error in translateSyncDirect', err);
-      throw new InternalServerErrorException(err.message || 'Dịch thuật thất bại');
-    }
-  }
 
   async handleTranslateTask(data: {
     jobId: string;

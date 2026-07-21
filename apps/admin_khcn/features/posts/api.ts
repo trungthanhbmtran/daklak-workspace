@@ -145,7 +145,7 @@ export const postsApi = {
   }>> =>
     apiClient.get("/posts/stats", { params }) as any,
 
-  // ─── Translation (with built-in Polling) ──────────────────
+  // ─── Translation (with SSE) ─────────────────────────────
   translate: async (text: string, targetLang: string): Promise<any> => {
     // 1. Submit translation job
     const initRes = await apiClient.post("/translate", { text, targetLang }) as any;
@@ -161,29 +161,35 @@ export const postsApi = {
       throw new Error("Không thể khởi tạo tiến trình dịch thuật.");
     }
 
-    // 3. Start polling
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    const maxRetries = 30;
-    let retries = 0;
+    // 3. Start SSE
+    return new Promise((resolve, reject) => {
+      const { fetchEventSource } = require('@microsoft/fetch-event-source');
+      // Thêm token Authorization nếu apiClient có cấu hình (ví dụ lấy từ localStorage)
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : '';
 
-    while (retries < maxRetries) {
-      await delay(2000);
-      try {
-        const statusRes = await apiClient.get(`/translate/jobs/${jobId}`) as any;
-        const jobStatus = statusRes.data;
+      const sseUrl = `${apiClient.defaults.baseURL || ''}/translate/jobs/${jobId}/stream`;
 
-        if (jobStatus.status === 'COMPLETED') {
-          return jobStatus.result || jobStatus.data;
-        } else if (jobStatus.status === 'FAILED') {
-          throw new Error(jobStatus.error || "Lỗi trong quá trình dịch thuật");
+      fetchEventSource(sseUrl, {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        onmessage(ev: any) {
+          try {
+            const jobStatus = JSON.parse(ev.data);
+            if (jobStatus.status === 'COMPLETED') {
+              resolve(jobStatus.result || jobStatus.data);
+            } else if (jobStatus.status === 'FAILED') {
+              reject(new Error(jobStatus.error || "Lỗi trong quá trình dịch thuật"));
+            }
+          } catch (e) {
+            console.warn("Parse SSE event error", e);
+          }
+        },
+        onerror(err: any) {
+          reject(err);
+          throw err; // Stop retrying
         }
-        retries++;
-      } catch (err) {
-        console.warn("Polling translate error", err);
-        retries++;
-      }
-    }
-
-    throw new Error("Quá thời gian chờ dịch thuật (Timeout).");
+      });
+    });
   },
 };

@@ -126,10 +126,12 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
     const translateTask = async () => {
       try {
         setIsTranslating(true);
-        const [translatedName, translatedDesc] = await Promise.all([
-          postsApi.translateTextSync(sourceName, langCode),
-          postsApi.translateTextSync(sourceDesc, langCode)
+        const [resName, resDesc] = await Promise.all([
+          postsApi.translate(sourceName, langCode),
+          postsApi.translate(sourceDesc, langCode)
         ]);
+        const translatedName = resName?.translated_text;
+        const translatedDesc = resDesc?.translated_text;
 
         setEditingMenu(prev => {
           if (!prev) return prev;
