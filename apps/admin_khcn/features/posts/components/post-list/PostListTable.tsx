@@ -15,7 +15,6 @@ import {
   X,
   EyeOff,
   Image as ImageIcon,
-  Loader2,
   MoreHorizontal
 } from "lucide-react";
 import { safeParseJSON, formatDate } from "@/lib/utils";
@@ -23,14 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageSizeSelector } from "@/components/ui/page-size-selector";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/shared/responsive-table";
+import { ColumnDef } from "@/components/shared/responsive-table/types";
 import {
   Pagination,
   PaginationContent,
@@ -148,7 +141,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
     placeholderData: keepPreviousData,
   });
 
-  const posts = (data?.items) as Post[];
+  const posts = (data?.items) as Post[] || [];
   const totalItems = Number((data?.meta as any)?.total || 0);
   const totalPages = Number((data?.meta as any)?.totalPages || 1);
 
@@ -208,302 +201,280 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
     return pages;
   };
 
+  const columns: ColumnDef<Post>[] = [
+    {
+      header: "Bài viết",
+      cell: (post) => (
+        <div className="flex items-center gap-4.5">
+          <div className="h-14 w-20 bg-muted/50 rounded-xl border border-border overflow-hidden flex items-center justify-center shrink-0 shadow-inner group-hover:scale-[1.03] transition-transform duration-300">
+            {post.thumbnail ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`/api/v1/admin/media/download/${post.thumbnail}`}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('/api/v1/media/download/')) {
+                    target.src = `/api/v1/media/download/${post.thumbnail}`;
+                  }
+                }}
+              />
+            ) : (
+              <ImageIcon className="h-5 w-5 text-muted-foreground" />
+            )}
+          </div>
+
+          <div className="space-y-1.5 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Text as="span"
+                onClick={() => onNavigateToEdit(post.id)}
+                className="font-bold text-foreground line-clamp-2 leading-snug hover:text-primary transition-colors cursor-pointer"
+              >
+                {post.title}
+              </Text>
+              {post.isFeatured && (
+                <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 shrink-0 flex items-center gap-0.5">
+                  <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500 shrink-0" /> Nổi bật
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold flex-wrap">
+              <Text as="span" className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border">
+                ID: {post.id?.substring(0, 8)}
+              </Text>
+
+              <Text as="span" className="flex items-center gap-1 font-sans text-slate-500 bg-muted dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
+                <Eye className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                {post.viewCount || 0} lượt xem
+              </Text>
+
+              {(() => {
+                const translationsObj = safeParseJSON(post.translations);
+                const langKeys = Object.keys(translationsObj);
+                if (langKeys.length === 0) return null;
+                return (
+                  <Text as="span" className="flex items-center gap-1 bg-blue-50/60 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-lg border border-blue-100/40 dark:border-blue-900/30 text-[9px] uppercase tracking-wide">
+                    <Globe className="h-3 w-3 shrink-0 text-blue-500" />
+                    {langKeys.join(", ")}
+                  </Text>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Chuyên mục",
+      cell: (post) => (
+        <Badge variant="secondary" className="font-bold text-[10px] bg-muted border border-border dark:border-slate-850 text-muted-foreground py-1 px-2.5 rounded-lg">
+          {post.category?.name || 'Chưa phân loại'}
+        </Badge>
+      ),
+    },
+    {
+      header: "Trạng thái & Phiên bản",
+      cell: (post) => {
+        const statusObj = getStatusStyle(post.status);
+        const StatusIcon = statusObj.icon;
+        return (
+          <div className="flex flex-col gap-1.5 w-fit">
+            <Text as="span" className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10.5px] font-bold ${statusObj.bg} ${statusObj.text}`}>
+              <Text as="span" className={`w-1.5 h-1.5 rounded-full ${statusObj.dot} shrink-0`} />
+              <StatusIcon className="h-3.5 w-3.5 shrink-0" />
+              {getStatusLabel(post.status)}
+            </Text>
+
+            <Text as="span" className="inline-flex items-center gap-1 text-[9px] font-mono text-muted-foreground font-extrabold uppercase px-2">
+              Phiên bản v{post.currentVersion || 1}
+            </Text>
+
+            {post.autoModerationStatus && (
+              <Text as="span" className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9.5px] font-bold ${post.autoModerationStatus === 'SAFE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/10' }`}>
+                <AlertCircle className="h-3 w-3 shrink-0" />
+                {post.autoModerationStatus === 'SAFE' ? 'AI An toàn' : 'AI Nghi ngờ'}
+              </Text>
+            )}
+          </div>
+        )
+      },
+    },
+    {
+      header: "Tác giả & Ngày đăng",
+      cell: (post) => (
+        <div className="space-y-1">
+          <Text className="font-extrabold text-foreground flex items-center gap-1">
+            <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            {post.authorId?.substring(0, 8) || 'Ẩn danh'}
+          </Text>
+          <Text className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            {formatDate(post.publishedAt || post.createdAt)}
+          </Text>
+        </div>
+      ),
+    },
+    {
+      header: "Thao tác",
+      className: "text-right",
+      cell: (post) => (
+        <div className="flex items-center justify-end gap-1.5">
+          {post.status === 'DRAFT' && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+              onClick={() => workflowMutation.mutate({ id: post.id, action: 'submit' })}
+            >
+              <Send className="h-3 w-3 mr-1 shrink-0" /> Gửi duyệt
+            </Button>
+          )}
+
+          {(post.status === 'SUBMITTED' || post.status === 'UNDER_REVIEW') && (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                onClick={() => workflowMutation.mutate({ id: post.id, action: 'approve' })}
+              >
+                <CheckCircle2 className="h-3 w-3 mr-1 shrink-0" /> Duyệt
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                onClick={() => {
+                  setRejectingPostId(post.id);
+                  setRejectionNote("");
+                }}
+              >
+                <X className="h-3 w-3 mr-1 shrink-0" /> Từ chối
+              </Button>
+            </div>
+          )}
+
+          {post.status === 'APPROVED' && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
+              onClick={() => workflowMutation.mutate({ id: post.id, action: 'publish' })}
+            >
+              <Globe className="h-3 w-3 mr-1 shrink-0" /> Xuất bản
+            </Button>
+          )}
+
+          {post.status === 'PUBLISHED' && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+              onClick={() => workflowMutation.mutate({ id: post.id, action: 'unpublish' })}
+            >
+              <EyeOff className="h-3 w-3 mr-1 shrink-0" /> Gỡ bài
+            </Button>
+          )}
+
+          <div className="w-px h-4 bg-border mx-1.5" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8.5 w-8.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+            onClick={() => onNavigateToEdit(post.id)}
+            title="Sửa bài viết"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8.5 w-8.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+            title="Xóa"
+            onClick={() => {
+              setDeletingPostId(post.id);
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       <Card className="border-border bg-card shadow-sm rounded-2xl overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="border-b border-border">
-              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest w-[45%]">Bài viết</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Chuyên mục</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Trạng thái & Phiên bản</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest">Tác giả & Ngày đăng</TableHead>
-              <TableHead className="px-6 py-4 font-black text-[10px] text-muted-foreground uppercase tracking-widest text-right">Thao tác</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-border/50">
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="px-6 py-24 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-                    <Text className="text-muted-foreground font-bold uppercase tracking-wider">Đang tải danh sách bài viết...</Text>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={5} className="px-6 py-24 text-center">
-                  <div className="flex flex-col items-center gap-3 text-rose-600 dark:text-rose-400">
-                    <AlertCircle className="h-10 w-10" />
-                    <Text className="font-black uppercase tracking-wider">Không thể tải dữ liệu</Text>
-                    <Text className="text-muted-foreground">{(error as Error)?.message || "Vui lòng thử lại sau"}</Text>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : posts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="px-6 py-24 text-center text-muted-foreground italic font-medium text-xs">
-                  Không tìm thấy bài viết nào thỏa mãn bộ lọc.
-                </TableCell>
-              </TableRow>
-            ) : (
-              posts.map((post: Post) => {
-                const statusObj = getStatusStyle(post.status);
-                const StatusIcon = statusObj.icon;
+        <ResponsiveTable
+          loading={isLoading}
+          data={posts}
+          columns={columns}
+          keyExtractor={(post) => post.id}
+          emptyMessage={isError ? ((error as Error)?.message || "Không thể tải dữ liệu") : "Không tìm thấy bài viết nào thỏa mãn bộ lọc."}
+          footer={
+            <div className="px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-muted/50">
+              <div className="text-xs font-bold text-muted-foreground">
+                Hiển thị từ{" "}
+                <Text as="span" className="text-foreground">
+                  {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
+                </Text>{" "}
+                đến{" "}
+                <Text as="span" className="text-foreground">
+                  {Math.min(page * pageSize, totalItems)}
+                </Text>{" "}
+                trong tổng số{" "}
+                <Text as="span" className="text-foreground">{totalItems}</Text>{" "}
+                bài viết
+              </div>
 
-                return (
-                  <TableRow key={post.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-950/20 transition-colors group">
-                    <TableCell className="px-6 py-4.5 align-middle">
-                      <div className="flex items-center gap-4.5">
-                        <div className="h-14 w-20 bg-muted/50 rounded-xl border border-border overflow-hidden flex items-center justify-center shrink-0 shadow-inner group-hover:scale-[1.03] transition-transform duration-300">
-                          {post.thumbnail ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={`/api/v1/admin/media/download/${post.thumbnail}`}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                if (!target.src.includes('/api/v1/media/download/')) {
-                                  target.src = `/api/v1/media/download/${post.thumbnail}`;
-                                }
-                              }}
-                            />
-                          ) : (
-                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </div>
+              <div className="flex flex-wrap items-center gap-4.5">
+                <PageSizeSelector value={pageSize} onValueChange={setPageSize} />
 
-                        <div className="space-y-1.5 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Text as="span"
-                              onClick={() => onNavigateToEdit(post.id)}
-                              className="font-bold text-foreground line-clamp-2 leading-snug hover:text-primary transition-colors cursor-pointer"
-                            >
-                              {post.title}
-                            </Text>
-                            {post.isFeatured && (
-                              <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 shrink-0 flex items-center gap-0.5">
-                                <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500 shrink-0" /> Nổi bật
-                              </Badge>
-                            )}
-                          </div>
+                <Pagination className="w-auto">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        className={`cursor-pointer ${page <= 1 ? "pointer-events-none opacity-50" : ""}`}
+                        onClick={() => setPage(Math.max(1, page - 1))}
+                      />
+                    </PaginationItem>
 
-                          <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground font-bold flex-wrap">
-                            <Text as="span" className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border border-border">
-                              ID: {post.id?.substring(0, 8)}
-                            </Text>
-
-                            <Text as="span" className="flex items-center gap-1 font-sans text-slate-500 bg-muted dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
-                              <Eye className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                              {post.viewCount || 0} lượt xem
-                            </Text>
-
-                            {(() => {
-                              const translationsObj = safeParseJSON(post.translations);
-                              const langKeys = Object.keys(translationsObj);
-                              if (langKeys.length === 0) return null;
-                              return (
-                                <Text as="span" className="flex items-center gap-1 bg-blue-50/60 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-lg border border-blue-100/40 dark:border-blue-900/30 text-[9px] uppercase tracking-wide">
-                                  <Globe className="h-3 w-3 shrink-0 text-blue-500" />
-                                  {langKeys.join(", ")}
-                                </Text>
-                              );
-                            })()}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4.5 align-middle">
-                      <Badge variant="secondary" className="font-bold text-[10px] bg-muted border border-border dark:border-slate-850 text-muted-foreground py-1 px-2.5 rounded-lg">
-                        {post.category?.name || 'Chưa phân loại'}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4.5 align-middle">
-                      <div className="flex flex-col gap-1.5 w-fit">
-                        <Text as="span" className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10.5px] font-bold ${statusObj.bg} ${statusObj.text}`}>
-                          <Text as="span" className={`w-1.5 h-1.5 rounded-full ${statusObj.dot} shrink-0`} />
-                          <StatusIcon className="h-3.5 w-3.5 shrink-0" />
-                          {getStatusLabel(post.status)}
-                        </Text>
-
-                        <Text as="span" className="inline-flex items-center gap-1 text-[9px] font-mono text-muted-foreground font-extrabold uppercase px-2">
-                          Phiên bản v{post.currentVersion || 1}
-                        </Text>
-
-                        {post.autoModerationStatus && (
-                          <Text as="span" className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9.5px] font-bold ${post.autoModerationStatus === 'SAFE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/10' }`}>
-                            <AlertCircle className="h-3 w-3 shrink-0" />
-                            {post.autoModerationStatus === 'SAFE' ? 'AI An toàn' : 'AI Nghi ngờ'}
-                          </Text>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4.5 align-middle">
-                      <div className="space-y-1">
-                        <Text className="font-extrabold text-foreground flex items-center gap-1">
-                          <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                          {post.authorId?.substring(0, 8) || 'Ẩn danh'}
-                        </Text>
-                        <Text className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                          {formatDate(post.publishedAt || post.createdAt)}
-                        </Text>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="px-6 py-4.5 align-middle text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {post.status === 'DRAFT' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                            onClick={() => workflowMutation.mutate({ id: post.id, action: 'submit' })}
-                          >
-                            <Send className="h-3 w-3 mr-1 shrink-0" /> Gửi duyệt
-                          </Button>
-                        )}
-
-                        {(post.status === 'SUBMITTED' || post.status === 'UNDER_REVIEW') && (
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-                              onClick={() => workflowMutation.mutate({ id: post.id, action: 'approve' })}
-                            >
-                              <CheckCircle2 className="h-3 w-3 mr-1 shrink-0" /> Duyệt
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                              onClick={() => {
-                                setRejectingPostId(post.id);
-                                setRejectionNote("");
-                              }}
-                            >
-                              <X className="h-3 w-3 mr-1 shrink-0" /> Từ chối
-                            </Button>
-                          </div>
-                        )}
-
-                        {post.status === 'APPROVED' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
-                            onClick={() => workflowMutation.mutate({ id: post.id, action: 'publish' })}
-                          >
-                            <Globe className="h-3 w-3 mr-1 shrink-0" /> Xuất bản
-                          </Button>
-                        )}
-
-                        {post.status === 'PUBLISHED' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-950/30"
-                            onClick={() => workflowMutation.mutate({ id: post.id, action: 'unpublish' })}
-                          >
-                            <EyeOff className="h-3 w-3 mr-1 shrink-0" /> Gỡ bài
-                          </Button>
-                        )}
-
-                        <div className="w-px h-4 bg-border mx-1.5" />
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8.5 w-8.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                          onClick={() => onNavigateToEdit(post.id)}
-                          title="Sửa bài viết"
+                    {getPageNumbers().map((pNum) => (
+                      <PaginationItem key={pNum}>
+                        <PaginationLink
+                          isActive={page === pNum}
+                          onClick={() => setPage(pNum)}
+                          className="cursor-pointer"
                         >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8.5 w-8.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                          title="Xóa"
-                          onClick={() => {
-                            setDeletingPostId(post.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                          {pNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
 
-        <div className="px-6 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-muted/50">
-          <div className="text-xs font-bold text-muted-foreground">
-            Hiển thị từ{" "}
-            <Text as="span" className="text-foreground">
-              {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
-            </Text>{" "}
-            đến{" "}
-            <Text as="span" className="text-foreground">
-              {Math.min(page * pageSize, totalItems)}
-            </Text>{" "}
-            trong tổng số{" "}
-            <Text as="span" className="text-foreground">{totalItems}</Text>{" "}
-            bài viết
-          </div>
+                    {totalPages > 5 && page < totalPages - 2 && (
+                      <PaginationItem>
+                        <div className="flex h-9 w-9 items-center justify-center">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </div>
+                      </PaginationItem>
+                    )}
 
-          <div className="flex flex-wrap items-center gap-4.5">
-            <PageSizeSelector value={pageSize} onValueChange={setPageSize} />
-
-            <Pagination className="w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    className={`cursor-pointer ${page <= 1 ? "pointer-events-none opacity-50" : ""}`}
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                  />
-                </PaginationItem>
-
-                {getPageNumbers().map((pNum) => (
-                  <PaginationItem key={pNum}>
-                    <PaginationLink
-                      isActive={page === pNum}
-                      onClick={() => setPage(pNum)}
-                      className="cursor-pointer"
-                    >
-                      {pNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-
-                {totalPages > 5 && page < totalPages - 2 && (
-                  <PaginationItem>
-                    <div className="flex h-9 w-9 items-center justify-center">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </div>
-                  </PaginationItem>
-                )}
-
-                <PaginationItem>
-                  <PaginationNext
-                    className={`cursor-pointer ${page >= totalPages ? "pointer-events-none opacity-50" : ""}`}
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        </div>
+                    <PaginationItem>
+                      <PaginationNext
+                        className={`cursor-pointer ${page >= totalPages ? "pointer-events-none opacity-50" : ""}`}
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </div>
+          }
+        />
       </Card>
 
       <AlertDialog open={!!deletingPostId} onOpenChange={(open) => !open && setDeletingPostId(null)}>
