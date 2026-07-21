@@ -15,7 +15,7 @@ export function usePageLayout(activePageId: string, pageIsActive: boolean, pageT
     queryKey: ["portal-configs"],
     queryFn: async () => {
       const res: any = await portalConfigApi.getAll();
-      return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      return res.data;
     },
     staleTime: 60_000,
   });

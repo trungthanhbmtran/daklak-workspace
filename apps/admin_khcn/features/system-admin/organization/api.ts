@@ -13,7 +13,7 @@ import type {
 } from "./types";
 
 function unwrapData<T>(res: any): T {
-  return (res?.data ?? res) as T;
+  return res.data as T;
 }
 
 function normalizeUnitNode(n: any): OrganizationUnitNode {

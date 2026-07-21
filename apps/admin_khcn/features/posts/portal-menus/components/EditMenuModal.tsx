@@ -62,19 +62,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const { data: dynamicUnitsRes } = useQuery({
     queryKey: ["organization-units-for-menu"],
     queryFn: async () => {
-      const { data: res } = await organizationApi.getTree();
-      // Hàm đệ quy làm phẳng danh sách các Đơn vị
-      const flattenUnits = (nodes: any[]): any[] => {
-        let result: any[] = [];
-        for (const node of nodes) {
-          result.push({ id: node.id, name: node.name, code: node.code });
-          if (node.children && node.children.length > 0) {
-            result = result.concat(flattenUnits(node.children));
-          }
-        }
-        return result;
-      };
-      return flattenUnitsres;
+      const res = await organizationApi.getOrganizations();
+      return res.data;
     },
     enabled: isOpen,
   });
@@ -139,6 +128,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
 
     const translateApi = async (text: string, targetLang: string): Promise<string> => {
       if (!text.trim()) return "";
+      
       try {
         const res = await apiClient.post<any, ApiResponse<{ jobId: string }>>('/admin/translate', { text, targetLang });
         if (!res.success || !res.data?.jobId) {
@@ -146,41 +136,27 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
         }
 
         const jobId = res.data.jobId;
+        const maxAttempts = 30; // 30s timeout
 
-        return await new Promise<string>((resolve, reject) => {
-          let attempts = 0;
-          const maxAttempts = 30; // 30s timeout
+        for (let attempts = 1; attempts <= maxAttempts; attempts++) {
+          await new Promise(r => setTimeout(r, 1000));
 
-          const checkStatus = async () => {
-            attempts++;
-            if (attempts > maxAttempts) {
-              reject(new Error("Quá thời gian chờ dịch thuật"));
-              return;
-            }
+          const statusRes = await apiClient.get<any, ApiResponse<{ status: string; result?: any; error?: string }>>(`/admin/translate/jobs/${jobId}`);
+          const jobData = statusRes.data;
 
-            try {
-              const statusRes = await apiClient.get<any, ApiResponse<{ status: string; result?: any; error?: string }>>(`/admin/translate/jobs/${jobId}`);
-              const jobData = statusRes.data;
+          if (!jobData) continue;
 
-              if (!jobData) {
-                setTimeout(checkStatus, 1000);
-                return;
-              }
-
-              if (jobData.status === 'COMPLETED') {
-                resolve(jobData.result?.translated_text || "");
-              } else if (jobData.status === 'FAILED') {
-                reject(new Error(jobData.error || "Dịch thuật thất bại"));
-              } else {
-                setTimeout(checkStatus, 1000);
-              }
-            } catch (err) {
-              reject(err);
-            }
-          };
-
-          setTimeout(checkStatus, 1000);
-        });
+          switch (jobData.status) {
+            case 'COMPLETED':
+              return jobData.result?.translated_text || "";
+            case 'FAILED':
+              throw new Error(jobData.error || "Dịch thuật thất bại");
+            default:
+              continue; // PROCESSING
+          }
+        }
+        
+        throw new Error("Quá thời gian chờ dịch thuật");
       } catch (error) {
         console.error("Auto translate error:", error);
         return "";

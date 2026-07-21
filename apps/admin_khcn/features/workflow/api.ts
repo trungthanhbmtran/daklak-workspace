@@ -36,7 +36,7 @@ export interface WorkflowInstance {
 function unwrapData<T>(res: any): T {
   // Chuẩn hóa: Gateway trả về { success: true, data: T, meta: ... }
   // Axios interceptor trả về res = { success: true, data: T, meta: ... }
-  return (res?.data ?? res) as T;
+  return res.data as T;
 }
 
 function unwrapMeta(res: any): any {

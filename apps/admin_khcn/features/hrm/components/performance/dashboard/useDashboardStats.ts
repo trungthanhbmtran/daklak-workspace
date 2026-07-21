@@ -7,7 +7,7 @@ export function useDashboardStats(selectedPeriod: string) {
     queryFn: async () => {
       if (!selectedPeriod) return null;
       const res = await hrmKpiEvaluationsApi.getDashboardStats({ periodId: selectedPeriod });
-      return res?.data || null;
+      return res.data;
     },
     enabled: !!selectedPeriod,
   });

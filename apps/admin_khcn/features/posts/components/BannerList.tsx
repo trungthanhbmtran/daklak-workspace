@@ -83,7 +83,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         position: activeTab === "all" ? undefined : activeTab,
       });
       return {
-        items: res.data || [],
+        items: res.data,
         meta: res.meta || {}
       };
     },

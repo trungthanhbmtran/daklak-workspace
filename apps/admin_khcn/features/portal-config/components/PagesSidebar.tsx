@@ -43,7 +43,7 @@ export default function PagesSidebar({
   return (
     <aside
       className={cn(
-        "border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex flex-col z-30 shrink-0 transition-all duration-300",
+        "border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col z-30 shrink-0 transition-all duration-300",
         "w-80"
       )}
     >

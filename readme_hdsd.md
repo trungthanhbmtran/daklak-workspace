@@ -6,6 +6,13 @@ Chào mừng bạn đến với tài liệu Hướng dẫn sử dụng và giớ
 
 ## 🕒 Lịch sử Cập nhật (Changelog / Version History)
 
+- **Version**: `v1.4.0`
+- **Thời gian cập nhật**: `21/07/2026 16:30`
+- **Nội dung cập nhật**: 
+  - **Tối ưu Thuật toán O(1)**: Tái cấu trúc logic vòng lặp `O(N^2)` lồng nhau tại HRM Service (KPI) và User Service (Categories) sang sử dụng Hash Map (O(1)). Đồng thời thay thế các khối `if-else` phức tạp thành `switch-case` ở Workflow Service, tuân thủ nguyên tắc Single Responsibility Principle (SRP).
+  - **Frontend Semantic UI & Trust Backend**: Đã thay thế hơn 70+ mã màu cứng (Hex Colors) sang chuẩn Semantic Colors của Tailwind ở cả Portal và Admin. Đồng thời áp dụng chuẩn "Dumb Client", gỡ bỏ toàn bộ fallback Optional Chaining (`res?.data || []`) dư thừa, đảm bảo Frontend chỉ đóng vai trò hiển thị thuần túy.
+  - **Meta Pagination chuẩn hóa**: Đồng bộ 100% Data và Proto cho các service, gỡ bỏ cấu trúc meta phân trang lồng nhau. Bổ sung `ValidationPipe` để khóa chặt đầu vào.
+
 - **Version**: `v1.3.0`
 - **Thời gian cập nhật**: `21/07/2026 13:30`
 - **Nội dung cập nhật**: 
@@ -25,6 +32,19 @@ Chào mừng bạn đến với tài liệu Hướng dẫn sử dụng và giớ
 - **Nội dung cập nhật**: 
   - Triển khai cấu trúc phản hồi Đăng nhập theo chuẩn Zero-Trust (Bảo mật cấp độ Chính phủ). Tách biệt hoàn toàn Token và dữ liệu cá nhân khỏi JSON payload, sử dụng cơ chế bảo mật HTTP-Only Cookie chống XSS.
   - Tái cấu trúc (Refactor) Frontend Component `LoginClient.tsx` chuyển sang sử dụng `useMutation` (React Query) quản lý Server State thay cho `useTransition` nội bộ, tuân thủ nghiêm ngặt tiêu chuẩn `api_integration_standard`.
+
+---
+
+## 🚀 Hướng Dẫn Vận Hành & Khởi Tạo Dữ Liệu (Deployment)
+
+1. **Khởi chạy Hệ thống**:
+   Luôn sử dụng Docker Compose qua lệnh: `docker compose -f docker-compose.prod.yml up -d`.
+2. **Quy tắc Seed Dữ liệu**:
+   Bắt buộc phải thực hiện theo thứ tự sau để tránh lỗi ràng buộc khóa ngoại (Foreign Key) và đồng bộ cache:
+   - **Bước 1**: `user-service` (Tạo khung Tổ chức, Phân quyền cơ bản)
+   - **Bước 2**: `hrm-service` (Tạo dữ liệu Hồ sơ nhân sự ăn theo Tổ chức)
+   - **Bước 3**: `workflow-service` (Khởi tạo các luồng Quy trình mẫu)
+   - **Bước 4**: **Restart `api-gateway`** để xóa toàn bộ cache tĩnh về Tổ chức và Phân quyền.
 
 ---
 

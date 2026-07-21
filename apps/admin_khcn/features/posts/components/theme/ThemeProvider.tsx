@@ -188,7 +188,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     axios
       .get("/api/v1/public/portal-configs", { withCredentials: true })
       .then((res: any) => {
-        const body = res?.data; // axios response.data
+        const body = res.data; // axios response.data
         const configs = Array.isArray(body?.data) ? body.data : [];
         const found = configs.find((c: any) => c.code === "theme_appearance");
         if (!found?.description) return;

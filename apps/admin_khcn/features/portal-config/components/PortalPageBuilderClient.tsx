@@ -58,7 +58,7 @@ export function PortalPageBuilderInner() {
 
           {/* 3. WORKSPACE VISUAL BUILDER */}
           <div className="flex-1 flex flex-col relative overflow-hidden">
-            <div className="flex-1 bg-[#f8fafc] dark:bg-[#020617] flex flex-col h-full overflow-hidden relative">
+            <div className="flex-1 bg-slate-50 dark:bg-slate-950 flex flex-col h-full overflow-hidden relative">
               <PageBuilder key={selectedPageId} />
             </div>
 

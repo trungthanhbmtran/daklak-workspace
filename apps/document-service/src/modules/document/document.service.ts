@@ -104,12 +104,7 @@ export class DocumentService {
     return {
       data: items.map(item => this.mapToProto(item)),
       meta: {
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        total, skip: (page - 1) * limit, take: limit
       },
     };
   }
@@ -390,12 +385,7 @@ export class DocumentService {
     return {
       data: items.map(item => this.mapProcedureToProto(item)),
       meta: {
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        total, skip: (page - 1) * limit, take: limit
       },
     };
   }
@@ -527,12 +517,7 @@ export class DocumentService {
     return {
       data: items.map(item => this.mapDossierToProto(item)),
       meta: {
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        total, skip: (page - 1) * limit, take: limit
       },
     };
   }

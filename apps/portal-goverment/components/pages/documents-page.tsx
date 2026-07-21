@@ -187,7 +187,7 @@ export default function DocumentsPage() {
 
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-        <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
+        <Link href="/" className="hover:text-portal-primary flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
           {t.home}
         </Link>
@@ -238,7 +238,7 @@ export default function DocumentsPage() {
                   key={tItem.value}
                   onClick={() => setActiveType(tItem.value)}
                   className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all ${activeType === tItem.value
-                    ? "bg-[#b91c1c] text-white shadow"
+                    ? "bg-portal-primary text-white shadow"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-950 dark:border dark:border-slate-800 dark:text-slate-400"
                     }`}
                 >
@@ -259,7 +259,7 @@ export default function DocumentsPage() {
                   key={oItem.value}
                   onClick={() => setActiveOrg(oItem.value)}
                   className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all ${activeOrg === oItem.value
-                    ? "bg-[#b91c1c] text-white shadow"
+                    ? "bg-portal-primary text-white shadow"
                     : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-950 dark:border dark:border-slate-800 dark:text-slate-400"
                     }`}
                 >
@@ -297,7 +297,7 @@ export default function DocumentsPage() {
                     <TableCell className="py-2.5 px-3 sm:py-3.5 sm:px-4">
                       <span
                         onClick={() => setSelectedDoc(doc)}
-                        className="text-slate-800 dark:text-slate-200 font-bold hover:text-[#b91c1c] cursor-pointer line-clamp-2 leading-relaxed"
+                        className="text-slate-800 dark:text-slate-200 font-bold hover:text-portal-primary cursor-pointer line-clamp-2 leading-relaxed"
                       >
                         {doc.title}
                       </span>
@@ -311,7 +311,7 @@ export default function DocumentsPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedDoc(doc)}
-                          className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 dark:bg-slate-950 dark:border-slate-800 hover:text-[#b91c1c] transition-all text-slate-500"
+                          className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 dark:bg-slate-950 dark:border-slate-800 hover:text-portal-primary transition-all text-slate-500"
                           title={t.viewDetail}
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -322,7 +322,7 @@ export default function DocumentsPage() {
                             e.preventDefault()
                             alert(`${t.downloadAlert}${doc.code}`)
                           }}
-                          className="p-1.5 rounded-lg bg-[#b91c1c]/5 hover:bg-[#b91c1c]/15 border border-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] transition-all"
+                          className="p-1.5 rounded-lg bg-portal-primary/5 hover:bg-portal-primary/15 border border-portal-primary/10 text-portal-primary dark:text-yellow-500 transition-all"
                           title={t.btnDownload}
                         >
                           <Download className="w-3.5 h-3.5" />
@@ -353,8 +353,8 @@ export default function DocumentsPage() {
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/45">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#b91c1c]" />
-                <span className="text-xs font-black text-[#b91c1c] uppercase tracking-wider">
+                <FileText className="w-5 h-5 text-portal-primary" />
+                <span className="text-xs font-black text-portal-primary uppercase tracking-wider">
                   {t.detailTitle}
                 </span>
               </div>
@@ -422,7 +422,7 @@ export default function DocumentsPage() {
                 </div>
                 <button
                   onClick={() => alert(`${t.downloadAlert}Van_ban_so_${selectedDoc.id}.pdf`)}
-                  className="bg-[#b91c1c] text-white hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-1 transition-colors font-bold uppercase text-[10px] tracking-wider shadow"
+                  className="bg-portal-primary text-white hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-1 transition-colors font-bold uppercase text-[10px] tracking-wider shadow"
                 >
                   <Download className="w-3.5 h-3.5" /> {t.btnDownload}
                 </button>

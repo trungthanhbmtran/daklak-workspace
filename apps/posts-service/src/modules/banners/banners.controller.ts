@@ -36,12 +36,7 @@ export class BannersController {
     return {
       data: items || [],
       meta: {
-        pagination: {
-          total: total || 0,
-          page: page,
-          pageSize: pageSize,
-          totalPages: Math.ceil((total || 0) / pageSize),
-        }
+        total: total || 0, skip: (page - 1) * pageSize, take: pageSize
       },
       success: true
     };

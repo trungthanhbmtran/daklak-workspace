@@ -50,12 +50,7 @@ export class KpiEvaluationsService {
         endDate: p.endDate ? new Date(p.endDate).toISOString() : '',
       })),
       meta: {
-        pagination: {
-          total: periods.length,
-          page,
-          limit: actualLimit,
-          totalPages: Math.ceil(periods.length / actualLimit)
-        }
+        total: periods.length, skip, take: actualLimit
       }
     };
   }
@@ -591,8 +586,10 @@ export class KpiEvaluationsService {
     // Auto-calculate tasks if status is DRAFT or COMPUTING
     const calcResult = await this.calculatePersonalKpi({ periodId: evaluation.periodId, employeeCode: evaluation.employeeCode, staffingSlotId: evaluation.staffingSlotId || undefined });
 
+    const evaluationDetailsMap = new Map(evaluation.details.map(d => [d.criteriaId, d]));
+
     const finalDetails = allCriteria.map(crit => {
-      const existingDetail = evaluation.details.find(d => d.criteriaId === crit.id);
+      const existingDetail = evaluationDetailsMap.get(crit.id);
 
       let autoScore: number | null = null;
       let notes = existingDetail?.notes || '';

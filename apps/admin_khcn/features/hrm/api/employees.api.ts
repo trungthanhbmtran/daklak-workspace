@@ -22,7 +22,7 @@ export const hrmApi = {
 
   getOne(id: number): Promise<HrmEmployee | null> {
     return (apiClient.get(`${HRM_EMPLOYEES_PATH}/${id}`) as any as Promise<ApiResponse<any>>)
-      .then((res) => res?.data ?? null);
+      .then((res) => res.data);
   },
 
   create(payload: any): Promise<ApiResponse<HrmEmployee>> {

@@ -11,7 +11,7 @@ export function useLanguages(initialLanguages: any[] = []) {
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const res: any = await portalLanguagesApi.getActive();
-      const all = Array.isArray(res?.data) ? res.data : [];
+      const all = res.data;
       const langs = all.filter((c: any) => c.active === 1);
       return langs.length > 0 ? langs : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }];
     },

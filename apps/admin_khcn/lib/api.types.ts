@@ -23,12 +23,12 @@ export interface ApiMeta {
 
 /** Tiện ích: bóc mảng data từ ApiResponse */
 export function pickData<T>(res: ApiResponse<T[]>): T[] {
-  return Array.isArray(res?.data) ? res.data : [];
+  return res.data;
 }
 
 /** Tiện ích: bóc object data từ ApiResponse */
 export function pickOne<T>(res: ApiResponse<T>): T {
-  return res?.data;
+  return res.data;
 }
 
 /** Tiện ích: bóc meta từ ApiResponse */

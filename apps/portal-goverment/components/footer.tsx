@@ -319,7 +319,7 @@ export default function Footer() {
           <div className="w-full bg-slate-900 border-b border-slate-800 py-6 px-4 md:px-8">
             <div className="max-w-7xl mx-auto flex flex-wrap justify-center md:justify-between items-center gap-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-portal-primary/15 flex items-center justify-center border border-portal-primary/20 text-[#fbc02d]">
+                <div className="w-10 h-10 rounded-full bg-portal-primary/15 flex items-center justify-center border border-portal-primary/20 text-yellow-500">
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
@@ -333,7 +333,7 @@ export default function Footer() {
               </div>
               <Link
                 href="/thu-tuc"
-                className="flex items-center gap-1.5 text-xs text-[#fef08a] hover:text-white bg-portal-primary/20 hover:bg-portal-primary/40 px-4 py-2 rounded-full border border-portal-primary/40 transition-all font-medium uppercase tracking-wider shadow-sm"
+                className="flex items-center gap-1.5 text-xs text-yellow-200 hover:text-white bg-portal-primary/20 hover:bg-portal-primary/40 px-4 py-2 rounded-full border border-portal-primary/40 transition-all font-medium uppercase tracking-wider shadow-sm"
               >
                 <FileText className="w-4 h-4" />
                 {ft.lookupProcedures}
@@ -353,7 +353,7 @@ export default function Footer() {
                 <h3 className="text-lg font-extrabold text-white uppercase tracking-wide mt-1">
                   {getConfigValue("unit_name", "")}
                 </h3>
-                <span className="text-xs font-semibold text-[#fef08a] uppercase tracking-wide mt-0.5">
+                <span className="text-xs font-semibold text-yellow-200 uppercase tracking-wide mt-0.5">
                   {getConfigValue("unit_identifier", "")}
                 </span>
               </div>
@@ -368,7 +368,7 @@ export default function Footer() {
                   <span>{ft.addressLabel} {getConfigValue("address", "")}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
+                  <Phone className="w-4 h-4 text-yellow-500 shrink-0" />
                   <a href={`tel:${getConfigValue("hotline", "").replace(/[^\d]/g, "")}`} className="hover:text-white transition-colors">
                     {ft.hotlineLabel} {getConfigValue("hotline", "")}
                   </a>
@@ -394,8 +394,8 @@ export default function Footer() {
               <ul className="flex flex-col gap-2.5 text-xs font-semibold text-slate-400">
                 {mainLinks.map((item: any) => (
                   <li key={item.name}>
-                    <Link href={item.path} className="hover:text-[#fef08a] flex items-center gap-1 transition-colors group">
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#fef08a] transition-colors" />
+                    <Link href={item.path} className="hover:text-yellow-200 flex items-center gap-1 transition-colors group">
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-yellow-200 transition-colors" />
                       {item.name}
                     </Link>
                   </li>
@@ -415,9 +415,9 @@ export default function Footer() {
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-[#fef08a] flex items-start gap-1 transition-colors group"
+                      className="hover:text-yellow-200 flex items-start gap-1 transition-colors group"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#fef08a] shrink-0 mt-0.5 transition-colors" />
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-600 group-hover:text-yellow-200 shrink-0 mt-0.5 transition-colors" />
                       <span>{item.name}</span>
                     </a>
                   </li>
@@ -450,7 +450,7 @@ export default function Footer() {
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                     {ft.statsTotal}
                   </span>
-                  <span className="text-xl font-black text-[#fef08a] mt-1 font-mono tracking-widest">{totalCount.toLocaleString()}</span>
+                  <span className="text-xl font-black text-yellow-200 mt-1 font-mono tracking-widest">{totalCount.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -473,15 +473,15 @@ export default function Footer() {
           <div className="w-full bg-[#111827] py-6 px-4 md:px-8 border-t border-slate-800 text-center text-xs font-medium text-slate-400">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex flex-wrap justify-center items-center gap-3">
-                <Link href="/gioi-thieu" className="hover:text-[#fef08a] transition-colors">
+                <Link href="/gioi-thieu" className="hover:text-yellow-200 transition-colors">
                   {ft.terms}
                 </Link>
                 <span className="text-slate-700">|</span>
-                <Link href="/gioi-thieu" className="hover:text-[#fef08a] transition-colors">
+                <Link href="/gioi-thieu" className="hover:text-yellow-200 transition-colors">
                   {ft.privacy}
                 </Link>
                 <span className="text-slate-700">|</span>
-                <Link href="/lien-he" className="hover:text-[#fef08a] transition-colors">
+                <Link href="/lien-he" className="hover:text-yellow-200 transition-colors">
                   {ft.sitemapLink}
                 </Link>
               </div>

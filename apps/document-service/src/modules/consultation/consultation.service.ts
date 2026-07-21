@@ -90,12 +90,7 @@ export class ConsultationService {
         totalUnits: item._count.responses,
       })),
       meta: {
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        total, skip: (page - 1) * limit, take: limit
       },
     };
   }

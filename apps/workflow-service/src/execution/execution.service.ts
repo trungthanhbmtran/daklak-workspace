@@ -89,52 +89,65 @@ export class ExecutionService {
       data: { currentNodeCode: node.code || node.id },
     });
 
-    if (node.type === 'serviceTask' && node.action === 'DYNAMIC_INTEGRATION') {
-      const ctx: WorkflowContext = {
-        instanceId: instance.id,
-        variables: instance.variables as Record<string, any>,
-        organizationId: instance.organizationId,
-        startedBy: instance.startedBy,
-      };
+    switch (node.type) {
+      case 'serviceTask': {
+        if (node.action === 'DYNAMIC_INTEGRATION') {
+          const ctx: WorkflowContext = {
+            instanceId: instance.id,
+            variables: instance.variables as Record<string, any>,
+            organizationId: instance.organizationId,
+            startedBy: instance.startedBy,
+          };
 
-      const result = await this.integrationAction.execute(ctx, node.payload);
+          const result = await this.integrationAction.execute(ctx, node.payload);
 
-      if (result.success) {
+          if (result.success) {
+            const nextEdges =
+              graph.edges?.filter((e: any) => e.source === node.id) || [];
+            if (nextEdges.length > 0) {
+              await this.advanceProcess(instanceId, nextEdges[0].target);
+            }
+          } else {
+            await this.prisma.processInstance.update({
+              where: { id: instanceId },
+              data: { status: 'FAILED' },
+            });
+          }
+        }
+        break;
+      }
+      case 'end': {
+        await this.prisma.processInstance.update({
+          where: { id: instanceId },
+          data: { status: 'COMPLETED', endedAt: new Date() },
+        });
+        this.eventEmitter.emit('workflow.instance.completed', {
+          instanceId: instance.id,
+        });
+        break;
+      }
+      case 'start': {
         const nextEdges =
           graph.edges?.filter((e: any) => e.source === node.id) || [];
         if (nextEdges.length > 0) {
           await this.advanceProcess(instanceId, nextEdges[0].target);
         }
-      } else {
-        await this.prisma.processInstance.update({
-          where: { id: instanceId },
-          data: { status: 'FAILED' },
+        break;
+      }
+      case 'userTask': {
+        // Create user task
+        await this.prisma.workflowTask.create({
+          data: {
+            instanceId: instance.id,
+            nodeCode: node.code || node.id,
+            title: node.name || 'User Task',
+            status: 'PENDING',
+          },
         });
+        break;
       }
-    } else if (node.type === 'end') {
-      await this.prisma.processInstance.update({
-        where: { id: instanceId },
-        data: { status: 'COMPLETED', endedAt: new Date() },
-      });
-      this.eventEmitter.emit('workflow.instance.completed', {
-        instanceId: instance.id,
-      });
-    } else if (node.type === 'start') {
-      const nextEdges =
-        graph.edges?.filter((e: any) => e.source === node.id) || [];
-      if (nextEdges.length > 0) {
-        await this.advanceProcess(instanceId, nextEdges[0].target);
-      }
-    } else if (node.type === 'userTask') {
-      // Create user task
-      await this.prisma.workflowTask.create({
-        data: {
-          instanceId: instance.id,
-          nodeCode: node.code || node.id,
-          title: node.name || 'User Task',
-          status: 'PENDING',
-        },
-      });
+      default:
+        break;
     }
   }
 

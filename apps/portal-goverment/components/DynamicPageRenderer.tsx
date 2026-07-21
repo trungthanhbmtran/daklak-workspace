@@ -869,7 +869,7 @@ function renderLexicalNode(node: any, index: number, currentLang: string): React
           href={node.url || "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-red-600 dark:text-[#fbc02d] hover:underline font-bold"
+          className="text-red-600 dark:text-yellow-500 hover:underline font-bold"
         >
           {renderChildren()}
         </a>
@@ -1298,12 +1298,12 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                       className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
                                     >
                                       <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-100/30 dark:bg-slate-900/40">
-                                        <div className="w-9 h-9 rounded-full bg-red-600/10 text-red-600 dark:text-[#fbc02d] flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
+                                        <div className="w-9 h-9 rounded-full bg-red-600/10 text-red-600 dark:text-yellow-500 flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
                                           {(leader.name || "A").split(' ').pop()?.[0]}
                                         </div>
                                         <div className="flex flex-col min-w-0">
                                           <h5 className="text-xs font-black text-slate-900 dark:text-white truncate">{leader.name}</h5>
-                                          <span className="text-[9px] text-red-600 dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate mt-0.5">{leader.role}</span>
+                                          <span className="text-[9px] text-red-600 dark:text-yellow-500 font-bold uppercase tracking-wider truncate mt-0.5">{leader.role}</span>
                                         </div>
                                       </div>
 
@@ -1395,8 +1395,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                   {activeZone && (
                                     <div className="flex-1 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-150 dark:border-slate-800/80 flex flex-col gap-2.5 text-[11px] self-stretch justify-center">
                                       <div className="flex items-center gap-1.5 border-b pb-1.5">
-                                        <Info className="w-3.5 h-3.5 text-red-600 dark:text-[#fbc02d]" />
-                                        <span className="font-extrabold text-red-600 dark:text-[#fbc02d] uppercase tracking-wide">
+                                        <Info className="w-3.5 h-3.5 text-red-600 dark:text-yellow-500" />
+                                        <span className="font-extrabold text-red-600 dark:text-yellow-500 uppercase tracking-wide">
                                           {activeZone.name}
                                         </span>
                                       </div>

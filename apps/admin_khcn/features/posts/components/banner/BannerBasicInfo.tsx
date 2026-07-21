@@ -52,7 +52,7 @@ export function BannerBasicInfo({
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const res: any = await portalLanguagesApi.getActive();
-      return Array.isArray(res?.data) ? res.data : [];
+      return res.data;
     },
     staleTime: 5 * 60_000,
     placeholderData: [],

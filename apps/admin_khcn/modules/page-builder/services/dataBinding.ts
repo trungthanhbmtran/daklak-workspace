@@ -44,7 +44,7 @@ export const useCategoriesQuery = () => {
     queryFn: async () => {
       try {
         const res: any = await apiClient.get("/categories");
-        return Array.isArray(res?.data) ? res.data : [];
+        return res.data;
       } catch (error) {
         console.error("Failed to fetch categories, returning empty array", error);
         return [];

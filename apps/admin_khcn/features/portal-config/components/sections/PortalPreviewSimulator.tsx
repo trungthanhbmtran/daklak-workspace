@@ -58,10 +58,10 @@ export const PortalPreviewSimulator = ({ activeLangTab, setActiveLangTab, langua
               )}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[8px] font-serif font-black tracking-widest text-[#0056b3] uppercase leading-none">
+              <span className="text-[8px] font-serif font-black tracking-widest text-gov-trust-blue uppercase leading-none">
                 {sim.simTitle}
               </span>
-              <h2 className="text-[11px] font-serif font-black text-[#cc0000] uppercase tracking-wide leading-tight mt-0.5 truncate">
+              <h2 className="text-[11px] font-serif font-black text-gov-alert-red uppercase tracking-wide leading-tight mt-0.5 truncate">
                 {sim.simName}
               </h2>
               <span className="text-blue-800 text-[6px] font-serif font-bold tracking-wider leading-none uppercase mt-0.5">
@@ -119,7 +119,7 @@ export const PortalPreviewSimulator = ({ activeLangTab, setActiveLangTab, langua
         <div className="bg-slate-900 text-slate-300 rounded-lg p-3 space-y-1.5 text-[8px] shadow-md">
           <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none block border-b pb-1 border-slate-800">Mô phỏng Chân Trang (Footer)</span>
           <p className="font-extrabold text-white text-[9px] uppercase">{sim.simName}</p>
-          <p className="text-[#fef08a] font-bold text-[8px] uppercase tracking-wide">{sim.simIdentifier}</p>
+          <p className="text-gov-warning-yellow font-bold text-[8px] uppercase tracking-wide">{sim.simIdentifier}</p>
           <p className="text-slate-400 leading-normal">
             {sim.simLicense}. Chịu trách nhiệm nội dung: {sim.simResponsible}.
           </p>

@@ -588,12 +588,6 @@ export class UsersService implements OnModuleInit {
         total,
         skip,
         take,
-        pagination: {
-          total,
-          page,
-          limit: take,
-          totalPages: Math.ceil(total / take)
-        }
       },
     };
   }

@@ -62,7 +62,7 @@ export class TaskCatalogService {
       success: true,
       message: 'Lấy danh sách nhiệm vụ mẫu thành công',
       data: templates,
-      meta: { pagination: { total: templates.length, page: 1, pageSize: templates.length, totalPages: 1 } }
+      meta: { total: templates.length, skip: 0, take: templates.length }
     };
     await this.cache.set(cacheKey, result);
     return result;

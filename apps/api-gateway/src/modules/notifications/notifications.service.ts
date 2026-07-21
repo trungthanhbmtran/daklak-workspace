@@ -41,10 +41,12 @@ export class NotificationsService {
     const redis = this.redisService.getClient();
     const pipeline = redis.pipeline();
 
-    // 1. Lưu payload vào HASH
-    pipeline.hset('notifications:data', id, JSON.stringify(n));
+    // 1. Lưu payload vào key độc lập (STRING) với TTL 30 ngày (2592000 giây)
+    pipeline.set(`notification:data:${id}`, JSON.stringify(n), 'EX', 2592000);
     // 2. Thêm vào ZSET của User
     pipeline.zadd(`notifications:user:${uid}`, timestamp, id);
+    // Cập nhật TTL cho ZSET
+    pipeline.expire(`notifications:user:${uid}`, 2592000);
     // 3. Auto-Trim giữ lại 500 item mới nhất tránh tràn RAM Redis
     pipeline.zremrangebyrank(
       `notifications:user:${uid}`,
@@ -132,8 +134,9 @@ export class NotificationsService {
       };
     }
 
-    // O(1) query HMGET
-    const payloads = await redis.hmget('notifications:data', ...paginatedIds);
+    // O(1) query MGET (vì ta đã chuyển từ HASH sang các key độc lập)
+    const payloadKeys = paginatedIds.map((id) => `notification:data:${id}`);
+    const payloads = await redis.mget(...payloadKeys);
     const notifications = payloads
       .map((p) => (p ? JSON.parse(p) : null))
       .filter(Boolean);

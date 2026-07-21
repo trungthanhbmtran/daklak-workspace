@@ -106,7 +106,7 @@ export function IntegrationConfig() {
             <p className="text-slate-400 font-mono text-sm">Đang tải file cấu hình...</p>
           </div>
         ) : (
-          <div className="flex-1 relative rounded-2xl overflow-hidden border border-slate-800 bg-[#1e1e1e]">
+          <div className="flex-1 relative rounded-2xl overflow-hidden border border-slate-800 bg-zinc-900">
             {/* Simple Textarea as a fallback code editor. In a real project, Monaco Editor would be used here. */}
             <textarea
               className="w-full h-full p-6 bg-transparent text-slate-300 font-mono text-[13px] leading-relaxed resize-none focus:outline-none focus:ring-0 custom-scrollbar"

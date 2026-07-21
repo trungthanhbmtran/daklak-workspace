@@ -92,13 +92,13 @@ export class TranslateService implements OnModuleInit {
           text: data.text,
           target_lang: data.targetLang,
         }) as any,
-      );
+      ) as { translated_text: string };
 
       await this.redisService.set(
         `translate_job_${data.jobId}`,
         JSON.stringify({
           status: 'COMPLETED',
-          result,
+          result: { translated_text: result.translated_text },
         }),
         3600,
       );

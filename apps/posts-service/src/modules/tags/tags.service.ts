@@ -31,12 +31,7 @@ export class TagsService {
     return { 
       data, 
       meta: {
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        total, skip: (page - 1) * limit, take: limit
       } 
     };
   }

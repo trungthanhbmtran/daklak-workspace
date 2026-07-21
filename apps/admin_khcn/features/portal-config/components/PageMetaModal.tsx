@@ -70,7 +70,7 @@ export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="max-w-md rounded-[32px] border-none p-0 overflow-hidden shadow-2xl">
-                <div className="p-8 bg-white dark:bg-[#0f172a]">
+                <div className="p-8 bg-white dark:bg-slate-900">
                     <DialogHeader className="mb-8">
                         <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/30 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100 dark:border-indigo-900/50">
                             <Layout className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />

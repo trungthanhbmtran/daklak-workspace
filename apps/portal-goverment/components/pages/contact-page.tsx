@@ -178,7 +178,7 @@ export default function ContactPage() {
 
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-        <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
+        <Link href="/" className="hover:text-portal-primary flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
           {currentLang === "en" ? "Home" : "Trang chủ"}
         </Link>
@@ -197,7 +197,7 @@ export default function ContactPage() {
           {/* Metadata Section */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5">
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <Building2 className="w-5 h-5 text-[#b91c1c]" />
+              <Building2 className="w-5 h-5 text-portal-primary" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
                 {currentLang === "en" ? "HEADQUARTERS INFORMATION" : "THÔNG TIN TRỤ SỞ CHÍNH"}
               </h3>
@@ -211,14 +211,14 @@ export default function ContactPage() {
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-                <a href={`tel:${getConfigValue("hotline", "").replace(/[^\d]/g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
+                <Phone className="w-4 h-4 text-yellow-500 shrink-0" />
+                <a href={`tel:${getConfigValue("hotline", "").replace(/[^\d]/g, "")}`} className="hover:text-portal-primary dark:hover:text-yellow-500">
                   {(currentLang === "en" ? "Phone: " : "Điện thoại: ") + getConfigValue("hotline", "")}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                <a href={`mailto:${getConfigValue("email", "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
+                <a href={`mailto:${getConfigValue("email", "")}`} className="hover:text-portal-primary dark:hover:text-yellow-500 break-all">
                   {"Email: " + getConfigValue("email", "")}
                 </a>
               </div>
@@ -239,7 +239,7 @@ export default function ContactPage() {
           {/* Contact form */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5">
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <Mail className="w-5 h-5 text-[#b91c1c]" />
+              <Mail className="w-5 h-5 text-portal-primary" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
                 {getConfigValue("contact_form_title", "")}
               </h3>
@@ -306,7 +306,7 @@ export default function ContactPage() {
                   type="submit"
                   className="w-full mt-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
                 >
-                  <Send className="w-4 h-4 text-[#fef08a] dark:text-[#b91c1c]" />
+                  <Send className="w-4 h-4 text-yellow-200 dark:text-portal-primary" />
                   {currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý"}
                 </button>
               </form>
@@ -336,7 +336,7 @@ export default function ContactPage() {
         {/* Right Side: Interactive Administrative subdivision zone Vector Map */}
         <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5 h-full">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <MapIcon className="w-5 h-5 text-[#b91c1c]" />
+            <MapIcon className="w-5 h-5 text-portal-primary" />
             <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide flex-1">
               {getConfigValue("contact_map_title", "")}
             </h3>
@@ -348,7 +348,7 @@ export default function ContactPage() {
                 type="button"
                 onClick={() => setMapType("vector")}
                 className={`text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg transition-all ${mapType === "vector"
-                  ? "bg-white dark:bg-slate-800 text-[#b91c1c] dark:text-white shadow"
+                  ? "bg-white dark:bg-slate-800 text-portal-primary dark:text-white shadow"
                   : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   }`}
               >
@@ -358,7 +358,7 @@ export default function ContactPage() {
                 type="button"
                 onClick={() => setMapType("image")}
                 className={`text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg transition-all ${mapType === "image"
-                  ? "bg-white dark:bg-slate-800 text-[#b91c1c] dark:text-white shadow"
+                  ? "bg-white dark:bg-slate-800 text-portal-primary dark:text-white shadow"
                   : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   }`}
               >
@@ -429,8 +429,8 @@ export default function ContactPage() {
               {activeZone && (
                 <div className="bg-slate-50 dark:bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex flex-col gap-3.5 animate-fade-in text-xs">
                   <div className="flex items-center gap-2 border-b border-slate-200/50 dark:border-slate-800/60 pb-2">
-                    <Info className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
-                    <span className="font-extrabold text-[#b91c1c] dark:text-[#fbc02d] uppercase tracking-wide">
+                    <Info className="w-4 h-4 text-portal-primary dark:text-yellow-500" />
+                    <span className="font-extrabold text-portal-primary dark:text-yellow-500 uppercase tracking-wide">
                       {(currentLang === "en" ? "DETAIL: " : "CHI TIẾT: ") + activeZone.name}
                     </span>
                   </div>

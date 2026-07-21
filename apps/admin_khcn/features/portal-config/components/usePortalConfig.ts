@@ -34,7 +34,7 @@ export function usePortalConfig() {
     queryKey: LANG_QUERY_KEY,
     queryFn: async () => {
       const res = await portalLanguagesApi.getActive() as any;
-      const all = Array.isArray(res?.data) ? res.data : [];
+      const all = res.data;
       const langs = all.filter((c: any) => c.active === 1);
       return langs.length > 0 ? langs : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
     },
@@ -50,7 +50,7 @@ export function usePortalConfig() {
     queryKey: QUERY_KEY,
     queryFn: async () => {
       const res = await portalConfigApi.getAll() as any;
-      return Array.isArray(res?.data) ? res.data : [];
+      return res.data;
     },
     staleTime: 60_000,       // config ít thay đổi → cache 1 phút
     gcTime:    10 * 60_000,

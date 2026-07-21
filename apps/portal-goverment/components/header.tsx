@@ -782,7 +782,7 @@ export default function Header() {
               if (item.name === t.home) {
                 return (
                   <div key={item.name} className="relative flex items-center justify-center h-12 px-3.5 hover:bg-portal-primary-hover dark:hover:bg-slate-900 transition-colors">
-                    <Link href="/" className={`text-white transition-colors ${isActive ? "text-[#fef08a]" : ""}`} title={t.home}>
+                    <Link href="/" className={`text-white transition-colors ${isActive ? "text-yellow-200" : ""}`} title={t.home}>
                       <Home className="w-4 h-4 fill-current stroke-current" />
                     </Link>
                   </div>
@@ -799,7 +799,7 @@ export default function Header() {
                   {hasChildren ? (
                     <button
                       onClick={() => toggleDropdown(item.name)}
-                      className={`flex items-center gap-1 text-[13px] font-bold tracking-wide uppercase transition-colors hover:text-[#fef08a] ${isActive ? "text-[#fef08a] font-black" : "text-white/90"
+                      className={`flex items-center gap-1 text-[13px] font-bold tracking-wide uppercase transition-colors hover:text-yellow-200 ${isActive ? "text-yellow-200 font-black" : "text-white/90"
                         }`}
                     >
                       {item.name}
@@ -808,7 +808,7 @@ export default function Header() {
                   ) : (
                     <Link
                       href={item.path}
-                      className={`text-[13px] font-bold tracking-wide uppercase transition-colors hover:text-[#fef08a] ${isActive ? "text-[#fef08a] font-black" : "text-white/90"
+                      className={`text-[13px] font-bold tracking-wide uppercase transition-colors hover:text-yellow-200 ${isActive ? "text-yellow-200 font-black" : "text-white/90"
                         }`}
                     >
                       {item.name}
@@ -822,7 +822,7 @@ export default function Header() {
                         <Link
                           key={child.name}
                           href={child.path}
-                          className="block px-4 py-2.5 text-xs text-white/90 hover:text-[#fef08a] hover:bg-portal-primary-hover/50 dark:hover:bg-slate-900/60 transition-colors border-b border-white/5 last:border-0"
+                          className="block px-4 py-2.5 text-xs text-white/90 hover:text-yellow-200 hover:bg-portal-primary-hover/50 dark:hover:bg-slate-900/60 transition-colors border-b border-white/5 last:border-0"
                         >
                           {child.name}
                         </Link>
@@ -837,14 +837,14 @@ export default function Header() {
           <div className="flex items-center gap-4 text-white">
             <button
               onClick={() => router.push(currentLang === "en" ? "/news" : "/tin-tuc")}
-              className="p-1 hover:text-[#fef08a] transition-colors"
+              className="p-1 hover:text-yellow-200 transition-colors"
               title={currentLang === "en" ? "Search" : "Tìm kiếm"}
             >
               <Search className="w-4 h-4" />
             </button>
             <button
               onClick={() => router.push(currentLang === "en" ? "/feedback" : "/tuong-tac")}
-              className="p-1 hover:text-[#fef08a] transition-colors"
+              className="p-1 hover:text-yellow-200 transition-colors"
               title={currentLang === "en" ? "Interactive Portal" : "Cổng tương tác"}
             >
               <User className="w-4 h-4" />
@@ -863,7 +863,7 @@ export default function Header() {
               <NationalEmblem className="w-full h-full" />
             )}
           </div>
-          <span className="text-xs font-black uppercase tracking-wider text-[#fef08a]">
+          <span className="text-xs font-black uppercase tracking-wider text-yellow-200">
             {getConfigValue("unit_name", "")}
           </span>
         </Link>
@@ -914,7 +914,7 @@ export default function Header() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/20 pb-4">
-              <span className="text-sm font-bold text-[#fef08a] uppercase tracking-wider">
+              <span className="text-sm font-bold text-yellow-200 uppercase tracking-wider">
                 {t.sitemapTitle}
               </span>
               <button
@@ -950,7 +950,7 @@ export default function Header() {
                       <>
                         <button
                           onClick={() => toggleDropdown(item.name)}
-                          className={`flex items-center justify-between text-left text-sm uppercase tracking-wide py-1 border-b border-white/10 hover:text-[#fef08a] cursor-pointer ${isActive ? "text-[#fef08a] font-bold" : "text-white/80"
+                          className={`flex items-center justify-between text-left text-sm uppercase tracking-wide py-1 border-b border-white/10 hover:text-yellow-200 cursor-pointer ${isActive ? "text-yellow-200 font-bold" : "text-white/80"
                             }`}
                         >
                           {item.name}
@@ -963,7 +963,7 @@ export default function Header() {
                                 key={child.name}
                                 href={child.path}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-xs text-white/90 hover:text-[#fef08a] py-1 block"
+                                className="text-xs text-white/90 hover:text-yellow-200 py-1 block"
                               >
                                 {child.name}
                               </Link>
@@ -975,7 +975,7 @@ export default function Header() {
                       <Link
                         href={item.path}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`text-sm uppercase tracking-wide py-1 border-b border-white/10 hover:text-[#fef08a] block ${isActive ? "text-[#fef08a] font-bold" : "text-white/80"
+                        className={`text-sm uppercase tracking-wide py-1 border-b border-white/10 hover:text-yellow-200 block ${isActive ? "text-yellow-200 font-bold" : "text-white/80"
                           }`}
                       >
                         {item.name}

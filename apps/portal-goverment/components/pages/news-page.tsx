@@ -310,7 +310,7 @@ function NewsListPageContent() {
 
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-        <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
+        <Link href="/" className="hover:text-portal-primary flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
           {t.home}
         </Link>
@@ -342,7 +342,7 @@ function NewsListPageContent() {
           />
           <button
             type="submit"
-            className="absolute right-1 p-2 rounded-lg text-slate-400 hover:text-[#b91c1c]"
+            className="absolute right-1 p-2 rounded-lg text-slate-400 hover:text-portal-primary"
           >
             <Search className="w-4 h-4" />
           </button>
@@ -363,12 +363,12 @@ function NewsListPageContent() {
                 key={cat.value}
                 onClick={() => handleCategorySelect(cat.value)}
                 className={`text-left px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all flex items-center justify-between group ${activeCategory === cat.value
-                  ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/20 dark:text-[#fbc02d]"
+                  ? "bg-red-50 text-portal-primary dark:bg-red-950/20 dark:text-yellow-500"
                   : "hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-700 dark:text-slate-400 hover:text-slate-950"
                   }`}
               >
                 <span>{cat.label}</span>
-                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${activeCategory === cat.value ? "opacity-100 text-[#b91c1c] dark:text-[#fbc02d]" : "text-slate-400"
+                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${activeCategory === cat.value ? "opacity-100 text-portal-primary dark:text-yellow-500" : "text-slate-400"
                   }`} />
               </button>
             ))}
@@ -404,7 +404,7 @@ function NewsListPageContent() {
                         </span>
                         <span>{post.readTime}</span>
                       </div>
-                      <h4 className="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-[#b91c1c] transition-colors tracking-wide">
+                      <h4 className="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-portal-primary transition-colors tracking-wide">
                         <Link href={articlePath}>{post.title}</Link>
                       </h4>
                       <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed">
@@ -413,7 +413,7 @@ function NewsListPageContent() {
                       <div className="mt-auto pt-3 border-t border-slate-50 dark:border-slate-850 flex items-center justify-between">
                         <Link
                           href={articlePath}
-                          className="text-[10px] text-slate-900 dark:text-[#fbc02d] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:underline"
+                          className="text-[10px] text-slate-900 dark:text-yellow-500 font-bold uppercase tracking-wider flex items-center gap-1 group-hover:underline"
                         >
                           {t.detailText}
                           <ArrowRight className="w-3 h-3" />

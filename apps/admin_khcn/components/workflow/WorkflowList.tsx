@@ -97,7 +97,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
         take: pageSize,
         search: searchTerm || undefined
       });
-      setWorkflows(Array.isArray(res?.data) ? res.data : []);
+      setWorkflows(res.data);
       setTotalItems(res?.meta?.total || (res?.data?.length || 0));
     } catch (error) {
       console.error("Failed to load workflows:", error);

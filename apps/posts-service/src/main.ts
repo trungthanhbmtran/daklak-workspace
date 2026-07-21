@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 const logger = new Logger('Main');
 const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
@@ -22,6 +22,7 @@ async function bootstrap() {
   try {
     // 1. Tạo app dưới dạng Hybrid
     const app = await NestFactory.create(AppModule);
+    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.enableShutdownHooks();
 
     // 2. Kết nối gRPC

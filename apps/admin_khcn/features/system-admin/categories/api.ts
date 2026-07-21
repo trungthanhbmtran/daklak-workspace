@@ -7,7 +7,7 @@ export const categoryApi = {
     try {
       const res: any = await apiClient.get("/categories", { params });
       return {
-        data: Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []),
+        data: res.data,
         meta: res?.meta || {},
       };
     } catch (error) {
@@ -20,7 +20,7 @@ export const categoryApi = {
     try {
       const res: any = await apiClient.get(`/categories`, { params: { group, ...params } });
       return {
-        data: Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []),
+        data: res.data,
         meta: res?.meta || {},
       };
     } catch (error) {

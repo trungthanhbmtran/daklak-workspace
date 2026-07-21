@@ -51,12 +51,7 @@ export class MinutesService {
     return {
       data: items.map(item => this.mapToProto(item)),
       meta: {
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        total, skip, take: limit
       },
     };
   }

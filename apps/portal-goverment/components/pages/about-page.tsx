@@ -301,7 +301,7 @@ export default function AboutPage() {
     return (
       <div className="flex flex-col gap-6 sm:gap-10 md:gap-14 animate-fade-in select-none">
         {/* Page Title Header banner */}
-        <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-[#b91c1c] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
+        <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-portal-primary p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
           <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-white uppercase tracking-wide">
             {t.pageTitle}
           </h2>
@@ -319,7 +319,7 @@ export default function AboutPage() {
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-14 animate-fade-in select-none">
 
       {/* Page Title Header banner */}
-      <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-[#b91c1c] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
+      <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-portal-primary p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
         <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-white uppercase tracking-wide">
           {t.pageTitle}
         </h2>
@@ -333,7 +333,7 @@ export default function AboutPage() {
         <section id="chung" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start">
           <div className="lg:col-span-7 flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-              <History className="w-5 h-5 text-[#b91c1c]" />
+              <History className="w-5 h-5 text-portal-primary" />
               <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
                 {t.historyTitle}
               </h3>
@@ -352,7 +352,7 @@ export default function AboutPage() {
           <div className="lg:col-span-5 grid grid-cols-2 gap-4">
             {areaStat && (
               <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
-                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/20 text-[#b91c1c] flex items-center justify-center border border-red-100 dark:border-red-900/30">
+                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/20 text-portal-primary flex items-center justify-center border border-red-100 dark:border-red-900/30">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
@@ -409,7 +409,7 @@ export default function AboutPage() {
       {orgSections && orgSections.length > 0 && (
         <section id="co-cau" className="scroll-mt-24 flex flex-col gap-5">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <Workflow className="w-5 h-5 text-[#b91c1c]" />
+            <Workflow className="w-5 h-5 text-portal-primary" />
             <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
               {t.orgTitle}
             </h3>
@@ -423,10 +423,10 @@ export default function AboutPage() {
             {orgSections.map((section: any, index: number) => (
               <div
                 key={section.title || index}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4 group hover:border-[#b91c1c] hover:shadow-md transition-all"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4 group hover:border-portal-primary hover:shadow-md transition-all"
               >
                 <div className="flex flex-col">
-                  <h4 className="text-xs sm:text-sm font-black text-[#b91c1c] dark:text-[#fbc02d] tracking-wide uppercase">{section.title}</h4>
+                  <h4 className="text-xs sm:text-sm font-black text-portal-primary dark:text-yellow-500 tracking-wide uppercase">{section.title}</h4>
                   <p className="text-[11px] text-slate-400 font-semibold leading-relaxed mt-1">{section.desc}</p>
                 </div>
                 <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 flex flex-col gap-2">
@@ -447,7 +447,7 @@ export default function AboutPage() {
       {detailLeaders && detailLeaders.length > 0 && (
         <section id="lanh-dao" className="scroll-mt-24 flex flex-col gap-5">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <UserSquare2 className="w-5 h-5 text-[#b91c1c]" />
+            <UserSquare2 className="w-5 h-5 text-portal-primary" />
             <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
               {t.leaderTitle}
             </h3>
@@ -464,12 +464,12 @@ export default function AboutPage() {
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden flex flex-col"
               >
                 <div className="p-4 sm:p-5 border-b border-slate-150 dark:border-slate-850 flex items-center gap-2.5 sm:gap-3 bg-slate-50/50 dark:bg-slate-950/45 shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] flex items-center justify-center font-bold text-lg shadow-inner">
+                  <div className="w-12 h-12 rounded-full bg-portal-primary/10 text-portal-primary dark:text-yellow-500 flex items-center justify-center font-bold text-lg shadow-inner">
                     {(leader.name || "A").split(' ').pop()?.[0]}
                   </div>
                   <div className="flex flex-col min-w-0">
                     <h4 className="text-sm font-black text-slate-900 dark:text-white truncate">{leader.name}</h4>
-                    <span className="text-[10px] text-[#b91c1c] dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate">{leader.role}</span>
+                    <span className="text-[10px] text-portal-primary dark:text-yellow-500 font-bold uppercase tracking-wider truncate">{leader.role}</span>
                   </div>
                 </div>
 
@@ -491,11 +491,11 @@ export default function AboutPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                      <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">{t.phone}: {leader.phone}</a>
+                      <a href={`tel:${leader.phone}`} className="hover:text-portal-primary dark:hover:text-yellow-500">{t.phone}: {leader.phone}</a>
                     </div>
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                      <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">{t.email}: {leader.email}</a>
+                      <a href={`mailto:${leader.email}`} className="hover:text-portal-primary dark:hover:text-yellow-500 break-all">{t.email}: {leader.email}</a>
                     </div>
                   </div>
                 </div>

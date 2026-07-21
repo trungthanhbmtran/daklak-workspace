@@ -251,10 +251,7 @@ export class EmployeesService implements OnModuleInit {
             message: 'OK',
             data: [],
             meta: {
-              pagination: { total: 0, page, pageSize, totalPages: 1, hasNext: false, hasPrev: false },
-              sort: { sortBy: 'id', sortOrder: 'asc' },
-              filters: {},
-              extra: {},
+              total: 0, skip: (page - 1) * pageSize, take: pageSize
             },
           };
         }
@@ -314,13 +311,7 @@ export class EmployeesService implements OnModuleInit {
       message: 'OK',
       data: items.map(e => this.toEmployee(e)),
       meta: {
-        total: totalCount,
-        page,
-        limit: pageSize,
-        totalPages: Math.ceil(totalCount / pageSize),
-        sort: { sortBy: 'id', sortOrder: 'asc' },
-        filters: params,
-        extra: {},
+        total: totalCount, skip, take: pageSize
       },
     };
   }

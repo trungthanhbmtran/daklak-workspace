@@ -53,7 +53,7 @@ export function BannerClientPreviewModal({
         </div>
 
         {/* Simulated Viewport Client App Content */}
-        <div className="flex-1 overflow-y-auto bg-[#f8fafc] text-slate-900">
+        <div className="flex-1 overflow-y-auto bg-slate-50 text-slate-900">
           
           {/* Portal Header */}
           <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">

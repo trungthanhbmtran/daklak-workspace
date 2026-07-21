@@ -90,7 +90,7 @@ export default function ProceduresPage() {
 
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-        <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
+        <Link href="/" className="hover:text-portal-primary flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
           Trang chủ
         </Link>
@@ -103,8 +103,8 @@ export default function ProceduresPage() {
       {/* Tra cứu tiến độ hồ sơ một cửa widget (Highlighted Section) */}
       <section id="tra-cuu" className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-lg text-white flex flex-col gap-4 sm:gap-5">
         <div className="flex items-center gap-3">
-          <div className="bg-[#b91c1c] text-white p-2 rounded-xl">
-            <FileSearch className="w-5 h-5 text-[#fef08a]" />
+          <div className="bg-portal-primary text-white p-2 rounded-xl">
+            <FileSearch className="w-5 h-5 text-yellow-200" />
           </div>
           <div>
             <h3 className="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider">
@@ -126,7 +126,7 @@ export default function ProceduresPage() {
           />
           <button
             type="submit"
-            className="bg-[#b91c1c] hover:bg-red-700 text-white font-bold tracking-wider text-xs px-6 py-3 rounded-xl transition-all uppercase shadow"
+            className="bg-portal-primary hover:bg-red-700 text-white font-bold tracking-wider text-xs px-6 py-3 rounded-xl transition-all uppercase shadow"
           >
             TRA CỨU TIẾN ĐỘ
           </button>
@@ -167,7 +167,7 @@ export default function ProceduresPage() {
                     <span className="text-[10px] text-slate-400 uppercase tracking-widest">
                       Thời hạn hoàn thành
                     </span>
-                    <span className="text-[#fef08a] font-mono">{trackResult.completeDate}</span>
+                    <span className="text-yellow-200 font-mono">{trackResult.completeDate}</span>
                   </div>
                 </div>
 
@@ -189,7 +189,7 @@ export default function ProceduresPage() {
                       return (
                         <div key={node.step} className="flex flex-col items-center gap-2">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold font-mono transition-all border ${isCurrent
-                            ? "bg-[#b91c1c] border-[#fef08a] text-white shadow-lg animate-pulse"
+                            ? "bg-portal-primary border-yellow-200 text-white shadow-lg animate-pulse"
                             : isActive
                               ? "bg-emerald-600 border-emerald-500 text-white"
                               : "bg-slate-800 border-slate-700 text-slate-500"
@@ -226,12 +226,12 @@ export default function ProceduresPage() {
                 key={cat.value}
                 onClick={() => setActiveCategory(cat.value)}
                 className={`text-left px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-between group ${activeCategory === cat.value
-                  ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/20 dark:text-[#fbc02d]"
+                  ? "bg-red-50 text-portal-primary dark:bg-red-950/20 dark:text-yellow-500"
                   : "hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-700 dark:text-slate-400 hover:text-slate-950"
                   }`}
               >
                 <span>{cat.label}</span>
-                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${activeCategory === cat.value ? "opacity-100 text-[#b91c1c] dark:text-[#fbc02d]" : "text-slate-400"
+                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${activeCategory === cat.value ? "opacity-100 text-portal-primary dark:text-yellow-500" : "text-slate-400"
                   }`} />
               </button>
             ))}
@@ -267,7 +267,7 @@ export default function ProceduresPage() {
                     className="w-full p-3.5 sm:p-4 text-left font-extrabold text-slate-900 dark:text-white hover:bg-slate-50/50 dark:hover:bg-slate-950/40 flex justify-between items-center gap-4 transition-colors text-sm"
                   >
                     <span>{proc.title}</span>
-                    <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180 text-[#b91c1c]" : "text-slate-400"}`} />
+                    <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180 text-portal-primary" : "text-slate-400"}`} />
                   </button>
 
                   {/* Accordion body content */}
@@ -286,7 +286,7 @@ export default function ProceduresPage() {
                           </div>
                         </div>
                         <div className="flex gap-2.5 p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm font-semibold">
-                          <Coins className="w-5 h-5 text-[#fbc02d] shrink-0 mt-0.5" />
+                          <Coins className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                           <div className="flex flex-col">
                             <span className="text-[10px] text-slate-400 uppercase tracking-wider">
                               Phí / Lệ phí
@@ -319,7 +319,7 @@ export default function ProceduresPage() {
                         <div className="flex flex-col gap-3 mt-1.5 pl-1.5 border-l-2 border-red-200 dark:border-red-900/40">
                           {proc.steps.map((step: string, idx: number) => (
                             <div key={idx} className="flex gap-2 items-start">
-                              <span className="w-5 h-5 rounded-full bg-[#b91c1c] text-white flex items-center justify-center font-bold text-[10px] font-mono shrink-0">
+                              <span className="w-5 h-5 rounded-full bg-portal-primary text-white flex items-center justify-center font-bold text-[10px] font-mono shrink-0">
                                 {idx + 1}
                               </span>
                               <span className="font-semibold">{step}</span>
@@ -336,7 +336,7 @@ export default function ProceduresPage() {
                         </span>
                         <button
                           onClick={() => alert(`Khởi tạo biểu mẫu trực tuyến cho: ${proc.title}`)}
-                          className="bg-[#b91c1c] text-white hover:bg-red-700 px-5 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-wider shadow"
+                          className="bg-portal-primary text-white hover:bg-red-700 px-5 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-wider shadow"
                         >
                           NỘP HỒ SƠ TRỰC TUYẾN
                         </button>

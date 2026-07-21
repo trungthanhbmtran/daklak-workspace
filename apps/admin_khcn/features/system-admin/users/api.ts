@@ -62,7 +62,7 @@ function normalizeUserDetail(raw: Record<string, unknown>): UserDetail {
 
 /** Gateway TransformInterceptor bọc response: { success, data, meta }. */
 function unwrapData<T>(res: any): T {
-  return (res?.data ?? res) as T;
+  return res.data as T;
 }
 
 export const userApi = {

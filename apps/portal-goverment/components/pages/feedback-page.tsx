@@ -149,7 +149,7 @@ const resetFormState = () => {
 
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-        <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
+        <Link href="/" className="hover:text-portal-primary flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
           Trang chủ
         </Link>
@@ -165,7 +165,7 @@ const resetFormState = () => {
         {/* Left Column: Interactive Q&A submission form */}
         <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5 md:gap-6">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <MessageSquare className="w-5 h-5 text-[#b91c1c]" />
+            <MessageSquare className="w-5 h-5 text-portal-primary" />
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
               GỬI CÂU HỎI / Ý KIẾN GÓP Ý
             </h3>
@@ -278,9 +278,9 @@ const resetFormState = () => {
 
               <button
                 type="submit"
-                className="w-full mt-2 bg-[#b91c1c] hover:bg-red-700 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
+                className="w-full mt-2 bg-portal-primary hover:bg-red-700 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
               >
-                <Send className="w-4 h-4 text-[#fef08a]" />
+                <Send className="w-4 h-4 text-yellow-200" />
                 GỬI Ý KIẾN PHẢN ÁNH
               </button>
             </form>
@@ -308,7 +308,7 @@ const resetFormState = () => {
         {/* Right Column: Q&A thread list with reactive moderation state */}
         <div className="lg:col-span-7 flex flex-col gap-4">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 mb-1">
-            <HelpCircle className="w-5 h-5 text-[#b91c1c]" />
+            <HelpCircle className="w-5 h-5 text-portal-primary" />
             <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
               Ý KIẾN CÔNG DÂN & PHẢN HỒI CHÍNH THỨC
             </h3>
@@ -323,7 +323,7 @@ const resetFormState = () => {
                 <div
                   key={item.id}
                   className={`bg-white dark:bg-slate-900 border rounded-xl sm:rounded-2xl overflow-hidden shadow-sm transition-all text-xs text-slate-700 dark:text-slate-300 ${isOpen
-                    ? "border-[#b91c1c]"
+                    ? "border-portal-primary"
                     : isPending
                       ? "border-amber-400 bg-amber-500/5"
                       : "border-slate-200/80 dark:border-slate-800"
@@ -338,7 +338,7 @@ const resetFormState = () => {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${isPending
                           ? "bg-amber-500 text-white animate-pulse"
-                          : "bg-[#b91c1c] text-white"
+                          : "bg-portal-primary text-white"
                           }`}>
                           {item.categoryName}
                         </span>
@@ -357,7 +357,7 @@ const resetFormState = () => {
                       </span>
                     </div>
                     {!isPending && (
-                      <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180 text-[#b91c1c]" : "text-slate-400"}`} />
+                      <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180 text-portal-primary" : "text-slate-400"}`} />
                     )}
                   </button>
 
@@ -373,7 +373,7 @@ const resetFormState = () => {
 
                       {item.answer ? (
                         <div className="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-850 pt-4">
-                          <span className="text-[10px] text-red-600 dark:text-[#fbc02d] font-black uppercase tracking-widest flex items-center gap-1">
+                          <span className="text-[10px] text-red-600 dark:text-yellow-500 font-black uppercase tracking-widest flex items-center gap-1">
                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             PHẢN HỒI CHÍNH THỨC TỪ CHÍNH QUYỀN XÃ DANG KANG
                           </span>

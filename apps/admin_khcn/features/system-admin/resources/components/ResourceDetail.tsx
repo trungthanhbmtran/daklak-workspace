@@ -68,7 +68,7 @@ function ResourceDetailInner({ resourceId }: ResourceDetailProps) {
     mutationFn: ({ id, ...payload }: { id: number; code?: string; name?: string }) =>
       resourceApi.updateResource(id, payload),
     onSuccess: (res: { data?: { id: number; code: string; name: string } }) => {
-      const d = res?.data;
+      const d = res.data;
       if (d) {
         setEditName(d.name);
         setEditCode(d.code);

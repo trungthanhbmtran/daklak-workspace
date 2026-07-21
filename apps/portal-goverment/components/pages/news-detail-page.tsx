@@ -334,12 +334,12 @@ export default function NewsDetailPage({ id }: Props) {
 
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-        <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
+        <Link href="/" className="hover:text-portal-primary flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
           {t.home}
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
-        <Link href={currentLang === "en" ? "/news" : "/tin-tuc"} className="hover:text-[#b91c1c]">
+        <Link href={currentLang === "en" ? "/news" : "/tin-tuc"} className="hover:text-portal-primary">
           {t.news}
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
@@ -362,7 +362,7 @@ export default function NewsDetailPage({ id }: Props) {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex flex-col justify-end p-4 sm:p-6 md:p-8">
-              <span className="self-start mb-3 bg-[#b91c1c] dark:bg-[#fbc02d] dark:text-slate-950 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">
+              <span className="self-start mb-3 bg-portal-primary dark:bg-[#fbc02d] dark:text-slate-950 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-md">
                 {article.categoryName}
               </span>
               <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight tracking-wide">
@@ -396,21 +396,21 @@ export default function NewsDetailPage({ id }: Props) {
                 <button
                   onClick={() => setFontSize("sm")}
                   title="Thu nhỏ chữ"
-                  className={`p-1.5 rounded transition-colors ${fontSize === "sm" ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
+                  className={`p-1.5 rounded transition-colors ${fontSize === "sm" ? "bg-red-50 text-portal-primary dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
                 >
                   <ZoomOut className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setFontSize("md")}
                   title="Cỡ chữ mặc định"
-                  className={`p-1.5 rounded transition-colors ${fontSize === "md" ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
+                  className={`p-1.5 rounded transition-colors ${fontSize === "md" ? "bg-red-50 text-portal-primary dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setFontSize("lg")}
                   title="Phóng to chữ"
-                  className={`p-1.5 rounded transition-colors ${fontSize === "lg" ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
+                  className={`p-1.5 rounded transition-colors ${fontSize === "lg" ? "bg-red-50 text-portal-primary dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
                 >
                   <ZoomIn className="w-3.5 h-3.5" />
                 </button>
@@ -421,14 +421,14 @@ export default function NewsDetailPage({ id }: Props) {
                 <button
                   onClick={handlePrint}
                   title="In bài viết"
-                  className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-[#b91c1c] rounded-lg transition-colors text-slate-400"
+                  className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-portal-primary rounded-lg transition-colors text-slate-400"
                 >
                   <Printer className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleDownloadPDF}
                   title="Tải xuống PDF"
-                  className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-[#b91c1c] rounded-lg transition-colors text-slate-400"
+                  className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-portal-primary rounded-lg transition-colors text-slate-400"
                 >
                   <FileDown className="w-3.5 h-3.5" />
                 </button>
@@ -437,7 +437,7 @@ export default function NewsDetailPage({ id }: Props) {
                   title={isCopied ? t.copied : "Share"}
                   className={`p-2 border rounded-lg transition-colors ${isCopied
                     ? "bg-green-50 border-green-200 text-green-600 dark:bg-green-950/20 dark:border-green-900"
-                    : "bg-white dark:bg-slate-900 border-slate-200/50 dark:border-slate-800 text-slate-400 hover:text-[#b91c1c]"
+                    : "bg-white dark:bg-slate-900 border-slate-200/50 dark:border-slate-800 text-slate-400 hover:text-portal-primary"
                     }`}
                 >
                   <Share2 className="w-3.5 h-3.5" />
@@ -464,7 +464,7 @@ export default function NewsDetailPage({ id }: Props) {
             {/* Bottom Signature / Footer */}
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="text-xs text-slate-400 font-bold">
-                <span className="text-[#b91c1c] dark:text-[#fbc02d]">{t.source}</span>
+                <span className="text-portal-primary dark:text-yellow-500">{t.source}</span>
                 <p className="mt-0.5 font-medium">{t.sourceDesc}</p>
               </div>
 
@@ -484,7 +484,7 @@ export default function NewsDetailPage({ id }: Props) {
         <div className="lg:col-span-4 flex flex-col gap-6">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4">
             <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
+              <FileText className="w-4 h-4 text-portal-primary dark:text-yellow-500" />
               {t.relatedNews}
             </h4>
 
@@ -503,10 +503,10 @@ export default function NewsDetailPage({ id }: Props) {
                       className="w-16 h-16 object-cover rounded-lg shrink-0 group-hover:scale-105 transition-transform"
                     />
                     <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-black uppercase text-[#b91c1c] dark:text-[#fbc02d] tracking-wider">
+                      <span className="text-[9px] font-black uppercase text-portal-primary dark:text-yellow-500 tracking-wider">
                         {post.categoryName}
                       </span>
-                      <h5 className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 group-hover:text-[#b91c1c] transition-colors line-clamp-2 leading-snug">
+                      <h5 className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 group-hover:text-portal-primary transition-colors line-clamp-2 leading-snug">
                         {post.title}
                       </h5>
                       <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">

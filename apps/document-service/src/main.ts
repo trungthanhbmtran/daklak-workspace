@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AppModule } from './app.module';
@@ -30,6 +31,7 @@ async function bootstrap() {
     },
   });
 
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.enableShutdownHooks();
 
   await app.listen();

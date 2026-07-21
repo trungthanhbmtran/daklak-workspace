@@ -19,12 +19,7 @@ export class InteractionsController {
     return {
       data: items.map(i => this.mapComment(i)),
       meta: {
-        pagination: {
-          total,
-          page: Number(query.page) || 1,
-          pageSize: Number(query.limit) || 10,
-          totalPages: Math.ceil(total / (Number(query.limit) || 10)),
-        },
+        total, skip: (Number(query.page || 1) - 1) * (Number(query.limit) || 10), take: Number(query.limit) || 10
       },
     };
   }
@@ -53,12 +48,7 @@ export class InteractionsController {
     return {
       data: items.map(i => this.mapQuestion(i)),
       meta: {
-        pagination: {
-          total,
-          page: Number(query.page) || 1,
-          pageSize: Number(query.limit) || 10,
-          totalPages: Math.ceil(total / (Number(query.limit) || 10)),
-        },
+        total, skip: (Number(query.page || 1) - 1) * (Number(query.limit) || 10), take: Number(query.limit) || 10
       },
     };
   }
@@ -88,12 +78,7 @@ export class InteractionsController {
     return {
       data: items.map(i => this.mapFeedback(i)),
       meta: {
-        pagination: {
-          total,
-          page: Number(query.page) || 1,
-          pageSize: Number(query.limit) || 10,
-          totalPages: Math.ceil(total / (Number(query.limit) || 10)),
-        },
+        total, skip: (Number(query.page || 1) - 1) * (Number(query.limit) || 10), take: Number(query.limit) || 10
       },
     };
   }

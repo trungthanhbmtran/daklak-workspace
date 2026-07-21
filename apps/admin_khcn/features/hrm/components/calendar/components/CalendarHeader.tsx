@@ -4,7 +4,6 @@ import { vi as viLocale } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { Button } from "@/components/ui/button";
 
 export type CalendarViewMode = "day" | "week" | "month" | "quarter" | "year";
 

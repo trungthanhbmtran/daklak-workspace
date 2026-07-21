@@ -136,9 +136,11 @@ export class CategoriesService {
       ]),
     );
 
+    const definedGroupsMap = new Map(definedGroups.map((dg) => [dg.code, dg]));
+
     // 4. Map lại thành đối tượng { code, name } và kèm theo thứ tự sắp xếp
     const result = allCodes.map((code) => {
-      const defined = definedGroups.find((dg) => dg.code === code);
+      const defined = definedGroupsMap.get(code);
       return {
         code,
         name: defined?.name || code, // Nếu chưa có tên hiển thị thì dùng mã code

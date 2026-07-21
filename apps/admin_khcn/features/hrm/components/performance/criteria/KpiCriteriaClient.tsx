@@ -46,7 +46,7 @@ export function KpiCriteriaClient() {
   const [limit, setLimit] = useState(10);
 
   const { data: response, isLoading } = useKpiCriteriaListPaginated({ page, limit });
-  const criteriaList = response.data;
+  const criteriaList = response?.data || [];
   const meta: any = response?.meta?.pagination;
 
   const createMutation = useCreateKpiCriterion();

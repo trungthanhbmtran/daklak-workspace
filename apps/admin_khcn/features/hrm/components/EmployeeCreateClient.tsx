@@ -143,7 +143,7 @@ export function EmployeeCreateClient() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] p-6 md:p-10 text-slate-900">
+    <div className="min-h-screen bg-slate-100 p-6 md:p-10 text-slate-900">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1200px] mx-auto space-y-6">
           {/* HEADER */}
