@@ -1,6 +1,7 @@
 "use client";
 import { useThemeConfig, LayoutSettings } from "./ThemeProvider";
 import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 export function LayoutConfig() {
@@ -20,7 +21,7 @@ export function LayoutConfig() {
                     {radiusOptions.map((r) => {
                         const isSelected = layout.radius === r;
                         return (
-                            <button
+                            <Button
                                 key={r}
                                 type="button"
                                 onClick={() => setLayout({ radius: r })}
@@ -30,7 +31,7 @@ export function LayoutConfig() {
                                     }`}
                             >
                                 {r}
-                            </button>
+                            </Button>
                         );
                     })}
                 </div>

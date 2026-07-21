@@ -53,7 +53,7 @@ export class PortalConfigController {
         return null;
       },
     );
-    return { success: true, data: res.data || [] };
+    return { success: true, data: res.data };
   }
 
   @Put(':id')

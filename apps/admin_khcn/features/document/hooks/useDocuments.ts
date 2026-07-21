@@ -141,16 +141,22 @@ export function useDocuments() {
   const queryClient = useQueryClient();
 
   const createDocumentMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: any) => apiClient.post(API_BASE, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Văn bản đã được lưu!'); },
   });
 
   const createConsultationMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: any) => apiClient.post(`${API_BASE}/consultations`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-consultations'] }); toast.success('Yêu cầu lấy ý kiến đã được phát hành!'); },
   });
 
   const updateDocumentMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, ...data }: any) => apiClient.put(`${API_BASE}/${id}`, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
@@ -161,11 +167,15 @@ export function useDocuments() {
   });
 
   const deleteDocumentMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: string) => apiClient.delete(`${API_BASE}/${id}`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Đã xóa văn bản!'); },
   });
 
   const extractMetadataMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: async (fileId: string): Promise<any> => {
       const res = await apiClient.post(`${API_BASE}/extract`, { fileId }) as any as ApiResponse<any>;
       return res.data;
@@ -173,32 +183,44 @@ export function useDocuments() {
   });
 
   const syncOnlineMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: () => apiClient.post(`${API_BASE}/sync`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Đã đồng bộ văn bản từ trục liên thông!'); },
   });
 
   const moderateCommentMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       apiClient.put(`${API_BASE}/consultations/public-comments/${id}/moderate`, { status }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['public-comments'] }); toast.success('Đã cập nhật trạng thái kiểm duyệt!'); },
   });
 
   const createCategoryMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: any) => apiClient.post(`${API_BASE}/categories`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-categories'] }); toast.success('Đã tạo danh mục mới!'); },
   });
 
   const updateCategoryMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, ...data }: any) => apiClient.put(`${API_BASE}/categories/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-categories'] }); toast.success('Đã cập nhật danh mục!'); },
   });
 
   const deleteCategoryMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: string) => apiClient.delete(`${API_BASE}/categories/${id}`),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-categories'] }); toast.success('Đã xóa danh mục!'); },
   });
 
   const createMinutesMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: any) => apiClient.post(`${API_BASE}/minutes`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-minutes'] }); toast.success('Đã lưu biên bản cuộc họp!'); },
   });

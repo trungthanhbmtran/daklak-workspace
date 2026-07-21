@@ -63,9 +63,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     return found ? found.name : (pos || "Chưa phân loại");
   };
 
-  const positionCategories = categories
-    .filter((cat: any) => cat.group === "BANNER_POSITION" && cat.active !== 0)
-    .sort((a: any, b: any) => (a.sort || 0) - (b.sort || 0));
+  const positionCategories = categories;
 
   const [page, setPage] = useState(1);
   const pageSize = 12;

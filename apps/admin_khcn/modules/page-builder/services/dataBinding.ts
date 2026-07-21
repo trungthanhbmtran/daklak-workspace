@@ -28,7 +28,7 @@ export const useHrmEmployeesQuery = () => {
     queryFn: async () => {
       try {
         const res = await hrmApi.list({ pageSize: 1000 });
-        return res?.data || [];
+        return res.data;
       } catch (e) {
         console.error("Failed to fetch HRM employees, returning empty array", e);
         return [];

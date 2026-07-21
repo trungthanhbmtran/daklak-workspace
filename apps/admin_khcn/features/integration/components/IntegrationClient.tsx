@@ -162,7 +162,7 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
         {modules.map((module) => {
           const style = module.theme;
           return (
-            <button
+            <Button
               key={module.id}
               onClick={() => setActiveView(module.id as any)}
               className="text-left group block outline-none w-full"
@@ -185,7 +185,7 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </div>
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

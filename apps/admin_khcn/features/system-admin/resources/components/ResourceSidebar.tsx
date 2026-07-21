@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { resourceApi } from "../api";
 import { resourceKeys } from "../keys";
 import type { Resource } from "../types";
+import { toast } from "sonner";
 
 // ─── Constants ────────────────────────────────────────────────────────
 const PAGE_SIZE = 12;
@@ -80,12 +81,16 @@ function ResourceSidebarInner() {
     queryClient.invalidateQueries({ queryKey: resourceKeys.lists() });
 
   const createResourceMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: { code: string; name: string; serviceCode?: string }) =>
       resourceApi.createResource(payload),
     onSuccess: () => invalidateResources(),
   });
 
   const deleteResourceMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: number) => resourceApi.deleteResource(id),
     onSuccess: () => invalidateResources(),
   });

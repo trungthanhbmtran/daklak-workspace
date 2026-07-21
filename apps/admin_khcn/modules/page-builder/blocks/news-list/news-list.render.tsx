@@ -55,7 +55,7 @@ export const NewsListRender: React.FC<NewsListRenderProps> = ({ widget, activeLa
             className="group rounded-3xl border border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
           >
             <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-950">
-              // eslint-disable-next-line @next/next/no-img-element
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={art.img}
                 alt="News"

@@ -307,7 +307,7 @@ export function CommentsClient() {
     queryKey: ["comments", "PENDING", 1, 50],
     queryFn: async () => {
       const response = await postsApi.getComments({ status: "PENDING", page: 1, limit: 50 });
-      return response.data || [];
+      return response.data;
     },
     staleTime: 60_000,
   });

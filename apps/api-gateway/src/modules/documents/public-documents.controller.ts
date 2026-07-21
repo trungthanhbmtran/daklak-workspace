@@ -72,6 +72,11 @@ export class PublicDocumentsController implements OnModuleInit {
     if (query.typeId) req.typeId = query.typeId;
     if (query.fieldId) req.fieldId = query.fieldId;
     if (query.status) req.status = query.status;
+    if (query.org) req.issuingAuthorityId = query.org;
+    if (query.date) {
+      req.startDate = query.date;
+      req.endDate = query.date;
+    }
     if (query.fiscalYear)
       req.fiscalYear = parseInt(query.fiscalYear.toString());
     if (query.transparencyCategory)

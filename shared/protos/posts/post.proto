@@ -150,6 +150,8 @@ message ListPostsRequest {
   string isFeatured = 8;
   string sortBy = 9;
   string sortOrder = 10;
+  string isNotification = 11;
+  string hasThumbnail = 12;
 }
 
 message DataListPost {

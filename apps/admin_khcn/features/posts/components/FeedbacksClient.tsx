@@ -104,6 +104,7 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
       queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
       onClose();
     },
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     onError: (error: any) => {
       const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
       toast.error(message);
@@ -205,6 +206,7 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
       toast.success("Đã đánh dấu đã xử lý");
       queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
     },
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     onError: (error: any) => {
       const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
       toast.error(message);
@@ -349,13 +351,15 @@ export function FeedbacksClient() {
     queryKey: ["feedbacks", 1, 50],
     queryFn: async () => {
       const response = await postsApi.getFeedbacks({ page: 1, limit: 50 });
-      return response.data || [];
+      return response.data;
     },
     staleTime: 60_000,
   });
 
   // Đọc nhanh khi mở dialog (không cần invalidate, chỉ mark READ)
   const markReadMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: string) => postsApi.updateFeedbackStatus(id, "READ"),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["feedbacks"] }),
   });

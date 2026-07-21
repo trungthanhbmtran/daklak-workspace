@@ -194,7 +194,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                           {Array.isArray(roles) && roles.map((role: string) => (
                             <span key={role} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
                               {role}
-                              <button
+                              <Button
                                 type="button"
                                 className="ml-1 text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
                                 onClick={() => {
@@ -206,7 +206,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                                 }}
                               >
                                 <X className="h-2.5 w-2.5" />
-                              </button>
+                              </Button>
                             </span>
                           ))}
                           <div className="flex items-center gap-1">

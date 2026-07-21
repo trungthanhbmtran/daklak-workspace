@@ -77,7 +77,7 @@ export function NotificationConfigPanel() {
       }
       setIntegrationIds(ids);
       setActiveStates(states);
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (error) {
       toast.error((error as any)?.response?.data?.message || "Không thể lấy cấu hình thông báo");
     } finally {

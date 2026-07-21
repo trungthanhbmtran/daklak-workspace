@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";
+import { Button } from "@/components/ui/button";
 import {
   UNIT_TYPE_CATEGORY_GROUP,
   parseUnitTypeCategoryMeta,
@@ -77,10 +78,10 @@ export function UnitTypeSelector({ value, onChange, disabled }: UnitTypeSelector
         <p className="text-xs text-muted-foreground">
           {isError ? "Không tải được danh mục phân loại." : "Chưa có danh mục phân loại."}
         </p>
-        <button type="button" onClick={() => refetch()}
+        <Button type="button" onClick={() => refetch()}
           className="flex items-center gap-1 text-xs text-primary hover:underline">
           <RefreshCw className="h-3 w-3" /> Thử lại
-        </button>
+        </Button>
       </div>
     );
   }
@@ -98,7 +99,7 @@ export function UnitTypeSelector({ value, onChange, disabled }: UnitTypeSelector
           const isSelected = value === item.code;
 
           return (
-            <button
+            <Button
               key={item.code}
               type="button"
               onClick={() => onChange(item.code)}
@@ -139,7 +140,7 @@ export function UnitTypeSelector({ value, onChange, disabled }: UnitTypeSelector
                   </span>
                 )}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

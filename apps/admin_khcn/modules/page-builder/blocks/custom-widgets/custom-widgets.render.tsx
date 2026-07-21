@@ -21,6 +21,9 @@ import {
   Info,
   HelpCircle
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 // Lucide icon mapping dictionary for public services
 const iconMap: Record<string, any> = {
@@ -56,7 +59,7 @@ export const HeroSliderRender: React.FC<{ widget: Widget; activeLang: string }> 
   return (
     <div className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden shadow-md border border-slate-200/20 bg-slate-900 select-none">
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10" />
-      // eslint-disable-next-line @next/next/no-img-element
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={displayBanners[0].imageUrl}
         alt={displayBanners[0].name}
@@ -130,7 +133,7 @@ export const PublicServicesRender: React.FC<{ widget: Widget; activeLang: string
     }
   ];
 
-  const customItems = widget.data?.items;
+  const customItems = widget.data?.items || [];
   const displayItems = Array.isArray(customItems) && customItems.length > 0 ? customItems : defaultServices;
 
   const colors = [
@@ -146,26 +149,28 @@ export const PublicServicesRender: React.FC<{ widget: Widget; activeLang: string
         const IconComponent = iconMap[svc.iconName] || FileText;
         const colorStyle = svc.color || colors[idx % colors.length];
         return (
-          <div
+          <Card
             key={idx}
-            className={`p-4 rounded-2xl border transition-all hover:-translate-y-0.5 shadow-sm flex flex-col justify-between gap-4 ${colorStyle}`}
+            className={`transition-all hover:-translate-y-0.5 shadow-sm flex flex-col justify-between gap-4 border-none rounded-2xl ${colorStyle}`}
           >
-            <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
-              <IconComponent className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <h5 className="font-extrabold text-slate-800 dark:text-white uppercase text-[10px] tracking-wide truncate">
-                {svc.title || (currentLang === "en" ? "Service Title" : "Tiêu đề dịch vụ")}
-              </h5>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium leading-relaxed line-clamp-2">
-                {svc.desc || (currentLang === "en" ? "Service Description goes here." : "Mô tả chi tiết dịch vụ công.")}
-              </p>
-            </div>
-            <div className="flex items-center gap-1 font-black text-[9px] tracking-wider uppercase opacity-80">
-              <span>{currentLang === "en" ? "Access Feature" : "Truy cập ngay"}</span>
-              <ArrowRight className="w-2.5 h-2.5" />
-            </div>
-          </div>
+            <CardContent className="p-4 flex flex-col h-full justify-between gap-4">
+              <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
+                <IconComponent className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h5 className="font-extrabold text-slate-800 dark:text-white uppercase text-[10px] tracking-wide truncate">
+                  {svc.title || (currentLang === "en" ? "Service Title" : "Tiêu đề dịch vụ")}
+                </h5>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium leading-relaxed line-clamp-2">
+                  {svc.desc || (currentLang === "en" ? "Service Description goes here." : "Mô tả chi tiết dịch vụ công.")}
+                </p>
+              </div>
+              <div className="flex items-center gap-1 font-black text-[9px] tracking-wider uppercase opacity-80">
+                <span>{currentLang === "en" ? "Access Feature" : "Truy cập ngay"}</span>
+                <ArrowRight className="w-2.5 h-2.5" />
+              </div>
+            </CardContent>
+          </Card>
         );
       })}
     </div>
@@ -194,32 +199,34 @@ export const LegalDocumentsRender: React.FC<{ widget: Widget; activeLang: string
         </h4>
       )}
       {displayDocs.map((doc, idx) => (
-        <div
+        <Card
           key={doc.id || idx}
-          className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-xl flex items-center justify-between gap-3 hover:border-red-500/50 transition-colors"
+          className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-xl hover:border-red-500/50 transition-colors shadow-none"
         >
-          <div className="flex items-start gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded bg-red-50 dark:bg-red-950/20 text-red-600 flex items-center justify-center shrink-0">
-              <FolderOpen className="w-3.5 h-3.5" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[8px] bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-black tracking-wide">
-                  {doc.codeNum}
-                </span>
-                <span className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {doc.dateStr}
-                </span>
+          <CardContent className="p-3 flex items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded bg-red-50 dark:bg-red-950/20 text-red-600 flex items-center justify-center shrink-0">
+                <FolderOpen className="w-3.5 h-3.5" />
               </div>
-              <h5 className="text-[11px] font-bold text-slate-750 dark:text-white mt-1 leading-snug truncate">
-                {doc.title}
-              </h5>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[8px] bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-black tracking-wide">
+                    {doc.codeNum}
+                  </span>
+                  <span className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {doc.dateStr}
+                  </span>
+                </div>
+                <h5 className="text-[11px] font-bold text-slate-750 dark:text-white mt-1 leading-snug truncate">
+                  {doc.title}
+                </h5>
+              </div>
             </div>
-          </div>
-          <div className="font-extrabold text-[8px] tracking-wider uppercase border border-red-200 hover:bg-red-50 text-red-600 dark:border-red-900 dark:hover:bg-red-950/30 dark:text-red-400 px-2.5 py-1.5 rounded-lg shrink-0 cursor-pointer transition-colors shadow-sm bg-white dark:bg-slate-950">
-            {currentLang === "en" ? "View Doc" : "Xem văn bản"}
-          </div>
-        </div>
+            <Button variant="outline" size="sm" className="font-extrabold text-[8px] tracking-wider uppercase border-red-200 hover:bg-red-50 text-red-600 dark:border-red-900 dark:hover:bg-red-950/30 dark:text-red-400 h-7 px-2.5 py-1.5 rounded-lg shrink-0">
+              {currentLang === "en" ? "View Doc" : "Xem văn bản"}
+            </Button>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
@@ -244,7 +251,7 @@ export const MediaGalleryRender: React.FC<{ widget: Widget; activeLang: string }
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {displayItems.map((item, idx) => (
         <div key={idx} className="group relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-800 aspect-video shadow-sm">
-          // eslint-disable-next-line @next/next/no-img-element
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={item.img}
             alt={item.title}
@@ -285,22 +292,25 @@ export const FaqAccordionRender: React.FC<{ widget: Widget; activeLang: string }
   const displayFaqs = mockFaqs.slice(0, limit);
 
   return (
-    <div className="space-y-3">
+    <Accordion type="single" collapsible className="space-y-3 w-full">
       {displayFaqs.map((faq, idx) => (
-        <div
+        <AccordionItem
           key={idx}
-          className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl space-y-2"
+          value={`item-${idx}`}
+          className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-3.5 data-[state=open]:pb-2"
         >
-          <div className="flex items-start gap-2 text-slate-850 dark:text-white font-extrabold text-[11px] leading-snug">
-            <HelpCircle className="w-3.5 h-3.5 text-red-600 shrink-0 mt-0.5" />
-            <span>{faq.q}</span>
-          </div>
-          <div className="pl-5.5 text-[10px] text-slate-450 dark:text-slate-400 font-semibold leading-relaxed border-t border-slate-100 dark:border-slate-850 pt-2">
+          <AccordionTrigger className="hover:no-underline py-3">
+            <div className="flex items-start gap-2 text-slate-850 dark:text-white font-extrabold text-[11px] leading-snug text-left">
+              <HelpCircle className="w-3.5 h-3.5 text-red-600 shrink-0 mt-0.5" />
+              <span>{faq.q}</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pl-5.5 text-[10px] text-slate-450 dark:text-slate-400 font-semibold leading-relaxed border-t border-slate-100 dark:border-slate-850 pt-3 pb-1">
             {faq.a}
-          </div>
-        </div>
+          </AccordionContent>
+        </AccordionItem>
       ))}
-    </div>
+    </Accordion>
   );
 };
 
@@ -317,25 +327,26 @@ export const ExternalLinksRender: React.FC<{ widget: Widget; activeLang: string 
     { title: currentLang === "en" ? "Ministry of Science & Tech" : "Bộ Khoa học và Công nghệ", url: "#" }
   ];
 
-  const customLinks = widget.data?.items;
+  const customLinks = widget.data?.items || [];
   const displayLinks = Array.isArray(customLinks) && customLinks.length > 0 ? customLinks : defaultLinks;
 
   return (
     <div className="grid grid-cols-2 gap-3">
       {displayLinks.map((link, idx) => (
-        <a
+        <Button
           key={idx}
-          href={link.url || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 rounded-xl border border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between text-slate-700 dark:text-slate-350 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors shadow-sm cursor-pointer"
+          variant="outline"
+          asChild
+          className="h-auto p-3 rounded-xl border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between text-slate-700 dark:text-slate-350 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors shadow-sm cursor-pointer whitespace-normal text-left"
         >
-          <div className="flex items-center gap-2 min-w-0">
-            <Link2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="text-[10px] font-black uppercase truncate tracking-wide">{link.title || (currentLang === "en" ? "Link" : "Liên kết")}</span>
-          </div>
-          <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-        </a>
+          <a href={link.url || "#"} target="_blank" rel="noopener noreferrer" className="w-full flex justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <Link2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="text-[10px] font-black uppercase truncate tracking-wide">{link.title || (currentLang === "en" ? "Link" : "Liên kết")}</span>
+            </div>
+            <ChevronRight className="w-3 h-3 text-slate-400 shrink-0 ml-2" />
+          </a>
+        </Button>
       ))}
     </div>
   );
@@ -399,7 +410,7 @@ export const CommuneInteractiveMapRender: React.FC<{ widget: Widget; activeLang:
                 fontWeight="bold"
                 textAnchor="middle"
                 className={`pointer-events-none transition-colors ${
-                  activeZoneId === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
+                  activeZoneId === zone.id ? "fill-yellow-200" : "fill-slate-800 dark:fill-slate-200"
                 }`}
               >
                 {zone.id}

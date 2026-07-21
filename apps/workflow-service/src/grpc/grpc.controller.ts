@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
+import { CreateWorkflowGrpcDto, StartWorkflowGrpcDto, FindOneWorkflowGrpcDto } from './dto/workflow.dto';
 import { DefinitionService } from '../definition/definition.service';
 import { ExecutionService } from '../execution/execution.service';
 
@@ -11,7 +12,7 @@ export class GrpcWorkflowController {
   ) {}
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
-  async createWorkflow(data: any) {
+  async createWorkflow(@Payload() data: CreateWorkflowGrpcDto) {
     const result = await this.definitionService.createProcess({
       code: data.code,
       name: data.name,
@@ -39,18 +40,14 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
-  async findOneWorkflow(_data: { id: string }) {
+  async findOneWorkflow(@Payload() data: FindOneWorkflowGrpcDto) {
     // Note: getDefinition uses 'code', while proto uses 'id'.
     // Need to adjust logic in Gateway or here to search by ID or Code.
     return { success: true };
   }
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
-  async startWorkflow(data: {
-    workflowId: string;
-    initialContext: any;
-    initiatorId: string;
-  }) {
+  async startWorkflow(@Payload() data: StartWorkflowGrpcDto) {
     // workflowId in new schema is definition code
     const instance = await this.executionService.startProcess(data.workflowId, {
       variables: data.initialContext,

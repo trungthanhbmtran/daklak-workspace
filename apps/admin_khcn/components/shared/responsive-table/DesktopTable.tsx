@@ -6,8 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
-  TableFooter
+  TableCaption
 } from "@/components/ui/table";
 import { ResponsiveTableProps } from './types';
 

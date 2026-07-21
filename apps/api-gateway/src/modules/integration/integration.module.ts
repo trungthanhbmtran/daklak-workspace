@@ -4,6 +4,7 @@ import { IntegrationController } from './integration.controller';
 
 @Global()
 @Module({
+  imports: [],
   controllers: [IntegrationController],
   providers: [IntegrationService],
   exports: [IntegrationService],

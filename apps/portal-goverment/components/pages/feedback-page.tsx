@@ -57,7 +57,7 @@ export default function InteractionsPage() {
     queryFn: async () => {
       try {
         const res: any = await apiClient.get("/public/interactions/questions?limit=50")
-        return res?.data || []
+        return res.data
       } catch (e) {
         console.error("Failed to fetch questions", e)
         return []

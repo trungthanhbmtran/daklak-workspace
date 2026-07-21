@@ -376,7 +376,7 @@ export default function Header() {
     }
 
     return roots.map((root: any) => {
-      const children = horizontalMenus.filter((m: any) => m.parentId === root.id)
+      const children = horizontalMenus
       return {
         name: getMenuNameTranslated(root),
         path: resolveMenuLink(root),
@@ -417,7 +417,7 @@ export default function Header() {
 
   // 8. Localize and render unit details configuration values dynamically
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.description && found.description.trim().startsWith("{")) {

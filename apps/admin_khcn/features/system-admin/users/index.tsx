@@ -31,6 +31,7 @@ export function UserClient() {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   // Reset page khi search thay đổi
+   
   useEffect(() => {
     setPage(1);
   }, [ui.state.searchTerm]);

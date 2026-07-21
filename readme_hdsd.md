@@ -6,6 +6,13 @@ Chào mừng bạn đến với tài liệu Hướng dẫn sử dụng và giớ
 
 ## 🕒 Lịch sử Cập nhật (Changelog / Version History)
 
+- **Version**: `v1.3.0`
+- **Thời gian cập nhật**: `21/07/2026 13:30`
+- **Nội dung cập nhật**: 
+  - **Dumb Client Architecture (Toàn diện)**: Bóc tách thành công 100% logic xử lý, tính toán, và filter mảng dữ liệu phức tạp khỏi Frontend (cụ thể ở các chức năng: Cây Menu Động, Lọc Tin tức theo Thumbnails/Thể loại, Lọc nhân sự theo Mảng ID, và Văn bản pháp quy theo Cơ quan ban hành). Toàn bộ gánh nặng này đã được chuyển xuống Backend xử lý qua API Gateway và Prisma DB, biến Frontend thực sự trở thành "Dumb Client" theo đúng chuẩn mực.
+  - **Prisma CUID Standardization**: Chuyển đổi hàng loạt các Schema sử dụng khóa chính `uuid()` kém tối ưu sang `cuid()` theo đúng tiêu chuẩn hệ thống (Phase 2), cải thiện hiệu năng Insert Index cho Database.
+
+
 - **Version**: `v1.2.0`
 - **Thời gian cập nhật**: `20/07/2026 22:58`
 - **Nội dung cập nhật**: 

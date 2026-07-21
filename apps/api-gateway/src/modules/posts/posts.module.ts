@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { PostsController } from './posts.controller';
+import { PostsService } from './posts.service';
 import { PublicPostsController } from './public-posts.controller';
 import { PostsCategoryController } from './posts-category.controller';
 import { PostsTagController } from './posts-tag.controller';
@@ -10,6 +11,7 @@ import { PublicBannersController } from './public-banners.controller';
 import { PortalMenuController } from './portal-menu.controller';
 import { PublicPortalMenuController } from './public-portal-menu.controller';
 import { InteractionsController } from './interactions.controller';
+import { InteractionsService } from './interactions.service';
 import { PublicInteractionsController } from './public-interactions.controller';
 import { PortalConfigController } from './portal-config.controller';
 import { PublicPortalConfigController } from './public-portal-config.controller';
@@ -38,5 +40,6 @@ import { PublicPortalConfigController } from './public-portal-config.controller'
     PortalConfigController,
     PublicPortalConfigController,
   ],
+  providers: [PostsService, InteractionsService],
 })
 export class PostsModule {}

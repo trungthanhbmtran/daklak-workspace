@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import {  GrpcMethod, RpcException , Payload } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { MenusService } from './menus.service';
 
@@ -30,7 +30,7 @@ export class MenusController {
   }
 
   @GrpcMethod('MenuService', 'GetMyMenus')
-  async getMyMenus(data: any) {
+  async getMyMenus(@Payload() data: Record<string, any>) {
     const userId = data.userId ?? data.user_id;
     const tree = await this.menusService.getMyMenus(
       typeof userId === 'number' ? userId : Number(userId),
@@ -59,7 +59,7 @@ export class MenusController {
   }
 
   @GrpcMethod('MenuService', 'Create')
-  async create(data: any) {
+  async create(@Payload() data: Record<string, any>) {
     try {
       const menu = await this.menusService.create({
         code: data.code,

@@ -92,7 +92,7 @@ export function PortalConfigClient() {
                 const TabIcon = tab.icon;
                 const isActive = activeConfigTab === tab.id;
                 return (
-                  <button
+                  <Button
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveConfigTab(tab.id)}
@@ -103,7 +103,7 @@ export function PortalConfigClient() {
                   >
                     <TabIcon className="w-4 h-4" />
                     {tab.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>

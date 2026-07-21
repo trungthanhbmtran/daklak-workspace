@@ -25,6 +25,9 @@ export class PublicHrmController implements OnModuleInit {
     if (req.page) req.page = parseInt(req.page);
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
+    if (req.ids) {
+      req.ids = typeof req.ids === 'string' ? req.ids.split(',').map((id: string) => parseInt(id, 10)).filter((id: number) => !isNaN(id)) : req.ids;
+    }
 
     const response = await firstValueFrom(
       this.employeeService.ListEmployees(req),

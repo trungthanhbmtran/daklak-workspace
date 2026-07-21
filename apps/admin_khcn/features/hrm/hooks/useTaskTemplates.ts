@@ -4,6 +4,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hrmTaskTemplatesApi } from "../api";
 import { hrmKeys } from "../keys";
+import { toast } from "sonner";
 
 export function useTaskTemplatesList(rank?: string) {
   return useQuery({
@@ -15,6 +16,8 @@ export function useTaskTemplatesList(rank?: string) {
 export function useCreateTaskTemplate() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: any) => hrmTaskTemplatesApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hrmKeys.taskTemplates() });
@@ -25,6 +28,8 @@ export function useCreateTaskTemplate() {
 export function useDeleteTaskTemplate() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: string) => hrmTaskTemplatesApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hrmKeys.taskTemplates() });
@@ -35,6 +40,8 @@ export function useDeleteTaskTemplate() {
 export function useUpdateTaskTemplate() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, payload }: { id: string, payload: any }) => hrmTaskTemplatesApi.update(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hrmKeys.taskTemplates() });

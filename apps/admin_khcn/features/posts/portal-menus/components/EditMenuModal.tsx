@@ -19,6 +19,8 @@ import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
 import { portalConfigApi } from "@/features/portal-config/api";
 import { Text } from "@/components/ui/typography";
+import apiClient from "@/lib/axiosInstance";
+import type { ApiResponse } from "@/lib/axiosInstance";
 
 
 interface EditMenuModalProps {
@@ -41,7 +43,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
     queryKey: ["categories-for-menu-posts"],
     queryFn: async () => {
       const res = await postsApi.getCategories({ page: 1, limit: 100 });
-      return res?.data || [];
+      return res.data;
     },
     enabled: isOpen,
   });
@@ -51,7 +53,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
     queryKey: ["posts-for-menu"],
     queryFn: async () => {
       const res = await postsApi.getPosts({ page: 1, limit: 100 });
-      return res?.data || [];
+      return res.data;
     },
     enabled: isOpen,
   });
@@ -60,7 +62,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const { data: dynamicUnitsRes } = useQuery({
     queryKey: ["organization-units-for-menu"],
     queryFn: async () => {
-      const { items: res } = await organizationApi.getTree();
+      const { data: res } = await organizationApi.getTree();
       // Hàm đệ quy làm phẳng danh sách các Đơn vị
       const flattenUnits = (nodes: any[]): any[] => {
         let result: any[] = [];
@@ -72,7 +74,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
         }
         return result;
       };
-      return flattenUnits(res || []);
+      return flattenUnitsres;
     },
     enabled: isOpen,
   });
@@ -85,8 +87,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const { data: portalConfigsForMenu } = useQuery({
     queryKey: ["portal-configs"],
     queryFn: async () => {
-      const res: any = await portalConfigApi.getAll();
-      return Array.isArray(res?.data) ? res.data : [];
+      const res = await portalConfigApi.getAll();
+      return res.data;
     },
     enabled: isOpen,
     staleTime: 60_000,
@@ -135,13 +137,50 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
       return;
     }
 
-    const translateApi = async (text: string, targetLang: string) => {
+    const translateApi = async (text: string, targetLang: string): Promise<string> => {
       if (!text.trim()) return "";
       try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=vi&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
-        if (!res.ok) throw new Error("Translation failed");
-        const json = await res.json();
-        return json[0].map((item: any) => item[0]).join('');
+        const res = await apiClient.post<any, ApiResponse<{ jobId: string }>>('/admin/translate', { text, targetLang });
+        if (!res.success || !res.data?.jobId) {
+          throw new Error("Không thể khởi tạo tác vụ dịch thuật");
+        }
+
+        const jobId = res.data.jobId;
+
+        return await new Promise<string>((resolve, reject) => {
+          let attempts = 0;
+          const maxAttempts = 30; // 30s timeout
+
+          const checkStatus = async () => {
+            attempts++;
+            if (attempts > maxAttempts) {
+              reject(new Error("Quá thời gian chờ dịch thuật"));
+              return;
+            }
+
+            try {
+              const statusRes = await apiClient.get<any, ApiResponse<{ status: string; result?: any; error?: string }>>(`/admin/translate/jobs/${jobId}`);
+              const jobData = statusRes.data;
+
+              if (!jobData) {
+                setTimeout(checkStatus, 1000);
+                return;
+              }
+
+              if (jobData.status === 'COMPLETED') {
+                resolve(jobData.result?.translated_text || "");
+              } else if (jobData.status === 'FAILED') {
+                reject(new Error(jobData.error || "Dịch thuật thất bại"));
+              } else {
+                setTimeout(checkStatus, 1000);
+              }
+            } catch (err) {
+              reject(err);
+            }
+          };
+
+          setTimeout(checkStatus, 1000);
+        });
       } catch (error) {
         console.error("Auto translate error:", error);
         return "";

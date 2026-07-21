@@ -24,6 +24,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { portalLanguagesApi } from "@/features/portal-config/api";
 import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 interface BannerBasicInfoProps {
@@ -51,22 +52,14 @@ export function BannerBasicInfo({
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const res: any = await portalLanguagesApi.getActive();
-      const all = Array.isArray(res?.data) ? res.data : [];
-      return all.filter((c: any) => c.active === 1);
+      return Array.isArray(res?.data) ? res.data : [];
     },
     staleTime: 5 * 60_000,
     placeholderData: [],
   });
 
   const renderPositions = React.useMemo(() => {
-    return categories
-      .filter((cat: any) => cat.group === "BANNER_POSITION" && cat.active !== 0)
-      .map((cat: any) => ({
-        code: cat.code.toLowerCase(),
-        name: cat.name,
-        sort: cat.sort || 0
-      }))
-      .sort((a: any, b: any) => a.sort - b.sort);
+    return categories;
   }, [categories]);
 
   return (
@@ -83,7 +76,7 @@ export function BannerBasicInfo({
         </CardHeader>
         <CardContent className="p-6 pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
+            <Button
               type="button"
               onClick={() => setDesignType("image")}
               className={`relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${designType === "image"
@@ -103,9 +96,9 @@ export function BannerBasicInfo({
                   <CheckCircle2 className="h-5 w-5 fill-blue-50 dark:fill-blue-950" />
                 </div>
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => setDesignType("slogan")}
               className={`relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${designType === "slogan"
@@ -125,7 +118,7 @@ export function BannerBasicInfo({
                   <CheckCircle2 className="h-5 w-5 fill-amber-50 dark:fill-amber-950" />
                 </div>
               )}
-            </button>
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
 model Credential {
-  id           String   @id @default(uuid())
+  id           String   @id @default(cuid())
   userId       Int      @unique @map("user_id")
   passwordHash String   @map("password_hash") @db.VarChar(255)
   createdAt    DateTime @default(now()) @map("created_at")
@@ -10,7 +10,7 @@ model Credential {
 }
 
 model Account {
-  id                String  @id @default(uuid())
+  id                String  @id @default(cuid())
   userId            Int     @map("user_id")
   type              String
   provider          String
@@ -30,7 +30,7 @@ model Account {
 }
 
 model RefreshToken {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   token           String   @unique @db.VarChar(512)
   userId          Int      @map("user_id")
   deviceInfo      String?  @map("device_info")

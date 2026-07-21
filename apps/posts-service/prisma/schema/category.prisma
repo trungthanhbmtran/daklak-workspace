@@ -1,5 +1,5 @@
 model Category {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   name            String
   slug            String   @unique
   parentId        String?  @map("parent_id")

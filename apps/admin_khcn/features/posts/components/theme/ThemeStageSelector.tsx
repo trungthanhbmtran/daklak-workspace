@@ -3,6 +3,7 @@
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
 import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 interface StageOption {
@@ -39,7 +40,7 @@ export function ThemeStageSelector() {
         {stages.map((item) => {
           const isSelected = stage === item.id;
           return (
-            <button
+            <Button
               key={item.id}
               type="button"
               onClick={() => loadSavedTheme(item.id)}
@@ -61,7 +62,7 @@ export function ThemeStageSelector() {
               <Text className="text-slate-400 dark:text-slate-500 font-light">
                 {item.description}
               </Text>
-            </button>
+            </Button>
           );
         })}
       </div>

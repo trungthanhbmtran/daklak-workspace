@@ -16,6 +16,7 @@ import { LayoutConfig } from "./theme/LayoutConfig";
 import { BrandingConfig } from "./theme/BrandingConfig";
 import { AdvancedCssEditor } from "./theme/AdvancedCssEditor";
 import { Heading, Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 export function AppearanceClient() {
     const [activeTab, setActiveTab] = useState<"library" | "customize" | "advanced">("customize");
@@ -44,24 +45,24 @@ export function AppearanceClient() {
                 {/* 2. NAVIGATION TABS (Phân chia luồng công việc của CMS) */}
                 <div className="shrink-0 max-w-7xl w-full mx-auto mb-6">
                     <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-6">
-                        <button
+                        <Button
                             onClick={() => setActiveTab("customize")}
                             className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === "customize" ? "border-blue-600 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                         >
                             Bộ tùy biến (Customizer)
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => setActiveTab("library")}
                             className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === "library" ? "border-blue-600 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                         >
                             Kho giao diện mẫu ({`12`})
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => setActiveTab("advanced")}
                             className={`pb-3 text-sm font-semibold border-b-2 transition-all ${activeTab === "advanced" ? "border-blue-600 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                         >
                             Cài đặt nâng cao (CSS/Code)
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -132,9 +133,9 @@ export function AppearanceClient() {
                                     </Text>
                                     {/* Giả lập đổi kích thước màn hình để test Responsive */}
                                     <div className="flex items-center gap-1 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-lg text-xs">
-                                        <button className="px-2 py-1 rounded bg-white dark:bg-slate-700 shadow-sm">Desktop</button>
-                                        <button className="px-2 py-1 rounded text-slate-400 hover:text-slate-600">Tablet</button>
-                                        <button className="px-2 py-1 rounded text-slate-400 hover:text-slate-600">Mobile</button>
+                                        <Button className="px-2 py-1 rounded bg-white dark:bg-slate-700 shadow-sm">Desktop</Button>
+                                        <Button className="px-2 py-1 rounded text-slate-400 hover:text-slate-600">Tablet</Button>
+                                        <Button className="px-2 py-1 rounded text-slate-400 hover:text-slate-600">Mobile</Button>
                                     </div>
                                 </div>
 

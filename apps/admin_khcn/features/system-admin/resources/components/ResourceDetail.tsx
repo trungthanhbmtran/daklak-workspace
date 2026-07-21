@@ -15,6 +15,7 @@ import { Heading, Text } from "@/components/ui/typography";
 import { resourceApi } from "../api";
 import { resourceKeys } from "../keys";
 import type { Resource } from "../types";
+import { toast } from "sonner";
 
 // ─── Props ────────────────────────────────────────────────────────────
 interface ResourceDetailProps {
@@ -62,6 +63,8 @@ function ResourceDetailInner({ resourceId }: ResourceDetailProps) {
   };
 
   const updateResourceMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, ...payload }: { id: number; code?: string; name?: string }) =>
       resourceApi.updateResource(id, payload),
     onSuccess: (res: { data?: { id: number; code: string; name: string } }) => {

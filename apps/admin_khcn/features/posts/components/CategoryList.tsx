@@ -79,7 +79,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
         mode: 'flat',
       });
       return {
-        items: res.data || [],
+        items: res.data,
         meta: res.meta || {},
       };
     },
@@ -90,6 +90,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const deleteMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: string) => postsApi.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts-categories"] });

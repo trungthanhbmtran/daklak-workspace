@@ -109,7 +109,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
     queryKey: ["system-categories"],
     queryFn: async () => {
       const res = await categoryApi.fetchByGroup('POST_STATUS');
-      return res.data || [];
+      return res.data;
     },
     staleTime: 5 * 60 * 1000 // Cache for 5 minutes
   });
@@ -140,7 +140,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
       };
       const res = await postsApi.getPosts(params);
       return {
-        items: res.data || [],
+        items: res.data,
         meta: res.meta || {}
       };
     },
@@ -148,7 +148,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
     placeholderData: keepPreviousData,
   });
 
-  const posts = (data?.items || []) as Post[];
+  const posts = (data?.items) as Post[];
   const totalItems = Number((data?.meta as any)?.total || 0);
   const totalPages = Number((data?.meta as any)?.totalPages || 1);
 

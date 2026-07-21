@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Text } from "@/components/ui/typography";
-import { Table, TableFooter } from "@/components/ui/table";
 import { ResponsiveTableProps } from './types';
 
 export default function MobileTable<T>({ columns, data, keyExtractor, caption, footer }: ResponsiveTableProps<T>) {

@@ -7,152 +7,69 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { PrismaService } from '../../core/prisma/prisma.service';
+import { IntegrationService } from './integration.service';
 
 @Controller('admin/integration')
 export class IntegrationController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly integrationService: IntegrationService) {}
 
   @Get('services')
   async getServices() {
-    const data = await this.prisma.gatewayService.findMany({
-      include: { routes: true },
-    });
-    return { success: true, data };
+    return this.integrationService.getServices();
   }
 
   @Post('services')
   async createService(@Body() data: any) {
-    const {
-      name,
-      url,
-      description,
-      isActive,
-      loadBalanceStrategy,
-      useSsl,
-      ignoreTlsVerify,
-    } = data;
-    const service = await this.prisma.gatewayService.create({
-      data: {
-        name,
-        url,
-        description,
-        loadBalanceStrategy: loadBalanceStrategy ?? 'ROUND_ROBIN',
-        useSsl: useSsl ?? false,
-        ignoreTlsVerify: ignoreTlsVerify ?? true,
-        isActive: isActive ?? true,
-      } as any,
-    });
-    return { success: true, data: service };
+    return this.integrationService.createService(data);
   }
 
   @Put('services/:id')
   async updateService(@Param('id') id: string, @Body() data: any) {
-    const {
-      name,
-      url,
-      description,
-      isActive,
-      loadBalanceStrategy,
-      useSsl,
-      ignoreTlsVerify,
-    } = data;
-    const service = await this.prisma.gatewayService.update({
-      where: { id: parseInt(id) },
-      data: {
-        name,
-        url,
-        description,
-        loadBalanceStrategy,
-        useSsl,
-        ignoreTlsVerify,
-        isActive,
-      } as any,
-    });
-    return { success: true, data: service };
+    return this.integrationService.updateService(id, data);
   }
 
   @Delete('services/:id')
   async deleteService(@Param('id') id: string) {
-    await this.prisma.gatewayService.delete({ where: { id: parseInt(id) } });
-    return { success: true };
+    return this.integrationService.deleteService(id);
   }
 
   @Get('routes')
   async getRoutes() {
-    const data = await this.prisma.gatewayRoute.findMany({
-      include: { service: true },
-    });
-    return { success: true, data };
+    return this.integrationService.getRoutes();
   }
 
   @Post('routes')
   async createRoute(@Body() data: any) {
-    const { path, stripPath, serviceId, methods, isActive } = data;
-    const route = await this.prisma.gatewayRoute.create({
-      data: {
-        path,
-        stripPath,
-        serviceId: parseInt(serviceId),
-        methods,
-        isActive: isActive ?? true,
-      },
-    });
-    return { success: true, data: route };
+    return this.integrationService.createRoute(data);
   }
 
   @Put('routes/:id')
   async updateRoute(@Param('id') id: string, @Body() data: any) {
-    const { path, stripPath, serviceId, methods, isActive } = data;
-    const route = await this.prisma.gatewayRoute.update({
-      where: { id: parseInt(id) },
-      data: {
-        path,
-        stripPath,
-        serviceId: serviceId ? parseInt(serviceId) : undefined,
-        methods,
-        isActive,
-      },
-    });
-    return { success: true, data: route };
+    return this.integrationService.updateRoute(id, data);
   }
 
   @Delete('routes/:id')
   async deleteRoute(@Param('id') id: string) {
-    await this.prisma.gatewayRoute.delete({ where: { id: parseInt(id) } });
-    return { success: true };
+    return this.integrationService.deleteRoute(id);
   }
 
   @Get('apikeys')
   async getApiKeys() {
-    const data = await this.prisma.apiKey.findMany();
-    return { success: true, data };
+    return this.integrationService.getApiKeys();
   }
 
   @Post('apikeys')
   async createApiKey(@Body() data: any) {
-    const crypto = require('crypto');
-    const key = crypto.randomBytes(32).toString('hex');
-    const { name, description, isActive } = data;
-    const apikey = await this.prisma.apiKey.create({
-      data: { name, description, isActive: isActive ?? true, key },
-    });
-    return { success: true, data: apikey };
+    return this.integrationService.createApiKey(data);
   }
 
   @Put('apikeys/:id')
   async updateApiKey(@Param('id') id: string, @Body() data: any) {
-    const { name, description, isActive } = data;
-    const apikey = await this.prisma.apiKey.update({
-      where: { id: parseInt(id) },
-      data: { name, description, isActive },
-    });
-    return { success: true, data: apikey };
+    return this.integrationService.updateApiKey(id, data);
   }
 
   @Delete('apikeys/:id')
   async deleteApiKey(@Param('id') id: string) {
-    await this.prisma.apiKey.delete({ where: { id: parseInt(id) } });
-    return { success: true };
+    return this.integrationService.deleteApiKey(id);
   }
 }

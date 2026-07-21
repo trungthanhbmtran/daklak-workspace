@@ -161,6 +161,7 @@ message ListDocumentsRequest {
   int32 fiscalYear = 11;
   string transparencyCategory = 12;
   optional bool isIncoming = 13;
+  string issuingAuthorityId = 14;
 }
 
 message ListDocumentsResponse {

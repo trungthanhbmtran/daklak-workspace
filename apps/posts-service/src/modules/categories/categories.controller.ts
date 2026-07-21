@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import {  GrpcMethod , Payload } from '@nestjs/microservices';
 import { CategoriesService } from './categories.service';
 
 function sanitizeCategory(cat: any): any {
@@ -64,7 +64,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) { }
 
   @GrpcMethod('CategoryService', 'CreateCategory')
-  async createCategory(data: any) {
+  async createCategory(@Payload() data: Record<string, any>) {
     const result = await this.categoriesService.create(data);
     return { data: sanitizeCategory(result) };
   }
@@ -76,7 +76,7 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
-  async listCategories(data: any) {
+  async listCategories(@Payload() data: Record<string, any>) {
     const mode = data?.mode || 'flat';
     console.log(`CategoryService.ListCategories called with mode: ${mode}`);
     try {
@@ -100,7 +100,7 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
-  async updateCategory(data: any) {
+  async updateCategory(@Payload() data: Record<string, any>) {
     const { id, ...rest } = data;
     const result = await this.categoriesService.update(id, rest);
     return { data: sanitizeCategory(result) };

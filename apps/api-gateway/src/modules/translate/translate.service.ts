@@ -1,0 +1,119 @@
+import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
+import { type ClientGrpc, ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { MICROSERVICES } from '../../core/constants/services';
+import { RedisService } from '../../core/redis/redis.service';
+import { v4 as uuidv4 } from 'uuid';
+
+interface TranslationService {
+  translateSync(data: {
+    text: string;
+    target_lang: string;
+  }): Promise<{ translated_text: string }>;
+}
+
+@Injectable()
+export class TranslateService implements OnModuleInit {
+  private translateGrpcService: TranslationService;
+  private readonly logger = new Logger(TranslateService.name);
+
+  constructor(
+    @Inject(MICROSERVICES.TRANSLATE.SYMBOL) private client: ClientGrpc,
+    private readonly redisService: RedisService,
+    @Inject('TRANSLATE_QUEUE_SERVICE') private readonly rmqClient: ClientProxy,
+  ) {}
+
+  onModuleInit() {
+    this.translateGrpcService = this.client.getService<TranslationService>(
+      MICROSERVICES.TRANSLATE.SERVICE,
+    );
+  }
+
+  async translate(text: string, targetLang: string) {
+    if (!text || !targetLang) {
+      return {
+        success: false,
+        data: null,
+        message: 'Missing text or targetLang',
+      };
+    }
+
+    try {
+      const jobId = uuidv4();
+
+      await this.redisService.set(
+        `translate_job_${jobId}`,
+        JSON.stringify({ status: 'PROCESSING' }),
+        3600,
+      );
+
+      this.rmqClient.emit('translate_task', {
+        jobId,
+        text,
+        targetLang,
+      });
+
+      return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
+    } catch (err: any) {
+      this.logger.error('Error queuing translation task', err);
+      return {
+        success: false,
+        data: null,
+        message: 'Không thể tạo tác vụ dịch thuật',
+      };
+    }
+  }
+
+  async getJobStatus(jobId: string) {
+    try {
+      const jobData = await this.redisService.get(`translate_job_${jobId}`);
+      if (!jobData) {
+        return {
+          success: false,
+          data: null,
+          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
+        };
+      }
+      return { success: true, data: JSON.parse(jobData) };
+    } catch (err: any) {
+      return { success: false, data: null, message: err.message };
+    }
+  }
+
+  async handleTranslateTask(data: {
+    jobId: string;
+    text: string;
+    targetLang: string;
+  }) {
+    this.logger.log(`Worker received translation task: ${data.jobId}`);
+    try {
+      const result = await firstValueFrom(
+        this.translateGrpcService.translateSync({
+          text: data.text,
+          target_lang: data.targetLang,
+        }) as any,
+      );
+
+      await this.redisService.set(
+        `translate_job_${data.jobId}`,
+        JSON.stringify({
+          status: 'COMPLETED',
+          result,
+        }),
+        3600,
+      );
+
+      this.logger.log(`Worker completed translation task: ${data.jobId}`);
+    } catch (err: any) {
+      this.logger.error(`Worker failed translation task: ${data.jobId}`, err);
+      await this.redisService.set(
+        `translate_job_${data.jobId}`,
+        JSON.stringify({
+          status: 'FAILED',
+          error: err.message,
+        }),
+        3600,
+      );
+    }
+  }
+}

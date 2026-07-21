@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useThemeConfig } from "./ThemeProvider";
 import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 export function ThemeSaveButton() {
@@ -18,7 +19,7 @@ export function ThemeSaveButton() {
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleSave}
       disabled={isSaving || !isDirty}
@@ -39,6 +40,6 @@ export function ThemeSaveButton() {
       ) : (
         <Text as="span">Áp dụng cấu hình</Text>
       )}
-    </button>
+    </Button>
   );
 }

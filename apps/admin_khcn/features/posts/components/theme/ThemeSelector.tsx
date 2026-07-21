@@ -3,6 +3,7 @@
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
 import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 export function ThemeSelector() {
@@ -37,7 +38,7 @@ export function ThemeSelector() {
       {options.map((opt) => {
         const isSelected = theme === opt.id;
         return (
-          <button
+          <Button
             key={opt.id}
             type="button"
             onClick={() => setThemeMode(opt.id)}
@@ -48,7 +49,7 @@ export function ThemeSelector() {
           >
             {opt.icon}
             <Text as="span">{opt.name}</Text>
-          </button>
+          </Button>
         );
       })}
     </div>

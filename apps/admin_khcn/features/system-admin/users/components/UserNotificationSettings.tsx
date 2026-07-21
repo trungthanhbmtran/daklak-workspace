@@ -54,7 +54,7 @@ export function UserNotificationSettings({ user }: UserNotificationSettingsProps
         });
         setPrefs(defaultPrefs);
       }
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (error) {
       toast.error((error as any)?.response?.data?.message || "Không thể tải cấu hình thông báo");
     } finally {
@@ -67,7 +67,7 @@ export function UserNotificationSettings({ user }: UserNotificationSettingsProps
       setSaving(true);
       await userApi.updateNotificationPrefs(user.id, prefs);
       toast.success("Đã lưu tùy chọn nhận thông báo cá nhân");
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (error) {
       toast.error((error as any)?.response?.data?.message || "Lỗi khi lưu cấu hình");
     } finally {

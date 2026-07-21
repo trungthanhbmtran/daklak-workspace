@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 // Cấu hình API
-import { API_BASE_URL } from "@/config/constants";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Tên đăng nhập không được để trống." }),
@@ -132,7 +131,7 @@ export function LoginClient() {
                           disabled={isPending}
                           {...field}
                         />
-                        <button
+                        <Button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
@@ -143,7 +142,7 @@ export function LoginClient() {
                           ) : (
                             <Eye className="h-5 w-5" />
                           )}
-                        </button>
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />

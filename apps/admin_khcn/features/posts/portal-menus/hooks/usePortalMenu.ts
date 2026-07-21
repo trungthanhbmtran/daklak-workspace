@@ -35,7 +35,7 @@ export function usePortalMenu() {
   const fetchLanguages = async () => {
     try {
       const langs = await categoryApi.fetchByGroup('LANGUAGE');
-      const activeLanguages = langs.data.filter((c: any) => c.active === 1);
+      const activeLanguages = langs.data;
       const finalLanguages = activeLanguages.length > 0 ? activeLanguages : [
         { id: 1, group: 'LANGUAGE', code: 'vi', name: 'Tiếng Việt', sort: 1, active: 1 },
         { id: 2, group: 'LANGUAGE', code: 'en', name: 'English', sort: 2, active: 1 }

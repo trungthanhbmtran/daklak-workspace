@@ -1,5 +1,5 @@
 model Consultation {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   title           String   // Tiêu đề đợt lấy ý kiến
   description     String?  @db.Text
   documentId      String?  @map("document_id") // Văn bản dự thảo đính kèm
@@ -18,7 +18,7 @@ model Consultation {
 }
 
 model PublicComment {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   consultationId  String   @map("consultation_id")
   fullName        String   @map("full_name")
   email           String?
@@ -36,7 +36,7 @@ model PublicComment {
 }
 
 model ConsultationResponse {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   consultationId  String   @map("consultation_id")
   unitId          String   @map("unit_id") // Đơn vị góp ý
   unitName        String?  @map("unit_name")

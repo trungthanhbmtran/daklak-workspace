@@ -25,7 +25,7 @@ export const hrmDepartmentsApi = {
 export const hrmLeaveApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/leaves", { params }).then((res: any) => ({
-      data: res.data || [],
+      data: res.data,
       meta: res.meta || { total: 0 },
     }));
   }
@@ -34,7 +34,7 @@ export const hrmLeaveApi = {
 export const hrmContractsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/contracts", { params }).then((res: any) => ({
-      data: res.data || [],
+      data: res.data,
       meta: res.meta || { total: 0 },
     }));
   }
@@ -50,7 +50,7 @@ export * from "./rank-quotas.api";
 export const hrmPayrollApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/payroll", { params }).then((res: any) => ({
-      data: res.data || [],
+      data: res.data,
       meta: res.meta || { total: 0 },
     }));
   }

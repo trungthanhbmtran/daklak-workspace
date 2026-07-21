@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useHrmEmployeesQuery } from "../../services/dataBinding";
 import { Search, Loader2, Check, X, ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface LeadershipEditorProps {
   widget: Widget<LeadershipData>;
@@ -82,13 +83,13 @@ export const LeadershipEditor: React.FC<LeadershipEditorProps> = ({ widget, onCh
                 className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-2xl text-[10px] font-bold text-slate-700 dark:text-slate-200 shadow-sm"
               >
                 <span>{leader.fullName}</span>
-                <button 
+                <Button 
                   type="button" 
                   onClick={() => handleRemoveLeader(leader.id)}
                   className="w-4 h-4 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-450 hover:text-rose-500 flex items-center justify-center transition-colors"
                 >
                   <X className="w-3 h-3" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>

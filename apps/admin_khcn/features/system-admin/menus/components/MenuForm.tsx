@@ -104,7 +104,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
   }, [defaultValues]);
 
   // Theo dõi Path để hiển thị Full Path real-time
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const watchPath = form.watch("path") || "";
   const watchLinkedResource = form.watch("linkedResourceCode");
   const watchType = form.watch("type") || "MENU";

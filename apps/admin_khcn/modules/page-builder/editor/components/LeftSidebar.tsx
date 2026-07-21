@@ -7,6 +7,7 @@ import { StructureTree } from "./StructureTree";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, LayoutGrid, Layers, Columns, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Auto-initialize registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {
@@ -44,7 +45,7 @@ export const LeftSidebar: React.FC = () => {
     <aside className="w-80 h-full border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 animate-fade-in">
       {/* Sidebar Header Tab Switcher */}
       <div className="flex border-b border-slate-100 dark:border-slate-800 p-2 gap-1.5 shrink-0 bg-slate-50/50 dark:bg-slate-950/20">
-        <button
+        <Button
           onClick={() => setActiveTab("library")}
           className={`flex-1 py-2 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${activeTab === "library"
             ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none"
@@ -52,8 +53,8 @@ export const LeftSidebar: React.FC = () => {
             }`}
         >
           <LayoutGrid className="w-3.5 h-3.5" /> Thư viện Widget
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setActiveTab("structure")}
           className={`flex-1 py-2 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${activeTab === "structure"
             ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 dark:shadow-none"
@@ -61,7 +62,7 @@ export const LeftSidebar: React.FC = () => {
             }`}
         >
           <Layers className="w-3.5 h-3.5" /> Outline cấu trúc
-        </button>
+        </Button>
       </div>
 
       {/* Main Sidebar Contents */}
@@ -74,7 +75,7 @@ export const LeftSidebar: React.FC = () => {
             </Label>
             <div className="grid grid-cols-2 gap-2.5">
               {rowTemplates.map((row) => (
-                <button
+                <Button
                   key={row.type}
                   onClick={() => addRow(row.type)}
                   className="p-3 border border-slate-100 dark:border-slate-800/80 rounded-2xl bg-white dark:bg-slate-900 text-left hover:border-indigo-400 dark:hover:border-indigo-800 hover:shadow-lg hover:shadow-indigo-50/10 dark:hover:shadow-none hover:-translate-y-0.5 transition-all flex flex-col justify-between h-20"
@@ -94,7 +95,7 @@ export const LeftSidebar: React.FC = () => {
                     <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">{row.label}</span>
                     <span className="text-[8px] text-slate-400 font-bold">{row.desc}</span>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           </div>

@@ -230,6 +230,7 @@ export class EmployeesService implements OnModuleInit {
     callerUserId?: number;
     descendantUnitIds?: number[];
     excludeEmployeeCode?: string;
+    ids?: number[];
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
@@ -292,6 +293,10 @@ export class EmployeesService implements OnModuleInit {
       } else if (!where.employeeCode) {
         where.employeeCode = { not: params.excludeEmployeeCode };
       }
+    }
+
+    if (params.ids && params.ids.length > 0) {
+      where.id = { in: params.ids };
     }
 
     const totalCount = await this.prisma.employee.count({ where });

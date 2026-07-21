@@ -5,7 +5,6 @@ import {
   startOfQuarter, endOfQuarter,
   startOfYear, endOfYear,
   startOfWeek, endOfWeek, 
-  isSameMonth, 
   isToday,
   addDays,
   startOfDay,
@@ -14,6 +13,7 @@ import {
 import { CheckCircle2, Clock, Video } from 'lucide-react';
 import { Text } from '@/components/ui/typography';
 import { isHoliday } from '@/lib/holidays';
+import { Button } from "@/components/ui/button";
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -164,12 +164,12 @@ export const CalendarGrid = React.memo(function CalendarGrid({
                   {/* +X more button pinned to bottom */}
                   {hiddenCounts[i] > 0 && (
                      <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-1">
-                        <button 
+                        <Button 
                           onClick={(e) => { e.stopPropagation(); onSelectDayEvents({ day: cloneDay, events: dayEvents }); }}
                           className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary font-medium transition-colors cursor-pointer shadow-sm border border-transparent hover:border-primary/20"
                         >
                           +{hiddenCounts[i]} sự kiện
-                        </button>
+                        </Button>
                      </div>
                   )}
                 </div>

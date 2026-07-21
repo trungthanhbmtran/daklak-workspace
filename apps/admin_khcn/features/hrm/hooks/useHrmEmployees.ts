@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hrmApi } from "../api";
 import { hrmKeys } from "../keys";
 import type { HrmEmployeesListParams } from "../types";
+import { toast } from "sonner";
 
 /**
  * Danh sách nhân viên có phân trang (trang HRM).
@@ -49,6 +50,8 @@ export function useHrmEmployee(id: number | null, options?: { enabled?: boolean 
 export function useUpdateHrmEmployee() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmApi.update(id, payload),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
@@ -63,6 +66,8 @@ export function useUpdateHrmEmployee() {
 export function useDeleteHrmEmployee() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: number) => hrmApi.deleteOne(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });

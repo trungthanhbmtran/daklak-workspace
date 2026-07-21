@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
     useCache: true,
+    optimizePackageImports: ['lucide-react'],
   },
 };
 

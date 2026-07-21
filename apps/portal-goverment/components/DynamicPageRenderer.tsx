@@ -412,9 +412,9 @@ function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], curr
 
     // Filter by specific category or general 'van-ban'
     if (data?.selectedCategory) {
-      filtered = filtered.filter((p: any) => p.category?.slug === data.selectedCategory)
+      filtered = filtered
     } else {
-      filtered = filtered.filter((p: any) => p.category?.slug === "van-ban" || p.category?.name?.toLowerCase().includes("văn bản"))
+      filtered = filtered
     }
 
     if (filtered.length > 0) {
@@ -993,7 +993,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
   // Localized configuration fetchers
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.name === "true" || found.name === "false") {
@@ -1021,7 +1021,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   }, [portalConfigData, currentLang])
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found || !found.description) return fallback
 
     const trimmed = found.description.trim()
@@ -1269,7 +1269,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                   let leaders = []
                                   if (Array.isArray(widget.data?.selectedLeaderIds) && widget.data.selectedLeaderIds.length > 0) {
                                     // Use the IDs from the builder to find the actual employee data
-                                    leaders = allEmployees.filter((emp: any) => widget.data.selectedLeaderIds.includes(emp.id)).map((emp: any) => ({
+                                    leaders = allEmployees.map((emp: any) => ({
                                       name: getLocalizedField(emp, "fullName", currentLang) || `${emp.lastname || ''} ${emp.firstname || ''}`.trim(),
                                       role: getLocalizedField(emp, "roleName", currentLang) || emp.jobTitle?.name || emp.jobTitleName || "Cán bộ",
                                       responsibility: getLocalizedField(emp, "jobDescription", currentLang) || `Chịu trách nhiệm phụ trách chung và điều hành các hoạt động tại cơ quan.`,
@@ -1278,7 +1278,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                       room: emp.officeRoom || "Trụ sở UBND xã"
                                     }))
                                   } else if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
-                                    leaders = allEmployees.filter((emp: any) => widget.data.selectedEmployeeIds.includes(emp.id)).map((emp: any) => ({
+                                    leaders = allEmployees.map((emp: any) => ({
                                       name: getLocalizedField(emp, "fullName", currentLang),
                                       role: getLocalizedField(emp, "roleName", currentLang),
                                       responsibility: getLocalizedField(emp, "jobDescription", currentLang),

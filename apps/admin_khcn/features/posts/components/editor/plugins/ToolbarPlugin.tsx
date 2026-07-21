@@ -262,7 +262,7 @@ const ColorAndLinkPlugin = () => {
         <PopoverContent className="w-[280px] p-3 shadow-xl rounded-xl" align="start">
           <div className="text-xs font-semibold mb-2 text-slate-500 uppercase">Màu chữ</div>
           <div className="grid grid-cols-10 gap-1">
-            {COLORS.map((color) => (<button type="button" key={`text-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ color: color })} title={color} />))}
+            {COLORS.map((color) => (<Button type="button" key={`text-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ color: color })} title={color} />))}
           </div>
         </PopoverContent>
       </Popover>
@@ -272,10 +272,10 @@ const ColorAndLinkPlugin = () => {
         <PopoverContent className="w-[280px] p-3 shadow-xl rounded-xl" align="start">
           <div className="flex justify-between items-center mb-2">
             <Text as="span" className="font-semibold text-slate-500 uppercase">Màu nền</Text>
-            <button type="button" className="text-[10px] text-blue-600 hover:underline" onClick={() => applyStyleText({ "background-color": "transparent" })}>Xóa nền</button>
+            <Button type="button" className="text-[10px] text-blue-600 hover:underline" onClick={() => applyStyleText({ "background-color": "transparent" })}>Xóa nền</Button>
           </div>
           <div className="grid grid-cols-10 gap-1">
-            {COLORS.map((color) => (<button type="button" key={`bg-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ "background-color": color })} title={color} />))}
+            {COLORS.map((color) => (<Button type="button" key={`bg-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ "background-color": color })} title={color} />))}
           </div>
         </PopoverContent>
       </Popover>

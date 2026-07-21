@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { WorkflowController } from './workflow.controller';
+import { WorkflowService } from './workflow.service';
 
 @Module({
   imports: [
@@ -10,5 +11,6 @@ import { WorkflowController } from './workflow.controller';
     registerGrpcService(MICROSERVICES.ORGANIZATION),
   ],
   controllers: [WorkflowController],
+  providers: [WorkflowService],
 })
 export class WorkflowModule {}

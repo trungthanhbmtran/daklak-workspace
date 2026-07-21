@@ -17,6 +17,7 @@ import { ChevronDown, ChevronRight, UserCheck } from "lucide-react";
 import { SlotCard } from "./SlotCard";
 import type { StaffingReportItem } from "../../types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type StaffingTableProps = {
   report: StaffingReportItem[];
@@ -146,7 +147,7 @@ export function StaffingTable({
                                   const employeeName = existingSlot?.assignedEmployeeName;
 
                                   return (
-                                    <button
+                                    <Button
                                       key={slotOrder}
                                       type="button"
                                       onClick={() => changeActiveSlot(row.id, slotOrder)}
@@ -173,7 +174,7 @@ export function StaffingTable({
                                       )}>
                                         {employeeName ? employeeName : "Chưa có nhân sự"}
                                       </div>
-                                    </button>
+                                    </Button>
                                   );
                                 })}
                               </div>

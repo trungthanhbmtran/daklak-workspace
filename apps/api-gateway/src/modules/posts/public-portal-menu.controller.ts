@@ -28,4 +28,15 @@ export class PublicPortalMenuController implements OnModuleInit {
       },
     );
   }
+
+  @Get('tree')
+  async getTree(@Query() query: any) {
+    // The listPortalMenus RPC already returns a hierarchical tree structure O(N)
+    return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
+  }
 }

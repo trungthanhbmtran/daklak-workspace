@@ -66,7 +66,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   };
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const watchedPosition = form.watch("position");
 
   const watchedName = form.watch("name");
@@ -142,6 +142,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   }, [bannerData, form]);
 
   const mutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (values: any) => {
       const { designType, ...payloadValues } = values;
       const payload = {

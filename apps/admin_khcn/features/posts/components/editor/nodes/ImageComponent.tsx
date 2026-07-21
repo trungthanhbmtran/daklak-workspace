@@ -54,13 +54,8 @@ export default function ImageComponent({
     setIsUploading(true);
     try {
       /* * NƠI BẠN GẮN API BACKEND CỦA MÌNH VÀO:
-       * const response = await fetch('/api/upload-from-url', {
-       * method: 'POST',
-       * headers: { 'Content-Type': 'application/json' },
-       * body: JSON.stringify({ url: src })
-       * });
-       * const data = await response.json();
-       * const newLocalUrl = data.localUrl; // URL nội bộ do Server bạn trả về
+       * const response: any = await apiClient.post('/admin/media/upload-from-url', { url: src });
+       * const newLocalUrl = response.data?.localUrl || `/api/v1/admin/media/download/${response.data?.fileId}`;
        */
 
       // Giả lập hệ thống đang tải ảnh mất 1.5 giây
@@ -77,7 +72,7 @@ export default function ImageComponent({
 
       setIsSuccess(true);
       setTimeout(() => setIsHovered(false), 2000);
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (error) {
       toast.error((error as any)?.response?.data?.message || "Đã xảy ra lỗi khi tải ảnh về máy chủ!");
     } finally {

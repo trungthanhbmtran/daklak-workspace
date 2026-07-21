@@ -4,7 +4,7 @@ import React from "react";
 import { PortalMenu } from "@/features/posts/types";
 import { CategoryItem } from "@/features/system-admin/categories/types";
 import { ResponsiveTable } from "@/components/shared/responsive-table";
-import { Loader2, ChevronRight, Layers, FileText, ExternalLink, Layout, Edit, Trash2 } from "lucide-react";
+import { ChevronRight, Layers, FileText, ExternalLink, Layout, Edit, Trash2 } from "lucide-react";
 import { Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

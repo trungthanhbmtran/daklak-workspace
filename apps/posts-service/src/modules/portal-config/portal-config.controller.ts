@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import {  GrpcMethod, RpcException , Payload } from '@nestjs/microservices';
 import { PortalConfigService } from './portal-config.service';
 import { status } from '@grpc/grpc-js';
 
@@ -33,7 +33,7 @@ export class PortalConfigController {
   }
 
   @GrpcMethod('PortalConfigService', 'GetAll')
-  async getAll(_data: any) {
+  async getAll(@Payload() _data: Record<string, any>) {
     try {
       const result = await this.configService.findAll();
       return { data: result };

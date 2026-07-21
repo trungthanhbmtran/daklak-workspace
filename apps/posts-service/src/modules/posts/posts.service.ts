@@ -469,7 +469,7 @@ export class PostsService implements OnModuleInit {
   }
 
   async findAll(query: any) {
-    const { authorId, categoryId, search, status, lang, isFeatured, sortBy, sortOrder } = query;
+    const { authorId, categoryId, category, search, status, lang, isFeatured, isNotification, hasThumbnail, sortBy, sortOrder } = query;
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
 
@@ -482,9 +482,18 @@ export class PostsService implements OnModuleInit {
     }
     if (authorId) where.authorId = authorId;
     if (categoryId) where.categoryId = categoryId;
+    if (category) where.category = { slug: category };
     if (status) where.status = status;
     if (isFeatured !== undefined && isFeatured !== '') {
       where.isFeatured = isFeatured === 'true' || isFeatured === true;
+    }
+    if (isNotification !== undefined && isNotification !== '') {
+      where.isNotification = isNotification === 'true' || isNotification === true;
+    }
+    if (hasThumbnail !== undefined && hasThumbnail !== '') {
+      if (hasThumbnail === 'true' || hasThumbnail === true) {
+        where.thumbnail = { not: null, gt: '' };
+      }
     }
 
     // Dynamic sorting

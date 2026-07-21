@@ -3,6 +3,7 @@
 import React from "react";
 import { usePortalBuilderUI } from "./PortalBuilderUIProvider";
 import { usePagesList } from "./hooks/usePagesList";
+import { Button } from "@/components/ui/button";
 
 export function BuilderBottomBar() {
     const { selectedPageId } = usePortalBuilderUI();
@@ -33,12 +34,12 @@ export function BuilderBottomBar() {
                 <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${selectedPageMeta?.isActive ? "text-emerald-600" : "text-amber-600"}`}>
                     {selectedPageMeta?.isActive ? "Trang đang hoạt động" : "Trang đang bảo trì"}
                 </span>
-                <button
+                <Button
                     onClick={onToggleActive}
                     className={`relative inline-flex h-4.5 w-9 items-center rounded-full transition-all shadow-inner ${selectedPageMeta?.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"}`}
                 >
                     <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-md transition-all ${selectedPageMeta?.isActive ? "translate-x-5" : "translate-x-1"}`} />
-                </button>
+                </Button>
             </div>
         </div>
     );

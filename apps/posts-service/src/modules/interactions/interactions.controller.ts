@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import {  GrpcMethod , Payload } from '@nestjs/microservices';
 import { InteractionsService } from './interactions.service';
 
 @Controller()
@@ -8,7 +8,7 @@ export class InteractionsController {
 
   // --- Comments ---
   @GrpcMethod('InteractionService', 'CreateComment')
-  async createComment(data: any) {
+  async createComment(@Payload() data: Record<string, any>) {
     const result = await this.service.createComment(data);
     return this.mapComment(result);
   }
@@ -42,7 +42,7 @@ export class InteractionsController {
 
   // --- Questions ---
   @GrpcMethod('InteractionService', 'CreateQuestion')
-  async createQuestion(data: any) {
+  async createQuestion(@Payload() data: Record<string, any>) {
     const result = await this.service.createQuestion(data);
     return this.mapQuestion(result);
   }
@@ -64,7 +64,7 @@ export class InteractionsController {
   }
 
   @GrpcMethod('InteractionService', 'AnswerQuestion')
-  async answerQuestion(data: any) {
+  async answerQuestion(@Payload() data: Record<string, any>) {
     const result = await this.service.answerQuestion(data);
     return this.mapQuestion(result);
   }
@@ -77,7 +77,7 @@ export class InteractionsController {
 
   // --- Feedback ---
   @GrpcMethod('InteractionService', 'CreateFeedback')
-  async createFeedback(data: any) {
+  async createFeedback(@Payload() data: Record<string, any>) {
     const result = await this.service.createFeedback(data);
     return this.mapFeedback(result);
   }

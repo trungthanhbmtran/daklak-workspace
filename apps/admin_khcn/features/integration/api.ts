@@ -5,6 +5,7 @@
 
 import apiClient from "@/lib/axiosInstance";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export interface LGSPConfigData {
   type: 'LGSP' | 'WEBHOOK' | 'SYSTEM' | 'POSTMAN';
@@ -143,6 +144,8 @@ export const useIntegrationList = (search?: string) => {
 export const useCreateIntegration = () => {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: integrationApi.create,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: integrationKeys.lists() })
   });
@@ -151,6 +154,8 @@ export const useCreateIntegration = () => {
 export const useUpdateIntegration = () => {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: integrationApi.update,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: integrationKeys.lists() })
   });
@@ -159,6 +164,8 @@ export const useUpdateIntegration = () => {
 export const useDeleteIntegration = () => {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: integrationApi.delete,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: integrationKeys.lists() })
   });
@@ -167,6 +174,8 @@ export const useDeleteIntegration = () => {
 export const useToggleActiveIntegration = () => {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: integrationApi.toggleActive,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: integrationKeys.lists() })
   });
@@ -189,6 +198,8 @@ export const useNginxConfig = () => {
 export const useUpdateNginxConfig = () => {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: integrationApi.updateNginxConfig,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integration', 'nginx'] })
   });
@@ -204,6 +215,8 @@ export const useApiPermissions = () => {
 export const useUpdateApiPermissions = () => {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: integrationApi.updateApiPermissions,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integration', 'api-permissions'] })
   });

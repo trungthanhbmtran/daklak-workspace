@@ -1,5 +1,5 @@
 model Document {
-  id                 String    @id @default(uuid())
+  id                 String    @id @default(cuid())
   documentNumber     String    @map("document_number") // Số văn bản (đi/đến)
   notation           String?   // Ký hiệu (ví dụ: QĐ-UBND)
   abstract           String    @db.Text // Trích yếu
@@ -39,7 +39,7 @@ model Document {
 }
 
 model DocumentLog {
-  id          String   @id @default(uuid())
+  id          String   @id @default(cuid())
   documentId  String   @map("document_id")
   userId      String?  @map("user_id")
   userName    String?  @map("user_name")

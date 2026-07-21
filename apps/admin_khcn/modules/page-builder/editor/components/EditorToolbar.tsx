@@ -61,7 +61,7 @@ export function EditorToolbar({
 
                 <div className={cn("flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 p-1 shrink-0", radiusClass)}>
                     {languages.map((lang) => (
-                        <button
+                        <Button
                             key={lang.code}
                             onClick={() => setActiveLang(lang.code)}
                             className={cn(
@@ -73,7 +73,7 @@ export function EditorToolbar({
                             )}
                         >
                             {lang.name}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </div>
@@ -83,7 +83,7 @@ export function EditorToolbar({
                 {(["desktop", "tablet", "mobile"] as const).map((v) => {
                     const IconComponent = v === "desktop" ? Monitor : v === "tablet" ? Tablet : Smartphone;
                     return (
-                        <button
+                        <Button
                             key={v}
                             onClick={() => setViewport(v)}
                             className={cn(
@@ -93,7 +93,7 @@ export function EditorToolbar({
                             )}
                         >
                             <IconComponent className="w-4 h-4" />
-                        </button>
+                        </Button>
                     );
                 })}
             </div>

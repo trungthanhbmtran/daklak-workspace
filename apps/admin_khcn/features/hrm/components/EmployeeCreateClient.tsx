@@ -188,7 +188,7 @@ export function EmployeeCreateClient() {
                         <div className="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
                           <div className="max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
                             {units.filter(u => u.fullPath.toLowerCase().includes(searchTerm.toLowerCase())).map((u) => (
-                              <button
+                              <Button
                                 key={u.id}
                                 type="button"
                                 onClick={() => {
@@ -206,7 +206,7 @@ export function EmployeeCreateClient() {
                                 <div className={cn("text-[10px] truncate font-medium", departmentId === u.id ? "text-blue-100" : "text-slate-400")}>
                                   {u.fullPath}
                                 </div>
-                              </button>
+                              </Button>
                             ))}
                           </div>
                         </div>

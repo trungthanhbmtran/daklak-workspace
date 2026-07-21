@@ -4,13 +4,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hrmKpiPlansApi, hrmKpiEvaluationsApi, hrmKpiCriteriaApi } from "../api";
 import { hrmKeys } from "../keys";
+import { toast } from "sonner";
 
 export function useKpiCriteriaList(params?: any) {
   return useQuery({
     queryKey: [...hrmKeys.kpis(), params],
     queryFn: async () => {
       const res = await hrmKpiCriteriaApi.list(params);
-      return res.data || [];
+      return res.data;
     },
   });
 }
@@ -28,6 +29,8 @@ export function useKpiCriteriaListPaginated(params?: any) {
 export function useCreateKpiCriterion() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: any) => hrmKpiCriteriaApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
@@ -39,6 +42,8 @@ export function useCreateKpiCriterion() {
 export function useUpdateKpiCriterion() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmKpiCriteriaApi.update(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
@@ -50,6 +55,8 @@ export function useUpdateKpiCriterion() {
 export function useDeleteKpiCriterion() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: number) => hrmKpiCriteriaApi.deleteOne(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
@@ -61,6 +68,8 @@ export function useDeleteKpiCriterion() {
 export function useCreateKpiPlan() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: any) => hrmKpiPlansApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: hrmKeys.kpiPlans() });
@@ -79,6 +88,8 @@ export function useKpiEvaluations(period: string) {
 export function useCalculatePersonalKpi() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: { periodId: number; employeeCode?: string }) => hrmKpiEvaluationsApi.calculatePersonal(payload),
     onSuccess: (_, variables) => {
       // Invalidate the evaluations query

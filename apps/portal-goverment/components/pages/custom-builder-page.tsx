@@ -40,7 +40,7 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
 
   // Get custom page list metadata
   const pageList = React.useMemo(() => {
-    const found = (portalConfigData || []).find((c: any) => c.code === "custom_page_list")
+    const found = (portalConfigData).find((c: any) => c.code === "custom_page_list")
     if (!found || !found.description) return []
     try {
       return JSON.parse(found.description)
@@ -70,7 +70,7 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
   const layoutSchema = React.useMemo(() => {
     // If it's about-page, we can also fall back to custom_about_layout for compatibility
     const configCode = id === "about-page" ? "custom_about_layout" : `custom_page_layout_${id}`
-    const found = (portalConfigData || []).find((c: any) => c.code === configCode)
+    const found = (portalConfigData).find((c: any) => c.code === configCode)
     if (!found || !found.description) return null
     try {
       return JSON.parse(found.description)

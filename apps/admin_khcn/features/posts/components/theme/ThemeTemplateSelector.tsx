@@ -3,6 +3,7 @@
 import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
 import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 interface ColorOption {
@@ -30,7 +31,7 @@ export function ThemeTemplateSelector() {
         {colorTemplates.map((item) => {
           const isSelected = template === item.id;
           return (
-            <button
+            <Button
               key={item.id}
               type="button"
               onClick={() => setTemplate(item.id)}
@@ -42,7 +43,7 @@ export function ThemeTemplateSelector() {
               {/* Vòng tròn màu sắc đại diện */}
               <Text as="span" className={`w-4 h-4 rounded-full shrink-0 ${item.colorClass} shadow-sm`} />
               <Text as="span" className="truncate">{item.name}</Text>
-            </button>
+            </Button>
           );
         })}
       </div>

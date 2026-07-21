@@ -7,9 +7,7 @@ import {
   Body,
   Param,
   Query,
-  Inject,
   UseGuards,
-  OnModuleInit,
   ParseIntPipe,
 } from '@nestjs/common';
 import {
@@ -19,58 +17,23 @@ import {
   ApiResponse,
   ApiQuery,
   ApiBody,
-  ApiParam,
 } from '@nestjs/swagger';
-import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
-
-function toFrontendItem(c: any) {
-  return {
-    id: c.id,
-    group: c.group ?? '',
-    code: c.code ?? '',
-    name: c.name ?? '',
-    sort: c.order ?? 0,
-    active: (c.isActive ?? c.is_active ?? true) ? 1 : 0,
-    description: c.description ?? '',
-  };
-}
+import { CategoriesService } from './categories.service';
 
 @ApiTags('Danh mục hệ thống')
 @Controller('admin/categories')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
-export class CategoriesController implements OnModuleInit {
-  private categoryService: any;
-
-  constructor(
-    @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
-  ) {}
-
-  onModuleInit() {
-    this.categoryService = this.client.getService(
-      MICROSERVICES.SYS_CATEGORY.SERVICE,
-    );
-  }
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get('groups')
   @ApiOperation({ summary: 'Lấy danh sách tất cả các nhóm danh mục' })
   @ApiResponse({ status: 200, description: 'Danh sách nhóm danh mục' })
   async getGroups() {
-    try {
-      const res: any = await firstValueFrom(
-        this.categoryService.GetAllGroups({}),
-      );
-      return { success: true, data: res.groups || [] };
-    } catch (error) {
-      return {
-        success: false,
-        data: [],
-        message: 'Chưa thể kết nối tới dịch vụ danh mục',
-      };
-    }
+    return this.categoriesService.getGroups();
   }
 
   @Put('groups/:code')
@@ -81,21 +44,7 @@ export class CategoriesController implements OnModuleInit {
     @Param('code') code: string,
     @Body() body: { name: string; order?: number },
   ) {
-    try {
-      const res: any = await firstValueFrom(
-        this.categoryService.UpdateGroup({
-          code,
-          name: body.name,
-          order: body.order ?? 0,
-        }),
-      );
-      return { success: true, data: res };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Lỗi cập nhật nhóm danh mục',
-      };
-    }
+    return this.categoriesService.updateGroup(code, body);
   }
 
   @Get()
@@ -124,45 +73,7 @@ export class CategoriesController implements OnModuleInit {
     @Query('skip') skip?: string,
     @Query('selectedIds') selectedIds?: string,
   ) {
-    const limitNum = limit ? parseInt(limit, 10) : 50;
-    const skipNum = skip ? parseInt(skip, 10) : 0;
-    const selectedIdsArr = selectedIds
-      ? selectedIds
-          .split(',')
-          .map(Number)
-          .filter((n) => !isNaN(n) && n > 0)
-      : [];
-
-    if (!group) {
-      const result: any = await firstValueFrom(
-        this.categoryService.GetAllCategories({}),
-      ).catch((e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      });
-      return {
-        success: true,
-        data: result?.data || [],
-        meta: { total: result?.total || result?.data?.length || 0 },
-      };
-    }
-    const result: any = await firstValueFrom(
-      this.categoryService.GetByGroup({
-        group: group || '',
-        search: q || '',
-        take: limitNum,
-        skip: skipNum,
-        selectedIds: selectedIdsArr,
-      }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-    return {
-      success: true,
-      data: result?.data || [],
-      meta: { total: result?.total || result?.data?.length || 0 },
-    };
+    return this.categoriesService.getByGroup(group, q, limit, skip, selectedIds);
   }
 
   @Post()
@@ -180,19 +91,7 @@ export class CategoriesController implements OnModuleInit {
       order?: number;
     },
   ) {
-    const res = await firstValueFrom(
-      this.categoryService.Create({
-        group: body.group,
-        code: body.code,
-        name: body.name,
-        description: body.description,
-        order: body.order,
-      }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-    return { success: true, data: toFrontendItem(res as any) };
+    return this.categoriesService.create(body);
   }
 
   @Put(':id')
@@ -211,21 +110,7 @@ export class CategoriesController implements OnModuleInit {
       active?: number;
     },
   ) {
-    const payload = {
-      id,
-      code: body.code,
-      name: body.name,
-      description: body.description,
-      order: body.order ?? body.sort,
-      isActive: body.active !== undefined ? !!body.active : undefined,
-    };
-    const res = await firstValueFrom(
-      this.categoryService.Update(payload),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-    return { success: true, data: toFrontendItem(res as any) };
+    return this.categoriesService.update(id, body);
   }
 
   @Delete(':id')
@@ -233,33 +118,14 @@ export class CategoriesController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Đã xóa danh mục' })
   @ApiResponse({ status: 404, description: 'Danh mục không tồn tại' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const res = (await firstValueFrom(
-      this.categoryService.Delete({ id }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    })) as any;
-    return {
-      success: res?.success ?? true,
-      message: res?.message ?? 'Đã xóa danh mục',
-    };
+    return this.categoriesService.delete(id);
   }
 }
 
 @ApiTags('Danh mục hệ thống công khai')
 @Controller('public/categories')
-export class PublicCategoriesController implements OnModuleInit {
-  private categoryService: any;
-
-  constructor(
-    @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
-  ) {}
-
-  onModuleInit() {
-    this.categoryService = this.client.getService(
-      MICROSERVICES.SYS_CATEGORY.SERVICE,
-    );
-  }
+export class PublicCategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get()
   @ApiOperation({
@@ -276,40 +142,6 @@ export class PublicCategoriesController implements OnModuleInit {
   })
   @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
   async getByGroup(@Query() query: any) {
-    const group = query.group;
-    const lang = query.lang || 'vi';
-    const limitNum = query.limit ? parseInt(query.limit, 10) : 50;
-    const skipNum = query.skip ? parseInt(query.skip, 10) : 0;
-
-    if (!group) {
-      const result: any = await firstValueFrom(
-        this.categoryService.GetAllCategories({ lang }),
-      ).catch((e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      });
-      return {
-        success: true,
-        data: result?.data || [],
-        meta: { total: result?.total || result?.data?.length || 0 },
-      };
-    }
-    const result: any = await firstValueFrom(
-      this.categoryService.GetByGroup({
-        group: group || '',
-        lang,
-        search: query.q || '',
-        take: limitNum,
-        skip: skipNum,
-      }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-    return {
-      success: true,
-      data: result?.data || [],
-      meta: { total: result?.total || result?.data?.length || 0 },
-    };
+    return this.categoriesService.publicGetByGroup(query);
   }
 }

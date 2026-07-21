@@ -1,5 +1,5 @@
 model PostVersion {
-  id            String   @id @default(uuid())
+  id            String   @id @default(cuid())
   postId        String   @map("post_id")
   version       Int
   title         String
@@ -18,7 +18,7 @@ model PostVersion {
 }
 
 model ModerationLog {
-  id          String   @id @default(uuid())
+  id          String   @id @default(cuid())
   postId      String   @map("post_id")
   reviewerId  String   @map("reviewer_id")
   oldStatus   String   @map("old_status")
@@ -36,7 +36,7 @@ model ModerationLog {
 }
 
 model AuditLog {
-  id          String   @id @default(uuid())
+  id          String   @id @default(cuid())
   postId      String?  @map("post_id")
   actorId     String   @map("actor_id")
   action      String   // CREATE | UPDATE | SUBMIT | APPROVE | REJECT | PUBLISH | UNPUBLISH | DELETE
@@ -57,7 +57,7 @@ model AuditLog {
 }
 
 model PostTranslation {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   postId          String   @map("post_id")
   langCode        String   @map("lang_code")
   

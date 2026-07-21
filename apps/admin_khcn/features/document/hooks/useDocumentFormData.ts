@@ -3,6 +3,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 const fetchList = async (group: string): Promise<any[]> => {
   const res: any = await apiClient.get("/categories", { params: { group } });
@@ -45,7 +46,7 @@ export function useCabinetFiles(enabled = true) {
     queryKey: ["document-cabinet"],
     queryFn: async (): Promise<any[]> => {
       const res: any = await apiClient.get("/documents/cabinet");
-      return res?.data || [];
+      return res.data;
     },
     enabled,
     staleTime: 60_000,
@@ -60,7 +61,7 @@ export function useDossierComponents(dossierId: string) {
     queryKey: ["dossier-components", dossierId],
     queryFn: async (): Promise<any[]> => {
       const res: any = await apiClient.get(`/documents/dossiers/${dossierId}/components`);
-      return res?.data || [];
+      return res.data;
     },
     enabled: !!dossierId,
     staleTime: 30_000,
@@ -75,6 +76,8 @@ export function useDossierComponentMutations(dossierId: string) {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["dossier-components", dossierId] });
 
   const updateComponent = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: { id: string; status: string; fileUrl?: string; source?: string }) =>
       apiClient.put(`/documents/dossiers/components/${data.id}`, {
         status: data.status,
@@ -85,6 +88,8 @@ export function useDossierComponentMutations(dossierId: string) {
   });
 
   const addComponent = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: { name: string; fileUrl: string }) =>
       apiClient.post(`/documents/dossiers/${dossierId}/components`, data),
     onSuccess: invalidate,
@@ -102,6 +107,8 @@ export function useCabinetMutations() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["document-cabinet"] });
 
   const addFile = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: {
       fileName: string;
       fileUrl: string;
@@ -112,6 +119,8 @@ export function useCabinetMutations() {
   });
 
   const deleteFile = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (fileId: string) =>
       apiClient.delete(`/documents/cabinet/${fileId}`),
     onSuccess: invalidate,
@@ -129,7 +138,7 @@ export function useDossierList() {
     queryKey: ["dossiers-list"],
     queryFn: async (): Promise<any[]> => {
       const res: any = await apiClient.get("/documents/dossiers/list");
-      return res?.data || [];
+      return res.data;
     },
     staleTime: 60_000,
     placeholderData: [],
@@ -143,6 +152,8 @@ export function useDossierList() {
 export function useCreateDossier(onSuccess?: () => void) {
   const qc = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: { procedureName: string; senderName: string }) =>
       apiClient.post("/documents/dossiers/create-blank", data),
     onSuccess: () => {
@@ -161,7 +172,7 @@ export function useProcedureList() {
     queryKey: ["procedures-list"],
     queryFn: async (): Promise<any[]> => {
       const res: any = await apiClient.get("/documents/procedures/list");
-      return res?.data || [];
+      return res.data;
     },
     staleTime: 2 * 60_000,
     placeholderData: [],
@@ -177,6 +188,8 @@ export function useProcedureMutations() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["procedures-list"] });
 
   const createProcedure = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (data: {
       name: string;
       code: string;
@@ -187,6 +200,8 @@ export function useProcedureMutations() {
   });
 
   const deleteProcedure = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (id: string) => apiClient.delete(`/documents/procedures/${id}`),
     onSuccess: invalidate,
   });

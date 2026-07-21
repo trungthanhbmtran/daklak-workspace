@@ -7,6 +7,8 @@ import { MinutesController } from './minutes.controller';
 import { ConsultationsController } from './consultations.controller';
 import { PublicConsultationsController } from './public-consultations.controller';
 import { PublicDocumentsController } from './public-documents.controller';
+import { DocumentsService } from './documents.service';
+import { ConsultationsService } from './consultations.service';
 
 @Module({
   imports: [
@@ -25,5 +27,6 @@ import { PublicDocumentsController } from './public-documents.controller';
     PublicDocumentsController,
     DocumentsController,
   ],
+  providers: [DocumentsService, ConsultationsService],
 })
 export class DocumentsModule {}

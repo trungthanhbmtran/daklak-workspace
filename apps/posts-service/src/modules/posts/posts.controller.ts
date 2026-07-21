@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, MessagePattern, Payload, RpcException, Ctx, RmqContext } from '@nestjs/microservices';
+import { CreatePostGrpcDto, IdGrpcDto, SlugGrpcDto, ActionPostGrpcDto, ReviewPostGrpcDto, ListPostsGrpcDto, UpdatePostGrpcDto, GetPostStatsGrpcDto } from './dto/posts.grpc.dto';
 import { PostsService } from './posts.service';
 import { status } from '@grpc/grpc-js';
 
@@ -19,13 +20,13 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) { }
 
   @GrpcMethod('PostService', 'CreatePost')
-  async createPost(data: any) {
+  async createPost(@Payload() data: CreatePostGrpcDto) {
     const result = await this.postsService.create(data);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'GetPost')
-  async getPost(data: { id: string }) {
+  async getPost(@Payload() data: IdGrpcDto) {
     const result = await this.postsService.findOne(data.id);
     if (!result) {
       throw new RpcException({
@@ -37,7 +38,7 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'ListPosts')
-  async listPosts(query: any) {
+  async listPosts(@Payload() query: ListPostsGrpcDto) {
     const result = await this.postsService.findAll(query);
     return {
       data: (result.data || []).map(p => sanitizePost(p)),
@@ -46,7 +47,7 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'UpdatePost')
-  async updatePost(data: any) {
+  async updatePost(@Payload() data: UpdatePostGrpcDto) {
     const { id, ...rest } = data;
     const result = await this.postsService.update(id, rest);
     return { data: sanitizePost(result) };
@@ -55,13 +56,13 @@ export class PostsController {
 
 
   @GrpcMethod('PostService', 'DeletePost')
-  async deletePost(data: { id: string }) {
+  async deletePost(@Payload() data: IdGrpcDto) {
     await this.postsService.remove(data.id);
     return { success: true };
   }
 
   @GrpcMethod('PostService', 'GetPostBySlug')
-  async getPostBySlug(data: { slug: string }) {
+  async getPostBySlug(@Payload() data: SlugGrpcDto) {
     const result = await this.postsService.findBySlug(data.slug);
     if (!result) {
       throw new RpcException({
@@ -73,55 +74,55 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'SubmitPost')
-  async submitPost(data: { id: string, actorId: string, note?: string }) {
+  async submitPost(@Payload() data: ActionPostGrpcDto) {
     const result = await this.postsService.submit(data.id, data.actorId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'ReviewPost')
-  async reviewPost(data: { id: string, reviewerId: string, note?: string }) {
+  async reviewPost(@Payload() data: ReviewPostGrpcDto) {
     const result = await this.postsService.review(data.id, data.reviewerId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'ApprovePost')
-  async approvePost(data: { id: string, reviewerId: string, note?: string }) {
+  async approvePost(@Payload() data: ReviewPostGrpcDto) {
     const result = await this.postsService.approve(data.id, data.reviewerId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'RejectPost')
-  async rejectPost(data: { id: string, reviewerId: string, note?: string }) {
+  async rejectPost(@Payload() data: ReviewPostGrpcDto) {
     const result = await this.postsService.reject(data.id, data.reviewerId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'PublishPost')
-  async publishPost(data: { id: string, actorId: string, note?: string }) {
+  async publishPost(@Payload() data: ActionPostGrpcDto) {
     const result = await this.postsService.publish(data.id, data.actorId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'UnpublishPost')
-  async unpublishPost(data: { id: string, actorId: string, note?: string }) {
+  async unpublishPost(@Payload() data: ActionPostGrpcDto) {
     const result = await this.postsService.unpublish(data.id, data.actorId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'ArchivePost')
-  async archivePost(data: { id: string, actorId: string, note?: string }) {
+  async archivePost(@Payload() data: ActionPostGrpcDto) {
     const result = await this.postsService.archive(data.id, data.actorId, data.note);
     return { data: sanitizePost(result) };
   }
 
   @GrpcMethod('PostService', 'GetPostHistory')
-  async getPostHistory(data: { id: string }) {
+  async getPostHistory(@Payload() data: IdGrpcDto) {
     const items = await this.postsService.getHistory(data.id);
     return { data: items };
   }
 
   @GrpcMethod('PostService', 'IncrementViewCount')
-  async incrementViewCount(data: { id: string }) {
+  async incrementViewCount(@Payload() data: IdGrpcDto) {
     const result = await this.postsService.incrementViewCount(data.id);
     return { data: sanitizePost(result) };
   }
@@ -130,7 +131,7 @@ export class PostsController {
    * Trả về thống kê tổng hợp — backend tính sẵn, client không cần fetch bulk.
    */
   @GrpcMethod('PostService', 'GetPostStats')
-  async getPostStats(data: { categoryId?: string; authorId?: string }) {
+  async getPostStats(@Payload() data: GetPostStatsGrpcDto) {
     return this.postsService.getStats(data);
   }
 

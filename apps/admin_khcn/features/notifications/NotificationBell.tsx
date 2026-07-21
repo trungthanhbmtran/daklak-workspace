@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { getNotifications, markNotificationRead, type NotificationItem } from "./api";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const NOTIFICATIONS_KEY = ["notifications"];
 
@@ -103,6 +104,8 @@ export function NotificationBell() {
   });
 
   const markRead = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: markNotificationRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });

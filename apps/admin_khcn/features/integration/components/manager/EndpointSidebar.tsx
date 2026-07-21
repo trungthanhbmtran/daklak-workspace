@@ -55,7 +55,7 @@ export const EndpointSidebar = memo(({ endpoints, selectedId, onSelect, onAdd, s
           <div className="text-center py-8 text-slate-500 text-sm">Không tìm thấy API nào</div>
         ) : (
           filteredEndpoints.map(ep => (
-            <button
+            <Button
               key={ep.id}
               onClick={() => onSelect(ep.id)}
               className={`w-full text-left px-3 py-2.5 rounded-lg flex flex-col gap-1.5 transition-colors ${
@@ -72,7 +72,7 @@ export const EndpointSidebar = memo(({ endpoints, selectedId, onSelect, onAdd, s
               </div>
               <div className="text-xs font-mono truncate opacity-70 ml-[38px]">{ep.path}</div>
               {ep.folder && <div className="text-[10px] text-slate-400 uppercase tracking-wide ml-[38px]">{ep.folder}</div>}
-            </button>
+            </Button>
           ))
         )}
       </div>

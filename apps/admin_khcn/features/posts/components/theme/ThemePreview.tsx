@@ -176,9 +176,9 @@ export function ThemePreview() {
 
           {/* Nút bấm & Ô Input */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <button className={`px-3 py-1.5 text-[11px] font-medium text-white shadow-sm ${colors.bgPrimary} transition-all duration-200 ${getRadiusClass()}`}>
+            <Button className={`px-3 py-1.5 text-[11px] font-medium text-white shadow-sm ${colors.bgPrimary} transition-all duration-200 ${getRadiusClass()}`}>
               Hành động chính
-            </button>
+            </Button>
             <input
               type="text"
               placeholder="Nhập thử..."

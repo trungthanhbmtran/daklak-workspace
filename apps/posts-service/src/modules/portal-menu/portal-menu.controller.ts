@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import {  GrpcMethod , Payload } from '@nestjs/microservices';
 import { PortalMenuService } from './portal-menu.service';
 
 @Controller()
@@ -7,7 +7,7 @@ export class PortalMenuController {
   constructor(private readonly service: PortalMenuService) { }
 
   @GrpcMethod('PortalMenuService', 'CreatePortalMenu')
-  async create(data: any) {
+  async create(@Payload() data: Record<string, any>) {
     const result = await this.service.create(data);
     return this.mapToProto(result);
   }
@@ -25,7 +25,7 @@ export class PortalMenuController {
   }
 
   @GrpcMethod('PortalMenuService', 'UpdatePortalMenu')
-  async update(data: any) {
+  async update(@Payload() data: Record<string, any>) {
     const { id, ...updateData } = data;
     const result = await this.service.update(id, updateData);
     return this.mapToProto(result);

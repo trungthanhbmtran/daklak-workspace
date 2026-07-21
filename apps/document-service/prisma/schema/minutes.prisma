@@ -1,5 +1,5 @@
 model Minutes {
-  id              String   @id @default(uuid())
+  id              String   @id @default(cuid())
   title           String   // Tiêu đề biên bản
   startTime       DateTime @map("start_time") // Thời gian bắt đầu
   endTime         DateTime? @map("end_time") // Thời gian kết thúc

@@ -3,6 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { TranslateController } from './translate.controller';
+import { TranslateService } from './translate.service';
 
 @Module({
   imports: [
@@ -24,5 +25,6 @@ import { TranslateController } from './translate.controller';
     ]),
   ],
   controllers: [TranslateController],
+  providers: [TranslateService],
 })
 export class TranslateModule {}

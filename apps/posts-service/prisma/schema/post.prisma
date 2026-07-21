@@ -1,5 +1,5 @@
 model Post {
-  id                    String   @id @default(uuid())
+  id                    String   @id @default(cuid())
   title                 String
   description           String?  @db.Text
   content               String?  @db.LongText

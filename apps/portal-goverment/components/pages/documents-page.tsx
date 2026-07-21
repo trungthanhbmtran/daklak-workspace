@@ -17,6 +17,14 @@ import {
   CheckCircle2,
   FileSpreadsheet
 } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 // Client-side cookie getter helper
 const getCookie = (name: string): string | null => {
@@ -267,39 +275,39 @@ export default function DocumentsPage() {
       {/* Main Table Grid */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-100 dark:bg-slate-950 text-slate-500 font-bold uppercase border-b border-slate-200 dark:border-slate-800">
-                <th className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 w-28">{t.thCode}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4 w-32">{t.thDate}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4">{t.thTitle}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4 w-36">{t.thOrg}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 text-right w-24">{t.thAction}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
+          <Table className="w-full text-left text-xs border-collapse">
+            <TableHeader>
+              <TableRow className="bg-slate-100 dark:bg-slate-950 text-slate-500 font-bold uppercase border-b border-slate-200 dark:border-slate-800 hover:bg-slate-100">
+                <TableHead className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 w-28 text-slate-500 font-bold uppercase">{t.thCode}</TableHead>
+                <TableHead className="py-3 px-3 sm:py-4 sm:px-4 w-32 text-slate-500 font-bold uppercase">{t.thDate}</TableHead>
+                <TableHead className="py-3 px-3 sm:py-4 sm:px-4 text-slate-500 font-bold uppercase">{t.thTitle}</TableHead>
+                <TableHead className="py-3 px-3 sm:py-4 sm:px-4 w-36 text-slate-500 font-bold uppercase">{t.thOrg}</TableHead>
+                <TableHead className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 text-right w-24 text-slate-500 font-bold uppercase">{t.thAction}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
               {filteredDocs.length > 0 ? (
                 filteredDocs.map((doc: any) => (
-                  <tr
+                  <TableRow
                     key={doc.id}
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-950/40 transition-colors"
                   >
-                    <td className="py-2.5 px-3 sm:py-3.5 sm:px-4 md:px-5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{doc.code}</td>
-                    <td className="py-2.5 px-3 sm:py-3.5 sm:px-4 text-slate-400 whitespace-nowrap font-mono">{doc.signDate}</td>
-                    <td className="py-2.5 px-3 sm:py-3.5 sm:px-4">
+                    <TableCell className="py-2.5 px-3 sm:py-3.5 sm:px-4 md:px-5 font-bold text-slate-900 dark:text-white whitespace-nowrap">{doc.code}</TableCell>
+                    <TableCell className="py-2.5 px-3 sm:py-3.5 sm:px-4 text-slate-400 whitespace-nowrap font-mono">{doc.signDate}</TableCell>
+                    <TableCell className="py-2.5 px-3 sm:py-3.5 sm:px-4">
                       <span
                         onClick={() => setSelectedDoc(doc)}
                         className="text-slate-800 dark:text-slate-200 font-bold hover:text-[#b91c1c] cursor-pointer line-clamp-2 leading-relaxed"
                       >
                         {doc.title}
                       </span>
-                    </td>
-                    <td className="py-2.5 px-3 sm:py-3.5 sm:px-4">
+                    </TableCell>
+                    <TableCell className="py-2.5 px-3 sm:py-3.5 sm:px-4">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-100 dark:bg-slate-950 rounded-md text-[10px] font-bold text-slate-500">
                         {doc.orgName}
                       </span>
-                    </td>
-                    <td className="py-2.5 px-3 sm:py-3.5 sm:px-4 md:px-5 text-right">
+                    </TableCell>
+                    <TableCell className="py-2.5 px-3 sm:py-3.5 sm:px-4 md:px-5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedDoc(doc)}
@@ -320,18 +328,18 @@ export default function DocumentsPage() {
                           <Download className="w-3.5 h-3.5" />
                         </a>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400 font-semibold bg-white dark:bg-slate-900">
+                <TableRow>
+                  <TableCell colSpan={5} className="py-12 text-center text-slate-400 font-semibold bg-white dark:bg-slate-900">
                     {t.noDocs}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
 

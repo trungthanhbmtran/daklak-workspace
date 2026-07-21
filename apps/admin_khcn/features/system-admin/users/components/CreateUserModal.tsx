@@ -283,7 +283,7 @@ export function CreateUserModal({
                       {hrmKeyword.trim().length >= 2 && hrmEmployees.length > 0 && (
                         <div className="rounded-md border bg-card max-h-[220px] overflow-y-auto shadow-md">
                           {hrmEmployees.map((emp: HrmEmployee) => (
-                            <button
+                            <Button
                               key={emp.id}
                               type="button"
                               onClick={() => fillFromHrm(emp)}
@@ -300,7 +300,7 @@ export function CreateUserModal({
                                   {getUnitName(emp) && <span>Phòng ban: <strong className="font-medium text-foreground/80">{getUnitName(emp)}</strong></span>}
                                 </div>
                               </div>
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       )}

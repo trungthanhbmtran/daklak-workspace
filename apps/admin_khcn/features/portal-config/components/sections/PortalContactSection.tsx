@@ -128,13 +128,13 @@ export const PortalContactSection = ({ activeLangTab, isCompareMode, languages }
                       className="w-full h-full object-cover rounded-lg"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <button
+                      <Button
                         type="button"
                         onClick={() => removeMapImage()}
                         className="p-1.5 bg-red-600 rounded-full text-white hover:bg-red-700 transition-colors"
                       >
                         <X className="w-4.5 h-4.5" />
-                      </button>
+                      </Button>
                     </div>
                   </>
                 ) : (

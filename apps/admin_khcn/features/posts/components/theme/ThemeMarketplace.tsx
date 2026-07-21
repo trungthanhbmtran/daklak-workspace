@@ -5,6 +5,7 @@ import Image from "next/image";
 // Import hook cấu hình hệ thống
 import { useThemeConfig } from "./ThemeProvider";
 import { Heading, Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
 
 
 interface ThemeItem {
@@ -120,10 +121,10 @@ export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () =>
                     placeholder="Tìm kiếm theme đã cài đặt..."
                     className="w-full sm:w-72 px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button className="w-full sm:w-auto px-4 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center justify-center gap-2">
+                <Button className="w-full sm:w-auto px-4 py-1.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                     Tải lên Theme (.zip)
-                </button>
+                </Button>
             </div>
 
             {/* Grid Thư viện */}
@@ -152,21 +153,21 @@ export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () =>
                             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
                                 <Text as="span" className="text-slate-400">Bởi <Text as="span" className="font-medium text-slate-600 dark:text-slate-300">{theme.author}</Text></Text>
                                 <div className="flex gap-2">
-                                    <button
+                                    <Button
                                         onClick={() => handleCustomize(theme.templateKey)}
                                         className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-md transition-colors"
                                     >
                                         Tùy biến
-                                    </button>
+                                    </Button>
 
                                     {/* SỬA TẠI ĐÂY: Truyền toàn bộ object theme vào hàm handleActivate để nạp cấu hình */}
                                     {!theme.isLive && (
-                                        <button
+                                        <Button
                                             onClick={() => handleActivate(theme)}
                                             className="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
                                         >
                                             Kích hoạt
-                                        </button>
+                                        </Button>
                                     )}
                                 </div>
                             </div>

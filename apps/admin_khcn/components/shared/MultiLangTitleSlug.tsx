@@ -86,7 +86,7 @@ export function MultiLangTitleSlug({
      * Update field helper
      */
     const updateLanguageValue = useCallback(
-        // eslint-disable-next-line react-hooks/preserve-manual-memoization
+         
         (
             langCode: string,
             field: keyof MultiLangValue,

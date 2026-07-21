@@ -110,12 +110,12 @@ export function PopoverMultiSelect({
           <div className="shrink-0 px-5 py-3 border-b bg-primary/5 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-primary">Đã chọn ({selectedIds.length})</span>
-              <button 
+              <Button 
                 onClick={removeAll}
                 className="text-xs text-muted-foreground hover:text-destructive transition-colors"
               >
                 Xóa tất cả
-              </button>
+              </Button>
             </div>
             <div className="flex flex-wrap gap-1.5 max-h-[100px] overflow-y-auto pr-1 custom-scrollbar">
               {selectedItems.map((item) => (
@@ -124,12 +124,12 @@ export function PopoverMultiSelect({
                   className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full bg-background text-foreground text-xs font-medium border shadow-sm"
                 >
                   <span className="truncate max-w-[200px]">{item.name}</span>
-                  <button
+                  <Button
                     onClick={() => toggleItem(item.id)}
                     className="rounded-full p-0.5 hover:bg-destructive hover:text-destructive-foreground transition-colors ml-0.5"
                   >
                     <X className="h-3 w-3" />
-                  </button>
+                  </Button>
                 </span>
               ))}
             </div>
@@ -146,12 +146,12 @@ export function PopoverMultiSelect({
             className="pl-10 h-10 bg-muted/30"
           />
           {currentSearch && (
-            <button
+            <Button
               onClick={() => handleSearchChange("")}
               className="absolute right-7 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -171,7 +171,7 @@ export function PopoverMultiSelect({
               displayItems.map((item) => {
                 const isSelected = selectedIds.includes(item.id);
                 return (
-                  <button
+                  <Button
                     key={item.id}
                     onClick={() => toggleItem(item.id)}
                     className={cn(
@@ -197,7 +197,7 @@ export function PopoverMultiSelect({
                         <span className="text-xs text-muted-foreground truncate">{item.code}</span>
                       )}
                     </div>
-                  </button>
+                  </Button>
                 );
               })
             )}

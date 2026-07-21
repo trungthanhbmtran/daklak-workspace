@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 const MenuItem = ({ icon: Icon, label, onClick, isDestructive }: any) => (
-  <button
+  <Button
     type="button"
     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
     className={cn(
@@ -36,7 +36,7 @@ const MenuItem = ({ icon: Icon, label, onClick, isDestructive }: any) => (
   >
     <Icon className="mr-2 h-4 w-4" />
     {label}
-  </button>
+  </Button>
 );
 
 export function MediaContextMenuPlugin() {

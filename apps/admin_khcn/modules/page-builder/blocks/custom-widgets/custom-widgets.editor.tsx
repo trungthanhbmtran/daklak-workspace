@@ -65,7 +65,7 @@ export const PublicServicesEditor: React.FC<{
     { title: "Hỏi đáp pháp luật", desc: "Giải đáp thắc mắc về đất đai, hộ tịch, quy hoạch.", url: "", iconName: "ShieldCheck" }
   ];
 
-  const items = Array.isArray(widget.data?.items) && widget.data.items.length > 0 ? widget.data.items : defaultServices;
+  const items = Array.isArray(widget.data?.items) && widget.data?.items.length > 0 ? widget.data.items : defaultServices;
 
   const updateItem = (index: number, key: string, value: string) => {
     const newItems = [...items];
@@ -292,7 +292,7 @@ export const ExternalLinksEditor: React.FC<{
     { title: "Bộ Khoa học và Công nghệ", url: "https://most.gov.vn" }
   ];
 
-  const items = Array.isArray(widget.data?.items) && widget.data.items.length > 0 ? widget.data.items : defaultLinks;
+  const items = Array.isArray(widget.data?.items) && widget.data?.items.length > 0 ? widget.data.items : defaultLinks;
 
   const updateLink = (index: number, key: string, value: string) => {
     const newLinks = [...items];

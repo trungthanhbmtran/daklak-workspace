@@ -67,7 +67,7 @@ export default function ContactPage() {
   })
 
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.description && found.description.trim().startsWith("{")) {
@@ -95,7 +95,7 @@ export default function ContactPage() {
   }, [portalConfigData, currentLang])
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.description && found.description.trim().startsWith("{")) {

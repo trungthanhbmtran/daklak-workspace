@@ -46,7 +46,7 @@ export function KpiCriteriaClient() {
   const [limit, setLimit] = useState(10);
 
   const { data: response, isLoading } = useKpiCriteriaListPaginated({ page, limit });
-  const criteriaList = response?.data || [];
+  const criteriaList = response.data;
   const meta: any = response?.meta?.pagination;
 
   const createMutation = useCreateKpiCriterion();
@@ -124,7 +124,7 @@ export function KpiCriteriaClient() {
         toast.success("Tạo tiêu chí mới thành công");
       }
       setIsModalOpen(false);
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (err) {
       toast.error((err as any)?.response?.data?.message || "Đã xảy ra lỗi khi lưu");
     }
@@ -141,7 +141,7 @@ export function KpiCriteriaClient() {
     try {
       await deleteMutation.mutateAsync(itemToDelete);
       toast.success("Đã xóa tiêu chí");
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (err) {
       toast.error((err as any)?.response?.data?.message || "Đã xảy ra lỗi khi xóa");
     } finally {

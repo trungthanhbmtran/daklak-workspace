@@ -27,7 +27,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
     queryKey: ["system-categories"],
     queryFn: async () => {
       const res = await categoryApi.fetchByGroup('POST_STATUS');
-      return res.data || [];
+      return res.data;
     },
     staleTime: 5 * 60 * 1000
   });
@@ -36,12 +36,12 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
     queryKey: ["post-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return res?.data || [];
+      return res.data;
     },
     staleTime: 5 * 60 * 1000
   });
 
-  const postStatusCategories = systemCategories?.filter((c: any) => c.active === 1) || [];
+  const postStatusCategories = systemCategories || [];
 
   const updateParams = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());

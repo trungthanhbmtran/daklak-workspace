@@ -91,7 +91,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     if (isRawMode) {
       try {
         metadataObj = JSON.parse(formData.rawConfig);
-      // eslint-disable-next-line unused-imports/no-unused-vars
+       
       } catch (e) {
         toast.error((e as any)?.response?.data?.message || "Cấu hình JSON không hợp lệ");
         return;

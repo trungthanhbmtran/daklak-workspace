@@ -64,7 +64,7 @@ message CreateWorkflowRequest {
   int32 version = 4;
   string status = 5;
   string createdBy = 6;
-  google.protobuf.Struct definition = 7;
+  WorkflowDefinition definition = 7;
 }
 
 message UpdateWorkflowRequest {
@@ -74,7 +74,7 @@ message UpdateWorkflowRequest {
   string description = 4;
   int32 version = 5;
   string status = 6;
-  google.protobuf.Struct definition = 7;
+  WorkflowDefinition definition = 7;
 }
 
 message FindOneWorkflowRequest {
@@ -93,7 +93,7 @@ message ListWorkflowsRequest {
 
 message ListWorkflowsResponse {
   repeated WorkflowResponse data = 1;
-  google.protobuf.Struct meta = 2;
+  common.PaginationMeta meta = 2;
 }
 
 message DeleteWorkflowRequest {
@@ -114,8 +114,13 @@ message WorkflowResponse {
   string createdBy = 7;
   string createdAt = 8;
   string updatedAt = 9;
-  google.protobuf.Struct definition = 10;
+  WorkflowDefinition definition = 10;
   string trigger = 11;
+}
+
+message WorkflowDefinition {
+  repeated WorkflowNode nodes = 1;
+  repeated WorkflowEdge edges = 2;
 }
 
 message WorkflowNode {
@@ -240,7 +245,7 @@ message ListInstancesRequest {
 
 message ListInstancesResponse {
   repeated WorkflowInstanceResponse data = 1;
-  google.protobuf.Struct meta = 2;
+  common.PaginationMeta meta = 2;
 }
 
 message WorkflowTask {
@@ -288,7 +293,7 @@ message CreateIntegrationRequest {
   string authType = 6;
   google.protobuf.Struct authConfig = 7;
   google.protobuf.Struct headers = 8;
-  repeated google.protobuf.Struct endpoints = 9;
+  repeated IntegrationEndpoint endpoints = 9;
   google.protobuf.Struct metadata = 10;
   bool isActive = 11;
 }
@@ -303,7 +308,7 @@ message UpdateIntegrationRequest {
   string authType = 7;
   google.protobuf.Struct authConfig = 8;
   google.protobuf.Struct headers = 9;
-  repeated google.protobuf.Struct endpoints = 10;
+  repeated IntegrationEndpoint endpoints = 10;
   google.protobuf.Struct metadata = 11;
   bool isActive = 12;
 }
@@ -331,11 +336,18 @@ message IntegrationResponse {
   string authType = 7;
   google.protobuf.Struct authConfig = 8;
   google.protobuf.Struct headers = 9;
-  repeated google.protobuf.Struct endpoints = 10;
+  repeated IntegrationEndpoint endpoints = 10;
   google.protobuf.Struct metadata = 11;
   bool isActive = 12;
   string createdAt = 13;
   string updatedAt = 14;
+}
+
+message IntegrationEndpoint {
+  string method = 1;
+  string path = 2;
+  google.protobuf.Struct headers = 3;
+  google.protobuf.Struct params = 4;
 }
 
 message FindAllIntegrationsRequest {

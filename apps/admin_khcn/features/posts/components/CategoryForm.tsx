@@ -94,7 +94,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const langs = await categoryApi.fetchByGroup('LANGUAGE');
-      return langs.data.filter((c: any) => c.active === 1);
+      return langs.data;
     },
     staleTime: 5 * 60_000,
   });
@@ -137,6 +137,8 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   }, [categoryData, form]);
 
   const mutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (v: CategoryFormValues) => isEdit ? postsApi.updateCategory(editId!, v) : postsApi.createCategory(v),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts-categories"] });

@@ -5,7 +5,7 @@ enum MediaStatus {
 }
 
 model Media {
-  id            String      @id @default(uuid())
+  id            String      @id @default(cuid())
   fileName      String      @unique
   originalName  String
   mimeType      String

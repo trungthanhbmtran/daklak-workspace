@@ -436,7 +436,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   })
 
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.description && found.description.trim().startsWith("{")) {
@@ -521,7 +521,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
   const tickerText = React.useMemo(() => {
     if (postsData?.data) {
-      const notices = postsData.data.filter((p: any) => p.isNotification || p.category?.slug === "thong-bao").slice(0, 5)
+      const notices = postsData.data.slice(0, 5)
       if (notices.length > 0) {
         return notices.map((n: any) => '🌟 ' + getLocalizedField(n, "title", currentLang)).join(" | ")
       }
@@ -531,7 +531,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
   const announcements = React.useMemo(() => {
     if (postsData?.data) {
-      const filtered = postsData.data.filter((p: any) => p.isNotification || p.category?.slug === "thong-bao").slice(0, 6).map((post: any) => ({
+      const filtered = postsData.data.slice(0, 6).map((post: any) => ({
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN"),
@@ -580,7 +580,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
   const galleryPhotos = React.useMemo(() => {
     if (postsData?.data) {
-      const withImages = postsData.data.filter((p: any) => p.thumbnail).slice(0, 4).map((post: any) => ({
+      const withImages = postsData.data.slice(0, 4).map((post: any) => ({
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         image: resolveMediaUrl(post.thumbnail),

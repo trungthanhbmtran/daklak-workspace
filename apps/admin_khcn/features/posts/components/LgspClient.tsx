@@ -27,7 +27,7 @@ export function LgspClient() {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" },
       });
       if (res.success) {
-        return res.data || [];
+        return res.data;
       }
       throw new Error(res.message || "Không thể đồng bộ văn bản.");
     },

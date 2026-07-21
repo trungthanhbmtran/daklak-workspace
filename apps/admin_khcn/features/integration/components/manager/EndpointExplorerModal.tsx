@@ -39,7 +39,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         },
         onError: (err: any) => toast.error(err.message || "Lỗi khi lưu Endpoints")
       });
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (e) {
       toast.error((e as any)?.response?.data?.message || "Lỗi dữ liệu cấu hình");
     }

@@ -126,7 +126,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
             {/* Tabs */}
             <div className="flex border-b bg-muted/30">
               {(["templates", "vars"] as const).map((t) => (
-                <button
+                <Button
                   key={t}
                   type="button"
                   onClick={() => setTab(t)}
@@ -137,7 +137,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
                   }`}
                 >
                   {t === "templates" ? "📋 Mẫu biểu thức" : "🧩 Biến khả dụng"}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -150,7 +150,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
                     </p>
                     <div className="space-y-1.5">
                       {group.items.map((item) => (
-                        <button
+                        <Button
                           key={item.value}
                           type="button"
                           onClick={() => handleSelectTemplate(item.value)}
@@ -166,7 +166,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
                           <code className="text-[10px] font-mono text-primary/70 mt-1 block truncate">
                             {item.value}
                           </code>
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -181,7 +181,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
                 </p>
                 <div className="grid grid-cols-1 gap-1">
                   {AVAILABLE_VARS.map((v) => (
-                    <button
+                    <Button
                       key={v.name}
                       type="button"
                       onClick={() => handleInsertVar(v.name)}
@@ -189,7 +189,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
                     >
                       <code className="text-[11px] font-mono text-primary font-semibold">{v.name}</code>
                       <span className="text-[10px] text-muted-foreground">{v.desc}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -7,189 +7,81 @@
   Body,
   Param,
   Query,
-  Inject,
   UseGuards,
-  OnModuleInit,
   Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { DocumentsService } from './documents.service';
 
 @ApiTags('Documents')
 @Controller('admin/documents')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
-export class DocumentsController implements OnModuleInit {
-  private documentService: any;
-  private cabinetService: any;
-  private dossierService: any;
-
-  constructor(
-    @Inject(MICROSERVICES.DOCUMENT.SYMBOL) private readonly documentClient: any,
-    @Inject(MICROSERVICES.CABINET.SYMBOL) private readonly cabinetClient: any,
-    @Inject(MICROSERVICES.DOSSIER.SYMBOL) private readonly dossierClient: any,
-  ) {}
-
-  onModuleInit() {
-    this.documentService = this.documentClient.getService(
-      MICROSERVICES.DOCUMENT.SERVICE,
-    );
-    this.cabinetService = this.cabinetClient.getService(
-      MICROSERVICES.CABINET.SERVICE,
-    );
-    this.dossierService = this.dossierClient.getService(
-      MICROSERVICES.DOSSIER.SERVICE,
-    );
-  }
+export class DocumentsController {
+  constructor(private readonly documentsService: DocumentsService) {}
 
   @Get('stats')
   async getStats() {
-    return firstValueFrom(this.documentService.GetStatistics({})).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.getStats();
   }
 
   @Get()
   async listDocuments(@Query() query: any) {
-    const req: any = {
-      page: parseInt(query.page) || 1,
-      limit: parseInt(query.limit) || 10,
-      search: query.search,
-      typeId: query.typeId,
-      fieldId: query.fieldId,
-      status: query.status,
-      urgency: query.urgency,
-      startDate: query.startDate,
-      endDate: query.endDate,
-    };
-    if (query.isPublic !== undefined) req.isPublic = query.isPublic === 'true';
-    if (query.fiscalYear) req.fiscalYear = parseInt(query.fiscalYear);
-    if (query.transparencyCategory)
-      req.transparencyCategory = query.transparencyCategory;
-    if (query.isIncoming !== undefined)
-      req.isIncoming = query.isIncoming === 'true';
-    return firstValueFrom(this.documentService.ListDocuments(req)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.listDocuments(query);
   }
 
   // --- Administrative Procedures CRUD ---
   @Get('procedures/list')
   async listAdminProcedures(@Query() query: any) {
-    const req = {
-      page: parseInt(query.page) || 1,
-      limit: parseInt(query.limit) || 10,
-      search: query.search || '',
-      category: query.category || 'ALL',
-    };
-    return firstValueFrom(this.documentService.ListProcedures(req)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.listAdminProcedures(query);
   }
 
   @Get('procedures/:id')
   async getAdminProcedure(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetProcedure({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.getAdminProcedure(id);
   }
 
   @Post('procedures')
   async createAdminProcedure(@Body() body: any) {
-    return firstValueFrom(this.documentService.CreateProcedure(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.createAdminProcedure(body);
   }
 
   @Put('procedures/:id')
   async updateAdminProcedure(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(
-      this.documentService.UpdateProcedure({ id, ...body }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.updateAdminProcedure(id, body);
   }
 
   @Delete('procedures/:id')
   async deleteAdminProcedure(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.DeleteProcedure({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.deleteAdminProcedure(id);
   }
 
   // --- One-Stop Dossiers CRUD ---
   @Get('dossiers/list')
   async listAdminDossiers(@Query() query: any) {
-    const req = {
-      page: parseInt(query.page) || 1,
-      limit: parseInt(query.limit) || 10,
-      search: query.search || '',
-      status: query.status || '',
-    };
-    return firstValueFrom(this.documentService.ListDossiers(req)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.listAdminDossiers(query);
   }
 
   @Get('dossiers/:id')
   async getAdminDossier(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetDossier({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.getAdminDossier(id);
   }
 
   @Post('dossiers')
   async createAdminDossier(@Body() body: any) {
-    return firstValueFrom(this.documentService.CreateDossier(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.createAdminDossier(body);
   }
 
   @Put('dossiers/:id')
   async updateAdminDossier(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(
-      this.documentService.UpdateDossier({ id, ...body }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.updateAdminDossier(id, body);
   }
 
   @Delete('dossiers/:id')
   async deleteAdminDossier(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.DeleteDossier({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.deleteAdminDossier(id);
   }
 
   // --- Cabinet ---
@@ -199,80 +91,42 @@ export class DocumentsController implements OnModuleInit {
     @Query('userId') userId: string,
     @Query('orgId') orgId: string,
   ) {
-    // Ưu tiên userId từ JWT token, không để client tự truyền userId
-    const finalUserId = req.user?.id ? String(req.user.id) : userId || '';
-    return firstValueFrom(
-      this.cabinetService.ListFiles({
-        userId: finalUserId,
-        orgId: orgId || '',
-      }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.listCabinetFiles(req.user, userId, orgId);
   }
 
   @Post('cabinet')
   async addCabinetFile(@Req() req: any, @Body() body: any) {
-    // Luôn lấy userId từ JWT token, bỏ qua giá trị client có thể gửi
-    body.userId = req.user?.id ? String(req.user.id) : '';
-    return firstValueFrom(this.cabinetService.AddFile(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.addCabinetFile(req.user, body);
   }
 
   @Delete('cabinet/:id')
   async deleteCabinetFile(@Param('id') id: string) {
-    return firstValueFrom(this.cabinetService.DeleteFile({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.deleteCabinetFile(id);
   }
 
   // --- Components ---
   @Get('dossiers/:id/components')
   async getComponents(@Param('id') id: string) {
-    return firstValueFrom(this.dossierService.GetComponents({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.getComponents(id);
   }
 
   @Put('dossiers/components/:compId')
   async updateComponent(@Param('compId') id: string, @Body() body: any) {
-    return firstValueFrom(
-      this.dossierService.UpdateComponent({ id, ...body }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.updateComponent(id, body);
   }
 
   @Post('dossiers/from-template')
   async createDossierFromTemplate(
     @Body() body: { procedureId: string; senderName: string },
   ) {
-    return firstValueFrom(
-      this.dossierService.CreateDossierFromTemplate(body),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.createDossierFromTemplate(body);
   }
 
   @Post('dossiers/create-blank')
   async createBlankDossier(
     @Body() body: { procedureName: string; senderName: string },
   ) {
-    return firstValueFrom(this.dossierService.CreateBlankDossier(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.createBlankDossier(body);
   }
 
   @Post('dossiers/:id/components')
@@ -280,36 +134,17 @@ export class DocumentsController implements OnModuleInit {
     @Param('id') dossierId: string,
     @Body() body: { name: string; fileUrl: string },
   ) {
-    return firstValueFrom(
-      this.dossierService.AddComponentFromCabinet({ dossierId, ...body }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.addComponentFromCabinet(dossierId, body);
   }
 
   @Get(':id')
   async getDocument(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetDocument({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.getDocument(id);
   }
 
   @Post()
   async createDocument(@Req() req: any, @Body() body: any) {
-    console.log('body', body);
-    // Inject thông tin người tạo từ JWT token
-    body.userId = req.user?.id ? String(req.user.id) : undefined;
-    body.userName = req.user?.fullname || req.user?.username || undefined;
-    return firstValueFrom(this.documentService.CreateDocument(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.createDocument(req.user, body);
   }
 
   @Put(':id')
@@ -318,56 +153,26 @@ export class DocumentsController implements OnModuleInit {
     @Param('id') id: string,
     @Body() body: any,
   ) {
-    // Inject thông tin người cập nhật từ JWT token
-    const payload = {
-      id,
-      ...body,
-      userId: req.user?.id ? String(req.user.id) : undefined,
-      userName: req.user?.fullname || req.user?.username || undefined,
-    };
-    return firstValueFrom(this.documentService.UpdateDocument(payload)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.updateDocument(id, req.user, body);
   }
 
   @Post('extract')
   async extractMetadata(@Body() body: { fileId: string }) {
-    return firstValueFrom(this.documentService.ExtractMetadata(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.extractMetadata(body);
   }
 
   @Post('sync')
   async syncOnline() {
-    return firstValueFrom(this.documentService.SyncOnline({})).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.syncOnline();
   }
 
   @Get(':id/logs')
   async getDocumentLogs(@Param('id') id: string) {
-    return firstValueFrom(
-      this.documentService.GetLogs({ documentId: id }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.documentsService.getDocumentLogs(id);
   }
 
   @Delete(':id')
   async deleteDocument(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.DeleteDocument({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.documentsService.deleteDocument(id);
   }
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import apiClient from "@/lib/axiosInstance";
+
 // Simple ThemeService using localStorage as fallback
 export const ThemeService = {
   save: async (stage: string, theme: string) => {
@@ -8,11 +10,7 @@ export const ThemeService = {
     localStorage.setItem(key, JSON.stringify(data));
     // Placeholder for future API call
     try {
-      await fetch('/api/theme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      await apiClient.post('/api/theme', data);
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       // ignore errors, localStorage already saved

@@ -4,6 +4,7 @@ import { vi as viLocale } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 export type CalendarViewMode = "day" | "week" | "month" | "quarter" | "year";
 
@@ -62,7 +63,7 @@ export const CalendarHeader = React.memo(function CalendarHeader({
             { id: 'quarter', label: 'Quý' },
             { id: 'year', label: 'Năm' },
           ].map((mode) => (
-            <button
+            <Button
               key={mode.id}
               onClick={() => setViewMode(mode.id as CalendarViewMode)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
@@ -72,7 +73,7 @@ export const CalendarHeader = React.memo(function CalendarHeader({
               }`}
             >
               {mode.label}
-            </button>
+            </Button>
           ))}
         </div>
 

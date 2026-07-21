@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { GrpcMethod, RpcException, Payload } from '@nestjs/microservices';
+import { CreateUserGrpcDto, LoginGrpcDto, RefreshGrpcDto, SetPasswordGrpcDto, FindOneGrpcDto, ListUsersGrpcDto, GetUsersByIdsGrpcDto, SetUserActiveGrpcDto, AssignRolesGrpcDto, AssignPositionGrpcDto, GetSubordinatesGrpcDto } from './dto/user.grpc.dto';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { UsersService } from './users.service';
 
@@ -8,24 +9,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @GrpcMethod('UserService', 'CreateUser')
-  async createUser(data: {
-    email?: string;
-    username?: string;
-    password?: string;
-    fullName?: string;
-    full_name?: string;
-    phoneNumber?: string;
-    phone_number?: string;
-    roleIds?: number[];
-    role_ids?: number[];
-    cccd?: string;
-    employeeCode?: string;
-    employee_code?: string;
-    createdByUserId?: number;
-    created_by_user_id?: number;
-    createdByEmail?: string;
-    created_by_email?: string;
-  }) {
+  async createUser(@Payload() data: CreateUserGrpcDto) {
     try {
       return await this.usersService.createUser({
         email: data.email ?? '',
@@ -52,15 +36,7 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'Login')
-  login(data: {
-    usernameOrEmail?: string;
-    username_or_email?: string;
-    password?: string;
-    deviceInfo?: string;
-    device_info?: string;
-    ipAddress?: string;
-    ip_address?: string;
-  }) {
+  login(@Payload() data: LoginGrpcDto) {
     return this.usersService.login({
       usernameOrEmail: data.usernameOrEmail ?? data.username_or_email ?? '',
       password: data.password ?? '',
@@ -70,14 +46,7 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'Refresh')
-  refresh(data: {
-    refreshToken?: string;
-    refresh_token?: string;
-    deviceInfo?: string;
-    device_info?: string;
-    ipAddress?: string;
-    ip_address?: string;
-  }) {
+  refresh(@Payload() data: RefreshGrpcDto) {
     return this.usersService.refresh({
       refreshToken: data.refreshToken ?? data.refresh_token ?? '',
       deviceInfo: data.deviceInfo ?? data.device_info,
@@ -86,29 +55,27 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'RevokeRefreshToken')
-  revokeRefreshToken(data: { refreshToken: string }) {
+  revokeRefreshToken(@Payload() data: { refreshToken: string }) {
     return this.usersService.revokeRefreshToken(data);
   }
 
   @GrpcMethod('UserService', 'SetPassword')
-  setPassword(data: { userId: number; newPassword: string }) {
+  setPassword(@Payload() data: SetPasswordGrpcDto) {
     return this.usersService.setPassword(data);
   }
 
   @GrpcMethod('UserService', 'FindOne')
-  async findOne(data: { id: number }) {
+  async findOne(@Payload() data: FindOneGrpcDto) {
     return this.usersService.findOne(data);
   }
 
   @GrpcMethod('UserService', 'GetEmployeesByScope')
-  getEmployeesByScope(data: { domain_id?: number, monitored_unit_id?: number }) {
+  getEmployeesByScope(@Payload() data: { domain_id?: number, monitored_unit_id?: number }) {
     return this.usersService.getEmployeesByScope(data.domain_id, data.monitored_unit_id);
   }
 
   @GrpcMethod('UserService', 'ListUsers')
-  async listUsers(
-    data: { skip?: number; take?: number; search?: string } = {},
-  ) {
+  async listUsers(@Payload() data: ListUsersGrpcDto = {}) {
     return this.usersService.listUsers({
       skip: data.skip ?? 0,
       take: data.take ?? 500,
@@ -117,43 +84,28 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'GetUsersByIds')
-  async getUsersByIds(data: { ids?: number[] }) {
+  async getUsersByIds(@Payload() data: GetUsersByIdsGrpcDto) {
     return this.usersService.getUsersByIds({
       ids: data.ids ?? [],
     });
   }
 
   @GrpcMethod('UserService', 'SetUserActive')
-  async setUserActive(data: {
-    userId?: number;
-    user_id?: number;
-    isActive?: boolean;
-    is_active?: boolean;
-  }) {
+  async setUserActive(@Payload() data: SetUserActiveGrpcDto) {
     const userId = data.userId ?? data.user_id ?? 0;
     const isActive = data.isActive ?? data.is_active ?? true;
     return this.usersService.setUserActive({ userId, isActive });
   }
 
   @GrpcMethod('UserService', 'AssignRoles')
-  async assignRoles(data: {
-    userId?: number;
-    user_id?: number;
-    roleIds?: number[];
-    role_ids?: number[];
-  }) {
+  async assignRoles(@Payload() data: AssignRolesGrpcDto) {
     const userId = data.userId ?? data.user_id ?? 0;
     const roleIds = data.roleIds ?? data.role_ids ?? [];
     return this.usersService.assignRoles({ userId, roleIds });
   }
 
   @GrpcMethod('UserService', 'AssignPosition')
-  async assignPosition(data: {
-    userId: number;
-    unitId: number;
-    jobTitleId: number;
-    isPrimary: boolean;
-  }) {
+  async assignPosition(@Payload() data: AssignPositionGrpcDto) {
     const result = await this.usersService.assignPosition({
       userId: data.userId,
       unitId: data.unitId,
@@ -172,7 +124,7 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'GetSubordinates')
-  async getSubordinates(data: { user_id?: number; userId?: number }) {
+  async getSubordinates(@Payload() data: GetSubordinatesGrpcDto) {
     const userId = data.userId ?? data.user_id ?? 0;
     return this.usersService.getSubordinates({ userId });
   }

@@ -353,7 +353,7 @@ export function QuestionsClient() {
     queryKey: ["questions", 1, 50],
     queryFn: async () => {
       const response = await postsApi.getQuestions({ page: 1, limit: 50 });
-      return response.data || [];
+      return response.data;
     },
     staleTime: 60_000,
   });

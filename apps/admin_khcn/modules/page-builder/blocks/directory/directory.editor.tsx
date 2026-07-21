@@ -5,6 +5,7 @@ import { DirectoryData } from "./directory.schema";
 import { Label } from "@/components/ui/label";
 import { useOrganizationTreeQuery } from "../../services/dataBinding";
 import { Loader2, Landmark, Building2, CheckSquare2, Square, Network } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DirectoryEditorProps {
   widget: Widget<DirectoryData>;
@@ -113,7 +114,7 @@ export const DirectoryEditor: React.FC<DirectoryEditorProps> = ({ widget, onChan
             const StyleIcon = style.icon;
             const isSelected = (widget.data?.displayStyle || "tree") === style.id;
             return (
-              <button
+              <Button
                 key={style.id}
                 type="button"
                 onClick={() => {
@@ -131,7 +132,7 @@ export const DirectoryEditor: React.FC<DirectoryEditorProps> = ({ widget, onChan
               >
                 <StyleIcon className="w-3.5 h-3.5 shrink-0" />
                 <span className="text-[10px]">{style.label}</span>
-              </button>
+              </Button>
             );
           })}
         </div>

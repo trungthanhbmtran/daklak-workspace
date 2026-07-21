@@ -6,7 +6,7 @@ import { hrmKpiPeriodsApi } from "@/features/hrm/api/kpis.api";
 export function PeriodSelector({ selectedPeriod, onSelect }: { selectedPeriod: string, onSelect: (v: string) => void }) {
   const { data: periodsData } = useQuery({
     queryKey: ["hrm-kpi-periods"],
-    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data || []),
+    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data),
   });
 
   return (

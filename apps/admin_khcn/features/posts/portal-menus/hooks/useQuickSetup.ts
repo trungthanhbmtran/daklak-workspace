@@ -72,7 +72,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       setSelectedCategories([]);
       onSuccess();
       onClose();
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (error) {
       toast.error((error as any)?.response?.data?.message || "Lỗi khi nhập danh mục hàng loạt");
     } finally {
@@ -182,7 +182,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       toast.success(`Đã thiết lập menu cho ${group.name}`);
       onSuccess();
       onClose();
-    // eslint-disable-next-line unused-imports/no-unused-vars
+     
     } catch (error) {
       toast.error((error as any)?.response?.data?.message || "Lỗi khi thiết lập danh mục văn bản");
     } finally {

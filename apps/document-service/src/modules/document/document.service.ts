@@ -61,7 +61,7 @@ export class DocumentService {
   }
 
   async findAll(query: any) {
-    const { page = 1, limit = 10, search, typeId, fieldId, status, urgency, startDate, endDate } = query;
+    const { page = 1, limit = 10, search, typeId, fieldId, status, urgency, startDate, endDate, issuingAuthorityId } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -77,6 +77,7 @@ export class DocumentService {
     if (fieldId) where.fieldId = fieldId;
     if (status) where.status = status;
     if (urgency) where.urgency = urgency;
+    if (issuingAuthorityId) where.issuingAuthorityId = issuingAuthorityId;
     if (query.isPublic !== undefined) where.isPublic = query.isPublic;
     if (query.fiscalYear) where.fiscalYear = parseInt(query.fiscalYear.toString());
     if (query.transparencyCategory) where.transparencyCategory = query.transparencyCategory;

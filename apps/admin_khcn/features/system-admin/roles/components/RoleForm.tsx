@@ -85,6 +85,8 @@ export function RoleForm({ roleId }: RoleFormProps) {
 
   // 3. Mutations
   const saveMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: roleApi.saveRole,
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: roleKeys.all });
@@ -99,6 +101,8 @@ export function RoleForm({ roleId }: RoleFormProps) {
   });
 
   const deleteMutation = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: roleApi.deleteRole,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: roleKeys.all });
@@ -214,7 +218,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
                   <Lock className="h-3.5 w-3.5 text-primary" /> 2. Chính sách truy cập tài nguyên (Policies)
                 </Text>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background">
-                  // eslint-disable-next-line react-hooks/incompatible-library
+                  {/* eslint-disable-next-line react-hooks/incompatible-library */}
                   Đã cấu hình: {form.watch("policies").length} chính sách
                 </Badge>
               </div>

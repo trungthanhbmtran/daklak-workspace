@@ -140,7 +140,7 @@ export default function Footer() {
 
   // 5. Enhance dynamic configurations helper with multilingual JSON support
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.description && found.description.trim().startsWith("{")) {

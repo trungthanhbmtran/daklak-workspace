@@ -174,13 +174,13 @@ function ScopePicker({
               <Icon className="h-3.5 w-3.5" />
               Đã chọn ({selectedItems.length})
             </span>
-            <button
+            <Button
               type="button"
               onClick={onRemoveAll}
               className="text-[11px] text-muted-foreground hover:text-destructive transition-colors"
             >
               Bỏ chọn tất cả
-            </button>
+            </Button>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {selectedItems.map(item => (
@@ -189,13 +189,13 @@ function ScopePicker({
                 className="inline-flex items-center gap-1 pl-2.5 pr-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20"
               >
                 {item.name}
-                <button
+                <Button
                   type="button"
                   onClick={() => onToggle(item.id)}
                   className="rounded-full p-0.5 hover:bg-primary/20 transition-colors"
                 >
                   <X className="h-2.5 w-2.5" />
-                </button>
+                </Button>
               </span>
             ))}
           </div>
@@ -215,13 +215,13 @@ function ScopePicker({
         {isFetching
           ? <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
           : q && (
-            <button
+            <Button
               type="button"
               onClick={() => onSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           )
         }
       </div>
@@ -287,7 +287,7 @@ function ResultRow({
   onToggle: (id: number) => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={() => onToggle(item.id)}
       className={cn(
@@ -310,6 +310,6 @@ function ResultRow({
           <span className="text-[11px] font-mono text-muted-foreground">{item.code}</span>
         )}
       </div>
-    </button>
+    </Button>
   );
 }

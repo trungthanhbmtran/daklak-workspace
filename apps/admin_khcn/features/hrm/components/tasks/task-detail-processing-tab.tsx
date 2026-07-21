@@ -159,7 +159,7 @@ export function TaskProcessingTab({
             {steps.map((step: any) => (
               <div key={step.id} className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3">
-                  <button
+                  <Button
                     onClick={() => handleToggleStep(step)}
                     disabled={isCompleted || updateStep.isPending}
                     className="shrink-0 focus:outline-none"
@@ -169,7 +169,7 @@ export function TaskProcessingTab({
                     ) : (
                       <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
                     )}
-                  </button>
+                  </Button>
                   <div className="flex flex-col">
                     <p className={`text-sm ${step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
                       {step.title}

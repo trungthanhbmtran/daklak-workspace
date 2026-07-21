@@ -3,13 +3,9 @@ import {
   Post,
   Get,
   Body,
-  Inject,
   Req,
   Res,
   UseGuards,
-  OnModuleInit,
-  BadRequestException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,33 +14,14 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { firstValueFrom } from 'rxjs';
-import { randomUUID } from 'crypto';
-import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { sanitizeUserForClient } from '../../common/utils/user.util';
+import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
 @Controller('admin/auth')
-export class AuthController implements OnModuleInit {
-  private authService: any;
-  private userService: any;
-  private employeeService: any;
-
-  constructor(
-    @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
-    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-    @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
-  ) {}
-
-  onModuleInit() {
-    this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
-    this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    this.employeeService = this.employeeClient.getService(
-      MICROSERVICES.EMPLOYEE.SERVICE,
-    );
-  }
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
@@ -53,54 +30,10 @@ export class AuthController implements OnModuleInit {
     description: 'Trả về sessionId và expiresAt. Token được gán qua HTTP-Only Cookie.',
   })
   async login(
-    @Body()
-    body: {
-      username?: string;
-      email?: string;
-      password?: string;
-      [key: string]: any;
-    },
+    @Body() body: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const hasPassword =
-      body.password && String(body.password).trim().length > 0;
-    const loginKey = body.username?.trim() || body.email?.trim();
-    if (!loginKey || !hasPassword) {
-      throw new BadRequestException(
-        'Vui lòng gửi username hoặc email kèm password để đăng nhập.',
-      );
-    }
-    try {
-      const result = (await firstValueFrom(
-        this.userService.Login({
-          usernameOrEmail: loginKey,
-          password: body.password,
-        }),
-      )) as any;
-
-      // Set cookies
-      const cookieConfig = {
-        httpOnly: true,
-        secure: false, // Tắt secure để chạy được trên HTTP (port 80)
-        sameSite: 'strict' as const,
-        maxAge: 15 * 60 * 1000,
-      };
-
-      res.cookie('accessToken', result.accessToken, cookieConfig);
-      res.cookie('refreshToken', result.refreshToken, cookieConfig);
-
-      const expiresAt = new Date(Date.now() + (result.expiresIn || 86400) * 1000).toISOString();
-
-      return {
-        sessionId: randomUUID(),
-        expiresAt,
-      };
-    } catch (err: any) {
-      const code = err?.code;
-      const message = err?.details || err?.message || 'Đăng nhập thất bại';
-      if (code === 16) throw new UnauthorizedException(message);
-      throw new UnauthorizedException(message);
-    }
+    return this.authService.login(body, res);
   }
 
   @Post('refresh')
@@ -112,43 +45,11 @@ export class AuthController implements OnModuleInit {
     description: 'Trả về sessionId và expiresAt. Token mới được gán qua HTTP-Only Cookie.',
   })
   async refresh(
-    @Body() body: { refreshToken?: string },
+    @Body() body: any,
     @Req() req: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const token =
-      body.refreshToken?.trim() ||
-      (req.cookies?.refreshToken as string)?.trim();
-    if (!token) {
-      throw new UnauthorizedException('Thiếu refresh_token');
-    }
-    try {
-      const result = (await firstValueFrom(
-        this.userService.Refresh({ refreshToken: token }),
-      )) as any;
-
-      // Set cookies
-      const cookieConfig = {
-        httpOnly: true,
-        secure: false, // Tắt secure để chạy được trên HTTP (port 80)
-        sameSite: 'strict' as const,
-        maxAge: 15 * 60 * 1000,
-      };
-
-      res.cookie('accessToken', result.accessToken, cookieConfig);
-      res.cookie('refreshToken', result.refreshToken, cookieConfig);
-
-      const expiresAt = new Date(Date.now() + (result.expiresIn || 86400) * 1000).toISOString();
-
-      return {
-        sessionId: randomUUID(),
-        expiresAt,
-      };
-    } catch (err: any) {
-      const message =
-        err?.details || err?.message || 'Refresh token không hợp lệ';
-      throw new UnauthorizedException(message);
-    }
+    return this.authService.refresh(body, req, res);
   }
 
   @Post('logout')
@@ -156,26 +57,9 @@ export class AuthController implements OnModuleInit {
   async logout(
     @Req() req: any,
     @Res({ passthrough: true }) res: Response,
-    @Body() body?: { refreshToken?: string },
+    @Body() body?: any,
   ) {
-    const token =
-      body?.refreshToken?.trim() ||
-      (req.cookies?.refreshToken as string)?.trim();
-    if (token) {
-      try {
-        await firstValueFrom(
-          this.userService.RevokeRefreshToken({ refreshToken: token }),
-        );
-      } catch {
-        // Ignore lỗi thu hồi
-      }
-    }
-
-    // Clear cookies
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
-
-    return { success: true };
+    return this.authService.logout(req, res, body);
   }
 
   @Get('me')
@@ -183,37 +67,6 @@ export class AuthController implements OnModuleInit {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Thông tin user đăng nhập' })
   async me(@Req() req: any) {
-    const employeeId = req.user?.employeeId;
-    const userId = req.user?.id;
-    if (!userId) {
-      throw new UnauthorizedException(
-        'Không tìm thấy thông tin user trong token',
-      );
-    }
-
-    const user: any = await firstValueFrom(
-      this.userService.FindOne({ id: Number(userId) }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-    let hrm: any = null;
-
-    if (employeeId) {
-      try {
-        const empRes: any = await firstValueFrom(
-          this.employeeService.GetEmployee({ id: Number(employeeId) }),
-        );
-        hrm = empRes?.data;
-      } catch (e) {
-        // Ignore error
-      }
-    }
-
-    return sanitizeUserForClient({
-      ...user,
-      fullName: hrm?.fullName || user?.fullName,
-      avatarUrl: hrm?.avatar || user?.avatarUrl,
-    });
+    return this.authService.me(req);
   }
 }

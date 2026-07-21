@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import {  GrpcMethod, RpcException , Payload } from '@nestjs/microservices';
 import { BannersService } from './banners.service';
 import { status } from '@grpc/grpc-js';
 
@@ -8,7 +8,7 @@ export class BannersController {
   constructor(private readonly bannersService: BannersService) { }
 
   @GrpcMethod('BannerService', 'CreateBanner')
-  async createBanner(data: any) {
+  async createBanner(@Payload() data: Record<string, any>) {
     const result = await this.bannersService.create(data);
     return { data: result, success: true };
   }
@@ -48,7 +48,7 @@ export class BannersController {
   }
 
   @GrpcMethod('BannerService', 'UpdateBanner')
-  async updateBanner(data: any) {
+  async updateBanner(@Payload() data: Record<string, any>) {
     const { id, ...rest } = data;
     const result = await this.bannersService.update(id, rest);
     return { data: result, success: true };

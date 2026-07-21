@@ -170,9 +170,9 @@ export function MinutesForm({ onComplete, onCancel }: { onComplete: () => void, 
                 {attendees.map((name, i) => (
                   <Badge key={i} className="pl-3 pr-1 py-1.5 bg-background text-foreground border shadow-sm group">
                     {name}
-                    <button type="button" onClick={() => removeAttendee(i)} className="ml-2 p-0.5 rounded-full hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button type="button" onClick={() => removeAttendee(i)} className="ml-2 p-0.5 rounded-full hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
                       <X className="h-3 w-3" />
-                    </button>
+                    </Button>
                   </Badge>
                 ))}
                 {attendees.length === 0 && <span className="text-xs text-muted-foreground italic mt-2">Chưa có thành viên tham dự...</span>}

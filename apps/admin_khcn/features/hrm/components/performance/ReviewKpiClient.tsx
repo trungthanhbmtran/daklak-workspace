@@ -51,6 +51,8 @@ export function ReviewKpiClient() {
   });
 
   const approveMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: any) => hrmKpiEvaluationsApi.approveReviewerScore(selectedEvalId!, payload),
     onSuccess: (res: any) => {
       if (res.success) {

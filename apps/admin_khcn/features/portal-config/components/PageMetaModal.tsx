@@ -95,13 +95,13 @@ export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({
                                 <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase">Kích hoạt hiển thị</span>
                                 <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500">Mở trang cho người dùng cuối truy cập</span>
                             </div>
-                            <button
+                            <Button
                                 type="button"
                                 onClick={() => setIsActive(!isActive)}
                                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all ${isActive ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"}`}
                             >
                                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-all ${isActive ? "translate-x-6" : "translate-x-1"}`} />
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

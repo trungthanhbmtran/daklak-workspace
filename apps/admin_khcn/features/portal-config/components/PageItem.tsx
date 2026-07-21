@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Globe, Settings2, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PageMeta {
     id: string;
@@ -65,7 +66,7 @@ export function PageItem({ page, isSelected, onSelect, onEdit, onDelete }: PageI
 
                 {/* Bộ nút Action xuất hiện mượt mà khi hover vào item */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
-                    <button
+                    <Button
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
@@ -74,10 +75,10 @@ export function PageItem({ page, isSelected, onSelect, onEdit, onDelete }: PageI
                         className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900"
                     >
                         <Settings2 className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
 
                     {!isSystemPage && (
-                        <button
+                        <Button
                             type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -86,7 +87,7 @@ export function PageItem({ page, isSelected, onSelect, onEdit, onDelete }: PageI
                             className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm border border-transparent hover:border-rose-100 dark:hover:border-rose-900"
                         >
                             <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>

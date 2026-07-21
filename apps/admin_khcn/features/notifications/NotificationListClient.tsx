@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getNotifications, markNotificationRead, type NotificationItem } from "./api";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const NOTIFICATIONS_KEY = ["notifications"];
 
@@ -33,6 +34,8 @@ export function NotificationListClient() {
   });
 
   const markRead = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: markNotificationRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });

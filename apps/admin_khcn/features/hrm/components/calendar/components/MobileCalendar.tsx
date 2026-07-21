@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { format, startOfWeek, endOfWeek, addDays, subDays, isSameDay, startOfDay, endOfDay, parseISO, addWeeks, subWeeks } from "date-fns";
+import { format, startOfWeek, endOfWeek, addDays, isSameDay, startOfDay, endOfDay, parseISO, addWeeks, subWeeks } from "date-fns";
 import { vi as viLocale } from "date-fns/locale";
 import { Heading, Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
@@ -177,7 +177,7 @@ export function MobileCalendar() {
               const isSelected = isSameDay(day, currentDate);
               const isToday = isSameDay(day, new Date());
               return (
-                <button
+                <Button
                   key={day.toISOString()}
                   onClick={() => setCurrentDate(day)}
                   className={`flex flex-col items-center justify-center min-w-[44px] h-[52px] rounded-lg transition-colors ${
@@ -194,7 +194,7 @@ export function MobileCalendar() {
                   <span className="text-base font-bold">
                     {format(day, "d")}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>

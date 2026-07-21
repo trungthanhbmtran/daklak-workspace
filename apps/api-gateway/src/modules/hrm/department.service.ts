@@ -1,0 +1,155 @@
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
+import { MICROSERVICES } from '../../core/constants/services';
+
+function flattenUnits(nodes: any[]): any[] {
+  let out: any[] = [];
+  for (const n of nodes || []) {
+    const { children, ...rest } = n;
+    out.push(rest);
+    out = out.concat(flattenUnits(children || []));
+  }
+  return out;
+}
+
+@Injectable()
+export class DepartmentService implements OnModuleInit {
+  private orgService: any;
+
+  constructor(
+    @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
+  ) {}
+
+  onModuleInit() {
+    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+  }
+
+  async getTree(rootId?: string) {
+    if (rootId && rootId !== '0') {
+      const id = parseInt(rootId, 10);
+      if (!Number.isNaN(id)) {
+        const res = await firstValueFrom(
+          this.orgService.GetSubTree({ id }),
+        ).catch((e) => {
+          console.error('RPC Call Failed', e.message);
+          return null;
+        });
+        return { nodes: (res as any).nodes ?? [] };
+      }
+    }
+    const res = await firstValueFrom(this.orgService.GetFullTree({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    );
+    return res;
+  }
+
+  async move(id: number, newParentId?: number) {
+    return firstValueFrom(
+      this.orgService.UpdateUnit({
+        id,
+        parentId: newParentId === 0 ? null : newParentId,
+      }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+  }
+
+  async list(query: any) {
+    const res = (await firstValueFrom(this.orgService.GetFullTree({})).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        return null;
+      },
+    )) as any;
+    const all = flattenUnits(res.nodes ?? []);
+    let list = all;
+    const parentId =
+      query.parentId != null ? parseInt(query.parentId, 10) : undefined;
+    if (parentId !== undefined && !Number.isNaN(parentId)) {
+      list = list.filter((u: any) => (u.parentId ?? 0) === parentId);
+    }
+    const keyword = (query.keyword || '').trim().toLowerCase();
+    if (keyword) {
+      list = list.filter(
+        (u: any) =>
+          (u.name && u.name.toLowerCase().includes(keyword)) ||
+          (u.code && u.code.toLowerCase().includes(keyword)),
+      );
+    }
+    const page = Math.max(1, parseInt(query.page, 10) || 1);
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(query.pageSize, 10) || 10),
+    );
+    const start = (page - 1) * pageSize;
+    const slice = list.slice(start, start + pageSize);
+    return {
+      data: slice,
+      meta: {
+        pagination: {
+          total: list.length,
+          page,
+          pageSize,
+          totalPages: Math.ceil(list.length / pageSize),
+          hasNext: start + pageSize < list.length,
+          hasPrev: page > 1,
+        },
+      },
+    };
+  }
+
+  async getDetail(id: string) {
+    const res = await firstValueFrom(
+      this.orgService.GetOne({ id: parseInt(id, 10) }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+    return res;
+  }
+
+  async create(body: any) {
+    const payload = {
+      code: body.code,
+      name: body.name,
+      shortName: body.shortName,
+      typeId: body.typeId ?? 0,
+      parentId: body.parentId != null ? body.parentId : undefined,
+      domainIds: body.domainIds ?? [],
+      scope: body.scope,
+    };
+    return firstValueFrom(this.orgService.CreateUnit(payload)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+  }
+
+  async update(id: number, body: any) {
+    const payload: any = { id };
+    if (body.code !== undefined) payload.code = body.code;
+    if (body.name !== undefined) payload.name = body.name;
+    if (body.shortName !== undefined) payload.shortName = body.shortName;
+    if (body.typeId !== undefined) payload.typeId = body.typeId;
+    if (body.parentId !== undefined) payload.parentId = body.parentId;
+    if (body.domainIds !== undefined) payload.domainIds = body.domainIds;
+    if (body.scope !== undefined) payload.scope = body.scope;
+    return firstValueFrom(this.orgService.UpdateUnit(payload)).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+  }
+
+  async delete(id: string) {
+    const res = await firstValueFrom(
+      this.orgService.DeleteUnit({ id: parseInt(id, 10) }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+    return res ?? { success: true, message: 'Đã xóa đơn vị' };
+  }
+}

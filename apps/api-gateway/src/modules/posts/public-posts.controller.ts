@@ -25,9 +25,16 @@ export class PublicPostsController implements OnModuleInit {
 
   @Get()
   async findAll(@Query() query: any) {
+    const req = { ...query };
+    
+    // Map Frontend ?type=notification to isNotification=true
+    if (req.type === 'notification') {
+      req.isNotification = 'true';
+    }
+
     // Chỉ trả về các bài viết công khai (PUBLISHED)
     return firstValueFrom(
-      this.postService.listPosts({ ...query, status: 'PUBLISHED' }),
+      this.postService.listPosts({ ...req, status: 'PUBLISHED' }),
     ).catch((e) => {
       console.error('RPC Call Failed', e.message);
       return null;

@@ -28,9 +28,10 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const MenuItem = ({ icon: Icon, label, onClick, disabled, isDestructive }: any) => (
-  <button
+  <Button
     type="button"
     disabled={disabled}
     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
@@ -41,7 +42,7 @@ const MenuItem = ({ icon: Icon, label, onClick, disabled, isDestructive }: any) 
   >
     <Icon className="mr-2 h-4 w-4" />
     {label}
-  </button>
+  </Button>
 );
 
 export function TableContextMenuPlugin() {

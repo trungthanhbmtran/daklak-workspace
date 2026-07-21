@@ -24,7 +24,7 @@ export function PersonalKpiClient() {
   // Fetch periods
   const { data: periodsData } = useQuery({
     queryKey: ["hrm-kpi-periods"],
-    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data || []),
+    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data),
   });
 
   // Fetch evaluation details when evaluationId changes
@@ -55,6 +55,7 @@ export function PersonalKpiClient() {
         toast.error(res?.message || "Có lỗi xảy ra");
       }
     },
+     
     onError: (error: any) => {
       const message = error.response?.data?.message || "Không thể kết nối đến máy chủ";
       toast.error(message);
@@ -62,6 +63,8 @@ export function PersonalKpiClient() {
   });
 
   const submitMutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (payload: any) => hrmKpiEvaluationsApi.submitSelfScore(evaluationId!, payload),
     onSuccess: (res: any) => {
       if (res.success) {

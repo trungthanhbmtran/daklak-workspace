@@ -207,7 +207,7 @@ export default function AboutPage() {
 
   // Localized configuration fetchers
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.name === "true" || found.name === "false") {
@@ -235,7 +235,7 @@ export default function AboutPage() {
   }, [portalConfigData, currentLang])
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    const found = (portalConfigData).find((c: any) => c.code === code)
     if (!found || !found.description) return fallback
 
     const trimmed = found.description.trim()

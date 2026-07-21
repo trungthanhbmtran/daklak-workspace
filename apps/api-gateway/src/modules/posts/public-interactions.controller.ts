@@ -48,7 +48,7 @@ export class PublicInteractionsController implements OnModuleInit {
     });
     return {
       success: true,
-      data: response.data || [],
+      data: response.data,
       meta: {
         total: response.meta?.pagination?.total || 0,
         page: Number(query.page) || 1,

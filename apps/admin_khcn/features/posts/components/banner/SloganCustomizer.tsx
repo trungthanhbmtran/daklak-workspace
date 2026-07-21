@@ -66,7 +66,7 @@ export function SloganCustomizer({
           <Label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Mẫu giao diện nhanh (Style Presets)</Label>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
             {PRESETS.map((preset) => (
-              <button
+              <Button
                 key={preset.name}
                 type="button"
                 onClick={() => setCustomStyles(preset)}
@@ -77,7 +77,7 @@ export function SloganCustomizer({
                   className="w-full h-3 rounded border border-black/10"
                 />
                 <Text as="span">{preset.name}</Text>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -100,7 +100,7 @@ export function SloganCustomizer({
             <div className="space-y-3">
               <Label className="text-[11px] font-bold text-slate-500 uppercase">Loại nền (Background Type)</Label>
               <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                <button
+                <Button
                   type="button"
                   onClick={() => updateStyle("bgType", "gradient")}
                   className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${customStyles.bgType !== "pattern" && customStyles.bgType !== "image"
@@ -109,8 +109,8 @@ export function SloganCustomizer({
                     }`}
                 >
                   Dải màu dốc (Gradient)
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => {
                     updateStyle("bgType", "pattern");
@@ -124,8 +124,8 @@ export function SloganCustomizer({
                     }`}
                 >
                   Hình chìm nghệ thuật
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => {
                     updateStyle("bgType", "image");
@@ -139,7 +139,7 @@ export function SloganCustomizer({
                     }`}
                 >
                   Ảnh nền toàn phần
-                </button>
+                </Button>
               </div>
 
               {customStyles.bgType === "pattern" && (
@@ -151,7 +151,7 @@ export function SloganCustomizer({
                         { name: "Trống đồng Đông Sơn", value: "pattern-drum" },
                         { name: "Họa tiết mây sóng cổ", value: "pattern-clouds" }
                       ].map((pat) => (
-                        <button
+                        <Button
                           key={pat.value}
                           type="button"
                           onClick={() => updateStyle("bgImage", pat.value)}
@@ -161,7 +161,7 @@ export function SloganCustomizer({
                             }`}
                         >
                           {pat.name}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -298,7 +298,7 @@ export function SloganCustomizer({
                 <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Căn lề nội dung</Label>
                 <div className="grid grid-cols-3 gap-1 mt-1">
                   {["left", "center", "right"].map((align) => (
-                    <button
+                    <Button
                       key={align}
                       type="button"
                       onClick={() => updateStyle("alignment", align)}
@@ -308,7 +308,7 @@ export function SloganCustomizer({
                         }`}
                     >
                       {align === "left" ? "Trái" : align === "center" ? "Giữa" : "Phải"}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -340,7 +340,7 @@ export function SloganCustomizer({
                           { name: "💮 Bông sen", value: "lotus" },
                           { name: "🖼️ Hình tự tải lên", value: "custom" }
                         ].map((wType) => (
-                          <button
+                          <Button
                             key={wType.value}
                             type="button"
                             onClick={() => updateStyle("watermarkType", wType.value)}
@@ -350,7 +350,7 @@ export function SloganCustomizer({
                               }`}
                           >
                             {wType.name}
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     </div>

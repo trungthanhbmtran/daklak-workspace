@@ -4,9 +4,7 @@ import {
   Post,
   Body,
   Param,
-  Inject,
   UseGuards,
-  OnModuleInit,
   Req,
   Res,
 } from '@nestjs/common';
@@ -17,9 +15,6 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import * as microservices from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import {
@@ -29,32 +24,13 @@ import {
   GetMultipartUrlsDto,
   CompleteMultipartUploadDto,
 } from './dto/media.dto';
-
-interface MediaGrpcService {
-  RequestUpload(data: any): any;
-  ConfirmUpload(data: any): any;
-  GetMedia(data: any): any;
-  InitMultipartUpload(data: any): any;
-  GetMultipartPreSignedUrls(data: any): any;
-  CompleteMultipartUpload(data: any): any;
-}
+import { MediaService } from './media.service';
 
 @ApiTags('Media Management')
 @Controller('admin/media')
 @ApiBearerAuth('JWT-auth')
-export class MediaGatewayController implements OnModuleInit {
-  private mediaService: MediaGrpcService;
-
-  constructor(
-    @Inject(MICROSERVICES.MEDIA.SYMBOL)
-    private readonly client: microservices.ClientGrpc,
-  ) {}
-
-  onModuleInit() {
-    this.mediaService = this.client.getService<MediaGrpcService>(
-      MICROSERVICES.MEDIA.SERVICE,
-    );
-  }
+export class MediaGatewayController {
+  constructor(private readonly mediaService: MediaService) {}
 
   @Get('download/:id')
   @ApiOperation({ summary: 'Download media file by ID (Redirect)' })
@@ -63,17 +39,7 @@ export class MediaGatewayController implements OnModuleInit {
     description: 'Redirects to the signed download URL',
   })
   async downloadMedia(@Param('id') id: string, @Res() res: Response) {
-    try {
-      const data = await firstValueFrom<any>(
-        this.mediaService.GetMedia({ fileId: id }),
-      );
-      if (data?.downloadUrl) {
-        return res.redirect(data.downloadUrl);
-      }
-      return res.status(404).json({ message: 'Media link not found' });
-    } catch (_e) {
-      return res.status(404).json({ message: 'Media not found' });
-    }
+    return this.mediaService.downloadMedia(id, res);
   }
 
   @Post('request-upload')
@@ -83,14 +49,7 @@ export class MediaGatewayController implements OnModuleInit {
   })
   @ApiResponse({ status: 201, description: 'Returns uploadUrl and fileId' })
   async requestUpload(@Req() req: any, @Body() body: RequestUploadDto) {
-    const ownerId = req.user?.id || req.user?.sub || 'anonymous';
-    const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaService.RequestUpload(payload)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.mediaService.requestUpload(req, body);
   }
 
   @Post('confirm-upload')
@@ -101,12 +60,7 @@ export class MediaGatewayController implements OnModuleInit {
     description: 'Returns media info and download URL',
   })
   async confirmUpload(@Body() body: ConfirmUploadDto) {
-    return await firstValueFrom(this.mediaService.ConfirmUpload(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return this.mediaService.confirmUpload(body);
   }
 
   @Post('init-multipart-upload')
@@ -116,26 +70,14 @@ export class MediaGatewayController implements OnModuleInit {
     @Req() req: any,
     @Body() body: InitMultipartUploadDto,
   ) {
-    const ownerId = req.user?.id || req.user?.sub || 'anonymous';
-    const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(
-      this.mediaService.InitMultipartUpload(payload),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.mediaService.initMultipartUpload(req, body);
   }
 
   @Post('get-multipart-urls')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
   async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
-    return await firstValueFrom(
-      this.mediaService.GetMultipartPreSignedUrls(body),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.mediaService.getMultipartUrls(body);
   }
 
   @Post('complete-multipart-upload')
@@ -144,12 +86,7 @@ export class MediaGatewayController implements OnModuleInit {
     summary: 'Complete multipart upload after all parts are uploaded',
   })
   async completeMultipartUpload(@Body() body: CompleteMultipartUploadDto) {
-    return await firstValueFrom(
-      this.mediaService.CompleteMultipartUpload(body),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.mediaService.completeMultipartUpload(body);
   }
 
   @Get(':id')
@@ -157,11 +94,6 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Get media metadata and download link' })
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {
-    return await firstValueFrom(
-      this.mediaService.GetMedia({ fileId: id }),
-    ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
+    return this.mediaService.getMedia(id);
   }
 }

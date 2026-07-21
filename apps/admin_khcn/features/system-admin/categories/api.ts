@@ -45,7 +45,7 @@ export const categoryApi = {
     try {
       const res: any = await apiClient.get("/categories/groups");
       console.log("[categoryApi] fetchGroups raw response:", res);
-      return res?.data || [];
+      return res.data;
     } catch (err) {
       console.error("[categoryApi] fetchGroups error:", err);
       return [];

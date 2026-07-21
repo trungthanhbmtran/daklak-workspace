@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 export const SYSTEM_CONFIGS_KEYS = {
   all: ["system-configs"] as const,
@@ -28,6 +29,8 @@ export function useGetSystemConfigs() {
 export function useUpdateSystemConfig() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: async ({ key, value, description }: { key: string; value: string; description?: string }) => {
       const res = await apiClient.put("/system-configs", { key, value, description }) as any;
       if (!res.success) {
@@ -44,6 +47,8 @@ export function useUpdateSystemConfig() {
 export function useUpdateMultipleSystemConfigs() {
   const queryClient = useQueryClient();
   return useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: async (configs: { key: string; value: string; description?: string }[]) => {
       const promises = configs.map(c => apiClient.put("/system-configs", c));
       await Promise.all(promises);

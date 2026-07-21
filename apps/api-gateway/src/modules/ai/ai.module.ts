@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AiService } from './ai.service';
+import { AiFeatureService } from './ai-feature.service';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { AiController } from './ai.controller';
@@ -28,7 +29,7 @@ import { AiController } from './ai.controller';
     ]),
   ],
   controllers: [AiController],
-  providers: [AiService],
+  providers: [AiService, AiFeatureService],
   exports: [AiService],
 })
 export class AiModule {}

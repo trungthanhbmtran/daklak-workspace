@@ -141,7 +141,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const langs = await categoryApi.fetchByGroup('LANGUAGE');
-      return langs.data.filter((c: any) => c.active === 1);
+      return langs.data;
     },
     staleTime: 5 * 60_000,
   });
@@ -240,6 +240,8 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   });
 
   const mutation = useMutation({
+     
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: (v: PostFormValues) => {
       const payload = {
         ...v,
