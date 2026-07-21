@@ -164,8 +164,8 @@ export class OrganizationsController {
   }
 
   @GrpcMethod('OrganizationService', 'GetFullTree')
-  async getFullTree() {
-    const res = await this.orgService.getFullTree();
+  async getFullTree(data: { q?: string }) {
+    const res = await this.orgService.getFullTree(data.q);
     const tree = res?.data ?? [];
     return {
       nodes: tree.map((node: any) => this.mapUnitNode(node)),

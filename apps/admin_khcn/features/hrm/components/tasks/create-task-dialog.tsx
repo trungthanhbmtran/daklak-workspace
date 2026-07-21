@@ -69,7 +69,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
 
   // ── Danh sách phòng ban từ API ──
   const { data: orgData } = useOrganizationFlatListQuery();
-  const departments = orgData?.items ?? [];
+  const departments = orgData?.data ?? [];
 
   const handleAddCoordinator = (value: string) => {
     let name = value;

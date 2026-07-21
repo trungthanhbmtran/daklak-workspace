@@ -51,8 +51,8 @@ export class OrganizationsService implements OnModuleInit {
     return { success: true, data: res.data };
   }
 
-  async getFullTree(user: any) {
-    const res = (await firstValueFrom(this.orgGrpcService.GetFullTree({})).catch(
+  async getFullTree(user: any, q?: string) {
+    const res = (await firstValueFrom(this.orgGrpcService.GetFullTree({ q: q || '' })).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },

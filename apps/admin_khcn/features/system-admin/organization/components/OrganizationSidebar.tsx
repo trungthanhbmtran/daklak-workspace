@@ -2,17 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
-import {
-  DndContext,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  useDraggable,
-  useDroppable,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { Plus, Search as SearchIcon, ChevronRight, Building2, ChevronDown, FolderOpen, GripVertical } from "lucide-react";
+import { Plus, Search as SearchIcon, ChevronRight, Building2, ChevronDown, FolderOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
@@ -20,21 +10,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useOrganizationContext } from "../context/OrganizationContext";
 import type { OrganizationUnitNode } from "../types";
-
-const ROOT_DROP_ID = "org-root";
-
-function getDescendantIds(flatUnits: OrganizationUnitNode[], unitId: number): Set<number> {
-  const set = new Set<number>();
-  const stack = [unitId];
-  while (stack.length) {
-    const id = stack.pop()!;
-    flatUnits.filter((u) => u.parentId === id).forEach((u) => {
-      set.add(u.id);
-      stack.push(u.id);
-    });
-  }
-  return set;
-}
 
 function UnitRow({
   unit,
@@ -59,26 +34,12 @@ function UnitRow({
   onToggleExpand: (id: number) => void;
   onAddChild: (id: number) => void;
 }) {
-  const id = `unit-${unit.id}`;
-  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
-    id,
-    data: { unit },
-  });
-  const { setNodeRef: setDropRef, isOver } = useDroppable({ id, data: { unit } });
-
-  const setRef = (el: HTMLDivElement | null) => {
-    setDragRef(el);
-    setDropRef(el);
-  };
-
   return (
     <li className="relative z-10">
       <div
-        ref={setRef}
         role="button"
         tabIndex={0}
-        className={`group flex items-start justify-between min-w-0 py-2 pr-2 rounded-md cursor-pointer transition-colors ${isDragging ? "opacity-50" : ""
-          } ${isOver ? "ring-2 ring-primary/50 bg-primary/5" : ""} ${isSelected
+        className={`group flex items-start justify-between min-w-0 py-2 pr-2 rounded-md cursor-pointer transition-colors ${isSelected
             ? "bg-primary/10 border border-primary/20"
             : "hover:bg-muted text-foreground border border-transparent"
           }`}
@@ -91,15 +52,7 @@ function UnitRow({
           }
         }}
       >
-        <div className="flex items-start gap-1.5 min-w-0 flex-1">
-          <div
-            className="touch-none cursor-grab active:cursor-grabbing shrink-0 mt-[2px] text-muted-foreground hover:text-foreground"
-            {...listeners}
-            {...attributes}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <GripVertical className="h-4 w-4" />
-          </div>
+        <div className="flex items-start gap-1.5 min-w-0 flex-1 pl-1">
           <div className="w-5 shrink-0 flex justify-center mt-[2px]">
             {hasChildren ? (
               <Button
@@ -237,7 +190,7 @@ function UnitTree({
 }
 
 export function OrganizationSidebar() {
-  const { state, actions } = useOrganizationContext();
+  const { state } = useOrganizationContext();
   const { flatUnits, tree } = state;
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -263,30 +216,6 @@ export function OrganizationSidebar() {
 
   // Tự động expand tất cả khi có searchTerm
   const effectiveExpandedIds = searchTerm.trim() ? new Set(flatUnits.map(u => u.id)) : expandedIds;
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-    const activeIdStr = String(active.id);
-    const overIdStr = String(over.id);
-    if (!activeIdStr.startsWith("unit-")) return;
-    const draggedId = Number(activeIdStr.replace("unit-", ""));
-    if (overIdStr === ROOT_DROP_ID) {
-      actions.updateUnit(draggedId, { parentId: null });
-      return;
-    }
-    if (!overIdStr.startsWith("unit-")) return;
-    const newParentId = Number(overIdStr.replace("unit-", ""));
-    if (draggedId === newParentId) return;
-    const descendants = getDescendantIds(flatUnits, draggedId);
-    if (descendants.has(newParentId)) return;
-    actions.updateUnit(draggedId, { parentId: newParentId });
-  };
 
   const handleSelect = (id: number) => {
     router.push(`/services/admin/organization/${id}`);
@@ -343,34 +272,18 @@ export function OrganizationSidebar() {
               <p>Không tìm thấy kết quả phù hợp.</p>
             </div>
           ) : (
-            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-              <RootDropZone />
-              <UnitTree
-                nodes={tree}
-                level={0}
-                expandedIds={effectiveExpandedIds}
-                activeId={activeId}
-                onSelect={handleSelect}
-                onToggleExpand={toggleExpand}
-                onAddChild={handleAddChild}
-              />
-            </DndContext>
+            <UnitTree
+              nodes={tree}
+              level={0}
+              expandedIds={effectiveExpandedIds}
+              activeId={activeId}
+              onSelect={handleSelect}
+              onToggleExpand={toggleExpand}
+              onAddChild={handleAddChild}
+            />
           )}
         </div>
       </ScrollArea>
     </Card>
-  );
-}
-
-function RootDropZone() {
-  const { setNodeRef, isOver } = useDroppable({ id: ROOT_DROP_ID });
-  return (
-    <div
-      ref={setNodeRef}
-      className={`mb-2 py-2 px-3 rounded-lg border border-dashed text-center text-xs text-muted-foreground transition-colors ${isOver ? "border-primary bg-primary/10 text-primary" : "border-muted-foreground/30"
-        }`}
-    >
-      Thả đơn vị vào đây để đưa lên cấp gốc
-    </div>
   );
 }

@@ -34,7 +34,7 @@ export function useEmployeeTitles(employee: any) {
     const title = employee?.jobTitle;
     if (title) return title.name;
     if (!employee?.jobTitleId) return "—";
-    const items = jobTitlesRes?.items ?? [];
+    const items = jobTitlesRes?.data ?? [];
     const found = items.find((j: { id: number }) => j.id === employee.jobTitleId);
     return found?.name ?? "—";
   }, [employee, jobTitlesRes]);
@@ -43,7 +43,7 @@ export function useEmployeeTitles(employee: any) {
     const rank = employee?.civilServantRank;
     if (rank) return rank.name;
     if (!employee?.civilServantRankId) return "—";
-    const items = jobTitlesRes?.items ?? [];
+    const items = jobTitlesRes?.data ?? [];
     const found = items.find((j: { id: number }) => j.id === employee.civilServantRankId);
     return found?.name ?? "—";
   }, [employee, jobTitlesRes]);
@@ -52,7 +52,7 @@ export function useEmployeeTitles(employee: any) {
     const party = employee?.partyTitle;
     if (party) return party.name;
     if (!employee?.partyTitleId) return "—";
-    const items = jobTitlesRes?.items ?? [];
+    const items = jobTitlesRes?.data ?? [];
     const found = items.find((j: { id: number }) => j.id === employee.partyTitleId);
     return found?.name ?? "—";
   }, [employee, jobTitlesRes]);

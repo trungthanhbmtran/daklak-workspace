@@ -48,8 +48,8 @@ export class OrganizationsController {
     status: 200,
     description: 'Cây đơn vị (root nodes có children)',
   })
-  async getFullTree(@Req() request: any) {
-    return this.orgService.getFullTree(request?.user);
+  async getFullTree(@Req() request: any, @Query('q') q?: string) {
+    return this.orgService.getFullTree(request?.user, q);
   }
 
   @Get()

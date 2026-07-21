@@ -28,7 +28,7 @@ export function useStaffingReport(unitId: number | null) {
   const report: StaffingReportItem[] = Array.isArray(reportQuery.data)
     ? reportQuery.data
     : [];
-  const jobTitles = jobTitlesQuery.data?.items ?? [];
+  const jobTitles = jobTitlesQuery.data?.data ?? [];
 
   return {
     report,

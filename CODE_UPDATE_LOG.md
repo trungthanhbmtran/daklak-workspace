@@ -68,6 +68,20 @@ Tài liệu này dùng để theo dõi và ghi nhận toàn bộ các thao tác 
 
 ---
 
+### [2026-07-21 23:55] Tác vụ: Fix Organization Tree Render & Dumb Client Filter
+- **File bị ảnh hưởng**:
+  - `apps/admin_khcn/features/system-admin/organization/components/OrganizationLayoutClient.tsx`
+  - `shared/protos/users/organization.proto`
+  - `apps/api-gateway/src/modules/users/organizations.controller.ts` & `organizations.service.ts`
+  - `apps/user-service/src/modules/organizations/organizations.controller.ts` & `organizations.service.ts`
+- **Chi tiết thay đổi**:
+  - **Frontend Fix**: Sửa lỗi không hiển thị cây do trỏ sai key (`treeResponse?.items` -> `treeResponse?.data`).
+  - **Backend Filter (Dumb Client)**: Cập nhật hàm `GetFullTree` trong Proto và Gateway để nhận tham số tìm kiếm `q`. Ở tầng Microservice `user-service`, thực hiện đệ quy (recursive filter) trên cache tree để trả về cây kết quả giữ nguyên cấu trúc cha-con mà không cần Frontend phải tự build hay tính toán.
+  - **Xóa tính năng Drag & Drop**: Gỡ bỏ hoàn toàn logic kéo thả (thư viện `@dnd-kit/core`) khỏi `OrganizationSidebar.tsx` theo yêu cầu của người dùng để đơn giản hóa giao diện.
+- **Mục đích**: Khắc phục lỗi rỗng cây tổ chức, tuân thủ tuyệt đối quy tắc Dumb Client (Backend chịu trách nhiệm filter tree) và làm gọn giao diện cây tổ chức.
+
+---
+
 ### [2026-07-21 13:20] Tác vụ: Bổ sung Backend APIs cho Frontend Dumb Client
 - **File bị ảnh hưởng**:
   - `shared/protos/posts/post.proto`, `apps/posts-service/src/modules/posts/posts.service.ts`, `apps/api-gateway/src/modules/posts/public-posts.controller.ts`

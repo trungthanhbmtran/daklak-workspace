@@ -236,37 +236,60 @@ export class OrganizationsService {
   }
 
   // Lấy cây tổ chức (Full Tree)
-  async getFullTree() {
+  async getFullTree(q?: string) {
     const cacheKey = 'FULL_TREE';
     const cached = this.treeCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.data;
-    }
+    let fullTree = [];
 
-    const units = await this.prisma.organizationUnit.findMany({
-      orderBy: { hierarchyPath: 'asc' },
-      include: {
-        type: true,
-        unitDomains: {
-          include: {
-            domain: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
+    if (cached && cached.expiresAt > Date.now()) {
+      fullTree = cached.data.data;
+    } else {
+      const units = await this.prisma.organizationUnit.findMany({
+        orderBy: { hierarchyPath: 'asc' },
+        include: {
+          type: true,
+          unitDomains: {
+            include: {
+              domain: {
+                include: {
+                  translations: {
+                    where: { langCode: 'vi' },
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
+      fullTree = buildTree(units, null);
+      this.treeCache.set(cacheKey, {
+        data: { data: fullTree },
+        expiresAt: Date.now() + this.CACHE_TTL_MS,
+      });
+    }
 
-    const result = { data: buildTree(units, null) };
-    this.treeCache.set(cacheKey, {
-      data: result,
-      expiresAt: Date.now() + this.CACHE_TTL_MS,
-    });
-    return result;
+    if (!q || !q.trim()) {
+      return { data: fullTree };
+    }
+
+    const lowerQ = q.toLowerCase().trim();
+    const filterTree = (nodes: any[]): any[] => {
+      const result: any[] = [];
+      for (const node of nodes) {
+        const filteredChildren = filterTree(node.children || []);
+        const matches =
+          (node.name && node.name.toLowerCase().includes(lowerQ)) ||
+          (node.code && node.code.toLowerCase().includes(lowerQ)) ||
+          (node.shortName && node.shortName.toLowerCase().includes(lowerQ));
+
+        if (matches || filteredChildren.length > 0) {
+          result.push({ ...node, children: filteredChildren });
+        }
+      }
+      return result;
+    };
+
+    return { data: filterTree(fullTree) };
   }
 
   // Lấy danh sách phẳng (có thể lọc theo tên, mã)

@@ -32,7 +32,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
   // ── Danh sách phòng ban từ API ──
   const { data: orgData } = useOrganizationFlatListQuery();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const departments = orgData?.items ?? [];
+  const departments = orgData?.data ?? [];
 
   useEffect(() => {
     if (open) {

@@ -147,7 +147,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
 
   const selectedUnit = units.find(u => u.id === departmentId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const jobTitles = jobTitlesRes?.items ?? [];
+  const jobTitles = jobTitlesRes?.data ?? [];
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
   const partyTitles = useMemo(() => jobTitles.filter(j => j.type === "PARTY"), [jobTitles]);

@@ -9,7 +9,7 @@ service OrganizationService {
   rpc GetOne (GetOneRequest) returns (UnitResponse);
   rpc UpdateUnit (UpdateUnitRequest) returns (UnitResponse);
   rpc DeleteUnit (DeleteUnitRequest) returns (DeleteUnitResponse);
-  rpc GetFullTree (common.Empty) returns (OrganizationTreeResponse);
+  rpc GetFullTree (GetOrganizationsRequest) returns (OrganizationTreeResponse);
   rpc GetSubTree (GetSubTreeRequest) returns (OrganizationTreeResponse);
   rpc GetDescendants (GetDescendantsRequest) returns (GetDescendantsResponse);
   rpc GetOrganizations (GetOrganizationsRequest) returns (OrganizationTreeResponse);

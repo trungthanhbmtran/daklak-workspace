@@ -100,7 +100,7 @@ export function CreateUserModal({
 
   const jobTitleNameMap = useMemo(() => {
     const m = new Map<number, string>();
-    (jobTitlesRes?.items ?? []).forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
+    (jobTitlesRes?.data ?? []).forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
     return m;
   }, [jobTitlesRes]);
 

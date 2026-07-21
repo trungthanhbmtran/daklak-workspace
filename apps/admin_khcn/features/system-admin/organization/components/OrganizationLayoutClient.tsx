@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useOrganizationTreeQuery, useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
+import { useOrganizationTreeQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import {
   useOrganizationCreateMutation,
   useOrganizationUpdateMutation,
@@ -12,13 +12,25 @@ import { OrganizationProvider } from "@/features/system-admin/organization/conte
 import { OrganizationSidebar } from "@/features/system-admin/organization/components/OrganizationSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "next/navigation";
+import type { OrganizationUnitNode } from "@/features/system-admin/organization/types";
+
+function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
+  const result: OrganizationUnitNode[] = [];
+  const traverse = (n: OrganizationUnitNode[]) => {
+    for (const node of n) {
+      result.push(node);
+      if (node.children?.length) traverse(node.children);
+    }
+  };
+  traverse(nodes);
+  return result;
+}
 
 export function OrganizationLayoutClient({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   
   const { data: treeResponse, isLoading: isLoadingTree } = useOrganizationTreeQuery(searchTerm);
-  const { data: flatResponse } = useOrganizationFlatListQuery(searchTerm);
   
   const { mutateAsync: createUnit, isPending: isCreating } = useOrganizationCreateMutation();
   const { mutateAsync: updateUnitBase, isPending: isUpdating } = useOrganizationUpdateMutation();
@@ -28,10 +40,13 @@ export function OrganizationLayoutClient({ children }: { children: React.ReactNo
   const updateUnit = (id: number, payload: any) => updateUnitBase({ id, payload });
   const updateScope = (id: number, payload: any) => updateScopeBase({ id, payload });
 
+  const tree = treeResponse?.data ?? [];
+  const flatUnits = flattenTree(tree);
+
   const contextValue = {
     state: {
-      tree: treeResponse?.items ?? [],
-      flatUnits: flatResponse?.items ?? [],
+      tree,
+      flatUnits,
       isLoadingTree,
     },
     actions: {
