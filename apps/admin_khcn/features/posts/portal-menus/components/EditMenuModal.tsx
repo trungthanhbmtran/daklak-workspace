@@ -163,35 +163,38 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
       }
     };
 
-    setIsTranslating(true);
-    toast.promise(
-      (async () => {
+    const translateTask = async () => {
+      try {
+        setIsTranslating(true);
         const [translatedName, translatedDesc] = await Promise.all([
           translateApi(sourceName, langCode),
           translateApi(sourceDesc, langCode)
         ]);
 
-        const newTranslations = { ...(editingMenu?.translations || {}) };
-        if (!newTranslations[langCode]) newTranslations[langCode] = {};
-
-        if (translatedName) newTranslations[langCode].name = translatedName;
-        if (translatedDesc) newTranslations[langCode].description = translatedDesc;
-
         setEditingMenu(prev => {
-          if (!prev) return null;
+          if (!prev) return prev;
           return {
             ...prev,
-            translations: newTranslations
+            translations: {
+              ...(prev.translations || {}),
+              [langCode]: {
+                ...(prev.translations?.[langCode] || {}),
+                ...(translatedName && { name: translatedName }),
+                ...(translatedDesc && { description: translatedDesc })
+              }
+            }
           };
         });
-      })(),
-      {
-        loading: `Đang dịch sang ${langCode.toUpperCase()}...`,
-        success: `Đã dịch thành công sang ${langCode.toUpperCase()}!`,
-        error: "Không thể tự động dịch, vui lòng thử lại.",
+      } finally {
+        setIsTranslating(false);
       }
-    );
-    setIsTranslating(false);
+    };
+
+    toast.promise(translateTask(), {
+      loading: `Đang dịch sang ${langCode.toUpperCase()}...`,
+      success: `Đã dịch thành công sang ${langCode.toUpperCase()}!`,
+      error: "Không thể tự động dịch, vui lòng thử lại.",
+    });
   };
 
   const handleLocalSave = async () => {

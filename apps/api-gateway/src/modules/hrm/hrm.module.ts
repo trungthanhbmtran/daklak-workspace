@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
-import { DepartmentController } from './department.controller';
 import { EmployeeController } from './employee.controller';
-import { PositionController } from './position.controller';
-import { JobTitleController } from './jobtitle.controller';
 import { PublicHrmController } from './public-hrm.controller';
 import { TasksController } from './tasks.controller';
 import { KpisController } from './kpis.controller';
@@ -15,8 +12,6 @@ import { RankQuotasController } from './rank-quotas.controller';
 import { TasksService } from './tasks.service';
 import { KpisService } from './kpis.service';
 import { EmployeeService } from './employee.service';
-import { DepartmentService } from './department.service';
-import { PositionService } from './position.service';
 
 @Module({
   imports: [
@@ -30,10 +25,7 @@ import { PositionService } from './position.service';
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
   ],
   controllers: [
-    DepartmentController,
     EmployeeController,
-    PositionController,
-    JobTitleController,
     PublicHrmController,
     TasksController,
     KpisController,
@@ -46,8 +38,6 @@ import { PositionService } from './position.service';
     MasterPlansService,
     KpisService,
     EmployeeService,
-    DepartmentService,
-    PositionService,
   ],
 })
 export class HrmModule {}
