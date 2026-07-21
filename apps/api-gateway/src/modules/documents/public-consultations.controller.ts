@@ -1,4 +1,4 @@
-import {
+import { InternalServerErrorException,
   Controller,
   Post,
   Body,
@@ -33,7 +33,7 @@ export class PublicConsultationsController implements OnModuleInit {
       this.consultationService.SubmitPublicComment(payload),
     ).catch((e) => {
       console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 }

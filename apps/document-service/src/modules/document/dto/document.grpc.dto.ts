@@ -21,6 +21,19 @@ export class ListDocumentsGrpcDto {
   @IsString() @IsOptional() search?: string;
   @IsString() @IsOptional() categoryId?: string;
   @IsString() @IsOptional() type?: string;
+  @IsString() @IsOptional() typeId?: string;
+  @IsString() @IsOptional() fieldId?: string;
+  @IsString() @IsOptional() status?: string;
+  @IsString() @IsOptional() urgency?: string;
+  @IsString() @IsOptional() startDate?: string;
+  @IsString() @IsOptional() endDate?: string;
+  @IsBoolean() @IsOptional() isPublic?: boolean;
+  @IsInt() @IsOptional() fiscalYear?: number;
+  @IsString() @IsOptional() transparencyCategory?: string;
+  @IsBoolean() @IsOptional() isIncoming?: boolean;
+  @IsString() @IsOptional() issuingAuthorityId?: string;
+  @IsInt() @IsOptional() page?: number;
+  @IsInt() @IsOptional() limit?: number;
 }
 
 export class ExtractMetadataGrpcDto {

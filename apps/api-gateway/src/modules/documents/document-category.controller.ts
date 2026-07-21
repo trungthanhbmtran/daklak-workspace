@@ -1,4 +1,4 @@
-﻿import {
+﻿import { InternalServerErrorException,
   Controller,
   Get,
   Post,
@@ -47,7 +47,7 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.ListCategories(req)).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -57,7 +57,7 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.GetCategory({ id })).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -67,7 +67,7 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.CreateCategory(body)).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -78,7 +78,7 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.UpdateCategory(payload)).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -88,7 +88,7 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.DeleteCategory({ id })).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }

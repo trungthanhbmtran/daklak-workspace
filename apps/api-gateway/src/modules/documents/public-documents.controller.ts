@@ -1,4 +1,4 @@
-import {
+import { InternalServerErrorException,
   Controller,
   Get,
   Param,
@@ -36,7 +36,7 @@ export class PublicDocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.ListProcedures(req)).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -46,7 +46,7 @@ export class PublicDocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.GetProcedure({ id })).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -56,7 +56,7 @@ export class PublicDocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.GetDossier({ code })).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -84,7 +84,7 @@ export class PublicDocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.ListDocuments(req)).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -94,7 +94,7 @@ export class PublicDocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.GetDocument({ id })).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }

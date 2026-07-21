@@ -33,7 +33,7 @@ export class BannersService {
       ];
     }
     if (position) where.position = position;
-    if (status === true) where.status = true;
+    if (status === true || status === 'true') where.status = true;
     // Note: We skip status = false default from gRPC to show all banners unless explicitly filtered
 
     const [total, items] = await Promise.all([

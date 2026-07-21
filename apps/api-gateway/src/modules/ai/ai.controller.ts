@@ -92,7 +92,7 @@ export class AiController {
       );
       return { success: true, data: models };
     } catch (err: any) {
-      return { success: false, data: null, message: err.message };
+      throw new Error(err.message);
     }
   }
 }

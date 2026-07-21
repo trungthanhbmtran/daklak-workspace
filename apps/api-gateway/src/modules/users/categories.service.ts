@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -32,13 +32,7 @@ export class CategoriesService implements OnModuleInit {
         this.categoryService.GetAllGroups({}),
       );
       return { success: true, data: res.groups };
-    } catch (error) {
-      return {
-        success: false,
-        data: [],
-        message: 'Chưa thể kết nối tới dịch vụ danh mục',
-      };
-    }
+    } catch (error) { throw new InternalServerErrorException('Chưa thể kết nối tới dịch vụ danh mục'); }
   }
 
   async updateGroup(code: string, body: { name: string; order?: number }) {
@@ -51,12 +45,7 @@ export class CategoriesService implements OnModuleInit {
         }),
       );
       return { success: true, data: res };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Lỗi cập nhật nhóm danh mục',
-      };
-    }
+    } catch (error) { throw new InternalServerErrorException('Lỗi cập nhật nhóm danh mục'); }
   }
 
   async getByGroup(
@@ -79,8 +68,7 @@ export class CategoriesService implements OnModuleInit {
       const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({}),
       ).catch((e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       });
       return {
         success: true,
@@ -97,8 +85,7 @@ export class CategoriesService implements OnModuleInit {
         selectedIds: selectedIdsArr,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return {
       success: true,
@@ -123,8 +110,7 @@ export class CategoriesService implements OnModuleInit {
         order: body.order,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: toFrontendItem(res as any) };
   }
@@ -151,8 +137,7 @@ export class CategoriesService implements OnModuleInit {
     const res = await firstValueFrom(
       this.categoryService.Update(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: toFrontendItem(res as any) };
   }
@@ -161,8 +146,7 @@ export class CategoriesService implements OnModuleInit {
     const res = (await firstValueFrom(
       this.categoryService.Delete({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return {
       success: res?.success ?? true,
@@ -181,8 +165,7 @@ export class CategoriesService implements OnModuleInit {
       const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({ lang }),
       ).catch((e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       });
       return {
         success: true,
@@ -199,8 +182,7 @@ export class CategoriesService implements OnModuleInit {
         skip: skipNum,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return {
       success: true,

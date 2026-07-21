@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,7 +53,7 @@ export class AiFeatureService implements OnModuleInit {
 
   async generateText(prompt: string) {
     if (!prompt) {
-      return { success: false, data: null, message: 'Prompt is required' };
+      throw new BadRequestException('Prompt is required');
     }
 
     try {
@@ -67,11 +67,7 @@ export class AiFeatureService implements OnModuleInit {
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing AI task', err);
-      return {
-        success: false,
-        data: null,
-        message: 'Không thể tạo tác vụ xử lý AI',
-      };
+      throw new InternalServerErrorException('Không thể tạo tác vụ xử lý AI');
     }
   }
 
@@ -88,11 +84,7 @@ export class AiFeatureService implements OnModuleInit {
       const promptTemplate = promptConfig?.value || '';
 
       if (!promptTemplate) {
-        return {
-          success: false,
-          data: null,
-          message: `Chưa cấu hình AI Prompt cho hành động: ${action}`,
-        };
+        throw new BadRequestException(`Chưa cấu hình AI Prompt cho hành động: ${action}`);
       }
 
       let prompt = promptTemplate;
@@ -204,11 +196,7 @@ export class AiFeatureService implements OnModuleInit {
           break;
         }
         default:
-          return {
-            success: false,
-            data: null,
-            message: `Hành động AI không được hỗ trợ: ${action}`,
-          };
+          throw new BadRequestException(`Hành động AI không được hỗ trợ: ${action}`);
       }
 
       const jobId = uuidv4();
@@ -223,11 +211,7 @@ export class AiFeatureService implements OnModuleInit {
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error(`Error in executeAiFeature for action ${action}`, err);
-      return {
-        success: false,
-        data: null,
-        message: 'Không thể khởi tạo tiến trình AI',
-      };
+      throw new InternalServerErrorException('Không thể khởi tạo tiến trình AI');
     }
   }
 
@@ -235,15 +219,12 @@ export class AiFeatureService implements OnModuleInit {
     try {
       const jobData = await this.redisService.get(`ai_job_${jobId}`);
       if (!jobData) {
-        return {
-          success: false,
-          data: null,
-          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
-        };
+        throw new NotFoundException('Không tìm thấy tác vụ (hoặc đã hết hạn)');
       }
       return { success: true, data: JSON.parse(jobData) };
     } catch (err: any) {
-      return { success: false, data: null, message: err.message };
+      if (err instanceof NotFoundException) throw err;
+      throw new InternalServerErrorException(err.message);
     }
   }
 

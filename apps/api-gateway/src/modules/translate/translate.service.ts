@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { type ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -31,11 +31,7 @@ export class TranslateService implements OnModuleInit {
 
   async translate(text: string, targetLang: string) {
     if (!text || !targetLang) {
-      return {
-        success: false,
-        data: null,
-        message: 'Missing text or targetLang',
-      };
+      throw new BadRequestException('Missing text or targetLang');
     }
 
     try {
@@ -56,11 +52,7 @@ export class TranslateService implements OnModuleInit {
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing translation task', err);
-      return {
-        success: false,
-        data: null,
-        message: 'Không thể tạo tác vụ dịch thuật',
-      };
+      throw new InternalServerErrorException('Không thể tạo tác vụ dịch thuật');
     }
   }
 
@@ -68,15 +60,31 @@ export class TranslateService implements OnModuleInit {
     try {
       const jobData = await this.redisService.get(`translate_job_${jobId}`);
       if (!jobData) {
-        return {
-          success: false,
-          data: null,
-          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
-        };
+        throw new NotFoundException('Không tìm thấy tác vụ (hoặc đã hết hạn)');
       }
       return { success: true, data: JSON.parse(jobData) };
     } catch (err: any) {
-      return { success: false, data: null, message: err.message };
+      if (err instanceof NotFoundException) throw err;
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  async translateSyncDirect(text: string, targetLang: string) {
+    if (!text || !targetLang) {
+      throw new BadRequestException('Missing text or targetLang');
+    }
+    try {
+      const result = await firstValueFrom(
+        this.translateGrpcService.translateSync({
+          text,
+          target_lang: targetLang,
+        }) as any,
+      ) as { translated_text: string };
+
+      return { success: true, data: result };
+    } catch (err: any) {
+      this.logger.error('Error in translateSyncDirect', err);
+      throw new InternalServerErrorException(err.message || 'Dịch thuật thất bại');
     }
   }
 

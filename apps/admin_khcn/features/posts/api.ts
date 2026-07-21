@@ -94,6 +94,13 @@ export const postsApi = {
   getQuickSetupData: (): Promise<ApiResponse<any>> =>
     apiClient.get("/portal-menus/quick-setup") as any,
 
+  // ─── Translation ──────────────────────────────────────────
+  translateTextSync: async (text: string, targetLang: string): Promise<string> => {
+    if (!text.trim()) return "";
+    const res = await apiClient.post<any, ApiResponse<{ translated_text: string }>>('/admin/translate/sync', { text, targetLang });
+    return res.data?.translated_text || "";
+  },
+
   // ─── Interactions - Comments ──────────────────────────────
   getComments: (params: any): Promise<ApiResponse<Comment[]>> =>
     apiClient.get("/interactions/comments", { params }) as any,

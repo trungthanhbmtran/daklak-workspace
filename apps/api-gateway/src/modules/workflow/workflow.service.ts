@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { CreateWorkflowDto, UpdateWorkflowDto, StartWorkflowDto } from './dto/workflow.dto';
@@ -25,8 +30,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: result?.data, message: 'OK' };
   }
@@ -35,8 +39,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: result?.data, message: 'OK' };
   }
@@ -45,8 +48,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListModules({}),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: result?.data, message: 'OK' };
   }
@@ -55,8 +57,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.orgGrpcService.ListJobTitles({}),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     const items = (result?.data ?? []).map((j: any) => ({
       code: j.code,
@@ -79,8 +80,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.CreateWorkflow(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
 
     return { success: true, data: result, message: 'Created successfully' };
@@ -98,8 +98,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.UpdateWorkflow(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
 
     return { success: true, data: result, message: 'Updated successfully' };
@@ -112,8 +111,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListWorkflows({ skip, take, search }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
 
     return {
@@ -134,8 +132,7 @@ export class WorkflowService implements OnModuleInit {
         userRoles,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { data: result };
   }
@@ -150,8 +147,7 @@ export class WorkflowService implements OnModuleInit {
         search,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: result?.data, meta: result?.meta, message: 'OK' };
   }
@@ -160,8 +156,7 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.GetInstance({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { data: result };
   }
@@ -170,8 +165,7 @@ export class WorkflowService implements OnModuleInit {
     const response = (await firstValueFrom(
       this.workflowGrpcService.GetLogs({ instanceId }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { data: response.logs };
   }
@@ -180,8 +174,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindAllIntegrations({ search: search || '' }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return result;
   }
@@ -190,8 +183,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.CreateIntegration(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: !!result, data: result, message: 'Created successfully' };
   }
@@ -200,8 +192,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindOneIntegration({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: !!result, data: result };
   }
@@ -210,8 +201,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.UpdateIntegration({ ...body, id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: !!result, data: result, message: 'Updated successfully' };
   }
@@ -220,8 +210,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.DeleteIntegration({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: result?.success || true, message: 'Deleted successfully' };
   }
@@ -230,8 +219,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindOneWorkflow({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { data: result };
   }
@@ -240,8 +228,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.DeleteWorkflow({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: result?.success ?? true };
   }
@@ -250,8 +237,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.PublishWorkflow({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { data: result };
   }
@@ -260,8 +246,7 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ApplyModule({ id, moduleCode }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { data: result };
   }
@@ -275,8 +260,7 @@ export class WorkflowService implements OnModuleInit {
         initiatorId,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: result, message: 'Workflow started' };
   }

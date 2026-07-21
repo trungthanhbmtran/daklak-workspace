@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Inject, OnModuleInit } from '@nestjs/common';
+import { Controller, Get, Query, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -32,8 +32,7 @@ export class PublicHrmController implements OnModuleInit {
     const response = await firstValueFrom(
       this.employeeService.ListEmployees(req),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return response;
   }

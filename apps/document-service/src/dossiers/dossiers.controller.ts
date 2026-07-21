@@ -1,3 +1,4 @@
+import { RpcException } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { DossiersService } from './dossiers.service';
@@ -21,7 +22,7 @@ export class DossiersController {
   @GrpcMethod('DossierService', 'GetDossier')
   async getDossier(data: { id: string }) {
     const d = await this.dossiersService.getDossier(data.id);
-    if (!d) return null;
+    if (!d) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
     return {
       ...d,
       createdAt: d.createdAt.toISOString(),

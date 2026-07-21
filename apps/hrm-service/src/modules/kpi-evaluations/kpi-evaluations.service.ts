@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
 
@@ -319,7 +320,7 @@ export class KpiEvaluationsService {
 
     const period = await this.prisma.kpiPeriod.findUnique({ where: { id: periodId } });
     if (!period) {
-      return { success: false, message: 'Kỳ đánh giá không tồn tại', totalScore: 0, tasks: [] };
+      throw new RpcException({ message: 'Kỳ đánh giá không tồn tại', code: 3 /* INVALID_ARGUMENT */ });
     }
 
     // Find all completed tasks for this employee within the period
@@ -547,7 +548,7 @@ export class KpiEvaluationsService {
       }
     } catch (error: any) {
       if (error.code === 'P2003') {
-        return { success: false, message: 'Nhân viên không tồn tại trong hệ thống', totalScore: 0, tasks: [] };
+        throw new RpcException({ message: 'Nhân viên không tồn tại trong hệ thống', code: 3 /* INVALID_ARGUMENT */ });
       }
       throw error;
     }
@@ -575,7 +576,7 @@ export class KpiEvaluationsService {
     });
 
     if (!evaluation) {
-      return { success: false, message: 'Không tìm thấy phiếu đánh giá', data: '' };
+      throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 /* INVALID_ARGUMENT */ });
     }
 
     const allCriteria = await this.prisma.kpiCriteria.findMany({
@@ -640,10 +641,10 @@ export class KpiEvaluationsService {
 
   async submitSelfScore(id: number, payload: any) {
     const evaluation = await this.prisma.kpiEvaluation.findUnique({ where: { id } });
-    if (!evaluation) return { success: false, message: 'Không tìm thấy phiếu đánh giá', data: '' };
+    if (!evaluation) throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 /* INVALID_ARGUMENT */ });
 
     if (evaluation.status !== 'DRAFT' && evaluation.status !== 'COMPUTING') {
-      return { success: false, message: 'Phiếu đã được nộp hoặc đã chốt', data: '' };
+      throw new RpcException({ message: 'Phiếu đã được nộp hoặc đã chốt', code: 3 /* INVALID_ARGUMENT */ });
     }
 
     // Upsert details
@@ -675,10 +676,10 @@ export class KpiEvaluationsService {
 
   async approveReviewerScore(id: number, payload: any, reviewerCode: string) {
     const evaluation = await this.prisma.kpiEvaluation.findUnique({ where: { id } });
-    if (!evaluation) return { success: false, message: 'Không tìm thấy phiếu đánh giá', data: '' };
+    if (!evaluation) throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 /* INVALID_ARGUMENT */ });
 
     if (evaluation.status !== 'SUBMITTED') {
-      return { success: false, message: 'Chỉ có thể duyệt phiếu ở trạng thái đã nộp', data: '' };
+      throw new RpcException({ message: 'Chỉ có thể duyệt phiếu ở trạng thái đã nộp', code: 3 /* INVALID_ARGUMENT */ });
     }
 
     let finalTotalScore = 0;

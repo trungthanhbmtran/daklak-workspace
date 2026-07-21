@@ -1,4 +1,11 @@
-import { Injectable, Inject, OnModuleInit, BadRequestException, NotAcceptableException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  BadRequestException,
+  NotAcceptableException,
+  InternalServerErrorException
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -51,8 +58,7 @@ export class UserService implements OnModuleInit {
     const response = (await firstValueFrom(
       this.userGrpcService.ListUsers({ skip, take, search, unitCodeStartsWith }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return {
       success: true,
@@ -65,8 +71,7 @@ export class UserService implements OnModuleInit {
     const data: any = await firstValueFrom(
       this.userGrpcService.FindOne({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (!data) return { success: true, data: null };
 
@@ -92,8 +97,7 @@ export class UserService implements OnModuleInit {
     const data: any = await firstValueFrom(
       this.userGrpcService.FindOne({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (!data) return { success: true, data: [] };
 
@@ -165,8 +169,7 @@ export class UserService implements OnModuleInit {
         isPrimary: body.isPrimary ?? false,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
@@ -183,8 +186,7 @@ export class UserService implements OnModuleInit {
         isActive: isActive ?? false,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
@@ -199,8 +201,7 @@ export class UserService implements OnModuleInit {
     const result = await firstValueFrom(
       this.userGrpcService.AssignRoles({ userId: id, roleIds: roles }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);

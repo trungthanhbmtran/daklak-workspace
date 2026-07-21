@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   Inject,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
@@ -27,8 +28,7 @@ export class RankQuotasController {
     const data = await firstValueFrom(
       this.rankQuotaService.SaveRankQuotas(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return data;
   }
@@ -41,8 +41,7 @@ export class RankQuotasController {
     const data = await firstValueFrom(
       this.rankQuotaService.GetRankQuotasByRank({ rankCode, domainCode }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return data;
   }

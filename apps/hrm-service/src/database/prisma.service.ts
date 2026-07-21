@@ -9,42 +9,86 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const url = config.getOrThrow<string>('DATABASE_URL');
     const adapter = new PrismaMariaDb(url);
     super({ adapter });
+
+    const softDeleteModels = ['Task', 'TaskStep', 'TaskAttachment', 'TaskComment', 'Employee'];
+
+    const client = this.$extends({
+      query: {
+        $allModels: {
+          async findMany({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              args.where = { ...args.where, isDeleted: false };
+            }
+            return query(args);
+          },
+          async findFirst({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              args.where = { ...args.where, isDeleted: false };
+            }
+            return query(args);
+          },
+          async findUnique({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              const result = await query(args);
+              if (result && (result as any).isDeleted) {
+                return null;
+              }
+              return result;
+            }
+            return query(args);
+          },
+          async count({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              args.where = { ...args.where, isDeleted: false };
+            }
+            return query(args);
+          },
+          async aggregate({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              args.where = { ...args.where, isDeleted: false };
+            }
+            return query(args);
+          },
+          async delete({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              return (client as any)[model].update({
+                ...args,
+                data: { isDeleted: true },
+              });
+            }
+            return query(args);
+          },
+          async deleteMany({ model, args, query }) {
+            if (model && softDeleteModels.includes(model as string)) {
+              return (client as any)[model].updateMany({
+                ...args,
+                data: { isDeleted: true },
+              });
+            }
+            return query(args);
+          },
+        },
+      },
+    });
+
+    (client as any).onModuleInit = async () => {
+      await client.$connect();
+    };
+
+    (client as any).onModuleDestroy = async () => {
+      await client.$disconnect();
+    };
+
+    return client as unknown as this;
   }
 
   async onModuleInit() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this as any).$use(async (params: any, next: any) => {
-      const softDeleteModels = ['Task', 'TaskStep', 'TaskAttachment', 'TaskComment', 'Employee'];
-      
-      if (params.model && softDeleteModels.includes(params.model)) {
-        if (params.action === 'findUnique' || params.action === 'findFirst') {
-          params.action = 'findFirst';
-          params.args = params.args || {};
-          params.args.where = { ...params.args.where, isDeleted: false };
-        }
-        if (params.action === 'findMany' || params.action === 'count' || params.action === 'aggregate') {
-          params.args = params.args || {};
-          params.args.where = { ...params.args.where, isDeleted: false };
-        }
-        // Soft delete logic for delete/deleteMany
-        if (params.action === 'delete') {
-          params.action = 'update';
-          params.args = params.args || {};
-          params.args.data = { isDeleted: true };
-        }
-        if (params.action === 'deleteMany') {
-          params.action = 'updateMany';
-          params.args = params.args || {};
-          params.args.data = { isDeleted: true };
-        }
-      }
-      return next(params);
-    });
-    
+    // This will be overridden by the proxy returned from constructor
     await this.$connect();
   }
 
   async onModuleDestroy() {
+    // This will be overridden by the proxy returned from constructor
     await this.$disconnect();
   }
 }

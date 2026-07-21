@@ -21,6 +21,11 @@ export class TranslateController {
     return this.translateService.translate(body.text, body.targetLang);
   }
 
+  @Post('sync')
+  async translateSync(@Body() body: { text: string; targetLang: string }) {
+    return this.translateService.translateSyncDirect(body.text, body.targetLang);
+  }
+
   @Get('jobs/:jobId')
   async getJobStatus(@Param('jobId') jobId: string) {
     return this.translateService.getJobStatus(jobId);

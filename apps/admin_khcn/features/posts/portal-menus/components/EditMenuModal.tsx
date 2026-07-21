@@ -19,9 +19,6 @@ import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
 import { portalConfigApi } from "@/features/portal-config/api";
 import { Text } from "@/components/ui/typography";
-import apiClient from "@/lib/axiosInstance";
-import type { ApiResponse } from "@/lib/axiosInstance";
-
 
 interface EditMenuModalProps {
   isOpen: boolean;
@@ -126,49 +123,12 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
       return;
     }
 
-    const translateApi = async (text: string, targetLang: string): Promise<string> => {
-      if (!text.trim()) return "";
-      
-      try {
-        const res = await apiClient.post<any, ApiResponse<{ jobId: string }>>('/admin/translate', { text, targetLang });
-        if (!res.success || !res.data?.jobId) {
-          throw new Error("Không thể khởi tạo tác vụ dịch thuật");
-        }
-
-        const jobId = res.data.jobId;
-        const maxAttempts = 30; // 30s timeout
-
-        for (let attempts = 1; attempts <= maxAttempts; attempts++) {
-          await new Promise(r => setTimeout(r, 1000));
-
-          const statusRes = await apiClient.get<any, ApiResponse<{ status: string; result?: any; error?: string }>>(`/admin/translate/jobs/${jobId}`);
-          const jobData = statusRes.data;
-
-          if (!jobData) continue;
-
-          switch (jobData.status) {
-            case 'COMPLETED':
-              return jobData.result?.translated_text || "";
-            case 'FAILED':
-              throw new Error(jobData.error || "Dịch thuật thất bại");
-            default:
-              continue; // PROCESSING
-          }
-        }
-        
-        throw new Error("Quá thời gian chờ dịch thuật");
-      } catch (error) {
-        console.error("Auto translate error:", error);
-        return "";
-      }
-    };
-
     const translateTask = async () => {
       try {
         setIsTranslating(true);
         const [translatedName, translatedDesc] = await Promise.all([
-          translateApi(sourceName, langCode),
-          translateApi(sourceDesc, langCode)
+          postsApi.translateTextSync(sourceName, langCode),
+          postsApi.translateTextSync(sourceDesc, langCode)
         ]);
 
         setEditingMenu(prev => {

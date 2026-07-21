@@ -10,6 +10,7 @@ import {
   UseGuards,
   OnModuleInit,
   ParseIntPipe,
+  InternalServerErrorException
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -49,8 +50,7 @@ export class ResourcesController implements OnModuleInit {
   async listResources() {
     const res = (await firstValueFrom(this.pbacService.GetResources({})).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
@@ -75,8 +75,7 @@ export class ResourcesController implements OnModuleInit {
         serviceCode: body.serviceCode,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -95,8 +94,7 @@ export class ResourcesController implements OnModuleInit {
         serviceCode: body.serviceCode,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

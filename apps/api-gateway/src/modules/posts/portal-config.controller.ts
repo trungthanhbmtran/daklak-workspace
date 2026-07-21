@@ -8,6 +8,7 @@ import {
   Inject,
   UseGuards,
   ParseIntPipe,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -38,8 +39,7 @@ export class PortalConfigController {
   ) {
     const res: any = await firstValueFrom(this.configService.create(dto)).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
     return { success: true, data: res.data };
@@ -49,8 +49,7 @@ export class PortalConfigController {
   async findAll() {
     const res: any = await firstValueFrom(this.configService.getAll({})).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
     return { success: true, data: res.data };
@@ -65,8 +64,7 @@ export class PortalConfigController {
     const res: any = await firstValueFrom(
       this.configService.update({ id, ...dto }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: res.data };
   }
@@ -83,8 +81,7 @@ export class PortalConfigController {
         description: dto.description,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: res.data };
   }
@@ -104,8 +101,7 @@ export class PortalConfigController {
     const res: any = await firstValueFrom(
       this.configService.batchUpsert({ data: dto.data }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: res.data };
   }

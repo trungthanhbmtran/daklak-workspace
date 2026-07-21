@@ -6,6 +6,7 @@ import {
   Query,
   Inject,
   OnModuleInit,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
@@ -36,8 +37,7 @@ export class PublicPostsController implements OnModuleInit {
     return firstValueFrom(
       this.postService.listPosts({ ...req, status: 'PUBLISHED' }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -45,8 +45,7 @@ export class PublicPostsController implements OnModuleInit {
   async findBySlug(@Param('slug') slug: string) {
     return firstValueFrom(this.postService.getPostBySlug({ slug })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
   }
@@ -54,8 +53,7 @@ export class PublicPostsController implements OnModuleInit {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return firstValueFrom(this.postService.getPost({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -63,8 +61,7 @@ export class PublicPostsController implements OnModuleInit {
   async incrementView(@Param('id') id: string) {
     return firstValueFrom(this.postService.incrementViewCount({ id })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
   }

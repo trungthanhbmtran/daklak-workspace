@@ -1,3 +1,4 @@
+import { RpcException } from '@nestjs/microservices';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 
@@ -75,7 +76,7 @@ export class MinutesService {
   }
 
   private mapToProto(item: any) {
-    if (!item) return null;
+    if (!item) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
     return {
       ...item,
       startTime: item.startTime?.toISOString(),

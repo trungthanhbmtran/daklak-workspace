@@ -1,3 +1,4 @@
+import { RpcException } from '@nestjs/microservices';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
@@ -225,7 +226,7 @@ export class DocumentService {
   }
 
   private mapToProto(doc: any) {
-    if (!doc) return null;
+    if (!doc) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
 
     return {
       id: doc.id,
@@ -422,7 +423,7 @@ export class DocumentService {
   }
 
   private mapProcedureToProto(item: any) {
-    if (!item) return null;
+    if (!item) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
 
     let requiredDocs: string[] = [];
     try {
@@ -546,7 +547,7 @@ export class DocumentService {
   }
 
   private mapDossierToProto(item: any) {
-    if (!item) return null;
+    if (!item) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
 
     return {
       id: item.id,

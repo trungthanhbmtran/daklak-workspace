@@ -9,6 +9,7 @@ import {
   Inject,
   Query,
   UseGuards,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -37,8 +38,7 @@ export class PortalMenuController {
   async create(@Body() dto: any) {
     return firstValueFrom(this.portalMenuService.createPortalMenu(dto)).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
   }
@@ -49,8 +49,7 @@ export class PortalMenuController {
     const result = await firstValueFrom(
       this.portalMenuService.listPortalMenus(query),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     console.log('Gateway: ListPortalMenus response received');
     return result;
@@ -62,8 +61,7 @@ export class PortalMenuController {
     const result = await firstValueFrom(
       this.portalMenuService.getQuickSetupData({}),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     console.log('Gateway: GetQuickSetupData response received');
     return result;
@@ -73,8 +71,7 @@ export class PortalMenuController {
   async findOne(@Param('id') id: string) {
     return firstValueFrom(this.portalMenuService.getPortalMenu({ id })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
   }
@@ -85,8 +82,7 @@ export class PortalMenuController {
     return firstValueFrom(
       this.portalMenuService.updatePortalMenu({ id, ...dto }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -96,8 +92,7 @@ export class PortalMenuController {
     return firstValueFrom(
       this.portalMenuService.deletePortalMenu({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

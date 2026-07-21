@@ -1,4 +1,4 @@
-import {
+import { InternalServerErrorException,
   Controller,
   Get,
   Post,
@@ -34,7 +34,7 @@ export class MinutesController implements OnModuleInit {
   async listMinutes(@Query() query: any) {
     return firstValueFrom(this.minutesService.ListMinutes(query)).catch((e) => {
       console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
@@ -43,7 +43,7 @@ export class MinutesController implements OnModuleInit {
   async getMinutes(@Param('id') id: string) {
     return firstValueFrom(this.minutesService.GetMinutes({ id })).catch((e) => {
       console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
@@ -53,7 +53,7 @@ export class MinutesController implements OnModuleInit {
     return firstValueFrom(this.minutesService.CreateMinutes(body)).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }
@@ -65,7 +65,7 @@ export class MinutesController implements OnModuleInit {
       this.minutesService.UpdateMinutes({ id, ...body }),
     ).catch((e) => {
       console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
@@ -75,7 +75,7 @@ export class MinutesController implements OnModuleInit {
     return firstValueFrom(this.minutesService.DeleteMinutes({ id })).catch(
       (e) => {
         console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
   }

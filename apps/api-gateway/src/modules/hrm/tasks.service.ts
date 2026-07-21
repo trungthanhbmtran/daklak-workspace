@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import * as jwt from 'jsonwebtoken';
@@ -163,8 +163,7 @@ export class TasksService implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -216,8 +215,7 @@ export class TasksService implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
 
     if (response?.data) {
@@ -279,8 +277,7 @@ export class TasksService implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.taskService.GetTaskStats(requestPayload, this.getGrpcMetadata(req)),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return response;
   }
@@ -301,8 +298,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -325,8 +321,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -410,8 +405,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -437,8 +431,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
@@ -456,8 +449,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (breakdownResponse?.data) this.translateTaskData(breakdownResponse.data);
     return breakdownResponse;
@@ -483,8 +475,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -510,8 +501,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -539,8 +529,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (!taskResponse) throw new Error('Task not found.');
 
@@ -558,8 +547,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -574,8 +562,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -599,8 +586,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (response?.data) {
       if (Array.isArray(response.data)) {
@@ -618,8 +604,7 @@ export class TasksService implements OnModuleInit {
     return firstValueFrom(
       this.taskService.GetTaskHistory({ taskId: id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -627,8 +612,7 @@ export class TasksService implements OnModuleInit {
     return firstValueFrom(
       this.taskService.UpsertTaskKpiSetting({ taskId: id, ...body }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -636,8 +620,7 @@ export class TasksService implements OnModuleInit {
     return firstValueFrom(
       this.taskService.GetTaskKpiSetting({ taskId: id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -653,8 +636,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -664,8 +646,7 @@ export class TasksService implements OnModuleInit {
     return firstValueFrom(
       this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req)),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -676,8 +657,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -688,8 +668,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -700,8 +679,7 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

@@ -1,4 +1,10 @@
-import { Injectable, Inject, OnModuleInit, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  BadRequestException,
+  InternalServerErrorException
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
@@ -105,8 +111,7 @@ export class MenusService implements OnModuleInit {
   async getAll(app?: string) {
     const res = (await firstValueFrom(this.menuGrpcService.GetAll({})).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     const items = res?.data ?? [];
@@ -116,8 +121,7 @@ export class MenusService implements OnModuleInit {
   async getMenuTree(app?: string) {
     const res = (await firstValueFrom(this.menuGrpcService.GetAll({})).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     const items = res?.data ?? [];
@@ -139,8 +143,7 @@ export class MenusService implements OnModuleInit {
         userId: Number.isNaN(userId) ? 0 : userId,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
 
     if (response) {
@@ -166,8 +169,7 @@ export class MenusService implements OnModuleInit {
         userId: Number.isNaN(userId) ? 0 : userId,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     const branches = getRealBranches(response?.data ?? []);
     return { apps: this.buildHubApps(branches) };
@@ -186,8 +188,7 @@ export class MenusService implements OnModuleInit {
         userId: Number.isNaN(userId) ? 0 : userId,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     const branches = getRealBranches(response?.data ?? []);
     const sidebarMenus = this.buildSidebarMenus(branches);
@@ -315,8 +316,7 @@ export class MenusService implements OnModuleInit {
   async delete(id: number) {
     const res = (await firstValueFrom(this.menuGrpcService.Delete({ id })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     return {

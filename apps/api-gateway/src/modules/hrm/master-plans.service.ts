@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -189,8 +189,7 @@ export class MasterPlansService implements OnModuleInit {
         isLeader,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (res?.data) {
       if (Array.isArray(res.data)) {
@@ -210,8 +209,7 @@ export class MasterPlansService implements OnModuleInit {
         durationDays: parseInt(durationDays || '0', 10),
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -245,8 +243,7 @@ export class MasterPlansService implements OnModuleInit {
         isLeader,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     if (res) {
       await this.populateUsers([res]);
@@ -299,8 +296,7 @@ export class MasterPlansService implements OnModuleInit {
       body.departmentId = parseInt(user.unitId, 10);
     }
     return firstValueFrom(this.masterPlanService.Create(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -309,8 +305,7 @@ export class MasterPlansService implements OnModuleInit {
     return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -318,8 +313,7 @@ export class MasterPlansService implements OnModuleInit {
     return firstValueFrom(
       this.masterPlanService.Delete({ id: parseInt(id, 10) }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

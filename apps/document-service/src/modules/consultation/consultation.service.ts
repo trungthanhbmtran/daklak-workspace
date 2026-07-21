@@ -1,3 +1,4 @@
+import { RpcException } from '@nestjs/microservices';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { WorkflowService } from '../workflow/workflow.service';
@@ -43,7 +44,7 @@ export class ConsultationService {
         }
       },
     });
-    if (!consultation) return null;
+    if (!consultation) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
     return {
       ...this.mapToProto(consultation),
       totalResponses: consultation.responses.length,
@@ -184,7 +185,7 @@ export class ConsultationService {
   }
 
   private mapToProto(item: any) {
-    if (!item) return null;
+    if (!item) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
     return {
       id: item.id,
       title: item.title,

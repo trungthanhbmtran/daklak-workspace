@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { Role } from '../../common/decorators/roles.decorator';
@@ -59,15 +59,13 @@ export class KpisService implements OnModuleInit {
 
   async findPeriods() {
     return firstValueFrom(this.kpiService.FindPeriods({})).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
   async createPeriod(body: any) {
     return firstValueFrom(this.kpiService.CreatePeriod(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -83,8 +81,7 @@ export class KpisService implements OnModuleInit {
         limit: limit ? Number(limit) : 0,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
 
     if (res) {
@@ -106,8 +103,7 @@ export class KpisService implements OnModuleInit {
 
   async createCriterion(body: any) {
     return firstValueFrom(this.kpiService.CreateCriterion(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -115,8 +111,7 @@ export class KpisService implements OnModuleInit {
     return firstValueFrom(
       this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -124,8 +119,7 @@ export class KpisService implements OnModuleInit {
     return firstValueFrom(
       this.kpiService.DeleteCriterion({ id: Number(id) }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -134,8 +128,7 @@ export class KpisService implements OnModuleInit {
       body.evaluatorCode = user.employeeCode || user.username;
     }
     return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -167,8 +160,7 @@ export class KpisService implements OnModuleInit {
         callerDescendantUnitIds,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -205,8 +197,7 @@ export class KpisService implements OnModuleInit {
         callerDescendantUnitIds,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
 
     if (res?.success && res.data?.statsByUnit) {
@@ -236,8 +227,7 @@ export class KpisService implements OnModuleInit {
         staffingSlotId: body.staffingSlotId ? Number(body.staffingSlotId) : undefined,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -245,8 +235,7 @@ export class KpisService implements OnModuleInit {
     return firstValueFrom(
       this.kpiService.GetEvaluationDetail({ id: Number(id) }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -257,8 +246,7 @@ export class KpisService implements OnModuleInit {
         data: JSON.stringify(body),
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -271,8 +259,7 @@ export class KpisService implements OnModuleInit {
         reviewerCode,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

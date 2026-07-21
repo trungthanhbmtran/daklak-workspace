@@ -10,6 +10,7 @@ import {
   UseGuards,
   OnModuleInit,
   ParseIntPipe,
+  InternalServerErrorException
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -45,8 +46,7 @@ export class PbacController implements OnModuleInit {
   })
   async findAll() {
     return firstValueFrom(this.pbacService.FindAllRoles({})).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -60,8 +60,7 @@ export class PbacController implements OnModuleInit {
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.FindOneRole({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -90,8 +89,7 @@ export class PbacController implements OnModuleInit {
         policies: body.policies,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -123,8 +121,7 @@ export class PbacController implements OnModuleInit {
         policies: body.policies,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -135,8 +132,7 @@ export class PbacController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.DeleteRole({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

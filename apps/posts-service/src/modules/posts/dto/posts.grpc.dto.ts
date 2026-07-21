@@ -35,6 +35,17 @@ export class ListPostsGrpcDto {
   @IsString() @IsOptional() search?: string;
   @IsString() @IsOptional() categoryId?: string;
   @IsString() @IsOptional() authorId?: string;
+  @IsString() @IsOptional() category?: string;
+  @IsString() @IsOptional() status?: string;
+  @IsString() @IsOptional() isFeatured?: string;
+  @IsString() @IsOptional() sortBy?: string;
+  @IsString() @IsOptional() sortOrder?: string;
+  @IsString() @IsOptional() isNotification?: string;
+  @IsString() @IsOptional() hasThumbnail?: string;
+  @IsString() @IsOptional() lang?: string;
+  @IsString() @IsOptional() cursor?: string;
+  @IsInt() @IsOptional() page?: number;
+  @IsInt() @IsOptional() limit?: number;
 }
 
 export class UpdatePostGrpcDto {

@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -109,6 +109,31 @@ export class EmployeeService implements OnModuleInit {
     };
   }
 
+  private async executeWithDicts(rpcCall: Promise<any>, isList = false) {
+    const [res, dicts]: [any, any] = await Promise.all([
+      rpcCall.catch((e: any) => {
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+      }),
+      this.fetchDictionaries(),
+    ]);
+
+    if (res && res.data) {
+      if (isList && Array.isArray(res.data)) {
+        res.data = res.data.map((e: any) =>
+          this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
+        );
+      } else {
+        res.data = this.enrichEmployee(
+          res.data,
+          dicts.jtMap,
+          dicts.unitMap,
+          dicts.catMap,
+        );
+      }
+    }
+    return res;
+  }
+
   async list(user: any, query: any) {
     const req = { ...query };
     if (req.page) req.page = parseInt(req.page);
@@ -117,6 +142,14 @@ export class EmployeeService implements OnModuleInit {
     if (req.civilServantRankId)
       req.civilServantRankId = parseInt(req.civilServantRankId);
     if (req.partyTitleId) req.partyTitleId = parseInt(req.partyTitleId);
+
+    if (req.ids) {
+      if (typeof req.ids === 'string') {
+        req.ids = req.ids.split(',').map((id: string) => parseInt(id, 10)).filter((id: number) => !isNaN(id));
+      } else if (Array.isArray(req.ids)) {
+        req.ids = req.ids.map((id: any) => parseInt(id, 10)).filter((id: number) => !isNaN(id));
+      }
+    }
 
     if (user) {
       req.callerEmail = user.email;
@@ -146,20 +179,10 @@ export class EmployeeService implements OnModuleInit {
       req.excludeEmployeeCode = req.callerEmployeeCode;
     }
 
-    const dicts = await this.fetchDictionaries();
-
-    const res: any = await firstValueFrom(
-      this.employeeService.ListEmployees(req),
-    ).catch((e: any) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-
-    if (res && res.data) {
-      res.data = res.data.map((e: any) =>
-        this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
-      );
-    }
+    const res: any = await this.executeWithDicts(
+      firstValueFrom(this.employeeService.ListEmployees(req)),
+      true
+    );
 
     if (res) {
       res.meta = res.meta || {};
@@ -177,78 +200,29 @@ export class EmployeeService implements OnModuleInit {
   }
 
   async getDetail(id: string) {
-    const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(
-        this.employeeService.GetEmployee({ id: parseInt(id) }),
-      ).catch((e: any) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      }),
-      this.fetchDictionaries(),
-    ]);
-
-    if (res && res.data) {
-      res.data = this.enrichEmployee(
-        res.data,
-        dicts.jtMap,
-        dicts.unitMap,
-        dicts.catMap,
-      );
-    }
-    return res;
+    return this.executeWithDicts(
+      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) }))
+    );
   }
 
   async create(body: any) {
-    const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.CreateEmployee(body)).catch(
-        (e: any) => {
-          console.error('RPC Call Failed', e.message);
-          return null;
-        },
-      ),
-      this.fetchDictionaries(),
-    ]);
-
-    if (res && res.data) {
-      res.data = this.enrichEmployee(
-        res.data,
-        dicts.jtMap,
-        dicts.unitMap,
-        dicts.catMap,
-      );
-    }
-    return res;
+    return this.executeWithDicts(
+      firstValueFrom(this.employeeService.CreateEmployee(body))
+    );
   }
 
   async update(id: string, body: any) {
     const payload = { ...body, id: parseInt(id) };
-    const [res, dicts]: [any, any] = await Promise.all([
-      firstValueFrom(this.employeeService.UpdateEmployee(payload)).catch(
-        (e: any) => {
-          console.error('RPC Call Failed', e.message);
-          return null;
-        },
-      ),
-      this.fetchDictionaries(),
-    ]);
-
-    if (res && res.data) {
-      res.data = this.enrichEmployee(
-        res.data,
-        dicts.jtMap,
-        dicts.unitMap,
-        dicts.catMap,
-      );
-    }
-    return res;
+    return this.executeWithDicts(
+      firstValueFrom(this.employeeService.UpdateEmployee(payload))
+    );
   }
 
   async delete(id: string) {
     return firstValueFrom(
       this.employeeService.DeleteEmployee({ id: parseInt(id) }),
     ).catch((e: any) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

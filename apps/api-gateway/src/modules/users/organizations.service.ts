@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, BadRequestException, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -45,8 +45,7 @@ export class OrganizationsService implements OnModuleInit {
   async getUnitTypes() {
     const res = (await firstValueFrom(this.orgGrpcService.ListUnitTypes({})).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     return { success: true, data: res.data };
@@ -55,8 +54,7 @@ export class OrganizationsService implements OnModuleInit {
   async getFullTree(user: any) {
     const res = (await firstValueFrom(this.orgGrpcService.GetFullTree({})).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     let nodes = res.nodes || [];
@@ -111,8 +109,7 @@ export class OrganizationsService implements OnModuleInit {
     const res = (await firstValueFrom(
       this.orgGrpcService.GetOrganizations({ q: q || '' }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
 
     let flatList = res.nodes || [];
@@ -149,8 +146,7 @@ export class OrganizationsService implements OnModuleInit {
         unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: res.data };
   }
@@ -162,8 +158,7 @@ export class OrganizationsService implements OnModuleInit {
         domainId: body.domainId,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: result };
   }
@@ -252,8 +247,7 @@ export class OrganizationsService implements OnModuleInit {
   async getSubTree(id: number) {
     const res = (await firstValueFrom(this.orgGrpcService.GetSubTree({ id })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     )) as any;
     return { success: true, data: res.nodes };
@@ -267,8 +261,7 @@ export class OrganizationsService implements OnModuleInit {
         quantity: body.quantity,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: result };
   }
@@ -277,8 +270,7 @@ export class OrganizationsService implements OnModuleInit {
     const res = (await firstValueFrom(
       this.orgGrpcService.GetStaffingReport({ unitId: id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: res.data };
   }
@@ -300,8 +292,7 @@ export class OrganizationsService implements OnModuleInit {
         monitoredUnitIds: body.monitoredUnitIds,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
     return { success: true, data: result };
   }
@@ -315,7 +306,7 @@ export class OrganizationsService implements OnModuleInit {
       const flatList = this.flattenTree(nodes);
       return { success: true, data: flatList };
     } catch (error: any) {
-      return { success: false, data: [], message: error?.message };
+      throw new InternalServerErrorException(error?.message || 'Failed to fetch public org units');
     }
   }
 

@@ -6,6 +6,7 @@
   OnModuleInit,
   Put,
   UseGuards,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -32,8 +33,7 @@ export class ConfigsController implements OnModuleInit {
     const response = (await firstValueFrom(
       this.configService.GetConfigs({}),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return response.configs || [];
   }
@@ -43,8 +43,7 @@ export class ConfigsController implements OnModuleInit {
     @Body() body: { key: string; value: string; description?: string },
   ) {
     return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }

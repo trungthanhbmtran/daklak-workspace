@@ -10,6 +10,7 @@
   OnModuleInit,
   UseGuards,
   Put,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -40,8 +41,7 @@ export class TaskTemplatesController implements OnModuleInit {
     return firstValueFrom(
       this.taskTemplateService.FindTaskTemplates({ classification, rank }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -50,8 +50,7 @@ export class TaskTemplatesController implements OnModuleInit {
     return firstValueFrom(
       this.taskTemplateService.CreateTaskTemplate(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -62,8 +61,7 @@ export class TaskTemplatesController implements OnModuleInit {
         templates: body.templates,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -72,8 +70,7 @@ export class TaskTemplatesController implements OnModuleInit {
     return firstValueFrom(
       this.taskTemplateService.UpdateTaskTemplate({ id: Number(id), ...body }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
@@ -82,8 +79,7 @@ export class TaskTemplatesController implements OnModuleInit {
     return firstValueFrom(
       this.taskTemplateService.DeleteTaskTemplate({ id: Number(id) }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 }
