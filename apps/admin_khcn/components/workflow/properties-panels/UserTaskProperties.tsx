@@ -70,10 +70,10 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
 
       <Accordion type="multiple" className="w-full mt-4 space-y-2">
         <AccordionItem value="advanced" className="border-none">
-          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cấu hình nâng cao (Quyền, UI, Phân công)</span>
+          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-muted py-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Cấu hình nâng cao (Quyền, UI, Phân công)</span>
           </AccordionTrigger>
-          <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-6">
+          <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-6">
 
             {/* Approval Evidence Configuration */}
             <div className="space-y-4">
@@ -82,7 +82,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                 Phê duyệt & Minh chứng
               </h4>
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <label className="text-sm font-semibold text-foreground">
                   Bắt buộc phê duyệt
                 </label>
                 <Switch
@@ -110,24 +110,24 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
               )}
             </div>
 
-            <div className="border-t border-slate-200 dark:border-slate-800" />
+            <div className="border-t border-border" />
 
 
 
             {/* Target Status & Assignment */}
             <div className="space-y-4">
-              <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Chuyển trạng thái & Phân công</h4>
+              <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Chuyển trạng thái & Phân công</h4>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Trạng thái mục tiêu</label>
-                <Input name="targetStatus" value={data.targetStatus || ""} onChange={handleChange} className="w-full text-sm bg-white" placeholder="VD: IN_PROGRESS" />
+                <Input name="targetStatus" value={data.targetStatus || ""} onChange={handleChange} className="w-full text-sm bg-background" placeholder="VD: IN_PROGRESS" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Giao trực tiếp cho nhân sự (Mã NV)</label>
-                <Input name="employeeCode" value={data.employeeCode || ""} onChange={handleChange} className="w-full text-sm bg-white" placeholder="VD: NV001" />
+                <Input name="employeeCode" value={data.employeeCode || ""} onChange={handleChange} className="w-full text-sm bg-background" placeholder="VD: NV001" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Chiến lược phân công tự động (PBAC)</label>
-                <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange} className="w-full text-sm bg-white">
+                <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange} className="w-full text-sm bg-background">
                   <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
                   <NativeSelectOption value="BY_DOMAIN">Theo Lĩnh vực phụ trách</NativeSelectOption>
                   <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
@@ -138,12 +138,12 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
               </div>
             </div>
 
-            <div className="border-t border-slate-200 dark:border-slate-800" />
+            <div className="border-t border-border" />
 
             {/* Dynamic Permissions Configuration */}
             <div className="space-y-3">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Quyền thao tác tuỳ biến</h4>
+                <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Quyền thao tác tuỳ biến</h4>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -168,7 +168,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
 
               <div className="space-y-3">
                 {Object.entries(data.permissions || {}).map(([action, roles]) => (
-                  <div key={action} className="flex flex-col gap-1.5 p-2 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
+                  <div key={action} className="flex flex-col gap-1.5 p-2 bg-background rounded-lg border border-border">
                     <div className="flex items-start gap-2">
                       <div className="flex-1 flex flex-col gap-2">
                         <Input
@@ -187,7 +187,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                             }
                             onUpdate(selectedNode.id, { ...data, permissions: updatedPerms });
                           }}
-                          className="h-7 text-xs font-bold font-mono w-[130px] bg-slate-100 dark:bg-slate-900 border-none px-2"
+                          className="h-7 text-xs font-bold font-mono w-[130px] bg-muted border-none px-2"
                           placeholder="ACTION"
                         />
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -211,7 +211,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                           ))}
                           <div className="flex items-center gap-1">
                             <select
-                              className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300"
+                              className="h-6 text-[10px] bg-muted border border-border rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-foreground"
                               value={activeRoleGroups[action] || ""}
                               onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
                             >
@@ -223,7 +223,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
 
                             {activeRoleGroups[action] && (
                               <select
-                                className="h-6 text-[10px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-slate-600 dark:text-slate-300 max-w-[120px]"
+                                className="h-6 text-[10px] bg-muted border border-border rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-foreground max-w-[120px]"
                                 onChange={(e) => {
                                   const role = e.target.value;
                                   if (!role) return;
@@ -256,7 +256,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"
+                        className="h-6 w-6 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded"
                         onClick={() => {
                           const newPerms = { ...data.permissions };
                           delete newPerms[action];
@@ -275,7 +275,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                   </div>
                 ))}
                 {(!data.permissions || Object.keys(data.permissions).length === 0) && (
-                  <p className="text-[10px] text-slate-400 text-center py-2">
+                  <p className="text-[10px] text-muted-foreground text-center py-2">
                     Sử dụng quyền hệ thống mặc định.
                   </p>
                 )}
@@ -286,21 +286,21 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
         </AccordionItem>
 
         <AccordionItem value="dev-advanced" className="border-none">
-          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Lập trình mở rộng (IT Only)</span>
+          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-muted py-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Lập trình mở rộng (IT Only)</span>
           </AccordionTrigger>
-          <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-4">
+          <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-muted-foreground uppercase">Bật Notification (Hệ thống cũ)</label>
               <Switch checked={data.sendNotification || false} onCheckedChange={(c) => handleChange({ target: { name: 'sendNotification', value: c } } as any)} />
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Biểu mẫu động (Form Schema)</label>
-              <Textarea name="formSchema" value={data.formSchema || ""} onChange={handleChange} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-mono min-h-[100px]" placeholder='[{ "name": "lyDo", "label": "Lý do", "type": "textarea" }]' spellCheck={false} />
+              <Textarea name="formSchema" value={data.formSchema || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl p-3 text-sm font-mono min-h-[100px]" placeholder='[{ "name": "lyDo", "label": "Lý do", "type": "textarea" }]' spellCheck={false} />
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Hành động phụ (Side Effects)</label>
-              <Textarea name="sideEffects" value={data.sideEffects || ""} onChange={handleChange} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-mono min-h-[80px]" placeholder='[{ "type": "WEBHOOK", "url": "..." }]' spellCheck={false} />
+              <Textarea name="sideEffects" value={data.sideEffects || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl p-3 text-sm font-mono min-h-[80px]" placeholder='[{ "type": "WEBHOOK", "url": "..." }]' spellCheck={false} />
             </div>
           </AccordionContent>
         </AccordionItem>

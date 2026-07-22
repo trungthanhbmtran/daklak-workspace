@@ -69,12 +69,12 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
         <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
           Bộ tạo điều kiện (Visual Rule Builder)
         </label>
-        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 space-y-3">
+        <div className="bg-muted border border-border rounded-lg p-3 space-y-3">
           <div className="flex gap-2">
             <NativeSelect
               value={field}
               onChange={(e) => { setField(e.target.value); updateExpression(e.target.value, operator, value); }}
-              className="w-1/3 bg-white"
+              className="w-1/3 bg-background"
             >
               <NativeSelectOption value="">-- Chọn biến --</NativeSelectOption>
               <NativeSelectOption value="actionName">Hành động (actionName)</NativeSelectOption>
@@ -85,7 +85,7 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
             <NativeSelect
               value={operator}
               onChange={(e) => { setOperator(e.target.value); updateExpression(field, e.target.value, value); }}
-              className="w-1/4 bg-white"
+              className="w-1/4 bg-background"
             >
               <NativeSelectOption value="===">Bằng</NativeSelectOption>
               <NativeSelectOption value="!==">Khác</NativeSelectOption>
@@ -97,7 +97,7 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
               value={value}
               onChange={(e) => { setValue(e.target.value); updateExpression(field, operator, e.target.value); }}
               placeholder="VD: UNASSIGNED"
-              className="w-5/12 bg-white"
+              className="w-5/12 bg-background"
             />
           </div>
           <p className="text-[10px] text-muted-foreground">
@@ -108,19 +108,19 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
       
       <Accordion type="single" collapsible className="w-full mt-4">
         <AccordionItem value="advanced" className="border-none">
-          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 py-2">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mã điều kiện (Dành cho IT)</span>
+          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-muted py-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Mã điều kiện (Dành cho IT)</span>
           </AccordionTrigger>
-          <AccordionContent className="p-4 rounded-b-xl bg-slate-50/50 border border-t-0 space-y-4">
+          <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-4">
             <div className="relative group">
-              <div className="absolute left-3 top-3.5 text-slate-400">
-                <span className="font-mono text-xs font-bold bg-slate-100 px-1 py-0.5 rounded">fx</span>
+              <div className="absolute left-3 top-3.5 text-muted-foreground">
+                <span className="font-mono text-xs font-bold bg-muted px-1 py-0.5 rounded">fx</span>
               </div>
               <Textarea
                 name="expression"
                 value={(edgeData.expression as string) || ""}
                 onChange={handleChange}
-                className="w-full bg-white border border-slate-200 rounded-xl p-3 pl-12 text-sm font-mono min-h-[80px]"
+                className="w-full bg-background border border-border rounded-xl p-3 pl-12 text-sm font-mono min-h-[80px]"
                 placeholder="actionName === 'APPROVE'"
                 spellCheck={false}
               />

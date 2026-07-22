@@ -63,6 +63,7 @@ model ProcessInstance {
   tasks       WorkflowTask[]
   transitions WorkflowTransition[]
   events      WorkflowEvent[]
+  messages    WorkflowMessage[]
 
   @@index([organizationId, status])
   @@index([businessKey])
@@ -83,6 +84,7 @@ model WorkflowTask {
   completedAt  DateTime? @map("completed_at")
 
   instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  messages WorkflowMessage[]
 
   @@index([instanceId, status])
   @@index([assigneeId, status])
@@ -121,6 +123,24 @@ model WorkflowEvent {
   @@index([instanceId, status])
   @@index([status, nextRetryAt])
   @@map("workflow_events")
+}
+
+model WorkflowMessage {
+  id          String   @id @default(cuid())
+  instanceId  String   @map("instance_id")
+  taskId      String?  @map("task_id")
+  senderId    String   @map("sender_id")
+  senderName  String   @map("sender_name")
+  content     String   @db.Text
+  attachments Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  task     WorkflowTask?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([instanceId, createdAt])
+  @@index([taskId])
+  @@map("workflow_messages")
 }
 
 // =============================================================================

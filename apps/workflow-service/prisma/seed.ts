@@ -86,6 +86,28 @@ const leaveRequestGraph = {
   ],
 };
 
+const govComplexTaskGraph = {
+  nodes: [
+    { id: 'start_1', type: 'start', position: { x: 250, y: 50 }, data: { label: 'Bắt đầu' } },
+    { id: 'task_assign', type: 'user_task', position: { x: 250, y: 150 }, data: { label: 'Giao việc (Lãnh đạo)', assigneeRole: 'MANAGER', form: { fields: ['taskName', 'description', 'dueDate', 'assigneeId'] } } },
+    { id: 'gateway_accept', type: 'exclusive_gateway', position: { x: 250, y: 250 }, data: { label: 'Tiếp nhận hay Từ chối?' } },
+    { id: 'task_process', type: 'user_task', position: { x: 250, y: 350 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', assigneeRole: 'STAFF', form: { fields: ['reportContent', 'attachments', 'coordinators'] }, multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
+    { id: 'task_evaluate', type: 'user_task', position: { x: 250, y: 450 }, data: { label: 'Nghiệm thu & Chấm KPI', assigneeRole: 'MANAGER', form: { fields: ['isApproved', 'kpiScore', 'managerFeedback'] } } },
+    { id: 'gateway_evaluate', type: 'exclusive_gateway', position: { x: 250, y: 550 }, data: { label: 'Kết quả Nghiệm thu' } },
+    { id: 'end_done', type: 'end', position: { x: 250, y: 650 }, data: { label: 'Hoàn thành' } },
+  ],
+  edges: [
+    { id: 'e_start_assign', source: 'start_1', target: 'task_assign', type: 'custom' },
+    { id: 'e_assign_gw', source: 'task_assign', target: 'gateway_accept', type: 'custom' },
+    { id: 'e_gw_reject', source: 'gateway_accept', target: 'task_assign', type: 'custom', sourceHandle: 'false', data: { condition: 'variables.isAccepted == false' } },
+    { id: 'e_gw_process', source: 'gateway_accept', target: 'task_process', type: 'custom', sourceHandle: 'true', data: { condition: 'variables.isAccepted == true' } },
+    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom' },
+    { id: 'e_eval_gw', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom' },
+    { id: 'e_gweval_reject', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', data: { condition: 'variables.isApproved == false' } },
+    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', data: { condition: 'variables.isApproved == true' } },
+  ],
+};
+
 const processDefinitions = [
   {
     code: 'LEAVE_REQUEST',
@@ -121,6 +143,17 @@ const processDefinitions = [
           { id: 'e_task3_end1', source: 'task_3', target: 'end_1', type: 'custom' },
         ],
       },
+    },
+  },
+  {
+    code: 'GOV_COMPLEX_TASK',
+    name: 'Quy trình Quản lý Công việc & KPI (CQNN)',
+    description: 'Quy trình giao việc, tiếp nhận/từ chối, phối hợp xử lý và đánh giá chấm KPI chuẩn cơ quan nhà nước',
+    isActive: true,
+    version: {
+      version: 1,
+      status: 'PUBLISHED',
+      graph: govComplexTaskGraph,
     },
   },
 ];

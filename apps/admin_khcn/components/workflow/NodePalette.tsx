@@ -9,14 +9,14 @@ import {
 import { cn } from "@/lib/utils";
 
 const NODE_TYPES = [
-  { type: "start", label: "Bắt đầu", icon: Play, color: "text-emerald-500", bgColor: "bg-emerald-50" },
-  { type: "user_task", label: "Bước xử lý", icon: UserCheck, color: "text-blue-500", bgColor: "bg-blue-50" },
-  { type: "exclusive_gateway", label: "Điều kiện rẽ nhánh", icon: Split, color: "text-orange-500", bgColor: "bg-orange-50" },
+  { type: "start", label: "Bắt đầu", icon: Play, color: "text-primary", bgColor: "bg-primary/10" },
+  { type: "user_task", label: "Bước xử lý", icon: UserCheck, color: "text-primary", bgColor: "bg-primary/10" },
+  { type: "exclusive_gateway", label: "Điều kiện rẽ nhánh", icon: Split, color: "text-destructive", bgColor: "bg-destructive/10" },
   // Ẩn các Node nâng cao để đơn giản hóa giao diện
-  // { type: "parallel_gateway", label: "Parallel Gateway", icon: Split, color: "text-orange-500", bgColor: "bg-orange-50" },
+  // { type: "parallel_gateway", label: "Parallel Gateway", icon: Split, color: "text-destructive", bgColor: "bg-destructive/10" },
   // { type: "service_task", label: "Action", icon: Zap, color: "text-violet-500", bgColor: "bg-violet-50" },
   // { type: "script_task", label: "Script Task", icon: Zap, color: "text-purple-500", bgColor: "bg-purple-50" },
-  { type: "end", label: "Kết thúc", icon: CircleStop, color: "text-rose-500", bgColor: "bg-rose-50" },
+  { type: "end", label: "Kết thúc", icon: CircleStop, color: "text-muted-foreground", bgColor: "bg-muted" },
 ];
 
 import { Button } from "@/components/ui/button";
