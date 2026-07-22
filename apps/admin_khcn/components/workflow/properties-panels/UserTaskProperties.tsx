@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Trash2 } from "lucide-react";
+import { Plus, X, Trash2, GripVertical } from "lucide-react";
 import { PropertiesPanelComponentProps } from "./types";
 
 const TASK_PARTICIPANT_ROLES = [
@@ -19,6 +19,50 @@ const TASK_PARTICIPANT_ROLES = [
 
 export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate, taskRoles = [], orgRoles = [] }: PropertiesPanelComponentProps) => {
   const [activeRoleGroups, setActiveRoleGroups] = useState<Record<string, string>>({});
+  
+  // State for Form Builder
+  const [formFields, setFormFields] = useState<any[]>([]);
+  // State for Side Effects Builder
+  const [sideEffects, setSideEffects] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (data.formSchema) {
+      try {
+        const parsed = typeof data.formSchema === 'string' ? JSON.parse(data.formSchema) : data.formSchema;
+        setFormFields(Array.isArray(parsed) ? parsed : []);
+      } catch (e) {
+        setFormFields([]);
+      }
+    }
+    if (data.sideEffects) {
+      try {
+        const parsed = typeof data.sideEffects === 'string' ? JSON.parse(data.sideEffects) : data.sideEffects;
+        setSideEffects(Array.isArray(parsed) ? parsed : []);
+      } catch (e) {
+        setSideEffects([]);
+      }
+    }
+  }, [data.formSchema, data.sideEffects]);
+
+  const updateFormFields = (newFields: any[]) => {
+    setFormFields(newFields);
+    if (selectedNode && onUpdate) {
+      onUpdate(selectedNode.id, {
+        ...data,
+        formSchema: JSON.stringify(newFields, null, 2)
+      });
+    }
+  };
+
+  const updateSideEffects = (newEffects: any[]) => {
+    setSideEffects(newEffects);
+    if (selectedNode && onUpdate) {
+      onUpdate(selectedNode.id, {
+        ...data,
+        sideEffects: JSON.stringify(newEffects, null, 2)
+      });
+    }
+  };
 
   if (!selectedNode || !onUpdate) return null;
 
@@ -69,15 +113,71 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
       </div>
 
       <Accordion type="multiple" className="w-full mt-4 space-y-2">
+        
+        {/* FORM BUILDER */}
+        <AccordionItem value="form-builder" className="border-none">
+          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border hover:bg-muted py-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Form Builder (Tạo biểu mẫu)</span>
+          </AccordionTrigger>
+          <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground">Thêm các trường dữ liệu cần nhập.</span>
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary hover:bg-primary/10" onClick={() => updateFormFields([...formFields, { id: Math.random().toString(36).substring(7), name: "", label: "", type: "text" }])}>
+                <Plus className="h-3 w-3 mr-1" /> Thêm Field
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              {formFields.length === 0 && (
+                <p className="text-[10px] text-center text-muted-foreground py-2 border border-dashed border-border rounded-lg">Chưa có trường dữ liệu nào.</p>
+              )}
+              {formFields.map((field, idx) => (
+                <div key={field.id || idx} className="bg-background border border-border rounded-lg p-3 flex flex-col gap-2 relative group">
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 cursor-grab" />
+                    <Input 
+                      placeholder="Mã biến (VD: reason)" 
+                      value={field.name} 
+                      onChange={(e) => updateFormFields(formFields.map((f, i) => i === idx ? { ...f, name: e.target.value } : f))}
+                      className="h-7 text-xs font-mono"
+                    />
+                    <Button variant="ghost" size="icon" onClick={() => updateFormFields(formFields.filter((_, i) => i !== idx))} className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2 pl-6">
+                    <Input 
+                      placeholder="Tên hiển thị (VD: Lý do)" 
+                      value={field.label} 
+                      onChange={(e) => updateFormFields(formFields.map((f, i) => i === idx ? { ...f, label: e.target.value } : f))}
+                      className="h-7 text-xs flex-1"
+                    />
+                    <NativeSelect 
+                      value={field.type} 
+                      onChange={(e) => updateFormFields(formFields.map((f, i) => i === idx ? { ...f, type: e.target.value } : f))}
+                      className="h-7 text-xs w-[100px]"
+                    >
+                      <NativeSelectOption value="text">Text</NativeSelectOption>
+                      <NativeSelectOption value="textarea">Textarea</NativeSelectOption>
+                      <NativeSelectOption value="number">Number</NativeSelectOption>
+                      <NativeSelectOption value="date">Date</NativeSelectOption>
+                    </NativeSelect>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
         <AccordionItem value="advanced" className="border-none">
-          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-muted py-2">
+          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-accent hover:text-accent-foreground py-2">
             <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Cấu hình nâng cao (Quyền, UI, Phân công)</span>
           </AccordionTrigger>
           <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-6">
 
             {/* Approval Evidence Configuration */}
             <div className="space-y-4">
-              <h4 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
+              <h4 className="text-[11px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
                 Phê duyệt & Minh chứng
               </h4>
@@ -111,8 +211,6 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
             </div>
 
             <div className="border-t border-border" />
-
-
 
             {/* Target Status & Assignment */}
             <div className="space-y-4">
@@ -256,7 +354,7 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded"
                         onClick={() => {
                           const newPerms = { ...data.permissions };
                           delete newPerms[action];
@@ -286,21 +384,58 @@ export const UserTaskProperties = ({ data, handleChange, selectedNode, onUpdate,
         </AccordionItem>
 
         <AccordionItem value="dev-advanced" className="border-none">
-          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-muted py-2">
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Lập trình mở rộng (IT Only)</span>
+          <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-accent hover:text-accent-foreground py-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Lập trình & API</span>
           </AccordionTrigger>
           <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Bật Notification (Hệ thống cũ)</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Bật Notification</label>
               <Switch checked={data.sendNotification || false} onCheckedChange={(c) => handleChange({ target: { name: 'sendNotification', value: c } } as any)} />
             </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Biểu mẫu động (Form Schema)</label>
-              <Textarea name="formSchema" value={data.formSchema || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl p-3 text-sm font-mono min-h-[100px]" placeholder='[{ "name": "lyDo", "label": "Lý do", "type": "textarea" }]' spellCheck={false} />
+            
+            <div className="border-t border-border pt-4 mt-2">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Hành động phụ (Side Effects)</label>
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary hover:bg-primary/10" onClick={() => updateSideEffects([...sideEffects, { id: Math.random().toString(36).substring(7), type: "WEBHOOK", url: "" }])}>
+                  <Plus className="h-3 w-3 mr-1" /> Thêm API
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {sideEffects.length === 0 && (
+                  <p className="text-[10px] text-center text-muted-foreground py-2 border border-dashed border-border rounded-lg">Chưa có hành động phụ nào.</p>
+                )}
+                {sideEffects.map((effect, idx) => (
+                  <div key={effect.id || idx} className="bg-background border border-border rounded-lg p-3 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <NativeSelect 
+                        value={effect.type} 
+                        onChange={(e) => updateSideEffects(sideEffects.map((f, i) => i === idx ? { ...f, type: e.target.value } : f))}
+                        className="h-7 text-xs w-[120px]"
+                      >
+                        <NativeSelectOption value="WEBHOOK">Webhook (POST)</NativeSelectOption>
+                        <NativeSelectOption value="EVENT">Bắn Event (RabbitMQ)</NativeSelectOption>
+                      </NativeSelect>
+                      <Button variant="ghost" size="icon" onClick={() => updateSideEffects(sideEffects.filter((_, i) => i !== idx))} className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 ml-auto">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <Input 
+                      placeholder={effect.type === 'WEBHOOK' ? "URL Webhook..." : "Tên Event..."} 
+                      value={effect.url || effect.eventName || ""} 
+                      onChange={(e) => {
+                        const key = effect.type === 'WEBHOOK' ? 'url' : 'eventName';
+                        updateSideEffects(sideEffects.map((f, i) => i === idx ? { ...f, [key]: e.target.value } : f))
+                      }}
+                      className="h-7 text-xs font-mono"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Hành động phụ (Side Effects)</label>
-              <Textarea name="sideEffects" value={data.sideEffects || ""} onChange={handleChange} className="w-full bg-background border border-border rounded-xl p-3 text-sm font-mono min-h-[80px]" placeholder='[{ "type": "WEBHOOK", "url": "..." }]' spellCheck={false} />
+            
+            <div className="border-t border-border pt-4 mt-2">
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Mã JSON Form (Readonly)</label>
+              <Textarea value={data.formSchema || ""} readOnly className="w-full bg-background border border-border rounded-xl p-3 text-[10px] font-mono min-h-[60px] text-muted-foreground opacity-70" spellCheck={false} />
             </div>
           </AccordionContent>
         </AccordionItem>
