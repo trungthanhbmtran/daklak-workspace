@@ -126,4 +126,36 @@ export class ApplyModuleGrpcDto {
   @IsString()
   @IsNotEmpty()
   moduleCode: string;
+export class ListWorkflowsGrpcDto {
+  @IsOptional()
+  skip?: number;
+
+  @IsOptional()
+  take?: number;
+
+  @IsString()
+  @IsOptional()
+  search?: string;
 }
+
+export class ListInstancesGrpcDto {
+  @IsOptional()
+  skip?: number;
+
+  @IsOptional()
+  take?: number;
+
+  @IsString()
+  @IsOptional()
+  workflowId?: string;
+
+  @IsString()
+  @IsOptional()
+  status?: string;
+
+  @IsString()
+  @IsOptional()
+  search?: string;
+}
+
+export class EmptyGrpcDto {}

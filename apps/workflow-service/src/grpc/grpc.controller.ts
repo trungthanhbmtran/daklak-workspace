@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
 import {
   CreateWorkflowGrpcDto,
@@ -7,11 +7,15 @@ import {
   UpdateWorkflowGrpcDto,
   PublishWorkflowGrpcDto,
   ApplyModuleGrpcDto,
+  ListWorkflowsGrpcDto,
+  ListInstancesGrpcDto,
+  EmptyGrpcDto,
 } from './dto/workflow.dto';
 import { DefinitionService } from '../definition/definition.service';
 import { ExecutionService } from '../execution/execution.service';
 
 @Controller()
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class GrpcWorkflowController {
   constructor(
     private readonly definitionService: DefinitionService,
@@ -42,7 +46,7 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
-  async listWorkflows(_data: unknown) {
+  async listWorkflows(@Payload() _data: ListWorkflowsGrpcDto) {
     const processes = await this.definitionService.getProcesses();
     return {
       data: processes.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
@@ -78,7 +82,7 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'ListInstances')
-  async listInstances(_data: unknown) {
+  async listInstances(@Payload() _data: ListInstancesGrpcDto) {
     const instances = await this.executionService.getInstances();
     return {
       data: instances.map((i: any) => ({
@@ -94,7 +98,7 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'ListModules')
-  async listModules(_data: unknown) {
+  async listModules(@Payload() _data: EmptyGrpcDto) {
     const processes = await this.definitionService.getProcesses();
     return {
       data: processes.map((p) => ({
