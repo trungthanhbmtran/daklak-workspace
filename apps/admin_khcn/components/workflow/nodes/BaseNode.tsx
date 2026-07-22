@@ -45,7 +45,7 @@ export const BaseNode = ({
           className="h-2 w-2 border-2 border-background ring-2 ring-border"
         />
       )}
-      {type !== "end" && (
+      {type !== "end" && !type.includes("gateway") && (
         <Handle
           type="source"
           position={Position.Right}

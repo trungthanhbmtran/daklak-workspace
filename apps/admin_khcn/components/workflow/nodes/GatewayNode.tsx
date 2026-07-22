@@ -13,6 +13,7 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
       // isConnectable={isConnectable}
       className="border-orange-200/50 hover:border-orange-500/50 shadow-orange-500/5 bg-orange-50/30"
     >
+      {/* Default Target Handle (Left) is handled by BaseNode */}
       <Handle
         type="target"
         position={Position.Top}
@@ -25,6 +26,14 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
       </div>
 
       <Handle
+        id="true"
+        type="source"
+        position={Position.Right}
+        isConnectable={isConnectable}
+        className="w-3 h-3 border-2 border-background bg-orange-500"
+      />
+      <Handle
+        id="false"
         type="source"
         position={Position.Bottom}
         isConnectable={isConnectable}
