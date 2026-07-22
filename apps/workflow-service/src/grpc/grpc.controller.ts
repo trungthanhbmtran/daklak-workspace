@@ -1,6 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload } from '@nestjs/microservices';
-import { CreateWorkflowGrpcDto, StartWorkflowGrpcDto, FindOneWorkflowGrpcDto } from './dto/workflow.dto';
+import {
+  CreateWorkflowGrpcDto,
+  StartWorkflowGrpcDto,
+  FindOneWorkflowGrpcDto,
+  UpdateWorkflowGrpcDto,
+  PublishWorkflowGrpcDto,
+  ApplyModuleGrpcDto,
+} from './dto/workflow.dto';
 import { DefinitionService } from '../definition/definition.service';
 import { ExecutionService } from '../execution/execution.service';
 
@@ -9,7 +16,7 @@ export class GrpcWorkflowController {
   constructor(
     private readonly definitionService: DefinitionService,
     private readonly executionService: ExecutionService,
-  ) {}
+  ) { }
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
   async createWorkflow(@Payload() data: CreateWorkflowGrpcDto) {
@@ -22,6 +29,18 @@ export class GrpcWorkflowController {
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
+  @GrpcMethod('WorkflowService', 'UpdateWorkflow')
+  async updateWorkflow(@Payload() data: UpdateWorkflowGrpcDto) {
+    const result = await this.definitionService.updateProcess(data.id, data);
+    return this.mapToWorkflowResponse(result.def, result.version);
+  }
+
+  @GrpcMethod('WorkflowService', 'FindOneWorkflow')
+  async findOneWorkflow(@Payload() data: FindOneWorkflowGrpcDto) {
+    const def = await this.definitionService.getDefinitionById(data.id);
+    return this.mapToWorkflowResponse(def, def.versions[0]);
+  }
+
   @GrpcMethod('WorkflowService', 'ListWorkflows')
   async listWorkflows(_data: unknown) {
     const processes = await this.definitionService.getProcesses();
@@ -31,24 +50,20 @@ export class GrpcWorkflowController {
     };
   }
 
-  @GrpcMethod('WorkflowService', 'FindOneWorkflow')
-  async findOneWorkflow(@Payload() data: FindOneWorkflowGrpcDto) {
-    const def = await this.definitionService.getDefinitionById(data.id);
-    return this.mapToWorkflowResponse(def, def.versions[0]);
+  @GrpcMethod('WorkflowService', 'PublishWorkflow')
+  async publishWorkflow(@Payload() data: PublishWorkflowGrpcDto) {
+    const result = await this.definitionService.publishProcess(data.id);
+    return this.mapToWorkflowResponse(result.def, result.version);
   }
 
-  @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(@Payload() data: any) {
-    // Basic implementation to avoid UNIMPLEMENTED errors
-    const def = await this.definitionService.getDefinitionById(data.id);
-    return this.mapToWorkflowResponse(def, def.versions[0]);
+  @GrpcMethod('WorkflowService', 'ApplyModule')
+  async applyModule(@Payload() data: ApplyModuleGrpcDto) {
+    const result = await this.definitionService.applyModule(data.id, data.moduleCode);
+    return this.mapToWorkflowResponse(result.def, result.version);
   }
-
-
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(@Payload() data: StartWorkflowGrpcDto) {
-    // workflowId in new schema is definition code
     const instance = await this.executionService.startProcess(data.workflowId, {
       variables: data.initialContext,
       startedBy: data.initiatorId,
@@ -77,6 +92,7 @@ export class GrpcWorkflowController {
       meta: { total: instances.length },
     };
   }
+
   @GrpcMethod('WorkflowService', 'ListModules')
   async listModules(_data: unknown) {
     const processes = await this.definitionService.getProcesses();
@@ -90,19 +106,6 @@ export class GrpcWorkflowController {
       })),
     };
   }
-
-  @GrpcMethod('WorkflowService', 'PublishWorkflow')
-  async publishWorkflow(@Payload() data: { id: string }) {
-    const def = await this.definitionService.getDefinitionById(data.id);
-    return this.mapToWorkflowResponse(def, def.versions[0]);
-  }
-
-  @GrpcMethod('WorkflowService', 'ApplyModule')
-  async applyModule(@Payload() data: { id: string; moduleCode: string }) {
-    const def = await this.definitionService.getDefinitionById(data.id);
-    return this.mapToWorkflowResponse(def, def.versions[0]);
-  }
-
 
   private mapToWorkflowResponse(def: any, version: any) {
     if (!def) return {};

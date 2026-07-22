@@ -87,3 +87,43 @@ export class FindOneWorkflowGrpcDto {
   @IsNotEmpty()
   id: string;
 }
+
+export class UpdateWorkflowGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  @IsString()
+  @IsOptional()
+  code?: string;
+
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsObject()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WorkflowDefinitionDto)
+  definition?: WorkflowDefinitionDto;
+}
+
+export class PublishWorkflowGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+}
+
+export class ApplyModuleGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  moduleCode: string;
+}

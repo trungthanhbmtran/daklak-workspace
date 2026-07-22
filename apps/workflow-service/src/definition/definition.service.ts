@@ -8,6 +8,13 @@ export interface CreateDefinitionDto {
   graph: any;
 }
 
+export interface UpdateDefinitionDto {
+  code?: string;
+  name?: string;
+  description?: string;
+  graph?: any;
+}
+
 @Injectable()
 export class DefinitionService {
   constructor(private prisma: PrismaService) {}
@@ -27,12 +34,110 @@ export class DefinitionService {
         data: {
           definitionId: def.id,
           version: 1,
-          status: 'PUBLISHED',
-          graph: dto.graph,
+          status: 'DRAFT',
+          graph: dto.graph || {},
         },
       });
 
       return { def, version };
+    });
+  }
+
+  async updateProcess(id: string, dto: UpdateDefinitionDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const def = await tx.processDefinition.findUnique({
+        where: { id },
+        include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
+      });
+
+      if (!def) throw new NotFoundException(`Process definition ${id} not found`);
+
+      const updatedDef = await tx.processDefinition.update({
+        where: { id },
+        data: {
+          code: dto.code ?? def.code,
+          name: dto.name ?? def.name,
+          description: dto.description ?? def.description,
+        },
+      });
+
+      let latestVersion = def.versions[0];
+
+      if (dto.graph) {
+        if (latestVersion && latestVersion.status === 'PUBLISHED') {
+          latestVersion = await tx.processVersion.create({
+            data: {
+              definitionId: id,
+              version: latestVersion.version + 1,
+              status: 'DRAFT',
+              graph: dto.graph,
+            },
+          });
+        } else if (latestVersion) {
+          latestVersion = await tx.processVersion.update({
+            where: { id: latestVersion.id },
+            data: { graph: dto.graph },
+          });
+        } else {
+           latestVersion = await tx.processVersion.create({
+            data: {
+              definitionId: id,
+              version: 1,
+              status: 'DRAFT',
+              graph: dto.graph,
+            },
+          });
+        }
+      }
+
+      return { def: updatedDef, version: latestVersion };
+    });
+  }
+
+  async publishProcess(id: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const def = await tx.processDefinition.findUnique({
+        where: { id },
+        include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
+      });
+      if (!def) throw new NotFoundException(`Process definition ${id} not found`);
+
+      const latestVersion = def.versions[0];
+      if (!latestVersion) throw new NotFoundException(`No versions found for process ${id}`);
+
+      if (latestVersion.status !== 'PUBLISHED') {
+        await tx.processVersion.update({
+          where: { id: latestVersion.id },
+          data: { status: 'PUBLISHED' },
+        });
+        latestVersion.status = 'PUBLISHED';
+      }
+
+      return { def, version: latestVersion };
+    });
+  }
+
+  async applyModule(id: string, moduleCode: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const updatedDef = await tx.processDefinition.update({
+        where: { id },
+        data: { code: moduleCode, isActive: true },
+      });
+      
+      const latestVersion = await tx.processVersion.findFirst({
+        where: { definitionId: id },
+        orderBy: { version: 'desc' },
+      });
+
+      if (latestVersion && latestVersion.status !== 'PUBLISHED') {
+        await tx.processVersion.update({
+          where: { id: latestVersion.id },
+          data: { status: 'PUBLISHED' },
+        });
+        latestVersion.status = 'PUBLISHED';
+      }
+
+      return { def: updatedDef, version: latestVersion };
     });
   }
 
@@ -60,7 +165,7 @@ export class DefinitionService {
     });
 
     if (!def) {
-      throw new NotFoundException(`Process definition code ${code} not found`);
+      throw new NotFoundException(`Process definition ${code} not found`);
     }
 
     return def;
