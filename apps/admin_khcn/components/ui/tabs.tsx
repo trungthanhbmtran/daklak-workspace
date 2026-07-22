@@ -87,7 +87,7 @@ function TabsTrigger({
       {...props}
     >
       {iconStart && <span className="shrink-0 flex items-center justify-center relative z-10">{iconStart}</span>}
-      <span className="relative z-10 truncate">{children}</span>
+      <span className="relative z-10 flex items-center justify-center whitespace-nowrap">{children}</span>
       {iconEnd && <span className="shrink-0 flex items-center justify-center relative z-10">{iconEnd}</span>}
     </TabsPrimitive.Trigger>
   )
