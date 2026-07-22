@@ -60,7 +60,25 @@ export class DefinitionService {
     });
 
     if (!def) {
-      throw new NotFoundException(`Process definition ${code} not found`);
+      throw new NotFoundException(`Process definition code ${code} not found`);
+    }
+
+    return def;
+  }
+
+  async getDefinitionById(id: string) {
+    const def = await this.prisma.processDefinition.findUnique({
+      where: { id },
+      include: {
+        versions: {
+          orderBy: { version: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!def) {
+      throw new NotFoundException(`Process definition id ${id} not found`);
     }
 
     return def;
