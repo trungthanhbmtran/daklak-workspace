@@ -74,7 +74,7 @@ export class WorkflowService implements OnModuleInit {
     const payload = {
       name: body.name,
       description: body.description,
-      code: body.trigger || body.code,
+      code: body.code,
       definition: body.definition || {},
     };
     const result = (await firstValueFrom(
@@ -91,7 +91,7 @@ export class WorkflowService implements OnModuleInit {
       id,
       name: body.name,
       description: body.description,
-      code: body.trigger || body.code,
+      code: body.code,
       definition: body.definition || {},
     };
 
@@ -168,51 +168,6 @@ export class WorkflowService implements OnModuleInit {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
     return { success: true, data: response?.logs || [], message: 'OK' };
-  }
-
-  async listIntegrations(search?: string) {
-    const result = (await firstValueFrom(
-      this.workflowGrpcService.FindAllIntegrations({ search: search || '' }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
-    return { success: true, data: result?.data || [], message: 'OK' };
-  }
-
-  async createIntegration(body: any) {
-    const result = (await firstValueFrom(
-      this.workflowGrpcService.CreateIntegration(body),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
-    return { success: !!result, data: result, message: 'Created successfully' };
-  }
-
-  async getIntegration(id: string) {
-    const result = (await firstValueFrom(
-      this.workflowGrpcService.FindOneIntegration({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
-    return { success: !!result, data: result, message: 'OK' };
-  }
-
-  async updateIntegration(id: string, body: any) {
-    const result = (await firstValueFrom(
-      this.workflowGrpcService.UpdateIntegration({ ...body, id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
-    return { success: !!result, data: result, message: 'Updated successfully' };
-  }
-
-  async deleteIntegration(id: string) {
-    const result = (await firstValueFrom(
-      this.workflowGrpcService.DeleteIntegration({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
-    return { success: result?.success || true, data: null, message: 'Deleted successfully' };
   }
 
   async findOne(id: string) {

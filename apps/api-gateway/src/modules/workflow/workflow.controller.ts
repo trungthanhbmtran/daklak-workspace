@@ -18,9 +18,7 @@ import {
   UpdateWorkflowDto, 
   StartWorkflowDto,
   ResumeWorkflowDto,
-  ApplyModuleDto,
-  CreateIntegrationDto,
-  UpdateIntegrationDto
+  ApplyModuleDto
 } from './dto/workflow.dto';
 import { WorkflowService } from './workflow.service';
 
@@ -117,38 +115,6 @@ export class WorkflowController {
   @ApiOperation({ summary: 'Lịch sử thực thi của workflow instance' })
   async getLogs(@Param('instanceId') instanceId: string) {
     return this.workflowService.getLogs(instanceId);
-  }
-
-  // --- API Integrations ---
-
-  @Get('integrations')
-  @ApiOperation({ summary: 'Lấy danh sách các kết nối API' })
-  async listIntegrations(@Query('search') search?: string) {
-    return this.workflowService.listIntegrations(search);
-  }
-
-  @Post('integrations')
-  @ApiOperation({ summary: 'Tạo cấu hình kết nối API' })
-  async createIntegration(@Body() body: CreateIntegrationDto) {
-    return this.workflowService.createIntegration(body);
-  }
-
-  @Get('integrations/:id')
-  @ApiOperation({ summary: 'Lấy cấu hình kết nối API theo ID' })
-  async getIntegration(@Param('id') id: string) {
-    return this.workflowService.getIntegration(id);
-  }
-
-  @Put('integrations/:id')
-  @ApiOperation({ summary: 'Cập nhật cấu hình kết nối API' })
-  async updateIntegration(@Param('id') id: string, @Body() body: UpdateIntegrationDto) {
-    return this.workflowService.updateIntegration(id, body);
-  }
-
-  @Delete('integrations/:id')
-  @ApiOperation({ summary: 'Xóa kết nối API' })
-  async deleteIntegration(@Param('id') id: string) {
-    return this.workflowService.deleteIntegration(id);
   }
 
   // --- Routes with :id wildcard LAST (prevents shadowing specific routes above) ---

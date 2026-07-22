@@ -75,11 +75,6 @@ export class CreateWorkflowDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  trigger?: string;
-
   @ApiProperty({ required: false, type: WorkflowDefinitionDto })
   @IsObject()
   @IsOptional()
@@ -110,61 +105,3 @@ export class ApplyModuleDto {
   @IsNotEmpty()
   moduleCode: string;
 }
-
-export class CreateIntegrationDto {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  code: string;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @ApiProperty({ required: false, default: 'REST' })
-  @IsString()
-  @IsOptional()
-  protocol?: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  baseUrl: string;
-
-  @ApiProperty({ required: false })
-  @IsString()
-  @IsOptional()
-  authType?: string;
-
-  @ApiProperty({ required: false })
-  @IsObject()
-  @IsOptional()
-  authConfig?: any;
-
-  @ApiProperty({ required: false })
-  @IsObject()
-  @IsOptional()
-  headers?: any;
-
-  @ApiProperty({ required: false })
-  @IsArray()
-  @IsOptional()
-  endpoints?: any[];
-
-  @ApiProperty({ required: false })
-  @IsObject()
-  @IsOptional()
-  metadata?: any;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  isActive?: boolean;
-}
-
-export class UpdateIntegrationDto extends CreateIntegrationDto {}
