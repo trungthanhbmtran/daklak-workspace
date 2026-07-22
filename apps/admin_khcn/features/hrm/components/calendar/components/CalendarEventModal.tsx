@@ -19,13 +19,13 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <CalendarIcon className="w-5 h-5 text-indigo-500" />
+            <CalendarIcon className="w-5 h-5 text-primary" />
             Sự kiện ngày {selectedDayEvents?.day && format(selectedDayEvents.day, "dd/MM/yyyy")}
           </DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-2 mt-4">
           {selectedDayEvents?.events.length === 0 ? (
-            <Text variant="small" className="text-slate-500 italic font-normal">Không có sự kiện nào.</Text>
+            <Text variant="small" className="text-muted-foreground italic font-normal">Không có sự kiện nào.</Text>
           ) : (
             selectedDayEvents?.events.map((evt) => (
               <div 

@@ -24,14 +24,16 @@ import dynamic from "next/dynamic";
 import { CalendarHeader, CalendarViewMode } from "./CalendarHeader";
 import { CalendarTabs } from "./CalendarTabs";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 const CalendarGrid = dynamic(
   () => import("./CalendarGrid").then(mod => mod.CalendarGrid), 
-  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center min-h-[500px]"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div> }
+  { ssr: false, loading: () => <Skeleton className="w-full min-h-[500px] rounded-xl" /> }
 );
 
 const CalendarTimeGrid = dynamic(
   () => import("./CalendarTimeGrid").then(mod => mod.CalendarTimeGrid), 
-  { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center min-h-[500px]"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div> }
+  { ssr: false, loading: () => <Skeleton className="w-full min-h-[500px] rounded-xl" /> }
 );
 
 const CalendarEventModal = dynamic(

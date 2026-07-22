@@ -11,6 +11,7 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Video
 import { CalendarTabs } from "./CalendarTabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
+import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
 
 const CalendarEventModal = dynamic(
@@ -209,9 +210,9 @@ export function MobileCalendar() {
         {/* Agenda / Event List */}
         <ScrollArea className="flex-1 bg-muted/30 p-4">
           {isLoading ? (
-            <div className="flex flex-col gap-3 animate-pulse">
+            <div className="flex flex-col gap-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-20 bg-muted rounded-xl w-full border border-border"></div>
+                <Skeleton key={i} className="h-20 w-full rounded-xl" />
               ))}
             </div>
           ) : todaysEvents.length === 0 ? (
