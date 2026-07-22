@@ -61,36 +61,42 @@ export class DefinitionService {
         },
       });
 
-      let latestVersion = def.versions[0];
-
-      if (dto.graph) {
-        if (latestVersion && latestVersion.status === 'PUBLISHED') {
-          latestVersion = await tx.processVersion.create({
-            data: {
-              definitionId: id,
-              version: latestVersion.version + 1,
-              status: 'DRAFT',
-              graph: dto.graph,
-            },
-          });
-        } else if (latestVersion) {
-          latestVersion = await tx.processVersion.update({
-            where: { id: latestVersion.id },
-            data: { graph: dto.graph },
-          });
-        } else {
-           latestVersion = await tx.processVersion.create({
-            data: {
-              definitionId: id,
-              version: 1,
-              status: 'DRAFT',
-              graph: dto.graph,
-            },
-          });
-        }
+      if (!dto.graph) {
+        return { def: updatedDef, version: def.versions[0] };
       }
 
-      return { def: updatedDef, version: latestVersion };
+      const latestVersion = def.versions[0];
+
+      if (!latestVersion) {
+        const newVersion = await tx.processVersion.create({
+          data: {
+            definitionId: id,
+            version: 1,
+            status: 'DRAFT',
+            graph: dto.graph,
+          },
+        });
+        return { def: updatedDef, version: newVersion };
+      }
+
+      if (latestVersion.status === 'PUBLISHED') {
+        const newVersion = await tx.processVersion.create({
+          data: {
+            definitionId: id,
+            version: latestVersion.version + 1,
+            status: 'DRAFT',
+            graph: dto.graph,
+          },
+        });
+        return { def: updatedDef, version: newVersion };
+      }
+
+      const updatedVersion = await tx.processVersion.update({
+        where: { id: latestVersion.id },
+        data: { graph: dto.graph },
+      });
+
+      return { def: updatedDef, version: updatedVersion };
     });
   }
 
@@ -105,13 +111,15 @@ export class DefinitionService {
       const latestVersion = def.versions[0];
       if (!latestVersion) throw new NotFoundException(`No versions found for process ${id}`);
 
-      if (latestVersion.status !== 'PUBLISHED') {
-        await tx.processVersion.update({
-          where: { id: latestVersion.id },
-          data: { status: 'PUBLISHED' },
-        });
-        latestVersion.status = 'PUBLISHED';
+      if (latestVersion.status === 'PUBLISHED') {
+        return { def, version: latestVersion };
       }
+
+      await tx.processVersion.update({
+        where: { id: latestVersion.id },
+        data: { status: 'PUBLISHED' },
+      });
+      latestVersion.status = 'PUBLISHED';
 
       return { def, version: latestVersion };
     });
@@ -129,13 +137,15 @@ export class DefinitionService {
         orderBy: { version: 'desc' },
       });
 
-      if (latestVersion && latestVersion.status !== 'PUBLISHED') {
-        await tx.processVersion.update({
-          where: { id: latestVersion.id },
-          data: { status: 'PUBLISHED' },
-        });
-        latestVersion.status = 'PUBLISHED';
+      if (!latestVersion || latestVersion.status === 'PUBLISHED') {
+        return { def: updatedDef, version: latestVersion };
       }
+
+      await tx.processVersion.update({
+        where: { id: latestVersion.id },
+        data: { status: 'PUBLISHED' },
+      });
+      latestVersion.status = 'PUBLISHED';
 
       return { def: updatedDef, version: latestVersion };
     });
