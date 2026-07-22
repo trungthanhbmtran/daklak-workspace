@@ -23,6 +23,7 @@ CREATE TABLE `employees` (
     `start_date` DATE NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
 
     UNIQUE INDEX `employees_employee_code_key`(`employee_code`),
     PRIMARY KEY (`id`)
@@ -170,6 +171,7 @@ CREATE TABLE `master_plans` (
     `department_id` INTEGER NULL,
     `created_by_code` VARCHAR(191) NULL,
     `document_id` VARCHAR(191) NULL,
+    `workflow_code` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -189,6 +191,7 @@ CREATE TABLE `tasks` (
     `start_date` DATE NULL,
     `due_date` DATE NULL,
     `completed_at` DATETIME(3) NULL,
+    `is_completed` BOOLEAN NOT NULL DEFAULT false,
     `is_deadline_warned` BOOLEAN NOT NULL DEFAULT false,
     `is_risk_warned` BOOLEAN NOT NULL DEFAULT false,
     `domain_id` INTEGER NULL,
@@ -199,12 +202,32 @@ CREATE TABLE `tasks` (
     `creator_employee_code` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
 
     INDEX `tasks_due_date_idx`(`due_date`),
     INDEX `tasks_status_due_date_idx`(`status`, `due_date`),
+    INDEX `tasks_is_completed_due_date_idx`(`is_completed`, `due_date`),
     INDEX `tasks_parent_id_idx`(`parent_id`),
     INDEX `tasks_plan_id_idx`(`plan_id`),
     INDEX `tasks_created_at_idx`(`created_at`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `task_steps` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `task_id` INTEGER NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'TODO',
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `assignee_code` VARCHAR(191) NULL,
+    `base_score` DOUBLE NOT NULL DEFAULT 0,
+    `completed_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
+
+    INDEX `task_steps_task_id_idx`(`task_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -215,6 +238,7 @@ CREATE TABLE `task_attachments` (
     `document_id` VARCHAR(191) NOT NULL,
     `type` VARCHAR(191) NOT NULL DEFAULT 'REFERENCE',
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
 
     INDEX `task_attachments_task_id_idx`(`task_id`),
     PRIMARY KEY (`id`)
@@ -249,6 +273,7 @@ CREATE TABLE `task_comments` (
     `is_system_message` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `is_deleted` BOOLEAN NOT NULL DEFAULT false,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -348,6 +373,9 @@ ALTER TABLE `kpi_evaluation_details` ADD CONSTRAINT `kpi_evaluation_details_crit
 
 -- AddForeignKey
 ALTER TABLE `tasks` ADD CONSTRAINT `tasks_plan_id_fkey` FOREIGN KEY (`plan_id`) REFERENCES `master_plans`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `task_steps` ADD CONSTRAINT `task_steps_task_id_fkey` FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `task_attachments` ADD CONSTRAINT `task_attachments_task_id_fkey` FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
