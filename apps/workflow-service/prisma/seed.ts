@@ -68,60 +68,21 @@ const integrationConnections = [
 
 const leaveRequestGraph = {
   nodes: [
-    {
-      id: 'start_1',
-      type: 'START',
-      name: 'Bắt đầu',
-      next: ['task_1'],
-    },
-    {
-      id: 'task_1',
-      type: 'USER_TASK',
-      name: 'Nhân viên nộp đơn',
-      assigneeRole: 'EMPLOYEE',
-      form: { fields: ['reason', 'startDate', 'endDate', 'leaveDays'] },
-      next: ['task_2'],
-    },
-    {
-      id: 'task_2',
-      type: 'USER_TASK',
-      name: 'Trưởng phòng Duyệt',
-      assigneeRole: 'MANAGER',
-      next: ['gateway_1'],
-    },
-    {
-      id: 'gateway_1',
-      type: 'EXCLUSIVE_GATEWAY',
-      name: 'Kiểm tra Kết quả Duyệt',
-      conditions: [
-        { target: 'integration_1', expression: 'variables.approved == true' },
-        { target: 'end_rejected', expression: 'variables.approved == false' },
-      ],
-    },
-    {
-      id: 'integration_1',
-      type: 'INTEGRATION_CALL',
-      name: 'Đồng bộ nghỉ phép sang HRM',
-      integrationCode: 'LGSP_TINH',
-      endpoint: '/hrm/leave-sync',
-      method: 'POST',
-      bodyMapping: {
-        employeeId: '{{ variables.employeeId }}',
-        startDate: '{{ variables.startDate }}',
-        endDate: '{{ variables.endDate }}',
-      },
-      next: ['end_approved'],
-    },
-    {
-      id: 'end_approved',
-      type: 'END',
-      name: 'Hoàn thành - Đã duyệt',
-    },
-    {
-      id: 'end_rejected',
-      type: 'END',
-      name: 'Hoàn thành - Bị từ chối',
-    },
+    { id: 'start_1', type: 'start', position: { x: 250, y: 50 }, data: { label: 'Bắt đầu' } },
+    { id: 'task_1', type: 'user_task', position: { x: 250, y: 150 }, data: { label: 'Nhân viên nộp đơn', assigneeRole: 'EMPLOYEE', form: { fields: ['reason', 'startDate', 'endDate', 'leaveDays'] } } },
+    { id: 'task_2', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Trưởng phòng Duyệt', assigneeRole: 'MANAGER' } },
+    { id: 'gateway_1', type: 'exclusive_gateway', position: { x: 250, y: 350 }, data: { label: 'Kiểm tra Kết quả Duyệt' } },
+    { id: 'integration_1', type: 'service_task', position: { x: 100, y: 450 }, data: { label: 'Đồng bộ nghỉ phép sang HRM', integrationCode: 'LGSP_TINH', endpoint: '/hrm/leave-sync', method: 'POST', bodyMapping: { employeeId: '{{ variables.employeeId }}', startDate: '{{ variables.startDate }}', endDate: '{{ variables.endDate }}' } } },
+    { id: 'end_approved', type: 'end', position: { x: 100, y: 550 }, data: { label: 'Hoàn thành - Đã duyệt' } },
+    { id: 'end_rejected', type: 'end', position: { x: 400, y: 450 }, data: { label: 'Hoàn thành - Bị từ chối' } },
+  ],
+  edges: [
+    { id: 'e_start1_task1', source: 'start_1', target: 'task_1', type: 'custom' },
+    { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom' },
+    { id: 'e_task2_gateway1', source: 'task_2', target: 'gateway_1', type: 'custom' },
+    { id: 'e_gateway1_integration1', source: 'gateway_1', target: 'integration_1', type: 'custom', sourceHandle: 'true', data: { condition: 'variables.approved == true' } },
+    { id: 'e_gateway1_rejected', source: 'gateway_1', target: 'end_rejected', type: 'custom', sourceHandle: 'false', data: { condition: 'variables.approved == false' } },
+    { id: 'e_integration1_end', source: 'integration_1', target: 'end_approved', type: 'custom' },
   ],
 };
 
@@ -147,11 +108,17 @@ const processDefinitions = [
       status: 'PUBLISHED',
       graph: {
         nodes: [
-          { id: 'start_1', type: 'START', name: 'Bắt đầu', next: ['task_1'] },
-          { id: 'task_1', type: 'USER_TASK', name: 'Soạn thảo văn bản', assigneeRole: 'STAFF', next: ['task_2'] },
-          { id: 'task_2', type: 'USER_TASK', name: 'Trưởng phòng ký duyệt', assigneeRole: 'MANAGER', next: ['task_3'] },
-          { id: 'task_3', type: 'USER_TASK', name: 'Ban Giám đốc ký ban hành', assigneeRole: 'DIRECTOR', next: ['end_1'] },
-          { id: 'end_1', type: 'END', name: 'Văn bản đã ban hành' },
+          { id: 'start_1', type: 'start', position: { x: 250, y: 50 }, data: { label: 'Bắt đầu' } },
+          { id: 'task_1', type: 'user_task', position: { x: 250, y: 150 }, data: { label: 'Soạn thảo văn bản', assigneeRole: 'STAFF' } },
+          { id: 'task_2', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Trưởng phòng ký duyệt', assigneeRole: 'MANAGER' } },
+          { id: 'task_3', type: 'user_task', position: { x: 250, y: 350 }, data: { label: 'Ban Giám đốc ký ban hành', assigneeRole: 'DIRECTOR' } },
+          { id: 'end_1', type: 'end', position: { x: 250, y: 450 }, data: { label: 'Văn bản đã ban hành' } },
+        ],
+        edges: [
+          { id: 'e_start1_task1', source: 'start_1', target: 'task_1', type: 'custom' },
+          { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom' },
+          { id: 'e_task2_task3', source: 'task_2', target: 'task_3', type: 'custom' },
+          { id: 'e_task3_end1', source: 'task_3', target: 'end_1', type: 'custom' },
         ],
       },
     },
