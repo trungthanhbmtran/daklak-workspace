@@ -64,6 +64,7 @@ export const CalendarHeader = React.memo(function CalendarHeader({
           ].map((mode) => (
             <Button
               key={mode.id}
+              variant="ghost"
               onClick={() => setViewMode(mode.id as CalendarViewMode)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                 viewMode === mode.id
