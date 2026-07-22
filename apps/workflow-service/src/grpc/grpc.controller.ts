@@ -22,14 +22,6 @@ export class GrpcWorkflowController {
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
-  @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(_data: unknown) {
-    // In our new schema, Update might mean creating a new version or updating definition
-    // For simplicity, we just create a new process if code doesn't exist, or fail
-    // We should implement an update method in DefinitionService if needed.
-    return { success: true };
-  }
-
   @GrpcMethod('WorkflowService', 'ListWorkflows')
   async listWorkflows(_data: unknown) {
     const processes = await this.definitionService.getProcesses();
@@ -39,12 +31,7 @@ export class GrpcWorkflowController {
     };
   }
 
-  @GrpcMethod('WorkflowService', 'FindOneWorkflow')
-  async findOneWorkflow(@Payload() data: FindOneWorkflowGrpcDto) {
-    // Note: getDefinition uses 'code', while proto uses 'id'.
-    // Need to adjust logic in Gateway or here to search by ID or Code.
-    return { success: true };
-  }
+
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(@Payload() data: StartWorkflowGrpcDto) {
@@ -77,6 +64,20 @@ export class GrpcWorkflowController {
       meta: { total: instances.length },
     };
   }
+  @GrpcMethod('WorkflowService', 'ListModules')
+  async listModules(_data: unknown) {
+    const processes = await this.definitionService.getProcesses();
+    return {
+      data: processes.map((p) => ({
+        id: p.id,
+        code: p.code,
+        name: p.name,
+        description: p.description,
+        updatedAt: p.updatedAt?.toISOString() || new Date().toISOString(),
+      })),
+    };
+  }
+
 
   private mapToWorkflowResponse(def: any, version: any) {
     if (!def) return {};
