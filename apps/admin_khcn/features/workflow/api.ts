@@ -1,9 +1,53 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
 
+export interface Position {
+  x?: number;
+  y?: number;
+}
+
+export interface Measured {
+  width?: number;
+  height?: number;
+}
+
+export interface WorkflowNode {
+  id: string;
+  nodeKey?: string;
+  type?: string;
+  name?: string;
+  propertiesJson?: string;
+  
+  // React Flow Properties
+  position?: Position;
+  data?: Record<string, any>;
+  width?: number;
+  height?: number;
+  selected?: boolean;
+  positionAbsolute?: Position;
+  dragging?: boolean;
+  measured?: Measured;
+}
+
+export interface WorkflowEdge {
+  id: string;
+  sourceNodeId?: string;
+  targetNodeId?: string;
+  
+  // React Flow Properties
+  source?: string;
+  target?: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  animated?: boolean;
+  label?: string;
+  data?: Record<string, any>;
+  type?: string;
+}
+
 export interface WorkflowDefinition {
-  nodes: any[];
-  edges: any[];
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
 }
 
 export interface Workflow {
