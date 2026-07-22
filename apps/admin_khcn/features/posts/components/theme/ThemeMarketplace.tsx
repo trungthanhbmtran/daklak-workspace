@@ -1,3 +1,181 @@
-"use client"; import React, { useState } from"react"; import Image from"next/image"; // Import hook cấu hình hệ thống import { useThemeConfig } from"./ThemeProvider";
-import { Heading, Text } from"@/components/ui/typography";
-import { Button } from"@/components/ui/button"; interface ThemeItem { id: string; name: string; description: string; author: string; version: string; thumbnail: string; isLive: boolean; templateKey: string; // Bổ sung thêm cấu hình mặc định đi kèm của từng mẫu theme để nạp khi kích hoạt defaultConfig: { typography: { heading: string; body: string; size: number }; layout: { radius:"Sharp" |"Subtle" |"Medium" |"Full"; width:"1024" |"1280" |"1536" |"full"; isCompact: boolean }; } } const mockThemes: ThemeItem[] = [ { id:"1", name:"Minimalist Horizon", description:"Giao diện tối giản, tập trung vào trải nghiệm đọc và tốc độ tải trang.", author:"CMS Team", version:"1.2.0", thumbnail:"https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60", isLive: true, templateKey:"blue", defaultConfig: { typography: { heading:"inter", body:"inter", size: 14 }, layout: { radius:"Medium", width:"1280", isCompact: false } } }, { id:"2", name:"MagazinX Pro", description:"Bố cục tạp chí đa cột, hoàn hảo cho các trang tin tức đồ sộ và nhiều media.", author:"StudioDev", version:"2.0.4", thumbnail:"https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=500&auto=format&fit=crop&q=60", isLive: false, templateKey:"violet", defaultConfig: { typography: { heading:"playfair", body:"merriweather", size: 15 }, layout: { radius:"Subtle", width:"1536", isCompact: true } } }, { id:"3", name:"E-Commerce Swift", description:"Tích hợp sẵn bộ lọc sản phẩm, tối ưu tỷ lệ chuyển đổi cho giỏ hàng.", author:"CommerceLab", version:"1.0.1", thumbnail:"https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=500&auto=format&fit=crop&q=60", isLive: false, templateKey:"emerald", defaultConfig: { typography: { heading:"inter", body:"inter", size: 13 }, layout: { radius:"Sharp", width:"full", isCompact: false } } }, ]; export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () => void }) { const [themes, setThemes] = useState<ThemeItem[]>(mockThemes); const [notification, setNotification] = useState<string | null>(null); // Lấy các hàm cập nhật cấu hình toàn cục từ ThemeProvider const { setTemplate, setTypography, setLayout, saveTheme } = useThemeConfig(); // SỬA LẠI HÀM KÍCH HOẠT CHUẨN CMS const handleActivate = async (selectedTheme: ThemeItem) => { // 1. Cập nhật UI trạng thái"Đang kích hoạt" trong kho theme mẫu setThemes(themes.map(t => ({ ...t, isLive: t.id === selectedTheme.id }))); // 2. Đồng bộ nạp toàn bộ Color, Typography, Layout mặc định của Theme đó vào hệ thống setTemplate(selectedTheme.templateKey); setTypography(selectedTheme.defaultConfig.typography); setLayout(selectedTheme.defaultConfig.layout); // 3. Gọi hàm lưu thẳng xuống Cơ sở dữ liệu/API (Môi trường Live) try { await saveTheme(); // Hiển thị thông báo Toast thành công setNotification(`Đã kích hoạt thành công giao diện"${selectedTheme.name}"!`); setTimeout(() => setNotification(null), 4000); } catch (error) { console.error("Lỗi kích hoạt theme:", error); } }; const handleCustomize = (templateKey: string) => { setTemplate(templateKey); onCustomizeClick(); }; return ( <div className="space-y-6 relative"> {/* TOAST NOTIFICATION (Thông báo nổi góc màn hình khi kích hoạt thành công) */} {notification && ( <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-white dark:text-foreground px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-slate-800 dark:border-slate-200 animate-in slide-in-from-bottom-5 duration-300"> <Text as="span" className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> <Text as="span" className="font-medium">{notification}</Text> </div> )} {/* Top Toolbar */} <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-card p-4 rounded-xl border border-border"> <input type="text" placeholder="Tìm kiếm theme đã cài đặt..." className="w-full sm:w-72 px-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" /> <Button className="w-full sm:w-auto px-4 py-1.5 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2"> <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg> Tải lên Theme (.zip) </Button> </div> {/* Grid Thư viện */} <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {themes.map((theme) => ( <div key={theme.id} className={`group relative rounded-xl border bg-card overflow-hidden shadow-sm transition-all ${theme.isLive ? 'ring-2 ring-blue-500 border-transparent' : 'border-border'}`}> {/* Thumbnail */} <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden"> <Image src={theme.thumbnail} alt={theme.name} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-300" /> {theme.isLive && ( <Text as="span" className="absolute top-3 left-3 px-2.5 py-1 font-semibold bg-emerald-500 text-white rounded-full shadow-sm flex items-center gap-1.5"> <Text as="span" className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Đang kích hoạt </Text> )} </div> {/* Content */} <div className="p-5"> <div className="flex justify-between items-start mb-1"> <Heading level="h4" className="font-bold line-clamp-1">{theme.name}</Heading> <Text as="span" className="text-muted-foreground">v{theme.version}</Text> </div> <Text className="text-muted-foreground line-clamp-2 mb-4 min-h-[32px]">{theme.description}</Text> <div className="pt-4 border-t border-border flex items-center justify-between"> <Text as="span" className="text-muted-foreground">Bởi <Text as="span" className="font-medium text-foreground">{theme.author}</Text></Text> <div className="flex gap-2"> <Button onClick={() => handleCustomize(theme.templateKey)} variant="secondary" className="px-3 py-1.5 text-xs font-medium rounded-md transition-colors" > Tùy biến </Button> {/* SỬA TẠI ĐÂY: Truyền toàn bộ object theme vào hàm handleActivate để nạp cấu hình */} {!theme.isLive && ( <Button onClick={() => handleActivate(theme)} className="px-3 py-1.5 text-xs font-medium rounded-md transition-colors" > Kích hoạt </Button> )} </div> </div> </div> </div> ))} </div> </div> ); }
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+// Import hook cấu hình hệ thống
+import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+
+
+interface ThemeItem {
+    id: string;
+    name: string;
+    description: string;
+    author: string;
+    version: string;
+    thumbnail: string;
+    isLive: boolean;
+    templateKey: string;
+    // Bổ sung thêm cấu hình mặc định đi kèm của từng mẫu theme để nạp khi kích hoạt
+    defaultConfig: {
+        typography: { heading: string; body: string; size: number };
+        layout: { radius: "Sharp" | "Subtle" | "Medium" | "Full"; width: "1024" | "1280" | "1536" | "full"; isCompact: boolean };
+    }
+}
+
+const mockThemes: ThemeItem[] = [
+    {
+        id: "1",
+        name: "Minimalist Horizon",
+        description: "Giao diện tối giản, tập trung vào trải nghiệm đọc và tốc độ tải trang.",
+        author: "CMS Team",
+        version: "1.2.0",
+        thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60",
+        isLive: true,
+        templateKey: "blue",
+        defaultConfig: {
+            typography: { heading: "inter", body: "inter", size: 14 },
+            layout: { radius: "Medium", width: "1280", isCompact: false }
+        }
+    },
+    {
+        id: "2",
+        name: "MagazinX Pro",
+        description: "Bố cục tạp chí đa cột, hoàn hảo cho các trang tin tức đồ sộ và nhiều media.",
+        author: "StudioDev",
+        version: "2.0.4",
+        thumbnail: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=500&auto=format&fit=crop&q=60",
+        isLive: false,
+        templateKey: "violet",
+        defaultConfig: {
+            typography: { heading: "playfair", body: "merriweather", size: 15 },
+            layout: { radius: "Subtle", width: "1536", isCompact: true }
+        }
+    },
+    {
+        id: "3",
+        name: "E-Commerce Swift",
+        description: "Tích hợp sẵn bộ lọc sản phẩm, tối ưu tỷ lệ chuyển đổi cho giỏ hàng.",
+        author: "CommerceLab",
+        version: "1.0.1",
+        thumbnail: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=500&auto=format&fit=crop&q=60",
+        isLive: false,
+        templateKey: "emerald",
+        defaultConfig: {
+            typography: { heading: "inter", body: "inter", size: 13 },
+            layout: { radius: "Sharp", width: "full", isCompact: false }
+        }
+    },
+];
+
+export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () => void }) {
+    const [themes, setThemes] = useState<ThemeItem[]>(mockThemes);
+    const [notification, setNotification] = useState<string | null>(null);
+
+    // Lấy các hàm cập nhật cấu hình toàn cục từ ThemeProvider
+    const { setTemplate, setTypography, setLayout, saveTheme } = useThemeConfig();
+
+    // SỬA LẠI HÀM KÍCH HOẠT CHUẨN CMS
+    const handleActivate = async (selectedTheme: ThemeItem) => {
+        // 1. Cập nhật UI trạng thái "Đang kích hoạt" trong kho theme mẫu
+        setThemes(themes.map(t => ({ ...t, isLive: t.id === selectedTheme.id })));
+
+        // 2. Đồng bộ nạp toàn bộ Color, Typography, Layout mặc định của Theme đó vào hệ thống
+        setTemplate(selectedTheme.templateKey);
+        setTypography(selectedTheme.defaultConfig.typography);
+        setLayout(selectedTheme.defaultConfig.layout);
+
+        // 3. Gọi hàm lưu thẳng xuống Cơ sở dữ liệu/API (Môi trường Live)
+        try {
+            await saveTheme();
+
+            // Hiển thị thông báo Toast thành công
+            setNotification(`Đã kích hoạt thành công giao diện "${selectedTheme.name}"!`);
+            setTimeout(() => setNotification(null), 4000);
+        } catch (error) {
+            console.error("Lỗi kích hoạt theme:", error);
+        }
+    };
+
+    const handleCustomize = (templateKey: string) => {
+        setTemplate(templateKey);
+        onCustomizeClick();
+    };
+
+    return (
+        <div className="space-y-6 relative">
+
+            {/* TOAST NOTIFICATION (Thông báo nổi góc màn hình khi kích hoạt thành công) */}
+            {notification && (
+                <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-white dark:text-foreground px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-slate-800 dark:border-slate-200 animate-in slide-in-from-bottom-5 duration-300">
+                    <Text as="span" className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <Text as="span" className="font-medium">{notification}</Text>
+                </div>
+            )}
+
+            {/* Top Toolbar */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-card p-4 rounded-xl border border-border">
+                <input
+                    type="text"
+                    placeholder="Tìm kiếm theme đã cài đặt..."
+                    className="w-full sm:w-72 px-3 py-1.5 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <Button className="w-full sm:w-auto px-4 py-1.5 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded-lg transition-all flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                    Tải lên Theme (.zip)
+                </Button>
+            </div>
+
+            {/* Grid Thư viện */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {themes.map((theme) => (
+                    <div key={theme.id} className={`group relative rounded-xl border bg-card overflow-hidden shadow-sm transition-all ${theme.isLive ? 'ring-2 ring-blue-500 border-transparent' : 'border-border'}`}>
+
+                        {/* Thumbnail */}
+                        <div className="aspect-video w-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+                            <Image src={theme.thumbnail} alt={theme.name} fill unoptimized className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                            {theme.isLive && (
+                                <Text as="span" className="absolute top-3 left-3 px-2.5 py-1 font-semibold bg-emerald-500 text-white rounded-full shadow-sm flex items-center gap-1.5">
+                                    <Text as="span" className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Đang kích hoạt
+                                </Text>
+                            )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-5">
+                            <div className="flex justify-between items-start mb-1">
+                                <Heading level="h4" className="font-bold line-clamp-1">{theme.name}</Heading>
+                                <Text as="span" className="text-muted-foreground">v{theme.version}</Text>
+                            </div>
+                            <Text className="text-muted-foreground line-clamp-2 mb-4 min-h-[32px]">{theme.description}</Text>
+
+                            <div className="pt-4 border-t border-border flex items-center justify-between">
+                                <Text as="span" className="text-muted-foreground">Bởi <Text as="span" className="font-medium text-foreground">{theme.author}</Text></Text>
+                                <div className="flex gap-2">
+                                    <Button
+                                        onClick={() => handleCustomize(theme.templateKey)}
+                                        className="px-3 py-1.5 text-xs font-medium bg-secondary hover:bg-secondary/80 rounded-md transition-colors"
+                                    >
+                                        Tùy biến
+                                    </Button>
+
+                                    {/* SỬA TẠI ĐÂY: Truyền toàn bộ object theme vào hàm handleActivate để nạp cấu hình */}
+                                    {!theme.isLive && (
+                                        <Button
+                                            onClick={() => handleActivate(theme)}
+                                            className="px-3 py-1.5 text-xs font-medium bg-primary hover:bg-primary/90 text-white rounded-md transition-colors"
+                                        >
+                                            Kích hoạt
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}

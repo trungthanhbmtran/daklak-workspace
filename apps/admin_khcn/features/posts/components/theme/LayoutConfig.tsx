@@ -1,3 +1,76 @@
-"use client"; import { useThemeConfig, LayoutSettings } from"./ThemeProvider";
-import { Text } from"@/components/ui/typography";
-import { Button } from"@/components/ui/button"; export function LayoutConfig() { // Lấy dữ liệu layout và hàm setter từ Context toàn cục const { layout, setLayout } = useThemeConfig(); const radiusOptions: LayoutSettings["radius"][] = ['Sharp', 'Subtle', 'Medium', 'Full']; return ( <div className="space-y-5"> {/* 1. Độ bo góc hệ thống (Border Radius) */} <div> <label className="block text-xs font-medium text-muted-foreground mb-2"> Độ bo góc thành phần (Border Radius) </label> <div className="grid grid-cols-4 gap-2"> {radiusOptions.map((r) => { const isSelected = layout.radius === r; return ( <Button key={r} type="button" onClick={() => setLayout({ radius: r })} className={`py-2 text-xs font-medium border rounded-lg transition-all ${isSelected ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-primary ring-1 ring-blue-500' : 'border-border hover:bg-muted/50 text-foreground' }`} > {r} </Button> ); })} </div> </div> {/* 2. Độ rộng tối đa trang (Max Content Width) */} <div> <label className="block text-xs font-medium text-muted-foreground mb-1.5"> Độ rộng khung nội dung (Max Content Width) </label> <select value={layout.width} onChange={(e) => setLayout({ width: e.target.value as LayoutSettings["width"] })} className="w-full text-sm bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-ring text-foreground" > <option value="1024">Đóng khung nhỏ (1024px)</option> <option value="1280">Tiêu chuẩn CMS (1280px)</option> <option value="1536">Màn hình rộng (1536px)</option> <option value="full">Toàn màn hình (100%)</option> </select> </div> {/* 3. Mật độ hiển thị (Compact Mode) */} <div className="flex items-center justify-between pt-2"> <div> <label className="block text-xs font-bold text-foreground"> Giao diện cô đọng (Compact Mode) </label> <Text className="text-[11px] text-muted-foreground"> Giảm padding của các bảng và danh sách để hiển thị nhiều data hơn. </Text> </div> <input type="checkbox" checked={layout.isCompact} onChange={(e) => setLayout({ isCompact: e.target.checked })} className="w-9 h-5 bg-slate-300 dark:bg-slate-700 rounded-full appearance-none checked:bg-primary cursor-pointer relative before:content-[''] before:absolute before:h-4 before:w-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 before:transition-transform transition-colors" /> </div> </div> ); }
+"use client";
+import { useThemeConfig, LayoutSettings } from "./ThemeProvider";
+import { Text } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+
+
+export function LayoutConfig() {
+    // Lấy dữ liệu layout và hàm setter từ Context toàn cục
+    const { layout, setLayout } = useThemeConfig();
+
+    const radiusOptions: LayoutSettings["radius"][] = ['Sharp', 'Subtle', 'Medium', 'Full'];
+
+    return (
+        <div className="space-y-5">
+            {/* 1. Độ bo góc hệ thống (Border Radius) */}
+            <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
+                    Độ bo góc thành phần (Border Radius)
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                    {radiusOptions.map((r) => {
+                        const isSelected = layout.radius === r;
+                        return (
+                            <Button
+                                key={r}
+                                type="button"
+                                onClick={() => setLayout({ radius: r })}
+                                className={`py-2 text-xs font-medium border rounded-lg transition-all ${isSelected
+                                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-primary ring-1 ring-blue-500'
+                                    : 'border-border hover:bg-muted/50 text-foreground'
+                                    }`}
+                            >
+                                {r}
+                            </Button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* 2. Độ rộng tối đa trang (Max Content Width) */}
+            <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                    Độ rộng khung nội dung (Max Content Width)
+                </label>
+                <select
+                    value={layout.width}
+                    onChange={(e) => setLayout({ width: e.target.value as LayoutSettings["width"] })}
+                    className="w-full text-sm bg-background border border-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
+                >
+                    <option value="1024">Đóng khung nhỏ (1024px)</option>
+                    <option value="1280">Tiêu chuẩn CMS (1280px)</option>
+                    <option value="1536">Màn hình rộng (1536px)</option>
+                    <option value="full">Toàn màn hình (100%)</option>
+                </select>
+            </div>
+
+            {/* 3. Mật độ hiển thị (Compact Mode) */}
+            <div className="flex items-center justify-between pt-2">
+                <div>
+                    <label className="block text-xs font-bold text-foreground">
+                        Giao diện cô đọng (Compact Mode)
+                    </label>
+                    <Text className="text-[11px] text-muted-foreground">
+                        Giảm padding của các bảng và danh sách để hiển thị nhiều data hơn.
+                    </Text>
+                </div>
+                <input
+                    type="checkbox"
+                    checked={layout.isCompact}
+                    onChange={(e) => setLayout({ isCompact: e.target.checked })}
+                    className="w-9 h-5 bg-slate-300 dark:bg-slate-700 rounded-full appearance-none checked:bg-primary cursor-pointer relative before:content-[''] before:absolute before:h-4 before:w-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 before:transition-transform transition-colors"
+                />
+            </div>
+        </div>
+    );
+}

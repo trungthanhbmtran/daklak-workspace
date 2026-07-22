@@ -1,6 +1,194 @@
-"use client"; import React from"react";
-import Image from"next/image";
-import { Button } from"@/components/ui/button";
-import { useThemeConfig } from"./ThemeProvider";
-import { Heading, Text } from"@/components/ui/typography"; export function ThemePreview() { // Lấy thêm trạng thái thiết bị previewDevice từ Context toàn cục const { template, typography, layout, previewDevice //"desktop" |"tablet" |"mobile" } = useThemeConfig(); // 1. Hàm mapping màu sắc động dựa trên Template const getColorClasses = () => { switch (template) { case"emerald": return { bgPrimary:"bg-emerald-600 hover:bg-emerald-700", textPrimary:"text-emerald-600 dark:text-emerald-400", gradient:"from-emerald-600 to-teal-600", ring:"focus:ring-emerald-500" }; case"violet": return { bgPrimary:"bg-violet-600 hover:bg-violet-700", textPrimary:"text-violet-600 dark:text-violet-400", gradient:"from-violet-600 to-purple-600", ring:"focus:ring-violet-500" }; case"amber": return { bgPrimary:"bg-amber-600 hover:bg-amber-700", textPrimary:"text-amber-600 dark:text-amber-400", gradient:"from-amber-600 to-orange-600", ring:"focus:ring-amber-500" }; case"blue": default: return { bgPrimary:"bg-primary hover:bg-primary/90", textPrimary:"text-primary", gradient:"from-blue-600 to-indigo-600", ring:"focus:ring-ring" }; } }; const colors = getColorClasses(); // 2. Định nghĩa Class cho Bo góc (Radius) const getRadiusClass = () => { switch (layout.radius) { case"Sharp": return"rounded-none"; case"Subtle": return"rounded-sm"; case"Medium": return"rounded-xl"; case"Full": return"rounded-3xl"; default: return"rounded-xl"; } }; // 3. Định nghĩa Class cho Font chữ const getFontFamilyClass = () => { switch (typography.heading) { case"playfair": return"font-serif"; case"merriweather": return"font-serif tracking-normal"; case"Geist": return"font-mono"; case"inter": default: return"font-sans"; } }; // 4. CẤU HÌNH ĐỘ RỘNG KHUNG GIẢ LẬP THEO THIẾT BỊ (BỔ SUNG MỚI) const getDeviceViewportClass = () => { switch (previewDevice) { case"mobile": return"max-w-[375px] h-[90%] border-[6px] border-border rounded-[2.5rem] shadow-2xl my-4"; case"tablet": return"max-w-[768px] h-[95%] border-[8px] border-border rounded-[1.5rem] shadow-2xl my-2"; case"desktop": default: return"w-full h-full border-none rounded-none shadow-none"; } }; return ( // Container ngoài cùng đóng vai trò là"Sàn diễn" (Stage) chứa thiết bị, luôn căn giữa thiết bị <div className="w-full h-full bg-muted flex items-center justify-center p-2 transition-all duration-300 overflow-hidden"> {/* THÀNH PHẦN KHUNG THIẾT BỊ ĐỘNG */} <div className={`w-full bg-slate-50 dark:bg-slate-900 text-foreground overflow-y-auto custom-scrollbar select-none transition-all duration-300 shadow-sm ${getDeviceViewportClass()} ${getFontFamilyClass()}`} style={{ fontSize: `${typography.size}px` }} > {/* MOCKUP HEADER WEBSITE */} <header className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10 px-4 py-3 flex items-center justify-between"> <div className="flex items-center gap-2"> <div className={`w-5 h-5 rounded-lg ${colors.bgPrimary} flex items-center justify-center text-white font-bold text-[10px] transition-colors duration-200`}> Ω </div> <Text as="span" className="font-bold tracking-tight">Portal</Text> </div> {/* Ẩn bớt menu điều hướng khi màn hình là Mobile để chuẩn UI/UX */} {previewDevice !=="mobile" && ( <nav className="flex items-center gap-4 text-[11px] font-medium text-muted-foreground"> <Text as="span" className={`${colors.textPrimary} font-semibold cursor-pointer`}>Tổng quan</Text> <Text as="span" className="hover:text-foreground cursor-pointer">Bài viết</Text> </nav> )} <div className="flex items-center gap-2"> <div className="w-6 h-6 rounded-full bg-muted overflow-hidden relative"> <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60" alt="Avatar" fill unoptimized className="object-cover" /> </div> </div> </header> {/* MOCKUP BODY CONTENT */} <div className={`p-4 space-y-4 max-w-4xl mx-auto transition-all duration-200 ${layout.isCompact ? 'space-y-3 p-3' : ''}`}> {/* Banner Thông báo */} <div className={`p-4 bg-gradient-to-r ${colors.gradient} text-white shadow-sm ${getRadiusClass()} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all duration-200`}> <div className="space-y-0.5"> <Heading level="h4" className="font-bold">🎉 Phiên bản CMS 5.0!</Heading> <Text className="text-[11px] text-muted-foreground font-light">Tối ưu render vượt trội bằng Core mới.</Text> </div> <Button className="h-6 px-2.5 bg-white text-foreground text-[10px] font-bold rounded shadow-sm whitespace-nowrap hover:bg-slate-50 transition-colors"> Cập nhật </Button> </div> {/* Grid Khối số liệu (Chuyển thành 1 cột trên Mobile để không bị vỡ) */} <div className={`grid gap-3 ${previewDevice ==="mobile" ?"grid-cols-1" :"grid-cols-3"}`}> {[ { title:"Lượt xem trang", value:"142,384", trend:"+12.5%", isPositive: true }, { title:"Bài viết mới", value:"32", trend:"+4.2%", isPositive: true }, { title:"Bình luận", value:"9", trend:"-2.1%", isPositive: false } ].map((stat, idx) => ( <div key={idx} className={`p-3 bg-card border border-border shadow-sm transition-all duration-200 ${getRadiusClass()}`}> <Text as="span" className="text-[11px] text-muted-foreground font-medium">{stat.title}</Text> <div className="flex items-baseline justify-between mt-0.5"> <Text as="span" className="font-bold tracking-tight">{stat.value}</Text> <Text as="span" className={`text-[10px] font-bold ${stat.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>{stat.trend}</Text> </div> </div> ))} </div> {/* Khu vực Danh sách bài viết mẫu */} <div className={`bg-card border border-border shadow-sm overflow-hidden transition-all duration-200 ${getRadiusClass()}`}> <div className="px-3 py-2 border-b border-border flex justify-between items-center bg-muted/50"> <Text as="span" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Bài viết gần đây</Text> <Text as="span" className={`text-[10px] ${colors.textPrimary} font-medium hover:underline cursor-pointer`}>Tất cả</Text> </div> <div className="divide-y divide-slate-100 dark:divide-slate-900"> {[ { title:"Cách tối ưu SEO On-Page cho Website Next.js năm 2026", author:"Alex Nguyễn", date:"2 giờ trước" }, { title:"Xây dựng hệ thống Design System đồng nhất doanh nghiệp", author:"Minh Trần", date:"1 ngày trước" } ].map((post, i) => ( <div key={i} className="p-3 flex items-center justify-between hover:bg-muted/80 hover:bg-muted/40 transition-colors"> <div className="space-y-0.5 max-w-[80%]"> <Heading level="h4" className={` font-semibold line-clamp-1 hover:${colors.textPrimary} cursor-pointer`}>{post.title}</Heading> <Text className="text-[10px] text-muted-foreground">{post.author} • {post.date}</Text> </div> <Text as="span" className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /> </div> ))} </div> </div> {/* Nút bấm & Ô Input */} <div className="flex flex-wrap items-center gap-2 pt-1"> <Button className={`px-3 py-1.5 text-[11px] font-medium text-white shadow-sm ${colors.bgPrimary} transition-all duration-200 ${getRadiusClass()}`}> Hành động chính </Button> <input type="text" placeholder="Nhập thử..." className={`px-2.5 py-1 text-[11px] bg-card border border-border shadow-inner focus:outline-none focus:ring-1 ${colors.ring} transition-all duration-200 ${getRadiusClass()} max-w-[120px]`} /> </div> </div> </div> </div> );
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { useThemeConfig } from "./ThemeProvider";
+import { Heading, Text } from "@/components/ui/typography";
+
+
+export function ThemePreview() {
+  // Lấy thêm trạng thái thiết bị previewDevice từ Context toàn cục
+  const {
+    template,
+    typography,
+    layout,
+    previewDevice // "desktop" | "tablet" | "mobile"
+  } = useThemeConfig();
+
+  // 1. Hàm mapping màu sắc động dựa trên Template
+  const getColorClasses = () => {
+    switch (template) {
+      case "emerald":
+        return {
+          bgPrimary: "bg-emerald-600 hover:bg-emerald-700",
+          textPrimary: "text-emerald-600 dark:text-emerald-400",
+          gradient: "from-emerald-600 to-teal-600",
+          ring: "focus:ring-emerald-500"
+        };
+      case "violet":
+        return {
+          bgPrimary: "bg-violet-600 hover:bg-violet-700",
+          textPrimary: "text-violet-600 dark:text-violet-400",
+          gradient: "from-violet-600 to-purple-600",
+          ring: "focus:ring-violet-500"
+        };
+      case "amber":
+        return {
+          bgPrimary: "bg-amber-600 hover:bg-amber-700",
+          textPrimary: "text-amber-600 dark:text-amber-400",
+          gradient: "from-amber-600 to-orange-600",
+          ring: "focus:ring-amber-500"
+        };
+      case "blue":
+      default:
+        return {
+          bgPrimary: "bg-primary hover:bg-primary/90",
+          textPrimary: "text-primary",
+          gradient: "from-blue-600 to-indigo-600",
+          ring: "focus:ring-ring"
+        };
+    }
+  };
+
+  const colors = getColorClasses();
+
+  // 2. Định nghĩa Class cho Bo góc (Radius)
+  const getRadiusClass = () => {
+    switch (layout.radius) {
+      case "Sharp": return "rounded-none";
+      case "Subtle": return "rounded-sm";
+      case "Medium": return "rounded-xl";
+      case "Full": return "rounded-3xl";
+      default: return "rounded-xl";
+    }
+  };
+
+  // 3. Định nghĩa Class cho Font chữ
+  const getFontFamilyClass = () => {
+    switch (typography.heading) {
+      case "playfair": return "font-serif";
+      case "merriweather": return "font-serif tracking-normal";
+      case "Geist": return "font-mono";
+      case "inter":
+      default: return "font-sans";
+    }
+  };
+
+  // 4. CẤU HÌNH ĐỘ RỘNG KHUNG GIẢ LẬP THEO THIẾT BỊ (BỔ SUNG MỚI)
+  const getDeviceViewportClass = () => {
+    switch (previewDevice) {
+      case "mobile":
+        return "max-w-[375px] h-[90%] border-[6px] border-border rounded-[2.5rem] shadow-2xl my-4";
+      case "tablet":
+        return "max-w-[768px] h-[95%] border-[8px] border-border rounded-[1.5rem] shadow-2xl my-2";
+      case "desktop":
+      default:
+        return "w-full h-full border-none rounded-none shadow-none";
+    }
+  };
+
+  return (
+    // Container ngoài cùng đóng vai trò là "Sàn diễn" (Stage) chứa thiết bị, luôn căn giữa thiết bị
+    <div className="w-full h-full bg-muted flex items-center justify-center p-2 transition-all duration-300 overflow-hidden">
+
+      {/* THÀNH PHẦN KHUNG THIẾT BỊ ĐỘNG */}
+      <div
+        className={`w-full bg-slate-50 dark:bg-slate-900 text-foreground overflow-y-auto custom-scrollbar select-none transition-all duration-300 shadow-sm ${getDeviceViewportClass()} ${getFontFamilyClass()}`}
+        style={{ fontSize: `${typography.size}px` }}
+      >
+
+        {/* MOCKUP HEADER WEBSITE */}
+        <header className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-5 h-5 rounded-lg ${colors.bgPrimary} flex items-center justify-center text-white font-bold text-[10px] transition-colors duration-200`}>
+              Ω
+            </div>
+            <Text as="span" className="font-bold tracking-tight">Portal</Text>
+          </div>
+          {/* Ẩn bớt menu điều hướng khi màn hình là Mobile để chuẩn UI/UX */}
+          {previewDevice !== "mobile" && (
+            <nav className="flex items-center gap-4 text-[11px] font-medium text-muted-foreground">
+              <Text as="span" className={`${colors.textPrimary} font-semibold cursor-pointer`}>Tổng quan</Text>
+              <Text as="span" className="hover:text-foreground cursor-pointer">Bài viết</Text>
+            </nav>
+          )}
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-muted overflow-hidden relative">
+              <Image src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60" alt="Avatar" fill unoptimized className="object-cover" />
+            </div>
+          </div>
+        </header>
+
+        {/* MOCKUP BODY CONTENT */}
+        <div className={`p-4 space-y-4 max-w-4xl mx-auto transition-all duration-200 ${layout.isCompact ? 'space-y-3 p-3' : ''}`}>
+
+          {/* Banner Thông báo */}
+          <div className={`p-4 bg-gradient-to-r ${colors.gradient} text-white shadow-sm ${getRadiusClass()} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all duration-200`}>
+            <div className="space-y-0.5">
+              <Heading level="h4" className="font-bold">🎉 Phiên bản CMS 5.0!</Heading>
+              <Text className="text-[11px] text-muted-foreground font-light">Tối ưu render vượt trội bằng Core mới.</Text>
+            </div>
+            <Button className="h-6 px-2.5 bg-white text-foreground text-[10px] font-bold rounded shadow-sm whitespace-nowrap hover:bg-slate-50 transition-colors">
+              Cập nhật
+            </Button>
+          </div>
+
+          {/* Grid Khối số liệu (Chuyển thành 1 cột trên Mobile để không bị vỡ) */}
+          <div className={`grid gap-3 ${previewDevice === "mobile" ? "grid-cols-1" : "grid-cols-3"}`}>
+            {[
+              { title: "Lượt xem trang", value: "142,384", trend: "+12.5%", isPositive: true },
+              { title: "Bài viết mới", value: "32", trend: "+4.2%", isPositive: true },
+              { title: "Bình luận", value: "9", trend: "-2.1%", isPositive: false }
+            ].map((stat, idx) => (
+              <div key={idx} className={`p-3 bg-card border border-border shadow-sm transition-all duration-200 ${getRadiusClass()}`}>
+                <Text as="span" className="text-[11px] text-muted-foreground font-medium">{stat.title}</Text>
+                <div className="flex items-baseline justify-between mt-0.5">
+                  <Text as="span" className="font-bold tracking-tight">{stat.value}</Text>
+                  <Text as="span" className={`text-[10px] font-bold ${stat.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>{stat.trend}</Text>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Khu vực Danh sách bài viết mẫu */}
+          <div className={`bg-card border border-border shadow-sm overflow-hidden transition-all duration-200 ${getRadiusClass()}`}>
+            <div className="px-3 py-2 border-b border-border flex justify-between items-center bg-muted/50">
+              <Text as="span" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Bài viết gần đây</Text>
+              <Text as="span" className={`text-[10px] ${colors.textPrimary} font-medium hover:underline cursor-pointer`}>Tất cả</Text>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-900">
+              {[
+                { title: "Cách tối ưu SEO On-Page cho Website Next.js năm 2026", author: "Alex Nguyễn", date: "2 giờ trước" },
+                { title: "Xây dựng hệ thống Design System đồng nhất doanh nghiệp", author: "Minh Trần", date: "1 ngày trước" }
+              ].map((post, i) => (
+                <div key={i} className="p-3 flex items-center justify-between hover:bg-muted/80 hover:bg-muted/40 transition-colors">
+                  <div className="space-y-0.5 max-w-[80%]">
+                    <Heading level="h4" className={` font-semibold line-clamp-1 hover:${colors.textPrimary} cursor-pointer`}>{post.title}</Heading>
+                    <Text className="text-[10px] text-muted-foreground">{post.author} • {post.date}</Text>
+                  </div>
+                  <Text as="span" className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Nút bấm & Ô Input */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Button className={`px-3 py-1.5 text-[11px] font-medium text-white shadow-sm ${colors.bgPrimary} transition-all duration-200 ${getRadiusClass()}`}>
+              Hành động chính
+            </Button>
+            <input
+              type="text"
+              placeholder="Nhập thử..."
+              className={`px-2.5 py-1 text-[11px] bg-card border border-border shadow-inner focus:outline-none focus:ring-1 ${colors.ring} transition-all duration-200 ${getRadiusClass()} max-w-[120px]`}
+            />
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  );
 }
