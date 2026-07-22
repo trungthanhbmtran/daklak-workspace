@@ -1,14 +1,30 @@
 import { IsString, IsNotEmpty, IsOptional, IsObject, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export class PositionDto {
+  @IsOptional()
+  x?: number;
+
+  @IsOptional()
+  y?: number;
+}
+
+export class MeasuredDto {
+  @IsOptional()
+  width?: number;
+
+  @IsOptional()
+  height?: number;
+}
+
 export class WorkflowNodeDto {
   @IsString()
   @IsNotEmpty()
   id: string;
 
   @IsString()
-  @IsNotEmpty()
-  nodeKey: string;
+  @IsOptional()
+  nodeKey?: string;
 
   @IsString()
   @IsOptional()
@@ -17,9 +33,41 @@ export class WorkflowNodeDto {
   @IsString()
   @IsOptional()
   name?: string;
-  
+
   @IsOptional()
   propertiesJson?: string;
+  
+  // React Flow Properties
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PositionDto)
+  position?: PositionDto;
+
+  @IsObject()
+  @IsOptional()
+  data?: Record<string, any>;
+
+  @IsOptional()
+  width?: number;
+
+  @IsOptional()
+  height?: number;
+
+  @IsOptional()
+  selected?: boolean;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PositionDto)
+  positionAbsolute?: PositionDto;
+
+  @IsOptional()
+  dragging?: boolean;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MeasuredDto)
+  measured?: MeasuredDto;
 }
 
 export class WorkflowEdgeDto {
@@ -28,12 +76,44 @@ export class WorkflowEdgeDto {
   id: string;
 
   @IsString()
-  @IsNotEmpty()
-  sourceNodeId: string;
+  @IsOptional()
+  sourceNodeId?: string;
 
   @IsString()
-  @IsNotEmpty()
-  targetNodeId: string;
+  @IsOptional()
+  targetNodeId?: string;
+  
+  // React Flow Properties
+  @IsString()
+  @IsOptional()
+  source?: string;
+
+  @IsString()
+  @IsOptional()
+  target?: string;
+
+  @IsString()
+  @IsOptional()
+  sourceHandle?: string;
+
+  @IsString()
+  @IsOptional()
+  targetHandle?: string;
+
+  @IsOptional()
+  animated?: boolean;
+
+  @IsString()
+  @IsOptional()
+  label?: string;
+
+  @IsObject()
+  @IsOptional()
+  data?: Record<string, any>;
+
+  @IsString()
+  @IsOptional()
+  type?: string;
 }
 
 export class WorkflowDefinitionDto {
@@ -126,6 +206,8 @@ export class ApplyModuleGrpcDto {
   @IsString()
   @IsNotEmpty()
   moduleCode: string;
+}
+
 export class ListWorkflowsGrpcDto {
   @IsOptional()
   skip?: number;
@@ -158,4 +240,4 @@ export class ListInstancesGrpcDto {
   search?: string;
 }
 
-export class EmptyGrpcDto {}
+export class EmptyGrpcDto { }

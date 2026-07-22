@@ -123,6 +123,16 @@ message WorkflowDefinition {
   repeated WorkflowEdge edges = 2;
 }
 
+message Position {
+  float x = 1;
+  float y = 2;
+}
+
+message Measured {
+  float width = 1;
+  float height = 2;
+}
+
 message WorkflowNode {
   string id = 1;
   string nodeKey = 2;
@@ -134,6 +144,16 @@ message WorkflowNode {
   int32 order = 8;
   repeated AssignmentRule assignments = 9;
   repeated NodeAction actions = 10;
+  
+  // React Flow Properties
+  Position position = 11;
+  google.protobuf.Struct data = 12;
+  float width = 13;
+  float height = 14;
+  bool selected = 15;
+  Position positionAbsolute = 16;
+  bool dragging = 17;
+  Measured measured = 18;
 }
 
 message WorkflowEdge {
@@ -144,6 +164,16 @@ message WorkflowEdge {
   int32 priority = 5;
   bool defaultFlow = 6;
   string propertiesJson = 7;
+  
+  // React Flow Properties
+  string source = 8;
+  string target = 9;
+  string sourceHandle = 10;
+  string targetHandle = 11;
+  bool animated = 12;
+  string label = 13;
+  google.protobuf.Struct data = 14;
+  string type = 15;
 }
 
 message AssignmentRule {

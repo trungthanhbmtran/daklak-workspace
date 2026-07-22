@@ -2,16 +2,36 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsObject, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export class PositionDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  x?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  y?: number;
+}
+
+export class MeasuredDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  width?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  height?: number;
+}
+
 export class WorkflowNodeDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
-  @IsNotEmpty()
-  nodeKey: string;
+  @IsOptional()
+  nodeKey?: string;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -26,6 +46,46 @@ export class WorkflowNodeDto {
   @ApiProperty({ required: false })
   @IsOptional()
   propertiesJson?: string;
+  
+  // React Flow Properties
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PositionDto)
+  position?: PositionDto;
+
+  @ApiProperty({ required: false })
+  @IsObject()
+  @IsOptional()
+  data?: Record<string, any>;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  width?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  height?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  selected?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PositionDto)
+  positionAbsolute?: PositionDto;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  dragging?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MeasuredDto)
+  measured?: MeasuredDto;
 }
 
 export class WorkflowEdgeDto {
@@ -34,15 +94,55 @@ export class WorkflowEdgeDto {
   @IsNotEmpty()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
-  @IsNotEmpty()
-  sourceNodeId: string;
+  @IsOptional()
+  sourceNodeId?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
-  @IsNotEmpty()
-  targetNodeId: string;
+  @IsOptional()
+  targetNodeId?: string;
+  
+  // React Flow Properties
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  source?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  target?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  sourceHandle?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  targetHandle?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  animated?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  label?: string;
+
+  @ApiProperty({ required: false })
+  @IsObject()
+  @IsOptional()
+  data?: Record<string, any>;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  type?: string;
 }
 
 export class WorkflowDefinitionDto {
@@ -83,7 +183,7 @@ export class CreateWorkflowDto {
   definition?: WorkflowDefinitionDto;
 }
 
-export class UpdateWorkflowDto extends CreateWorkflowDto {}
+export class UpdateWorkflowDto extends CreateWorkflowDto { }
 
 export class StartWorkflowDto {
   @ApiProperty({ required: false })
