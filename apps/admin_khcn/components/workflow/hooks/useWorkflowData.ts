@@ -106,15 +106,15 @@ export function useWorkflowData({
       name: workflowName,
       description: workflowDesc,
       code: workflowCode,
-      definition: { nodes, edges },
+      definition: { nodes, edges: edges as any },
     };
 
     try {
       if (workflowId) {
-        await workflowApi.update(workflowId, workflowData);
+        await workflowApi.update(workflowId, workflowData as any);
         toast.success("Đã cập nhật quy trình!");
       } else {
-        const response = await workflowApi.create(workflowData);
+        const response = await workflowApi.create(workflowData as any);
         if (response && response.id) {
           setWorkflowId(response.id);
         }
@@ -153,10 +153,10 @@ export function useWorkflowData({
         name: workflowName,
         description: workflowDesc,
         code: workflowCode,
-        definition: { nodes, edges },
+        definition: { nodes, edges: edges as any },
       };
       try {
-        const response = await workflowApi.create(workflowData);
+        const response = await workflowApi.create(workflowData as any);
         if (response && response.id) {
           setWorkflowId(response.id);
           targetId = response.id;
