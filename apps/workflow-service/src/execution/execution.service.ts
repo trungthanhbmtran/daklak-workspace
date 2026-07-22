@@ -4,6 +4,18 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DynamicIntegrationAction } from '../action/dynamic-integration.action';
 import { WorkflowContext } from '../action/action.interface';
 
+export interface StartProcessPayload {
+  businessKey?: string;
+  organizationId?: string;
+  startedBy?: string;
+  variables?: Record<string, any>;
+}
+
+export interface CompleteTaskPayload {
+  action?: string;
+  [key: string]: any;
+}
+
 @Injectable()
 export class ExecutionService {
   private readonly logger = new Logger(ExecutionService.name);
@@ -14,7 +26,7 @@ export class ExecutionService {
     private readonly integrationAction: DynamicIntegrationAction,
   ) {}
 
-  async startProcess(code: string, payload: any) {
+  async startProcess(code: string, payload: StartProcessPayload) {
     const def = await this.prisma.processDefinition.findUnique({
       where: { code },
       include: {
@@ -26,9 +38,7 @@ export class ExecutionService {
     });
 
     if (!def || def.versions.length === 0) {
-      throw new NotFoundException(
-        `Active process definition ${code} not found`,
-      );
+      throw new NotFoundException(`Active process definition ${code} not found`);
     }
 
     const version = def.versions[0];
@@ -90,65 +100,74 @@ export class ExecutionService {
     });
 
     switch (node.type) {
-      case 'serviceTask': {
-        if (node.action === 'DYNAMIC_INTEGRATION') {
-          const ctx: WorkflowContext = {
-            instanceId: instance.id,
-            variables: instance.variables as Record<string, any>,
-            organizationId: instance.organizationId,
-            startedBy: instance.startedBy,
-          };
-
-          const result = await this.integrationAction.execute(ctx, node.payload);
-
-          if (result.success) {
-            const nextEdges =
-              graph.edges?.filter((e: any) => e.source === node.id) || [];
-            if (nextEdges.length > 0) {
-              await this.advanceProcess(instanceId, nextEdges[0].target);
-            }
-          } else {
-            await this.prisma.processInstance.update({
-              where: { id: instanceId },
-              data: { status: 'FAILED' },
-            });
-          }
-        }
-        break;
-      }
-      case 'end': {
-        await this.prisma.processInstance.update({
-          where: { id: instanceId },
-          data: { status: 'COMPLETED', endedAt: new Date() },
-        });
-        this.eventEmitter.emit('workflow.instance.completed', {
-          instanceId: instance.id,
-        });
-        break;
-      }
-      case 'start': {
-        const nextEdges =
-          graph.edges?.filter((e: any) => e.source === node.id) || [];
-        if (nextEdges.length > 0) {
-          await this.advanceProcess(instanceId, nextEdges[0].target);
-        }
-        break;
-      }
-      case 'userTask': {
-        // Create user task
-        await this.prisma.workflowTask.create({
-          data: {
-            instanceId: instance.id,
-            nodeCode: node.code || node.id,
-            title: node.name || 'User Task',
-            status: 'PENDING',
-          },
-        });
-        break;
-      }
+      case 'serviceTask':
+        return this.handleServiceTask(instance, node, graph);
+      case 'end':
+        return this.handleEndTask(instance.id);
+      case 'start':
+        return this.handleStartTask(instance.id, node, graph);
+      case 'userTask':
+        return this.handleUserTask(instance, node);
       default:
-        break;
+        this.logger.warn(`Unsupported node type: ${node.type}`);
+        return;
     }
+  }
+
+  private async handleServiceTask(instance: any, node: any, graph: any) {
+    if (node.action !== 'DYNAMIC_INTEGRATION') {
+      return; // Early return for unsupported actions
+    }
+
+    const ctx: WorkflowContext = {
+      instanceId: instance.id,
+      variables: instance.variables as Record<string, any>,
+      organizationId: instance.organizationId,
+      startedBy: instance.startedBy,
+    };
+
+    const result = await this.integrationAction.execute(ctx, node.payload);
+
+    if (!result.success) {
+      await this.prisma.processInstance.update({
+        where: { id: instance.id },
+        data: { status: 'FAILED' },
+      });
+      return;
+    }
+
+    const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
+    if (nextEdges.length > 0) {
+      await this.advanceProcess(instance.id, nextEdges[0].target);
+    }
+  }
+
+  private async handleEndTask(instanceId: string) {
+    await this.prisma.processInstance.update({
+      where: { id: instanceId },
+      data: { status: 'COMPLETED', endedAt: new Date() },
+    });
+    this.eventEmitter.emit('workflow.instance.completed', {
+      instanceId,
+    });
+  }
+
+  private async handleStartTask(instanceId: string, node: any, graph: any) {
+    const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
+    if (nextEdges.length > 0) {
+      await this.advanceProcess(instanceId, nextEdges[0].target);
+    }
+  }
+
+  private async handleUserTask(instance: any, node: any) {
+    await this.prisma.workflowTask.create({
+      data: {
+        instanceId: instance.id,
+        nodeCode: node.code || node.id,
+        title: node.name || 'User Task',
+        status: 'PENDING',
+      },
+    });
   }
 
   async getInstances() {
@@ -175,7 +194,7 @@ export class ExecutionService {
     });
   }
 
-  async completeTask(taskId: string, payload: any) {
+  async completeTask(taskId: string, payload: CompleteTaskPayload) {
     const task = await this.prisma.workflowTask.findUnique({
       where: { id: taskId },
       include: { instance: { include: { version: true } } },

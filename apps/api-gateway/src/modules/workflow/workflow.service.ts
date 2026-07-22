@@ -32,7 +32,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: true, data: result?.data, message: 'OK' };
+    return { success: true, data: result?.data || [], message: 'OK' };
   }
 
   async getTriggers() {
@@ -41,7 +41,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: true, data: result?.data, message: 'OK' };
+    return { success: true, data: result?.data || [], message: 'OK' };
   }
 
   async getModules() {
@@ -50,7 +50,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: true, data: result?.data, message: 'OK' };
+    return { success: true, data: result?.data || [], message: 'OK' };
   }
 
   async getOrgRoles() {
@@ -116,7 +116,7 @@ export class WorkflowService implements OnModuleInit {
 
     return {
       success: true,
-      data: result?.data,
+      data: result?.data || [],
       meta: result?.meta,
       message: 'OK'
     };
@@ -134,7 +134,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { data: result };
+    return { success: true, data: result, message: 'Task resumed successfully' };
   }
 
   async listInstances(skip?: string, take?: string, workflowId?: string, status?: string, search?: string) {
@@ -149,7 +149,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: true, data: result?.data, meta: result?.meta, message: 'OK' };
+    return { success: true, data: result?.data || [], meta: result?.meta, message: 'OK' };
   }
 
   async getInstance(id: string) {
@@ -158,7 +158,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
-    return { data: result };
+    return { success: true, data: result, message: 'OK' };
   }
 
   async getLogs(instanceId: string) {
@@ -167,7 +167,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { data: response.logs };
+    return { success: true, data: response?.logs || [], message: 'OK' };
   }
 
   async listIntegrations(search?: string) {
@@ -176,7 +176,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return result;
+    return { success: true, data: result?.data || [], message: 'OK' };
   }
 
   async createIntegration(body: any) {
@@ -194,7 +194,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: !!result, data: result };
+    return { success: !!result, data: result, message: 'OK' };
   }
 
   async updateIntegration(id: string, body: any) {
@@ -212,7 +212,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: result?.success || true, message: 'Deleted successfully' };
+    return { success: result?.success || true, data: null, message: 'Deleted successfully' };
   }
 
   async findOne(id: string) {
@@ -221,7 +221,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { data: result };
+    return { success: true, data: result, message: 'OK' };
   }
 
   async delete(id: string) {
@@ -230,7 +230,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: result?.success ?? true };
+    return { success: result?.success ?? true, data: null, message: 'Deleted successfully' };
   }
 
   async publish(id: string) {
@@ -239,7 +239,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { data: result };
+    return { success: true, data: result, message: 'Workflow published successfully' };
   }
 
   async applyModule(id: string, moduleCode: string) {
@@ -248,7 +248,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { data: result };
+    return { success: true, data: result, message: 'Module applied successfully' };
   }
 
   async start(id: string, body: StartWorkflowDto, user: any) {

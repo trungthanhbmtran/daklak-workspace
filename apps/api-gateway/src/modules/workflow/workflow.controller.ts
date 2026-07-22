@@ -13,7 +13,15 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { CreateWorkflowDto, UpdateWorkflowDto, StartWorkflowDto } from './dto/workflow.dto';
+import { 
+  CreateWorkflowDto, 
+  UpdateWorkflowDto, 
+  StartWorkflowDto,
+  ResumeWorkflowDto,
+  ApplyModuleDto,
+  CreateIntegrationDto,
+  UpdateIntegrationDto
+} from './dto/workflow.dto';
 import { WorkflowService } from './workflow.service';
 
 @ApiTags('Workflow')
@@ -81,7 +89,7 @@ export class WorkflowController {
   async resume(
     @Param('instanceId') instanceId: string,
     @Param('nodeId') nodeId: string,
-    @Body() body: any,
+    @Body() body: ResumeWorkflowDto,
     @Req() req: any,
   ) {
     return this.workflowService.resume(instanceId, nodeId, body, req.user);
@@ -121,7 +129,7 @@ export class WorkflowController {
 
   @Post('integrations')
   @ApiOperation({ summary: 'Tạo cấu hình kết nối API' })
-  async createIntegration(@Body() body: any) {
+  async createIntegration(@Body() body: CreateIntegrationDto) {
     return this.workflowService.createIntegration(body);
   }
 
@@ -133,7 +141,7 @@ export class WorkflowController {
 
   @Put('integrations/:id')
   @ApiOperation({ summary: 'Cập nhật cấu hình kết nối API' })
-  async updateIntegration(@Param('id') id: string, @Body() body: any) {
+  async updateIntegration(@Param('id') id: string, @Body() body: UpdateIntegrationDto) {
     return this.workflowService.updateIntegration(id, body);
   }
 
@@ -167,7 +175,7 @@ export class WorkflowController {
   @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
   async applyModule(
     @Param('id') id: string,
-    @Body() body: { moduleCode: string },
+    @Body() body: ApplyModuleDto,
   ) {
     return this.workflowService.applyModule(id, body.moduleCode);
   }
