@@ -54,9 +54,7 @@ export const StatsGridEditor: React.FC<StatsGridEditorProps> = ({ widget, onChan
           size="sm" 
           onClick={handleAddItem}
           className="h-8 rounded-xl border-dashed border-indigo-200 dark:border-indigo-800 text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50 dark:hover:bg-indigo-950 hover:text-indigo-700 gap-1"
-        >
-          <Plus className="w-3.5 h-3.5" /> Thêm số liệu
-        </Button>
+         iconStart={<Plus className="w-3.5 h-3.5" />}>Thêm số liệu</Button>
       </div>
 
       <div className="space-y-4">

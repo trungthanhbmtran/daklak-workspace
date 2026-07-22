@@ -262,9 +262,7 @@ export default function DocumentPublishingPage() {
                   </CardTitle>
                   <CardDescription className="text-xs mt-1">Văn bản này tác động pháp lý đến các văn bản nào khác?</CardDescription>
                 </div>
-                <Button size="sm" variant="outline" className="h-8 text-xs font-bold">
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Thêm liên kết
-                </Button>
+                <Button size="sm" variant="outline" className="h-8 text-xs font-bold" iconStart={<Plus className="h-3.5 w-3.5" />}>Thêm liên kết</Button>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
                 <div className="flex gap-2 p-3 bg-muted/30 border rounded-lg items-center">

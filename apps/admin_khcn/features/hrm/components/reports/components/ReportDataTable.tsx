@@ -32,14 +32,8 @@ export const ReportDataTable = React.memo(function ReportDataTable({ isLoading, 
           Danh sách chi tiết công việc
         </CardTitle>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-8">
-            <Filter className="w-4 h-4 mr-1.5" />
-            Lọc nâng cao
-          </Button>
-          <Button size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700" onClick={handleExport}>
-            <Download className="w-4 h-4 mr-1.5" />
-            Xuất báo cáo
-          </Button>
+          <Button variant="outline" size="sm" className="h-8" iconStart={<Filter className="w-4 h-4 .5" />}>Lọc nâng cao</Button>
+          <Button size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700" onClick={handleExport} iconStart={<Download className="w-4 h-4 .5" />}>Xuất báo cáo</Button>
         </div>
       </CardHeader>
       <CardContent>

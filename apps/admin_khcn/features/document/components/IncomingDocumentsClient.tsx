@@ -117,9 +117,7 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
             size="icon"
             className="h-9 w-9 rounded-xl shadow-sm hover:bg-blue-600 hover:text-white transition-colors"
             onClick={handleBtnClick}
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
+           iconStart={<FileText className="h-4 w-4" />}></Button>
         </div>
       </TableCell>
     </TableRow>
@@ -196,9 +194,7 @@ export function IncomingDocumentsClient() {
           <Button
             onClick={handleOpenModal}
             className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 active:scale-95"
-          >
-            <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản đến
-          </Button>
+           iconStart={<Plus className="h-4 w-4" />}>Vào sổ văn bản đến</Button>
         </div>
       </div>
 
@@ -206,9 +202,7 @@ export function IncomingDocumentsClient() {
       <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
         <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
           <Search placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..." className="flex-1 min-w-[300px]" />
-          <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10">
-            <Filter className="h-4 w-4 mr-2" /> Bộ lọc
-          </Button>
+          <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10" iconStart={<Filter className="h-4 w-4" />}>Bộ lọc</Button>
         </div>
 
         <CardContent className="p-0">

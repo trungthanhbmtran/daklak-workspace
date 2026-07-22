@@ -100,10 +100,7 @@ export function LgspClient() {
             disabled={sendMutation.isPending}
             onClick={handleSendTest}
             className="gap-2"
-          >
-            <Send className="w-4 h-4" />
-            Kiểm tra gửi VB
-          </Button>
+           iconStart={<Send className="w-4 h-4" />}>Kiểm tra gửi VB</Button>
         </div>
       </div>
 

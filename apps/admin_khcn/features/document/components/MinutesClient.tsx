@@ -97,12 +97,8 @@ const MinutesRow = React.memo(function MinutesRow({ minutes: m }: MinutesRowProp
       {/* Actions */}
       <TableCell className="px-6 py-5 text-right">
         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="secondary" size="icon" className="rounded-full shadow-sm">
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button variant="secondary" size="icon" className="rounded-full shadow-sm">
-            <Download className="h-4 w-4" />
-          </Button>
+          <Button variant="secondary" size="icon" className="rounded-full shadow-sm" iconStart={<Eye className="h-4 w-4" />}></Button>
+          <Button variant="secondary" size="icon" className="rounded-full shadow-sm" iconStart={<Download className="h-4 w-4" />}></Button>
         </div>
       </TableCell>
     </TableRow>
@@ -186,9 +182,7 @@ export function MinutesClient() {
     return (
       <div className="p-6 bg-muted/5 min-h-screen animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="max-w-4xl mx-auto">
-          <Button variant="ghost" onClick={handleSwitchToList} className="mb-6 hover:bg-background">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
-          </Button>
+          <Button variant="ghost" onClick={handleSwitchToList} className="mb-6 hover:bg-background" iconStart={<ArrowLeft className="h-4 w-4" />}>Quay lại danh sách</Button>
           <MinutesForm onComplete={handleSwitchToList} onCancel={handleSwitchToList} />
         </div>
       </div>
@@ -209,9 +203,7 @@ export function MinutesClient() {
         <Button
           onClick={handleSwitchToCreate}
           className="shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 rounded-xl px-6 transition-all active:scale-95"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Tạo biên bản mới
-        </Button>
+         iconStart={<Plus className="h-4 w-4" />}>Tạo biên bản mới</Button>
       </div>
 
       {/* Filter bar — outside of table, so it doesn't trigger table re-render */}
@@ -220,9 +212,7 @@ export function MinutesClient() {
           placeholder="Tìm theo tiêu đề, địa điểm, thành phần tham dự..."
           className="flex-1 min-w-[300px]"
         />
-        <Button variant="outline" className="h-11 rounded-xl border-dashed border-2 hover:bg-muted/10">
-          <Filter className="h-4 w-4 mr-2" /> Bộ lọc
-        </Button>
+        <Button variant="outline" className="h-11 rounded-xl border-dashed border-2 hover:bg-muted/10" iconStart={<Filter className="h-4 w-4" />}>Bộ lọc</Button>
       </div>
 
       <MinutesTable data={minutes} isLoading={isLoading} />

@@ -71,10 +71,7 @@ export function ConsultationsClient() {
 
             <div className="flex items-center gap-3 w-full md:w-auto">
                <Link href="/services/documents/consultations/manage" className="flex-1 md:flex-none">
-                  <Button variant="outline" className="w-full rounded-xl border-muted-foreground/20 hover:bg-muted/50 font-bold">
-                     <BarChart3 className="h-4 w-4 mr-2 text-primary" />
-                     Báo cáo tổng hợp
-                  </Button>
+                  <Button variant="outline" className="w-full rounded-xl border-muted-foreground/20 hover:bg-muted/50 font-bold" iconStart={<BarChart3 className="h-4 w-4  text-primary" />}>Báo cáo tổng hợp</Button>
                </Link>
 
                <Button
@@ -110,9 +107,7 @@ export function ConsultationsClient() {
                      </SelectContent>
                   </Select>
 
-                  <Button variant="outline" className="h-12 w-12 rounded-xl border-muted-foreground/10 p-0 shrink-0">
-                     <Filter className="h-5 w-5 text-muted-foreground" />
-                  </Button>
+                  <Button variant="outline" className="h-12 w-12 rounded-xl border-muted-foreground/10 p-0 shrink-0" iconStart={<Filter className="h-5 w-5 text-muted-foreground" />}></Button>
                </div>
             </div>
          </Card>

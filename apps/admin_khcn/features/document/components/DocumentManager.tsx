@@ -105,9 +105,7 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
               </div>
               
               {/* Nút gọi Modal Upload */}
-              <Button onClick={onOpenUploadModal} className="w-full sm:w-auto shadow-sm">
-                <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản mới
-              </Button>
+              <Button onClick={onOpenUploadModal} className="w-full sm:w-auto shadow-sm" iconStart={<Plus className="h-4 w-4" />}>Vào sổ văn bản mới</Button>
             </div>
 
             <CardContent className="p-0">
@@ -147,9 +145,7 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                        className: "text-right",
                        cell: () => (
                          <div className="flex justify-end">
-                           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                             <Eye className="h-4 w-4" />
-                           </Button>
+                           <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" iconStart={<Eye className="h-4 w-4" />}></Button>
                          </div>
                        ),
                      }
@@ -176,7 +172,7 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={onOpenConsultationModal}><Plus className="h-4 w-4 mr-2"/> Tạo luồng lấy ý kiến</Button>
+              <Button onClick={onOpenConsultationModal} iconStart={<Plus className="h-4 w-4" />}>Tạo luồng lấy ý kiến</Button>
             </div>
             
             <div className="divide-y bg-background">
@@ -213,12 +209,8 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                   </div>
 
                   <div className="flex flex-col gap-2 justify-center">
-                    <Button variant="outline" className="w-full justify-start h-9 bg-background">
-                      <Download className="h-4 w-4 mr-2 text-muted-foreground" /> Tải File Dự thảo gốc
-                    </Button>
-                    <Button variant="default" className="w-full justify-start h-9">
-                      <CheckCircle2 className="h-4 w-4 mr-2" /> Tổng hợp giải trình
-                    </Button>
+                    <Button variant="outline" className="w-full justify-start h-9 bg-background" iconStart={<Download className="h-4 w-4  text-muted-foreground" />}>Tải File Dự thảo gốc</Button>
+                    <Button variant="default" className="w-full justify-start h-9" iconStart={<CheckCircle2 className="h-4 w-4" />}>Tổng hợp giải trình</Button>
                   </div>
                 </div>
               </div>
@@ -276,9 +268,7 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                 </SelectContent>
               </Select>
               <div className="flex-1" />
-              <Button variant="outline" className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10" onClick={onOpenFinanceModal}>
-                <Upload className="h-4 w-4 mr-2" /> Đăng tải báo cáo
-              </Button>
+              <Button variant="outline" className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10" onClick={onOpenFinanceModal} iconStart={<Upload className="h-4 w-4" />}>Đăng tải báo cáo</Button>
             </div>
             
              <div className="w-full">
@@ -314,9 +304,7 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                      className: "text-right w-32",
                      cell: () => (
                        <div className="flex justify-end">
-                         <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
-                           <Download className="h-4 w-4 mr-1.5" /> PDF
-                         </Button>
+                         <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10" iconStart={<Download className="h-4 w-4 .5" />}>PDF</Button>
                        </div>
                      ),
                    }

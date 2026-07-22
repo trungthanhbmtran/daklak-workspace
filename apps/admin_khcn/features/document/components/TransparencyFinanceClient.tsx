@@ -158,9 +158,7 @@ export function TransparencyFinanceClient() {
               <strong className="text-foreground">Thông tư 61/2017/TT-BTC</strong>.
             </p>
           </div>
-          <Button className="shadow-sm font-semibold h-10 px-5">
-            <Plus className="h-4 w-4 mr-2" /> Tạo hồ sơ công khai mới
-          </Button>
+          <Button className="shadow-sm font-semibold h-10 px-5" iconStart={<Plus className="h-4 w-4" />}>Tạo hồ sơ công khai mới</Button>
         </div>
 
         {/* Stat cards */}
@@ -206,9 +204,7 @@ export function TransparencyFinanceClient() {
               <SelectItem value="FUNDS">Công khai các Quỹ</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="h-10 text-muted-foreground">
-            <Filter className="h-4 w-4 mr-2" /> Lọc thêm
-          </Button>
+          <Button variant="outline" className="h-10 text-muted-foreground" iconStart={<Filter className="h-4 w-4" />}>Lọc thêm</Button>
         </div>
 
         <CardContent className="p-0">

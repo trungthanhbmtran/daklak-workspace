@@ -63,9 +63,7 @@ export function DocumentsDashboardClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="bg-background shadow-sm">
-            <BarChart3 className="h-4 w-4 mr-2" /> Báo cáo thống kê
-          </Button>
+          <Button variant="outline" className="bg-background shadow-sm" iconStart={<BarChart3 className="h-4 w-4" />}>Báo cáo thống kê</Button>
           <Link href="/services/documents/incoming">
             <Button className="shadow-sm">
               Vào sổ văn bản ngay <ArrowRight className="h-4 w-4 ml-2" />

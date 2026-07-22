@@ -40,9 +40,7 @@ export function EmployeeListClient() {
         </div>
         {allowedActions.includes('CREATE') && (
           <Link href="/services/hrm/employees/create">
-            <Button className="rounded-full bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
-              <Plus className="mr-2 h-4 w-4" /> Thêm nhân sự
-            </Button>
+            <Button className="rounded-full bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6" iconStart={<Plus className="h-4 w-4" />}>Thêm nhân sự</Button>
           </Link>
         )}
       </div>
@@ -181,15 +179,11 @@ export function EmployeeListClient() {
                 cell: (emp) => (
                   <div className="flex justify-end gap-2">
                     <Link href={`/services/hrm/employees/${emp.id}`}>
-                      <Button variant="ghost" size="icon" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-500/10 rounded-full" title="Xem chi tiết">
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <Button variant="ghost" size="icon" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-500/10 rounded-full" title="Xem chi tiết" iconStart={<Eye className="h-4 w-4" />}></Button>
                     </Link>
                     {allowedActions.includes('EDIT') && (
                       <Link href={`/services/hrm/employees/${emp.id}/edit`}>
-                        <Button variant="ghost" size="icon" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-500/10 rounded-full" title="Chỉnh sửa">
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <Button variant="ghost" size="icon" className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-500/10 rounded-full" title="Chỉnh sửa" iconStart={<Edit className="h-4 w-4" />}></Button>
                       </Link>
                     )}
                     {allowedActions.includes('DELETE') && (

@@ -162,9 +162,7 @@ export function MinutesForm({ onComplete, onCancel }: { onComplete: () => void, 
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAttendee())}
                   className="bg-muted/5 border-dashed"
                 />
-                <Button type="button" size="icon" onClick={addAttendee} variant="secondary">
-                  <UserPlus className="h-4 w-4" />
-                </Button>
+                <Button type="button" size="icon" onClick={addAttendee} variant="secondary" iconStart={<UserPlus className="h-4 w-4" />}></Button>
               </div>
               <div className="flex flex-wrap gap-2 p-4 border rounded-xl bg-muted/5 min-h-[60px]">
                 {attendees.map((name, i) => (

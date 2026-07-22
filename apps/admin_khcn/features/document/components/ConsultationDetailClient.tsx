@@ -31,7 +31,7 @@ export function ConsultationDetailClient({ consultationId }: Props) {
       <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
       <h2 className="text-xl font-bold">Không tìm thấy đợt lấy ý kiến</h2>
       <Link href="/services/documents/consultations">
-        <Button variant="outline"><ChevronLeft className="h-4 w-4 mr-2" /> Quay lại danh sách</Button>
+        <Button variant="outline" iconStart={<ChevronLeft className="h-4 w-4" />}>Quay lại danh sách</Button>
       </Link>
     </div>
   );
@@ -57,7 +57,7 @@ export function ConsultationDetailClient({ consultationId }: Props) {
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Button variant="outline" size="sm" className="font-bold"><Download className="h-4 w-4 mr-2" /> Tải dự thảo</Button>
+          <Button variant="outline" size="sm" className="font-bold" iconStart={<Download className="h-4 w-4" />}>Tải dự thảo</Button>
           <Button size="sm" className="font-bold bg-primary shadow-lg shadow-primary/20">Tổng hợp báo cáo</Button>
         </div>
       </div>
@@ -101,7 +101,7 @@ export function ConsultationDetailClient({ consultationId }: Props) {
                             </Badge>
                           </div>
                           {res.content && <div className="bg-muted/30 p-3 rounded-lg text-sm italic text-muted-foreground border mt-2">&ldquo;{res.content}&rdquo;</div>}
-                          {res.fileId && <Button variant="link" size="sm" className="h-auto p-0 mt-2 text-primary font-bold"><Download className="h-3 w-3 mr-1" /> Tải tệp đính kèm</Button>}
+                          {res.fileId && <Button variant="link" size="sm" className="h-auto p-0 mt-2 text-primary font-bold" iconStart={<Download className="h-3 w-3" />}>Tải tệp đính kèm</Button>}
                         </div>
                       ))}
                     </div>

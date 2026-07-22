@@ -161,9 +161,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
           }
         </CardTitle>
         {!isCreate && selectedId && (
-          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={isDeleting}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={isDeleting} iconStart={<Trash2 className="h-4 w-4" />}></Button>
         )}
       </CardHeader>
 

@@ -95,9 +95,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button type="button" onClick={handleAddTemplate} className="w-full sm:w-auto h-9 px-4 gap-2 text-xs">
-                            <Plus className="w-3.5 h-3.5" /> Thêm mới
-                        </Button>
+                        <Button type="button" onClick={handleAddTemplate} className="w-full sm:w-auto h-9 px-4 gap-2 text-xs" iconStart={<Plus className="w-3.5 h-3.5" />}>Thêm mới</Button>
                     </div>
                 </div>
 
@@ -158,9 +156,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                                 <div className="flex items-center gap-1 shrink-0 self-end sm:self-center">
                                     {editingId === item.id ? (
                                         <>
-                                            <Button variant="ghost" size="icon" onClick={handleSaveEdit} className="text-primary hover:bg-primary/10 h-8 w-8">
-                                                <Save className="w-4 h-4" />
-                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={handleSaveEdit} className="text-primary hover:bg-primary/10 h-8 w-8" iconStart={<Save className="w-4 h-4" />}></Button>
                                             <Button variant="ghost" size="icon" onClick={handleCancelEdit} className="text-muted-foreground hover:bg-muted h-8 w-8">
                                                 <X className="w-4 h-4" />
                                             </Button>

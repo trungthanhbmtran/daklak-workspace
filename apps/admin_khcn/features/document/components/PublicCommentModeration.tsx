@@ -103,9 +103,7 @@ const CommentCard = React.memo(function CommentCard({ comment }: CommentCardProp
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" iconStart={<MoreHorizontal className="h-4 w-4" />}></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 p-1.5 rounded-xl shadow-xl">
                   <DropdownMenuItem

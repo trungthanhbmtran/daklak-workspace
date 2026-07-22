@@ -79,10 +79,7 @@ export function MasterPlanListClient() {
             </CardDescription>
           </div>
           <div className="mt-4 sm:mt-0">
-            <Button onClick={handleCreateNew} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Tạo Dự án Mới
-            </Button>
+            <Button onClick={handleCreateNew} className="gap-2" iconStart={<Plus className="w-4 h-4" />}>Tạo Dự án Mới</Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">

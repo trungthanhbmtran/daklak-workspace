@@ -260,9 +260,7 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
 
       <TableCell>
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={handleOpenDetail}>
-            <Eye className="w-4 h-4 mr-1" /> Chi tiết
-          </Button>
+          <Button variant="outline" size="sm" onClick={handleOpenDetail} iconStart={<Eye className="w-4 h-4" />}>Chi tiết</Button>
           {feedback.status !== "PROCESSED" && (
             <Button
               variant="ghost"
@@ -270,9 +268,7 @@ const FeedbackRow = React.memo(function FeedbackRow({ feedback, onOpenDetail }: 
               className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
               disabled={quickProcessMutation.isPending}
               onClick={handleQuickProcess}
-            >
-              <Check className="w-4 h-4" />
-            </Button>
+             iconStart={<Check className="w-4 h-4" />}></Button>
           )}
         </div>
       </TableCell>

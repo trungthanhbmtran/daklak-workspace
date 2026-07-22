@@ -137,17 +137,13 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDelete }: DocumentR
             variant="secondary"
             size="icon"
             className="h-9 w-9 rounded-xl shadow-sm hover:bg-emerald-600 hover:text-white transition-colors"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
+           iconStart={<Eye className="h-4 w-4" />}></Button>
           <Button
             variant="secondary"
             size="icon"
             className="h-9 w-9 rounded-xl shadow-sm hover:bg-rose-600 hover:text-white transition-colors"
             onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+           iconStart={<Trash2 className="h-4 w-4" />}></Button>
         </div>
       </TableCell>
     </TableRow>
@@ -268,9 +264,7 @@ export function OutgoingDocumentsClient() {
         <Button
           onClick={handleOpenModal}
           className="rounded-xl shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 font-bold px-6 h-12 transition-all active:scale-95"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Phát hành văn bản mới
-        </Button>
+         iconStart={<Plus className="h-4 w-4" />}>Phát hành văn bản mới</Button>
       </div>
 
       {/* Table — only re-renders when documents/loading/error changes */}

@@ -40,7 +40,7 @@ export function PendingConsultationsClient() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Link href="/services/documents/consultations">
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full"><ArrowLeft className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" iconStart={<ArrowLeft className="h-4 w-4" />} />
             </Link>
             <h2 className="text-2xl font-bold tracking-tight text-foreground">Văn bản chờ Ý kiến</h2>
           </div>
@@ -54,7 +54,7 @@ export function PendingConsultationsClient() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Tìm dự thảo..." className="pl-9 h-10 bg-muted/20 border-none" />
           </div>
-          <Button variant="outline" className="h-10"><Filter className="h-4 w-4 mr-2" /> Lọc</Button>
+          <Button variant="outline" className="h-10" iconStart={<Filter className="h-4 w-4" />}>Lọc</Button>
         </div>
 
         <CardContent className="p-0">
@@ -80,7 +80,7 @@ export function PendingConsultationsClient() {
 
                 <div className="shrink-0 flex gap-2">
                   <Button variant="outline" className="rounded-xl font-bold text-xs h-9">Góp ý ngay</Button>
-                  <Button variant="ghost" size="icon" className="rounded-full h-9 w-9"><Eye className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="rounded-full h-9 w-9" iconStart={<Eye className="h-4 w-4" />} />
                 </div>
               </div>
             ))}

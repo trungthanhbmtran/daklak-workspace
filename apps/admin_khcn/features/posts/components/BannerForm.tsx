@@ -194,9 +194,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     <div className="w-full max-w-full px-4 md:px-8 space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-background/80 backdrop-blur-md py-4 border-b">
         <div className="flex items-center gap-4">
-          <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm" iconStart={<ArrowLeft className="h-4 w-4" />}></Button>
           <div>
             <Heading level="h2" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa Banner" : "Thêm Banner mới"}</Heading>
             <Text variant="small" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Cấu hình trình chiếu & liên kết</Text>

@@ -119,8 +119,8 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" /> In phiếu</Button>
-          <Button variant="outline" size="sm" onClick={handleDownload}><Download className="h-4 w-4 mr-2" /> Tải về</Button>
+          <Button variant="outline" size="sm" onClick={handlePrint} iconStart={<Printer className="h-4 w-4" />}>In phiếu</Button>
+          <Button variant="outline" size="sm" onClick={handleDownload} iconStart={<Download className="h-4 w-4" />}>Tải về</Button>
         </div>
       </div>
 
@@ -240,9 +240,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                 >
                   <CheckCheck className="h-3.5 w-3.5 mr-2" /> Kết thúc hồ sơ
                 </Button>
-                <Button variant="outline" className="w-full text-foreground border-border hover:bg-muted col-span-2 h-9 text-xs">
-                  <FileSignature className="h-3.5 w-3.5 mr-2" /> Ký số & Trình duyệt (VGCA)
-                </Button>
+                <Button variant="outline" className="w-full text-foreground border-border hover:bg-muted col-span-2 h-9 text-xs" iconStart={<FileSignature className="h-3.5 w-3.5" />}>Ký số & Trình duyệt (VGCA)</Button>
               </div>
             </CardContent>
           </Card>

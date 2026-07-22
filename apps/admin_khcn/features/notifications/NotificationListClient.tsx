@@ -80,7 +80,7 @@ export function NotificationListClient() {
           <Input placeholder="Tìm kiếm thông báo..." className="pl-10 bg-background border-none" />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-full"><Filter className="h-4 w-4 mr-2"/> Lọc</Button>
+          <Button variant="outline" size="sm" className="rounded-full" iconStart={<Filter className="h-4 w-4" />}>Lọc</Button>
           <Button variant="secondary" size="sm" className="rounded-full bg-muted">Chưa đọc</Button>
           <Button variant="ghost" size="sm" className="rounded-full">Tất cả</Button>
         </div>

@@ -313,9 +313,7 @@ export function ManualPlanSelectorByRankClient() {
                                 onClick={handleAssignTask}
                                 disabled={!selectedTaskId}
                                 className="w-full sm:w-auto h-10 px-5 rounded-xl font-semibold shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
-                            >
-                                <Plus className="w-4 h-4 mr-2" /> Thêm
-                            </Button>
+                             iconStart={<Plus className="w-4 h-4" />}>Thêm</Button>
                         </div>
                     </div>
 

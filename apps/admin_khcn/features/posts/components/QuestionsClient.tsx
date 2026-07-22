@@ -197,9 +197,7 @@ const AnswerDialog = React.memo(function AnswerDialog({
               className="bg-blue-600 hover:bg-blue-700"
               onClick={handleAnswer}
               disabled={answerMutation.isPending}
-            >
-              <Send className="w-4 h-4 mr-2" /> Gửi phản hồi
-            </Button>
+             iconStart={<Send className="w-4 h-4" />}>Gửi phản hồi</Button>
           )}
         </DialogFooter>
       </DialogContent>
@@ -272,10 +270,7 @@ const QuestionRow = React.memo(function QuestionRow({
           size="sm"
           className={question.status !== "ANSWERED" ? "bg-blue-600 hover:bg-blue-700" : ""}
           onClick={handleClick}
-        >
-          <MessageCircle className="w-3.5 h-3.5 mr-1" />
-          {question.status === "ANSWERED" ? "Xem lại" : "Trả lời"}
-        </Button>
+         iconStart={<MessageCircle className="w-3.5 h-3.5" />}>{question.status === "ANSWERED" ? "Xem lại" : "Trả lời"}</Button>
       </TableCell>
     </TableRow>
   );

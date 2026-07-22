@@ -164,10 +164,10 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
           return (
             <Button
               key={module.id}
+              variant="outline"
               onClick={() => setActiveView(module.id as any)}
-              className="text-left group block outline-none w-full"
+              className="h-auto p-5 md:p-6 flex flex-col items-start text-left group w-full rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm whitespace-normal"
             >
-              <div className={`h-full rounded-2xl bg-card border border-border p-5 md:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm flex flex-col`}>
                 <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl ${style.wrapper} border ${style.border} flex items-center justify-center mb-4 md:mb-6 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
                   <module.icon className={`w-6 h-6 md:w-7 md:h-7 ${style.icon}`} />
                 </div>
@@ -180,11 +180,10 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
                   {module.description}
                 </p>
                 
-                <div className="flex items-center text-xs md:text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors mt-auto uppercase tracking-wide">
+                <div className="flex items-center text-xs md:text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors mt-auto uppercase tracking-wide w-full">
                   Truy cập phân hệ
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </div>
-              </div>
             </Button>
           );
         })}

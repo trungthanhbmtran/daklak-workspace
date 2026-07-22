@@ -115,9 +115,7 @@ const ReportRow = React.memo(function ReportRow({ report, fiscalYear }: ReportRo
               </a>
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" iconStart={<ArrowUpRight className="h-4 w-4 text-muted-foreground" />}></Button>
         </div>
       </TableCell>
     </TableRow>
@@ -160,12 +158,8 @@ export function TransparencyClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="shadow-sm">
-            <TrendingUp className="h-4 w-4 mr-2" /> Thống kê báo cáo
-          </Button>
-          <Button className="shadow-sm bg-primary hover:bg-primary/90" onClick={handleOpenModal}>
-            <Plus className="h-4 w-4 mr-2" /> Đăng tải báo cáo mới
-          </Button>
+          <Button variant="outline" className="shadow-sm" iconStart={<TrendingUp className="h-4 w-4" />}>Thống kê báo cáo</Button>
+          <Button className="shadow-sm bg-primary hover:bg-primary/90" onClick={handleOpenModal} iconStart={<Plus className="h-4 w-4" />}>Đăng tải báo cáo mới</Button>
         </div>
       </div>
 

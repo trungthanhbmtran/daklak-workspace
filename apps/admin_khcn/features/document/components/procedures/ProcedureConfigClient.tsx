@@ -134,9 +134,7 @@ export function ProcedureConfigClient() {
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Cấu hình Mẫu hồ sơ (TTHC)</h2>
           <p className="text-sm sm:text-base text-muted-foreground mt-2">Định nghĩa danh sách các thủ tục và biểu mẫu, thành phần file yêu cầu.</p>
         </div>
-        <Button onClick={openCreateModal} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Plus className="mr-2 h-4 w-4" /> Thêm Mẫu mới
-        </Button>
+        <Button onClick={openCreateModal} className="bg-primary hover:bg-primary/90 text-primary-foreground" iconStart={<Plus className="h-4 w-4" />}>Thêm Mẫu mới</Button>
       </div>
 
       {loading ? (
@@ -158,9 +156,7 @@ export function ProcedureConfigClient() {
                   <CardTitle className="text-xl font-bold text-foreground">{proc.name}</CardTitle>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" iconStart={<Edit className="h-4 w-4" />}></Button>
                   <Button onClick={() => handleDelete(proc.id)} variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -226,9 +222,7 @@ export function ProcedureConfigClient() {
             <div className="mt-6">
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm font-medium text-foreground">Các thành phần hồ sơ yêu cầu</label>
-                <Button onClick={handleAddComponent} variant="outline" size="sm" className="h-8 text-xs">
-                  <Plus className="mr-1 h-3 w-3" /> Thêm tệp
-                </Button>
+                <Button onClick={handleAddComponent} variant="outline" size="sm" className="h-8 text-xs" iconStart={<Plus className="h-3 w-3" />}>Thêm tệp</Button>
               </div>
               <div className="space-y-2 bg-muted/30 p-4 rounded-xl border border-border">
                 {components.map((c, index) => (

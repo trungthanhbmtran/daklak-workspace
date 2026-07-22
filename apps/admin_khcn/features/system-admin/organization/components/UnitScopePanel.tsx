@@ -78,10 +78,7 @@ export function UnitScopePanel() {
             </span>
           )}
           {dirty && (
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleReset}>
-              <RotateCcw className="h-3.5 w-3.5 mr-1" />
-              Hoàn tác
-            </Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleReset} iconStart={<RotateCcw className="h-3.5 w-3.5" />}>Hoàn tác</Button>
           )}
           <Button
             size="sm"

@@ -80,9 +80,7 @@ const DossierCard = React.memo(function DossierCard({ hs }: DossierCardProps) {
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 rounded-full"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
+               iconStart={<ChevronRight className="h-5 w-5" />}></Button>
             </Link>
           </div>
         </div>
@@ -114,9 +112,7 @@ export function DossierListClient() {
             Theo dõi tiến độ, tiếp nhận và yêu cầu bổ sung thành phần hồ sơ.
           </p>
         </div>
-        <Button onClick={handleOpenModal} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Plus className="mr-2 h-4 w-4" /> Tiếp nhận hồ sơ mới
-        </Button>
+        <Button onClick={handleOpenModal} className="bg-primary hover:bg-primary/90 text-primary-foreground" iconStart={<Plus className="h-4 w-4" />}>Tiếp nhận hồ sơ mới</Button>
       </div>
 
       {/* Filter bar */}
@@ -129,9 +125,7 @@ export function DossierListClient() {
           />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-full">
-            <Filter className="h-4 w-4 mr-2" /> Lọc Trạng thái
-          </Button>
+          <Button variant="outline" size="sm" className="rounded-full" iconStart={<Filter className="h-4 w-4" />}>Lọc Trạng thái</Button>
           <Button variant="secondary" size="sm" className="rounded-full bg-muted text-foreground hover:bg-muted/80">
             Đang xử lý
           </Button>

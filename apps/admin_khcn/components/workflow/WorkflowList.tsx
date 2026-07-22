@@ -203,9 +203,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
             Thiết kế và giám sát các quy trình nghiệp vụ tự động trong hệ thống.
           </p>
         </div>
-        <Button onClick={onCreate} className="rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto">
-          <Plus className="mr-2 h-4 w-4" /> Tạo quy trình mới
-        </Button>
+        <Button onClick={onCreate} className="rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto" iconStart={<Plus className="h-4 w-4" />}>Tạo quy trình mới</Button>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
@@ -256,9 +254,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" iconStart={<MoreHorizontal className="h-4 w-4" />}></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="rounded-xl border-border/60">
                     <DropdownMenuItem onClick={() => onEdit(workflow.id)} className="rounded-lg">

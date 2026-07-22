@@ -86,9 +86,7 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
           <label className="text-xs font-semibold text-muted-foreground uppercase block">
             Bộ tạo điều kiện (Visual Rule Builder)
           </label>
-          <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary hover:bg-primary/10" onClick={addCondition}>
-            <Plus className="h-3 w-3 mr-1" /> Thêm
-          </Button>
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary hover:bg-primary/10" onClick={addCondition} iconStart={<Plus className="h-3 w-3" />}>Thêm</Button>
         </div>
         
         <div className="bg-muted border border-border rounded-lg p-3 space-y-3">

@@ -114,9 +114,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
       <Button
         onClick={onNavigateToCreate}
         className="w-full lg:w-auto h-10 px-6 shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold uppercase text-[11px] tracking-wide rounded-xl transition-all duration-300"
-      >
-        <Plus className="h-4 w-4 mr-2 stroke-[3px]" /> Viết bài mới
-      </Button>
+       iconStart={<Plus className="h-4 w-4  stroke-[3px]" />}>Viết bài mới</Button>
     </Card>
   );
 }

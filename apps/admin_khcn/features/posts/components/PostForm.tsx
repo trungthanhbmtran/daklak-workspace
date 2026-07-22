@@ -277,9 +277,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
       <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1400px] mx-auto space-y-6 pb-20 p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-background/80 backdrop-blur-md py-4 border-b">
           <div className="flex items-center gap-4">
-            <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
+            <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm" iconStart={<ArrowLeft className="h-4 w-4" />}></Button>
             <div>
               <Heading level="h1" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa nội dung" : "Tạo bài viết mới"}</Heading>
               <Text className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Bản thảo nội dung & cấu hình</Text>

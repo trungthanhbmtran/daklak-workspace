@@ -46,9 +46,7 @@ export const EndpointSidebar = memo(({ endpoints, selectedId, onSelect, onAdd, s
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button size="sm" variant="outline" onClick={onAdd}>
-          <Plus className="w-4 h-4" />
-        </Button>
+        <Button size="sm" variant="outline" onClick={onAdd} iconStart={<Plus className="w-4 h-4" />}></Button>
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
         {filteredEndpoints.length === 0 ? (

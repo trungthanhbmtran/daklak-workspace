@@ -21,9 +21,7 @@ export function SidebarHeader({ onAddPageClick }: SidebarHeaderProps) {
                 size="icon"
                 onClick={onAddPageClick}
                 className="w-8 h-8 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-100 dark:shadow-none transition-all hover:rotate-90"
-            >
-                <Plus className="w-4 h-4" />
-            </Button>
+             iconStart={<Plus className="w-4 h-4" />}></Button>
         </div>
     );
 }

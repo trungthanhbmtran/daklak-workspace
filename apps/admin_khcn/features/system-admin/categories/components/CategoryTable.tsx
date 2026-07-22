@@ -38,9 +38,7 @@ const CategoryRow = React.memo(function CategoryRow({ item, onEdit, onDelete }: 
       <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <Button variant="ghost" className="h-8 w-8 p-0" iconStart={<MoreHorizontal className="h-4 w-4" />}></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Thao tác</DropdownMenuLabel>

@@ -79,10 +79,7 @@ export function IntegrationManager() {
           <Button
             onClick={handleOpenCreate}
             className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 px-6 h-10"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm API Đầu Vào
-          </Button>
+           iconStart={<Plus className="w-4 h-4" />}>Thêm API Đầu Vào</Button>
         </div>
       </div>
 

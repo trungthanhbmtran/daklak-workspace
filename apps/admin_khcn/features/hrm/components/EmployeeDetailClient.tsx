@@ -60,9 +60,7 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
       <div className="max-w-[1200px] mx-auto w-full flex flex-col gap-6">
         <div>
           <Link href="/services/hrm/employees">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground -ml-4">
-              <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
-            </Button>
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground -ml-4" iconStart={<ArrowLeft className="h-4 w-4" />}>Quay lại danh sách</Button>
           </Link>
         </div>
 

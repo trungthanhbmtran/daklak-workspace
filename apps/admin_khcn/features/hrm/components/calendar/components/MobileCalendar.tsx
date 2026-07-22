@@ -159,15 +159,11 @@ export function MobileCalendar() {
             </Heading>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={prevDate}>
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
+            <Button variant="ghost" size="icon" onClick={prevDate} iconStart={<ChevronLeft className="w-5 h-5" />}></Button>
             <Button variant="ghost" size="sm" onClick={goToToday} className="text-xs">
               Hôm nay
             </Button>
-            <Button variant="ghost" size="icon" onClick={nextDate}>
-              <ChevronRight className="w-5 h-5" />
-            </Button>
+            <Button variant="ghost" size="icon" onClick={nextDate} iconStart={<ChevronRight className="w-5 h-5" />}></Button>
           </div>
         </div>
 

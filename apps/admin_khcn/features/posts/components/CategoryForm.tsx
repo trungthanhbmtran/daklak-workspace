@@ -201,9 +201,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     <div className="max-w-5xl mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          <Button variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm" iconStart={<ArrowLeft className="h-4 w-4" />}></Button>
           <div>
             <Heading level="h1" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa chuyên mục" : "Tạo chuyên mục mới"}</Heading>
             <Text className="text-muted-foreground font-normal">Phân loại nội dung để người dùng dễ dàng tìm kiếm.</Text>

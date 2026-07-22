@@ -133,9 +133,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       {/* Sidebar Configuration */}
       <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex flex-col">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={onBack} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 -ml-2">
-            <ChevronLeft className="w-4 h-4 mr-1" /> Trở lại
-          </Button>
+          <Button variant="ghost" size="sm" onClick={onBack} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 -ml-2" iconStart={<ChevronLeft className="w-4 h-4" />}>Trở lại</Button>
           <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400 font-semibold text-sm">
             <Settings className="w-4 h-4" /> Cấu hình
           </div>
@@ -243,9 +241,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
         </div>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-          <Button onClick={handleSave} className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20">
-            <Save className="w-4 h-4 mr-2" /> Lưu Báo Cáo
-          </Button>
+          <Button onClick={handleSave} className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20" iconStart={<Save className="w-4 h-4" />}>Lưu Báo Cáo</Button>
         </div>
       </div>
 
@@ -256,9 +252,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             <LayoutGrid className="w-5 h-5 text-violet-500" />
             Xem trước (Preview)
           </h3>
-          <Button variant="outline" size="sm" className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30">
-            <Play className="w-4 h-4 mr-2" /> Làm mới dữ liệu
-          </Button>
+          <Button variant="outline" size="sm" className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30" iconStart={<Play className="w-4 h-4" />}>Làm mới dữ liệu</Button>
         </div>
         
         <div className="flex-1 p-8 overflow-y-auto flex flex-col items-center justify-center">

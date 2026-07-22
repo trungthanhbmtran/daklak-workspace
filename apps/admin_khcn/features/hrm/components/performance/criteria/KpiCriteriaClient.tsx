@@ -278,9 +278,7 @@ export function KpiCriteriaClient() {
                 className="w-8 h-8"
                 onClick={handleNextPage}
                 disabled={!(meta?.page < meta?.totalPages)}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+               iconStart={<ChevronRight className="w-4 h-4" />}></Button>
             </div>
           </div>
         </div>

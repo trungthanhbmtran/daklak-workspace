@@ -117,9 +117,7 @@ const ConsultationRow = React.memo(function ConsultationRow({ item, stats }: Con
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link href={`/services/documents/consultations/${item.id}`}>
-                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20">
-                    <Eye className="h-5 w-5" />
-                  </Button>
+                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20" iconStart={<Eye className="h-5 w-5" />}></Button>
                 </Link>
               </TooltipTrigger>
               <TooltipContent className="rounded-xl font-bold bg-foreground text-background">Xem chi tiết</TooltipContent>
@@ -181,9 +179,7 @@ export function ConsultationManageClient() {
         <Button
         onClick={handleOpenModal}
           className="flex-1 md:flex-none shadow-xl shadow-primary/20 h-12 px-8 font-black rounded-2xl bg-primary hover:bg-primary/90 transition-all active:scale-95"
-        >
-          <Plus className="h-5 w-5 mr-2 stroke-[3px]" /> KHỞI TẠO LUỒNG MỚI
-        </Button>
+         iconStart={<Plus className="h-5 w-5  stroke-[3px]" />}>KHỞI TẠO LUỒNG MỚI</Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -232,13 +228,9 @@ export function ConsultationManageClient() {
               </SelectContent>
             </Select>
             {(searchTerm || statusFilter !== "ALL") && (
-              <Button variant="ghost" onClick={resetFilters} className="h-12 rounded-2xl px-4 font-bold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
-                <RotateCcw className="h-4 w-4 mr-2" /> ĐẶT LẠI
-              </Button>
+              <Button variant="ghost" onClick={resetFilters} className="h-12 rounded-2xl px-4 font-bold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all" iconStart={<RotateCcw className="h-4 w-4" />}>ĐẶT LẠI</Button>
             )}
-            <Button variant="outline" className="h-12 rounded-2xl border-muted-foreground/20 font-bold px-6">
-              <Filter className="h-4 w-4 mr-2" /> BỘ LỌC KHÁC
-            </Button>
+            <Button variant="outline" className="h-12 rounded-2xl border-muted-foreground/20 font-bold px-6" iconStart={<Filter className="h-4 w-4" />}>BỘ LỌC KHÁC</Button>
           </div>
         </div>
 

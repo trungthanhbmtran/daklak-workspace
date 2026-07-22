@@ -295,7 +295,7 @@ const ColorAndLinkPlugin = () => {
               <Label htmlFor="target-blank" className="text-xs text-slate-600 font-medium cursor-pointer">Mở trong Tab mới</Label>
             </div>
             <div className="flex justify-end gap-2 mt-1">
-              {isLink && (<Button type="button" variant="ghost" size="sm" className="h-8 text-xs text-red-600 hover:bg-red-50" onClick={removeLink}><Unlink className="h-3.5 w-3.5 mr-1" /> Gỡ Link</Button>)}
+              {isLink && (<Button type="button" variant="ghost" size="sm" className="h-8 text-xs text-red-600 hover:bg-red-50" onClick={removeLink} iconStart={<Unlink className="h-3.5 w-3.5" />}>Gỡ Link</Button>)}
               <Button type="button" size="sm" className="h-8 px-4 text-xs bg-blue-600 hover:bg-blue-700 text-white" onClick={insertLink}>Áp dụng</Button>
             </div>
           </div>

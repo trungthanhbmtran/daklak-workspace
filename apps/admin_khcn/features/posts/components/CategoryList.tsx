@@ -173,9 +173,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
       cell: (cat) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="group-hover:bg-background border-transparent transition-colors">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <Button variant="ghost" size="icon" className="group-hover:bg-background border-transparent transition-colors" iconStart={<MoreHorizontal className="h-4 w-4" />}></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={() => onNavigateToEdit(cat.id)}>
@@ -201,9 +199,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
             <Heading level="h1" className="font-bold tracking-tight">Chuyên mục bài viết</Heading>
             <Text className="text-muted-foreground">Quản lý cấu trúc phân cấp các bài viết trên hệ thống.</Text>
           </div>
-          <Button onClick={onNavigateToCreate} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Plus className="mr-2 h-4 w-4" /> Thêm chuyên mục
-          </Button>
+          <Button onClick={onNavigateToCreate} className="bg-primary hover:bg-primary/90 text-primary-foreground" iconStart={<Plus className="h-4 w-4" />}>Thêm chuyên mục</Button>
         </div>
 
         <Card className="border-border bg-card shadow-sm rounded-2xl overflow-hidden">

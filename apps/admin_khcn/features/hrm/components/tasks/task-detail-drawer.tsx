@@ -130,10 +130,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     </Button>
                   )}
                   {!isCompleted && (
-                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700">
-                      <BellRing className="w-3 h-3 mr-1" />
-                      Đôn đốc
-                    </Button>
+                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700" iconStart={<BellRing className="w-3 h-3" />}>Đôn đốc</Button>
                   )}
                 </div>
               </div>
@@ -191,10 +188,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               Công việc này vừa được giao. Vui lòng xác nhận tiếp nhận để có thể bắt đầu xử lý (phân rã công việc, cập nhật tiến độ, v.v.), hoặc từ chối nếu không đúng thẩm quyền.
             </Text>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleAcceptTask} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Nhận việc
-              </Button>
+              <Button onClick={handleAcceptTask} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm" iconStart={<CheckCircle2 className="w-4 h-4" />}>Nhận việc</Button>
               <Button onClick={handleRejectTask} size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 bg-white">
                 Từ chối
               </Button>

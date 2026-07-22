@@ -271,9 +271,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
       cell: (banner) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="group-hover:bg-background border-transparent transition-colors">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <Button variant="ghost" size="icon" className="group-hover:bg-background border-transparent transition-colors" iconStart={<MoreHorizontal className="h-4 w-4" />}></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={() => onNavigateToEdit(banner.id)}>
@@ -299,9 +297,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
             <Heading level="h2" className="font-bold tracking-tight">Quản lý Banner/Quảng cáo</Heading>
             <Text variant="small" className="text-muted-foreground mt-0.5 font-normal">Phân phối banner hình ảnh và thiết kế khẩu hiệu tuyên truyền đồng bộ</Text>
           </div>
-          <Button onClick={onNavigateToCreate} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm rounded-xl px-5 font-bold transition-all">
-            <Plus className="h-4 w-4 mr-2" /> Thêm banner mới
-          </Button>
+          <Button onClick={onNavigateToCreate} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm rounded-xl px-5 font-bold transition-all" iconStart={<Plus className="h-4 w-4" />}>Thêm banner mới</Button>
         </div>
 
         {/* Elegant Slideshow Configuration Panel */}

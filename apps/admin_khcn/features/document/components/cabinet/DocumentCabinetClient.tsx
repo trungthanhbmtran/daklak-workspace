@@ -96,9 +96,7 @@ export function DocumentCabinetClient() {
           <Input placeholder="Tìm kiếm tài liệu trong tủ..." className="pl-10 bg-background border-input text-foreground placeholder:text-muted-foreground" />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-full">
-            <Filter className="h-4 w-4 mr-2" /> Lọc theo nhãn
-          </Button>
+          <Button variant="outline" size="sm" className="rounded-full" iconStart={<Filter className="h-4 w-4" />}>Lọc theo nhãn</Button>
           <Button variant="secondary" size="sm" className="rounded-full bg-muted text-foreground hover:bg-muted/80">Cá nhân</Button>
           <Button variant="ghost" size="sm" className="rounded-full">Cơ quan</Button>
         </div>
@@ -147,9 +145,7 @@ export function DocumentCabinetClient() {
               <Card key={file.id} className="group border-border bg-card shadow-sm hover:shadow-md hover:border-primary/50 transition-all">
                 <CardContent className="p-5 flex flex-col items-center text-center">
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" iconStart={<MoreVertical className="h-4 w-4" />}></Button>
                   </div>
                   <div className="mb-4 mt-2 p-4 bg-muted/30 rounded-full group-hover:scale-110 transition-transform">
                     {getFileIcon(file.fileType || file.type || "pdf")}

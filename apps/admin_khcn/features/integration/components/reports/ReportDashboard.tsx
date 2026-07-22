@@ -128,9 +128,7 @@ export function ReportDashboard() {
                   <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{widget.title}</h3>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" iconStart={<MoreVertical className="w-4 h-4" />}></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem className="text-red-600 cursor-pointer" onClick={() => handleDeleteWidget(widget.id)}>

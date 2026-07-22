@@ -178,9 +178,7 @@ const CommentRow = React.memo(function CommentRow({ comment, onRequestDelete }: 
                 className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                 disabled={isPending}
                 onClick={handleApprove}
-              >
-                <Check className="w-4 h-4" />
-              </Button>
+               iconStart={<Check className="w-4 h-4" />}></Button>
             </TooltipTrigger>
             <TooltipContent>Duyệt</TooltipContent>
           </Tooltip>
@@ -208,9 +206,7 @@ const CommentRow = React.memo(function CommentRow({ comment, onRequestDelete }: 
                 className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
                 disabled={isPending}
                 onClick={handleSpam}
-              >
-                <ShieldAlert className="w-4 h-4" />
-              </Button>
+               iconStart={<ShieldAlert className="w-4 h-4" />}></Button>
             </TooltipTrigger>
             <TooltipContent>Đánh dấu Spam</TooltipContent>
           </Tooltip>
@@ -224,9 +220,7 @@ const CommentRow = React.memo(function CommentRow({ comment, onRequestDelete }: 
                 size="icon-sm"
                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 onClick={handleDelete}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+               iconStart={<Trash2 className="w-4 h-4" />}></Button>
             </TooltipTrigger>
             <TooltipContent>Xóa vĩnh viễn</TooltipContent>
           </Tooltip>

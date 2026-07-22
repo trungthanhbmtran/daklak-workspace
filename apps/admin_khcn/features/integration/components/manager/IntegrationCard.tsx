@@ -83,9 +83,7 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" onClick={() => onEdit(item)} title="Sửa thông tin">
             <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" onClick={handleDelete} title="Xóa">
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" onClick={handleDelete} title="Xóa" iconStart={<Trash2 className="w-4 h-4" />}></Button>
         </div>
       </CardFooter>
     </Card>

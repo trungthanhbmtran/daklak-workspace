@@ -24,10 +24,7 @@ export function PostmanImportButton({ onSuccess }: PostmanImportButtonProps) {
         onClick={triggerUpload}
         variant="outline"
         className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 h-10 px-4 text-orange-600 dark:text-orange-500"
-      >
-        <Upload className="w-4 h-4 mr-2" />
-        Nhập Postman
-      </Button>
+       iconStart={<Upload className="w-4 h-4" />}>Nhập Postman</Button>
     </>
   );
 }

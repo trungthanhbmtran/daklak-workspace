@@ -24,10 +24,7 @@ export function SwaggerImportButton({ onSuccess }: SwaggerImportButtonProps) {
         onClick={triggerUpload}
         variant="outline"
         className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 h-10 px-4 text-green-600 dark:text-green-500"
-      >
-        <Upload className="w-4 h-4 mr-2" />
-        Nhập Swagger
-      </Button>
+       iconStart={<Upload className="w-4 h-4" />}>Nhập Swagger</Button>
     </>
   );
 }

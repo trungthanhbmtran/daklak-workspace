@@ -101,12 +101,8 @@ export function EditorToolbar({
             {/* Cột phải: Lịch sử và Ẩn hiện panel */}
             <div className="flex items-center gap-2 lg:gap-4 shrink-0">
                 <div className="flex gap-1">
-                    <Button variant="outline" size="icon" onClick={undo} disabled={history.past.length === 0} className={cn("w-9 h-9 bg-white dark:bg-slate-950", radiusClass)}>
-                        <Undo className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={redo} disabled={history.future.length === 0} className={cn("w-9 h-9 bg-white dark:bg-slate-950", radiusClass)}>
-                        <Redo className="w-4 h-4" />
-                    </Button>
+                    <Button variant="outline" size="icon" onClick={undo} disabled={history.past.length === 0} className={cn("w-9 h-9 bg-white dark:bg-slate-950", radiusClass)} iconStart={<Undo className="w-4 h-4" />}></Button>
+                    <Button variant="outline" size="icon" onClick={redo} disabled={history.future.length === 0} className={cn("w-9 h-9 bg-white dark:bg-slate-950", radiusClass)} iconStart={<Redo className="w-4 h-4" />}></Button>
                 </div>
 
                 <div className="h-6 w-px bg-slate-100 dark:bg-slate-850 shrink-0" />
@@ -131,9 +127,7 @@ export function EditorToolbar({
                 </div>
 
                 {onPreview && (
-                    <Button onClick={onPreview} className={cn("h-10 px-4 text-xs font-black uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-850 flex items-center gap-1.5", radiusClass)}>
-                        <Eye className="w-4 h-4" /> Xem trước
-                    </Button>
+                    <Button onClick={onPreview} className={cn("h-10 px-4 text-xs font-black uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-850 flex items-center gap-1.5", radiusClass)} iconStart={<Eye className="w-4 h-4" />}>Xem trước</Button>
                 )}
             </div>
         </header>

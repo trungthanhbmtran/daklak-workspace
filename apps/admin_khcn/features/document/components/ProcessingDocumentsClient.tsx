@@ -117,9 +117,7 @@ const ProcessingRow = React.memo(function ProcessingRow({ doc }: ProcessingRowPr
             variant="secondary"
             size="icon"
             className="h-10 w-10 rounded-2xl shadow-sm hover:bg-primary hover:text-white transition-all group-hover:scale-110 active:scale-95"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+           iconStart={<ChevronRight className="h-5 w-5" />}></Button>
         </Link>
       </TableCell>
     </TableRow>
@@ -156,12 +154,8 @@ export function ProcessingDocumentsClient() {
           </p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
-          <Button variant="outline" className="flex-1 md:flex-none h-12 rounded-xl border-muted-foreground/20 font-bold bg-background/50">
-            <History className="h-4 w-4 mr-2" /> Nhật ký xử lý
-          </Button>
-          <Button className="flex-1 md:flex-none h-12 rounded-xl shadow-xl shadow-primary/20 bg-primary font-bold px-6">
-            <Plus className="h-4 w-4 mr-2" /> Tạo dự thảo mới
-          </Button>
+          <Button variant="outline" className="flex-1 md:flex-none h-12 rounded-xl border-muted-foreground/20 font-bold bg-background/50" iconStart={<History className="h-4 w-4" />}>Nhật ký xử lý</Button>
+          <Button className="flex-1 md:flex-none h-12 rounded-xl shadow-xl shadow-primary/20 bg-primary font-bold px-6" iconStart={<Plus className="h-4 w-4" />}>Tạo dự thảo mới</Button>
         </div>
       </div>
 
@@ -180,9 +174,7 @@ export function ProcessingDocumentsClient() {
               <SelectItem value="OVERDUE">Quá hạn</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10 font-bold">
-            <Filter className="h-4 w-4 mr-2" /> Lọc thêm
-          </Button>
+          <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10 font-bold" iconStart={<Filter className="h-4 w-4" />}>Lọc thêm</Button>
         </div>
 
         <CardContent className="p-0">

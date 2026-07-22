@@ -80,12 +80,8 @@ export const CalendarHeader = React.memo(function CalendarHeader({
           <Button variant="ghost" size="sm" onClick={onGoToToday} className="mr-1">
             Hôm nay
           </Button>
-          <Button variant="ghost" size="icon" onClick={onPrevDate} className="w-8 h-8 rounded-full">
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={onNextDate} className="w-8 h-8 rounded-full">
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+          <Button variant="ghost" size="icon" onClick={onPrevDate} className="w-8 h-8 rounded-full" iconStart={<ChevronLeft className="w-4 h-4" />}></Button>
+          <Button variant="ghost" size="icon" onClick={onNextDate} className="w-8 h-8 rounded-full" iconStart={<ChevronRight className="w-4 h-4" />}></Button>
         </div>
       </div>
     </CardHeader>

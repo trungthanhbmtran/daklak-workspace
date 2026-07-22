@@ -46,9 +46,7 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           <Button variant="ghost" size="sm" onClick={() => onChange('enabled', !provider.enabled)} className={provider.enabled ? 'text-primary bg-primary/10' : 'text-muted-foreground bg-muted'}>
             {provider.enabled ? 'Đang Bật' : 'Đang Tắt'}
           </Button>
-          <Button variant="ghost" size="icon" onClick={onRemove} className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg">
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          <Button variant="ghost" size="icon" onClick={onRemove} className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg" iconStart={<Trash2 className="w-4 h-4" />}></Button>
         </div>
       </div>
 

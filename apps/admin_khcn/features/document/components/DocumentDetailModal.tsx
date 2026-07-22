@@ -238,9 +238,7 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
                         <p className="text-[10px] text-muted-foreground font-medium">Tệp văn bản chính • 1.2MB</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all">
-                      <Download className="h-4 w-4" />
-                    </Button>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all" iconStart={<Download className="h-4 w-4" />}></Button>
                   </div>
                 </div>
               )}
@@ -273,15 +271,11 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
             <Button
               onClick={handlePrint}
               variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4"
-            >
-              <Printer className="h-4 w-4 mr-2" /> In văn bản
-            </Button>
+             iconStart={<Printer className="h-4 w-4" />}>In văn bản</Button>
             <Button
               onClick={handleShare}
               variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4"
-            >
-              <Share2 className="h-4 w-4 mr-2" /> Chia sẻ
-            </Button>
+             iconStart={<Share2 className="h-4 w-4" />}>Chia sẻ</Button>
           </div>
           <Button onClick={onClose} className="rounded-xl font-bold px-8 h-10 bg-foreground text-background hover:bg-foreground/90 shadow-xl transition-all active:scale-95">
             Đóng lại

@@ -127,9 +127,7 @@ export const UserTable = React.memo(function UserTable({
             {start}–{end} / {total} người dùng
           </Text>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="h-7 w-7" disabled={page <= 1} onClick={handlePrev}>
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </Button>
+            <Button variant="outline" size="icon" className="h-7 w-7" disabled={page <= 1} onClick={handlePrev} iconStart={<ChevronLeft className="h-3.5 w-3.5" />}></Button>
             <Text as="span" variant="small" weight="medium" className="px-2 min-w-[60px] text-center">
               {page} / {totalPages}
             </Text>

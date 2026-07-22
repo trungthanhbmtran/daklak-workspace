@@ -75,9 +75,7 @@ export const Topbar = ({
           size="icon"
           className="rounded-full hover:bg-muted/80 transition-colors"
           onClick={onBack}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
+         iconStart={<ChevronLeft className="h-5 w-5" />}></Button>
         <div className="h-6 w-[1px] bg-border/60 mx-[-4px]" />
         <Button
           variant="outline"
@@ -85,9 +83,7 @@ export const Topbar = ({
           className="rounded-xl border-border/60 hover:bg-muted/60 transition-colors"
           onClick={onOpenPalette}
           title="Mở thanh Tác nhân"
-        >
-          <PanelLeft className="h-4 w-4" />
-        </Button>
+         iconStart={<PanelLeft className="h-4 w-4" />}></Button>
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-inner">
           <Layers className="h-5 w-5" />
         </div>
@@ -148,10 +144,7 @@ export const Topbar = ({
           variant="outline"
           className="rounded-xl font-medium px-4 transition-all border-border/60 hover:bg-muted/60"
           onClick={onPublish}
-        >
-          <Send className="h-4 w-4 mr-2" />
-          Kích hoạt
-        </Button>
+         iconStart={<Send className="h-4 w-4" />}>Kích hoạt</Button>
 
         {/* Nút Áp dụng nghiệp vụ (Publish + Bind module) */}
         {onPublishAndApply && (
@@ -202,17 +195,13 @@ export const Topbar = ({
         )}
 
         <div className="h-6 w-[1px] bg-border/60 mx-1" />
-        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-muted text-muted-foreground">
-          <History className="h-4 w-4" />
-        </Button>
+        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-muted text-muted-foreground" iconStart={<History className="h-4 w-4" />}></Button>
         <Button 
           variant="ghost" 
           size="icon" 
           className="rounded-xl hover:bg-muted text-muted-foreground"
           onClick={onOpenSettings}
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
+         iconStart={<Settings className="h-4 w-4" />}></Button>
       </div>
     </header>
   );

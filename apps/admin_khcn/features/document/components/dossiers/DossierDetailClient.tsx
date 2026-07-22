@@ -98,9 +98,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Link href="/services/documents/dossiers">
-              <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-500 hover:text-slate-900">
-                <ArrowLeft className="mr-1 h-4 w-4" /> Quay lại
-              </Button>
+              <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-500 hover:text-slate-900" iconStart={<ArrowLeft className="h-4 w-4" />}>Quay lại</Button>
             </Link>
             <Badge variant="outline" className="font-mono text-indigo-700 bg-indigo-50 border-indigo-200">{dossier.id}</Badge>
             <DossierStatusBadge code={dossier.status} />
@@ -110,7 +108,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50">Yêu cầu bổ sung</Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700"><CheckCircle2 className="mr-2 h-4 w-4"/> Duyệt hồ sơ</Button>
+          <Button className="bg-emerald-600 hover:bg-emerald-700" iconStart={<CheckCircle2 className="h-4 w-4" />}>Duyệt hồ sơ</Button>
         </div>
       </div>
 
@@ -121,9 +119,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
             <CardTitle className="text-lg font-bold text-slate-800">Thành phần hồ sơ</CardTitle>
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-slate-500">Tiến độ: {components.filter(c => c.status === 'VALID').length}/{components.length} tài liệu</span>
-              <Button onClick={handleAddFromCabinetClick} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                <Plus className="mr-2 h-4 w-4" /> Thêm yêu cầu từ Tủ VB
-              </Button>
+              <Button onClick={handleAddFromCabinetClick} size="sm" className="bg-indigo-600 hover:bg-indigo-700" iconStart={<Plus className="h-4 w-4" />}>Thêm yêu cầu từ Tủ VB</Button>
             </div>
           </div>
         </CardHeader>
@@ -180,12 +176,8 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                     </>
                   ) : (
                     <>
-                      <Button variant="ghost" size="icon" className="text-slate-400 hover:text-blue-600">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-slate-400 hover:text-rose-600">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Button variant="ghost" size="icon" className="text-slate-400 hover:text-blue-600" iconStart={<Download className="h-4 w-4" />}></Button>
+                      <Button variant="ghost" size="icon" className="text-slate-400 hover:text-rose-600" iconStart={<Trash2 className="h-4 w-4" />}></Button>
                     </>
                   )}
                 </div>

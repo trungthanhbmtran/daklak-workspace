@@ -102,9 +102,10 @@ export function UnitTypeSelector({ value, onChange, disabled }: UnitTypeSelector
             <Button
               key={item.code}
               type="button"
+              variant="outline"
               onClick={() => onChange(item.code)}
               className={cn(
-                "relative group flex items-start gap-3 rounded-xl border-2 px-4 py-3.5 text-left transition-all duration-150",
+                "h-auto justify-start relative group flex items-start gap-3 rounded-xl border-2 px-4 py-3.5 text-left transition-all duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
                 isSelected
                   ? cn("border-current shadow-md", c.border, c.bgSelected)
