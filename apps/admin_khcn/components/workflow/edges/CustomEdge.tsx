@@ -36,9 +36,9 @@ export default function CustomEdge({
               pointerEvents: 'all',
               zIndex: selected ? 10 : 5,
             }}
-            className="nodrag nopan"
+            className="nodrag nopan bg-white border border-border px-1.5 py-0.5 rounded-md text-[10px] font-bold"
           >
-             <WorkflowStatusBadge status={label as string} showIcon={true} />
+             {label as string}
           </div>
         </EdgeLabelRenderer>
       )}
