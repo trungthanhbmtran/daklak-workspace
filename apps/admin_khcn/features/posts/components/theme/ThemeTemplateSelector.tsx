@@ -34,6 +34,7 @@ export function ThemeTemplateSelector() {
             <Button
               key={item.id}
               type="button"
+              variant="outline"
               onClick={() => setTemplate(item.id)}
               className={`flex items-center gap-3 p-3 text-sm font-medium border rounded-lg transition-all text-left ${isSelected
                 ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 text-blue-900 dark:text-blue-100 ring-1 ring-blue-500"

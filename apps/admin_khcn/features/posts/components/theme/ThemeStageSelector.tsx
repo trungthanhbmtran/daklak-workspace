@@ -43,6 +43,7 @@ export function ThemeStageSelector() {
             <Button
               key={item.id}
               type="button"
+              variant="outline"
               onClick={() => loadSavedTheme(item.id)}
               className={`w-full flex flex-col p-3 text-left border rounded-lg transition-all gap-1 ${isSelected
                 ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 ring-1 ring-blue-500"

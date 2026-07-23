@@ -41,6 +41,7 @@ export function ThemeSelector() {
           <Button
             key={opt.id}
             type="button"
+            variant="outline"
             onClick={() => setThemeMode(opt.id)}
             className={`flex flex-col items-center justify-center p-3 text-xs font-medium border rounded-xl gap-2 transition-all ${isSelected
               ? "border-blue-500 bg-primary text-white shadow-md shadow-blue-500/10 dark:bg-primary"

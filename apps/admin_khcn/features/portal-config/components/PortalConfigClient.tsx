@@ -95,10 +95,11 @@ export function PortalConfigClient() {
                   <Button
                     key={tab.id}
                     type="button"
+                    variant="ghost"
                     onClick={() => setActiveConfigTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 select-none ${isActive
-                      ? "border-primary text-primary font-extrabold"
-                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                    className={`flex items-center gap-2 px-4 py-3 h-auto text-xs font-black uppercase tracking-wider border-b-2 rounded-none transition-all shrink-0 select-none ${isActive
+                      ? "border-primary text-primary bg-transparent font-extrabold hover:bg-transparent"
+                      : "border-transparent bg-transparent text-muted-foreground hover:text-foreground hover:border-border hover:bg-transparent"
                       }`}
                   >
                     <TabIcon className="w-4 h-4" />
