@@ -268,3 +268,13 @@ Tài liệu này dùng để theo dõi và ghi nhận toàn bộ các thao tác 
   - Sử dụng `$http_origin` làm `Access-Control-Allow-Origin` đi kèm `Access-Control-Allow-Credentials "true"`.
   - Bổ sung khối xử lý preflight `OPTIONS` trả về HTTP 204.
 - **Mục đích**: Mở CORS cho tất cả các origin bên thứ 3 hoặc các domain khác gọi vào API nội bộ hệ thống, nhưng vẫn đảm bảo tính bảo mật và hỗ trợ gửi nhận Cookie (Zero-Trust) chính xác.
+
+---
+
+### [2026-07-23 14:14] Tác vụ: Khắc phục lỗi HTTP 304 (Not Modified) trên API Gateway
+- **File bị ảnh hưởng**:
+  - `nginx/conf.d/default.conf`
+- **Chi tiết thay đổi**:
+  - Bổ sung header xoá yêu cầu bộ đệm từ trình duyệt: `proxy_set_header If-None-Match "";` và `proxy_set_header If-Modified-Since "";`.
+  - Bổ sung tiêu đề yêu cầu trình duyệt không lưu cache: `add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;` tại route `/api/`.
+- **Mục đích**: Triệt tiêu lỗi dữ liệu "đóng băng" do trình duyệt hoặc proxy chặn lại (trả về 304) trên các HTTP Request. Đảm bảo dữ liệu gửi/nhận luôn là bản mới nhất trực tiếp từ Backend (NestJS), ép API Gateway luôn trả về Status 200 OK thay vì 304.
