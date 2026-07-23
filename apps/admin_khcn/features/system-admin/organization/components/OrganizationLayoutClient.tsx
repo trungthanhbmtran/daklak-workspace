@@ -29,9 +29,9 @@ function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
 export function OrganizationLayoutClient({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
-  
+
   const { data: treeResponse, isLoading: isLoadingTree } = useOrganizationTreeQuery(searchTerm);
-  
+
   const { mutateAsync: createUnit, isPending: isCreating } = useOrganizationCreateMutation();
   const { mutateAsync: updateUnitBase, isPending: isUpdating } = useOrganizationUpdateMutation();
   const { mutateAsync: updateScopeBase, isPending: isUpdatingScope } = useOrganizationUpdateScopeMutation();
