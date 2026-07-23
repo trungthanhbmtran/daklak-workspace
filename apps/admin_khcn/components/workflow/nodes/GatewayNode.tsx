@@ -14,12 +14,6 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
       className="border-orange-200/50 hover:border-orange-500/50 shadow-orange-500/5 bg-orange-50/30"
     >
       {/* Default Target Handle (Left) is handled by BaseNode */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-background bg-orange-500"
-      />
 
       <div className="text-xs text-muted-foreground mt-2 px-1 text-center">
         {isParallel ? 'Phân nhánh đồng thời (Fork/Join)' : 'Đánh giá điều kiện nhánh (XOR)'}
@@ -44,7 +38,7 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
         type="source"
         position={Position.Right}
         isConnectable={isConnectable}
-        style={{ display: 'none' }}
+        style={{ opacity: 0, pointerEvents: 'none' }}
       />
     </BaseNode>
   );
