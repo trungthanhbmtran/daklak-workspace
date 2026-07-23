@@ -133,8 +133,16 @@ export const PropertiesPanel = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[320px] sm:w-[400px] border-l border-border bg-card p-0 flex flex-col shadow-2xl z-50">
+    <Sheet open={isOpen} onOpenChange={onOpenChange} modal={false}>
+      <SheetContent 
+        className="w-[320px] sm:w-[400px] border-l border-border bg-card p-0 flex flex-col shadow-2xl z-40"
+        onPointerDownOutside={(e) => {
+          // Prevent closing when clicking on the React Flow canvas (nodes/edges)
+          if ((e.target as Element).closest('.react-flow')) {
+            e.preventDefault();
+          }
+        }}
+      >
         <div className="flex items-center justify-between p-4 border-b border-border/60 bg-muted/10">
           <div className="flex items-center gap-2">
             {(selectedNode || selectedEdge) ? <Settings2 className="h-4 w-4 text-primary" /> : <Activity className="h-4 w-4 text-primary" />}

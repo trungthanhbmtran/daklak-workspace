@@ -39,6 +39,13 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
         isConnectable={isConnectable}
         className="w-3 h-3 border-2 border-background bg-orange-500"
       />
+      {/* Fallback default handle for legacy edges without sourceHandle */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        isConnectable={isConnectable}
+        style={{ display: 'none' }}
+      />
     </BaseNode>
   );
 }
