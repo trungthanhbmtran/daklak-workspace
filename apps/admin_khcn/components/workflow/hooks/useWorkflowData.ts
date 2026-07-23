@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { workflowApi } from "@/features/workflow/api";
 import { toast } from "sonner";
-import { Node, Edge } from "@xyflow/react";
+import { Node, Edge, MarkerType } from "@xyflow/react";
 
 interface UseWorkflowDataProps {
   id?: string;
@@ -76,6 +76,16 @@ export function useWorkflowData({
               ...edge,
               type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
               id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
+              markerEnd: edge.markerEnd || {
+                type: MarkerType.ArrowClosed,
+                width: 20,
+                height: 20,
+                color: '#64748b',
+              },
+              style: edge.style || {
+                strokeWidth: 2,
+                stroke: '#64748b',
+              }
             })
           );
 
