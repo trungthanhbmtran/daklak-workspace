@@ -24,8 +24,9 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
     if (conds.length === 0) return "";
     return conds.map((c, i) => {
       if (!c.field) return "";
+      const isBoolean = c.value === "true" || c.value === "false";
       const isNumber = !isNaN(Number(c.value)) && c.value !== "";
-      const quote = isNumber ? "" : "'";
+      const quote = (isNumber || isBoolean) ? "" : "'";
       const expr = `${c.field} ${c.operator} ${quote}${c.value}${quote}`;
       const nextOp = i < conds.length - 1 ? ` ${c.logicalOp} ` : "";
       return expr + nextOp;

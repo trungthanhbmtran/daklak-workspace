@@ -16,7 +16,7 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
       {/* Default Target Handle (Left) is handled by BaseNode */}
       <Handle
         type="target"
-        position={Position.Top}
+        position={Position.Left}
         isConnectable={isConnectable}
         className="w-3 h-3 border-2 border-background bg-orange-500"
       />
