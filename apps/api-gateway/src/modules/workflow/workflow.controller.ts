@@ -117,6 +117,38 @@ export class WorkflowController {
     return this.workflowService.getLogs(instanceId);
   }
 
+  // --- Integrations ---
+
+  @Get('integrations')
+  @ApiOperation({ summary: 'Danh sách các API integrations' })
+  async findAllIntegrations(@Query() query: any) {
+    return this.workflowService.findAllIntegrations(query);
+  }
+
+  @Post('integrations')
+  @ApiOperation({ summary: 'Tạo API integration' })
+  async createIntegration(@Body() body: any) {
+    return this.workflowService.createIntegration(body);
+  }
+
+  @Get('integrations/:id')
+  @ApiOperation({ summary: 'Chi tiết API integration' })
+  async findOneIntegration(@Param('id') id: string) {
+    return this.workflowService.findOneIntegration(id);
+  }
+
+  @Put('integrations/:id')
+  @ApiOperation({ summary: 'Cập nhật API integration' })
+  async updateIntegration(@Param('id') id: string, @Body() body: any) {
+    return this.workflowService.updateIntegration(id, body);
+  }
+
+  @Delete('integrations/:id')
+  @ApiOperation({ summary: 'Xóa API integration' })
+  async deleteIntegration(@Param('id') id: string) {
+    return this.workflowService.deleteIntegration(id);
+  }
+
   // --- Routes with :id wildcard LAST (prevents shadowing specific routes above) ---
 
   @Get(':id')

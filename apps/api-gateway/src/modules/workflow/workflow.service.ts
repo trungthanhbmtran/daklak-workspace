@@ -219,4 +219,52 @@ export class WorkflowService implements OnModuleInit {
     })) as any;
     return { success: true, data: result, message: 'Workflow started' };
   }
+
+  // --- Integrations ---
+
+  async findAllIntegrations(query: any) {
+    const search = query.search;
+    const result = (await firstValueFrom(
+      this.workflowGrpcService.FindAllIntegrations({ search: search || '' }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
+    return { success: true, data: result?.data || [], message: 'OK' };
+  }
+
+  async createIntegration(body: any) {
+    const result = (await firstValueFrom(
+      this.workflowGrpcService.CreateIntegration(body),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
+    return { success: true, data: result, message: 'Created successfully' };
+  }
+
+  async findOneIntegration(id: string) {
+    const result = (await firstValueFrom(
+      this.workflowGrpcService.FindOneIntegration({ id }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
+    return { success: true, data: result, message: 'OK' };
+  }
+
+  async updateIntegration(id: string, body: any) {
+    const result = (await firstValueFrom(
+      this.workflowGrpcService.UpdateIntegration({ id, ...body }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
+    return { success: true, data: result, message: 'Updated successfully' };
+  }
+
+  async deleteIntegration(id: string) {
+    const result = (await firstValueFrom(
+      this.workflowGrpcService.DeleteIntegration({ id }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
+    return { success: result?.success ?? true, data: null, message: 'Deleted successfully' };
+  }
 }
