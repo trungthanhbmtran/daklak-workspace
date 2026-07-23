@@ -36,7 +36,7 @@ export default function CustomEdge({
               pointerEvents: 'all',
               zIndex: selected ? 10 : 5,
             }}
-            className="nodrag nopan bg-white border border-border px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+            className="nodrag nopan bg-background/90 backdrop-blur border border-border shadow-md px-2.5 py-1 rounded-full text-[10px] font-bold text-foreground transition-all duration-200 hover:scale-105 hover:border-primary/50"
           >
              {label as string}
           </div>

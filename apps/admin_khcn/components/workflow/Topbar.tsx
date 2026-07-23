@@ -68,7 +68,7 @@ export const Topbar = ({
   };
 
   return (
-    <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-4 lg:px-6 shadow-sm z-50">
+    <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-4 lg:px-6 shadow-sm z-30 relative">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -128,23 +128,26 @@ export const Topbar = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-3">
         <Button
           variant="outline"
           size="sm"
-          className="rounded-xl border-border/60 font-medium hover:bg-muted/60 transition-all px-4"
+          className="rounded-xl border-border/60 font-medium hover:bg-muted/60 transition-all px-2 sm:px-4"
           onClick={onSave}
           disabled={isSaving}
         >
-          {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2 text-primary" />}
-          Lưu bản nháp
+          {isSaving ? <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" /> : <Save className="h-4 w-4 sm:mr-2 text-primary" />}
+          <span className="hidden sm:inline">Lưu bản nháp</span>
         </Button>
         <Button
           size="sm"
           variant="outline"
-          className="rounded-xl font-medium px-4 transition-all border-border/60 hover:bg-muted/60"
+          className="rounded-xl font-medium px-2 sm:px-4 transition-all border-border/60 hover:bg-muted/60"
           onClick={onPublish}
-         iconStart={<Send className="h-4 w-4" />}>Kích hoạt</Button>
+          iconStart={<Send className="h-4 w-4" />}
+        >
+          <span className="hidden sm:inline">Kích hoạt</span>
+        </Button>
 
         {/* Nút Áp dụng nghiệp vụ (Publish + Bind module) */}
         {onPublishAndApply && (
@@ -152,16 +155,16 @@ export const Topbar = ({
             <DropdownMenuTrigger asChild>
               <Button
                 size="sm"
-                className="rounded-xl font-bold px-4 shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all border-none"
+                className="rounded-xl font-bold px-2 sm:px-4 shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all border-none"
                 disabled={isApplying}
               >
                 {isApplying ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
                 ) : (
-                  <Link2 className="h-4 w-4 mr-2" />
+                  <Link2 className="h-4 w-4 sm:mr-2" />
                 )}
-                Áp dụng nghiệp vụ
-                <ChevronDown className="h-3.5 w-3.5 ml-1.5 opacity-70" />
+                <span className="hidden sm:inline">Áp dụng nghiệp vụ</span>
+                <ChevronDown className="h-3.5 w-3.5 ml-1 sm:ml-1.5 opacity-70" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl border-border/60 w-60">

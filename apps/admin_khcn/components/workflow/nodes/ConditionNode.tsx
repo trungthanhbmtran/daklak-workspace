@@ -10,7 +10,7 @@ const ConditionNode = ({ data, selected }: { data: any; selected: boolean }) => 
       label="Condition"
       icon={<Split className="h-3.5 w-3.5 text-amber-500" />}
       selected={selected}
-      className="border-amber-500/30"
+      className="border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50"
     >
       <div className="flex flex-col gap-1">
         <div className="text-xs font-mono bg-muted/60 px-1.5 py-0.5 rounded border border-border/40 truncate">

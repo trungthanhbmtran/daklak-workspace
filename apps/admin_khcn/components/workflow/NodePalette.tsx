@@ -39,8 +39,8 @@ export const NodePalette = ({ isOpen, onClose }: NodePaletteProps) => {
   return (
     <aside 
       className={cn(
-        "absolute left-0 top-0 bottom-0 z-40 w-64 border-r border-border bg-card shadow-2xl flex flex-col gap-4 transition-transform duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        "absolute z-40 w-64 border border-border/50 bg-card/80 backdrop-blur-xl shadow-2xl flex flex-col transition-all duration-300 ease-in-out rounded-2xl overflow-hidden max-h-[calc(100%-2rem)]",
+        isOpen ? "left-4 top-4 opacity-100 scale-100" : "-left-10 top-4 opacity-0 scale-95 pointer-events-none"
       )}
     >
       <div className="flex items-center justify-between p-4 border-b border-border/60">

@@ -11,7 +11,7 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
       type={type}
       icon={<Diamond className="w-4 h-4 text-orange-500" />}
       // isConnectable={isConnectable}
-      className="border-orange-200/50 hover:border-orange-500/50 shadow-orange-500/5 bg-orange-50/30"
+      className="border-orange-500/30 bg-orange-500/5 hover:border-orange-500/50"
     >
       {/* Default Target Handle (Left) is handled by BaseNode */}
 
@@ -24,14 +24,14 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
         type="source"
         position={Position.Right}
         isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-background bg-orange-500"
+        className="w-3 h-3 -mr-1 border-2 border-background bg-orange-500 ring-2 ring-orange-500/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(249,115,22,0.5)]"
       />
       <Handle
         id="false"
         type="source"
         position={Position.Bottom}
         isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-background bg-orange-500"
+        className="w-3 h-3 -mb-1 border-2 border-background bg-destructive ring-2 ring-destructive/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)]"
       />
       {/* Fallback default handle for legacy edges without sourceHandle */}
       <Handle

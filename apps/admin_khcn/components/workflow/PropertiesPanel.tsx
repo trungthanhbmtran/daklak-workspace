@@ -135,7 +135,7 @@ export const PropertiesPanel = ({
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange} modal={false}>
       <SheetContent 
-        className="w-[320px] sm:w-[400px] border-l border-border bg-card p-0 flex flex-col shadow-2xl z-40"
+        className="w-[320px] sm:w-[400px] border-l border-border bg-card p-0 flex flex-col shadow-2xl z-50"
         onPointerDownOutside={(e) => {
           // Prevent closing when clicking on the React Flow canvas (nodes/edges)
           if ((e.target as Element).closest('.react-flow')) {

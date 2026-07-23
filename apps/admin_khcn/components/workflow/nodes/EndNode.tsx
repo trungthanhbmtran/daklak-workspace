@@ -11,7 +11,7 @@ const EndNode = ({ data, selected }: { data: any; selected: boolean }) => {
       label="End"
       icon={<CircleStop className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />}
       selected={selected}
-      className="border-rose-500/30"
+      className="border-rose-500/30 bg-rose-500/5 hover:border-rose-500/50"
     >
       <div className="flex flex-col gap-1">
         <div className="text-sm font-medium">{data.label || "Terminate"}</div>

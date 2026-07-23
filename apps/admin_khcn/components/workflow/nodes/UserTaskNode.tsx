@@ -11,7 +11,7 @@ const UserTaskNode = ({ data, selected }: { data: any; selected: boolean }) => {
       label="User Task"
       icon={<UserCheck className="h-3.5 w-3.5 text-blue-500" />}
       selected={selected}
-      className="border-blue-500/30 min-w-[150px]"
+      className="border-blue-500/30 bg-blue-500/5 hover:border-blue-500/50 min-w-[150px]"
     >
       <div className="flex flex-col gap-1">
         <div className="text-sm font-medium whitespace-pre-wrap wrap-break-words">{data.label || data.role || "Unassigned"}</div>

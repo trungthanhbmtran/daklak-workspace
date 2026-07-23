@@ -190,19 +190,19 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
               color="#e2e8f0" 
             />
             <Controls 
-              className="bg-card border border-border shadow-lg rounded-xl overflow-hidden" 
+              className="bg-card/90 backdrop-blur border border-border/50 shadow-xl rounded-2xl overflow-hidden" 
               showInteractive={false} 
             />
             <MiniMap 
-              className="bg-card border border-border/60 shadow-md rounded-xl overflow-hidden mb-4" 
-              nodeStrokeColor="#cbd5e1"
-              nodeColor="#f8fafc"
-              maskColor="rgba(241, 245, 249, 0.6)"
+              className="bg-card/90 backdrop-blur border border-border/50 shadow-xl rounded-2xl overflow-hidden mb-4 mr-4" 
+              nodeStrokeColor="rgba(var(--primary), 0.2)"
+              nodeColor="rgba(var(--primary), 0.05)"
+              maskColor="rgba(var(--background), 0.7)"
             />
             
-            <Panel position="top-left" className="bg-background/80 backdrop-blur-sm border border-border/40 p-2 rounded-lg shadow-sm">
-                <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
-                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <Panel position="top-left" className="bg-card/80 backdrop-blur-md border border-border/50 px-3 py-2 rounded-xl shadow-md mt-4 ml-4">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                    {workflowId ? `Editing: ${workflowId.slice(0, 8)}` : "New Workflow"}
                 </div>
             </Panel>

@@ -10,7 +10,7 @@ const NginxProxyNode = ({ data, selected }: { data: any; selected: boolean }) =>
       label="NGINX Proxy (WAF)"
       icon={<GlobeLock className="h-3.5 w-3.5 text-emerald-500" />}
       selected={selected}
-      className="border-emerald-500/30"
+      className="border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50"
     >
       <div className="flex flex-col gap-1">
         <div className="text-sm font-medium">{data.domain || "example.com"}</div>

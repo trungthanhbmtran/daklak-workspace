@@ -10,13 +10,13 @@ export default function ScriptTaskNode({ data, isConnectable, type }: any) {
       type={type}
       icon={<Code2 className="w-4 h-4 text-purple-500" />}
       // isConnectable={isConnectable}
-      className="border-purple-200/50 hover:border-purple-500/50 shadow-purple-500/5 bg-purple-50/30"
+      className="border-purple-500/30 bg-purple-500/5 hover:border-purple-500/50"
     >
       <Handle
         type="target"
         position={Position.Top}
         isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-background bg-purple-500"
+        className="w-3 h-3 -mt-1 border-2 border-background bg-purple-500 ring-2 ring-purple-500/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(168,85,247,0.5)]"
       />
 
       <div className="text-xs text-muted-foreground mt-2 px-1">
@@ -27,7 +27,7 @@ export default function ScriptTaskNode({ data, isConnectable, type }: any) {
         type="source"
         position={Position.Bottom}
         isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-background bg-purple-500"
+        className="w-3 h-3 -mb-1 border-2 border-background bg-purple-500 ring-2 ring-purple-500/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(168,85,247,0.5)]"
       />
     </BaseNode>
   );
