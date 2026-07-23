@@ -257,3 +257,14 @@ Tài liệu này dùng để theo dõi và ghi nhận toàn bộ các thao tác 
   - Thay thế thuộc tính `Access-Control-Allow-Origin "*"` thành `$http_origin` ở các location trỏ về Media.
   - Bổ sung cấu hình `Access-Control-Allow-Credentials "true"`.
 - **Mục đích**: Tuân thủ tiêu chuẩn Xác thực Zero-Trust (Sử dụng HttpOnly Cookie chống XSS). Việc cho phép gửi cookie (`withCredentials`) yêu cầu CORS không được dùng wildcard `*` mà phải chỉ định rõ nguồn origin. Đảm bảo luồng xác thực giữa Frontend và Backend hoạt động bảo mật theo chuẩn đã quy định tại tài liệu `AGENTS.md`.
+
+---
+
+### [2026-07-23 14:02] Tác vụ: Mở rộng CORS cho toàn bộ API Gateway
+- **File bị ảnh hưởng**:
+  - `nginx/conf.d/default.conf`
+- **Chi tiết thay đổi**:
+  - Bổ sung cấu hình CORS Headers vào location `/api/` (API Gateway).
+  - Sử dụng `$http_origin` làm `Access-Control-Allow-Origin` đi kèm `Access-Control-Allow-Credentials "true"`.
+  - Bổ sung khối xử lý preflight `OPTIONS` trả về HTTP 204.
+- **Mục đích**: Mở CORS cho tất cả các origin bên thứ 3 hoặc các domain khác gọi vào API nội bộ hệ thống, nhưng vẫn đảm bảo tính bảo mật và hỗ trợ gửi nhận Cookie (Zero-Trust) chính xác.
