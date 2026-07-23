@@ -38,7 +38,15 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentProps<"button"> &
+    VariantProps<typeof buttonVariants> & {
+      asChild?: boolean
+      iconStart?: React.ReactNode
+      iconEnd?: React.ReactNode
+    }
+>(({
   className,
   variant = "default",
   size = "default",
@@ -47,12 +55,7 @@ function Button({
   iconEnd,
   children,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-    iconStart?: React.ReactNode
-    iconEnd?: React.ReactNode
-  }) {
+}, ref) => {
   const Comp = asChild ? Slot.Root : "button"
 
   if (asChild) {
@@ -62,6 +65,7 @@ function Button({
         data-variant={variant}
         data-size={size}
         className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
         {...props}
       >
         {children}
@@ -75,6 +79,7 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      ref={ref}
       {...props}
     >
       {iconStart && <span className="shrink-0 flex items-center justify-center">{iconStart}</span>}
@@ -82,6 +87,7 @@ function Button({
       {iconEnd && <span className="shrink-0 flex items-center justify-center">{iconEnd}</span>}
     </Comp>
   )
-}
+})
+Button.displayName = "Button"
 
 export { Button, buttonVariants }
