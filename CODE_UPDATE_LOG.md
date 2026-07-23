@@ -238,3 +238,22 @@ Tài liệu này dùng để theo dõi và ghi nhận toàn bộ các thao tác 
   - Sửa hàm truy vấn từ `HMGET` sang `MGET` để đọc dữ liệu phân trang O(1).
 - **Mục đích**: Vá lỗi rò rỉ bộ nhớ (Memory Leak) do lưu rác dữ liệu cũ vĩnh viễn trên RAM, tuân thủ tuyệt đối `infra_cache_broker_standard`.
 
+---
+
+### [2026-07-23 11:55] Tác vụ: Sửa lỗi hiển thị & Đồng bộ state của React Flow (Dumb Client Standard)
+- **File bị ảnh hưởng**:
+  - `apps/admin_khcn/components/workflow/properties-panels/EdgeProperties.tsx`
+- **Chi tiết thay đổi**:
+  - Sửa lỗi mapping dữ liệu sai (đọc từ `selectedEdge` thay vì `selectedEdge.data`).
+  - Gỡ bỏ hoàn toàn việc sử dụng `useState` và `useEffect` thừa thãi (anti-pattern sao chép props vào state). Trực tiếp sử dụng biến số từ `edgeData.conditions` (Single Source of Truth).
+- **Mục đích**: Đảm bảo bảng thuộc tính Visual Rule Builder của các đường nối (Edge) trong React Flow hoạt động chính xác khi chuyển đổi qua lại, tuân thủ nguyên tắc Clean Code và Không lưu trữ state cục bộ dư thừa (thuộc `frontend_integration_standard`).
+
+---
+
+### [2026-07-23 11:58] Tác vụ: Chuẩn hóa CORS Header NGINX (Zero-Trust Security)
+- **File bị ảnh hưởng**:
+  - `nginx/conf.d/default.conf`
+- **Chi tiết thay đổi**:
+  - Thay thế thuộc tính `Access-Control-Allow-Origin "*"` thành `$http_origin` ở các location trỏ về Media.
+  - Bổ sung cấu hình `Access-Control-Allow-Credentials "true"`.
+- **Mục đích**: Tuân thủ tiêu chuẩn Xác thực Zero-Trust (Sử dụng HttpOnly Cookie chống XSS). Việc cho phép gửi cookie (`withCredentials`) yêu cầu CORS không được dùng wildcard `*` mà phải chỉ định rõ nguồn origin. Đảm bảo luồng xác thực giữa Frontend và Backend hoạt động bảo mật theo chuẩn đã quy định tại tài liệu `AGENTS.md`.

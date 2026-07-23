@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -17,10 +17,8 @@ interface Condition {
 
 export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge }: PropertiesPanelComponentProps) => {
   if (!selectedEdge) return null;
-  const edgeData = data;
-  
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [conditions, setConditions] = useState<Condition[]>(edgeData.conditions || []);
+  const edgeData = selectedEdge.data || {};
+  const conditions = (edgeData.conditions as Condition[]) || [];
 
   const generateExpression = (conds: Condition[]) => {
     if (conds.length === 0) return "";
@@ -35,7 +33,6 @@ export const EdgeProperties = ({ data, handleChange, selectedEdge, onUpdateEdge 
   };
 
   const updateConditions = (newConds: Condition[]) => {
-    setConditions(newConds);
     if (onUpdateEdge) {
       onUpdateEdge(selectedEdge.id, {
         ...selectedEdge,
