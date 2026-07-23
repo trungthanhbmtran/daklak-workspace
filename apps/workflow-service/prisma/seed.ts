@@ -78,10 +78,10 @@ const leaveRequestGraph = {
   ],
   edges: [
     { id: 'e_start1_task1', source: 'start_1', target: 'task_1', type: 'custom' },
-    { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom' },
-    { id: 'e_task2_gateway1', source: 'task_2', target: 'gateway_1', type: 'custom' },
-    { id: 'e_gateway1_integration1', source: 'gateway_1', target: 'integration_1', type: 'custom', sourceHandle: 'true', data: { conditions: [{ id: 'c1', field: 'variables.approved', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.approved === 'true'" } },
-    { id: 'e_gateway1_rejected', source: 'gateway_1', target: 'end_rejected', type: 'custom', sourceHandle: 'false', data: { conditions: [{ id: 'c1', field: 'variables.approved', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.approved === 'false'" } },
+    { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom', label: 'SUBMIT' },
+    { id: 'e_task2_gateway1', source: 'task_2', target: 'gateway_1', type: 'custom', label: 'REVIEW' },
+    { id: 'e_gateway1_integration1', source: 'gateway_1', target: 'integration_1', type: 'custom', sourceHandle: 'true', label: 'APPROVE', data: { conditions: [{ id: 'c1', field: 'variables.approved', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.approved === 'true'" } },
+    { id: 'e_gateway1_rejected', source: 'gateway_1', target: 'end_rejected', type: 'custom', sourceHandle: 'false', label: 'REJECT', data: { conditions: [{ id: 'c1', field: 'variables.approved', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.approved === 'false'" } },
     { id: 'e_integration1_end', source: 'integration_1', target: 'end_approved', type: 'custom' },
   ],
 };
@@ -98,13 +98,13 @@ const govComplexTaskGraph = {
   ],
   edges: [
     { id: 'e_start_assign', source: 'start_1', target: 'task_assign', type: 'custom' },
-    { id: 'e_assign_gw', source: 'task_assign', target: 'gateway_accept', type: 'custom' },
-    { id: 'e_gw_reject', source: 'gateway_accept', target: 'task_assign', type: 'custom', sourceHandle: 'false', data: { conditions: [{ id: 'c1', field: 'variables.isAccepted', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.isAccepted === 'false'" } },
-    { id: 'e_gw_process', source: 'gateway_accept', target: 'task_process', type: 'custom', sourceHandle: 'true', data: { conditions: [{ id: 'c1', field: 'variables.isAccepted', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.isAccepted === 'true'" } },
-    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom' },
-    { id: 'e_eval_gw', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom' },
-    { id: 'e_gweval_reject', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', data: { conditions: [{ id: 'c1', field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.isApproved === 'false'" } },
-    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', data: { conditions: [{ id: 'c1', field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.isApproved === 'true'" } },
+    { id: 'e_assign_gw', source: 'task_assign', target: 'gateway_accept', type: 'custom', label: 'ASSIGN' },
+    { id: 'e_gw_reject', source: 'gateway_accept', target: 'task_assign', type: 'custom', sourceHandle: 'false', label: 'REJECT', data: { conditions: [{ id: 'c1', field: 'variables.isAccepted', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.isAccepted === 'false'" } },
+    { id: 'e_gw_process', source: 'gateway_accept', target: 'task_process', type: 'custom', sourceHandle: 'true', label: 'ACCEPT', data: { conditions: [{ id: 'c1', field: 'variables.isAccepted', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.isAccepted === 'true'" } },
+    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom', label: 'SUBMIT_REPORT' },
+    { id: 'e_eval_gw', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom', label: 'EVALUATE' },
+    { id: 'e_gweval_reject', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', label: 'REWORK', data: { conditions: [{ id: 'c1', field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.isApproved === 'false'" } },
+    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', label: 'APPROVE', data: { conditions: [{ id: 'c1', field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.isApproved === 'true'" } },
   ],
 };
 
@@ -138,9 +138,9 @@ const processDefinitions = [
         ],
         edges: [
           { id: 'e_start1_task1', source: 'start_1', target: 'task_1', type: 'custom' },
-          { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom' },
-          { id: 'e_task2_task3', source: 'task_2', target: 'task_3', type: 'custom' },
-          { id: 'e_task3_end1', source: 'task_3', target: 'end_1', type: 'custom' },
+          { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom', label: 'SUBMIT' },
+          { id: 'e_task2_task3', source: 'task_2', target: 'task_3', type: 'custom', label: 'APPROVE' },
+          { id: 'e_task3_end1', source: 'task_3', target: 'end_1', type: 'custom', label: 'PUBLISH' },
         ],
       },
     },
