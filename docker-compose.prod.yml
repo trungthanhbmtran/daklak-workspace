@@ -76,7 +76,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db?allowPublicKeyRetrieval=true
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
@@ -98,7 +98,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems?allowPublicKeyRetrieval=true
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
@@ -114,7 +114,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm?allowPublicKeyRetrieval=true
     volumes:
       - ./shared/protos:/app/protos:ro
 
@@ -127,7 +127,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media?allowPublicKeyRetrieval=true
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
     volumes:
@@ -142,7 +142,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts?allowPublicKeyRetrieval=true
       PROTO_PATH: /app/protos
     volumes:
       - ./shared/protos:/app/protos:ro
@@ -156,7 +156,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow?allowPublicKeyRetrieval=true
     volumes:
       - ./shared/protos:/app/protos:ro
 
@@ -169,7 +169,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document?allowPublicKeyRetrieval=true
     volumes:
       - ./shared/protos:/app/protos:ro
 
@@ -184,7 +184,7 @@ services:
     env_file:
       - .env.production
     environment:
-      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_translation
+      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_translation?allowPublicKeyRetrieval=true
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
 
   notification-service:
@@ -198,7 +198,7 @@ services:
     environment:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
       NOTIFICATION_QUEUE: notifications
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification?allowPublicKeyRetrieval=true
 
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
@@ -225,7 +225,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_systems
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_systems?allowPublicKeyRetrieval=true
 
   hrm-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
@@ -234,7 +234,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm?allowPublicKeyRetrieval=true
 
   media-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
@@ -243,7 +243,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media?allowPublicKeyRetrieval=true
 
   posts-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
@@ -252,7 +252,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts?allowPublicKeyRetrieval=true
 
   workflow-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
@@ -261,7 +261,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow?allowPublicKeyRetrieval=true
 
   document-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
@@ -270,7 +270,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document?allowPublicKeyRetrieval=true
 
   api-gateway-migrate:
     image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
@@ -279,7 +279,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db?allowPublicKeyRetrieval=true
 
   notification-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
@@ -288,7 +288,7 @@ services:
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification?allowPublicKeyRetrieval=true
 
   # =============================
   # Nginx
