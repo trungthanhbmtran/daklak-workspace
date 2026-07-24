@@ -168,6 +168,12 @@ export class FindOneWorkflowGrpcDto {
   id: string;
 }
 
+export class FindWorkflowByCodeGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  code: string;
+}
+
 export class UpdateWorkflowGrpcDto {
   @IsString()
   @IsNotEmpty()

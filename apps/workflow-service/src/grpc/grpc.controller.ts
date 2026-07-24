@@ -10,6 +10,7 @@ import {
   ListWorkflowsGrpcDto,
   ListInstancesGrpcDto,
   EmptyGrpcDto,
+  FindWorkflowByCodeGrpcDto,
 } from './dto/workflow.dto';
 import { DefinitionService } from '../definition/definition.service';
 import { ExecutionService } from '../execution/execution.service';
@@ -42,6 +43,12 @@ export class GrpcWorkflowController {
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
   async findOneWorkflow(@Payload() data: FindOneWorkflowGrpcDto) {
     const def = await this.definitionService.getDefinitionById(data.id);
+    return this.mapToWorkflowResponse(def, def.versions[0]);
+  }
+
+  @GrpcMethod('WorkflowService', 'FindWorkflowByCode')
+  async findWorkflowByCode(@Payload() data: FindWorkflowByCodeGrpcDto) {
+    const def = await this.definitionService.getDefinition(data.code);
     return this.mapToWorkflowResponse(def, def.versions[0]);
   }
 
