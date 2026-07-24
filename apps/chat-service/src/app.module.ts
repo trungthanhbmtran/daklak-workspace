@@ -6,7 +6,6 @@ import { ConversationModule } from './modules/conversation/conversation.module';
 import { MessageModule } from './modules/message/message.module';
 import { ParticipantModule } from './modules/participant/participant.module';
 import { PresenceModule } from './modules/presence/presence.module';
-
 import { GatewayModule } from './modules/gateway/gateway.module';
 
 @Module({
@@ -23,4 +22,4 @@ import { GatewayModule } from './modules/gateway/gateway.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

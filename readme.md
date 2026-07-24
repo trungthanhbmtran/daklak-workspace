@@ -51,6 +51,7 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm document-se
 
 # Khởi động toàn bộ các services (đảm bảo DB đang chạy để seed)
 docker compose -f docker-compose.prod.yml up -d
+
 # Chạy seeders để khởi tạo dữ liệu mặc định (hoặc dữ liệu mẫu)
 # YÊU CẦU QUAN TRỌNG: Phải chạy seed của user-service ĐẦU TIÊN để tạo sơ đồ tổ chức, sau đó mới tới các dịch vụ khác.
 docker exec -it daklak-workspace-user-service-1 npx prisma db seed

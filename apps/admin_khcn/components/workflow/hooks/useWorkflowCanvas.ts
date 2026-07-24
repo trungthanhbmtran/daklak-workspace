@@ -33,7 +33,7 @@ export function useWorkflowCanvas() {
     (params: Connection) => setEdges((eds) => addEdge({
       ...params,
       type: 'custom',
-      animated: false,
+      animated: true,
       markerEnd: {
         type: MarkerType.ArrowClosed,
         width: 20,

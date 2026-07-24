@@ -131,7 +131,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
   const defaultEdgeOptions = {
     type: "custom",
-    animated: false,
+    animated: true,
     markerEnd: {
       type: MarkerType.ArrowClosed,
       width: 20,

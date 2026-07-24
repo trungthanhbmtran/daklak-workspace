@@ -1,56 +1,46 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Redis } from 'ioredis';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
+  private redisClient: Redis;
   private readonly logger = new Logger(RedisService.name);
-  private client: Redis;
+
+  constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    this.client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    this.redisClient = new Redis(redisUrl);
     
-    this.client.on('connect', () => {
-      this.logger.log('Connected to Redis successfully');
+    this.redisClient.on('connect', () => {
+      this.logger.log('Connected to Redis');
     });
 
-    this.client.on('error', (err) => {
-      this.logger.error('Redis connection error', err);
+    this.redisClient.on('error', (err) => {
+      this.logger.error('Redis error', err);
     });
   }
 
   onModuleDestroy() {
-    this.client?.disconnect();
+    this.redisClient.disconnect();
   }
 
-  // Presence
-  async setUserOnline(userId: string, socketId: string) {
-    await this.client.hset('presence:online', userId, socketId);
-    await this.client.set(`presence:last_seen:${userId}`, Date.now().toString());
+  getClient(): Redis {
+    return this.redisClient;
   }
 
-  async setUserOffline(userId: string) {
-    await this.client.hdel('presence:online', userId);
-    await this.client.set(`presence:last_seen:${userId}`, Date.now().toString());
+  // Tiện ích Cache Presence / Typing
+  async setPresence(userId: string, status: string, ttl?: number) {
+    const key = `presence:${userId}`;
+    if (ttl) {
+      await this.redisClient.set(key, status, 'EX', ttl);
+    } else {
+      await this.redisClient.set(key, status);
+    }
   }
 
-  async isUserOnline(userId: string): Promise<boolean> {
-    const exists = await this.client.hexists('presence:online', userId);
-    return exists === 1;
-  }
-
-  // Typing
-  async setUserTyping(conversationId: string, userId: string) {
-    const key = `typing:${conversationId}`;
-    await this.client.sadd(key, userId);
-    await this.client.expire(key, 10); // Auto expire after 10 seconds
-  }
-
-  async stopUserTyping(conversationId: string, userId: string) {
-    const key = `typing:${conversationId}`;
-    await this.client.srem(key, userId);
-  }
-
-  async getTypingUsers(conversationId: string): Promise<string[]> {
-    return this.client.smembers(`typing:${conversationId}`);
+  async getPresence(userId: string) {
+    return await this.redisClient.get(`presence:${userId}`);
   }
 }

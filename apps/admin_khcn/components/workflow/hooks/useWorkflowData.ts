@@ -76,9 +76,7 @@ export function useWorkflowData({
               ...edge,
               type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
               id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
-              sourceHandle: edge.sourceHandle === "" ? undefined : edge.sourceHandle,
-              targetHandle: edge.targetHandle === "" ? undefined : edge.targetHandle,
-              animated: edge.animated || false,
+              animated: edge.animated || true,
               label: edge.label || (edge.data?.label as string) || "Chuyển tiếp",
               markerEnd: edge.markerEnd || {
                 type: MarkerType.ArrowClosed,
@@ -175,7 +173,7 @@ export function useWorkflowData({
           setWorkflowId(response.id);
           targetId = response.id;
         }
-       
+
       } catch (error) {
         toast.error((error as any)?.response?.data?.message || "Lỗi khi lưu quy trình");
         setIsSaving(false);
