@@ -20,6 +20,7 @@ import NodePalette from "./NodePalette";
 import PropertiesPanel from "./PropertiesPanel";
 import Topbar from "./Topbar";
 import { useHubServices } from "@/hooks/useServiceMenus";
+import { WorkflowUpdateHistory } from "./WorkflowUpdateHistory";
 import { Loader2 } from "lucide-react";
 
 import { useWorkflowDynamics } from "./hooks/useWorkflowDynamics";
@@ -35,6 +36,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const { apps: availableServices } = useHubServices();
 
   const { dynamicServices, dynamicTriggers, taskRoles, workflowModules, orgRoles } = useWorkflowDynamics();
@@ -134,11 +136,11 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
       type: MarkerType.ArrowClosed,
       width: 20,
       height: 20,
-      color: "var(--primary)",
+      color: "#3b82f6",
     },
     style: {
       strokeWidth: 2,
-      stroke: "var(--primary)",
+      stroke: "#3b82f6",
     },
   };
 
@@ -159,6 +161,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
           setIsPropertiesOpen(true);
         }}
         onOpenPalette={() => setIsPaletteOpen(!isPaletteOpen)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
       />
       
       <div className="flex flex-1 overflow-hidden relative min-h-0" ref={reactFlowWrapper}>
@@ -195,9 +198,9 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             />
             <MiniMap 
               className="bg-card/90 backdrop-blur border border-border/50 shadow-xl rounded-2xl overflow-hidden mb-4 mr-4" 
-              nodeStrokeColor="var(--primary)"
-              nodeColor="var(--muted)"
-              maskColor="color-mix(in srgb, var(--background) 70%, transparent)"
+              nodeStrokeColor="#3b82f6"
+              nodeColor="#94a3b8"
+              maskColor="rgba(0, 0, 0, 0.1)"
               pannable
               zoomable
             />
@@ -231,6 +234,12 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
           setWorkflowCode={setWorkflowCode}
         />
       </div>
+      <WorkflowUpdateHistory
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        workflowId={workflowId || undefined}
+        workflowName={workflowName}
+      />
     </div>
   );
 };

@@ -40,6 +40,7 @@ interface TopbarProps {
   isSaving: boolean;
   onOpenSettings?: () => void;
   onOpenPalette?: () => void;
+  onOpenHistory?: () => void;
 }
 
 export const Topbar = ({
@@ -52,7 +53,8 @@ export const Topbar = ({
   setWorkflowName,
   isSaving,
   onOpenSettings,
-  onOpenPalette
+  onOpenPalette,
+  onOpenHistory
 }: TopbarProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
@@ -198,7 +200,13 @@ export const Topbar = ({
         )}
 
         <div className="h-6 w-[1px] bg-border/60 mx-1" />
-        <Button variant="ghost" size="icon" className="rounded-xl hover:bg-muted text-muted-foreground" iconStart={<History className="h-4 w-4" />}></Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-xl hover:bg-muted text-muted-foreground" 
+          onClick={onOpenHistory}
+          iconStart={<History className="h-4 w-4" />}>
+        </Button>
         <Button 
           variant="ghost" 
           size="icon" 
