@@ -58,12 +58,12 @@ export const hrmTasksApi = {
     return apiClient.put(`/hrm/tasks/${id}/assign`, payload) as any;
   },
 
-  getComments(id: number): Promise<ApiResponse<any[]>> {
-    return apiClient.get(`/hrm/tasks/${id}/comments`) as any;
+  getComments(conversationId: string): Promise<ApiResponse<any>> {
+    return apiClient.get(`/chat/conversation/${conversationId}/messages`) as any;
   },
 
-  addComment(id: number, payload: { authorCode?: string; content: string; isSystemMessage?: boolean }): Promise<ApiResponse<any>> {
-    return apiClient.post(`/hrm/tasks/${id}/comments`, payload) as any;
+  addComment(conversationId: string, payload: { senderId?: string; content: string; type?: string }): Promise<ApiResponse<any>> {
+    return apiClient.post(`/chat/message`, { conversationId, ...payload }) as any;
   },
 
   getSubTasks(id: number): Promise<ApiResponse<any[]>> {

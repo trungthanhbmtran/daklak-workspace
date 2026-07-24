@@ -55,10 +55,10 @@ export function useTaskDetail(taskId: number | undefined) {
  * - enabled: chỉ fetch khi taskId có giá trị
  * - staleTime ngắn hơn vì comments thay đổi thường xuyên
  */
-export function useTaskComments(taskId: number | undefined) {
+export function useTaskComments(conversationId: string | undefined) {
   return useQuery({
-    queryKey: taskId ? hrmKeys.taskComments(taskId) : [...hrmKeys.tasks(), 'comments', 'none'],
-    queryFn: taskId ? () => hrmTasksApi.getComments(taskId) : skipToken,
+    queryKey: conversationId ? hrmKeys.taskComments(conversationId as any) : [...hrmKeys.tasks(), 'comments', 'none'],
+    queryFn: conversationId ? () => hrmTasksApi.getComments(conversationId) : skipToken,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false, // chat không cần refetch khi focus lại tab
@@ -111,14 +111,15 @@ export function useUpdateTaskStatus() {
  * - Optimistic update: thêm comment vào cache trước khi server confirm
  * - Rollback nếu lỗi
  */
-export function useAddComment(taskId: number | undefined) {
+export function useAddComment(conversationId: string | undefined) {
   const qc = useQueryClient();
-  const key = hrmKeys.taskComments(taskId!);
+  const key = hrmKeys.taskComments(conversationId as any);
 
   return useMutation({
     mutationFn: (content: string) => {
-      if (!taskId) return Promise.reject(new Error("Missing taskId"));
-      return hrmTasksApi.addComment(taskId, { content });
+      if (!conversationId) return Promise.reject(new Error("Missing conversationId"));
+      // Assuming senderId will be handled by gateway auth or we can pass empty and let gateway inject
+      return hrmTasksApi.addComment(conversationId, { content });
     },
 
     // Optimistic: thêm ngay vào cache
@@ -129,13 +130,12 @@ export function useAddComment(taskId: number | undefined) {
       qc.setQueryData(key, (old: any) => {
         const optimisticMsg = {
           content,
-          authorCode: "__optimistic__",
-          authorName: "Bạn",
+          senderId: "__optimistic__",
           createdAt: new Date().toISOString(),
           isOptimistic: true,
         };
-        const existingData = old?.data || [];
-        return { ...old, data: [...existingData, optimisticMsg] };
+        const existingData = old?.data?.items || [];
+        return { ...old, data: { ...old?.data, items: [...existingData, optimisticMsg] } };
       });
 
       return { previous };

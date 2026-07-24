@@ -67,7 +67,6 @@ export const ModelName = {
   TaskAttachment: 'TaskAttachment',
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
-  TaskComment: 'TaskComment',
   TaskHistory: 'TaskHistory',
   TaskRankTemplate: 'TaskRankTemplate',
   RankQuota: 'RankQuota'
@@ -284,6 +283,7 @@ export const TaskScalarFieldEnum = {
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
   workflowInstId: 'workflowInstId',
+  conversationId: 'conversationId',
   metadata: 'metadata',
   creatorEmployeeCode: 'creatorEmployeeCode',
   createdAt: 'createdAt',
@@ -341,20 +341,6 @@ export const TaskClosureScalarFieldEnum = {
 } as const
 
 export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[keyof typeof TaskClosureScalarFieldEnum]
-
-
-export const TaskCommentScalarFieldEnum = {
-  id: 'id',
-  taskId: 'taskId',
-  authorCode: 'authorCode',
-  content: 'content',
-  isSystemMessage: 'isSystemMessage',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
-} as const
-
-export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
 
 
 export const TaskHistoryScalarFieldEnum = {
@@ -539,6 +525,7 @@ export const TaskOrderByRelevanceFieldEnum = {
   priority: 'priority',
   rejectReason: 'rejectReason',
   workflowInstId: 'workflowInstId',
+  conversationId: 'conversationId',
   creatorEmployeeCode: 'creatorEmployeeCode'
 } as const
 
@@ -567,14 +554,6 @@ export const TaskParticipantOrderByRelevanceFieldEnum = {
 } as const
 
 export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
-
-
-export const TaskCommentOrderByRelevanceFieldEnum = {
-  authorCode: 'authorCode',
-  content: 'content'
-} as const
-
-export type TaskCommentOrderByRelevanceFieldEnum = (typeof TaskCommentOrderByRelevanceFieldEnum)[keyof typeof TaskCommentOrderByRelevanceFieldEnum]
 
 
 export const TaskHistoryOrderByRelevanceFieldEnum = {

@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package chat;
+
+service ChatService {
+  rpc CreateConversation (CreateConversationRequest) returns (ConversationResponse);
+  rpc GetConversation (GetConversationRequest) returns (ConversationResponse);
+  rpc GetMessages (GetMessagesRequest) returns (GetMessagesResponse);
+  rpc GetUnreadCount (GetUnreadCountRequest) returns (GetUnreadCountResponse);
+  rpc MarkRead (MarkReadRequest) returns (MarkReadResponse);
+  rpc SearchMessage (SearchMessageRequest) returns (SearchMessageResponse);
+  rpc SendMessage (ChatMessage) returns (Message);
+  
+  // Streaming RPCs
+  rpc Chat (stream ChatMessage) returns (stream ChatMessage);
+  rpc WatchPresence (stream WatchPresenceRequest) returns (stream PresenceUpdate);
+  rpc WatchConversation (WatchConversationRequest) returns (stream ConversationEvent);
+}
+
+message CreateConversationRequest {
+  string type = 1; // "DIRECT", "GROUP", "TASK"
+  string title = 2;
+  repeated string participantIds = 3;
+}
+
+message ConversationResponse {
+  string id = 1;
+  string type = 2;
+  string title = 3;
+  string createdAt = 4;
+}
+
+message GetConversationRequest {
+  string id = 1;
+}
+
+message GetMessagesRequest {
+  string conversationId = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message GetMessagesResponse {
+  repeated Message items = 1;
+}
+
+message Message {
+  string id = 1;
+  string conversationId = 2;
+  string senderId = 3;
+  string type = 4;
+  string content = 5;
+  string createdAt = 6;
+}
+
+message GetUnreadCountRequest {
+  string userId = 1;
+}
+
+message GetUnreadCountResponse {
+  int32 count = 1;
+}
+
+message MarkReadRequest {
+  string messageId = 1;
+  string userId = 2;
+}
+
+message MarkReadResponse {
+  bool success = 1;
+}
+
+message SearchMessageRequest {
+  string query = 1;
+  string conversationId = 2;
+}
+
+message SearchMessageResponse {
+  repeated Message items = 1;
+}
+
+message ChatMessage {
+  string conversationId = 1;
+  string senderId = 2;
+  string type = 3;
+  string content = 4;
+}
+
+message WatchPresenceRequest {
+  repeated string userIds = 1;
+}
+
+message PresenceUpdate {
+  string userId = 1;
+  string status = 2; // "ONLINE", "OFFLINE", "TYPING"
+  string lastSeen = 3;
+}
+
+message WatchConversationRequest {
+  string conversationId = 1;
+}
+
+message ConversationEvent {
+  string eventType = 1; // "MESSAGE_CREATED", "TYPING_STARTED"
+  string payload = 2; // JSON string
+}

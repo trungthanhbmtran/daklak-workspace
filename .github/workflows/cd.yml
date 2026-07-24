@@ -36,6 +36,7 @@ jobs:
 
             admin_khcn: 'apps/admin_khcn/**'
             api-gateway: 'apps/api-gateway/**'
+            chat-service: 'apps/chat-service/**'
             hrm-service: 'apps/hrm-service/**'
             media-service: 'apps/media-service/**'
             notification_service: 'apps/notification_service/**'
@@ -49,7 +50,7 @@ jobs:
       - id: prepare
         run: |
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts-service","translate_service","user-service","workflow-service","document-service","portal-goverment"]'
+            SERVICES='["admin_khcn","api-gateway","chat-service","hrm-service","media-service","notification_service","posts-service","translate_service","user-service","workflow-service","document-service","portal-goverment"]'
           else
             SERVICES='${{ steps.filter.outputs.changes }}'
           fi
@@ -121,6 +122,7 @@ jobs:
 
           echo "🗄 Run migrations..."
           docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate || true
+          docker compose -f docker-compose.prod.yml --profile migrate run --rm chat-service-migrate || true
           docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate || true
           docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate || true
           docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate || true

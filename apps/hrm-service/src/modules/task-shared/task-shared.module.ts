@@ -1,4 +1,4 @@
-﻿import { Global, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TaskSharedService } from './task-shared.service';
@@ -42,6 +42,16 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
           package: 'workflow',
           protoPath: require('path').join(PROTO_ROOT, 'workflow/workflow.proto'),
           url: process.env.WORKFLOW_SERVICE_URL || 'workflow-service:50060',
+          loader: { keepCase: false, longs: String, enums: String, defaults: true, includeDirs: [PROTO_ROOT] },
+        },
+      },
+      {
+        name: 'CHAT_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'chat',
+          protoPath: require('path').join(PROTO_ROOT, 'chat/chat.proto'),
+          url: process.env.CHAT_SERVICE_ADDR || 'chat-service:50061',
           loader: { keepCase: false, longs: String, enums: String, defaults: true, includeDirs: [PROTO_ROOT] },
         },
       }

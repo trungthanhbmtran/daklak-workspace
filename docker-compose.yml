@@ -122,6 +122,26 @@ services:
     environment:
       - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_notification
 
+  chat-service:
+    build:
+      context: .
+      dockerfile: apps/chat-service/Dockerfile
+    container_name: chat-service
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+    ports:
+      - "3004:3004"
+      - "50061:50061"
+    env_file:
+      - apps/chat-service/.env
+    environment:
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_chat
+      - GRPC_URL=0.0.0.0:50061
+      - PORT=3004
+
 volumes:
   mysql_data:
   minio_data:

@@ -44,7 +44,7 @@ export function TaskProcessingTab({
 
   const updateProgress = useUpdateProgress(taskId);
   const updateStep = useUpdateStep(taskId);
-  const addComment = useAddComment(taskId);
+  const addComment = useAddComment(currentTask.conversationId);
   const updateStatus = useUpdateStatus(taskId);
 
   const handleSaveReport = async () => {

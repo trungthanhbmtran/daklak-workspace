@@ -185,7 +185,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             fitView
             defaultEdgeOptions={defaultEdgeOptions}
             connectionLineStyle={{ stroke: '#3b82f6', strokeWidth: 2.5 }}
-            connectionLineType={"smoothstep" as any}
+            connectionLineType={"step" as any}
             className="transition-opacity duration-300"
           >
             <Background

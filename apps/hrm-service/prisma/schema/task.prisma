@@ -22,6 +22,7 @@ model Task {
   planId          Int? @map("plan_id")
 
   workflowInstId String? @map("workflow_instance_id")
+  conversationId String? @map("conversation_id")
   metadata       Json?   @map("metadata")
 
   creatorEmployeeCode String?  @map("creator_employee_code")
@@ -34,7 +35,6 @@ model Task {
 
   participants TaskParticipant[]
   attachments  TaskAttachment[]
-  comments     TaskComment[]
   histories    TaskHistory[]
   steps        TaskStep[]
 
@@ -117,21 +117,6 @@ model TaskClosure {
   @@map("task_closure")
 }
 
-model TaskComment {
-  id              Int     @id @default(autoincrement())
-  taskId          Int     @map("task_id")
-  authorCode      String? @map("author_code")
-  content         String  @db.Text
-  isSystemMessage Boolean @default(false) @map("is_system_message")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  isDeleted Boolean  @default(false) @map("is_deleted")
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@map("task_comments")
-}
 
 model TaskHistory {
   id        Int      @id @default(autoincrement())

@@ -23,6 +23,7 @@ jobs:
           filters: |
             admin_khcn: 'apps/admin_khcn/**'
             api-gateway: 'apps/api-gateway/**'
+            chat-service: 'apps/chat-service/**'
             hrm-service: 'apps/hrm-service/**'
             media-service: 'apps/media-service/**'
             notification_service: 'apps/notification_service/**'

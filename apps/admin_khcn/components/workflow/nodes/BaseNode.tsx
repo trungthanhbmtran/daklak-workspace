@@ -44,14 +44,14 @@ export const BaseNode = ({
         <Handle
           type="target"
           position={Position.Left}
-          className="h-4 w-4 -ml-2 border-2 border-background bg-muted-foreground ring-2 ring-border/50 transition-all hover:scale-125 hover:bg-primary z-10"
+          className="h-6 w-6 -ml-3 border-2 border-background bg-slate-400 ring-2 ring-border/50 transition-all hover:scale-125 hover:bg-primary z-10"
         />
       )}
       {type !== "end" && !type.includes("gateway") && (
         <Handle
           type="source"
           position={Position.Right}
-          className="h-4 w-4 -mr-2 border-2 border-background bg-primary ring-2 ring-primary/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(var(--primary),0.5)] z-10"
+          className="h-6 w-6 -mr-3 border-2 border-background bg-primary ring-2 ring-primary/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(var(--primary),0.5)] z-10"
         />
       )}
     </div>

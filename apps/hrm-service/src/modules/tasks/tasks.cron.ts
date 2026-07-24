@@ -119,12 +119,12 @@ export class TasksCronService {
     if (warnType === 'RISK') updateData.isRiskWarned = true;
 
     await this.prisma.task.update({ where: { id: task.id }, data: updateData });
-    await this.prisma.taskComment.create({
+    await this.prisma.taskHistory.create({
       data: {
         taskId: task.id,
-        authorCode: null,
-        content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}`,
-        isSystemMessage: true,
+        action: 'SYSTEM_WARNING',
+        actorCode: 'SYSTEM',
+        newValue: { content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}` },
       }
     });
   }

@@ -82,6 +82,7 @@ export interface HrmTask {
   
   attachments?: HrmTaskAttachment[];
   comments?: HrmTaskComment[];
+  conversationId?: string;
   kpi?: HrmTaskKPI; // Kết quả đánh giá KPI sau khi hoàn thành
   
   // Quan hệ kế thừa nhiệm vụ (Cây phân cấp)

@@ -415,6 +415,30 @@ export class TasksService {
       return task;
     });
 
+    // Khởi tạo Conversation từ ChatService
+    try {
+      const participants = [creatorCode, assigneeCode, ...(data.coassigneeCodes || [])]
+        .filter(Boolean)
+        .map(code => code.toString());
+      const uniqueParticipants = [...new Set(participants)];
+
+      if (this.shared.chatService) {
+        const conversationRes = await firstValueFrom<any>(
+          this.shared.chatService.CreateConversation({
+            type: 'TASK',
+            title: `Task: ${newTask.title}`,
+            participantIds: uniqueParticipants
+          })
+        );
+        if (conversationRes && conversationRes.id) {
+          await this.prisma.task.update({ where: { id: newTask.id }, data: { conversationId: conversationRes.id } });
+          newTask.conversationId = conversationRes.id;
+        }
+      }
+    } catch (e) {
+      this.logger.error('Failed to create chat conversation for task ' + newTask.id, e);
+    }
+
     // Khởi động workflow — workflow điều hướng mọi hành động tiếp theo
     const workflowCode = await this.wf.resolveWorkflowCode(data, planId, parentId);
     const wfInit = workflowCode
@@ -737,43 +761,11 @@ export class TasksService {
   // ─── Comments ─────────────────────────────────────────────────────────────
 
   async addComment(id: number, data: any) {
-    await this.shared.populateQueryHierarchy(data);
-    const t = await this.findTaskOrFail(id);
-    const [enriched] = await this.shared.enrichTasks([t]);
-    const access = await this.shared.checkTaskAccess(enriched, data);
-    if (!access.hasAccess) throw new RpcException('Bạn không có quyền xem nhiệm vụ này.');
-    const actions = await this.shared.computeAllowedActions(enriched, data);
-    if (!actions.includes('CHAT')) throw new RpcException('Bạn không có quyền trao đổi trong công việc này.');
-
-    const actorCode = data.authorCode || data.currentEmployeeCode || 'SYSTEM';
-    const c = await this.prisma.taskComment.create({ data: { taskId: id, authorCode: actorCode === 'SYSTEM' ? null : actorCode, content: data.content, isSystemMessage: data.isSystemMessage || false } });
-    const emp = await this.prisma.employee.findUnique({ where: { employeeCode: actorCode }, select: { fullName: true, avatar: true } });
-
-    if (!data.isSystemMessage && data.content) {
-      await this.notif.notifyMention(enriched, data.content, actorCode, emp?.fullName || actorCode);
-    }
-
-    return { success: true, data: { id: c.id, taskId: c.taskId, authorCode: actorCode, authorName: emp?.fullName || actorCode, authorAvatar: emp?.avatar || '', content: c.content, isSystemMessage: c.isSystemMessage, createdAt: c.createdAt.toISOString() } };
+    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
   }
 
   async getComments(id: number, query: any) {
-    await this.shared.populateQueryHierarchy(query);
-    const t = await this.findTaskOrFail(id);
-    const [enriched] = await this.shared.enrichTasks([t]);
-    const access = await this.shared.checkTaskAccess(enriched, query);
-    if (!access.hasAccess) throw new RpcException('Bạn không có quyền xem nhiệm vụ này.');
-
-    const comments = await this.prisma.taskComment.findMany({ where: { taskId: id }, orderBy: { createdAt: 'asc' } });
-    const codes = [...new Set(comments.map(c => c.authorCode).filter(Boolean))];
-    const emps = await this.prisma.employee.findMany({ where: { employeeCode: { in: codes as string[] } }, select: { employeeCode: true, fullName: true, avatar: true } });
-    const empMap = new Map(emps.map(e => [e.employeeCode, e]));
-
-    return {
-      success: true, data: comments.map(c => {
-        const e = c.authorCode ? empMap.get(c.authorCode) : null;
-        return { id: c.id, taskId: c.taskId, authorCode: e?.employeeCode || 'SYSTEM', authorName: e?.fullName || 'SYSTEM', authorAvatar: e?.avatar || '', content: c.content, isSystemMessage: c.isSystemMessage, createdAt: c.createdAt.toISOString(), isMine: e ? e.employeeCode === query.currentEmployeeCode : false };
-      })
-    };
+    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
   }
 
   // ─── Steps (Checklist) ────────────────────────────────────────────────────

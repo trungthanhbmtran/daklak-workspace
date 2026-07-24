@@ -16,14 +16,17 @@ export class TaskSharedService {
     @Inject('NOTIFICATION_SERVICE') public notificationClient: ClientProxy,
     @Inject('USER_PACKAGE') public userClient: any,
     @Inject('WORKFLOW_PACKAGE') public workflowClient: any,
+    @Inject('CHAT_PACKAGE') public chatClient: any,
     public cache: AppCacheService,
     
   ) {}
   public userService: any;
   public workflowService: any;
+  public chatService: any;
   onModuleInit() {
     this.userService = this.userClient.getService('UserService');
     this.workflowService = this.workflowClient.getService('WorkflowService');
+    this.chatService = this.chatClient.getService('ChatService');
   }
 
   public async resolveAssigneeCodes(tasks: any[]): Promise<Map<number, string>> {

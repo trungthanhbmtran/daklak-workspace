@@ -16,6 +16,7 @@ import { GlobalClientModule } from './core/global-client.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 import { DynamicProxyMiddleware } from './modules/integration/dynamic-proxy.middleware';
 import { PrismaModule } from './core/prisma/prisma.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PrismaModule } from './core/prisma/prisma.module';
     RedisModule,
     IntegrationModule,
     PrismaModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [],

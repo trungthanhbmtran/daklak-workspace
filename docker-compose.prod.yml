@@ -200,6 +200,24 @@ services:
       NOTIFICATION_QUEUE: notifications
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification?allowPublicKeyRetrieval=true
 
+  chat-service:
+    image: ${DOCKER_USERNAME}/daklak-chat-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_chat?allowPublicKeyRetrieval=true
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
+    volumes:
+      - ./shared/protos:/app/protos:ro
+
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -226,6 +244,15 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_systems?allowPublicKeyRetrieval=true
+
+  chat-service-migrate:
+    image: ${DOCKER_USERNAME}/daklak-chat-service:${IMAGE_TAG:-latest}
+    profiles: [ "migrate" ]
+    command: npx prisma migrate deploy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_chat?allowPublicKeyRetrieval=true
 
   hrm-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}

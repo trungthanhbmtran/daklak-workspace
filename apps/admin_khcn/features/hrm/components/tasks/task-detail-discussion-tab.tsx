@@ -17,12 +17,12 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-export function TaskDiscussionTab({ taskId, allowedActions }: { taskId: number; allowedActions?: string[] }) {
+export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { taskId: number; conversationId?: string; allowedActions?: string[] }) {
   const [commentText, setCommentText] = useState("");
-  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
-  const addComment = useAddComment(taskId);
+  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
+  const addComment = useAddComment(conversationId);
   
-  const comments: any[] = (commentsData as any)?.data ?? [];
+  const comments: any[] = (commentsData as any)?.data?.items ?? [];
 
   const handleSendComment = async () => {
     if (!commentText.trim()) return;
@@ -51,11 +51,11 @@ export function TaskDiscussionTab({ taskId, allowedActions }: { taskId: number; 
           comments.map((comment: any) => (
             <div key={comment.id || comment.createdAt} className="flex gap-3">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
-                {(comment.authorName || comment.user?.fullName || "U")?.[0]?.toUpperCase()}
+                {(comment.senderId || "U")?.[0]?.toUpperCase()}
               </div>
               <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
                 <div className="flex justify-between items-center mb-1">
-                  <Text as="span" variant="small" weight="medium">{comment.authorName || comment.user?.fullName || "Người dùng"}</Text>
+                  <Text as="span" variant="small" weight="medium">{comment.senderId || "Người dùng"}</Text>
                   <Text as="span" className="text-slate-500">
                     {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
                   </Text>

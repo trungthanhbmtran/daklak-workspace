@@ -98,11 +98,6 @@ export type TaskParticipant = Prisma.TaskParticipantModel
  */
 export type TaskClosure = Prisma.TaskClosureModel
 /**
- * Model TaskComment
- * 
- */
-export type TaskComment = Prisma.TaskCommentModel
-/**
  * Model TaskHistory
  * 
  */

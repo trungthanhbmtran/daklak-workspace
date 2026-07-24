@@ -400,7 +400,6 @@ export const ModelName = {
   TaskAttachment: 'TaskAttachment',
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
-  TaskComment: 'TaskComment',
   TaskHistory: 'TaskHistory',
   TaskRankTemplate: 'TaskRankTemplate',
   RankQuota: 'RankQuota'
@@ -419,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "jobTitleKpiTarget" | "staffingSlotKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskComment" | "taskHistory" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "jobTitleKpiTarget" | "staffingSlotKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1479,72 +1478,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    TaskComment: {
-      payload: Prisma.$TaskCommentPayload<ExtArgs>
-      fields: Prisma.TaskCommentFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.TaskCommentFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.TaskCommentFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
-        }
-        findFirst: {
-          args: Prisma.TaskCommentFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.TaskCommentFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
-        }
-        findMany: {
-          args: Prisma.TaskCommentFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>[]
-        }
-        create: {
-          args: Prisma.TaskCommentCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
-        }
-        createMany: {
-          args: Prisma.TaskCommentCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.TaskCommentDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
-        }
-        update: {
-          args: Prisma.TaskCommentUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
-        }
-        deleteMany: {
-          args: Prisma.TaskCommentDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.TaskCommentUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.TaskCommentUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
-        }
-        aggregate: {
-          args: Prisma.TaskCommentAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskComment>
-        }
-        groupBy: {
-          args: Prisma.TaskCommentGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TaskCommentGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.TaskCommentCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TaskCommentCountAggregateOutputType> | number
-        }
-      }
-    }
     TaskHistory: {
       payload: Prisma.$TaskHistoryPayload<ExtArgs>
       fields: Prisma.TaskHistoryFieldRefs
@@ -1977,6 +1910,7 @@ export const TaskScalarFieldEnum = {
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
   workflowInstId: 'workflowInstId',
+  conversationId: 'conversationId',
   metadata: 'metadata',
   creatorEmployeeCode: 'creatorEmployeeCode',
   createdAt: 'createdAt',
@@ -2034,20 +1968,6 @@ export const TaskClosureScalarFieldEnum = {
 } as const
 
 export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[keyof typeof TaskClosureScalarFieldEnum]
-
-
-export const TaskCommentScalarFieldEnum = {
-  id: 'id',
-  taskId: 'taskId',
-  authorCode: 'authorCode',
-  content: 'content',
-  isSystemMessage: 'isSystemMessage',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
-} as const
-
-export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
 
 
 export const TaskHistoryScalarFieldEnum = {
@@ -2232,6 +2152,7 @@ export const TaskOrderByRelevanceFieldEnum = {
   priority: 'priority',
   rejectReason: 'rejectReason',
   workflowInstId: 'workflowInstId',
+  conversationId: 'conversationId',
   creatorEmployeeCode: 'creatorEmployeeCode'
 } as const
 
@@ -2260,14 +2181,6 @@ export const TaskParticipantOrderByRelevanceFieldEnum = {
 } as const
 
 export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
-
-
-export const TaskCommentOrderByRelevanceFieldEnum = {
-  authorCode: 'authorCode',
-  content: 'content'
-} as const
-
-export type TaskCommentOrderByRelevanceFieldEnum = (typeof TaskCommentOrderByRelevanceFieldEnum)[keyof typeof TaskCommentOrderByRelevanceFieldEnum]
 
 
 export const TaskHistoryOrderByRelevanceFieldEnum = {
@@ -2474,7 +2387,6 @@ export type GlobalOmitConfig = {
   taskAttachment?: Prisma.TaskAttachmentOmit
   taskParticipant?: Prisma.TaskParticipantOmit
   taskClosure?: Prisma.TaskClosureOmit
-  taskComment?: Prisma.TaskCommentOmit
   taskHistory?: Prisma.TaskHistoryOmit
   taskRankTemplate?: Prisma.TaskRankTemplateOmit
   rankQuota?: Prisma.RankQuotaOmit
