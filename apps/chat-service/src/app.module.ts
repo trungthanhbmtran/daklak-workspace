@@ -7,6 +7,8 @@ import { MessageModule } from './modules/message/message.module';
 import { ParticipantModule } from './modules/participant/participant.module';
 import { PresenceModule } from './modules/presence/presence.module';
 
+import { GatewayModule } from './modules/gateway/gateway.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -16,6 +18,7 @@ import { PresenceModule } from './modules/presence/presence.module';
     MessageModule,
     ParticipantModule,
     PresenceModule,
+    GatewayModule,
   ],
   controllers: [],
   providers: [],

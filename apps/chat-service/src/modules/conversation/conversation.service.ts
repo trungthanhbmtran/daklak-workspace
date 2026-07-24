@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { RpcException } from '@nestjs/microservices';
+import { RabbitmqService } from '../../infra/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class ConversationService {
   private readonly logger = new Logger(ConversationService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly rabbitmqService: RabbitmqService
+  ) {}
 
   async createConversation(data: { type: string; title?: string; participantIds: string[] }) {
     if (!data.type) {
@@ -27,7 +31,14 @@ export class ConversationService {
         }
       });
       
-      // TODO: Publish ConversationCreated event to RabbitMQ
+      this.rabbitmqService.publishEvent('conversation.created', {
+        id: conversation.id,
+        type: conversation.type,
+        title: conversation.title,
+        participantIds: data.participantIds,
+        createdAt: conversation.createdAt,
+      });
+      
       return conversation;
     } catch (e) {
       this.logger.error('Error creating conversation', e);

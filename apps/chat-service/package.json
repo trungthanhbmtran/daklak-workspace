@@ -38,6 +38,8 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/microservices": "^11.1.13",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.28",
+    "@nestjs/websockets": "^11.1.28",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "amqp-connection-manager": "^5.0.0",
@@ -56,6 +58,7 @@
     "mysql2": "^3.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3",
     "winston": "^3.17.0"
   },
   "devDependencies": {

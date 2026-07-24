@@ -1,12 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { RpcException } from '@nestjs/microservices';
+import { RabbitmqService } from '../../infra/rabbitmq/rabbitmq.service';
+import { ChatGateway } from '../gateway/chat.gateway';
 
 @Injectable()
 export class MessageService {
   private readonly logger = new Logger(MessageService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly rabbitmqService: RabbitmqService,
+    private readonly chatGateway: ChatGateway
+  ) {}
 
   async getMessages(conversationId: string, limit: number, offset: number) {
     if (!conversationId) {
@@ -31,7 +37,10 @@ export class MessageService {
           content: data.content,
         }
       });
-      // TODO: Publish MessageCreated event to RabbitMQ
+      
+      this.rabbitmqService.publishEvent('message.created', msg);
+      this.chatGateway.broadcastMessage(msg.conversationId, msg);
+      
       return msg;
     } catch (e) {
       this.logger.error('Error saving message', e);
