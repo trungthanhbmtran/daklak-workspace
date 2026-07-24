@@ -6,7 +6,6 @@ import { ConversationModule } from './modules/conversation/conversation.module';
 import { MessageModule } from './modules/message/message.module';
 import { ParticipantModule } from './modules/participant/participant.module';
 import { PresenceModule } from './modules/presence/presence.module';
-import { GatewayModule } from './modules/gateway/gateway.module';
 
 @Module({
   imports: [
@@ -17,7 +16,6 @@ import { GatewayModule } from './modules/gateway/gateway.module';
     MessageModule,
     ParticipantModule,
     PresenceModule,
-    GatewayModule,
   ],
   controllers: [],
   providers: [],

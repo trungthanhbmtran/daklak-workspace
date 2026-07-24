@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ChatController } from './chat.controller';
-import { ChatService } from './chat.service';
+import { ChatGateway } from './chat.gateway';
 
 const protoRoot =
   process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
@@ -30,6 +30,6 @@ const chatProtoPath = join(protoRoot, 'chat', 'chat.proto');
     ]),
   ],
   controllers: [ChatController],
-  providers: [ChatService],
+  providers: [ChatGateway],
 })
 export class ChatModule {}

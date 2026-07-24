@@ -18,8 +18,10 @@ export function useChatSocket(conversationId: string | undefined, userId?: strin
   useEffect(() => {
     if (!conversationId) return;
 
-    // Khởi tạo kết nối socket
-    const socket = io(`${SOCKET_URL}/chat`, {
+    // Khởi tạo kết nối socket tới API Gateway
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : SOCKET_URL;
+    const socket = io(`${baseUrl}/admin/chat`, {
+      path: "/api/v1/admin/chat/socket.io",
       query: { userId: userId || "Anonymous" },
       transports: ["websocket"],
       autoConnect: true,

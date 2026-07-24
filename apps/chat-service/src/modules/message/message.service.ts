@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { RabbitmqService } from '../../infra/rabbitmq/rabbitmq.service';
-import { ChatGateway } from '../gateway/chat.gateway';
 import { MessageRepository } from './message.repository';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { MessageResponseDto } from './dto/message-response.dto';
@@ -12,8 +11,7 @@ export class MessageService {
 
   constructor(
     private readonly messageRepository: MessageRepository,
-    private readonly rabbitmqService: RabbitmqService,
-    private readonly chatGateway: ChatGateway
+    private readonly rabbitmqService: RabbitmqService
   ) {}
 
   async getMessages(conversationId: string, limit: number, offset: number): Promise<MessageResponseDto[]> {
@@ -36,7 +34,6 @@ export class MessageService {
       const msg = await this.messageRepository.create(data);
       
       this.rabbitmqService.publishEvent('message.created', msg);
-      this.chatGateway.broadcastMessage(msg.conversationId, msg);
       
       return new MessageResponseDto({
         id: msg.id,

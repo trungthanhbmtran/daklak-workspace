@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Param, Query, Inject, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { Controller, Get, Post, Body, Param, Query, Inject, OnModuleInit, UseGuards, Req } from '@nestjs/common';
+import { ClientGrpc, EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { ChatGateway } from './chat.gateway';
 
 interface ChatServiceClient {
   createConversation(data: any): Observable<any>;
@@ -9,14 +11,31 @@ interface ChatServiceClient {
   sendMessage(data: any): Observable<any>;
 }
 
-@Controller('chat')
+@Controller('admin/chat')
+@UseGuards(JwtAuthGuard)
 export class ChatController implements OnModuleInit {
   private chatService: ChatServiceClient;
 
-  constructor(@Inject('CHAT_PACKAGE') private client: ClientGrpc) {}
+  constructor(
+    @Inject('CHAT_PACKAGE') private client: ClientGrpc,
+    private readonly chatGateway: ChatGateway
+  ) {}
 
   onModuleInit() {
     this.chatService = this.client.getService<ChatServiceClient>('ChatService');
+  }
+
+  @EventPattern('message.created')
+  async handleMessageCreated(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    
+    // Broadcast message via WebSockets
+    if (data && data.conversationId) {
+      this.chatGateway.broadcastMessage(data.conversationId, data);
+    }
+    
+    channel.ack(originalMsg);
   }
 
   @Post('conversation')
@@ -43,7 +62,11 @@ export class ChatController implements OnModuleInit {
   }
 
   @Post('message')
-  sendMessage(@Body() body: any) {
+  sendMessage(@Req() req: any, @Body() body: any) {
+    // Tự động gán người gửi là user đang đăng nhập nếu chưa có
+    if (!body.senderId && req.user) {
+      body.senderId = req.user.employeeCode || req.user.username;
+    }
     return this.chatService.sendMessage(body);
   }
 }
