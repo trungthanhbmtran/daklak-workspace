@@ -195,9 +195,11 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             />
             <MiniMap 
               className="bg-card/90 backdrop-blur border border-border/50 shadow-xl rounded-2xl overflow-hidden mb-4 mr-4" 
-              nodeStrokeColor="rgba(var(--primary), 0.2)"
-              nodeColor="rgba(var(--primary), 0.05)"
-              maskColor="rgba(var(--background), 0.7)"
+              nodeStrokeColor="var(--primary)"
+              nodeColor="var(--muted)"
+              maskColor="color-mix(in srgb, var(--background) 70%, transparent)"
+              pannable
+              zoomable
             />
             
             <Panel position="top-left" className="bg-card/80 backdrop-blur-md border border-border/50 px-3 py-2 rounded-xl shadow-md mt-4 ml-4">
