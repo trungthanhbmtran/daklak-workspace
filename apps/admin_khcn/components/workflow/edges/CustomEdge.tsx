@@ -26,7 +26,7 @@ export default function CustomEdge({
 
   return (
     <>
-      <BaseEdge path={edgePath} markerEnd={markerEnd} style={{ ...style, strokeWidth: selected ? 3 : 2, stroke: selected ? 'var(--primary)' : style.stroke || 'var(--primary)' }} id={id} />
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={{ ...style, strokeWidth: selected ? 3 : 2, stroke: selected ? '#3b82f6' : style.stroke || '#3b82f6' }} id={id} />
       {label && (
         <EdgeLabelRenderer>
           <div
