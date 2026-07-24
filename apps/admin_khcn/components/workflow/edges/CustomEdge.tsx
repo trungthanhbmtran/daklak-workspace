@@ -22,7 +22,6 @@ export default function CustomEdge({
     targetX,
     targetY,
     targetPosition,
-    borderRadius: 0,
   });
 
   return (
