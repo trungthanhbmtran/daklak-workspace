@@ -131,7 +131,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
   const defaultEdgeOptions = {
     type: "custom",
-    animated: true,
+    animated: false,
     markerEnd: {
       type: MarkerType.ArrowClosed,
       width: 20,
@@ -185,7 +185,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             fitView
             defaultEdgeOptions={defaultEdgeOptions}
             connectionLineStyle={{ stroke: '#3b82f6', strokeWidth: 2.5 }}
-            connectionLineType={"smoothstep" as any}
+            connectionLineType={"straight" as any}
             className="transition-opacity duration-300"
           >
             <Background
