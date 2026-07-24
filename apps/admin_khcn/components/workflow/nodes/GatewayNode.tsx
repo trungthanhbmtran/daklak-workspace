@@ -24,14 +24,14 @@ export default function GatewayNode({ data, isConnectable, type }: any) {
         type="source"
         position={Position.Right}
         isConnectable={isConnectable}
-        className="w-3 h-3 -mr-1 border-2 border-background bg-orange-500 ring-2 ring-orange-500/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+        className="w-4 h-4 -mr-2 border-2 border-background bg-orange-500 ring-2 ring-orange-500/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(249,115,22,0.5)] z-10"
       />
       <Handle
         id="false"
         type="source"
         position={Position.Bottom}
         isConnectable={isConnectable}
-        className="w-3 h-3 -mb-1 border-2 border-background bg-destructive ring-2 ring-destructive/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+        className="w-4 h-4 -mb-2 border-2 border-background bg-destructive ring-2 ring-destructive/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] z-10"
       />
       {/* Fallback default handle for legacy edges without sourceHandle */}
       <Handle
