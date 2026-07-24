@@ -80,11 +80,11 @@ export function useWorkflowData({
                 type: MarkerType.ArrowClosed,
                 width: 20,
                 height: 20,
-                color: '#64748b',
+                color: 'var(--primary)',
               },
               style: edge.style || {
                 strokeWidth: 2,
-                stroke: '#64748b',
+                stroke: 'var(--primary)',
               }
             })
           );

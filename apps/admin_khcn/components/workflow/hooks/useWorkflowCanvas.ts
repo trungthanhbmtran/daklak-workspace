@@ -38,11 +38,11 @@ export function useWorkflowCanvas() {
         type: MarkerType.ArrowClosed,
         width: 20,
         height: 20,
-        color: 'hsl(var(--primary))',
+        color: 'var(--primary)',
       },
       style: {
         strokeWidth: 2,
-        stroke: 'hsl(var(--primary))',
+        stroke: 'var(--primary)',
       }
     }, eds)),
     [setEdges]
