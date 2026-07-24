@@ -76,6 +76,8 @@ export function useWorkflowData({
               ...edge,
               type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
               id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
+              sourceHandle: edge.sourceHandle === "" ? undefined : edge.sourceHandle,
+              targetHandle: edge.targetHandle === "" ? undefined : edge.targetHandle,
               animated: edge.animated || false,
               label: edge.label || (edge.data?.label as string) || "Chuyển tiếp",
               markerEnd: edge.markerEnd || {
