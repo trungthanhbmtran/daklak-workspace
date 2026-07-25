@@ -2303,7 +2303,7 @@ async function main() {
     { group: 'DOMAIN', code: 'AN_TOAN_BUC_XA_HAT_NHAN', order: 107, nameVi: 'An toàn bức xạ & hạt nhân', nameEn: 'Radiation & Nuclear Safety' },
     { group: 'DOMAIN', code: 'TAN_SO_VO_TUYEN_DIEN', order: 108, nameVi: 'Tần số vô tuyến điện', nameEn: 'Radio Frequency' },
     { group: 'DOMAIN', code: 'CONG_NGHE_THONG_TIN', order: 109, nameVi: 'Công nghệ thông tin', nameEn: 'Information Technology' },
-    
+
     // --- CATEGORY_GROUPS ---
     { group: 'CATEGORY_GROUPS', code: 'STATUS', order: 1, nameVi: 'Trạng thái hệ thống', nameEn: 'Trạng thái hệ thống' },
     { group: 'CATEGORY_GROUPS', code: 'TASK_ROLE', order: 2, nameVi: 'Vai trò công việc', nameEn: 'Vai trò công việc' },
@@ -2551,12 +2551,12 @@ async function main() {
     const resId = resources[resCode]?.id;
     if (!resId) continue;
     for (const action of adminActions) {
-      let policy = await prisma.policy.findFirst({ 
-        where: { resourceId: resId, action, effect: 'ALLOW', conditions: { equals: { expression: 'targetUser.unitCode STARTSWITH user.unitCode' } } } 
+      let policy = await prisma.policy.findFirst({
+        where: { resourceId: resId, action, effect: 'ALLOW', conditions: { equals: { expression: 'targetUser.unitCode STARTSWITH user.unitCode' } } }
       });
       if (!policy) {
-        policy = await prisma.policy.create({ 
-          data: { resourceId: resId, action, effect: 'ALLOW', conditions: { expression: 'targetUser.unitCode STARTSWITH user.unitCode' } } 
+        policy = await prisma.policy.create({
+          data: { resourceId: resId, action, effect: 'ALLOW', conditions: { expression: 'targetUser.unitCode STARTSWITH user.unitCode' } }
         });
       }
       orgAdminPolicyIds.push(policy.id);
@@ -4728,6 +4728,62 @@ async function main() {
   console.log('🔹 Seeding Categories...');
 
   await prisma.categoryGroup.upsert({
+    where: { code: 'INTEGRATION_PROTOCOL' },
+    update: { name: 'Giao thức tích hợp' },
+    create: { code: 'INTEGRATION_PROTOCOL', name: 'Giao thức tích hợp' },
+  });
+
+  const integrationProtocols = [
+    { code: 'REST', name: 'REST API', order: 1 },
+    { code: 'SOAP', name: 'SOAP / WSDL', order: 2 },
+    { code: 'GRAPHQL', name: 'GraphQL', order: 3 },
+    { code: 'GRPC', name: 'gRPC', order: 4 },
+  ];
+
+  for (const protocol of integrationProtocols) {
+    const cat = await prisma.category.upsert({
+      where: { groupCode_code: { groupCode: 'INTEGRATION_PROTOCOL', code: protocol.code } },
+      update: { order: protocol.order },
+      create: { groupCode: 'INTEGRATION_PROTOCOL', code: protocol.code, order: protocol.order },
+    });
+
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_langCode: { categoryId: cat.id, langCode: 'vi' } },
+      update: { name: protocol.name },
+      create: { categoryId: cat.id, langCode: 'vi', name: protocol.name },
+    });
+  }
+
+  await prisma.categoryGroup.upsert({
+    where: { code: 'INTEGRATION_AUTH_TYPE' },
+    update: { name: 'Loại xác thực tích hợp' },
+    create: { code: 'INTEGRATION_AUTH_TYPE', name: 'Loại xác thực tích hợp' },
+  });
+
+  const integrationAuthTypes = [
+    { code: 'NONE', name: 'Không xác thực', order: 1 },
+    { code: 'BASIC', name: 'Basic Auth', order: 2 },
+    { code: 'BEARER', name: 'Bearer Token', order: 3 },
+    { code: 'OAUTH2', name: 'OAuth 2.0', order: 4 },
+    { code: 'API_KEY', name: 'API Key', order: 5 },
+    // { code: 'MTLS', name: 'mTLS', order: 6 },
+  ];
+
+  for (const auth of integrationAuthTypes) {
+    const cat = await prisma.category.upsert({
+      where: { groupCode_code: { groupCode: 'INTEGRATION_AUTH_TYPE', code: auth.code } },
+      update: { order: auth.order },
+      create: { groupCode: 'INTEGRATION_AUTH_TYPE', code: auth.code, order: auth.order },
+    });
+
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_langCode: { categoryId: cat.id, langCode: 'vi' } },
+      update: { name: auth.name },
+      create: { categoryId: cat.id, langCode: 'vi', name: auth.name },
+    });
+  }
+
+  await prisma.categoryGroup.upsert({
     where: { code: 'PLAN_FRAMEWORK' },
     update: { name: 'Mô hình Quản trị / Kế hoạch' },
     create: { code: 'PLAN_FRAMEWORK', name: 'Mô hình Quản trị / Kế hoạch' },
@@ -4939,7 +4995,7 @@ async function main() {
         }
 
         // 2. Lĩnh vực và Phòng ban theo dõi
-        
+
         // Mặc định: Kế thừa lĩnh vực của đơn vị cha (ngoại trừ Lãnh đạo cấp Sở phân công riêng)
         if (staffing.unit.code !== 'H15.07') {
           const assignedCodes = domainMapping[staffing.unit.code] || ['H15.07'];
@@ -4954,7 +5010,7 @@ async function main() {
             // Giám đốc phụ trách chung tất cả các lĩnh vực của Sở
             const allAssigned = techDomains.filter(d => (domainMapping['H15.07'] || []).includes(d.code));
             for (const d of allAssigned) slotDomains.push({ slotId: slot.id, domainId: d.id });
-            
+
             if (vanPhong) slotMonitored.push({ slotId: slot.id, unitId: vanPhong.id });
             if (thanhTra) slotMonitored.push({ slotId: slot.id, unitId: thanhTra.id });
             if (phongKHTC) slotMonitored.push({ slotId: slot.id, unitId: phongKHTC.id });

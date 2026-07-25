@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
-import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from "../../api";
+import { useCreateIntegration, useUpdateIntegration, IntegrationConfig, useCategories } from "../../api";
 import { toast } from "sonner";
 
 export interface IntegrationFormModalRef {
@@ -21,6 +21,8 @@ export interface IntegrationFormModalRef {
 export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, ref) => {
   const createMutation = useCreateIntegration();
   const updateMutation = useUpdateIntegration();
+  const { data: protocols } = useCategories("INTEGRATION_PROTOCOL");
+  const { data: authTypes } = useCategories("INTEGRATION_AUTH_TYPE");
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
@@ -198,10 +200,17 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
                   <SelectValue placeholder="Chọn giao thức" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="REST">REST API</SelectItem>
-                  <SelectItem value="SOAP">SOAP / WSDL</SelectItem>
-                  <SelectItem value="GRAPHQL">GraphQL</SelectItem>
-                  <SelectItem value="GRPC">gRPC</SelectItem>
+                  {protocols?.map(p => (
+                    <SelectItem key={p.code} value={p.code}>{p.name}</SelectItem>
+                  ))}
+                  {!protocols?.length && (
+                    <>
+                      <SelectItem value="REST">REST API</SelectItem>
+                      <SelectItem value="SOAP">SOAP / WSDL</SelectItem>
+                      <SelectItem value="GRAPHQL">GraphQL</SelectItem>
+                      <SelectItem value="GRPC">gRPC</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -230,11 +239,18 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
                   <SelectValue placeholder="Chọn loại xác thực" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NONE">Không xác thực</SelectItem>
-                  <SelectItem value="BASIC">Basic Auth</SelectItem>
-                  <SelectItem value="BEARER">Bearer Token</SelectItem>
-                  <SelectItem value="OAUTH2">OAuth 2.0</SelectItem>
-                  <SelectItem value="API_KEY">API Key</SelectItem>
+                  {authTypes?.map(a => (
+                    <SelectItem key={a.code} value={a.code}>{a.name}</SelectItem>
+                  ))}
+                  {!authTypes?.length && (
+                    <>
+                      <SelectItem value="NONE">Không xác thực</SelectItem>
+                      <SelectItem value="BASIC">Basic Auth</SelectItem>
+                      <SelectItem value="BEARER">Bearer Token</SelectItem>
+                      <SelectItem value="OAUTH2">OAuth 2.0</SelectItem>
+                      <SelectItem value="API_KEY">API Key</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>

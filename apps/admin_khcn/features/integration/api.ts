@@ -6,7 +6,18 @@
 import apiClient from "@/lib/axiosInstance";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { ApiResponse } from "@/lib/api.types";
 
+export const useCategories = (groupCode: string) => {
+  return useQuery({
+    queryKey: ['integration-categories', groupCode],
+    queryFn: async (): Promise<any[]> => {
+      const res = await apiClient.get(`/categories`, { params: { group: groupCode } }) as any as ApiResponse<any[]>;
+      return res.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
 export interface LGSPConfigData {
   type: 'LGSP' | 'WEBHOOK' | 'SYSTEM' | 'POSTMAN';
   apiUrl?: string;
