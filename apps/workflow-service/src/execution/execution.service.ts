@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../infra/prisma.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DynamicIntegrationAction } from '../action/dynamic-integration.action';
 import { WorkflowContext } from '../action/action.interface';
+import { RedisService } from '../infra/redis.service';
+import { RabbitMQService } from '../infra/rabbitmq.service';
 
 export interface StartProcessPayload {
   businessKey?: string;
@@ -22,9 +23,26 @@ export class ExecutionService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly eventEmitter: EventEmitter2,
     private readonly integrationAction: DynamicIntegrationAction,
+    private readonly redisService: RedisService,
+    private readonly rabbitMqService: RabbitMQService,
   ) {}
+
+  private async getGraph(instanceId: string): Promise<any> {
+    const cacheKey = `workflow:${instanceId}:graph`;
+    let graph = await this.redisService.get<any>(cacheKey);
+    if (!graph) {
+      const instance = await this.prisma.processInstance.findUnique({
+        where: { id: instanceId },
+        include: { version: true },
+      });
+      if (instance && instance.version) {
+        graph = instance.version.graph;
+        await this.redisService.set(cacheKey, graph, 86400000); // 24 hours
+      }
+    }
+    return graph;
+  }
 
   async startProcess(code: string, payload: StartProcessPayload) {
     const def = await this.prisma.processDefinition.findUnique({
@@ -55,8 +73,12 @@ export class ExecutionService {
       },
     });
 
-    this.eventEmitter.emit('workflow.instance.started', {
+    // Cache the graph immediately
+    await this.redisService.set(`workflow:${instance.id}:graph`, version.graph, 86400000);
+
+    this.rabbitMqService.emit('workflow.instance.started', {
       instanceId: instance.id,
+      businessKey: instance.businessKey,
     });
 
     // Start execution loop async
@@ -68,20 +90,19 @@ export class ExecutionService {
   }
 
   async advanceProcess(instanceId: string, nodeId: string) {
-    const instance = await this.prisma.processInstance.findUnique({
-      where: { id: instanceId },
-      include: { version: true },
-    });
+    const graph = await this.getGraph(instanceId);
+    if (!graph) return;
 
-    if (!instance) return;
-
-    const graph: any = instance.version.graph;
     const node = graph.nodes?.find((n: any) => n.id === nodeId);
-
     if (!node) {
       this.logger.warn(`Node ${nodeId} not found in graph`);
       return;
     }
+
+    const instance = await this.prisma.processInstance.findUnique({
+      where: { id: instanceId },
+    });
+    if (!instance) return;
 
     // Append to transition log
     await this.prisma.workflowTransition.create({
@@ -129,10 +150,13 @@ export class ExecutionService {
     const result = await this.integrationAction.execute(ctx, node.payload);
 
     if (!result.success) {
+      this.logger.error(`Service Task failed for instance ${instance.id} on node ${node.id}`);
       await this.prisma.processInstance.update({
         where: { id: instance.id },
         data: { status: 'FAILED' },
       });
+      // Saga Compensation
+      await this.triggerCompensation(instance.id, node, graph);
       return;
     }
 
@@ -142,12 +166,22 @@ export class ExecutionService {
     }
   }
 
+  private async triggerCompensation(instanceId: string, failedNode: any, graph: any) {
+    this.logger.log(`Triggering Saga Compensation for instance ${instanceId} from node ${failedNode.id}`);
+    this.rabbitMqService.emit('workflow.saga.compensation_triggered', {
+      instanceId,
+      failedNodeCode: failedNode.code || failedNode.id,
+    });
+    // In a real Saga, we would traverse backward and call compensation actions for previous service tasks
+  }
+
   private async handleEndTask(instanceId: string) {
     await this.prisma.processInstance.update({
       where: { id: instanceId },
       data: { status: 'COMPLETED', endedAt: new Date() },
     });
-    this.eventEmitter.emit('workflow.instance.completed', {
+    await this.redisService.del(`workflow:${instanceId}:graph`);
+    this.rabbitMqService.emit('workflow.instance.completed', {
       instanceId,
     });
   }
@@ -160,13 +194,21 @@ export class ExecutionService {
   }
 
   private async handleUserTask(instance: any, node: any) {
-    await this.prisma.workflowTask.create({
+    const task = await this.prisma.workflowTask.create({
       data: {
         instanceId: instance.id,
         nodeCode: node.code || node.id,
         title: node.name || 'User Task',
         status: 'PENDING',
       },
+    });
+
+    // Notify other microservices that a User Task requires action
+    this.rabbitMqService.emit('workflow.task.created', {
+      taskId: task.id,
+      instanceId: instance.id,
+      nodeCode: task.nodeCode,
+      title: task.title,
     });
   }
 
@@ -197,7 +239,7 @@ export class ExecutionService {
   async completeTask(taskId: string, payload: CompleteTaskPayload) {
     const task = await this.prisma.workflowTask.findUnique({
       where: { id: taskId },
-      include: { instance: { include: { version: true } } },
+      include: { instance: true },
     });
 
     if (!task || task.status !== 'PENDING') {
@@ -209,7 +251,14 @@ export class ExecutionService {
       data: { status: 'COMPLETED', completedAt: new Date() },
     });
 
-    const graph: any = task.instance.version.graph;
+    this.rabbitMqService.emit('workflow.task.completed', {
+      taskId: task.id,
+      instanceId: task.instanceId,
+      action: payload.action,
+    });
+
+    const graph = await this.getGraph(task.instanceId);
+    if (!graph) return { success: false, message: 'Graph not found' };
 
     const node = graph.nodes?.find(
       (n: any) => (n.code || n.id) === task.nodeCode,
@@ -227,3 +276,4 @@ export class ExecutionService {
     return { success: true };
   }
 }
+

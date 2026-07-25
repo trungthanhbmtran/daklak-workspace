@@ -44,6 +44,18 @@ async function bootstrap() {
     },
   });
 
+  // Add RabbitMQ Transport to receive events from workflow-service
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+      queue: 'workflow_events_queue',
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+
   await app.startAllMicroservices();
   await app.init();
   console.log('HRM Service (gRPC + Redis) listening on', process.env.GRPC_URL ?? '0.0.0.0:50052');
