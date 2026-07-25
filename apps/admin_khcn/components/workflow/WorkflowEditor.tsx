@@ -17,7 +17,7 @@ import "@xyflow/react/dist/style.css";
 import { nodeTypes } from "./nodes";
 import { edgeTypes } from "./edges";
 import NodePalette from "./NodePalette";
-import PropertiesPanel from "./PropertiesPanel";
+import { PropertiesPanel } from "./PropertiesPanel";
 import Topbar from "./Topbar";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { WorkflowUpdateHistory } from "./WorkflowUpdateHistory";
