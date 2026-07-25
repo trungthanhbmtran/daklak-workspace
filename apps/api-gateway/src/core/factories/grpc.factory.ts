@@ -19,6 +19,8 @@ export function registerGrpcService(serviceConfig: any) {
           longs: String,
           enums: String,
           defaults: true,
+          objects: true,
+          arrays: true,
           includeDirs: [PROTO_ROOT],
         },
       },
