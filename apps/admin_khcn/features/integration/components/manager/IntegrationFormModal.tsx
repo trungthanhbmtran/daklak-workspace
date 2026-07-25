@@ -2,16 +2,21 @@
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { Server, ShieldAlert, KeyRound } from "lucide-react";
+import { Server, ShieldAlert, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { integrationFormSchema, IntegrationFormValues } from "../../schemas";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
-import { useCreateIntegration, useUpdateIntegration, IntegrationConfig, useCategories } from "../../api";
+import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from "../../api";
 import { toast } from "sonner";
+
+import { BasicInfoFields } from "./form/BasicInfoFields";
+import { ProtocolFields } from "./form/ProtocolFields";
+import { AuthFields } from "./form/AuthFields";
+import { RawConfigFields } from "./form/RawConfigFields";
 
 export interface IntegrationFormModalRef {
   openCreate: (initialData?: any) => void;
@@ -21,31 +26,34 @@ export interface IntegrationFormModalRef {
 export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, ref) => {
   const createMutation = useCreateIntegration();
   const updateMutation = useUpdateIntegration();
-  const { data: protocols } = useCategories("INTEGRATION_PROTOCOL");
-  const { data: authTypes } = useCategories("INTEGRATION_AUTH_TYPE");
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    isActive: true,
-    protocol: "REST",
-    baseUrl: "",
-    authType: "NONE",
-    authUrl: "",
-    apiToken: "",
-    clientId: "",
-    clientSecret: "",
-    rawConfig: "{}"
+  const form = useForm<IntegrationFormValues>({
+    resolver: zodResolver(integrationFormSchema),
+    defaultValues: {
+      name: "",
+      code: "",
+      isActive: true,
+      protocol: "REST",
+      baseUrl: "",
+      authType: "NONE",
+      authUrl: "",
+      apiToken: "",
+      clientId: "",
+      clientSecret: "",
+      isRawMode: false,
+      rawConfig: "{}"
+    }
   });
-  const [isRawMode, setIsRawMode] = useState(false);
+
+  const isRawMode = form.watch("isRawMode");
 
   useImperativeHandle(ref, () => ({
     openCreate: (initialData?: any) => {
       setEditingItem(null);
-      setFormData({
+      form.reset({
         name: initialData?.name || "",
         code: initialData?.code || "",
         isActive: true,
@@ -56,14 +64,14 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         apiToken: initialData?.authConfig?.apiToken || "",
         clientId: initialData?.authConfig?.clientId || "",
         clientSecret: initialData?.authConfig?.clientSecret || "",
+        isRawMode: !!initialData?.isRawMode,
         rawConfig: initialData?.metadata ? JSON.stringify(initialData.metadata) : "{}"
       });
-      setIsRawMode(!!initialData?.isRawMode);
       setIsOpen(true);
     },
     openEdit: (item: IntegrationConfig) => {
       setEditingItem(item);
-      setFormData({
+      form.reset({
         name: item.name || "",
         code: item.code || "",
         isActive: item.isActive ?? true,
@@ -74,49 +82,42 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         apiToken: item.authConfig?.apiToken || "",
         clientId: item.authConfig?.clientId || "",
         clientSecret: item.authConfig?.clientSecret || "",
-        rawConfig: item.metadata ? JSON.stringify(item.metadata) : "{}"
+        isRawMode: false,
+        rawConfig: item.metadata ? JSON.stringify(item.metadata, null, 2) : "{}"
       });
-      setIsRawMode(false);
       setIsOpen(true);
     }
   }));
 
-  const handleClose = () => setIsOpen(false);
+  const handleClose = () => {
+    setIsOpen(false);
+    form.reset();
+  };
 
-  const handleSave = () => {
-    if (!formData.name || !formData.code) {
-      toast.error("Vui lòng nhập Tên hệ thống và Mã tích hợp");
-      return;
-    }
-
+  const onSubmit = (data: IntegrationFormValues) => {
     let metadataObj: any = {};
-    if (isRawMode) {
-      try {
-        metadataObj = JSON.parse(formData.rawConfig);
-       
-      } catch (e) {
-        toast.error((e as any)?.response?.data?.message || "Cấu hình JSON không hợp lệ");
-        return;
-      }
+    if (data.isRawMode) {
+      metadataObj = JSON.parse(data.rawConfig);
     } else {
       try {
-        metadataObj = JSON.parse(formData.rawConfig || "{}");
-      // eslint-disable-next-line unused-imports/no-unused-vars
-      } catch (e) { }
+        metadataObj = JSON.parse(data.rawConfig || "{}");
+      } catch (e) { 
+        // ignore
+      }
     }
 
     const payload = {
-      name: formData.name,
-      code: formData.code,
-      isActive: formData.isActive,
-      protocol: formData.protocol,
-      baseUrl: formData.baseUrl,
-      authType: formData.authType,
+      name: data.name,
+      code: data.code,
+      isActive: data.isActive,
+      protocol: data.protocol,
+      baseUrl: data.baseUrl,
+      authType: data.authType,
       authConfig: {
-        authUrl: formData.authUrl,
-        apiToken: formData.apiToken,
-        clientId: formData.clientId,
-        clientSecret: formData.clientSecret
+        authUrl: data.authUrl,
+        apiToken: data.apiToken,
+        clientId: data.clientId,
+        clientSecret: data.clientSecret
       },
       metadata: metadataObj
     };
@@ -140,10 +141,12 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     }
   };
 
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
   return (
     <ResponsiveModal
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}
       maxWidth="max-w-6xl"
       contentClassName="sm:min-w-[1024px] lg:min-w-[1152px]"
       icon={<Server className="w-6 h-6 text-violet-600" />}
@@ -152,174 +155,58 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       bodyClassName="space-y-6"
       footer={
         <>
-          <Button variant="outline" onClick={handleClose}>Hủy bỏ</Button>
-          <Button onClick={handleSave} className="bg-violet-600 hover:bg-violet-700 text-white min-w-[120px]" disabled={createMutation.isPending || updateMutation.isPending}>
-            {createMutation.isPending || updateMutation.isPending ? "Đang lưu..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
+          <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Hủy bỏ</Button>
+          <Button type="submit" form="integration-form" className="bg-violet-600 hover:bg-violet-700 text-white min-w-[120px]" disabled={isPending}>
+            {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isPending ? "Đang xử lý..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
           </Button>
         </>
       }
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label>Tên Hệ thống đối tác <span className="text-red-500">*</span></Label>
-          <Input
-            value={formData.name}
-            onChange={e => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Vd: Hệ thống LGSP Tỉnh..."
+      <Form {...form}>
+        <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <BasicInfoFields />
+
+          <FormField
+            name="isRawMode"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10 space-y-0">
+                <div className="flex items-center gap-3 text-amber-800 dark:text-amber-500">
+                  <ShieldAlert className="w-5 h-5" />
+                  <div>
+                    <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
+                    <FormDescription className="text-xs text-amber-700 dark:text-amber-600 opacity-80 mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</FormDescription>
+                  </div>
+                </div>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="space-y-2">
-          <Label>Mã tích hợp (Integration Code) <span className="text-red-500">*</span></Label>
-          <Input
-            value={formData.code}
-            onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-            placeholder="Vd: LGSP_HCM"
-            className="font-mono uppercase"
+
+          {!isRawMode ? (
+            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+              <ProtocolFields />
+              <AuthFields />
+            </div>
+          ) : (
+            <RawConfigFields />
+          )}
+
+          <FormField
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-0">
+                <FormLabel className="text-sm font-semibold cursor-pointer">Bật / Tắt kết nối ngay lập tức</FormLabel>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
           />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10">
-        <div className="flex items-center gap-3 text-amber-800 dark:text-amber-500">
-          <ShieldAlert className="w-5 h-5" />
-          <div>
-            <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
-            <p className="text-xs opacity-80 mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</p>
-          </div>
-        </div>
-        <Switch checked={isRawMode} onCheckedChange={setIsRawMode} />
-      </div>
-
-      {!isRawMode ? (
-        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label>Giao thức (Protocol)</Label>
-              <Select value={formData.protocol} onValueChange={(val) => setFormData({ ...formData, protocol: val })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn giao thức" />
-                </SelectTrigger>
-                <SelectContent>
-                  {protocols?.map(p => (
-                    <SelectItem key={p.code} value={p.code}>{p.name}</SelectItem>
-                  ))}
-                  {!protocols?.length && (
-                    <>
-                      <SelectItem value="REST">REST API</SelectItem>
-                      <SelectItem value="SOAP">SOAP / WSDL</SelectItem>
-                      <SelectItem value="GRAPHQL">GraphQL</SelectItem>
-                      <SelectItem value="GRPC">gRPC</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>URL Máy chủ (Base URL)</Label>
-              <Input
-                value={formData.baseUrl}
-                onChange={e => setFormData({ ...formData, baseUrl: e.target.value })}
-                placeholder="https://api.example.com/v1"
-                className="font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-violet-50/50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30 rounded-xl">
-            <div className="space-y-4 md:col-span-2">
-              <div className="flex items-center gap-2 text-violet-800 dark:text-violet-400 font-semibold border-b border-violet-100 dark:border-violet-900/50 pb-2">
-                <KeyRound className="w-4 h-4" />
-                Thông tin Xác thực (Authentication)
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Loại xác thực</Label>
-              <Select value={formData.authType} onValueChange={(val) => setFormData({ ...formData, authType: val })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn loại xác thực" />
-                </SelectTrigger>
-                <SelectContent>
-                  {authTypes?.map(a => (
-                    <SelectItem key={a.code} value={a.code}>{a.name}</SelectItem>
-                  ))}
-                  {!authTypes?.length && (
-                    <>
-                      <SelectItem value="NONE">Không xác thực</SelectItem>
-                      <SelectItem value="BASIC">Basic Auth</SelectItem>
-                      <SelectItem value="BEARER">Bearer Token</SelectItem>
-                      <SelectItem value="OAUTH2">OAuth 2.0</SelectItem>
-                      <SelectItem value="API_KEY">API Key</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {formData.authType === 'OAUTH2' && (
-              <div className="space-y-2">
-                <Label>URL lấy Token (Auth URL)</Label>
-                <Input
-                  value={formData.authUrl}
-                  onChange={e => setFormData({ ...formData, authUrl: e.target.value })}
-                  placeholder="https://sso.example.com/token"
-                  className="font-mono bg-white dark:bg-slate-950"
-                />
-              </div>
-            )}
-
-            {formData.authType === 'BEARER' && (
-              <div className="space-y-2">
-                <Label>API Bearer Token (Nếu dùng Token tĩnh)</Label>
-                <Input
-                  type="password"
-                  value={formData.apiToken}
-                  onChange={e => setFormData({ ...formData, apiToken: e.target.value })}
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
-                  className="font-mono bg-white dark:bg-slate-950"
-                />
-              </div>
-            )}
-
-            {(formData.authType === 'BASIC' || formData.authType === 'OAUTH2' || formData.authType === 'API_KEY') && (
-              <div className="space-y-2">
-                <Label>{formData.authType === 'BASIC' ? 'Username' : 'Client ID (App Key)'}</Label>
-                <Input
-                  value={formData.clientId}
-                  onChange={e => setFormData({ ...formData, clientId: e.target.value })}
-                  className="font-mono bg-white dark:bg-slate-950"
-                />
-              </div>
-            )}
-
-            {(formData.authType === 'BASIC' || formData.authType === 'OAUTH2') && (
-              <div className="space-y-2">
-                <Label>{formData.authType === 'BASIC' ? 'Password' : 'Client Secret (App Secret)'}</Label>
-                <Input
-                  type="password"
-                  value={formData.clientSecret}
-                  onChange={e => setFormData({ ...formData, clientSecret: e.target.value })}
-                  className="font-mono bg-white dark:bg-slate-950"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200 h-[400px]">
-          <Label>JSON Configuration Data</Label>
-          <Textarea
-            className="h-full font-mono text-sm p-4 bg-slate-900 text-slate-300 rounded-xl resize-none"
-            value={formData.rawConfig}
-            onChange={(e) => setFormData({ ...formData, rawConfig: e.target.value })}
-            spellCheck={false}
-          />
-        </div>
-      )}
-
-      <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-        <Label className="text-sm font-semibold">Bật / Tắt kết nối ngay lập tức</Label>
-        <Switch checked={formData.isActive} onCheckedChange={v => setFormData({ ...formData, isActive: v })} />
-      </div>
+        </form>
+      </Form>
     </ResponsiveModal>
   );
 });
