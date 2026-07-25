@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { RabbitMQService } from './rabbitmq.service';
-
-export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
+import { RabbitMQService, WORKFLOW_RMQ_CLIENT } from './rabbitmq.service';
 
 @Module({
   imports: [
@@ -26,6 +24,6 @@ export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
     ]),
   ],
   providers: [RabbitMQService],
-  exports: [RabbitMQService, WORKFLOW_RMQ_CLIENT],
+  exports: [RabbitMQService, ClientsModule],
 })
-export class RabbitMQModule {}
+export class RabbitMQModule { }

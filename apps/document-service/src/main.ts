@@ -5,10 +5,14 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+
   const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
   const docDir = join(protoRoot, 'document');
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+  // gRPC Transport
+  app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
       package: ['document', 'category', 'minutes'],
@@ -31,10 +35,23 @@ async function bootstrap() {
     },
   });
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  // RMQ Transport
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+      queue: 'workflow_events_queue',
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+
   app.enableShutdownHooks();
 
-  await app.listen();
-  console.log('Document Service (gRPC) listening on', process.env.GRPC_URL ?? '0.0.0.0:50056');
+  await app.startAllMicroservices();
+  await app.init();
+  console.log('Document Service (gRPC + RMQ) listening on', process.env.GRPC_URL ?? '0.0.0.0:50056');
 }
 bootstrap();
+

@@ -1,36 +1,37 @@
-import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, Inject, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
 
+export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
+
 @Injectable()
-export class WorkflowService implements OnModuleInit {
+export class WorkflowService {
   private readonly logger = new Logger(WorkflowService.name);
-  private engine: any;
 
   constructor(
     private prisma: PrismaService,
-    @Inject('WORKFLOW_SERVICE') private client: ClientGrpc,
+    @Inject(WORKFLOW_RMQ_CLIENT) private client: ClientProxy,
   ) { }
 
-  onModuleInit() {
-    this.engine = this.client.getService<any>('WorkflowService');
-  }
-
   /**
-   * Kích hoạt quy trình động qua gRPC Workflow Engine
+   * Kích hoạt quy trình động qua Message Broker (RabbitMQ)
    */
   async triggerDynamicWorkflow(trigger: string, context: any) {
-    if (!this.engine) {
-      this.logger.warn('Workflow Engine service not initialized');
-      return;
-    }
     try {
-      this.logger.log(`Triggering workflow: ${trigger}`);
-      const result = await firstValueFrom(this.engine.TriggerWorkflow({ trigger, initialContext: context }));
-      return result;
+      this.logger.log(`Triggering workflow async via RMQ: ${trigger}`);
+      this.client.emit('workflow.instance.start_requested', {
+        code: trigger,
+        payload: {
+          businessKey: context.documentId,
+          organizationId: context.unitId,
+          startedBy: context.initiatorId,
+          variables: context,
+        },
+      });
+      return { success: true, message: 'Workflow trigger emitted' };
     } catch (e) {
       this.logger.error(`Failed to trigger workflow ${trigger}: ${e.message}`);
+      return { success: false, message: e.message };
     }
   }
 

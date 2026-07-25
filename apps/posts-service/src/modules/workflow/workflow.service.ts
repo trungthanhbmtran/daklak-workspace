@@ -1,8 +1,9 @@
-import { Injectable, BadRequestException, Inject, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { AuditService } from '../audit/audit.service';
+
+export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
 
 export enum PostStatus {
   DRAFT = 'DRAFT',
@@ -16,18 +17,12 @@ export enum PostStatus {
 }
 
 @Injectable()
-export class WorkflowService implements OnModuleInit {
-  private dynamicWorkflowService: any;
-
+export class WorkflowService {
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
-    @Inject('WORKFLOW_SERVICE') private client: ClientGrpc,
+    @Inject(WORKFLOW_RMQ_CLIENT) private client: ClientProxy,
   ) { }
-
-  onModuleInit() {
-    this.dynamicWorkflowService = this.client.getService<any>('WorkflowService');
-  }
 
   // --- Atomic Business Actions ---
 
@@ -134,20 +129,25 @@ export class WorkflowService implements OnModuleInit {
     });
   }
 
-  private async triggerDynamicWorkflow(post: any, actorId: string) {
+  private triggerDynamicWorkflow(post: any, actorId: string) {
     try {
-      await firstValueFrom(this.dynamicWorkflowService.TriggerWorkflow({
-        trigger: 'POST_SUBMIT',
-        initialContext: {
-          postId: post.id,
-          title: post.title,
-          authorId: post.authorId,
-          status: post.status
-        },
-        initiatorId: actorId,
-      }));
+      this.client.emit('workflow.instance.start_requested', {
+        code: 'POST_SUBMIT',
+        payload: {
+          businessKey: post.id,
+          organizationId: 'DEFAULT',
+          startedBy: actorId,
+          variables: {
+            postId: post.id,
+            title: post.title,
+            authorId: post.authorId,
+            status: post.status
+          }
+        }
+      });
     } catch (e) {
-      console.error('Failed to trigger dynamic workflow:', e.message);
+      console.error('Failed to trigger dynamic workflow via RMQ:', e.message);
     }
   }
 }
+

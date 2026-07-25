@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaModule } from './infra/prisma.module';
 import { RedisModule } from './infra/redis.module';
 import { RabbitMQModule } from './infra/rabbitmq.module';
@@ -14,7 +13,6 @@ import { GrpcModule } from './grpc/grpc.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    EventEmitterModule.forRoot(),
     PrismaModule,
     RedisModule,
     RabbitMQModule,

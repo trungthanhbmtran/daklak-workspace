@@ -1,32 +1,33 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { join } from 'path';
-import { WorkflowService } from './workflow.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { WorkflowService, WORKFLOW_RMQ_CLIENT } from './workflow.service';
+import { WorkflowController } from './workflow.controller';
 
-const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
-
+@Global()
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
-        name: 'WORKFLOW_SERVICE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'workflow',
-          protoPath: join(protoRoot, 'workflow', 'workflow.proto'),
-          url: process.env.WORKFLOW_SERVICE_URL || 'localhost:50060',
-          loader: {
-            keepCase: false,
-            longs: String,
-            enums: String,
-            defaults: true,
-            includeDirs: [protoRoot],
+        name: WORKFLOW_RMQ_CLIENT,
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL') || 'amqp://admin:admin123@localhost:5672'],
+            queue: 'workflow_events_queue',
+            queueOptions: {
+              durable: true,
+            },
           },
-        },
+        }),
       },
     ]),
   ],
+  controllers: [WorkflowController],
   providers: [WorkflowService],
   exports: [WorkflowService],
 })
 export class WorkflowModule { }
+

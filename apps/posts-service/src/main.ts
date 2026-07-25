@@ -46,7 +46,7 @@ async function bootstrap() {
       },
     });
 
-    // 3. Kết nối RabbitMQ
+    // 3. Kết nối RabbitMQ (Translation)
     const rabbitUrl = process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672';
     app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.RMQ,
@@ -57,6 +57,18 @@ async function bootstrap() {
         noAck: false,
         queueOptions: {
           durable: false,
+        },
+      },
+    });
+
+    // 3.5. Kết nối RabbitMQ (Workflow Events)
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.RMQ,
+      options: {
+        urls: [rabbitUrl],
+        queue: 'workflow_events_queue',
+        queueOptions: {
+          durable: true,
         },
       },
     });

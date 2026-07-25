@@ -1,7 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { WORKFLOW_RMQ_CLIENT } from './rabbitmq.module';
 import { firstValueFrom } from 'rxjs';
+
+export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
 
 @Injectable()
 export class RabbitMQService {
@@ -17,3 +18,4 @@ export class RabbitMQService {
     return firstValueFrom(this.client.send(pattern, data));
   }
 }
+
