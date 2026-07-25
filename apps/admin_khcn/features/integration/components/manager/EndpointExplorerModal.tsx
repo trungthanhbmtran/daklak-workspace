@@ -114,6 +114,16 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     setSelectedId(newId);
   }, []);
 
+  const handleDeleteEndpoint = useCallback((id: string) => {
+    setEndpoints(prev => {
+      const filtered = prev.filter(ep => ep.id !== id);
+      if (selectedId === id) {
+        setSelectedId(filtered.length > 0 ? filtered[0].id : null);
+      }
+      return filtered;
+    });
+  }, [selectedId]);
+
   const selectedEndpoint = endpoints.find(ep => ep.id === selectedId);
 
   return (
@@ -152,6 +162,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
           onItemChange={handleItemChange}
           onAddItem={handleAddItem}
           onRemoveItem={handleRemoveItem}
+          onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
         />
       </div>
     </ResponsiveModal>

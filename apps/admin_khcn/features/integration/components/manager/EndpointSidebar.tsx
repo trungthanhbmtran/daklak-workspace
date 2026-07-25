@@ -56,7 +56,7 @@ export const EndpointSidebar = memo(({ endpoints, selectedId, onSelect, onAdd, s
             <Button
               key={ep.id}
               onClick={() => onSelect(ep.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-lg flex flex-col gap-1.5 transition-colors ${
+              className={`w-full h-auto items-start text-left px-3 py-2.5 rounded-lg flex flex-col gap-1.5 transition-colors ${
                 selectedId === ep.id 
                   ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-900 dark:text-violet-100 border border-violet-200 dark:border-violet-800/50' 
                   : 'hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-transparent'

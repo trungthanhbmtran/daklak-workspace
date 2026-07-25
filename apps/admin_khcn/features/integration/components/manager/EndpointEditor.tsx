@@ -2,8 +2,9 @@
 "use client";
 
 import React, { memo } from "react";
-import { Server } from "lucide-react";
+import { Server, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +17,7 @@ interface EndpointEditorProps {
   onItemChange: (type: 'headers' | 'params', index: number, field: 'key' | 'value', val: string) => void;
   onAddItem: (type: 'headers' | 'params') => void;
   onRemoveItem: (type: 'headers' | 'params', index: number) => void;
+  onDelete: () => void;
 }
 
 export const EndpointEditor = memo(({ 
@@ -23,7 +25,8 @@ export const EndpointEditor = memo(({
   onChange, 
   onItemChange, 
   onAddItem, 
-  onRemoveItem 
+  onRemoveItem,
+  onDelete
 }: EndpointEditorProps) => {
   
   if (!selectedEndpoint) {
@@ -40,12 +43,17 @@ export const EndpointEditor = memo(({
       <div className="flex flex-col h-full">
         {/* Top Header URL */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
-          <Input 
-            value={selectedEndpoint.name} 
-            onChange={(e) => onChange('name', e.target.value)}
-            className="font-bold text-lg text-slate-800 dark:text-slate-100 h-auto py-1.5 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1"
-            placeholder="Tên API..."
-          />
+          <div className="flex items-center justify-between gap-2">
+            <Input 
+              value={selectedEndpoint.name} 
+              onChange={(e) => onChange('name', e.target.value)}
+              className="font-bold text-lg text-slate-800 dark:text-slate-100 h-auto py-1.5 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 flex-1"
+              placeholder="Tên API..."
+            />
+            <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0" title="Xóa Endpoint này">
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
             <Select 
               value={selectedEndpoint.method}

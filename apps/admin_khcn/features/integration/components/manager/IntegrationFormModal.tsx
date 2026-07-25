@@ -54,18 +54,18 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     openCreate: (initialData?: any) => {
       setEditingItem(null);
       form.reset({
-        name: initialData?.name || "",
-        code: initialData?.code || "",
+        name: initialData?.name || initialData?.systemName || "",
+        code: initialData?.code || initialData?.integrationCode || "",
         isActive: true,
         protocol: initialData?.protocol || "REST",
-        baseUrl: initialData?.baseUrl || "",
+        baseUrl: initialData?.baseUrl || initialData?.apiUrl || "",
         authType: initialData?.authType || "NONE",
         authUrl: initialData?.authConfig?.authUrl || "",
         apiToken: initialData?.authConfig?.apiToken || "",
         clientId: initialData?.authConfig?.clientId || "",
         clientSecret: initialData?.authConfig?.clientSecret || "",
         isRawMode: !!initialData?.isRawMode,
-        rawConfig: initialData?.metadata ? JSON.stringify(initialData.metadata) : "{}"
+        rawConfig: initialData?.rawConfig || (initialData?.metadata ? JSON.stringify(initialData.metadata, null, 2) : "{}")
       });
       setIsOpen(true);
     },

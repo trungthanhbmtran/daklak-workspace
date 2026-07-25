@@ -13,73 +13,89 @@ import { IntegrationService } from './integration.service';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
 
+// Helper for mapping to Response DTO format (as per standard)
+const mapIntegrationResponse = (data: any) => {
+  if (!data) return null;
+  return {
+    ...data,
+    createdAt: data.createdAt?.toISOString(),
+    updatedAt: data.updatedAt?.toISOString(),
+  };
+};
+
 @Controller('workflow/integrations')
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 
+  // ==========================================
+  // HTTP REST ENDPOINTS
+  // ==========================================
+
   @Post()
-  @GrpcMethod('WorkflowService', 'CreateIntegration')
-  async create(@Body() createDto: CreateIntegrationDto) {
+  async createRest(@Body() createDto: CreateIntegrationDto) {
     const data = await this.integrationService.create(createDto);
-    // Return gRPC format (IntegrationResponse) when called via gRPC,
-    // or REST format when called via HTTP.
-    return {
-      ...data,
-      createdAt: data.createdAt?.toISOString(),
-      updatedAt: data.updatedAt?.toISOString(),
-    };
+    return mapIntegrationResponse(data);
   }
 
   @Get()
-  @GrpcMethod('WorkflowService', 'FindAllIntegrations')
-  async findAll(
-    @Query('search') search?: string,
-    @Payload() payload?: { search?: string },
-  ) {
-    const searchTerm = payload?.search || search;
-    const data = await this.integrationService.findAll(searchTerm);
-    return {
-      data: data.map((d) => ({
-        ...d,
-        createdAt: d.createdAt?.toISOString(),
-        updatedAt: d.updatedAt?.toISOString(),
-      })),
-    };
+  async findAllRest(@Query('search') search?: string) {
+    const data = await this.integrationService.findAll(search);
+    return { data: data.map(mapIntegrationResponse) };
   }
 
   @Get(':id')
-  @GrpcMethod('WorkflowService', 'FindOneIntegration')
-  async findOne(@Param('id') id: string | { id: string }) {
-    const actualId = typeof id === 'object' ? id.id : id;
-    const data = await this.integrationService.findOne(actualId);
-    return {
-      ...data,
-      createdAt: data.createdAt?.toISOString(),
-      updatedAt: data.updatedAt?.toISOString(),
-    };
+  async findOneRest(@Param('id') id: string) {
+    const data = await this.integrationService.findOne(id);
+    return mapIntegrationResponse(data);
   }
 
   @Put(':id')
-  @GrpcMethod('WorkflowService', 'UpdateIntegration')
-  async update(
-    @Param('id') id: string | { id: string },
+  async updateRest(
+    @Param('id') id: string,
     @Body() updateDto: UpdateIntegrationDto,
   ) {
-    // If called via gRPC, payload contains both id and fields in updateDto
-    const actualId = typeof id === 'object' ? id.id : id;
-    const data = await this.integrationService.update(actualId, updateDto);
-    return {
-      ...data,
-      createdAt: data.createdAt?.toISOString(),
-      updatedAt: data.updatedAt?.toISOString(),
-    };
+    const data = await this.integrationService.update(id, updateDto);
+    return mapIntegrationResponse(data);
   }
 
   @Delete(':id')
+  async removeRest(@Param('id') id: string) {
+    await this.integrationService.remove(id);
+    return { success: true, message: 'Deleted successfully' };
+  }
+
+  // ==========================================
+  // GRPC ENDPOINTS
+  // ==========================================
+
+  @GrpcMethod('WorkflowService', 'CreateIntegration')
+  async createGrpc(@Payload() payload: CreateIntegrationDto) {
+    const data = await this.integrationService.create(payload);
+    return mapIntegrationResponse(data);
+  }
+
+  @GrpcMethod('WorkflowService', 'FindAllIntegrations')
+  async findAllGrpc(@Payload() payload: { search?: string }) {
+    const data = await this.integrationService.findAll(payload.search);
+    return { data: data.map(mapIntegrationResponse) };
+  }
+
+  @GrpcMethod('WorkflowService', 'FindOneIntegration')
+  async findOneGrpc(@Payload() payload: { id: string }) {
+    const data = await this.integrationService.findOne(payload.id);
+    return mapIntegrationResponse(data);
+  }
+
+  @GrpcMethod('WorkflowService', 'UpdateIntegration')
+  async updateGrpc(@Payload() payload: UpdateIntegrationDto & { id: string }) {
+    const { id, ...updateDto } = payload;
+    const data = await this.integrationService.update(id, updateDto);
+    return mapIntegrationResponse(data);
+  }
+
   @GrpcMethod('WorkflowService', 'DeleteIntegration')
-  async remove(@Param('id') id: string | { id: string }) {
-    const actualId = typeof id === 'object' ? id.id : id;
-    await this.integrationService.remove(actualId);
+  async removeGrpc(@Payload() payload: { id: string }) {
+    await this.integrationService.remove(payload.id);
     return { success: true, message: 'Deleted successfully' };
   }
 }
