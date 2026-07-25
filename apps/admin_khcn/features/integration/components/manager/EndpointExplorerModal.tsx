@@ -120,8 +120,8 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     <ResponsiveModal
       open={isOpen}
       onOpenChange={setIsOpen}
-      maxWidth="max-w-7xl"
-      fullHeight={true}
+      maxWidth="max-w-6xl"
+      contentClassName="sm:min-w-[1024px] lg:min-w-[1152px]"
       icon={<Plug className="w-6 h-6 text-violet-500" />}
       title={`Quản lý Endpoints - ${integration?.name}`}
       description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
@@ -136,7 +136,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         </div>
       }
     >
-      <div className="flex flex-col sm:flex-row h-full">
+      <div className="flex flex-col sm:flex-row h-[85vh] sm:h-[75vh] min-h-[500px]">
         <EndpointSidebar 
           endpoints={endpoints}
           selectedId={selectedId}
