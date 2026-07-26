@@ -1,3 +1,5 @@
+import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
@@ -7,6 +9,8 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const logger = new Logger('ChatService');
   const app = await NestFactory.create(AppModule);
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // 1. Configure Global Middlewares/Pipes for REST
   app.setGlobalPrefix('api/v1');

@@ -1,3 +1,5 @@
+import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -12,6 +14,8 @@ const protoPath = [join(reportDir, 'report.proto')];
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,

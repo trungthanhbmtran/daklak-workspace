@@ -1,13 +1,15 @@
+import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 async function bootstrap() {
   const logger = new Logger('WorkflowService');
   const app = await NestFactory.create(AppModule);
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // 2. Configure Global Middlewares/Pipes for REST
   app.setGlobalPrefix('api/v1');
@@ -17,8 +19,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalInterceptors(new TransformInterceptor());
   app.enableCors();
 
   // 3. Connect as a gRPC microservice (Hybrid mode)

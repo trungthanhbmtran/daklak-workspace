@@ -1,3 +1,5 @@
+import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
@@ -22,6 +24,8 @@ async function bootstrap() {
   try {
     // 1. Tạo app dưới dạng Hybrid
     const app = await NestFactory.create(AppModule);
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
     app.enableShutdownHooks();
 
