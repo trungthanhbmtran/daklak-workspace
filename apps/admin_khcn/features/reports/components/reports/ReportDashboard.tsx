@@ -18,7 +18,7 @@ const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartR
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-import { useTemplates } from "../../api";
+import { useTemplates, useDeleteTemplate } from "../../api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { MOCK_DATA } from "./mockData";
