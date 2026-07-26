@@ -300,6 +300,15 @@ services:
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document?allowPublicKeyRetrieval=true
 
+  report-service-migrate:
+    image: ${DOCKER_USERNAME}/daklak-report-service:${IMAGE_TAG:-latest}
+    profiles: [ "migrate" ]
+    command: npx prisma migrate deploy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_report?allowPublicKeyRetrieval=true
+
   api-gateway-migrate:
     image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]

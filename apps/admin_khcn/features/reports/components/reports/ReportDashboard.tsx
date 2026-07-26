@@ -18,26 +18,16 @@ const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartR
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-import { useTemplates, useDeleteTemplate } from "../../api";
+import { useWidgets, useDeleteTemplate } from "../../api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { MOCK_DATA } from "./mockData";
 
 export function ReportDashboard() {
   const [isBuilding, setIsBuilding] = useState(false);
-  
-  const { data: templatesData, isLoading } = useTemplates();
+
+  const { data: widgets = [], isLoading } = useWidgets();
   const { mutateAsync: deleteTemplate } = useDeleteTemplate();
-  
-  // Flatten widgets from all templates to show on dashboard for now
-  const widgets = React.useMemo(() => {
-    if (!templatesData?.data) return [];
-    return templatesData.data.reduce((acc: any[], t: any) => {
-      // Gắn templateId vào widget để biết đường mà xóa nếu cần (tuy nhiên backend xoá theo templateId)
-      const mappedWidgets = (t.widgets || []).map((w: any) => ({ ...w, templateId: t.id }));
-      return [...acc, ...mappedWidgets];
-    }, []);
-  }, [templatesData]);
 
   const handleDelete = async (widgetId: string, templateId?: string) => {
     if (!templateId) {
@@ -54,11 +44,11 @@ export function ReportDashboard() {
 
   if (isBuilding) {
     return (
-      <ReportBuilder 
-        onBack={() => setIsBuilding(false)} 
+      <ReportBuilder
+        onBack={() => setIsBuilding(false)}
         onSave={(config) => {
           setIsBuilding(false);
-        }} 
+        }}
       />
     );
   }
@@ -100,7 +90,7 @@ export function ReportDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
-          {widgets.map(widget => {
+          {widgets.map((widget: any) => {
             const data = (MOCK_DATA as any)[widget.dataSourceCode || widget.sourceId] || [];
             return (
               <div key={widget.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-lg transition-shadow group relative">
@@ -117,14 +107,14 @@ export function ReportDashboard() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                
+
                 <div className="w-full">
-                  <ChartRenderer 
-                    type={widget.chartType} 
-                    data={data} 
-                    xAxisKey={widget.xAxisKey} 
-                    yAxisKey={widget.yAxisKey} 
-                    height={280} 
+                  <ChartRenderer
+                    type={widget.chartType}
+                    data={data}
+                    xAxisKey={widget.xAxisKey}
+                    yAxisKey={widget.yAxisKey}
+                    height={280}
                   />
                 </div>
               </div>

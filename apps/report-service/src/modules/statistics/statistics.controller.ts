@@ -1,6 +1,7 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
-import { EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
+import { Controller } from '@nestjs/common';
+import { EventPattern, Payload, Ctx, RmqContext, GrpcMethod } from '@nestjs/microservices';
 import { StatisticsService } from './statistics.service';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
 export class StatisticsController {
@@ -19,23 +20,33 @@ export class StatisticsController {
     }
   }
 
-  @Get('tasks')
-  async getTaskStatistics(@Query() filter: any, @Req() req: any) {
-    return this.statisticsService.getTaskStatistics(filter, req);
+  @GrpcMethod('ReportService', 'GetTaskStats')
+  async getTaskStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
+    const filter = data.payload ? JSON.parse(data.payload) : {};
+    const user = data.userData ? JSON.parse(data.userData) : null;
+    const res = await this.statisticsService.getTaskStatistics(filter, user, metadata);
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Get('posts')
-  async getPostStatistics(@Query() filter: any, @Req() req: any) {
-    return this.statisticsService.getPostStatistics(filter, req);
+  @GrpcMethod('ReportService', 'GetPostStats')
+  async getPostStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
+    const filter = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.statisticsService.getPostStatistics(filter, metadata);
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Get('kpis')
-  async getKpiStatistics(@Query() filter: any, @Req() req: any) {
-    return this.statisticsService.getKpiStatistics(filter, req);
+  @GrpcMethod('ReportService', 'GetKpiStats')
+  async getKpiStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
+    const filter = data.payload ? JSON.parse(data.payload) : {};
+    const user = data.userData ? JSON.parse(data.userData) : null;
+    const res = await this.statisticsService.getKpiStatistics(filter, user, metadata);
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Get('documents')
-  async getDocumentStatistics(@Query() filter: any, @Req() req: any) {
-    return this.statisticsService.getDocumentStatistics(filter, req);
+  @GrpcMethod('ReportService', 'GetDocumentStats')
+  async getDocumentStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
+    const filter = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.statisticsService.getDocumentStatistics(filter, metadata);
+    return { success: true, data: JSON.stringify(res) };
   }
 }

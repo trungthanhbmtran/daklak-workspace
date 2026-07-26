@@ -32,6 +32,7 @@ jobs:
             user-service: 'apps/user-service/**'
             workflow-service: 'apps/workflow-service/**'
             document-service: 'apps/document-service/**'
+            report-service: 'apps/report-service/**'
             portal-goverment: 'apps/portal-goverment/**'
   build-push:
     needs: filter

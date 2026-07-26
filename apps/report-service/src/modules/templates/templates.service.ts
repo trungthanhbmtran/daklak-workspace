@@ -26,6 +26,12 @@ export class TemplatesService {
     });
   }
 
+  async getAllWidgets() {
+    return this.prisma.reportWidget.findMany({
+      orderBy: { id: 'desc' },
+    });
+  }
+
   async getTemplateById(id: number) {
     const template = await this.prisma.reportTemplate.findUnique({
       where: { id },

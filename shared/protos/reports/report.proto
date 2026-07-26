@@ -7,6 +7,27 @@ import "common/common.proto";
 
 service ReportService {
   rpc GetStaffingReport (GetStaffingReportRequest) returns (StaffingReportResponse);
+  rpc CreateTemplate (GenericRequest) returns (GenericResponse);
+  rpc GetAllTemplates (GenericRequest) returns (GenericResponse);
+  rpc GetTemplateById (GenericRequest) returns (GenericResponse);
+  rpc UpdateTemplate (GenericRequest) returns (GenericResponse);
+  rpc DeleteTemplate (GenericRequest) returns (GenericResponse);
+  rpc GetAllWidgets (GenericRequest) returns (GenericResponse);
+  rpc GetTaskStats (GenericRequest) returns (GenericResponse);
+  rpc GetPostStats (GenericRequest) returns (GenericResponse);
+  rpc GetKpiStats (GenericRequest) returns (GenericResponse);
+  rpc GetDocumentStats (GenericRequest) returns (GenericResponse);
+}
+
+message GenericRequest {
+  string payload = 1;
+  string userData = 2;
+}
+
+message GenericResponse {
+  bool success = 1;
+  string message = 2;
+  string data = 3;
 }
 
 message GetStaffingReportRequest {

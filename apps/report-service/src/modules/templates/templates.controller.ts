@@ -1,32 +1,50 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
 import { TemplatesService } from './templates.service';
 
-@Controller('reports/templates')
+@Controller()
 export class TemplatesController {
   constructor(private readonly templatesService: TemplatesService) { }
 
-  @Post()
-  async createTemplate(@Body() body: any) {
-    return this.templatesService.createTemplate(body);
+  @GrpcMethod('ReportService', 'CreateTemplate')
+  async createTemplate(data: { payload: string }) {
+    const body = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.templatesService.createTemplate(body);
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Get()
+  @GrpcMethod('ReportService', 'GetAllTemplates')
   async getAllTemplates() {
-    return this.templatesService.getAllTemplates();
+    const res = await this.templatesService.getAllTemplates();
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Get(':id')
-  async getTemplateById(@Param('id') id: string) {
-    return this.templatesService.getTemplateById(+id);
+  @GrpcMethod('ReportService', 'GetAllWidgets')
+  async getAllWidgets() {
+    const res = await this.templatesService.getAllWidgets();
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Put(':id')
-  async updateTemplate(@Param('id') id: string, @Body() body: any) {
-    return this.templatesService.updateTemplate(+id, body);
+  @GrpcMethod('ReportService', 'GetTemplateById')
+  async getTemplateById(data: { payload: string }) {
+    const body = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.templatesService.getTemplateById(+body.id);
+    return { success: true, data: JSON.stringify(res) };
   }
 
-  @Delete(':id')
-  async deleteTemplate(@Param('id') id: string) {
-    return this.templatesService.deleteTemplate(+id);
+  @GrpcMethod('ReportService', 'UpdateTemplate')
+  async updateTemplate(data: { payload: string }) {
+    const body = data.payload ? JSON.parse(data.payload) : {};
+    const id = body.id;
+    delete body.id;
+    const res = await this.templatesService.updateTemplate(+id, body);
+    return { success: true, data: JSON.stringify(res) };
+  }
+
+  @GrpcMethod('ReportService', 'DeleteTemplate')
+  async deleteTemplate(data: { payload: string }) {
+    const body = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.templatesService.deleteTemplate(+body.id);
+    return { success: true, data: JSON.stringify(res) };
   }
 }

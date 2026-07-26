@@ -31,6 +31,13 @@ export function useTemplates() {
   });
 }
 
+export function useWidgets() {
+  return useQuery({
+    queryKey: ["reports", "widgets", "list"],
+    queryFn: () => api.get("/api/v1/reports/templates/widgets").then(res => res.data),
+  });
+}
+
 export function useCreateTemplate() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -29,26 +29,7 @@ export class StatisticsService implements OnModuleInit {
     this.documentService = this.documentClient.getService('DocumentService');
     this.orgService = this.orgClient.getService('OrganizationService');
   }
-
-  getGrpcMetadata(req: any) {
-    const meta = new Metadata();
-    if (req?.headers?.authorization) {
-      meta.add('authorization', req.headers.authorization);
-    }
-    return meta;
-  }
-
-  getUserFromReq(req: any) {
-    if (!req?.headers?.['x-user-data']) return null;
-    try {
-      return JSON.parse(req.headers['x-user-data'] as string);
-    } catch {
-      return null;
-    }
-  }
-
-  async getTaskStatistics(filter: any, req?: any) {
-    const user = this.getUserFromReq(req);
+  async getTaskStatistics(filter: any, user: any, metadata: Metadata) {
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader = isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*');
 
@@ -75,14 +56,14 @@ export class StatisticsService implements OnModuleInit {
       role: filter.role,
     };
 
-    return firstValueFrom(this.taskService.GetTaskStats(requestPayload, this.getGrpcMetadata(req))).catch(e => {
+    return firstValueFrom(this.taskService.GetTaskStats(requestPayload, metadata)).catch(e => {
       console.error('TaskService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê nhiệm vụ');
     });
   }
 
-  async getPostStatistics(filter: any, req?: any) {
-    return firstValueFrom(this.postService.GetPostStats(filter, this.getGrpcMetadata(req))).catch(e => {
+  async getPostStatistics(filter: any, metadata: Metadata) {
+    return firstValueFrom(this.postService.GetPostStats(filter, metadata)).catch(e => {
       console.error('PostService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê bài viết');
     });
@@ -104,8 +85,7 @@ export class StatisticsService implements OnModuleInit {
     }
   }
 
-  async getKpiStatistics(filter: any, req?: any) {
-    const user = this.getUserFromReq(req);
+  async getKpiStatistics(filter: any, user: any, metadata: Metadata) {
     const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE') || user?.roles?.some((r: any) => r === 'ADMIN' || r?.code === 'ADMIN');
     
     let callerDescendantUnitIds: number[] = [];
@@ -125,7 +105,7 @@ export class StatisticsService implements OnModuleInit {
       periodId: filter.periodId,
       isAdmin,
       callerDescendantUnitIds,
-    }, this.getGrpcMetadata(req))).catch((e) => {
+    }, metadata)).catch((e) => {
       throw new InternalServerErrorException('Lỗi lấy thống kê KPI');
     });
 
@@ -138,8 +118,8 @@ export class StatisticsService implements OnModuleInit {
     return res;
   }
 
-  async getDocumentStatistics(filter: any, req?: any) {
-    return firstValueFrom(this.documentService.GetStatistics(filter, this.getGrpcMetadata(req))).catch(e => {
+  async getDocumentStatistics(filter: any, metadata: Metadata) {
+    return firstValueFrom(this.documentService.GetStatistics(filter, metadata)).catch(e => {
       console.error('DocumentService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê văn bản');
     });
