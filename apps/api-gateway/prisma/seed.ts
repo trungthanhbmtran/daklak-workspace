@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../src/generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as crypto from 'crypto';
 import * as dotenv from 'dotenv';

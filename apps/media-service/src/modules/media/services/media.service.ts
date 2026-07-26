@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MinioService } from '../../../infrastructure/minio/minio.service';
 import { MediaRepository } from '../repositories/media.repository';
 import { MediaStatus } from '../enums/media.enum';
-import { Media } from '@prisma/client';
+import { Media } from '../../../../src/generated/prisma/client';
 
 @Injectable()
 export class MediaService {

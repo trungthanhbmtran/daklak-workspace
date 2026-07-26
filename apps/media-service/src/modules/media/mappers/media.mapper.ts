@@ -1,4 +1,4 @@
-import { Media as PrismaMedia } from '@prisma/client';
+import { Media as PrismaMedia } from '../../../../src/generated/prisma/client';
 import { MediaInfo } from '../interfaces/media.interface';
 
 export class MediaMapper {

@@ -1,0 +1,205 @@
+model Consultation {
+  id          String   @id @default(cuid())
+  title       String // Tiêu đề đợt lấy ý kiến
+  description String?  @db.Text
+  documentId  String?  @map("document_id") // Văn bản dự thảo đính kèm
+  deadline    DateTime // Hạn góp ý
+  status      String   @default("OPEN") // OPEN, CLOSED, PENDING
+  issuerId    String?  @map("issuer_id") // Người tạo/Đơn vị chủ trì
+  issuerName  String?  @map("issuer_name")
+  isUrgent    Boolean  @default(false) @map("is_urgent")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  responses      ConsultationResponse[]
+  publicComments PublicComment[]
+
+  @@map("consultations")
+}
+
+model PublicComment {
+  id             String    @id @default(cuid())
+  consultationId String    @map("consultation_id")
+  fullName       String    @map("full_name")
+  email          String?
+  phoneNumber    String?   @map("phone_number")
+  content        String    @db.Text
+  status         String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  moderatedBy    String?   @map("moderated_by")
+  moderatedAt    DateTime? @map("moderated_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@map("public_comments")
+}
+
+model ConsultationResponse {
+  id             String    @id @default(cuid())
+  consultationId String    @map("consultation_id")
+  unitId         String    @map("unit_id") // Đơn vị góp ý
+  unitName       String?   @map("unit_name")
+  userId         String?   @map("user_id") // Người góp ý
+  content        String?   @db.Text // Nội dung góp ý
+  fileId         String?   @map("file_id") // Tệp phản hồi (nếu có)
+  status         String    @default("PENDING") // PENDING, RESPONDED
+  respondedAt    DateTime? @map("responded_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@map("consultation_responses")
+}
+
+model Document {
+  id                   String    @id @default(cuid())
+  documentNumber       String    @map("document_number") // Số văn bản (đi/đến)
+  notation             String? // Ký hiệu (ví dụ: QĐ-UBND)
+  abstract             String    @db.Text // Trích yếu
+  content              String?   @db.LongText // Nội dung
+  typeId               String?   @map("type_id") // Loại văn bản (Quyết định, Công văn...)
+  fieldId              String?   @map("field_id") // Lĩnh vực (Khoa học, Công nghệ...)
+  issuingAuthorityId   String?   @map("issuing_authority_id") // Cơ quan ban hành
+  issuerName           String?   @map("issuer_name")
+  signerId             String?   @map("signer_id")
+  signerName           String?   @map("signer_name")
+  signerPosition       String?   @map("signer_position")
+  issueDate            DateTime? @map("issue_date")
+  arrivalDate          DateTime? @map("arrival_date")
+  arrivalNumber        String?   @map("arrival_number") // Số đến (dành cho văn bản đến)
+  processingDeadline   DateTime? @map("processing_deadline") // Hạn xử lý
+  recipients           String?   @db.Text // Nơi nhận
+  urgency              String    @default("NORMAL") // NORMAL, URGENT, FLASH
+  securityLevel        String    @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
+  status               String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  isPublic             Boolean   @default(false) @map("is_public")
+  isIncoming           Boolean   @default(true) @map("is_incoming")
+  fileId               String?   @map("file_id")
+  signatureValid       Boolean   @default(false) @map("signature_valid")
+  pageCount            Int       @default(1) @map("page_count")
+  attachmentCount      Int       @default(0) @map("attachment_count")
+  linkedDocumentId     String?   @map("linked_document_id")
+  fiscalYear           Int?      @map("fiscal_year") // Năm tài chính (cho công khai ngân sách)
+  transparencyCategory String?   @map("transparency_category") // ESTIMATE, SETTLEMENT, EXECUTION
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  @@index([documentNumber])
+  @@index([typeId])
+  @@index([fieldId])
+  @@index([status])
+  @@map("documents")
+}
+
+model DocumentLog {
+  id         String   @id @default(cuid())
+  documentId String   @map("document_id")
+  userId     String?  @map("user_id")
+  userName   String?  @map("user_name")
+  action     String // VÀO SỔ, PHÂN XỬ LÝ, TIẾP NHẬN, CHUYỂN XỬ LÝ, KẾT THÚC
+  note       String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([documentId])
+  @@map("document_logs")
+}
+
+generator client {
+  provider     = "prisma-client-js"
+  output       = "../../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Minutes {
+  id         String    @id @default(cuid())
+  title      String // Tiêu đề biên bản
+  startTime  DateTime  @map("start_time") // Thời gian bắt đầu
+  endTime    DateTime? @map("end_time") // Thời gian kết thúc
+  location   String? // Địa điểm
+  chairman   String? // Chủ trì
+  secretary  String? // Thư ký
+  attendees  String?   @db.Text // Thành phần tham dự (JSON string)
+  content    String?   @db.LongText // Nội dung cuộc họp
+  conclusion String?   @db.Text // Kết luận
+  documentId String?   @map("document_id") // Liên kết với văn bản (nếu có)
+  status     String    @default("DRAFT") // DRAFT, SIGNED, ARCHIVED
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("minutes")
+}
+
+model AdministrativeProcedure {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  category     String // e.g. "ho-tich", "chung-thuc"
+  description  String?  @db.Text
+  duration     String // e.g. "3 ngày làm việc"
+  fee          String   @default("Miễn phí")
+  requiredDocs String   @db.Text // Store list as JSON array of strings
+  steps        String   @db.Text // Store list as JSON array of strings
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([code])
+  @@map("administrative_procedures")
+}
+
+model OneStopDossier {
+  id            String   @id @default(cuid())
+  code          String   @unique // e.g. "DK-2026-888"
+  procedureName String?  @map("procedure_name")
+  senderName    String   @map("sender_name")
+  receiveDate   DateTime @map("receive_date")
+  dueDate       DateTime @map("due_date")
+  status        String   @default("RECEIVED") // RECEIVED, PROCESSING, RESOLVED, RETURNED
+  currentStep   Int      @default(1) @map("current_step") // 1 to 4
+  stepDetails   String?  @map("step_details") @db.Text // JSON array of step timeline
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@index([status])
+  @@map("one_stop_dossiers")
+}
+
+model DossierComponent {
+  id            String   @id @default(cuid())
+  dossierId     String   @map("dossier_id")
+  name          String
+  isRequired    Boolean  @default(true) @map("is_required")
+  status        String   @default("MISSING") // VALID, MISSING, PENDING_REVIEW
+  fileUrl       String?  @map("file_url")
+  sampleFileUrl String?  @map("sample_file_url") @db.Text
+  source        String? // UPLOAD, CABINET
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([dossierId])
+  @@map("dossier_components")
+}
+
+model DocumentCabinet {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id") // Nếu là tủ cá nhân
+  orgId     String?  @map("org_id") // Nếu là tủ cơ quan
+  fileName  String   @map("file_name")
+  fileUrl   String   @map("file_url") @db.Text
+  fileType  String   @map("file_type") // pdf, excel, image, etc.
+  fileSize  Int      @map("file_size") // bytes
+  tags      String   @default("[]") // JSON array
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([orgId])
+  @@map("document_cabinets")
+}

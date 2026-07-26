@@ -44,3 +44,4 @@ Thumbs.db
 # Documentation / Configs không cần thiết lúc chạy
 README.md
 LICENSE
+src/generated

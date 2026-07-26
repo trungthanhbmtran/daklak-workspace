@@ -14,3 +14,4 @@ apps/*/dist
 npm-debug.log
 .idea
 .vscode
+src/generated

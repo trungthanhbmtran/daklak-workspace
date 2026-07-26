@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TaskRole } from '@generated/prisma/client';
+import { TaskRole } from '../../../src/generated/prisma/client'
 import { PrismaService } from '../../database/prisma.service';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 

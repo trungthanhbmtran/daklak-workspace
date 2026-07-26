@@ -9,7 +9,7 @@
  */
 import 'dotenv/config';
 import * as bcrypt from 'bcrypt'; // Hoặc 'bcryptjs' tùy package bạn cài
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../src/generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 const url = process.env.DATABASE_URL;

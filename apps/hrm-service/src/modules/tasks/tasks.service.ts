@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { TaskRole } from '@generated/prisma/client';
+import { TaskRole } from '../../../src/generated/prisma/client'
 import { PrismaService } from '../../database/prisma.service';
 import { RpcException, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';

@@ -2,11 +2,10 @@
 # 1. Builder Stage
 # Môi trường dùng để cài đặt dependencies và compile code
 # ==========================================
-FROM node:22-alpine AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 # Bắt buộc cài openssl cho Prisma Engine
-RUN apk add --no-cache openssl
 
 # [MONOREPO] Copy package.json của service cụ thể từ gốc
 # Context của docker build phải đặt ở thư mục ngoài cùng (root)
@@ -18,7 +17,7 @@ COPY apps/workflow-service/ ./
 COPY shared/protos ./shared/protos
 
 # Generate Prisma Client (Nếu service có sử dụng Prisma)
-RUN npx prisma generate
+RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
 
 # Compile source code sang thư mục /dist
 RUN npm run build
@@ -27,16 +26,15 @@ RUN npm run build
 # 2. Runner Stage
 # Môi trường chạy thực tế trên Production
 # ==========================================
-FROM node:22-alpine AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PROTO_PATH=/app/protos
 
-RUN apk add --no-cache openssl
 
 # [Bảo Mật] Tạo và chuyển sang user app không có đặc quyền
-RUN addgroup -S app && adduser -S app -G app && chown app:app /app
+RUN groupadd -r app && useradd -r -g app app && chown app:app /app
 USER app
 
 # Cài đặt Prod Dependencies trực tiếp dưới quyền app

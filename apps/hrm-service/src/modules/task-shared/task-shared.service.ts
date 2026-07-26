@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { TaskRole } from '@generated/prisma/client';
+import { TaskRole } from '../../../src/generated/prisma/client'
 import { AppCacheService } from '../../core/cache/app-cache.service';
 
 

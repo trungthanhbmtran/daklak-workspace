@@ -1,7 +1,7 @@
 # ==========================================
 # 1️⃣ Builder Stage
 # ==========================================
-FROM node:22-alpine AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 COPY apps/notification_service/package*.json ./
@@ -14,13 +14,13 @@ COPY shared/protos ./shared/protos
 # ==========================================
 # 2️⃣ Runner Stage
 # ==========================================
-FROM node:22-alpine AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
 # Create non-root user early to run container and install packages under its ownership
-RUN addgroup -S app && adduser -S app -G app && chown app:app /app
+RUN groupadd -r app && useradd -r -g app app && chown app:app /app
 USER app
 
 # Copy package files and install production dependencies directly as non-root user (avoids slow chown at the end)
@@ -37,7 +37,7 @@ COPY --chown=app:app apps/notification_service/prisma ./prisma
 COPY --chown=app:app apps/notification_service/prisma.config.ts ./prisma.config.ts
 
 ENV DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy"
-RUN npx prisma generate
+RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
 
 ENV PROTO_PATH=/app/protos
 

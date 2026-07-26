@@ -1,0 +1,311 @@
+model Banner {
+  id              String  @id @default(cuid())
+  name            String
+  slug            String  @unique
+  description     String? @db.Text
+  imageUrl        String  @map("image_url")
+  linkType        String? @default("internal") @map("link_type") // internal | external
+  customUrl       String? @map("custom_url")
+  target          String? @default("_self") // _self | _blank
+  position        String? @default("top") // top | middle | bottom | custom
+  orderIndex      Int     @default(0) @map("order_index")
+  status          Boolean @default(true)
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description") @db.Text
+
+  startAt   DateTime? @map("start_at")
+  endAt     DateTime? @map("end_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("posts_banners")
+}
+
+model Category {
+  id              String  @id @default(cuid())
+  name            String
+  slug            String  @unique
+  parentId        String? @map("parent_id")
+  lft             Int     @default(0)
+  rgt             Int     @default(0)
+  depth           Int     @default(0)
+  status          Boolean @default(true)
+  thumbnail       String?
+  attachmentId    String? @map("attachment_id")
+  linkType        String? @default("standard") @map("link_type") // standard | static | external
+  customUrl       String? @map("custom_url")
+  target          String? @default("_self") // _self | _blank
+  orderIndex      Int     @default(0) @map("order_index")
+  description     String? @db.Text
+  translations    Json?   @default("{}")
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description") @db.Text
+  isGovStandard   Boolean @default(false) @map("is_gov_standard")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  posts    Post[]
+
+  @@index([lft, rgt])
+  @@index([parentId])
+  @@map("posts_categories")
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String @db.Text
+  status  String @default("PENDING") // PENDING | APPROVED | REJECTED | SPAM
+
+  authorId    String? @map("author_id")
+  authorName  String? @map("author_name")
+  authorEmail String? @map("author_email")
+  authorIp    String? @map("author_ip")
+
+  postId String @map("post_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  parentId String?   @map("parent_id")
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([postId])
+  @@index([status])
+  @@map("post_comments")
+}
+
+model CitizenQuestion {
+  id      String @id @default(cuid())
+  title   String
+  content String @db.Text
+
+  askedByName  String  @map("asked_by_name")
+  askedByEmail String? @map("asked_by_email")
+  askedByPhone String? @map("asked_by_phone")
+  address      String?
+
+  status String @default("PENDING") // PENDING | PROCESSING | ANSWERED | REJECTED
+
+  answerContent String?   @map("answer_content") @db.Text
+  answeredAt    DateTime? @map("answered_at")
+  answeredById  String?   @map("answered_by_id")
+
+  isPublic   Boolean @default(false) @map("is_public")
+  categoryId String? @map("category_id") // Reference to a Category in posts-service
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("citizen_questions")
+}
+
+model CitizenFeedback {
+  id      String @id @default(cuid())
+  title   String
+  content String @db.Text
+
+  feedbackType String  @default("GENERAL") // GENERAL | DRAFT_DOC | SERVICE
+  referenceId  String? @map("reference_id") // ID of the draft document (Post) if applicable
+
+  senderName  String  @map("sender_name")
+  senderEmail String? @map("sender_email")
+
+  status String @default("NEW") // NEW | READ | PROCESSED
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("citizen_feedbacks")
+}
+
+generator client {
+  provider     = "prisma-client-js"
+  output       = "../../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model PortalConfig {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  name        String   @db.Text
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("portal_configs")
+}
+
+model PortalMenu {
+  id           String  @id @default(cuid())
+  name         String
+  description  String? @db.Text
+  translations Json?   @default("{}")
+  icon         String?
+  link         String?
+
+  order    Int          @default(0)
+  parentId String?      @map("parent_id")
+  parent   PortalMenu?  @relation("PortalMenuHierarchy", fields: [parentId], references: [id])
+  children PortalMenu[] @relation("PortalMenuHierarchy")
+
+  isActive Boolean @default(true) @map("is_active")
+  target   String  @default("_self") // _self, _blank
+
+  // To link with posts or categories
+  type        String  @default("URL") // URL, CATEGORY, POST, STATIC_PAGE
+  referenceId String? @map("reference_id") // ID of Category or Post
+
+  position String @default("HORIZONTAL") // HORIZONTAL, VERTICAL, FOOTER
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("portal_menus")
+}
+
+model Post {
+  id          String  @id @default(cuid())
+  title       String
+  description String? @db.Text
+  content     String? @db.LongText
+  contentHtml String? @map("content_html") @db.LongText
+  slug        String  @unique
+  thumbnail   String?
+  authorId    String  @map("author_id")
+
+  // Lifecycle & Workflow
+  status         String @default("DRAFT") // DRAFT | SUBMITTED | UNDER_REVIEW | REJECTED | APPROVED | PUBLISHED | UNPUBLISHED | ARCHIVED
+  currentVersion Int    @default(1) @map("current_version")
+
+  isFeatured     Boolean @default(false) @map("is_featured")
+  isNotification Boolean @default(false) @map("is_notification")
+  viewCount      Int     @default(0) @map("view_count")
+
+  isTranslated     Boolean @default(false) @map("is_translated")
+  isCommentAllowed Boolean @default(true) @map("is_comment_allowed")
+  isDeleted        Boolean @default(false) @map("is_deleted")
+
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  tags             Tag[]             @relation("PostToTag")
+  versions         PostVersion[]
+  translations_rel PostTranslation[] @relation("PostToTranslation")
+  comments         Comment[]
+  moderationLogs   ModerationLog[]
+  auditLogs        AuditLog[]
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isDeleted])
+  @@map("posts")
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  posts Post[] @relation("PostToTag")
+
+  @@map("posts_tags")
+}
+
+model PostVersion {
+  id          String  @id @default(cuid())
+  postId      String  @map("post_id")
+  version     Int
+  title       String
+  description String? @db.Text
+  content     String? @db.LongText
+  editorId    String  @map("editor_id")
+  changeNote  String? @map("change_note") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([version])
+  @@map("posts_versions")
+}
+
+model ModerationLog {
+  id         String  @id @default(cuid())
+  postId     String  @map("post_id")
+  reviewerId String  @map("reviewer_id")
+  oldStatus  String  @map("old_status")
+  newStatus  String  @map("new_status")
+  decision   String // APPROVE | REJECT | REQUEST_CHANGES
+  note       String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([reviewerId])
+  @@map("posts_moderation_logs")
+}
+
+model AuditLog {
+  id         String  @id @default(cuid())
+  postId     String? @map("post_id")
+  actorId    String  @map("actor_id")
+  action     String // CREATE | UPDATE | SUBMIT | APPROVE | REJECT | PUBLISH | UNPUBLISH | DELETE
+  entityType String  @default("POST") @map("entity_type")
+  entityId   String  @map("entity_id")
+  metadata   String? @db.LongText // JSON metadata
+  ipAddress  String? @map("ip_address")
+  userAgent  String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([postId])
+  @@index([actorId])
+  @@index([action])
+  @@map("posts_audit_logs")
+}
+
+model PostTranslation {
+  id       String @id @default(cuid())
+  postId   String @map("post_id")
+  langCode String @map("lang_code")
+
+  title       String
+  slug        String?
+  description String? @db.Text
+  content     String? @db.LongText
+  contentHtml String? @map("content_html") @db.LongText
+
+  version        Int @default(1)
+  mainVersionRef Int @map("main_version_ref") // Phiên bản của nội dung gốc mà bản dịch này dựa trên
+
+  isPublished Boolean  @default(false) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade, name: "PostToTranslation")
+
+  @@index([postId])
+  @@index([langCode])
+  @@map("posts_translations")
+}

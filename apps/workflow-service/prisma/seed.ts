@@ -7,11 +7,11 @@
  *
  * LƯU Ý Prisma 7.x:
  * - PrismaClient phải được khởi tạo với Driver Adapter.
- * - Import từ generated output path, không phải '@prisma/client'.
+ * - Import từ generated output path, không phải '../src/generated/prisma/client'.
  * - DATABASE_URL phải được set trước khi chạy seed.
  */
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client';
+import { PrismaClient } from '../src/generated/prisma/client'
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 function createPrismaClient(): PrismaClient {
@@ -69,7 +69,7 @@ const integrationConnections = [
 const leaveRequestGraph = {
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
-    { id: 'task_1', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Nhân viên nộp đơn', assigneeRole: 'EMPLOYEE', formSchema: JSON.stringify([{id:"f1",name:"reason",label:"Lý do",type:"textarea"},{id:"f2",name:"startDate",label:"Ngày bắt đầu",type:"date"},{id:"f3",name:"endDate",label:"Ngày kết thúc",type:"date"},{id:"f4",name:"leaveDays",label:"Số ngày nghỉ",type:"number"}]) } },
+    { id: 'task_1', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Nhân viên nộp đơn', assigneeRole: 'EMPLOYEE', formSchema: JSON.stringify([{ id: "f1", name: "reason", label: "Lý do", type: "textarea" }, { id: "f2", name: "startDate", label: "Ngày bắt đầu", type: "date" }, { id: "f3", name: "endDate", label: "Ngày kết thúc", type: "date" }, { id: "f4", name: "leaveDays", label: "Số ngày nghỉ", type: "number" }]) } },
     { id: 'task_2', type: 'user_task', position: { x: 500, y: 250 }, data: { label: 'Trưởng phòng Duyệt', assigneeRole: 'MANAGER' } },
     { id: 'gateway_1', type: 'exclusive_gateway', position: { x: 750, y: 250 }, data: { label: 'Kiểm tra Kết quả Duyệt' } },
     { id: 'integration_1', type: 'service_task', position: { x: 1050, y: 250 }, data: { label: 'Đồng bộ nghỉ phép sang HRM', integrationCode: 'LGSP_TINH', endpoint: '/hrm/leave-sync', method: 'POST', bodyMapping: { employeeId: '{{ variables.employeeId }}', startDate: '{{ variables.startDate }}', endDate: '{{ variables.endDate }}' } } },
@@ -89,10 +89,10 @@ const leaveRequestGraph = {
 const govComplexTaskGraph = {
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
-    { id: 'task_assign', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Giao việc (Lãnh đạo)', assigneeRole: 'MANAGER', formSchema: JSON.stringify([{id:"f1",name:"taskName",label:"Tên công việc",type:"text"},{id:"f2",name:"description",label:"Mô tả",type:"textarea"},{id:"f3",name:"dueDate",label:"Hạn chót",type:"date"},{id:"f4",name:"assigneeId",label:"Người nhận",type:"text"}]) } },
+    { id: 'task_assign', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Giao việc (Lãnh đạo)', assigneeRole: 'MANAGER', formSchema: JSON.stringify([{ id: "f1", name: "taskName", label: "Tên công việc", type: "text" }, { id: "f2", name: "description", label: "Mô tả", type: "textarea" }, { id: "f3", name: "dueDate", label: "Hạn chót", type: "date" }, { id: "f4", name: "assigneeId", label: "Người nhận", type: "text" }]) } },
     { id: 'gateway_accept', type: 'exclusive_gateway', position: { x: 550, y: 250 }, data: { label: 'Tiếp nhận hay Từ chối?' } },
-    { id: 'task_process', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', assigneeRole: 'STAFF', formSchema: JSON.stringify([{id:"f1",name:"reportContent",label:"Nội dung báo cáo",type:"textarea"},{id:"f2",name:"attachments",label:"Đính kèm",type:"text"},{id:"f3",name:"coordinators",label:"Người phối hợp",type:"text"}]), multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
-    { id: 'task_evaluate', type: 'user_task', position: { x: 1150, y: 250 }, data: { label: 'Nghiệm thu & Chấm KPI', assigneeRole: 'MANAGER', formSchema: JSON.stringify([{id:"f1",name:"isApproved",label:"Đồng ý duyệt",type:"text"},{id:"f2",name:"kpiScore",label:"Điểm KPI",type:"number"},{id:"f3",name:"managerFeedback",label:"Phản hồi",type:"textarea"}]) } },
+    { id: 'task_process', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', assigneeRole: 'STAFF', formSchema: JSON.stringify([{ id: "f1", name: "reportContent", label: "Nội dung báo cáo", type: "textarea" }, { id: "f2", name: "attachments", label: "Đính kèm", type: "text" }, { id: "f3", name: "coordinators", label: "Người phối hợp", type: "text" }]), multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
+    { id: 'task_evaluate', type: 'user_task', position: { x: 1150, y: 250 }, data: { label: 'Nghiệm thu & Chấm KPI', assigneeRole: 'MANAGER', formSchema: JSON.stringify([{ id: "f1", name: "isApproved", label: "Đồng ý duyệt", type: "text" }, { id: "f2", name: "kpiScore", label: "Điểm KPI", type: "number" }, { id: "f3", name: "managerFeedback", label: "Phản hồi", type: "textarea" }]) } },
     { id: 'gateway_evaluate', type: 'exclusive_gateway', position: { x: 1450, y: 250 }, data: { label: 'Kết quả Nghiệm thu' } },
     { id: 'end_done', type: 'end', position: { x: 1750, y: 250 }, data: { label: 'Hoàn thành' } },
   ],

@@ -1,9 +1,9 @@
-import type { PrismaClient as PrismaClientType } from '@prisma/client'
+import type { PrismaClient as PrismaClientType } from '../src/generated/prisma/client'
 let PrismaClient: typeof PrismaClientType;
 try {
-  PrismaClient = require('@prisma/client').PrismaClient;
+  PrismaClient = require('../src/generated/prisma/client').PrismaClient;
 } catch (e) {
-  PrismaClient = require('@prisma/client').PrismaClient;
+  PrismaClient = require('../src/generated/prisma/client').PrismaClient;
 }
 import * as dotenv from 'dotenv';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
