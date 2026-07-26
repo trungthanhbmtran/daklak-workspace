@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../infra/prisma.service';
 
 import { CreateIntegrationDto } from './dto/create-integration.dto';
@@ -9,7 +11,17 @@ export class IntegrationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateIntegrationDto) {
-    return this.prisma.integrationConnection.create({ data });
+    try {
+      return await this.prisma.integrationConnection.create({ data });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new RpcException({
+          code: 6, // GRPC StatusCode.ALREADY_EXISTS
+          message: `Mã tích hợp "${data.code}" đã tồn tại. Vui lòng chọn mã khác.`,
+        });
+      }
+      throw new RpcException({ code: 13, message: 'Lỗi nội bộ khi tạo Integration.' });
+    }
   }
 
   async findAll(search?: string) {
@@ -34,10 +46,22 @@ export class IntegrationService {
   }
 
   async update(id: string, data: UpdateIntegrationDto) {
-    return this.prisma.integrationConnection.update({
-      where: { id },
-      data,
-    });
+    try {
+      return await this.prisma.integrationConnection.update({
+        where: { id },
+        data,
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2025') {
+          throw new RpcException({ code: 5, message: 'Không tìm thấy Integration Connection.' });
+        }
+        if (err.code === 'P2002') {
+          throw new RpcException({ code: 6, message: 'Mã tích hợp đã tồn tại.' });
+        }
+      }
+      throw new RpcException({ code: 13, message: 'Lỗi nội bộ khi cập nhật Integration.' });
+    }
   }
 
   async remove(id: string) {
