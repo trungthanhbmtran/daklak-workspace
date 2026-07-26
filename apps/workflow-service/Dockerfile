@@ -1,65 +1,58 @@
 # ==========================================
-# 1️⃣ Deps Stage — Chỉ cài production deps
-# ==========================================
-FROM node:22-alpine AS deps
-WORKDIR /app
-
-RUN apk add --no-cache openssl
-
-COPY apps/workflow-service/package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund
-
-# ==========================================
-# 2️⃣ Builder Stage — Build + generate Prisma
+# 1. Builder Stage
+# Môi trường dùng để cài đặt dependencies và compile code
 # ==========================================
 FROM node:22-alpine AS builder
 WORKDIR /app
 
+# Bắt buộc cài openssl cho Prisma Engine
 RUN apk add --no-cache openssl
 
+# [MONOREPO] Copy package.json của service cụ thể từ gốc
+# Context của docker build phải đặt ở thư mục ngoài cùng (root)
 COPY apps/workflow-service/package*.json ./
-RUN npm ci --no-audit --no-fund
+RUN npm ci
 
+# [MONOREPO] Copy source code service và các thư mục chia sẻ (protos)
 COPY apps/workflow-service/ ./
-COPY shared/ ./shared/
+COPY shared/protos ./shared/protos
 
-# Prisma generate cần DATABASE_URL dù chỉ để generate types
-ENV DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy"
+# Generate Prisma Client (Nếu service có sử dụng Prisma)
+RUN npx prisma generate
+
+# Compile source code sang thư mục /dist
 RUN npm run build
 
 # ==========================================
-# 3️⃣ Runner Stage — Image tối giản
+# 2. Runner Stage
+# Môi trường chạy thực tế trên Production
 # ==========================================
 FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PROTO_PATH=/app/protos
 
 RUN apk add --no-cache openssl
 
-# Non-root user
+# [Bảo Mật] Tạo và chuyển sang user app không có đặc quyền
 RUN addgroup -S app && adduser -S app -G app && chown app:app /app
 USER app
 
-# Production node_modules từ deps stage (đã tối ưu, không cần build lại)
-COPY --chown=app:app --from=deps /app/node_modules ./node_modules
+# Cài đặt Prod Dependencies trực tiếp dưới quyền app
+COPY --chown=app:app apps/workflow-service/package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
-# Build artifacts
-COPY --chown=app:app --from=builder /app/dist ./dist
-
-# Prisma: schema, migrations, generated client, config
+# [PRISMA] Copy Prisma generated client và engine binary (BẮT BUỘC để tránh lỗi)
+COPY --chown=app:app --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=app:app --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --chown=app:app --from=builder /app/prisma ./prisma
-COPY --chown=app:app --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --chown=app:app --from=builder /app/generated ./generated
 
-# Proto files
+# Copy thư mục build và protos từ builder stage
+COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
-ENV PROTO_PATH=/app/protos
+EXPOSE 8080
 
-EXPOSE 3004
-
-# Mặc định: chạy app
-# Để migrate: docker run --rm ... sh -c "npx prisma migrate deploy"
-# Để seed:    docker run --rm ... sh -c "npx ts-node -r tsconfig-paths/register prisma/seed.ts"
 CMD ["node", "dist/src/main.js"]
+

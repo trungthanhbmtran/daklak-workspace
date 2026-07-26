@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 async function bootstrap() {
   const logger = new Logger('WorkflowService');
   const app = await NestFactory.create(AppModule);
@@ -15,6 +17,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
   app.enableCors();
 
   // 3. Connect as a gRPC microservice (Hybrid mode)

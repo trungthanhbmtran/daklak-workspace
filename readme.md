@@ -4,7 +4,16 @@ npx prisma migrate dev --name mo_ta_su_thay_doi
 npx prisma generate
 Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
 
-## 1. CI/CD Workflow
+## 1. Hướng Dẫn Sử Dụng AI Agent Skills (Dành cho Lập Trình Viên)
+Dự án được cấu hình sẵn các thư mục kỹ năng (skills) đặc biệt dành cho AI (như Github Copilot, Gemini, Cursor) trong thư mục `.agents/skills`. Để AI viết code chính xác theo chuẩn kiến trúc dự án, bạn nên sử dụng các Slash Command hoặc Prompt gợi ý:
+
+- **Frontend**: `@frontend_master_skill` - Kích hoạt khi cần code giao diện Next.js, component Shadcn, hoặc làm việc với API Client (React Query, Zod).
+- **Backend**: `@backend_master_skill` - Kích hoạt khi xây dựng API mới, làm việc với Microservices (gRPC/RabbitMQ) hoặc truy vấn dữ liệu bằng Prisma.
+- **DevOps**: `@devops_master_skill` - Kích hoạt khi cần tối ưu Dockerfile, sửa lỗi luồng CI/CD, hoặc viết script deploy.
+
+*Mẹo: Bạn có thể viết prompt như sau: "Hãy viết thêm tính năng tạo báo cáo sử dụng @backend_master_skill để đảm bảo đúng chuẩn Microservice của dự án".*
+
+## 2. CI/CD Workflow
 Ứng dụng được tự động deploy khi có hành động `push` vào nhánh `main`.
 
 ### Luồng hoạt động:

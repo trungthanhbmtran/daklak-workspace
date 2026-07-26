@@ -13,43 +13,20 @@ import { IntegrationService } from './integration.service';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
 
-// Parse JSON field an toàn
-const parseJsonField = (val: any): any => {
-  if (!val) return null;
-  if (typeof val === 'string') {
-    try { return JSON.parse(val); } catch { return null; }
-  }
-  return val;
-};
-
-// Map gRPC request (strings) sang Prisma DTO (objects)
-const mapToPrisma = (payload: any) => {
-  return {
-    ...payload,
-    authConfig: parseJsonField(payload.authConfig) ?? {},
-    headers: parseJsonField(payload.headers) ?? {},
-    metadata: parseJsonField(payload.metadata) ?? {},
-  };
-};
-
-// Map Prisma record sang gRPC-safe response (với authConfig, headers, metadata là string)
-const mapIntegrationResponse = (data: any) => {
+// Map response sang định dạng gRPC an toàn (biến object thành chuỗi JSON cho authConfig, headers, metadata)
+const mapToGrpc = (data: any) => {
   if (!data) return null;
-  const parsedEndpoints = parseJsonField(data.endpoints) ?? [];
   return {
     ...data,
-    authConfig: JSON.stringify(parseJsonField(data.authConfig) ?? {}),
-    headers: JSON.stringify(parseJsonField(data.headers) ?? {}),
-    endpoints: parsedEndpoints, // endpoints vẫn là repeated message
-    metadata: JSON.stringify(parseJsonField(data.metadata) ?? {}),
-    createdAt: data.createdAt?.toISOString?.() ?? data.createdAt ?? '',
-    updatedAt: data.updatedAt?.toISOString?.() ?? data.updatedAt ?? '',
+    authConfig: JSON.stringify(data.authConfig ?? {}),
+    headers: JSON.stringify(data.headers ?? {}),
+    metadata: JSON.stringify(data.metadata ?? {}),
   };
 };
 
 @Controller('workflow/integrations')
 export class IntegrationController {
-  constructor(private readonly integrationService: IntegrationService) { }
+  constructor(private readonly integrationService: IntegrationService) {}
 
   // ==========================================
   // HTTP REST ENDPOINTS
@@ -57,20 +34,18 @@ export class IntegrationController {
 
   @Post()
   async createRest(@Body() createDto: CreateIntegrationDto) {
-    const data = await this.integrationService.create(createDto);
-    return { success: true, data: mapIntegrationResponse(data) || {}, meta: {}, message: 'Created successfully' };
+    return this.integrationService.create(createDto);
   }
 
   @Get()
   async findAllRest(@Query('search') search?: string) {
-    const data = await this.integrationService.findAll(search);
-    return { success: true, data: data.map(mapIntegrationResponse), meta: {}, message: 'OK' };
+    // Interceptor tự động bọc response thành { success: true, data: [...] }
+    return this.integrationService.findAll(search);
   }
 
   @Get(':id')
   async findOneRest(@Param('id') id: string) {
-    const data = await this.integrationService.findOne(id);
-    return { success: true, data: mapIntegrationResponse(data) || {}, meta: {}, message: 'OK' };
+    return this.integrationService.findOne(id);
   }
 
   @Put(':id')
@@ -78,14 +53,13 @@ export class IntegrationController {
     @Param('id') id: string,
     @Body() updateDto: UpdateIntegrationDto,
   ) {
-    const data = await this.integrationService.update(id, updateDto);
-    return { success: true, data: mapIntegrationResponse(data) || {}, meta: {}, message: 'Updated successfully' };
+    return this.integrationService.update(id, updateDto);
   }
 
   @Delete(':id')
   async removeRest(@Param('id') id: string) {
     await this.integrationService.remove(id);
-    return { success: true, data: {}, meta: {}, message: 'Deleted successfully' };
+    return {};
   }
 
   // ==========================================
@@ -94,29 +68,27 @@ export class IntegrationController {
 
   @GrpcMethod('WorkflowService', 'CreateIntegration')
   async createGrpc(@Payload() payload: CreateIntegrationDto) {
-    const createData = mapToPrisma(payload);
-    const data = await this.integrationService.create(createData);
-    return mapIntegrationResponse(data);
+    const data = await this.integrationService.create(payload);
+    return mapToGrpc(data);
   }
 
   @GrpcMethod('WorkflowService', 'FindAllIntegrations')
   async findAllGrpc(@Payload() payload: { search?: string }) {
     const data = await this.integrationService.findAll(payload.search);
-    return { data: data.map(mapIntegrationResponse) };
+    return { data: data.map(mapToGrpc) };
   }
 
   @GrpcMethod('WorkflowService', 'FindOneIntegration')
   async findOneGrpc(@Payload() payload: { id: string }) {
     const data = await this.integrationService.findOne(payload.id);
-    return mapIntegrationResponse(data);
+    return mapToGrpc(data);
   }
 
   @GrpcMethod('WorkflowService', 'UpdateIntegration')
   async updateGrpc(@Payload() payload: UpdateIntegrationDto & { id: string }) {
     const { id, ...updateDto } = payload;
-    const updateData = mapToPrisma(updateDto);
-    const data = await this.integrationService.update(id, updateData);
-    return mapIntegrationResponse(data);
+    const data = await this.integrationService.update(id, updateDto);
+    return mapToGrpc(data);
   }
 
   @GrpcMethod('WorkflowService', 'DeleteIntegration')

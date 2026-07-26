@@ -1,50 +1,58 @@
 # ==========================================
-# 1️⃣ Builder Stage
+# 1. Builder Stage
+# Môi trường dùng để cài đặt dependencies và compile code
 # ==========================================
 FROM node:22-alpine AS builder
 WORKDIR /app
 
+# Bắt buộc cài openssl cho Prisma Engine
 RUN apk add --no-cache openssl
 
+# [MONOREPO] Copy package.json của service cụ thể từ gốc
+# Context của docker build phải đặt ở thư mục ngoài cùng (root)
 COPY apps/posts-service/package*.json ./
 RUN npm ci
 
+# [MONOREPO] Copy source code service và các thư mục chia sẻ (protos)
 COPY apps/posts-service/ ./
 COPY shared/protos ./shared/protos
 
-# Generate Prisma client and build the NestJS app
-# Provide a dummy DATABASE_URL for Prisma generate during build
-ENV DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy"
+# Generate Prisma Client (Nếu service có sử dụng Prisma)
+RUN npx prisma generate
+
+# Compile source code sang thư mục /dist
 RUN npm run build
 
-
 # ==========================================
-# 2️⃣ Runner Stage
+# 2. Runner Stage
+# Môi trường chạy thực tế trên Production
 # ==========================================
 FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PROTO_PATH=/app/protos
 
 RUN apk add --no-cache openssl
 
-# Create non-root user early to run container and install packages under its ownership
+# [Bảo Mật] Tạo và chuyển sang user app không có đặc quyền
 RUN addgroup -S app && adduser -S app -G app && chown app:app /app
 USER app
 
-# Copy package files and install production dependencies directly as non-root user (avoids slow chown at the end)
+# Cài đặt Prod Dependencies trực tiếp dưới quyền app
 COPY --chown=app:app apps/posts-service/package*.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
-# Copy build outputs from builder stage with correct ownership
-COPY --chown=app:app --from=builder /app/dist ./dist
+# [PRISMA] Copy Prisma generated client và engine binary (BẮT BUỘC để tránh lỗi)
+COPY --chown=app:app --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=app:app --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --chown=app:app --from=builder /app/prisma ./prisma
+
+# Copy thư mục build và protos từ builder stage
+COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
-COPY --chown=app:app --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --chown=app:app --from=builder /app/generated ./generated
 
-ENV PROTO_PATH=/app/protos
-
-EXPOSE 50055
+EXPOSE 8080
 
 CMD ["node", "dist/src/main.js"]
+
