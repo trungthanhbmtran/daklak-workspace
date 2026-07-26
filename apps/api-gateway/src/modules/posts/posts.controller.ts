@@ -31,10 +31,6 @@ export class PostsController {
     return this.postsService.findAll(query);
   }
 
-  @Get('stats')
-  async getStats(@Query() query: any) {
-    return this.postsService.getStats(query);
-  }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {

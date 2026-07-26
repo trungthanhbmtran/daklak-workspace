@@ -143,7 +143,7 @@ export const postsApi = {
     total: number; published: number; draft: number; pending: number;
     reviewing: number; rejected: number; totalViews: number;
   }>> =>
-    apiClient.get("/posts/stats", { params }) as any,
+    apiClient.get("/reports/posts", { params }) as any,
 
   // ─── Translation (with SSE) ─────────────────────────────
   translate: async (text: string, targetLang: string): Promise<any> => {

@@ -33,6 +33,7 @@ import { IntegrationsController } from './integrations.controller';
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
     registerGrpcService(MICROSERVICES.EMPLOYEE),
+    registerGrpcService(MICROSERVICES.REPORT),
   ],
   controllers: [
     UserController,

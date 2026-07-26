@@ -22,10 +22,7 @@ import { DocumentsService } from './documents.service';
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
-  @Get('stats')
-  async getStats() {
-    return this.documentsService.getStats();
-  }
+
 
   @Get()
   async listDocuments(@Query() query: any) {

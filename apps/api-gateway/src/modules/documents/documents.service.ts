@@ -20,12 +20,7 @@ export class DocumentsService implements OnModuleInit {
     this.dossierService = this.dossierClient.getService(MICROSERVICES.DOSSIER.SERVICE);
   }
 
-  async getStats() {
-    return firstValueFrom(this.documentService.GetStatistics({})).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
-  }
+
 
   async listDocuments(query: any) {
     const req: any = {

@@ -6,15 +6,18 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class OrganizationsService implements OnModuleInit {
   private orgGrpcService: any;
   private userGrpcService: any;
+  private reportGrpcService: any;
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
+    @Inject(MICROSERVICES.REPORT.SYMBOL) private readonly reportClient: any,
   ) {}
 
   onModuleInit() {
     this.orgGrpcService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
     this.userGrpcService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
+    this.reportGrpcService = this.reportClient.getService(MICROSERVICES.REPORT.SERVICE);
   }
 
   async create(body: any) {
@@ -268,7 +271,7 @@ export class OrganizationsService implements OnModuleInit {
 
   async getStaffingReport(id: number) {
     const res = (await firstValueFrom(
-      this.orgGrpcService.GetStaffingReport({ unitId: id }),
+      this.reportGrpcService.GetStaffingReport({ unitId: id }),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;

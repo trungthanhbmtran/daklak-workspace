@@ -318,6 +318,22 @@ services:
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_notification?allowPublicKeyRetrieval=true
 
+  report-service:
+    image: ${DOCKER_USERNAME}/daklak-report-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - redis
+    ports:
+      - "3011:3011"
+      - "50062:50062"
+    env_file:
+      - .env.production
+    environment:
+      - GRPC_URL=0.0.0.0:50062
+      - PORT=3011
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_report?allowPublicKeyRetrieval=true
+
   # =============================
   # Nginx
   # =============================

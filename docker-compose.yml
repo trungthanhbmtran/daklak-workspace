@@ -142,6 +142,25 @@ services:
       - GRPC_URL=0.0.0.0:50061
       - PORT=3004
 
+  report-service:
+    build:
+      context: .
+      dockerfile: apps/report-service/Dockerfile
+    container_name: report-service
+    restart: always
+    depends_on:
+      - redis
+      - rabbitmq
+    ports:
+      - "3011:3011"
+      - "50062:50062"
+    env_file:
+      - apps/report-service/.env
+    environment:
+      - GRPC_URL=0.0.0.0:50062
+      - PORT=3011
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_report?allowPublicKeyRetrieval=true
+
 volumes:
   mysql_data:
   minio_data:

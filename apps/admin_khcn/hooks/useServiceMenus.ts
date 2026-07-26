@@ -111,6 +111,7 @@ const ROUTE_TO_SERVICE: Record<string, string> = {
   "/services/documents": "DOC_GROUP",
   "/services/posts": "CONTENT_GROUP",
   "/services/integration": "WORKFLOW_GROUP",
+  "/services/reports": "REPORT_GROUP",
 };
 
 function getServiceCodeFromPath(pathname: string): string | null {

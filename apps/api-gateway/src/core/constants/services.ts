@@ -227,4 +227,11 @@ export const MICROSERVICES = {
     URL: getPostUrl(),
     SERVICE: 'PortalConfigService',
   },
+  REPORT: {
+    PACKAGE: 'reports',
+    SYMBOL: 'REPORT_PACKAGE',
+    PROTO: 'reports/report.proto',
+    URL: process.env.REPORT_SERVICE_URL || 'report-service:50062',
+    SERVICE: 'ReportService',
+  },
 };

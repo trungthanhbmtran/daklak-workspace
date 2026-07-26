@@ -73,13 +73,7 @@ export class KpisController {
     return this.kpisService.findEvaluations(req.user, employeeCode);
   }
 
-  @Get('dashboard-stats')
-  async getDashboardStats(
-    @Req() req: any,
-    @Query('periodId') periodId: string,
-  ) {
-    return this.kpisService.getDashboardStats(req.user, periodId);
-  }
+
 
   @Post('evaluations/calculate-personal')
   async calculatePersonalKpi(

@@ -48,21 +48,6 @@ export class TasksController {
     return this.tasksService.list(req, role, assigneeCode, assignerCode, filter, search, departmentId, planId, isSupervisor, status, priority, page, limit, statsFilter);
   }
 
-  @Get('stats')
-  async getStats(
-    @Req() req: any,
-    @Query('role') role: string,
-    @Query('assigneeCode') assigneeCode: string,
-    @Query('assignerCode') assignerCode: string,
-    @Query('departmentId') departmentId: string,
-    @Query('planId') planId: string,
-    @Query('isSupervisor') isSupervisor: string,
-    @Query('status') status: string,
-    @Query('priority') priority: string,
-    @Query('search') search: string,
-  ) {
-    return this.tasksService.getStats(req, role, assigneeCode, assignerCode, departmentId, planId, isSupervisor, status, priority, search);
-  }
 
   @Put(':id')
   async update(

@@ -17,8 +17,21 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
         useFactory: (config: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
-            urls: [config.get<string>('RABBITMQ_URL') || 'amqp://guest:guest@localhost:5672'],
+            urls: [config.get<string>('RABBITMQ_URL') || 'amqp://root:mypassword@rabbitmq:5672'],
             queue: config.get<string>('NOTIFICATION_QUEUE') || 'notifications',
+            queueOptions: { durable: true },
+          },
+        }),
+      },
+      {
+        name: 'REPORT_SERVICE_RMQ',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [config.get<string>('RABBITMQ_URL') || 'amqp://root:mypassword@rabbitmq:5672'],
+            queue: 'report_queue',
             queueOptions: { durable: true },
           },
         }),

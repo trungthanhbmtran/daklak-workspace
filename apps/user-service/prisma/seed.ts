@@ -5316,7 +5316,10 @@ async function main() {
     { code: 'WORKFLOW_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/integration/gateway', icon: 'Network', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
     { code: 'WORKFLOW_SYSTEM_MENU', name: 'Quy trình hệ thống', route: '/services/integration/workflows', icon: 'GitBranch', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
     { code: 'WORKFLOW_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/integration/apis', icon: 'Plug', order: 4, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
-    { code: 'WORKFLOW_REPORT_MENU', name: 'Thiết kế Báo cáo', route: '/services/integration/reports', icon: 'PieChart', order: 5, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
+
+    // 7. Phân tích, báo cáo
+    { code: 'REPORT_GROUP', name: 'Phân tích, báo cáo', route: '/services/reports', icon: 'BarChart3', order: 6, linkedResourceCode: 'REPORT', type: 'SERVICE_ITEM' },
+    { code: 'REPORT_DASHBOARD_MENU', name: 'Dashboard Thống kê', route: '/services/reports', icon: 'LayoutDashboard', order: 1, parentCode: 'REPORT_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
   ];
 
   for (const m of menuData) {

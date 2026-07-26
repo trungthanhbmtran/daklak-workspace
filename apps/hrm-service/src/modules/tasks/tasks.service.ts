@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-import { RpcException } from '@nestjs/microservices';
+import { RpcException, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 import { TaskWorkflowService } from '../task-workflow/task-workflow.service';
@@ -17,6 +17,7 @@ export class TasksService {
     private readonly shared: TaskSharedService,
     private readonly wf: TaskWorkflowService,
     private readonly notif: TaskNotificationService,
+    @Inject('REPORT_SERVICE_RMQ') private readonly reportClient: ClientProxy,
   ) { }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -247,6 +248,7 @@ export class TasksService {
     enriched.allowedActions = await this.shared.computeAllowedActions(enriched, query);
     return this.shared.toTaskResponse(enriched);
   }
+
 
   async getTaskStats(query: any) {
     const where: any = {};
@@ -508,7 +510,24 @@ export class TasksService {
       updateData.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: transition.nextNodeId };
     }
 
-    await this.prisma.task.update({ where: { id }, data: updateData });
+    let resultTask;
+    const isUpdated = true;
+    if (isUpdated) {
+      resultTask = await this.prisma.task.update({ where: { id }, data: updateData });
+      
+      // Phát event task.completed nếu task vừa được hoàn thành
+      if (updateData.isCompleted) {
+        this.reportClient.emit('task.completed', {
+          taskId: resultTask.id,
+          title: resultTask.title,
+          completedAt: resultTask.completedAt,
+          progress: resultTask.progress,
+          assigneeId: resultTask.assigneeId
+        });
+      }
+    } else {
+      resultTask = rawTask;
+    }
 
     const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
     if (isReject) {

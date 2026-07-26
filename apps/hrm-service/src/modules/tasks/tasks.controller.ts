@@ -28,6 +28,7 @@ export class TasksController {
   @GrpcMethod('TaskService', 'GetTaskStats')
   getTaskStats(data: any) { return this.tasksService.getTaskStats(data); }
 
+
   @GrpcMethod('TaskService', 'GetTaskTree')
   getTaskTree(data: any) { return this.tasksService.getTaskTree(data.id, data); }
 

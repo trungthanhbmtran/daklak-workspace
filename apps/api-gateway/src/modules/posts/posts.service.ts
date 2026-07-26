@@ -32,13 +32,6 @@ export class PostsService implements OnModuleInit {
     });
   }
 
-  async getStats(query: any) {
-    return firstValueFrom(this.postGrpcService.getPostStats(query)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
-    });
-  }
-
   async findOne(id: string) {
     return firstValueFrom(this.postGrpcService.getPost({ id })).catch((e) => {
       console.error('RPC Call Failed', e.message);

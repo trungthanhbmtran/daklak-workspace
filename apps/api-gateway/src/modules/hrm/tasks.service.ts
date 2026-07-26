@@ -235,53 +235,6 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async getStats(req: any, role: string, assigneeCode: string, assignerCode: string, departmentId: string, planId: string, isSupervisor: string, status: string, priority: string, search: string) {
-    const user = req.user;
-    let finalAssigneeCode = assigneeCode;
-    let finalAssignerCode: string | undefined = assignerCode;
-    const finalDepartmentId =
-      departmentId && departmentId !== 'undefined'
-        ? parseInt(departmentId, 10)
-        : undefined;
-
-    if (role === 'ASSIGNEE' && user) {
-      finalAssigneeCode = user.employeeCode;
-    } else if (role === 'OWNER' && user) {
-      finalAssignerCode = user.employeeCode;
-    }
-
-    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
-    const isLeader =
-      isAdmin ||
-      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
-      user?.permissionsFlatten?.includes('TASK.*');
-
-    const requestPayload = {
-      assigneeCode: finalAssigneeCode,
-      assignerCode: finalAssignerCode,
-      departmentId: finalDepartmentId,
-      planId:
-        planId && planId !== 'undefined' ? parseInt(planId, 10) : undefined,
-      isSupervisor: isSupervisor === 'true',
-      status,
-      priority,
-      search,
-      currentEmployeeCode: user?.employeeCode,
-      isAdmin,
-      isLeader,
-      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
-      role,
-    };
-
-    const response: any = await firstValueFrom(
-      this.taskService.GetTaskStats(requestPayload, this.getGrpcMetadata(req)),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-    return response;
-  }
-
   async update(req: any, id: number, body: any) {
     const response: any = await firstValueFrom(
       this.taskService.UpdateTask(

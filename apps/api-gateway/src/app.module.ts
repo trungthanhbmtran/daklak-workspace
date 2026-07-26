@@ -17,6 +17,7 @@ import { IntegrationModule } from './modules/integration/integration.module';
 import { DynamicProxyMiddleware } from './modules/integration/dynamic-proxy.middleware';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ChatModule } from './modules/chat/chat.module';
     IntegrationModule,
     PrismaModule,
     ChatModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [],

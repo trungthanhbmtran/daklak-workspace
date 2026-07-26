@@ -164,58 +164,7 @@ export class KpisService implements OnModuleInit {
     });
   }
 
-  async getDashboardStats(user: any, periodId: string) {
-    const isAdmin =
-      user?.permissionsFlatten?.includes('KPI:MANAGE') ||
-      user?.roles?.some((r: any) => r === Role.ADMIN || r?.code === Role.ADMIN);
 
-    let callerDescendantUnitIds: number[] = [];
-    let unitMap: Record<number, any> = {};
-
-    try {
-      unitMap = await this.getUnitMap();
-    } catch (e) {
-      console.error('Failed to get unit map', e);
-    }
-
-    if (!isAdmin && user?.unitId) {
-      const callerUnitId = parseInt(user.unitId, 10);
-      try {
-        const descRes: any = await firstValueFrom(
-          this.orgService.GetDescendants({ id: callerUnitId }),
-        );
-        callerDescendantUnitIds = descRes.ids || [];
-      } catch (e) {
-        callerDescendantUnitIds = [];
-      }
-    }
-
-    const res: any = await firstValueFrom(
-      this.kpiService.GetEvaluationStats({
-        periodId,
-        isAdmin,
-        callerDescendantUnitIds,
-      }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-
-    if (res?.success && res.data?.statsByUnit) {
-      const mappedStats = res.data.statsByUnit.map((s: any) => {
-        let name = 'Chưa xác định';
-        if (s.departmentId && unitMap[s.departmentId]) {
-          name = unitMap[s.departmentId].name;
-        }
-        return {
-          ...s,
-          departmentName: name,
-        };
-      });
-      res.data.statsByUnit = mappedStats;
-    }
-
-    return res;
-  }
 
   async calculatePersonalKpi(user: any, body: { periodId: number; employeeCode?: string; staffingSlotId?: number }) {
     const targetCode = body.employeeCode || user?.employeeCode || user?.username;

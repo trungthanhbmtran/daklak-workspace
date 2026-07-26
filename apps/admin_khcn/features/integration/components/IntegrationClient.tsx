@@ -20,7 +20,6 @@ const WorkflowList = dynamic(() => import("@/features/workflow").then(mod => mod
 const WorkflowInstanceList = dynamic(() => import("@/features/workflow").then(mod => mod.WorkflowInstanceList), { ssr: false, loading: Loading });
 const IntegrationConfig = dynamic(() => import("./IntegrationConfig").then(mod => mod.IntegrationConfig), { ssr: false, loading: Loading });
 const IntegrationManager = dynamic(() => import("./IntegrationManager").then(mod => mod.IntegrationManager), { ssr: false, loading: Loading });
-const ReportDashboard = dynamic(() => import("./reports/ReportDashboard").then(mod => mod.ReportDashboard), { ssr: false, loading: Loading });
 
 function CardContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -30,12 +29,12 @@ function CardContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function IntegrationClient({ initialView = 'dashboard' }: { initialView?: 'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports' }) {
+export function IntegrationClient({ initialView = 'dashboard' }: { initialView?: 'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' }) {
   // eslint-disable-next-line unused-imports/no-unused-vars
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis' | 'reports'>(initialView);
+  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway' | 'apis'>(initialView);
 
   if (editingId || isCreating) {
     return (
@@ -69,7 +68,6 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
             {activeView === 'instances' && "Theo dõi Quy trình Đang chạy"}
             {activeView === 'gateway' && "Cấu hình API Gateway"}
             {activeView === 'apis' && "Quản lý Kết nối API"}
-            {activeView === 'reports' && "Bảng điều khiển Báo cáo (Dashboards)"}
           </h2>
         </div>
 
@@ -92,9 +90,6 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
           )}
           {activeView === 'apis' && (
             <IntegrationManager />
-          )}
-          {activeView === 'reports' && (
-            <ReportDashboard />
           )}
         </div>
       </div>
@@ -130,13 +125,6 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
       description: "Quản lý cấu hình, xác thực và Keys để kết nối với các hệ thống ngoài (LGSP, Webhook, Postman).",
       icon: Plug,
       theme: { wrapper: "bg-muted text-muted-foreground", border: "border-border", icon: "text-muted-foreground" },
-    },
-    {
-      id: 'reports',
-      title: "Thiết kế Báo cáo",
-      description: "Tạo và lưu trữ các biểu đồ, bảng dữ liệu thống kê từ các API hoặc Kho CSDL hệ thống.",
-      icon: PieChart,
-      theme: { wrapper: "bg-primary/5 text-primary", border: "border-primary/10", icon: "text-primary" },
     }
   ];
 

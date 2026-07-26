@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package reports;
+
+// Import common if needed
+import "common/common.proto";
+
+service ReportService {
+  rpc GetStaffingReport (GetStaffingReportRequest) returns (StaffingReportResponse);
+}
+
+message GetStaffingReportRequest {
+  int32 unitId = 1;
+}
+
+message StaffingReportItem {
+  int32 id = 1;
+  int32 unitId = 2;
+  int32 jobTitleId = 3;
+  string jobTitleName = 4;
+  int32 quantity = 5;
+  int32 currentCount = 6;
+  int32 missingCount = 7;
+  bool isOver = 8;
+  repeated StaffingSlotItem slots = 9;
+}
+
+message StaffingSlotItem {
+  int32 id = 1;
+  int32 slotOrder = 2;
+  string description = 3;
+  int32 userSlotId = 4;
+  int32 userId = 5;
+  string userFullName = 6;
+}
+
+message StaffingReportResponse {
+  bool success = 1;
+  repeated StaffingReportItem data = 2;
+  string message = 3;
+}
