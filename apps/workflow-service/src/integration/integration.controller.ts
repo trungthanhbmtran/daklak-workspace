@@ -58,19 +58,19 @@ export class IntegrationController {
   @Post()
   async createRest(@Body() createDto: CreateIntegrationDto) {
     const data = await this.integrationService.create(createDto);
-    return mapIntegrationResponse(data);
+    return { success: true, data: mapIntegrationResponse(data) || {}, meta: {}, message: 'Created successfully' };
   }
 
   @Get()
   async findAllRest(@Query('search') search?: string) {
     const data = await this.integrationService.findAll(search);
-    return { data: data.map(mapIntegrationResponse) };
+    return { success: true, data: data.map(mapIntegrationResponse), meta: {}, message: 'OK' };
   }
 
   @Get(':id')
   async findOneRest(@Param('id') id: string) {
     const data = await this.integrationService.findOne(id);
-    return mapIntegrationResponse(data);
+    return { success: true, data: mapIntegrationResponse(data) || {}, meta: {}, message: 'OK' };
   }
 
   @Put(':id')
@@ -79,13 +79,13 @@ export class IntegrationController {
     @Body() updateDto: UpdateIntegrationDto,
   ) {
     const data = await this.integrationService.update(id, updateDto);
-    return mapIntegrationResponse(data);
+    return { success: true, data: mapIntegrationResponse(data) || {}, meta: {}, message: 'Updated successfully' };
   }
 
   @Delete(':id')
   async removeRest(@Param('id') id: string) {
     await this.integrationService.remove(id);
-    return { success: true, message: 'Deleted successfully' };
+    return { success: true, data: {}, meta: {}, message: 'Deleted successfully' };
   }
 
   // ==========================================

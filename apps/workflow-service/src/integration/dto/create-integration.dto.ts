@@ -32,11 +32,9 @@ export class CreateIntegrationDto {
   @IsOptional()
   authType?: string;
 
-  @IsObject()
   @IsOptional()
   authConfig?: any;
 
-  @IsObject()
   @IsOptional()
   headers?: any;
 
@@ -44,7 +42,6 @@ export class CreateIntegrationDto {
   @IsOptional()
   endpoints?: any;
 
-  @IsObject()
   @IsOptional()
   metadata?: any;
 
