@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client"
-  output        = "../../generated/prisma"
-  moduleFormat  = "cjs"
+
+
 }
 
 // LƯU Ý Prisma 7.x:
