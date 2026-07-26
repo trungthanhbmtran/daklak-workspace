@@ -35,7 +35,7 @@ ENV PROTO_PATH=/app/protos
 
 
 # [Bảo Mật] Tạo và chuyển sang user app không có đặc quyền
-RUN groupadd -r app && useradd -r -g app app && chown app:app /app
+RUN groupadd -r app && useradd -r -m -g app app && chown app:app /app
 USER app
 
 # Cài đặt Prod Dependencies trực tiếp dưới quyền app
@@ -51,5 +51,5 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["node", "dist/apps/chat-service/src/main.js"]
+CMD ["node", "dist/src/main.js"]
 
