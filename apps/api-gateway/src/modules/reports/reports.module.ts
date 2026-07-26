@@ -5,6 +5,8 @@ import { ReportsService } from './reports.service';
 import { MICROSERVICES } from '../../core/constants/services';
 import { join } from 'path';
 
+const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../shared/protos');
+
 @Module({
   imports: [
     ClientsModule.register([
@@ -13,10 +15,7 @@ import { join } from 'path';
         transport: Transport.GRPC,
         options: {
           package: MICROSERVICES.REPORT.PACKAGE,
-          protoPath: join(
-            __dirname,
-            '../../../../shared/protos/' + MICROSERVICES.REPORT.PROTO,
-          ),
+          protoPath: join(PROTO_ROOT, MICROSERVICES.REPORT.PROTO),
           url: MICROSERVICES.REPORT.URL,
         },
       },
