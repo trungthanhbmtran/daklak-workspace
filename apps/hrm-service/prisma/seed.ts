@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import type { PrismaClient as PrismaClientType } from '@generated/prisma/client';
+import type { PrismaClient as PrismaClientType } from '@prisma/client'
 let PrismaClient: typeof PrismaClientType;
 try {
-  PrismaClient = require('@generated/prisma/client').PrismaClient;
+  PrismaClient = require('@prisma/client').PrismaClient;
 } catch (e) {
-  PrismaClient = require('../generated/prisma/client').PrismaClient;
+  PrismaClient = require('@prisma/client').PrismaClient;
 }
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
@@ -27,7 +27,7 @@ async function main() {
   await prisma.kpiPeriod.deleteMany({});
   await prisma.rankQuota.deleteMany({});
   await prisma.taskRankTemplate.deleteMany({});
-  
+
   console.log('🔹 Seed HRM employees...');
   const startDate = new Date('2020-01-01');
 
@@ -165,7 +165,7 @@ async function main() {
   // Đồng bộ vị trí định biên từ HRM sang StaffingSlot của hệ thống (admin_systems)
   try {
     console.log('🔹 Gán mã nhân viên vào Vị trí định biên (admin_systems.staffing_slots)...');
-    
+
     // Xóa tất cả gán cũ trước khi gán mới từ HRM
     // Chỉ xóa những slot mà mã nhân viên thuộc danh sách được seed trong HRM
     await prisma.$executeRawUnsafe(`
@@ -184,14 +184,14 @@ async function main() {
 
         if (staffing.length > 0) {
           const staffingId = staffing[0].id;
-          
+
           // Tìm slot trống đầu tiên
           const emptySlot: any[] = await prisma.$queryRaw`
             SELECT id FROM admin_systems.staffing_slots 
             WHERE staffing_id = ${staffingId} AND assigned_employee_code IS NULL 
             ORDER BY slot_order ASC LIMIT 1
           `;
-          
+
           if (emptySlot.length > 0) {
             await prisma.$executeRawUnsafe(`
               UPDATE admin_systems.staffing_slots 
@@ -207,7 +207,7 @@ async function main() {
               ORDER BY slot_order DESC LIMIT 1
             `;
             const nextSlotOrder = lastSlot.length > 0 ? lastSlot[0].slot_order + 1 : 1;
-            
+
             await prisma.$executeRawUnsafe(`
               INSERT INTO admin_systems.staffing_slots (staffing_id, slot_order, description, assigned_employee_code)
               VALUES (${staffingId}, ${nextSlotOrder}, 'Phụ trách bởi ${e.fullName}', '${e.employeeCode}')
@@ -219,12 +219,12 @@ async function main() {
             INSERT INTO admin_systems.org_staffing (unit_id, job_title_id, quantity, created_at, updated_at)
             VALUES (${e.departmentId}, ${e.jobTitleId}, 1, NOW(), NOW())
           `);
-          
+
           const newStaffing: any[] = await prisma.$queryRaw`
             SELECT id FROM admin_systems.org_staffing 
             WHERE unit_id = ${e.departmentId} AND job_title_id = ${e.jobTitleId} LIMIT 1
           `;
-          
+
           if (newStaffing.length > 0) {
             await prisma.$executeRawUnsafe(`
               INSERT INTO admin_systems.staffing_slots (staffing_id, slot_order, description, assigned_employee_code)
@@ -246,83 +246,83 @@ async function main() {
   const RANK_TEMPLATES = [
     // KHỐI CÔNG CHỨC
     // 1. Ngạch Chuyên viên cao cấp (SENIOR_SPECIALIST)
-    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Chủ trì nghiên cứu, xây dựng Nghị quyết, Quyết định quy phạm pháp luật', defaultUnit: 'Văn bản QPPL', defaultWeight: 30, target: 5 , standardDurationDays: 15 },
-    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Chủ trì thẩm định quy hoạch ngành, đề án phát triển kinh tế - xã hội', defaultUnit: 'Đề án/Quy hoạch', defaultWeight: 25, target: 3 , standardDurationDays: 30 },
-    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Chủ trì các chương trình đàm phán, thỏa thuận hợp tác liên ngành', defaultUnit: 'Chương trình', defaultWeight: 20, target: 2 , standardDurationDays: 3 },
-    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Tham mưu chiến lược, báo cáo chuyên đề cấp Tỉnh/Bộ', defaultUnit: 'Báo cáo', defaultWeight: 25, target: 10 , standardDurationDays: 5 },
+    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Chủ trì nghiên cứu, xây dựng Nghị quyết, Quyết định quy phạm pháp luật', defaultUnit: 'Văn bản QPPL', defaultWeight: 30, target: 5, standardDurationDays: 15 },
+    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Chủ trì thẩm định quy hoạch ngành, đề án phát triển kinh tế - xã hội', defaultUnit: 'Đề án/Quy hoạch', defaultWeight: 25, target: 3, standardDurationDays: 30 },
+    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Chủ trì các chương trình đàm phán, thỏa thuận hợp tác liên ngành', defaultUnit: 'Chương trình', defaultWeight: 20, target: 2, standardDurationDays: 3 },
+    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', rankNameVN: 'Chuyên viên cao cấp', taskName: 'Tham mưu chiến lược, báo cáo chuyên đề cấp Tỉnh/Bộ', defaultUnit: 'Báo cáo', defaultWeight: 25, target: 10, standardDurationDays: 5 },
 
     // 2. Ngạch Chuyên viên chính (PRINCIPAL_SPECIALIST)
-    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Chủ trì thẩm định hồ sơ chuyên ngành, đề án kỹ thuật công nghệ', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 15 , standardDurationDays: 2 },
-    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Chủ trì biên soạn tài liệu, văn bản hướng dẫn nghiệp vụ', defaultUnit: 'Văn bản', defaultWeight: 20, target: 10 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Tham mưu giải quyết khiếu nại, tố cáo phức tạp', defaultUnit: 'Vụ việc', defaultWeight: 15, target: 5 , standardDurationDays: 3 },
-    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Tham mưu tổng hợp, xây dựng kế hoạch công tác năm, báo cáo định kỳ', defaultUnit: 'Báo cáo/Kế hoạch', defaultWeight: 15, target: 12 , standardDurationDays: 5 },
-    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Thẩm định độc lập các văn bản do Chuyên viên dự thảo', defaultUnit: 'Văn bản', defaultWeight: 15, target: 30 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Tham gia hội đồng chuyên môn, đoàn thanh tra/kiểm tra', defaultUnit: 'Lượt tham gia', defaultWeight: 15, target: 8 , standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Chủ trì thẩm định hồ sơ chuyên ngành, đề án kỹ thuật công nghệ', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 15, standardDurationDays: 2 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Chủ trì biên soạn tài liệu, văn bản hướng dẫn nghiệp vụ', defaultUnit: 'Văn bản', defaultWeight: 20, target: 10, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Tham mưu giải quyết khiếu nại, tố cáo phức tạp', defaultUnit: 'Vụ việc', defaultWeight: 15, target: 5, standardDurationDays: 3 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Tham mưu tổng hợp, xây dựng kế hoạch công tác năm, báo cáo định kỳ', defaultUnit: 'Báo cáo/Kế hoạch', defaultWeight: 15, target: 12, standardDurationDays: 5 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Thẩm định độc lập các văn bản do Chuyên viên dự thảo', defaultUnit: 'Văn bản', defaultWeight: 15, target: 30, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', rankNameVN: 'Chuyên viên chính', taskName: 'Tham gia hội đồng chuyên môn, đoàn thanh tra/kiểm tra', defaultUnit: 'Lượt tham gia', defaultWeight: 15, target: 8, standardDurationDays: 1 },
 
     // 3. Ngạch Chuyên viên (SPECIALIST)
-    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Chủ trì xử lý các hồ sơ thủ tục hành chính, dịch vụ công trực tuyến', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 50 , standardDurationDays: 2 },
-    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Tham mưu soạn thảo tờ trình, công văn, quyết định cá biệt', defaultUnit: 'Văn bản', defaultWeight: 25, target: 30 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Tổng hợp số liệu, lập báo cáo chuyên đề, báo cáo tháng/quý', defaultUnit: 'Báo cáo', defaultWeight: 20, target: 12 , standardDurationDays: 5 },
-    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Nghiên cứu, thu thập tài liệu phục vụ đề án/dự án', defaultUnit: 'Bộ tài liệu', defaultWeight: 10, target: 5 , standardDurationDays: 3 },
-    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Tham gia các tổ công tác, hội đồng chuyên môn, đoàn khảo sát thực tế', defaultUnit: 'Lượt tham gia', defaultWeight: 15, target: 10 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Giải đáp thắc mắc, hướng dẫn người dân/doanh nghiệp qua tổng đài/email', defaultUnit: 'Phiếu hỗ trợ (Ticket)', defaultWeight: 10, target: 100 , standardDurationDays: 3 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Chủ trì xử lý các hồ sơ thủ tục hành chính, dịch vụ công trực tuyến', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 50, standardDurationDays: 2 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Tham mưu soạn thảo tờ trình, công văn, quyết định cá biệt', defaultUnit: 'Văn bản', defaultWeight: 25, target: 30, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Tổng hợp số liệu, lập báo cáo chuyên đề, báo cáo tháng/quý', defaultUnit: 'Báo cáo', defaultWeight: 20, target: 12, standardDurationDays: 5 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Nghiên cứu, thu thập tài liệu phục vụ đề án/dự án', defaultUnit: 'Bộ tài liệu', defaultWeight: 10, target: 5, standardDurationDays: 3 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Tham gia các tổ công tác, hội đồng chuyên môn, đoàn khảo sát thực tế', defaultUnit: 'Lượt tham gia', defaultWeight: 15, target: 10, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên', taskName: 'Giải đáp thắc mắc, hướng dẫn người dân/doanh nghiệp qua tổng đài/email', defaultUnit: 'Phiếu hỗ trợ (Ticket)', defaultWeight: 10, target: 100, standardDurationDays: 3 },
 
     // 4. Ngạch Cán sự (OFFICER)
-    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Thu thập, cập nhật và chuẩn hóa dữ liệu vào các hệ thống thông tin', defaultUnit: 'Bản ghi/Bộ dữ liệu', defaultWeight: 30, target: 500 , standardDurationDays: 3 },
-    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Kiểm tra tính hợp lệ, đầy đủ của hồ sơ đầu vào', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 100 , standardDurationDays: 2 },
-    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Soạn thảo văn bản hành chính thông thường (giấy mời, thông báo)', defaultUnit: 'Văn bản', defaultWeight: 20, target: 40 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Sắp xếp, chuẩn bị tài liệu cho các cuộc họp', defaultUnit: 'Lượt', defaultWeight: 20, target: 20 , standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Thu thập, cập nhật và chuẩn hóa dữ liệu vào các hệ thống thông tin', defaultUnit: 'Bản ghi/Bộ dữ liệu', defaultWeight: 30, target: 500, standardDurationDays: 3 },
+    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Kiểm tra tính hợp lệ, đầy đủ của hồ sơ đầu vào', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 100, standardDurationDays: 2 },
+    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Soạn thảo văn bản hành chính thông thường (giấy mời, thông báo)', defaultUnit: 'Văn bản', defaultWeight: 20, target: 40, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'OFFICER', rankNameVN: 'Cán sự', taskName: 'Sắp xếp, chuẩn bị tài liệu cho các cuộc họp', defaultUnit: 'Lượt', defaultWeight: 20, target: 20, standardDurationDays: 1 },
 
     // 5. Ngạch Nhân viên (STAFF)
-    { classification: 'CONG_CHUC', rank: 'STAFF', rankNameVN: 'Nhân viên', taskName: 'Thực hiện công tác văn thư, tiếp nhận, luân chuyển văn bản đi/đến', defaultUnit: 'Lượt', defaultWeight: 40, target: 1000 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'STAFF', rankNameVN: 'Nhân viên', taskName: 'Quản trị cơ sở vật chất, bảo trì trang thiết bị văn phòng', defaultUnit: 'Lượt', defaultWeight: 30, target: 50 , standardDurationDays: 1 },
-    { classification: 'CONG_CHUC', rank: 'STAFF', rankNameVN: 'Nhân viên', taskName: 'Thực hiện công tác lễ tân, khánh tiết, phục vụ hội nghị', defaultUnit: 'Lượt', defaultWeight: 30, target: 30 , standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'STAFF', rankNameVN: 'Nhân viên', taskName: 'Thực hiện công tác văn thư, tiếp nhận, luân chuyển văn bản đi/đến', defaultUnit: 'Lượt', defaultWeight: 40, target: 1000, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'STAFF', rankNameVN: 'Nhân viên', taskName: 'Quản trị cơ sở vật chất, bảo trì trang thiết bị văn phòng', defaultUnit: 'Lượt', defaultWeight: 30, target: 50, standardDurationDays: 1 },
+    { classification: 'CONG_CHUC', rank: 'STAFF', rankNameVN: 'Nhân viên', taskName: 'Thực hiện công tác lễ tân, khánh tiết, phục vụ hội nghị', defaultUnit: 'Lượt', defaultWeight: 30, target: 30, standardDurationDays: 1 },
 
 
     // ==========================================
     // KHỐI VIÊN CHỨC - ĐƠN VỊ SỰ NGHIỆP CÔNG LẬP (KHCN, CNTT, Y TẾ, GIÁO DỤC...)
     // Căn cứ pháp lý: Nghị định 115/2020/NĐ-CP & Nghị định 85/2023/NĐ-CP
     // Phân loại: Dữ liệu khung (Generic Data). Các đơn vị sẽ tự thêm nhiệm vụ chi tiết thông qua UI.
-    
+
     // 1. Chức danh nghề nghiệp CHUYÊN NGÀNH
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_1', rankNameVN: 'Viên chức Chuyên ngành Hạng I', taskName: 'Chủ trì đề tài/dự án cấp Bộ, Tỉnh', defaultUnit: 'Đề tài', defaultWeight: 30, target: 1 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_1', rankNameVN: 'Viên chức Chuyên ngành Hạng I', taskName: 'Nghiên cứu, đề xuất chiến lược phát triển chuyên ngành', defaultUnit: 'Chiến lược', defaultWeight: 20, target: 2 , standardDurationDays: 30 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_1', rankNameVN: 'Viên chức Chuyên ngành Hạng I', taskName: 'Thẩm định các giải pháp, quy hoạch chuyên môn cấp cao', defaultUnit: 'Bản thẩm định', defaultWeight: 25, target: 5 , standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_1', rankNameVN: 'Viên chức Chuyên ngành Hạng I', taskName: 'Chủ trì đề tài/dự án cấp Bộ, Tỉnh', defaultUnit: 'Đề tài', defaultWeight: 30, target: 1, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_1', rankNameVN: 'Viên chức Chuyên ngành Hạng I', taskName: 'Nghiên cứu, đề xuất chiến lược phát triển chuyên ngành', defaultUnit: 'Chiến lược', defaultWeight: 20, target: 2, standardDurationDays: 30 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_1', rankNameVN: 'Viên chức Chuyên ngành Hạng I', taskName: 'Thẩm định các giải pháp, quy hoạch chuyên môn cấp cao', defaultUnit: 'Bản thẩm định', defaultWeight: 25, target: 5, standardDurationDays: 3 },
 
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', rankNameVN: 'Viên chức Chuyên ngành Hạng II', taskName: 'Chủ trì thực hiện nhiệm vụ chuyên môn cấp cơ sở', defaultUnit: 'Nhiệm vụ', defaultWeight: 30, target: 10 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', rankNameVN: 'Viên chức Chuyên ngành Hạng II', taskName: 'Hướng dẫn, đào tạo, chuyển giao nghiệp vụ cho tuyến dưới', defaultUnit: 'Khóa/Lượt', defaultWeight: 20, target: 4 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', rankNameVN: 'Viên chức Chuyên ngành Hạng II', taskName: 'Xây dựng quy trình, tài liệu hướng dẫn chuyên môn', defaultUnit: 'Tài liệu', defaultWeight: 20, target: 3 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng II (IOC)', taskName: 'Nghiên cứu, thiết kế mô hình dự báo, phân tích dữ liệu lớn (Big Data)', defaultUnit: 'Mô hình/Chuyên đề', defaultWeight: 25, target: 2 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng II (IOC)', taskName: 'Thiết kế, tích hợp các hệ thống thông tin, cơ sở dữ liệu liên ngành', defaultUnit: 'Hệ thống', defaultWeight: 25, target: 2 , standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', rankNameVN: 'Viên chức Chuyên ngành Hạng II', taskName: 'Chủ trì thực hiện nhiệm vụ chuyên môn cấp cơ sở', defaultUnit: 'Nhiệm vụ', defaultWeight: 30, target: 10, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', rankNameVN: 'Viên chức Chuyên ngành Hạng II', taskName: 'Hướng dẫn, đào tạo, chuyển giao nghiệp vụ cho tuyến dưới', defaultUnit: 'Khóa/Lượt', defaultWeight: 20, target: 4, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', rankNameVN: 'Viên chức Chuyên ngành Hạng II', taskName: 'Xây dựng quy trình, tài liệu hướng dẫn chuyên môn', defaultUnit: 'Tài liệu', defaultWeight: 20, target: 3, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng II (IOC)', taskName: 'Nghiên cứu, thiết kế mô hình dự báo, phân tích dữ liệu lớn (Big Data)', defaultUnit: 'Mô hình/Chuyên đề', defaultWeight: 25, target: 2, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_2', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng II (IOC)', taskName: 'Thiết kế, tích hợp các hệ thống thông tin, cơ sở dữ liệu liên ngành', defaultUnit: 'Hệ thống', defaultWeight: 25, target: 2, standardDurationDays: 3 },
 
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', rankNameVN: 'Viên chức Chuyên ngành Hạng III', taskName: 'Thực hiện nhiệm vụ chuyên môn cốt lõi theo Bản mô tả Vị trí việc làm', defaultUnit: 'Hạng mục/Khối lượng', defaultWeight: 30, target: 100 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', rankNameVN: 'Viên chức Chuyên ngành Hạng III', taskName: 'Tham gia nghiên cứu, đóng góp ý kiến xây dựng quy trình chuyên môn', defaultUnit: 'Ý kiến', defaultWeight: 10, target: 5 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', rankNameVN: 'Viên chức Chuyên ngành Hạng III', taskName: 'Lập báo cáo kết quả thực hiện nhiệm vụ chuyên môn định kỳ', defaultUnit: 'Báo cáo', defaultWeight: 10, target: 12 , standardDurationDays: 5 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng III (IOC)', taskName: 'Trực vận hành, giám sát các nền tảng số tại Trung tâm IOC', defaultUnit: 'Ca trực', defaultWeight: 20, target: 20 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng III (IOC)', taskName: 'Tiếp nhận, phân loại, điều phối phản ánh kiến nghị (PAKN)', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 100 , standardDurationDays: 2 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng III (IOC)', taskName: 'Phân tích dữ liệu, lập báo cáo chuyên sâu phục vụ chỉ đạo điều hành', defaultUnit: 'Báo cáo', defaultWeight: 20, target: 4 , standardDurationDays: 5 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', rankNameVN: 'Viên chức Chuyên ngành Hạng III', taskName: 'Thực hiện nhiệm vụ chuyên môn cốt lõi theo Bản mô tả Vị trí việc làm', defaultUnit: 'Hạng mục/Khối lượng', defaultWeight: 30, target: 100, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', rankNameVN: 'Viên chức Chuyên ngành Hạng III', taskName: 'Tham gia nghiên cứu, đóng góp ý kiến xây dựng quy trình chuyên môn', defaultUnit: 'Ý kiến', defaultWeight: 10, target: 5, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', rankNameVN: 'Viên chức Chuyên ngành Hạng III', taskName: 'Lập báo cáo kết quả thực hiện nhiệm vụ chuyên môn định kỳ', defaultUnit: 'Báo cáo', defaultWeight: 10, target: 12, standardDurationDays: 5 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng III (IOC)', taskName: 'Trực vận hành, giám sát các nền tảng số tại Trung tâm IOC', defaultUnit: 'Ca trực', defaultWeight: 20, target: 20, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng III (IOC)', taskName: 'Tiếp nhận, phân loại, điều phối phản ánh kiến nghị (PAKN)', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 100, standardDurationDays: 2 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_3', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng III (IOC)', taskName: 'Phân tích dữ liệu, lập báo cáo chuyên sâu phục vụ chỉ đạo điều hành', defaultUnit: 'Báo cáo', defaultWeight: 20, target: 4, standardDurationDays: 5 },
 
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', rankNameVN: 'Viên chức Chuyên ngành Hạng IV', taskName: 'Hỗ trợ thực hiện các tác nghiệp chuyên môn, kỹ thuật', defaultUnit: 'Tác vụ', defaultWeight: 30, target: 50 , standardDurationDays: 3 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', rankNameVN: 'Viên chức Chuyên ngành Hạng IV', taskName: 'Vận hành, bảo trì các trang thiết bị, cơ sở vật chất kỹ thuật', defaultUnit: 'Lượt', defaultWeight: 30, target: 50 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', rankNameVN: 'Viên chức Chuyên ngành Hạng IV', taskName: 'Chuẩn bị vật tư, tài liệu phục vụ công tác chuyên môn', defaultUnit: 'Lượt', defaultWeight: 20, target: 60 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng IV (IOC)', taskName: 'Hỗ trợ kỹ thuật, xử lý sự cố thiết bị đầu cuối tại Trung tâm IOC', defaultUnit: 'Lượt', defaultWeight: 30, target: 30 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng IV (IOC)', taskName: 'Trực màn hình giám sát an ninh trật tự, giao thông', defaultUnit: 'Ca trực', defaultWeight: 30, target: 20 , standardDurationDays: 3 },
-    
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', rankNameVN: 'Viên chức Chuyên ngành Hạng IV', taskName: 'Hỗ trợ thực hiện các tác nghiệp chuyên môn, kỹ thuật', defaultUnit: 'Tác vụ', defaultWeight: 30, target: 50, standardDurationDays: 3 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', rankNameVN: 'Viên chức Chuyên ngành Hạng IV', taskName: 'Vận hành, bảo trì các trang thiết bị, cơ sở vật chất kỹ thuật', defaultUnit: 'Lượt', defaultWeight: 30, target: 50, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', rankNameVN: 'Viên chức Chuyên ngành Hạng IV', taskName: 'Chuẩn bị vật tư, tài liệu phục vụ công tác chuyên môn', defaultUnit: 'Lượt', defaultWeight: 20, target: 60, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng IV (IOC)', taskName: 'Hỗ trợ kỹ thuật, xử lý sự cố thiết bị đầu cuối tại Trung tâm IOC', defaultUnit: 'Lượt', defaultWeight: 30, target: 30, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_CN_HANG_4', domainCode: 'IOC', rankNameVN: 'Viên chức Chuyên ngành Hạng IV (IOC)', taskName: 'Trực màn hình giám sát an ninh trật tự, giao thông', defaultUnit: 'Ca trực', defaultWeight: 30, target: 20, standardDurationDays: 3 },
+
     // 2. Chức danh nghề nghiệp DÙNG CHUNG (Hành chính, Tổ chức, Kế toán...)
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_1', rankNameVN: 'Viên chức Dùng chung Hạng I (Chuyên viên CC)', taskName: 'Tham mưu hoạch định chính sách, chiến lược phát triển đơn vị', defaultUnit: 'Văn bản', defaultWeight: 30, target: 5 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_2', rankNameVN: 'Viên chức Dùng chung Hạng II (Chuyên viên C)', taskName: 'Chủ trì xây dựng các đề án, quy chế nội bộ', defaultUnit: 'Đề án/Quy chế', defaultWeight: 30, target: 10 , standardDurationDays: 3 },
-    
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_3', rankNameVN: 'Viên chức Dùng chung Hạng III (Chuyên viên)', taskName: 'Thực hiện thủ tục hành chính, dịch vụ công trực tuyến tại đơn vị SNCL', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 50 , standardDurationDays: 2 },
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_3', rankNameVN: 'Viên chức Dùng chung Hạng III (Chuyên viên)', taskName: 'Soạn thảo tờ trình, công văn, quyết định thuộc thẩm quyền', defaultUnit: 'Văn bản', defaultWeight: 25, target: 30 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_3', rankNameVN: 'Viên chức Dùng chung Hạng III (Chuyên viên)', taskName: 'Tổng hợp số liệu, lập báo cáo chuyên đề, báo cáo tháng/quý', defaultUnit: 'Báo cáo', defaultWeight: 20, target: 12 , standardDurationDays: 5 },
-    
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_4', rankNameVN: 'Viên chức Dùng chung Hạng IV (Cán sự)', taskName: 'Kiểm tra, hướng dẫn thủ tục hồ sơ cơ bản', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 100 , standardDurationDays: 2 },
-    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_4', rankNameVN: 'Viên chức Dùng chung Hạng IV (Cán sự)', taskName: 'Quản lý, theo dõi số liệu, hồ sơ chuyên môn nội bộ', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 50 , standardDurationDays: 2 },
-    
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_1', rankNameVN: 'Viên chức Dùng chung Hạng I (Chuyên viên CC)', taskName: 'Tham mưu hoạch định chính sách, chiến lược phát triển đơn vị', defaultUnit: 'Văn bản', defaultWeight: 30, target: 5, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_2', rankNameVN: 'Viên chức Dùng chung Hạng II (Chuyên viên C)', taskName: 'Chủ trì xây dựng các đề án, quy chế nội bộ', defaultUnit: 'Đề án/Quy chế', defaultWeight: 30, target: 10, standardDurationDays: 3 },
+
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_3', rankNameVN: 'Viên chức Dùng chung Hạng III (Chuyên viên)', taskName: 'Thực hiện thủ tục hành chính, dịch vụ công trực tuyến tại đơn vị SNCL', defaultUnit: 'Hồ sơ', defaultWeight: 20, target: 50, standardDurationDays: 2 },
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_3', rankNameVN: 'Viên chức Dùng chung Hạng III (Chuyên viên)', taskName: 'Soạn thảo tờ trình, công văn, quyết định thuộc thẩm quyền', defaultUnit: 'Văn bản', defaultWeight: 25, target: 30, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_3', rankNameVN: 'Viên chức Dùng chung Hạng III (Chuyên viên)', taskName: 'Tổng hợp số liệu, lập báo cáo chuyên đề, báo cáo tháng/quý', defaultUnit: 'Báo cáo', defaultWeight: 20, target: 12, standardDurationDays: 5 },
+
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_4', rankNameVN: 'Viên chức Dùng chung Hạng IV (Cán sự)', taskName: 'Kiểm tra, hướng dẫn thủ tục hồ sơ cơ bản', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 100, standardDurationDays: 2 },
+    { classification: 'VIEN_CHUC', rank: 'VC_DC_HANG_4', rankNameVN: 'Viên chức Dùng chung Hạng IV (Cán sự)', taskName: 'Quản lý, theo dõi số liệu, hồ sơ chuyên môn nội bộ', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 50, standardDurationDays: 2 },
+
     // 3. Chức danh nghề nghiệp HỖ TRỢ, PHỤC VỤ
-    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác văn thư, lưu trữ tại đơn vị SNCL', defaultUnit: 'Lượt', defaultWeight: 40, target: 1000 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Quản trị cơ sở vật chất, bảo trì trang thiết bị văn phòng', defaultUnit: 'Lượt', defaultWeight: 30, target: 50 , standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác lễ tân, khánh tiết, phục vụ hội nghị', defaultUnit: 'Lượt', defaultWeight: 30, target: 30 , standardDurationDays: 1 }
+    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác văn thư, lưu trữ tại đơn vị SNCL', defaultUnit: 'Lượt', defaultWeight: 40, target: 1000, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Quản trị cơ sở vật chất, bảo trì trang thiết bị văn phòng', defaultUnit: 'Lượt', defaultWeight: 30, target: 50, standardDurationDays: 1 },
+    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác lễ tân, khánh tiết, phục vụ hội nghị', defaultUnit: 'Lượt', defaultWeight: 30, target: 30, standardDurationDays: 1 }
   ];
 
   const templatesToSeed = RANK_TEMPLATES.map(t => {
@@ -350,7 +350,7 @@ async function main() {
   const rankQuotas = RANK_TEMPLATES.map(t => {
     let targetValue = 10;
     let weight = t.defaultWeight || 10;
-    
+
     if (['Văn bản QPPL', 'Bộ tài liệu', 'Chương trình', 'Bài báo', 'Báo cáo thẩm định'].includes(t.defaultUnit)) targetValue = 2;
     else if (['Đề án/Quy hoạch', 'Tài liệu thiết kế'].includes(t.defaultUnit)) targetValue = 3;
     else if (t.defaultUnit === 'Hồ sơ') targetValue = t.rank === 'PRINCIPAL_SPECIALIST' ? 15 : (t.rank === 'OFFICER' ? 50 : 30);
@@ -377,54 +377,54 @@ async function main() {
   // --- Seed KPI Criteria (Updated for Rank Quotas) ---
   console.log('🔹 Seed KPI Criteria (Đề án Vị trí việc làm 01/07/2026)...');
   const kpiCriteriaData = [
-    { 
-      name: 'Chính trị tư tưởng, đạo đức và lối sống', 
-      description: 'Chấp hành chủ trương, đường lối, quy định của Đảng, Nhà nước; giữ gìn phẩm chất đạo đức, lối sống, không có biểu hiện suy thoái.', 
+    {
+      name: 'Chính trị tư tưởng, đạo đức và lối sống',
+      description: 'Chấp hành chủ trương, đường lối, quy định của Đảng, Nhà nước; giữ gìn phẩm chất đạo đức, lối sống, không có biểu hiện suy thoái.',
       settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
     },
-    { 
-      name: 'Tác phong, lề lối làm việc và tinh thần phối hợp', 
-      description: 'Có trách nhiệm với công việc; phối hợp tốt với đồng nghiệp, cơ quan khác; thái độ phục vụ nhân dân chuẩn mực.', 
+    {
+      name: 'Tác phong, lề lối làm việc và tinh thần phối hợp',
+      description: 'Có trách nhiệm với công việc; phối hợp tốt với đồng nghiệp, cơ quan khác; thái độ phục vụ nhân dân chuẩn mực.',
       settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
     },
-    { 
-      name: 'Ý thức tổ chức kỷ luật và thời giờ làm việc', 
-      description: 'Chấp hành sự phân công của tổ chức; tuân thủ nội quy, quy chế cơ quan; đảm bảo thời gian, ngày công làm việc.', 
+    {
+      name: 'Ý thức tổ chức kỷ luật và thời giờ làm việc',
+      description: 'Chấp hành sự phân công của tổ chức; tuân thủ nội quy, quy chế cơ quan; đảm bảo thời gian, ngày công làm việc.',
       settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'INTEGRATION_API', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 2, integrationCode: 'TIMEKEEPER_API' }
     },
-    { 
-      name: 'Chuyên môn: Khối lượng công việc hoàn thành', 
-      description: 'Đánh giá mức độ hoàn thành khối lượng công việc theo định mức VTVL (Tự động đếm Task).', 
+    {
+      name: 'Chuyên môn: Khối lượng công việc hoàn thành',
+      description: 'Đánh giá mức độ hoàn thành khối lượng công việc theo định mức VTVL (Tự động đếm Task).',
       settings: { weight: 15.0, baseScore: 15.0, scoringMethod: 'AUTO', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
     },
-    { 
-      name: 'Chuyên môn: Chất lượng và hiệu quả', 
-      description: 'Đánh giá chất lượng sản phẩm đầu ra, mức độ sai sót và hiệu quả mang lại.', 
+    {
+      name: 'Chuyên môn: Chất lượng và hiệu quả',
+      description: 'Đánh giá chất lượng sản phẩm đầu ra, mức độ sai sót và hiệu quả mang lại.',
       settings: { weight: 15.0, baseScore: 15.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
     },
-    { 
-      name: 'Chuyên môn: Tiến độ thực hiện', 
-      description: 'Đánh giá thời gian hoàn thành so với hạn chót (Deadline) và thời gian chuẩn được giao.', 
+    {
+      name: 'Chuyên môn: Tiến độ thực hiện',
+      description: 'Đánh giá thời gian hoàn thành so với hạn chót (Deadline) và thời gian chuẩn được giao.',
       settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'AUTO', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 1, penaltyPerDay: 2 }
     },
-    { 
-      name: 'Kết quả thực hiện nhiệm vụ đột xuất, phát sinh', 
-      description: 'Mức độ sẵn sàng và hiệu quả xử lý các công việc phát sinh ngoài kế hoạch do Lãnh đạo giao.', 
+    {
+      name: 'Kết quả thực hiện nhiệm vụ đột xuất, phát sinh',
+      description: 'Mức độ sẵn sàng và hiệu quả xử lý các công việc phát sinh ngoài kế hoạch do Lãnh đạo giao.',
       settings: { weight: 15.0, baseScore: 15.0, scoringMethod: 'AUTO', difficulty: 'HARD', difficultyMultiplier: 1.5, bonusThresholdDays: 0, bonusPerDay: 2, penaltyPerDay: 3 }
     },
-    { 
-      name: 'Năng lực lãnh đạo, chỉ đạo, quản lý và điều hành', 
-      description: '(Dành cho chức vụ Lãnh đạo/Quản lý) Xây dựng kế hoạch, tổ chức thực hiện, kiểm tra và năng lực điều hành phòng ban/cơ quan.', 
+    {
+      name: 'Năng lực lãnh đạo, chỉ đạo, quản lý và điều hành',
+      description: '(Dành cho chức vụ Lãnh đạo/Quản lý) Xây dựng kế hoạch, tổ chức thực hiện, kiểm tra và năng lực điều hành phòng ban/cơ quan.',
       settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
     },
-    { 
-      name: 'Đổi mới, sáng tạo, đề xuất giải pháp, sáng kiến', 
-      description: 'Có sáng kiến, giải pháp cải tiến quy trình công tác, ứng dụng công nghệ thông tin mang lại hiệu quả.', 
+    {
+      name: 'Đổi mới, sáng tạo, đề xuất giải pháp, sáng kiến',
+      description: 'Có sáng kiến, giải pháp cải tiến quy trình công tác, ứng dụng công nghệ thông tin mang lại hiệu quả.',
       settings: { weight: 5.0, baseScore: 5.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
     },
-    { 
-      name: 'Điểm trừ: Vi phạm nội quy, trễ hạn công việc', 
-      description: 'Điểm trừ tự động khi vi phạm quy chế hoặc có các công việc bị đánh dấu quá hạn, bị trả về nhiều lần.', 
+    {
+      name: 'Điểm trừ: Vi phạm nội quy, trễ hạn công việc',
+      description: 'Điểm trừ tự động khi vi phạm quy chế hoặc có các công việc bị đánh dấu quá hạn, bị trả về nhiều lần.',
       settings: { weight: -5.0, baseScore: 0.0, scoringMethod: 'AUTO', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 5 }
     }
   ];

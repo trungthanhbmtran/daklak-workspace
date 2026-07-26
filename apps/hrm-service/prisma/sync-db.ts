@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import type { PrismaClient as PrismaClientType } from '@generated/prisma/client';
+import type { PrismaClient as PrismaClientType } from '@prisma/client'
 let PrismaClient: typeof PrismaClientType;
 try {
-  PrismaClient = require('@generated/prisma/client').PrismaClient;
+  PrismaClient = require('@prisma/client').PrismaClient;
 } catch (e) {
-  PrismaClient = require('../generated/prisma/client').PrismaClient;
+  PrismaClient = require('@prisma/client').PrismaClient;
 }
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
@@ -20,7 +20,7 @@ const prisma = new PrismaClient({
 
 async function main() {
   console.log('Syncing users and employees...');
-  
+
   // Update employees user_id by joining with admin_systems.users on email
   const updateEmployeesResult = await prisma.$executeRawUnsafe(`
     UPDATE admin_hrm.employees e
