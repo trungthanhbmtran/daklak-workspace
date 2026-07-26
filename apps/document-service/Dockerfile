@@ -15,6 +15,7 @@ RUN npm ci
 # [MONOREPO] Copy source code service và các thư mục chia sẻ (protos)
 COPY apps/document-service/ ./
 COPY shared/protos ./shared/protos
+COPY shared/core ./shared/core
 
 # Generate Prisma Client (Nếu service có sử dụng Prisma)
 RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
@@ -51,5 +52,5 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/apps/document-service/src/main.js"]
 

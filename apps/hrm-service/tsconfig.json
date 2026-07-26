@@ -13,6 +13,9 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
+      "@core/*": [
+        "../../shared/core/*"
+      ],
       "@/*": ["src/*"],
       "@generated/*": ["generated/*"],
       "@shared/*": ["../../shared/*", "./shared/*"]

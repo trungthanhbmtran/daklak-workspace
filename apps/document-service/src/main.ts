@@ -1,5 +1,5 @@
-import { TransformInterceptor } from './core/interceptors/transform.interceptor';
-import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
+import { TransformInterceptor } from '@core/interceptors/transform.interceptor';
+import { AllExceptionsFilter } from '@core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
