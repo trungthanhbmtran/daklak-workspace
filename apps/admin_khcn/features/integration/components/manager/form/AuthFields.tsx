@@ -4,13 +4,14 @@ import { KeyRound } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { IntegrationFormValues } from "../../../schemas";
 import { useCategories } from "../../../api";
 
 export function AuthFields() {
   const { control, watch } = useFormContext<IntegrationFormValues>();
-  const authType = watch("authType");
-  const { data: authTypes } = useCategories("INTEGRATION_AUTH_TYPE");
+  const authType = (watch("authType") || '').toUpperCase();
+  const { data: authTypes, isLoading } = useCategories("INTEGRATION_AUTH_TYPE");
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 bg-violet-50/50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30 rounded-xl">
@@ -26,23 +27,33 @@ export function AuthFields() {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Loại xác thực</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn loại xác thực" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {authTypes?.map(a => (
-                  <SelectItem key={a.code} value={a.code}>{a.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isLoading ? (
+              <Skeleton className="h-10 w-full rounded-md" />
+            ) : (
+              <Select
+                value={(field.value || 'NONE').toUpperCase()}
+                onValueChange={(val) => field.onChange(val)}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn loại xác thực" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {(authTypes ?? []).map((a: any) => (
+                    <SelectItem key={a.code} value={(a.code || '').toUpperCase()}>
+                      {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
       />
 
+      {/* OAuth2: Auth URL */}
       {authType === 'OAUTH2' && (
         <FormField
           control={control}
@@ -59,15 +70,21 @@ export function AuthFields() {
         />
       )}
 
+      {/* Bearer: Token tĩnh */}
       {authType === 'BEARER' && (
         <FormField
           control={control}
           name="apiToken"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>API Bearer Token (Nếu dùng Token tĩnh)</FormLabel>
+              <FormLabel>Bearer Token (Token tĩnh)</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..." className="font-mono bg-white dark:bg-slate-950" {...field} />
+                <Input
+                  type="password"
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
+                  className="font-mono bg-white dark:bg-slate-950"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -75,13 +92,16 @@ export function AuthFields() {
         />
       )}
 
+      {/* BASIC / OAUTH2 / API_KEY: Client ID / Username */}
       {(authType === 'BASIC' || authType === 'OAUTH2' || authType === 'API_KEY') && (
         <FormField
           control={control}
           name="clientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{authType === 'BASIC' ? 'Username' : 'Client ID (App Key)'}</FormLabel>
+              <FormLabel>
+                {authType === 'BASIC' ? 'Username' : authType === 'API_KEY' ? 'API Key Name / Key ID' : 'Client ID (App Key)'}
+              </FormLabel>
               <FormControl>
                 <Input className="font-mono bg-white dark:bg-slate-950" {...field} />
               </FormControl>
@@ -91,13 +111,16 @@ export function AuthFields() {
         />
       )}
 
-      {(authType === 'BASIC' || authType === 'OAUTH2') && (
+      {/* BASIC / OAUTH2 / API_KEY: Password / Secret / Value */}
+      {(authType === 'BASIC' || authType === 'OAUTH2' || authType === 'API_KEY') && (
         <FormField
           control={control}
           name="clientSecret"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{authType === 'BASIC' ? 'Password' : 'Client Secret (App Secret)'}</FormLabel>
+              <FormLabel>
+                {authType === 'BASIC' ? 'Password' : authType === 'API_KEY' ? 'API Key Value' : 'Client Secret (App Secret)'}
+              </FormLabel>
               <FormControl>
                 <Input type="password" className="font-mono bg-white dark:bg-slate-950" {...field} />
               </FormControl>
@@ -109,3 +132,4 @@ export function AuthFields() {
     </div>
   );
 }
+

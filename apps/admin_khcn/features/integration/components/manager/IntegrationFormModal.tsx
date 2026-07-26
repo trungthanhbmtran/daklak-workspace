@@ -2,13 +2,14 @@
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { Server, ShieldAlert, Loader2 } from "lucide-react";
+import { Server, ShieldAlert, Loader2, List, CheckCircle2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { integrationFormSchema, IntegrationFormValues } from "../../schemas";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from "../../api";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
+  const [parsedEndpointCount, setParsedEndpointCount] = useState(0);
 
   const form = useForm<IntegrationFormValues>({
     resolver: zodResolver(integrationFormSchema),
@@ -53,13 +55,23 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   useImperativeHandle(ref, () => ({
     openCreate: (initialData?: any) => {
       setEditingItem(null);
+      // Extract parsed endpoints count from rawConfig
+      let endpointCount = 0;
+      try {
+        if (initialData?.rawConfig) {
+          const parsed = JSON.parse(initialData.rawConfig);
+          endpointCount = parsed._parsedEndpoints?.length || 0;
+        }
+      } catch { /* ignore */ }
+      setParsedEndpointCount(endpointCount);
+
       form.reset({
         name: initialData?.name || initialData?.systemName || "",
         code: initialData?.code || initialData?.integrationCode || "",
         isActive: true,
         protocol: initialData?.protocol || "REST",
         baseUrl: initialData?.baseUrl || initialData?.apiUrl || "",
-        authType: initialData?.authType || "NONE",
+        authType: (initialData?.authType || "NONE").toUpperCase(),
         authUrl: initialData?.authConfig?.authUrl || "",
         apiToken: initialData?.authConfig?.apiToken || "",
         clientId: initialData?.authConfig?.clientId || "",
@@ -71,13 +83,14 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     },
     openEdit: (item: IntegrationConfig) => {
       setEditingItem(item);
+      setParsedEndpointCount(item.metadata?._parsedEndpoints?.length || item.endpoints?.length || 0);
       form.reset({
         name: item.name || "",
         code: item.code || "",
         isActive: item.isActive ?? true,
         protocol: item.protocol || "REST",
         baseUrl: item.baseUrl || "",
-        authType: item.authType || "NONE",
+        authType: (item.authType || "NONE").toUpperCase(),
         authUrl: item.authConfig?.authUrl || "",
         apiToken: item.authConfig?.apiToken || "",
         clientId: item.authConfig?.clientId || "",
@@ -91,6 +104,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
   const handleClose = () => {
     setIsOpen(false);
+    setParsedEndpointCount(0);
     form.reset();
   };
 
@@ -189,6 +203,21 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
               <ProtocolFields />
               <AuthFields />
+              {parsedEndpointCount > 0 && (
+                <div className="flex items-center gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/10">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Đã trích xuất Endpoints</h4>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-500 mt-0.5">
+                      Hệ thống đã tìm thấy <strong>{parsedEndpointCount}</strong> API endpoints từ file import.
+                      Sau khi lưu, bạn có thể quản lý chi tiết qua nút <List className="w-3 h-3 inline" /> trên thẻ tích hợp.
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800 font-mono text-sm shrink-0">
+                    {parsedEndpointCount} APIs
+                  </Badge>
+                </div>
+              )}
             </div>
           ) : (
             <RawConfigFields />
