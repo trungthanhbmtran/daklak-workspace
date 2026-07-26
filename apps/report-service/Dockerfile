@@ -32,6 +32,11 @@ USER app
 COPY --chown=app:app apps/report-service/package*.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
+# Copy Prisma generated client and schema from builder
+COPY --chown=app:app --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=app:app --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --chown=app:app --from=builder /app/prisma ./prisma
+
 # Copy build outputs from builder stage with correct ownership
 COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
