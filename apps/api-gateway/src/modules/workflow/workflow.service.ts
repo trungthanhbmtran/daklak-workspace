@@ -2,9 +2,7 @@ import {
   Injectable,
   Inject,
   OnModuleInit,
-  InternalServerErrorException,
-  BadRequestException,
-  NotFoundException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -20,7 +18,7 @@ export class WorkflowService implements OnModuleInit {
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.workflowGrpcService = this.client.getService(MICROSERVICES.WORKFLOW.SERVICE);
@@ -234,39 +232,74 @@ export class WorkflowService implements OnModuleInit {
     throw new InternalServerErrorException(message);
   }
 
+  private safeParseJson(val: any) {
+    if (typeof val === 'string' && val) {
+      try { return JSON.parse(val); } catch { return val; }
+    }
+    return val;
+  }
+
+  private mapIntegrationResponse(data: any) {
+    if (!data) return null;
+    return {
+      ...data,
+      authConfig: this.safeParseJson(data.authConfig) || {},
+      headers: this.safeParseJson(data.headers) || {},
+      metadata: this.safeParseJson(data.metadata) || {},
+    };
+  }
+
+  private prepareIntegrationPayload(body: any) {
+    if (!body) return body;
+    return {
+      ...body,
+      authConfig: body.authConfig ? JSON.stringify(body.authConfig) : '{}',
+      headers: body.headers ? JSON.stringify(body.headers) : '{}',
+      metadata: body.metadata ? JSON.stringify(body.metadata) : '{}',
+    };
+  }
+
   async findAllIntegrations(query: any) {
     const search = query.search;
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindAllIntegrations({ search: search || '' }),
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
-    return { success: true, data: result?.data || [], message: 'OK' };
+    
+    const parsedData = (result?.data || []).map(this.mapIntegrationResponse.bind(this));
+    return { success: true, data: parsedData, message: 'OK' };
   }
 
   async createIntegration(body: any) {
+    const payload = this.prepareIntegrationPayload(body);
     const result = (await firstValueFrom(
-      this.workflowGrpcService.CreateIntegration(body),
+      this.workflowGrpcService.CreateIntegration(payload),
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
-    return { success: true, data: result, message: 'Created successfully' };
+    
+    return { success: true, data: this.mapIntegrationResponse(result), message: 'Created successfully' };
   }
 
   async findOneIntegration(id: string) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindOneIntegration({ id }),
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
-    return { success: true, data: result, message: 'OK' };
+    
+    return { success: true, data: this.mapIntegrationResponse(result), message: 'OK' };
   }
 
   async updateIntegration(id: string, body: any) {
+    const payload = this.prepareIntegrationPayload({ id, ...body });
     const result = (await firstValueFrom(
-      this.workflowGrpcService.UpdateIntegration({ id, ...body }),
+      this.workflowGrpcService.UpdateIntegration(payload),
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
-    return { success: true, data: result, message: 'Updated successfully' };
+    
+    return { success: true, data: this.mapIntegrationResponse(result), message: 'Updated successfully' };
   }
 
   async deleteIntegration(id: string) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.DeleteIntegration({ id }),
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
+    
     return { success: result?.success ?? true, data: null, message: 'Deleted successfully' };
   }
 }
