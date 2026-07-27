@@ -25,6 +25,8 @@ RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
 
 # Compile source code sang thư mục /dist
 RUN npm run build
+# Copy generated Prisma client to the correct compiled src directory
+RUN cp -r src/generated $(find dist -type d -name src | head -n 1)/ || true
 
 # ==========================================
 # 2. Runner Stage
