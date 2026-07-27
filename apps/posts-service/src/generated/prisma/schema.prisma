@@ -125,6 +125,7 @@ model CitizenFeedback {
 
 generator client {
   provider     = "prisma-client-js"
+  engineType   = "binary"
   output       = "../../src/generated/prisma"
   moduleFormat = "cjs"
 }

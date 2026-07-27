@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { PrismaClient } from '../src/generated/prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { runSeeds } from './seeds';
 
 const url = process.env.DATABASE_URL;
@@ -11,9 +10,7 @@ if (!url) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient({
-  adapter: new PrismaMariaDb(url),
-});
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 START COMPREHENSIVE E-GOV SEED');

@@ -6,7 +6,7 @@ try {
 } catch (e) {
   PrismaClient = require('../src/generated/prisma/client').PrismaClient;
 }
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -14,8 +14,7 @@ if (!url) {
   process.exit(1);
 }
 
-const adapter = new PrismaMariaDb(url);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('🔹 Cleaning old seed data...');

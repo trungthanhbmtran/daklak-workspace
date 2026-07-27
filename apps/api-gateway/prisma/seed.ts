@@ -1,5 +1,5 @@
 import { PrismaClient } from '../src/generated/prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+
 import * as crypto from 'crypto';
 import * as dotenv from 'dotenv';
 
@@ -11,8 +11,7 @@ if (!url) {
   process.exit(1);
 }
 
-const adapter = new PrismaMariaDb(url);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('Start seeding gateway configuration...');

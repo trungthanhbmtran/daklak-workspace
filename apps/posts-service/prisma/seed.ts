@@ -6,7 +6,7 @@ try {
   PrismaClient = require('../src/generated/prisma/client').PrismaClient;
 }
 import * as dotenv from 'dotenv';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+
 
 dotenv.config();
 
@@ -16,9 +16,7 @@ if (!url) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient({
-  adapter: new PrismaMariaDb(url),
-});
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 STARTING COMPREHENSIVE POSTS-SERVICE SEED');

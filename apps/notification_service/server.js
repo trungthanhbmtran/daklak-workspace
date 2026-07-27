@@ -7,15 +7,13 @@ const cors = require('cors');
 const config = require('./config');
 const { startConsumer, stopConsumer } = require('./worker/consumer');
 const { PrismaClient } = require('./generated/prisma/client');
-const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const url = process.env.DATABASE_URL || 'mysql://root:mypassword@127.0.0.1:3306/admin_notification';
-const adapter = new PrismaMariaDb(url);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 // Map NotificationChannel to Integration for frontend
 const mapToIntegration = (c) => ({

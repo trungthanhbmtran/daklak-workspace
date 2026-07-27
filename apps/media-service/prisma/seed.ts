@@ -10,14 +10,13 @@
 import 'dotenv/config';
 import * as bcrypt from 'bcrypt'; // Hoặc 'bcryptjs' tùy package bạn cài
 import { PrismaClient } from '../src/generated/prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is required for seed');
 
 // Khởi tạo Prisma Client
-const adapter = new PrismaMariaDb(url);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 const DEFAULT_PASSWORD = 'Admin@123';
 
