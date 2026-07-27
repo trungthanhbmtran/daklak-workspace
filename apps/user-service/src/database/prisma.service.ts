@@ -10,7 +10,7 @@ export class PrismaService
 {
   constructor(config: ConfigService) {
     const url = config.getOrThrow<string>('DATABASE_URL');
-    const adapter = new PrismaMariaDb({ url });
+    const adapter = new PrismaMariaDb(url);
     super({ adapter });
   }
 

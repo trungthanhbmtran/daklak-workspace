@@ -11,7 +11,7 @@ export class PrismaService
   constructor() {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error('DATABASE_URL is required');
-    const adapter = new PrismaMariaDb({ url });
+    const adapter = new PrismaMariaDb(url);
     super({ adapter });
   }
 
