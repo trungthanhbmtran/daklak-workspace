@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { PrismaService } from '../../core/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class IntegrationService implements OnModuleInit {
