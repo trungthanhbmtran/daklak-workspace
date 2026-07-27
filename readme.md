@@ -1,7 +1,5 @@
 # Daklak Workspace Deployment Guide
-npx prisma migrate dev --name init
-npx prisma migrate dev --name mo_ta_su_thay_doi
-npx prisma generate
+
 Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
 
 ## 1. Hướng Dẫn Sử Dụng AI Agent Skills (Dành cho Lập Trình Viên)

@@ -2,7 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"`n  output       = "../src/generated/prisma"`n  moduleFormat = "cjs"
+  provider     = "prisma-client-js"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -13,7 +15,7 @@ model ReportTemplate {
   id          Int            @id @default(autoincrement())
   title       String         @db.VarChar(255)
   description String?        @db.Text
-  layout      Json?          // Lưu trữ lưới (Grid layout) của các Widget
+  layout      Json? // Lưu trữ lưới (Grid layout) của các Widget
   widgets     ReportWidget[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -27,7 +29,7 @@ model ReportWidget {
   dataSourceCode String         @db.VarChar(100) // "HRM_TASK_STATS", "DOC_STATS"
   xAxisKey       String         @db.VarChar(100)
   yAxisKey       String         @db.VarChar(100)
-  config         Json?          // Cấu hình màu sắc, bộ lọc...
+  config         Json? // Cấu hình màu sắc, bộ lọc...
   template       ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 }
 
@@ -35,6 +37,6 @@ model ReportWidget {
 model StatisticsSnapshot {
   id             Int      @id @default(autoincrement())
   dataSourceCode String   @db.VarChar(100)
-  data           Json     // Lưu dữ liệu thống kê
+  data           Json // Lưu dữ liệu thống kê
   recordedAt     DateTime @default(now())
 }
