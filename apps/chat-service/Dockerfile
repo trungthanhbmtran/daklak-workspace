@@ -42,7 +42,7 @@ USER app
 COPY --chown=app:app apps/chat-service/package*.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
-# [PRISMA] Prisma client was generated to prisma/generated/client, so it is copied with the prisma folder below
+# [PRISMA] Copy Prisma generated client và engine binary (BẮT BUỘC để tránh lỗi)
 COPY --chown=app:app --from=builder /app/prisma ./prisma
 
 # Copy thư mục build và protos từ builder stage
