@@ -2,6 +2,13 @@ import { PrismaClient } from '../../src/generated/prisma/client';
 import * as bcrypt from 'bcrypt';
 
 export async function seedUsers(prisma: PrismaClient) {
+
+  const _roles = await prisma.role.findMany();
+  const roleMap: Record<string, any> = {};
+  for (const r of _roles) roleMap[r.code] = r;
+  const superAdminRole = roleMap['SUPER_ADMIN'];
+
+
   const DEFAULT_PASSWORD = 'Admin@123';
   const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
   

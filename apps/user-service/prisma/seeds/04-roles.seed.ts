@@ -2,6 +2,12 @@ import { PrismaClient } from '../../src/generated/prisma/client';
 import * as bcrypt from 'bcrypt';
 
 export async function seedRoles(prisma: PrismaClient) {
+
+  const _resources = await prisma.resource.findMany();
+  const resources: Record<string, any> = {};
+  for (const r of _resources) resources[r.code] = r;
+
+
   
   const superAdminRole = await prisma.role.upsert({
     where: { code: 'SUPER_ADMIN' },

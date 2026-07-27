@@ -2,6 +2,12 @@ import { PrismaClient } from '../../src/generated/prisma/client';
 import * as bcrypt from 'bcrypt';
 
 export async function seedJobTitles(prisma: PrismaClient) {
+
+  const _unitTypes = await prisma.unitType.findMany();
+  const unitTypeMap: Record<string, any> = {};
+  for (const r of _unitTypes) unitTypeMap[r.code] = r;
+
+
   
   console.log('📦 Seeding Job Titles...');
   const jobTitlesData = [

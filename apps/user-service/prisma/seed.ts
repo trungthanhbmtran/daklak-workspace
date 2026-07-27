@@ -12,7 +12,7 @@ if (!url) {
 }
 
 const prisma = new PrismaClient({
-  adapter: new PrismaMariaDb({ url }),
+  adapter: new PrismaMariaDb(url),
 });
 
 async function main() {
