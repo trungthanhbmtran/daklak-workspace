@@ -6,7 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const config = require('./config');
 const { startConsumer, stopConsumer } = require('./worker/consumer');
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('./generated/prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 
 const app = express();

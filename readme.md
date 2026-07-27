@@ -20,7 +20,7 @@ Dự án được cấu hình sẵn các thư mục kỹ năng (skills) đặc b
 1. **Build & Push**: GitHub Actions build Docker images cho các dịch vụ thay đổi và push lên Docker Hub.
 2. **Deploy**: GitHub Actions SSH vào server đích, copy file `docker-compose.prod.yml`, và chạy các lệnh docker compose để cập nhật ứng dụng.
 
-## 2. Cấu hình GitHub Secrets
+## 3. Cấu hình GitHub Secrets
 Để workflow hoạt động, bạn cần cấu hình các Secrets sau trong repository:
 
 | Biến | Mô tả |
@@ -32,28 +32,36 @@ Dự án được cấu hình sẵn các thư mục kỹ năng (skills) đặc b
 | `SSH_PRIVATE_KEY` | SSH Private Key để truy cập server |
 | `DEPLOY_PATH` | Thư mục deploy trên server (vd: `/home/ubuntu/daklak`) |
 
-## 3. Deploy thủ công (Manual)
+## 4. Deploy thủ công (Manual)
 Nếu muốn deploy thủ công trên server:
 ```bash
 # Pull images mới nhất
 docker compose -f docker-compose.prod.yml pull
 
 # Chạy migrations (cập nhật schema DB)
+docker compose -f docker-compose.prod.yml --profile migrate run --rm api-gateway-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm chat-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm notification-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm report-service-migrate
 
 # (Tùy chọn) Xóa toàn bộ dữ liệu cũ và ép đồng bộ cấu trúc mới nhất
 # Lưu ý: Lệnh này sẽ xóa sạch dữ liệu. Dùng "db push" thay cho "migrate reset" để tránh lỗi lệch file migration
+# docker exec -it daklak-workspace-api-gateway-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-user-service-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-hrm-service-1 npx prisma db push --accept-data-loss
-# docker exec -it daklak-workspace-workflow-service-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-media-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-chat-service-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-posts-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-workflow-service-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-document-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-notification-service-1 npx prisma db push --accept-data-loss
+# docker exec -it daklak-workspace-report-service-1 npx prisma db push --accept-data-loss
 
 # Khởi động toàn bộ các services (đảm bảo DB đang chạy để seed)
 docker compose -f docker-compose.prod.yml up -d
@@ -61,20 +69,21 @@ docker compose -f docker-compose.prod.yml up -d
 # Chạy seeders để khởi tạo dữ liệu mặc định (hoặc dữ liệu mẫu)
 # YÊU CẦU QUAN TRỌNG: Phải chạy seed của user-service ĐẦU TIÊN để tạo sơ đồ tổ chức, sau đó mới tới các dịch vụ khác.
 docker exec -it daklak-workspace-user-service-1 npx prisma db seed
+docker exec -it daklak-workspace-api-gateway-1 npx prisma db seed
 docker exec -it daklak-workspace-hrm-service-1 npx prisma db seed
-docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
 docker exec -it daklak-workspace-media-service-1 npx prisma db seed
 docker exec -it daklak-workspace-posts-service-1 npx prisma db seed
+docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
 
 # BẮT BUỘC KHỞI ĐỘNG LẠI API-GATEWAY SAU KHI SEED:
 # Mục đích: Xoá bộ nhớ cache lưu trữ cấu trúc phòng ban trống (empty) lúc mới up DB lên.
 docker restart daklak-workspace-api-gateway-1
 ```
 
-## 4. Thông tin Tài khoản & Kết nối
+## 5. Thông tin Tài khoản & Kết nối
 Thông tin đăng nhập mặc định cho các dịch vụ:
 
-### Infrastructure
+### 5.1. Infrastructure
 | Dịch vụ | Cổng | Tài khoản | Mật khẩu |
 | :--- | :--- | :--- | :--- |
 | **MySQL** | `3306` | `root` | `mypassword` |
@@ -82,20 +91,24 @@ Thông tin đăng nhập mặc định cho các dịch vụ:
 | **MinIO** | `9000` | `admin` | `password123` |
 | **Redis** | `6379` | - | - |
 
-### Microservices
+### 5.2. Microservices
 | Dịch vụ | Port (Internal) | Database Name |
 | :--- | :--- | :--- |
-| `api-gateway` | `8080` | `admin_systems` |
+| `api-gateway` | `8080` | `daklak_db` |
 | `user-service` | `3001` | `admin_systems` |
 | `hrm-service` | `3002` | `admin_hrm` |
 | `media-service` | `3003` | `admin_media` |
+| `chat-service` | `50061` (gRPC) | `admin_chat` |
 | `posts-service` | `3005` | `admin_posts` |
 | `translate-service` | `3006` | `daklak_translation` |
 | `workflow-service` | `50060` (gRPC), `3001` (REST) | `admin_workflow` |
+| `document-service` | `3008` (REST) | `admin_document` |
+| `notification-service` | - | `admin_notification` |
+| `report-service` | `50062` (gRPC), `3011` (REST) | `admin_report` |
 | `admin-khcn` | `3007` | - |
 | `portal-goverment` | `3000` | - |
 
-### 5. Triển khai Cổng thông tin Công dân (`portal-goverment`)
+## 6. Triển khai Cổng thông tin Công dân (`portal-goverment`)
 Dịch vụ mới thêm **Cổng thông tin Công dân (`portal-goverment`)** chạy hoàn hảo bên dưới lớp proxy bảo mật của Nginx:
 - **Đường dẫn truy cập người dân (Công khai)**: `http://<IP-SERVER>/` (Proxy qua Nginx trực tiếp vào container `portal-goverment:3000`).
 - **Tích hợp API động**: Phía Client của Cổng thông tin gọi API Gateway thông qua đường dẫn bảo mật `/api/v1` được định nghĩa trong Nginx.
@@ -107,10 +120,10 @@ Dịch vụ mới thêm **Cổng thông tin Công dân (`portal-goverment`)** ch
 
 *Lưu ý: Đảm bảo tệp `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*
 
-## 6. Tài khoản thử nghiệm (Module Giao việc)
+## 7. Tài khoản thử nghiệm (Module Giao việc)
 Dưới đây là danh sách các tài khoản tiêu biểu dùng để test các luồng của chức năng Giao việc (Task Management) dựa theo phân quyền PBAC. Tất cả tài khoản đều dùng mật khẩu mặc định là `123456aA@`.
 
-### 6.1. Luồng Giao việc & Đánh giá (Dành cho Lãnh đạo Đơn vị - LEADER)
+### 7.1. Luồng Giao việc & Đánh giá (Dành cho Lãnh đạo Đơn vị - LEADER)
 > **Quyền hạn**: `TASK.*` (Toàn quyền sinh việc, giao việc xuyên suốt từ trên xuống, đánh giá, phê duyệt).
 - **Đỗ Hữu Huy** (Chủ tịch UBND Tỉnh)
   - Username: `dohuuhuy` (Cơ quan: UBND Tỉnh Đắk Lắk - `H15`)
@@ -125,7 +138,7 @@ Dưới đây là danh sách các tài khoản tiêu biểu dùng để test cá
 - **Trần Duy Tân** (Phó Giám đốc Trung tâm IOC)
   - Username: `tranduytan` (Cơ quan: Trung tâm IOC - `H15.07.04`)
 
-### 6.2. Luồng Giao việc nội bộ phòng & Quản lý (Dành cho Quản lý cấp phòng - MANAGER)
+### 7.2. Luồng Giao việc nội bộ phòng & Quản lý (Dành cho Quản lý cấp phòng - MANAGER)
 > **Quyền hạn**: `TASK.CREATE`, `TASK.ASSIGN`, `TASK.COMPLETE`, `TASK.UPDATE`, `TASK.VIEW` (Chỉ giao việc trong phạm vi phòng ban mình quản lý hoặc công việc mình làm chủ sở hữu).
 - **Nguyễn Văn A** (Chánh Văn phòng Sở)
   - Username: `nguyenvana` (Cơ quan: Văn phòng Sở KHCN - `H15.07.05`)
@@ -140,7 +153,7 @@ Dưới đây là danh sách các tài khoản tiêu biểu dùng để test cá
 - **Lê Trọng Vũ** (Trưởng phòng Khai thác và Quản lý dữ liệu)
   - Username: `letrongvu` (Cơ quan: Phòng Khai thác và Quản lý dữ liệu - `H15.07.04.02`)
 
-### 6.3. Luồng Nhận việc & Báo cáo tiến độ (Dành cho Nhân viên/Chuyên viên - STAFF)
+### 7.3. Luồng Nhận việc & Báo cáo tiến độ (Dành cho Nhân viên/Chuyên viên - STAFF)
 > **Quyền hạn**: `TASK.VIEW`, `TASK.UPDATE`, `TASK.COMMENT`, `TASK.COMPLETE` (Chỉ được xem, nhận việc, cập nhật tiến độ, thảo luận, và báo cáo hoàn thành cho công việc được giao).
 - **Trần Trung Thành** (Công chức phụ trách)
   - Username: `trungthanh` (Cơ quan: Sở KHCN - `H15.07`)
@@ -157,14 +170,9 @@ Dưới đây là danh sách các tài khoản tiêu biểu dùng để test cá
 - **Lê Thị Thanh Kiều** (Nhân viên)
   - Username: `lethithanhkieu` (Cơ quan: Phòng Khai thác và Quản lý dữ liệu - `H15.07.04.02`)
 
-### 6.4. Quản trị hệ thống & Đơn vị (Dành cho ADMIN / ORG_ADMIN)
+### 7.4. Quản trị hệ thống & Đơn vị (Dành cho ADMIN / ORG_ADMIN)
 > **Quyền hạn**: Quản lý tài khoản, phân quyền, menu, tài nguyên và cấu hình hệ thống (hoặc đơn vị trực thuộc).
 - **Quản trị viên Hệ thống** (Toàn quyền)
   - Username: `admin` / Email: `admin@sys.com` (Mật khẩu: `Admin@123`)
 - **Quản trị viên Đơn vị** (Giới hạn trong đơn vị)
   - Username: `orgadmin` / Email: `orgadmin@daklak.gov.vn` (Mật khẩu: `Admin@123`)
-
-
-docker run --rm -e DATABASE_URL=... workflow-service sh -c "npx prisma migrate deploy"
-# Seed dữ liệu
-docker run --rm -e DATABASE_URL=... workflow-service sh -c "npx ts-node -r tsconfig-paths/register prisma/seed.ts"
