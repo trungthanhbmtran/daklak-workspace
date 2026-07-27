@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npx prisma generate && nest build && tsc && tsc-alias",
+    "build": "npx prisma generate && nest build && node -e \"const fs=require('fs'); const src='src/generated'; if(fs.existsSync(src)){ ['dist/src/generated', 'dist/apps/media-service/src/generated'].forEach(d => { fs.mkdirSync(d, {recursive:true}); fs.cpSync(src, d, {recursive:true}); }); }\" && tsc-alias",
     "prisma:generate": "prisma generate --schema=./prisma/schema",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:dev": "prisma migrate dev --schema=./prisma/schema",
@@ -38,6 +38,7 @@
     "@nestjs/microservices": "^11.1.13",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/terminus": "^11.1.1",
+    "@prisma/adapter-mariadb": "^7.9.1",
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
     "bcrypt": "^5.1.1",
@@ -46,7 +47,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "ioredis": "^5.9.3",
-    "mariadb": "^3.4.5",
+    "mariadb": "^3.5.3",
     "mysql2": "^3.19.1",
     "prisma": "^7.9.0",
     "reflect-metadata": "^0.2.2",
@@ -77,10 +78,10 @@
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0",
-    "tsc-alias": "^1.8.10"
+    "typescript-eslint": "^8.20.0"
   },
   "jest": {
     "moduleFileExtensions": [

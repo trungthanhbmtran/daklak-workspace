@@ -1,3 +1,4 @@
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '../generated/prisma/client';
 
@@ -7,7 +8,11 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    super();
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) throw new Error('DATABASE_URL is not set');
+    const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+    const adapter = new PrismaMariaDb(mariadbUrl);
+    super({ adapter });
   }
 
   async onModuleInit() {

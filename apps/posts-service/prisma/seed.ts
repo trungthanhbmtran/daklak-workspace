@@ -1,3 +1,4 @@
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import type { PrismaClient as PrismaClientType } from '../src/generated/prisma/client'
 let PrismaClient: typeof PrismaClientType;
 try {
@@ -16,7 +17,11 @@ if (!url) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) throw new Error('DATABASE_URL is not set');
+const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+const adapter = new PrismaMariaDb(mariadbUrl);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 STARTING COMPREHENSIVE POSTS-SERVICE SEED');

@@ -1,3 +1,4 @@
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,7 +11,11 @@ if (!url) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) throw new Error('DATABASE_URL is not set');
+const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+const adapter = new PrismaMariaDb(mariadbUrl);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 START COMPREHENSIVE E-GOV SEED');

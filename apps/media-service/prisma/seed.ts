@@ -1,3 +1,4 @@
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 /**
  * Seed script – nạp dữ liệu mẫu và cập nhật database (idempotent, an toàn chạy lại).
  * Sau khi chuyển RBAC → PBAC: seed cập nhật menu SYS_RBAC thành SYS_PBAC.
@@ -16,7 +17,11 @@ const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is required for seed');
 
 // Khởi tạo Prisma Client
-const prisma = new PrismaClient();
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) throw new Error('DATABASE_URL is not set');
+const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+const adapter = new PrismaMariaDb(mariadbUrl);
+const prisma = new PrismaClient({ adapter });
 
 const DEFAULT_PASSWORD = 'Admin@123';
 

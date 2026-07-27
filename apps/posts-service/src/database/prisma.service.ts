@@ -1,3 +1,4 @@
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '../generated/prisma/client';
 import { softDeleteExtension } from './extensions/soft-delete.extension';
@@ -5,11 +6,12 @@ import { softDeleteExtension } from './extensions/soft-delete.extension';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    super();
-    const client = this.$extends(softDeleteExtension);
-    (client as any).onModuleInit = async () => {
-      await this.$connect();
-    };
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) throw new Error('DATABASE_URL is not set');
+    const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+    const adapter = new PrismaMariaDb(mariadbUrl);
+    super({ adapter });
+  };
     (client as any).onModuleDestroy = async () => {
       await this.$disconnect();
     };

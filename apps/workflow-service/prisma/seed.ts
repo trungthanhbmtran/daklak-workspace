@@ -1,3 +1,4 @@
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 /**
  * Prisma Seed - Workflow Service
  * Chuẩn Prisma 7.x với Driver Adapter (mariadb)
@@ -19,17 +20,9 @@ function createPrismaClient(): PrismaClient {
   if (!dbUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
-  // PrismaMariaDb nhận PoolConfig object trực tiếp, không cần createPool() trước
-  const url = new URL(dbUrl);
-  const adapter = new PrismaMariaDb({
-    host: url.hostname,
-    port: parseInt(url.port || '3306', 10),
-    user: url.username,
-    password: url.password,
-    database: url.pathname.replace('/', ''),
-    connectionLimit: 5,
-  });
-  return new PrismaClient({ adapter } as any);
+  const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+  const adapter = new PrismaMariaDb(mariadbUrl);
+  return new PrismaClient({ adapter });
 }
 
 // ============================================================================

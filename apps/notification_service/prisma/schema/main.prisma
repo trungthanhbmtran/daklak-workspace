@@ -7,7 +7,6 @@ generator client {
   engineType = "binary"
   output       = "../../generated/prisma"
   moduleFormat = "cjs"
-  previewFeatures = ["driverAdapters"]
 }
 
 model NotificationChannel {
