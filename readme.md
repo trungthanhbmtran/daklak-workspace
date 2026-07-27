@@ -35,10 +35,7 @@ Dự án được cấu hình sẵn các thư mục kỹ năng (skills) đặc b
 ## 3. Deploy thủ công (Manual)
 Nếu muốn deploy thủ công trên server:
 ```bash
-
 # Pull images mới nhất
-
- 
 docker compose -f docker-compose.prod.yml pull
 
 # Chạy migrations (cập nhật schema DB)

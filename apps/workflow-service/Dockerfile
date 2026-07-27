@@ -43,7 +43,6 @@ COPY --chown=app:app apps/workflow-service/package*.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # [PRISMA] Copy Prisma custom generated client (BẮT BUỘC để tránh lỗi)
-COPY --chown=app:app --from=builder /app/generated ./generated
 COPY --chown=app:app --from=builder /app/prisma ./prisma
 
 # Copy thư mục build và protos từ builder stage
