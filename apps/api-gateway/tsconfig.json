@@ -12,15 +12,6 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
-    "paths": {
-      "@core/*": [
-        "../../shared/core/*", "./shared/core/*"
-      ],
-      "@generated/*": [
-        "generated/*"
-      ]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -31,5 +22,6 @@
   },
   "tsc-alias": {
     "resolveFullPaths": true
-  }
+  },
+  "extends": "../../tsconfig.base.json"
 }

@@ -9,14 +9,12 @@ WORKDIR /app
 
 # [MONOREPO] Copy package.json của service cụ thể từ gốc
 # Context của docker build phải đặt ở thư mục ngoài cùng (root)
-COPY apps/api-gateway/package*.json ./
+COPY package*.json ./
+COPY tsconfig.base.json ./
+COPY shared ./shared
+COPY apps/api-gateway ./apps/api-gateway
+WORKDIR /app/apps/api-gateway
 RUN npm ci
-
-# [MONOREPO] Copy source code service và các thư mục chia sẻ (protos)
-COPY apps/api-gateway/ ./
-COPY shared/protos ./shared/protos
-COPY shared/core ./shared/core
-
 # Generate Prisma Client (Nếu service có sử dụng Prisma)
 RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
 
@@ -43,13 +41,13 @@ COPY --chown=app:app apps/api-gateway/package*.json ./
 RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # [PRISMA] Copy Prisma generated client và engine binary (BẮT BUỘC để tránh lỗi)
-COPY --chown=app:app --from=builder /app/prisma ./prisma
+COPY --chown=app:app --from=builder /app/apps/api-gateway/prisma ./prisma
 
 # Copy thư mục build và protos từ builder stage
-COPY --chown=app:app --from=builder /app/dist ./dist
+COPY --chown=app:app --from=builder /app/apps/api-gateway/dist ./dist
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/apps/api-gateway/src/main.js"]
 
