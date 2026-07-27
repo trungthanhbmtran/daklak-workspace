@@ -240,7 +240,8 @@ services:
   user-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -249,7 +250,8 @@ services:
   chat-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-chat-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -258,7 +260,8 @@ services:
   hrm-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -267,7 +270,8 @@ services:
   media-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -276,7 +280,8 @@ services:
   posts-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -285,7 +290,8 @@ services:
   workflow-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -294,7 +300,8 @@ services:
   document-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -303,7 +310,8 @@ services:
   report-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-report-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -312,7 +320,8 @@ services:
   api-gateway-migrate:
     image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:
@@ -321,7 +330,8 @@ services:
   notification-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
     profiles: [ "migrate" ]
-    command: npx prisma migrate deploy
+    command: >-
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
     env_file:
       - .env.production
     environment:

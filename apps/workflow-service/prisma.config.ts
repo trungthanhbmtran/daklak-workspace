@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { defineConfig } from 'prisma/config';
+import { defineConfig, env } from "prisma/config";
 
 /**
  * Prisma 7.x Configuration File

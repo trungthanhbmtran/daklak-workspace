@@ -15,21 +15,12 @@
     "baseUrl": "./",
     "paths": {
       "@core/*": [
-        "../../shared/core/*"
+        "../../shared/core/*", "./shared/core/*"
       ],
-      "@/*": [
-        "src/*"
-      ],
-      "@generated/*": [
-        "generated/*"
-      ],
-      "@shared/*": [
-        "../../shared/*",
-        "shared/*"
-      ],
-      "@domain/*": [
-        "src/domain/*"
-      ]
+      "@/*": ["src/*"],
+      "@generated/*": ["generated/*"],
+      "@shared/*": ["../../shared/*", "shared/*"],
+      "@domain/*": ["src/domain/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

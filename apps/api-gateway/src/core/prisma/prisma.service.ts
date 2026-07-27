@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '../../../src/generated/prisma/client';
+import { PrismaClient } from '@generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as mariadb from 'mariadb';
 
@@ -11,7 +11,7 @@ export class PrismaService
   constructor() {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error('DATABASE_URL is required');
-    const adapter = new PrismaMariaDb(url);
+    const adapter = new PrismaMariaDb({ url });
     super({ adapter });
   }
 
