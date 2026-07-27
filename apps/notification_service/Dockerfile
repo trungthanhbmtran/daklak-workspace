@@ -19,6 +19,9 @@ RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
 FROM node:22-slim AS runner
 WORKDIR /app
 
+# Bắt buộc cài openssl cho Prisma Engine (Runner)
+RUN apt-get update -y && apt-get install -y openssl
+
 ENV NODE_ENV=production
 ENV PROTO_PATH=/app/protos
 

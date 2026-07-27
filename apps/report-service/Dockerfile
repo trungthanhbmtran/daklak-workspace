@@ -6,6 +6,8 @@ FROM node:22-slim AS builder
 WORKDIR /app
 
 # Bắt buộc cài openssl cho Prisma Engine
+RUN apt-get update -y && apt-get install -y openssl
+
 
 # [MONOREPO] Copy package.json của service cụ thể từ gốc
 # Context của docker build phải đặt ở thư mục ngoài cùng (root)
@@ -13,6 +15,9 @@ COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY shared ./shared
 COPY apps/report-service ./apps/report-service
+# Install root dependencies so shared/core can resolve them
+RUN npm ci
+
 WORKDIR /app/apps/report-service
 RUN npm ci
 # Generate Prisma Client (Nếu service có sử dụng Prisma)
@@ -27,6 +32,9 @@ RUN npm run build
 # ==========================================
 FROM node:22-slim AS runner
 WORKDIR /app
+
+# Bắt buộc cài openssl cho Prisma Engine (Runner)
+RUN apt-get update -y && apt-get install -y openssl
 
 ENV NODE_ENV=production
 ENV PROTO_PATH=/app/protos

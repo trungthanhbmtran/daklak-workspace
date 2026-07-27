@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { execSync } = require('child_process');
 
 const nestApps = [
   'api-gateway', 'chat-service', 'document-service', 
@@ -9,13 +10,23 @@ const nestApps = [
 nestApps.forEach(app => {
   const tsconfigPath = `apps/${app}/tsconfig.json`;
   if (fs.existsSync(tsconfigPath)) {
+    // Restore from git
+    execSync(`git checkout HEAD~1 -- ${tsconfigPath}`);
+    
+    // Read and modify
     const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
     
     if (tsconfig.compilerOptions && tsconfig.compilerOptions.paths && tsconfig.compilerOptions.paths['@core/*']) {
-      // Unify to a single standard path
+      // Just remove the Docker local path hack
       tsconfig.compilerOptions.paths['@core/*'] = ["../../shared/core/*"];
-      fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
-      console.log(`Updated ${tsconfigPath}`);
+      
+      // Also ensure baseUrl is present for relative paths
+      if (!tsconfig.compilerOptions.baseUrl) {
+          tsconfig.compilerOptions.baseUrl = "./";
+      }
     }
+    
+    fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n');
+    console.log(`Restored and fixed ${tsconfigPath}`);
   }
 });
