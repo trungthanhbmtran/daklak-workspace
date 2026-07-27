@@ -15,10 +15,14 @@
     "baseUrl": "./",
     "paths": {
       "@core/*": [
-        "../../shared/core/*", "./shared/core/*"
+        "../../shared/core/*",
+        "./shared/core/*"
       ],
       "@generated/*": [
-        "generated/*"
+        "src/generated/*"
+      ],
+      "@/*": [
+        "src/*"
       ]
     },
     "incremental": true,

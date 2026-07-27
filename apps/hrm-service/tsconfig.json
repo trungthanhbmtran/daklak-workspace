@@ -14,11 +14,19 @@
     "baseUrl": "./",
     "paths": {
       "@core/*": [
-        "../../shared/core/*", "./shared/core/*"
+        "../../shared/core/*",
+        "./shared/core/*"
       ],
-      "@/*": ["src/*"],
-      "@generated/*": ["generated/*"],
-      "@shared/*": ["../../shared/*", "./shared/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@generated/*": [
+        "src/generated/*"
+      ],
+      "@shared/*": [
+        "../../shared/*",
+        "./shared/*"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,

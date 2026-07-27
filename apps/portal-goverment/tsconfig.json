@@ -25,7 +25,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "src/*"
+      ],
+      "@core/*": [
+        "../../shared/core/*",
+        "./shared/core/*"
+      ],
+      "@generated/*": [
+        "src/generated/*"
       ]
     }
   },
