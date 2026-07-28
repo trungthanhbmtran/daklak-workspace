@@ -52,6 +52,7 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # [PRISMA] Copy Prisma custom generated client (BẮT BUỘC để tránh lỗi)
 COPY --chown=app:app --from=builder /app/apps/workflow-service/prisma ./prisma
+COPY --chown=app:app --from=builder /app/apps/workflow-service/src/generated ./src/generated
 
 # Copy thư mục build và protos từ builder stage
 COPY --chown=app:app --from=builder /app/apps/workflow-service/dist ./dist
@@ -60,4 +61,3 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 EXPOSE 8080
 
 CMD ["node", "dist/apps/workflow-service/src/main.js"]
-

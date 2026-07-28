@@ -52,6 +52,7 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # [PRISMA] Copy Prisma custom generated client (BẮT BUỘC để tránh lỗi)
 COPY --chown=app:app --from=builder /app/apps/hrm-service/prisma ./prisma
+COPY --chown=app:app --from=builder /app/apps/hrm-service/src/generated ./src/generated
 
 # Copy thư mục build và protos từ builder stage
 COPY --chown=app:app --from=builder /app/apps/hrm-service/dist ./dist
