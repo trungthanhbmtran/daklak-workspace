@@ -52,12 +52,34 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
       </CardHeader>
 
       <CardContent className="flex-1 space-y-4">
-        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>Trạng thái kết nối:</span>
-          <Badge variant={item.isActive ? "default" : "secondary"} className={item.isActive ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" : ""}>
-            {item.isActive ? "Đang hoạt động" : "Đã vô hiệu hóa"}
-          </Badge>
+        <div className="flex flex-col space-y-2 text-sm text-slate-600 dark:text-slate-400">
+          {item.baseUrl && (
+            <div className="flex items-start gap-2 overflow-hidden">
+              <span className="font-medium shrink-0">Base URL:</span>
+              <span className="truncate text-violet-600 dark:text-violet-400" title={item.baseUrl}>
+                {item.baseUrl}
+              </span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <span className="font-medium shrink-0">Protocol:</span>
+            <Badge variant="outline" className="text-xs bg-slate-50 dark:bg-slate-800">
+              {item.protocol || "N/A"}
+            </Badge>
+            <span className="font-medium shrink-0 ml-2">Auth:</span>
+            <Badge variant="outline" className="text-xs bg-slate-50 dark:bg-slate-800">
+              {item.authType || "N/A"}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span className="font-medium shrink-0">Trạng thái:</span>
+            <Badge variant={item.isActive ? "default" : "secondary"} className={item.isActive ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" : ""}>
+              {item.isActive ? "Đang hoạt động" : "Vô hiệu hóa"}
+            </Badge>
+          </div>
         </div>
 
         <div className="text-xs text-slate-500 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">

@@ -1,5 +1,5 @@
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { KeyRound } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,9 @@ import { IntegrationFormValues } from "../../../schemas";
 import { useCategories } from "../../../api";
 
 export function AuthFields() {
-  const { control, watch } = useFormContext<IntegrationFormValues>();
-  const authType = (watch("authType") || '').toUpperCase();
+  const { control } = useFormContext<IntegrationFormValues>();
+  const authTypeValue = useWatch({ control, name: "authType", defaultValue: "NONE" });
+  const authType = (authTypeValue || '').toUpperCase();
   const { data: authTypes, isLoading } = useCategories("INTEGRATION_AUTH_TYPE");
 
   return (
