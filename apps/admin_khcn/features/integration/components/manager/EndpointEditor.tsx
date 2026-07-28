@@ -20,15 +20,15 @@ interface EndpointEditorProps {
   onDelete: () => void;
 }
 
-export const EndpointEditor = memo(({ 
-  selectedEndpoint, 
-  onChange, 
-  onItemChange, 
-  onAddItem, 
+export const EndpointEditor = memo(({
+  selectedEndpoint,
+  onChange,
+  onItemChange,
+  onAddItem,
   onRemoveItem,
   onDelete
 }: EndpointEditorProps) => {
-  
+
   if (!selectedEndpoint) {
     return (
       <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 overflow-hidden items-center justify-center text-slate-400">
@@ -44,8 +44,8 @@ export const EndpointEditor = memo(({
         {/* Top Header URL */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <Input 
-              value={selectedEndpoint.name} 
+            <Input
+              value={selectedEndpoint.name}
               onChange={(e) => onChange('name', e.target.value)}
               className="font-bold text-lg text-slate-800 dark:text-slate-100 h-auto py-1.5 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 flex-1"
               placeholder="Tên API..."
@@ -55,7 +55,7 @@ export const EndpointEditor = memo(({
             </Button>
           </div>
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
-            <Select 
+            <Select
               value={selectedEndpoint.method}
               onValueChange={(val) => onChange('method', val)}
             >
@@ -70,8 +70,8 @@ export const EndpointEditor = memo(({
                 <SelectItem value="PATCH">PATCH</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Input 
+
+            <Input
               value={selectedEndpoint.path}
               onChange={(e) => onChange('path', e.target.value)}
               placeholder="/api/v1/..."
@@ -90,7 +90,7 @@ export const EndpointEditor = memo(({
             </TabsList>
 
             <div className="flex-1 overflow-hidden mt-4">
-              <EndpointEditorKeyValueTab 
+              <EndpointEditorKeyValueTab
                 value="headers"
                 type="headers"
                 items={selectedEndpoint.headers || []}
@@ -101,7 +101,7 @@ export const EndpointEditor = memo(({
                 onRemoveItem={onRemoveItem}
               />
 
-              <EndpointEditorKeyValueTab 
+              <EndpointEditorKeyValueTab
                 value="params"
                 type="params"
                 items={selectedEndpoint.params || []}
@@ -114,7 +114,7 @@ export const EndpointEditor = memo(({
 
               <TabsContent value="body" className="h-full m-0 data-[state=active]:flex flex-col">
                 <div className="bg-slate-900 rounded-xl flex-1 overflow-hidden border border-slate-800 p-1 flex">
-                  <Textarea 
+                  <Textarea
                     className="flex-1 resize-none bg-transparent border-0 text-slate-300 font-mono text-sm focus-visible:ring-0 custom-scrollbar p-3"
                     value={selectedEndpoint.body}
                     onChange={(e) => onChange('body', e.target.value)}
