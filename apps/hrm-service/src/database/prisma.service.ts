@@ -11,11 +11,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
     const adapter = new PrismaMariaDb(mariadbUrl);
     super({ adapter });
-  };
-    (client as any).onModuleDestroy = async () => {
-      await this.$disconnect();
-    };
-    return client as unknown as this;
   }
 
   async onModuleInit() {
