@@ -62,8 +62,8 @@ export function ResponsiveTable<T>({
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full h-full">
-      <div className="flex-1 overflow-y-auto custom-scrollbar w-full min-h-0">
+    <div className="flex flex-col flex-1 min-h-0 w-full h-full min-w-0">
+      <div className="flex-1 overflow-auto custom-scrollbar w-full min-h-0">
         {renderContent()}
       </div>
       {footer && (

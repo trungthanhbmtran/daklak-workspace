@@ -39,15 +39,15 @@ export const EndpointEditor = memo(({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 overflow-hidden">
-      <div className="flex flex-col h-full">
+    <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 overflow-hidden min-w-0">
+      <div className="flex flex-col h-full min-w-0">
         {/* Top Header URL */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <Input
               value={selectedEndpoint.name}
               onChange={(e) => onChange('name', e.target.value)}
-              className="font-bold text-lg text-slate-800 dark:text-slate-100 h-auto py-1.5 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 flex-1"
+              className="font-bold text-lg text-slate-800 dark:text-slate-100 h-auto py-1.5 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 flex-1 min-w-0"
               placeholder="Tên API..."
             />
             <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0" title="Xóa Endpoint này">
@@ -75,21 +75,21 @@ export const EndpointEditor = memo(({
               value={selectedEndpoint.path}
               onChange={(e) => onChange('path', e.target.value)}
               placeholder="/api/v1/..."
-              className="font-mono text-sm h-8 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 flex-1"
+              className="font-mono text-sm h-8 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 flex-1 min-w-0"
             />
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex-1 overflow-hidden p-4">
-          <Tabs defaultValue="headers" className="w-full h-full flex flex-col">
+        <div className="flex-1 overflow-hidden p-4 min-w-0">
+          <Tabs defaultValue="headers" className="w-full h-full flex flex-col min-w-0">
             <TabsList className="w-fit bg-slate-100 dark:bg-slate-900">
               <TabsTrigger value="headers">Headers ({selectedEndpoint.headers?.length || 0})</TabsTrigger>
               <TabsTrigger value="params">Params ({selectedEndpoint.params?.length || 0})</TabsTrigger>
               <TabsTrigger value="body">Body</TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-hidden mt-4">
+            <div className="flex-1 overflow-hidden mt-4 min-w-0">
               <EndpointEditorKeyValueTab
                 value="headers"
                 type="headers"

@@ -27,9 +27,9 @@ export const EndpointEditorKeyValueTab = ({
   onRemoveItem 
 }: EndpointEditorKeyValueTabProps) => {
   return (
-    <TabsContent value={value} className="h-full m-0 data-[state=active]:flex flex-col gap-2">
-      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+    <TabsContent value={value} className="h-full m-0 data-[state=active]:flex flex-col gap-2 min-w-0">
+      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex-1 flex flex-col min-w-0">
+        <div className="flex-1 overflow-y-auto custom-scrollbar min-w-0">
           <ResponsiveTable
             data={items}
             keyExtractor={(_, i) => String(i)}
