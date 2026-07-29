@@ -145,8 +145,9 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
            iconStart={<Save className="w-4 h-4" />}>{updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}</Button>
         </div>
       }
+      fullHeight={true}
     >
-      <div className="flex flex-col sm:flex-row h-[85vh] sm:h-[75vh] min-h-[500px]">
+      <div className="flex flex-col sm:flex-row h-full flex-1 min-h-[500px]">
         <EndpointSidebar 
           endpoints={endpoints}
           selectedId={selectedId}
