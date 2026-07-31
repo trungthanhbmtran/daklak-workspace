@@ -25,7 +25,7 @@ export const toValidCode = (str: string) => {
 
 function extractSwaggerBaseUrl(data: any): string {
   if (data.servers && data.servers.length > 0) {
-    return data.servers[0].url;
+    return data.servers[0].url || "";
   }
   if (data.host) {
     const scheme = data.schemes?.[0] || 'https';
@@ -56,22 +56,22 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
     return p;
   };
 
-  const generateSkeleton = (schema: any): any => {
-    if (!schema) return {};
+  const generateSkeleton = (schema: any, depth = 0): any => {
+    if (!schema || depth > 5) return {}; // prevent infinite loops
     if (schema.$ref) schema = resolveRef(schema.$ref) || schema;
     
     if (schema.example !== undefined) return schema.example;
-    if (schema.type === 'object' && schema.properties) {
+    if (schema.type === 'object' || schema.properties) {
       const obj: any = {};
       for (const key in schema.properties) {
-        obj[key] = generateSkeleton(schema.properties[key]);
+        obj[key] = generateSkeleton(schema.properties[key], depth + 1);
       }
       return obj;
     }
     if (schema.type === 'array' && schema.items) {
-      return [generateSkeleton(schema.items)];
+      return [generateSkeleton(schema.items, depth + 1)];
     }
-    if (schema.type === 'string') return "string";
+    if (schema.type === 'string') return "";
     if (schema.type === 'integer' || schema.type === 'number') return 0;
     if (schema.type === 'boolean') return true;
     return "";
@@ -91,16 +91,27 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
     let reqBody = details.requestBody;
     if (reqBody?.$ref) reqBody = resolveRef(reqBody.$ref) || reqBody;
     
-    if (reqBody?.content?.['application/json']) {
-      const content = reqBody.content['application/json'];
-      if (content.example) return typeof content.example === 'string' ? content.example : JSON.stringify(content.example, null, 2);
-      if (content.schema) {
-         let schema = content.schema;
-         if (schema.$ref) schema = resolveRef(schema.$ref) || schema;
-         if (schema.example) return typeof schema.example === 'string' ? schema.example : JSON.stringify(schema.example, null, 2);
-         return JSON.stringify(generateSkeleton(schema), null, 2);
+    if (reqBody?.content) {
+      const contentKeys = Object.keys(reqBody.content);
+      // Prefer application/json, fallback to first available
+      const contentType = contentKeys.includes('application/json') ? 'application/json' : contentKeys[0];
+      
+      if (contentType) {
+          const content = reqBody.content[contentType];
+          if (content.example) return typeof content.example === 'string' ? content.example : JSON.stringify(content.example, null, 2);
+          if (content.schema) {
+             let schema = content.schema;
+             if (schema.$ref) schema = resolveRef(schema.$ref) || schema;
+             if (schema.example) return typeof schema.example === 'string' ? schema.example : JSON.stringify(schema.example, null, 2);
+             
+             const skeleton = generateSkeleton(schema);
+             if (contentType === 'application/x-www-form-urlencoded' || contentType === 'multipart/form-data') {
+                 // Format as JSON anyway for the UI to display, or just return JSON string
+                 return JSON.stringify(skeleton, null, 2);
+             }
+             return JSON.stringify(skeleton, null, 2);
+          }
       }
-      return "{\n  \n}";
     }
     
     const params = Array.isArray(details.parameters) ? details.parameters : [];
@@ -169,13 +180,29 @@ export function processSwaggerData(data: any): any {
 }
 
 function extractPostmanBaseUrl(data: any): string {
+  // First try to find base URL from variables
   if (data.variable && Array.isArray(data.variable)) {
     const baseUrlVar = data.variable.find((v: any) => v.key.toLowerCase().includes("url"));
     if (baseUrlVar) return baseUrlVar.value;
   }
-  if (data.item?.[0]?.request?.url?.raw) {
+  
+  // Helper to find the first request in the collection deeply
+  const findFirstRequest = (items: any[]): any => {
+    if (!items || !Array.isArray(items)) return null;
+    for (const item of items) {
+      if (item.request) return item.request;
+      if (item.item) {
+        const req = findFirstRequest(item.item);
+        if (req) return req;
+      }
+    }
+    return null;
+  };
+
+  const firstReq = findFirstRequest(data.item);
+  if (firstReq?.url?.raw) {
     try {
-      const rawUrl = data.item[0].request.url.raw as string;
+      const rawUrl = firstReq.url.raw as string;
       const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
       if (match) return match[1];
       // eslint-disable-next-line unused-imports/no-unused-vars
@@ -195,27 +222,66 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
         const req = item.request;
         const rawUrl = req.url?.raw || (typeof req.url === 'string' ? req.url : "");
 
-        const queryParams = req.url?.query?.map((q: any) => ({ key: q.key, value: q.value || "" })) || [];
-        const pathVars = req.url?.variable?.map((v: any) => ({ key: v.key, value: v.value || "" })) || [];
-        const headers = req.header?.map((h: any) => ({ key: h.key, value: h.value })) || [];
+        // Safely extract query parameters
+        let queryParams: any[] = [];
+        if (Array.isArray(req.url?.query)) {
+           queryParams = req.url.query.map((q: any) => ({ key: q.key, value: q.value || "" }));
+        }
+
+        // Safely extract path variables
+        let pathVars: any[] = [];
+        if (Array.isArray(req.url?.variable)) {
+           pathVars = req.url.variable.map((v: any) => ({ key: v.key, value: v.value || "" }));
+        }
+
+        // Safely extract headers
+        let headers: any[] = [];
+        if (Array.isArray(req.header)) {
+           headers = req.header.map((h: any) => ({ key: h.key, value: h.value || "" }));
+        } else if (typeof req.header === 'string') {
+           // Postman sometimes stores headers as a raw string
+           headers = req.header.split('\n').filter(Boolean).map((line: string) => {
+              const parts = line.split(':');
+              return { key: parts[0]?.trim() || "", value: parts.slice(1).join(':')?.trim() || "" };
+           }).filter((h: any) => h.key);
+        }
 
         let bodyStr = "";
-        if (req.body?.mode === 'raw') bodyStr = req.body.raw || "";
-        else if (req.body?.mode === 'urlencoded') {
-           bodyStr = JSON.stringify(req.body.urlencoded || [], null, 2);
+        if (req.body?.mode === 'raw') {
+            bodyStr = req.body.raw || "";
+        } else if (req.body?.mode === 'urlencoded') {
+            bodyStr = JSON.stringify(req.body.urlencoded || [], null, 2);
         } else if (req.body?.mode === 'formdata') {
-           bodyStr = JSON.stringify(req.body.formdata || [], null, 2);
+            bodyStr = JSON.stringify(req.body.formdata || [], null, 2);
         } else if (req.body) {
-           bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body, null, 2);
+            bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body, null, 2);
         }
+
+        let pathStr = rawUrl;
+        if (req.url?.path) {
+            const pathParts = Array.isArray(req.url.path) 
+               ? req.url.path.map((p: any) => typeof p === 'string' ? p : p.value || "") 
+               : [req.url.path];
+            pathStr = "/" + pathParts.join('/');
+        } else if (rawUrl) {
+            try {
+                // remove protocol and domain if present, or variables like {{baseUrl}}
+                const noHost = rawUrl.replace(/^(?:https?:\/\/[^\/]+|{{[^}]+}})/, '');
+                pathStr = noHost.startsWith('/') ? noHost : '/' + noHost;
+            } catch (e) {
+                pathStr = rawUrl;
+            }
+        }
+        
+        pathStr = pathStr.split('?')[0];
 
         endpoints.push({
           id: Math.random().toString(36).substring(2, 11),
-          name: item.name || "Unnamed Request",
+          name: item.name || req.name || "Unnamed Request",
           description: req.description || item.description || "",
           folder: parentPath,
-          method: req.method || "GET",
-          path: rawUrl,
+          method: (req.method || "GET").toUpperCase(),
+          path: pathStr,
           headers,
           params: [...queryParams, ...pathVars],
           body: bodyStr
@@ -233,8 +299,8 @@ export function processPostmanData(data: any): any {
     isRawMode: false,
     rawConfig: JSON.stringify(data, null, 2),
     type: "POSTMAN",
-    systemName: data.info.name || "Postman API",
-    integrationCode: toValidCode(data.info.name || "POSTMAN"),
+    systemName: data.info?.name || "Postman API",
+    integrationCode: toValidCode(data.info?.name || "POSTMAN"),
     apiUrl: extractPostmanBaseUrl(data)
   };
 
