@@ -131,7 +131,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       open={isOpen}
       onOpenChange={setIsOpen}
       maxWidth="max-w-full"
-      contentClassName="w-[98vw] md:w-[95vw] h-[95vh] md:h-[90vh] flex flex-col sm:max-w-[98vw] md:max-w-[95vw]"
+      contentClassName="!w-screen !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
       icon={<Plug className="w-6 h-6 text-violet-500" />}
       title={`Quản lý Endpoints - ${integration?.name}`}
       description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
