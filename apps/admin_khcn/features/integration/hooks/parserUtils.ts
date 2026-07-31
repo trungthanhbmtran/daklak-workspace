@@ -2,6 +2,7 @@
 export interface ParsedEndpoint {
   id: string;
   name: string;
+  description?: string;
   folder: string;
   method: string;
   path: string;
@@ -37,13 +38,43 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
   const endpoints: ParsedEndpoint[] = [];
   const validMethods: Record<string, boolean> = { get: true, post: true, put: true, delete: true, patch: true };
 
-  const resolveParam = (p: any) => {
-    if (p.$ref && typeof p.$ref === 'string') {
-      const parts = p.$ref.split('/');
-      if (parts[1] === 'components' && parts[2] === 'parameters') return data.components?.parameters?.[parts[3]] || p;
-      if (parts[1] === 'parameters') return data.parameters?.[parts[2]] || p;
+  const resolveRef = (ref: string) => {
+    if (typeof ref !== 'string') return null;
+    const parts = ref.split('/');
+    if (parts[1] === 'components') {
+       if (parts[2] === 'schemas') return data.components?.schemas?.[parts[3]];
+       if (parts[2] === 'parameters') return data.components?.parameters?.[parts[3]];
+       if (parts[2] === 'requestBodies') return data.components?.requestBodies?.[parts[3]];
     }
+    if (parts[1] === 'definitions') return data.definitions?.[parts[2]];
+    if (parts[1] === 'parameters') return data.parameters?.[parts[2]];
+    return null;
+  };
+
+  const resolveParam = (p: any) => {
+    if (p.$ref) return resolveRef(p.$ref) || p;
     return p;
+  };
+
+  const generateSkeleton = (schema: any): any => {
+    if (!schema) return {};
+    if (schema.$ref) schema = resolveRef(schema.$ref) || schema;
+    
+    if (schema.example !== undefined) return schema.example;
+    if (schema.type === 'object' && schema.properties) {
+      const obj: any = {};
+      for (const key in schema.properties) {
+        obj[key] = generateSkeleton(schema.properties[key]);
+      }
+      return obj;
+    }
+    if (schema.type === 'array' && schema.items) {
+      return [generateSkeleton(schema.items)];
+    }
+    if (schema.type === 'string') return "string";
+    if (schema.type === 'integer' || schema.type === 'number') return 0;
+    if (schema.type === 'boolean') return true;
+    return "";
   };
 
   const extractParams = (parameters: any[] | undefined, types: string[]) => {
@@ -57,17 +88,29 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
   };
 
   const extractBody = (details: any) => {
-    if (details.requestBody?.content?.['application/json']) {
-      const content = details.requestBody.content['application/json'];
+    let reqBody = details.requestBody;
+    if (reqBody?.$ref) reqBody = resolveRef(reqBody.$ref) || reqBody;
+    
+    if (reqBody?.content?.['application/json']) {
+      const content = reqBody.content['application/json'];
       if (content.example) return typeof content.example === 'string' ? content.example : JSON.stringify(content.example, null, 2);
-      if (content.schema?.example) return typeof content.schema.example === 'string' ? content.schema.example : JSON.stringify(content.schema.example, null, 2);
+      if (content.schema) {
+         let schema = content.schema;
+         if (schema.$ref) schema = resolveRef(schema.$ref) || schema;
+         if (schema.example) return typeof schema.example === 'string' ? schema.example : JSON.stringify(schema.example, null, 2);
+         return JSON.stringify(generateSkeleton(schema), null, 2);
+      }
       return "{\n  \n}";
     }
+    
     const params = Array.isArray(details.parameters) ? details.parameters : [];
     for (let i = 0; i < params.length; i++) {
       const p = resolveParam(params[i]);
       if (p.in === 'body') {
-        if (p.schema?.example) return typeof p.schema.example === 'string' ? p.schema.example : JSON.stringify(p.schema.example, null, 2);
+        let schema = p.schema;
+        if (schema?.$ref) schema = resolveRef(schema.$ref) || schema;
+        if (schema?.example) return typeof schema.example === 'string' ? schema.example : JSON.stringify(schema.example, null, 2);
+        if (schema) return JSON.stringify(generateSkeleton(schema), null, 2);
         return "{\n  \n}";
       }
     }
@@ -89,12 +132,13 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
 
         endpoints.push({
           id: Math.random().toString(36).substring(2, 11),
-          name: details.summary || details.description || details.operationId || pathKey,
+          name: details.summary || details.operationId || pathKey,
+          description: details.description || "",
           folder: details.tags?.[0] || "",
           method: lowerMethod.toUpperCase(),
           path: pathKey,
           headers: extractParams(allParams, ['header']),
-          params: extractParams(allParams, ['query', 'path']),
+          params: extractParams(allParams, ['query', 'path', 'formData']),
           body: extractBody(details)
         });
       }
@@ -155,15 +199,26 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
         const pathVars = req.url?.variable?.map((v: any) => ({ key: v.key, value: v.value || "" })) || [];
         const headers = req.header?.map((h: any) => ({ key: h.key, value: h.value })) || [];
 
+        let bodyStr = "";
+        if (req.body?.mode === 'raw') bodyStr = req.body.raw || "";
+        else if (req.body?.mode === 'urlencoded') {
+           bodyStr = JSON.stringify(req.body.urlencoded || [], null, 2);
+        } else if (req.body?.mode === 'formdata') {
+           bodyStr = JSON.stringify(req.body.formdata || [], null, 2);
+        } else if (req.body) {
+           bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body, null, 2);
+        }
+
         endpoints.push({
           id: Math.random().toString(36).substring(2, 11),
           name: item.name || "Unnamed Request",
+          description: req.description || item.description || "",
           folder: parentPath,
           method: req.method || "GET",
           path: rawUrl,
           headers,
           params: [...queryParams, ...pathVars],
-          body: req.body?.raw || ""
+          body: bodyStr
         });
       }
     });

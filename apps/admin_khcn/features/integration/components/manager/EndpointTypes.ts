@@ -1,6 +1,7 @@
 export interface ParsedEndpoint {
   id: string;
   name: string;
+  description?: string;
   folder: string;
   method: string;
   path: string;

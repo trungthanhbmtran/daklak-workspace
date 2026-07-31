@@ -54,6 +54,12 @@ export const EndpointEditor = memo(({
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
+          <Input
+            value={selectedEndpoint.description || ""}
+            onChange={(e) => onChange('description', e.target.value)}
+            className="text-sm text-slate-500 h-auto py-1 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 w-full"
+            placeholder="Mô tả API..."
+          />
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
             <Select
               value={selectedEndpoint.method}
