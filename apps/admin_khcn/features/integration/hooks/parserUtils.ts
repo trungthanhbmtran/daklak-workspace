@@ -13,6 +13,7 @@ export interface ParsedEndpoint {
 
 // Helper to normalize string for codes
 export const toValidCode = (str: string) => {
+  if (!str) return "API_ENDPOINT";
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // Remove accents
@@ -82,18 +83,22 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
     const result: any[] = [];
     for (let i = 0; i < parameters.length; i++) {
       const p = resolveParam(parameters[i]);
-      if (types.includes(p.in)) result.push({ key: p.name, value: p.example || p.schema?.example || "" });
+      if (types.includes(p.in)) {
+        let val = p.example !== undefined ? p.example : (p.schema?.example !== undefined ? p.schema.example : "");
+        if (typeof val === 'object') val = JSON.stringify(val);
+        result.push({ key: p.name || "", value: String(val) });
+      }
     }
     return result;
   };
 
-  const extractBody = (details: any) => {
+  const extractBody = (details: any, allParams: any[]) => {
+    // OpenAPI 3 requestBody
     let reqBody = details.requestBody;
     if (reqBody?.$ref) reqBody = resolveRef(reqBody.$ref) || reqBody;
     
     if (reqBody?.content) {
       const contentKeys = Object.keys(reqBody.content);
-      // Prefer application/json, fallback to first available
       const contentType = contentKeys.includes('application/json') ? 'application/json' : contentKeys[0];
       
       if (contentType) {
@@ -105,18 +110,14 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
              if (schema.example) return typeof schema.example === 'string' ? schema.example : JSON.stringify(schema.example, null, 2);
              
              const skeleton = generateSkeleton(schema);
-             if (contentType === 'application/x-www-form-urlencoded' || contentType === 'multipart/form-data') {
-                 // Format as JSON anyway for the UI to display, or just return JSON string
-                 return JSON.stringify(skeleton, null, 2);
-             }
              return JSON.stringify(skeleton, null, 2);
           }
       }
     }
     
-    const params = Array.isArray(details.parameters) ? details.parameters : [];
-    for (let i = 0; i < params.length; i++) {
-      const p = resolveParam(params[i]);
+    // Swagger 2 fallback: body parameter
+    for (let i = 0; i < allParams.length; i++) {
+      const p = resolveParam(allParams[i]);
       if (p.in === 'body') {
         let schema = p.schema;
         if (schema?.$ref) schema = resolveRef(schema.$ref) || schema;
@@ -125,6 +126,18 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
         return "{\n  \n}";
       }
     }
+
+    // Swagger 2 fallback: formData parameters
+    const formDataParams = allParams.filter(p => resolveParam(p).in === 'formData');
+    if (formDataParams.length > 0) {
+      const formDataObj: any = {};
+      formDataParams.forEach(p => {
+         const resolved = resolveParam(p);
+         formDataObj[resolved.name] = resolved.example !== undefined ? resolved.example : "";
+      });
+      return JSON.stringify(formDataObj, null, 2);
+    }
+
     return "";
   };
 
@@ -149,8 +162,8 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
           method: lowerMethod.toUpperCase(),
           path: pathKey,
           headers: extractParams(allParams, ['header']),
-          params: extractParams(allParams, ['query', 'path', 'formData']),
-          body: extractBody(details)
+          params: extractParams(allParams, ['query', 'path']),
+          body: extractBody(details, allParams)
         });
       }
     }
@@ -182,7 +195,7 @@ export function processSwaggerData(data: any): any {
 function extractPostmanBaseUrl(data: any): string {
   // First try to find base URL from variables
   if (data.variable && Array.isArray(data.variable)) {
-    const baseUrlVar = data.variable.find((v: any) => v.key.toLowerCase().includes("url"));
+    const baseUrlVar = data.variable.find((v: any) => v.key.toLowerCase().includes("url") || v.key.toLowerCase().includes("host"));
     if (baseUrlVar) return baseUrlVar.value;
   }
   
@@ -200,9 +213,9 @@ function extractPostmanBaseUrl(data: any): string {
   };
 
   const firstReq = findFirstRequest(data.item);
-  if (firstReq?.url?.raw) {
+  if (firstReq?.url?.raw || typeof firstReq?.url === 'string') {
     try {
-      const rawUrl = firstReq.url.raw as string;
+      const rawUrl = typeof firstReq.url === 'string' ? firstReq.url : (firstReq.url.raw as string);
       const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
       if (match) return match[1];
       // eslint-disable-next-line unused-imports/no-unused-vars
@@ -225,19 +238,30 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
         // Safely extract query parameters
         let queryParams: any[] = [];
         if (Array.isArray(req.url?.query)) {
-           queryParams = req.url.query.map((q: any) => ({ key: q.key, value: q.value || "" }));
+           queryParams = req.url.query.map((q: any) => {
+              let val = q.value !== undefined ? q.value : "";
+              if (typeof val === 'object') val = JSON.stringify(val);
+              return { key: String(q.key || ""), value: String(val) };
+           });
         }
 
         // Safely extract path variables
         let pathVars: any[] = [];
         if (Array.isArray(req.url?.variable)) {
-           pathVars = req.url.variable.map((v: any) => ({ key: v.key, value: v.value || "" }));
+           pathVars = req.url.variable.map((v: any) => {
+              let val = v.value !== undefined ? v.value : "";
+              if (typeof val === 'object') val = JSON.stringify(val);
+              return { key: String(v.key || ""), value: String(val) };
+           });
         }
 
         // Safely extract headers
         let headers: any[] = [];
         if (Array.isArray(req.header)) {
-           headers = req.header.map((h: any) => ({ key: h.key, value: h.value || "" }));
+           headers = req.header.map((h: any) => {
+              let val = h.value !== undefined ? h.value : "";
+              return { key: String(h.key || ""), value: String(val) };
+           });
         } else if (typeof req.header === 'string') {
            // Postman sometimes stores headers as a raw string
            headers = req.header.split('\n').filter(Boolean).map((line: string) => {
@@ -246,13 +270,22 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
            }).filter((h: any) => h.key);
         }
 
+        const mapFormDataToObject = (formDataArr: any[]) => {
+           if (!Array.isArray(formDataArr)) return {};
+           const obj: any = {};
+           formDataArr.forEach(item => {
+               if (item.key) obj[item.key] = item.value !== undefined ? item.value : "";
+           });
+           return obj;
+        };
+
         let bodyStr = "";
         if (req.body?.mode === 'raw') {
             bodyStr = req.body.raw || "";
         } else if (req.body?.mode === 'urlencoded') {
-            bodyStr = JSON.stringify(req.body.urlencoded || [], null, 2);
+            bodyStr = JSON.stringify(mapFormDataToObject(req.body.urlencoded), null, 2);
         } else if (req.body?.mode === 'formdata') {
-            bodyStr = JSON.stringify(req.body.formdata || [], null, 2);
+            bodyStr = JSON.stringify(mapFormDataToObject(req.body.formdata), null, 2);
         } else if (req.body) {
             bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body, null, 2);
         }
@@ -282,8 +315,8 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
           folder: parentPath,
           method: (req.method || "GET").toUpperCase(),
           path: pathStr,
-          headers,
-          params: [...queryParams, ...pathVars],
+          headers: headers.filter(h => h.key),
+          params: [...queryParams, ...pathVars].filter(p => p.key),
           body: bodyStr
         });
       }
