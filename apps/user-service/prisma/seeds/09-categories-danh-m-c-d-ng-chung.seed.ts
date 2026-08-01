@@ -543,6 +543,7 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'SYS_MENU', name: 'Quản lý Menu', route: '/services/admin/menus', icon: 'Menu', order: 5, parentCode: 'SYS_GROUP', linkedResourceCode: 'MENU', type: 'MENU' },
     { code: 'SYS_CAT', name: 'Danh mục', route: '/services/admin/categories', icon: 'ListTree', order: 6, parentCode: 'SYS_GROUP', linkedResourceCode: 'CATEGORY', type: 'MENU' },
     { code: 'SYS_SETTING', name: 'Cấu hình chung', route: '/services/admin/settings', icon: 'Settings', order: 8, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
+    { code: 'SYS_ENDPOINT', name: 'Quản lý Endpoints', route: '/system-admin/endpoints', icon: 'PlugZ', order: 9, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
 
     // 2.5 Trung tâm Thông báo (Hub)
     { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: 'NOTIFICATION', type: 'SERVICE_ITEM' },
@@ -557,7 +558,7 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/services/hrm/employees', icon: 'UserCircle', order: 2, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
     { code: 'HRM_TASK_MENU', name: 'Danh sách nhiệm vụ', route: '/services/hrm/work-plans/tasks', icon: 'CheckSquare', order: 3, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
     { code: 'HRM_CALENDAR_MENU', name: 'Lịch công tác', route: '/services/hrm/calendar', icon: 'CalendarDays', order: 4, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
-    { code: 'HRM_REPORT_MENU', name: 'Báo cáo công việc', route: '/services/hrm/reports', icon: 'Presentation', order: 5, parentCode: 'HRM_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
+    { code: 'HRM_PROJECT_MENU', name: 'Dự án', route: '/services/hrm/work-plans/projects', icon: 'FolderGit2', order: 5, parentCode: 'HRM_GROUP', linkedResourceCode: 'PROJECT', type: 'MENU' },
     { code: 'HRM_TEMPLATE_MENU', name: 'Khung mẫu nhiệm vụ', route: '/services/hrm/work-plans/rank-templates', icon: 'ClipboardList', order: 6, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
     { code: 'HRM_SELECTOR_MENU', name: 'Đăng ký nhiệm vụ', route: '/services/hrm/work-plans/manual-selector', icon: 'Layers', order: 7, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
     { code: 'HRM_CRITERIA_MENU', name: 'Tiêu chí đánh giá', route: '/services/hrm/work-plans/criteria', icon: 'BarChart2', order: 8, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },

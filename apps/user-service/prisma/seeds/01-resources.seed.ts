@@ -47,7 +47,7 @@ export async function seedResources(prisma: PrismaClient) {
     { code: 'WORKFLOW', name: 'Quy trình công việc', serviceCode: 'WORKFLOW_SERVICE' },
     { code: 'OBJECTIVE', name: 'Mục tiêu', serviceCode: 'WORKFLOW_SERVICE' },
     { code: 'KPI', name: 'KPI', serviceCode: 'WORKFLOW_SERVICE' },
-    { code: 'REPORT', name: 'Báo cáo', serviceCode: 'WORKFLOW_SERVICE' },
+    { code: 'REPORT', name: 'Báo cáo', serviceCode: 'REPORT_SERVICE' },
   ];
 
   const resources: Record<string, { id: number; code: string; name: string; serviceCode?: string | null }> = {};
