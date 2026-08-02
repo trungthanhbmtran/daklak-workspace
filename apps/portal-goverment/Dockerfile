@@ -23,7 +23,7 @@ COPY apps/portal-goverment ./
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN npm run build
+RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npm run build
 # Copy generated Prisma client to the correct compiled src directory
 RUN cp -r src/generated $(find dist -type d -name src | head -n 1)/ || true
 
