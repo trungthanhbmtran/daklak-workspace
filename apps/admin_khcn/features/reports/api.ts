@@ -9,17 +9,17 @@ export const REPORT_KEYS = {
 
 // --- API FETCHERS ---
 export const fetchTemplates = async () => {
-  const res = await api.get('/api/v1/reports/templates');
+  const res = await api.get('/reports/templates');
   return res.data;
 };
 
 export const createTemplate = async (data: any) => {
-  const res = await api.post('/api/v1/reports/templates', data);
+  const res = await api.post('/reports/templates', data);
   return res.data;
 };
 
 export const deleteTemplate = async (id: string) => {
-  const res = await api.delete(`/api/v1/reports/templates/${id}`);
+  const res = await api.delete(`/reports/templates/${id}`);
   return res.data;
 };
 
@@ -34,7 +34,7 @@ export function useTemplates() {
 export function useWidgets() {
   return useQuery({
     queryKey: ["reports", "widgets", "list"],
-    queryFn: () => api.get("/api/v1/reports/templates/widgets").then(res => res.data),
+    queryFn: () => api.get("/reports/templates/widgets").then(res => res.data),
   });
 }
 

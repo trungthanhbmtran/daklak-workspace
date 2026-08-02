@@ -76,6 +76,14 @@ docker exec -it daklak-workspace-media-service-1 npx prisma db seed
 docker exec -it daklak-workspace-posts-service-1 npx prisma db seed
 docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
 
+# 💡 Khắc phục sự cố (Troubleshooting): Lỗi "No seed command configured"
+# Nếu khi chạy lệnh seed bị lỗi trên do container cũ chưa được build lại với cấu hình mới, 
+# hãy thực hiện thủ công các bước sau để ép seed chạy thành công:
+# 1. Copy config vào container: docker cp apps/user-service/prisma.config.ts daklak-workspace-user-service-1:/app/prisma.config.ts
+# 2. Cài đặt môi trường chạy tsx: docker exec -u root daklak-workspace-user-service-1 npm install -g tsx
+# 3. Chạy lại lệnh seed: docker exec -it daklak-workspace-user-service-1 npx prisma db seed
+# (Làm tương tự với các service khác nếu gặp lỗi tương tự)
+
 # BẮT BUỘC KHỞI ĐỘNG LẠI API-GATEWAY SAU KHI SEED:
 # Mục đích: Xoá bộ nhớ cache lưu trữ cấu trúc phòng ban trống (empty) lúc mới up DB lên.
 docker restart daklak-workspace-api-gateway-1
