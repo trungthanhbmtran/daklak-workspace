@@ -3,7 +3,6 @@ import { useState } from "react";
 import axios from "axios";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
-import imageCompression from "browser-image-compression";
 
 interface UploadOptions {
   onSuccess?: (fileInfo: any) => void;
@@ -26,6 +25,7 @@ export const useFileUpload = (options?: UploadOptions) => {
       // Nếu là ảnh (không phải svg), nén ảnh trước khi upload
       if (file.type.startsWith("image/") && file.type !== "image/svg+xml") {
         try {
+          const imageCompression = (await import("browser-image-compression")).default;
           file = await imageCompression(rawFile, {
             maxSizeMB: 1, // Kích thước tối đa 1MB
             maxWidthOrHeight: 1920,

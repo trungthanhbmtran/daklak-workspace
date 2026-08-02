@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import axios from "axios";
-import imageCompression from "browser-image-compression";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
 
@@ -15,6 +14,7 @@ export const useImageUpload = (options?: { onSuccess?: (id: string, url: string)
 
     setIsUploading(true);
     try {
+      const imageCompression = (await import("browser-image-compression")).default;
       const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200, fileType: 'image/webp' });
 
       const res: any = await apiClient.post("/media/request-upload", {
