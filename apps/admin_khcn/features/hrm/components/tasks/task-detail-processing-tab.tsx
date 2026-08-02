@@ -67,6 +67,13 @@ export function TaskProcessingTab({
     } catch { /* handled */ }
   };
 
+  const handleStartTask = async () => {
+    try {
+      await updateStatus.mutateAsync({ status: "IN_PROGRESS", actionName: "IN_PROGRESS" } as any);
+      toast.success("Đã bắt đầu thực hiện công việc");
+    } catch { /* handled */ }
+  };
+
   const handleToggleStep = async (step: any) => {
     const newStatus = step.status === "COMPLETED" ? "TODO" : "COMPLETED";
     await updateStep.mutateAsync({ stepId: Number(step.id), payload: { status: newStatus } });
@@ -234,14 +241,28 @@ export function TaskProcessingTab({
                 {(updateProgress.isPending || addComment.isPending) ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
                 Lưu tiến độ
               </Button>
-              <Button
-                size="sm"
-                onClick={handleComplete}
-                disabled={updateStatus.isPending}
-              >
-                {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                Báo cáo hoàn thành
-              </Button>
+              {currentTask.allowedActions?.includes('IN_PROGRESS') && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleStartTask}
+                  disabled={updateStatus.isPending}
+                >
+                  {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                  Bắt đầu làm
+                </Button>
+              )}
+              {currentTask.allowedActions?.includes('COMPLETED') || !currentTask.allowedActions?.includes('IN_PROGRESS') ? (
+                <Button
+                  size="sm"
+                  onClick={handleComplete}
+                  disabled={updateStatus.isPending}
+                >
+                  {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                  Báo cáo hoàn thành
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>

@@ -522,7 +522,7 @@ export class TaskSharedService {
     }
 
     // Natively inject actions for the assignee when the task is in progress or TODO
-    const isTaskActive = !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'MỚI GIAO' && t.status !== 'TODO';
+    const isTaskActive = !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'MỚI GIAO';
     
     if (access.isAssignee && isTaskActive) {
       actions.push('CREATE_SUBTASK');
