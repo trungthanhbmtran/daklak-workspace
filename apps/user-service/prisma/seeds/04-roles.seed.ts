@@ -44,7 +44,13 @@ export async function seedRoles(prisma: PrismaClient) {
 
   // Gán đầy đủ policies cho ADMIN role
   // Policy<->Role là many-to-many nên phải dùng findFirst/create + role.update connect
-  const adminResourceCodes = ['USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'SYSTEM', 'NOTIFICATION', 'HRM_EMPLOYEE', 'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_PROCESSING', 'DOC_PUBLISH', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES', 'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION', 'WORKFLOW', 'TASK', 'PLAN', 'REPORT', 'INTEGRATION', 'API_GATEWAY'];
+  const adminResourceCodes = [
+    'SYSTEM', 'USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'NOTIFICATION', 'API_GATEWAY',
+    'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_DRAFT', 'DOC_TEMPLATE', 'DOC_PUBLISH', 'DOC_PROCESSING', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES',
+    'HRM_EMPLOYEE',
+    'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION',
+    'INTEGRATION', 'TASK', 'PROJECT', 'PLAN', 'WORKFLOW', 'OBJECTIVE', 'KPI', 'REPORT'
+  ];
   const adminActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'PUBLISH', 'APPROVE'];
   const adminPolicyIds: number[] = [];
   for (const resCode of adminResourceCodes) {

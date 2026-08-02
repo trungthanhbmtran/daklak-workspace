@@ -535,7 +535,7 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'DASHBOARD', name: 'Bảng điều khiển', route: '/', icon: 'LayoutDashboard', order: 1, linkedResourceCode: null, type: 'MENU' },
 
     // 2. Quản trị hệ thống (chỉ SUPER_ADMIN + ADMIN thấy)
-    { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: '/services/admin', icon: 'Settings2', order: 99, linkedResourceCode: 'SYSTEM', type: 'SERVICE_ITEM' },
+    { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: '/services/admin', icon: 'Settings2', order: 99, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'SYS_ORG', name: 'Cơ cấu tổ chức', route: '/services/admin/organization', icon: 'Building2', order: 1, parentCode: 'SYS_GROUP', linkedResourceCode: 'ORGANIZATION', type: 'MENU' },
     { code: 'SYS_USER', name: 'Người dùng', route: '/services/admin/users', icon: 'Users', order: 2, parentCode: 'SYS_GROUP', linkedResourceCode: 'USER', type: 'MENU' },
     { code: 'SYS_ROLE', name: 'Vai trò & Quyền', route: '/services/admin/roles', icon: 'ShieldCheck', order: 3, parentCode: 'SYS_GROUP', linkedResourceCode: 'ROLE', type: 'MENU' },
@@ -546,14 +546,14 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'SYS_ENDPOINT', name: 'Quản lý Endpoints', route: '/system-admin/endpoints', icon: 'PlugZ', order: 9, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
 
     // 2.5 Trung tâm Thông báo (Hub)
-    { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: 'NOTIFICATION', type: 'SERVICE_ITEM' },
-    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/hub/notifications?tab=config', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
+    { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: null, type: 'SERVICE_ITEM' },
+    { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/hub/notifications/config', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
 
     // 2.6 Quản lý API Gateway
-    { code: 'API_GATEWAY_GROUP', name: 'Quản lý API Gateway', route: '/admin/gateway', icon: 'Server', order: 11, linkedResourceCode: 'API_GATEWAY', type: 'SERVICE_ITEM' },
+    { code: 'API_GATEWAY_GROUP', name: 'Quản lý API Gateway', route: '/admin/gateway', icon: 'Server', order: 11, linkedResourceCode: null, type: 'SERVICE_ITEM' },
 
     // 3. Quản lý Nhân sự & Công việc
-    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: 'HRM_EMPLOYEE', type: 'SERVICE_ITEM' },
+    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'HRM_DASHBOARD_MENU', name: 'Tổng quan (Dashboard)', route: '/services/hrm/dashboard', icon: 'LayoutDashboard', order: 1, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
     { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/services/hrm/employees', icon: 'UserCircle', order: 2, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
     { code: 'HRM_TASK_MENU', name: 'Danh sách nhiệm vụ', route: '/services/hrm/work-plans/tasks', icon: 'CheckSquare', order: 3, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
@@ -567,7 +567,7 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'HRM_DASHBOARD_KPI_MENU', name: 'Tổng hợp KPI', route: '/services/hrm/work-plans/dashboard-kpi', icon: 'PieChart', order: 11, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
 
     // 4. Quản lý Văn bản
-    { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: '/services/documents', icon: 'FileText', order: 3, linkedResourceCode: 'DOC_INCOMING', type: 'SERVICE_ITEM' },
+    { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: '/services/documents', icon: 'FileText', order: 3, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'DOC_INCOMING_MENU', name: 'Văn bản đến', route: '/services/documents/incoming', icon: 'Mail', order: 1, parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_INCOMING', type: 'MENU' },
     { code: 'DOC_OUTGOING_MENU', name: 'Văn bản đi', route: '/services/documents/outgoing', icon: 'Send', order: 2, parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_OUTGOING', type: 'MENU' },
     { code: 'DOC_PROCESSING_MENU', name: 'Xử lý văn bản', route: '/services/documents/processing', icon: 'Layers', order: 3, parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_PROCESSING', type: 'MENU' },
@@ -580,7 +580,7 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'DOC_PROCEDURE_MENU', name: 'Thủ tục hành chính', route: '/services/documents/procedures', icon: 'ClipboardList', order: 10, parentCode: 'DOC_GROUP', linkedResourceCode: 'DOCUMENT', type: 'MENU' },
 
     // 5. Quản lý Nội dung
-    { code: 'CONTENT_GROUP', name: 'Quản lý Nội dung', route: '/services/posts', icon: 'Newspaper', order: 4, linkedResourceCode: 'POST', type: 'SERVICE_ITEM' },
+    { code: 'CONTENT_GROUP', name: 'Quản lý Nội dung', route: '/services/posts', icon: 'Newspaper', order: 4, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'CONTENT_POST_MENU', name: 'Bài viết', route: '/services/posts', icon: 'FileText', order: 1, parentCode: 'CONTENT_GROUP', linkedResourceCode: 'POST', type: 'MENU' },
     { code: 'CONTENT_BANNER_MENU', name: 'Banner', route: '/services/posts/banners', icon: 'Image', order: 2, parentCode: 'CONTENT_GROUP', linkedResourceCode: 'BANNER', type: 'MENU' },
     { code: 'CONTENT_PORTAL_MENU', name: 'Menu Portal', route: '/services/posts/portal-menu', icon: 'Menu', order: 3, parentCode: 'CONTENT_GROUP', linkedResourceCode: 'PORTAL_MENU', type: 'MENU' },
@@ -590,14 +590,14 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'CONTENT_BUILDER_MENU', name: 'Trình dựng trang', route: '/services/posts/portal-page-builder', icon: 'Layers', order: 7, parentCode: 'CONTENT_GROUP', linkedResourceCode: 'POST', type: 'MENU' },
 
     // 6. Quy trình & Tích hợp
-    { code: 'WORKFLOW_GROUP', name: 'Quy trình & Liên thông', route: '/services/integration', icon: 'GitBranch', order: 5, linkedResourceCode: 'WORKFLOW', type: 'SERVICE_ITEM' },
+    { code: 'WORKFLOW_GROUP', name: 'Quy trình & Liên thông', route: '/services/integration', icon: 'GitBranch', order: 5, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'WORKFLOW_DASHBOARD_MENU', name: 'Bảng quản trị', route: '/services/integration', icon: 'Layers', order: 1, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
     { code: 'WORKFLOW_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/integration/gateway', icon: 'Network', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
     { code: 'WORKFLOW_SYSTEM_MENU', name: 'Quy trình hệ thống', route: '/services/integration/workflows', icon: 'GitBranch', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
     { code: 'WORKFLOW_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/integration/apis', icon: 'Plug', order: 4, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
 
     // 7. Phân tích, báo cáo
-    { code: 'REPORT_GROUP', name: 'Phân tích, báo cáo', route: '/services/reports', icon: 'BarChart3', order: 6, linkedResourceCode: 'REPORT', type: 'SERVICE_ITEM' },
+    { code: 'REPORT_GROUP', name: 'Phân tích, báo cáo', route: '/services/reports', icon: 'BarChart3', order: 6, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'REPORT_DASHBOARD_MENU', name: 'Dashboard Thống kê', route: '/services/reports', icon: 'LayoutDashboard', order: 1, parentCode: 'REPORT_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
   ];
 
