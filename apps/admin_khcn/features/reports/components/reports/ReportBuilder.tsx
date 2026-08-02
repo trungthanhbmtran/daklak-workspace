@@ -67,13 +67,6 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const [xAxisKey, setXAxisKey] = useState<string>("");
   const [yAxisKey, setYAxisKey] = useState<string>("");
 
-  const availableFields = useMemo(() => {
-    if (!sourceId) return [];
-    const data = (MOCK_DATA as any)[sourceId];
-    if (!data || data.length === 0) return [];
-    return Object.keys(data[0]);
-  }, [sourceId]);
-
   const previewData = useMemo(() => {
     if (!sourceId) return [];
     
@@ -86,6 +79,11 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     const selectedSource = systemSources.find(s => s.id === sourceId);
     return generateMockDataForSource(selectedSource?.name || "System");
   }, [sourceId, systemSources]);
+
+  const availableFields = useMemo(() => {
+    if (!previewData || previewData.length === 0) return [];
+    return Object.keys(previewData[0]);
+  }, [previewData]);
 
   const handleSave = async () => {
     if (!title || !sourceId || !xAxisKey || !yAxisKey) {
