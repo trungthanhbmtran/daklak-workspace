@@ -21,7 +21,11 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSearchParams } from "next/navigation";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
-import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
+import dynamic from "next/dynamic";
+
+const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
+  ssr: false,
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

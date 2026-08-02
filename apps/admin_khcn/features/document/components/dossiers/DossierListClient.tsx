@@ -4,7 +4,11 @@
 import React, { useCallback, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CreateDossierModal } from "./CreateDossierModal";
+import dynamic from "next/dynamic";
+
+const CreateDossierModal = dynamic(() => import("./CreateDossierModal").then(mod => mod.CreateDossierModal), {
+  ssr: false,
+});
 import { useDossierList } from "../../hooks/useDocumentFormData";
 import { DossierCard } from "./components/DossierCard";
 import { DossierHeader } from "./components/DossierHeader";

@@ -11,8 +11,15 @@ import {
 } from "./hooks/useUserApi";
 import { useUserUI } from "./hooks/useUserUI";
 import { UserTable } from "./components/UserTable";
-import { CreateUserModal } from "./components/CreateUserModal";
-import { UserDetailSheet } from "./components/UserDetailCard";
+import dynamic from "next/dynamic";
+
+const CreateUserModal = dynamic(() => import("./components/CreateUserModal").then(mod => mod.CreateUserModal), {
+  ssr: false,
+});
+
+const UserDetailSheet = dynamic(() => import("./components/UserDetailCard").then(mod => mod.UserDetailSheet), {
+  ssr: false,
+});
 
 export function UserClient() {
   const ui = useUserUI();

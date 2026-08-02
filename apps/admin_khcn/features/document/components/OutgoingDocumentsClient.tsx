@@ -21,7 +21,11 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
-import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
+import dynamic from "next/dynamic";
+
+const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
+  ssr: false,
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
