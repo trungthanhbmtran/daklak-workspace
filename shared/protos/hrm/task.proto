@@ -124,9 +124,9 @@ message TaskResponse {
   string startDate = 19;
   int32 parentId = 20;
   string rejectReason = 21;
-  string assignerName = 22;  // Tên người giao việc
-  string priority = 23;      // Mức độ ưu tiên
-  string supervisorName = 24; // Tên người theo dõi chỉ đạo
+  string assignerName = 22;  // TÃªn ngÆ°á»i giao viá»‡c
+  string priority = 23;      // Má»©c Ä‘á»™ Æ°u tiÃªn
+  string supervisorName = 24; // TÃªn ngÆ°á»i theo dÃµi chá»‰ Ä‘áº¡o
   repeated string coassigneeCodes = 25;
   repeated string allowedActions = 26;
   TaskPlan plan = 27;
@@ -180,12 +180,12 @@ message ListTasksRequest {
   int32 page = 6;
   int32 limit = 7;
   string currentEmployeeCode = 8;
-  string assignerCode = 9; // optional - lọc theo người giao việc (tab Đã giao)
-  string status = 10; // optional - lọc theo trạng thái
-  string priority = 11; // optional - lọc theo mức độ ưu tiên
-  int32 planId = 12; // optional - id kế hoạch
+  string assignerCode = 9; // optional - lá»c theo ngÆ°á»i giao viá»‡c (tab ÄÃ£ giao)
+  string status = 10; // optional - lá»c theo tráº¡ng thÃ¡i
+  string priority = 11; // optional - lá»c theo má»©c Ä‘á»™ Æ°u tiÃªn
+  int32 planId = 12; // optional - id káº¿ hoáº¡ch
   string statsFilter = 13;
-  string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
+  string role = 14; // optional - lá»c theo vai trÃ² (ASSIGNEE, OWNER)
   bool isAdmin = 15;
   bool isLeader = 16;
   repeated int32 allowedDepartmentIds = 17;
@@ -235,8 +235,8 @@ message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
   string rejectReason = 3;         // optional
-  string actorCode = 4;             // người thực hiện (từ JWT)
-  string actionName = 5;            // optional — tên action workflow (mặc định = status)
+  string actorCode = 4;             // ngÆ°á»i thá»±c hiá»‡n (tá»« JWT)
+  string actionName = 5;            // optional â€” tÃªn action workflow (máº·c Ä‘á»‹nh = status)
   int32 currentUserId = 6;
   string currentEmployeeCode = 7;
   repeated string currentUserPermissions = 8;
@@ -267,6 +267,10 @@ message TaskTemplateResponse {
   string defaultUnit = 5;
   float defaultWeight = 6;
   string createdAt = 7;
+  string actorName = 8;
+  string actorAvatar = 9;
+  string assigneeName = 10;
+  repeated string coassigneeNames = 11;
   string updatedAt = 8;
 }
 
@@ -353,7 +357,7 @@ message GetCommentsResponse {
   repeated TaskCommentResponse data = 3;
 }
 
-// Chuỗi giao việc - mỗi node là một bước trong timeline
+// Chuá»—i giao viá»‡c - má»—i node lÃ  má»™t bÆ°á»›c trong timeline
 message DelegationNode {
   int32 id = 1;
   string title = 2;
@@ -367,11 +371,11 @@ message DelegationNode {
   int32 parentId = 10;
   string dueDate = 11;
   string createdAt = 12;
-  bool isParent = 13;      // Đây là task cha (cấp trên đã giao task này)
-  bool isCurrent = 14;     // Đây là task đang xem
-  bool isChild = 15;       // Task con (bất kỳ cấp nào)
-  bool isGrandChild = 16;  // Giữ lại để tương thích
-  int32 level = 17;        // Cấp độ: -1=cha, 0=hiện tại, 1,2,3...=các cấp con (không giới hạn)
+  bool isParent = 13;      // ÄÃ¢y lÃ  task cha (cáº¥p trÃªn Ä‘Ã£ giao task nÃ y)
+  bool isCurrent = 14;     // ÄÃ¢y lÃ  task Ä‘ang xem
+  bool isChild = 15;       // Task con (báº¥t ká»³ cáº¥p nÃ o)
+  bool isGrandChild = 16;  // Giá»¯ láº¡i Ä‘á»ƒ tÆ°Æ¡ng thÃ­ch
+  int32 level = 17;        // Cáº¥p Ä‘á»™: -1=cha, 0=hiá»‡n táº¡i, 1,2,3...=cÃ¡c cáº¥p con (khÃ´ng giá»›i háº¡n)
   repeated string allowedActions = 18;
   string description = 19;
   string supervisorCode = 20;
@@ -396,7 +400,7 @@ message GetSubTasksResponse {
   repeated DelegationNode data = 3;
 }
 
-// ─── GetTask ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ GetTask â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 message GetTaskRequest {
   int32 id = 1;
   int32 currentUserId = 2;
@@ -405,7 +409,7 @@ message GetTaskRequest {
   repeated string currentUserPermissions = 5;
 }
 
-// ─── BreakdownTask ─────────────────────────────────────────────────────────
+// â”€â”€â”€ BreakdownTask â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 message BreakdownTaskRequest {
   int32 parentId = 1;
   string title = 2;
@@ -423,7 +427,7 @@ message BreakdownTaskRequest {
   repeated string currentUserPermissions = 14;
 }
 
-// ─── UpdateTaskProgress ────────────────────────────────────────────────────
+// â”€â”€â”€ UpdateTaskProgress â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 message UpdateTaskProgressRequest {
   int32 id = 1;
   float progress = 2;
@@ -434,12 +438,12 @@ message UpdateTaskProgressRequest {
   repeated string currentUserPermissions = 7;
 }
 
-// ─── RequestCoordination ───────────────────────────────────────────────────
+// â”€â”€â”€ RequestCoordination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 message RequestCoordinationRequest {
   int32 taskId = 1;
   string requesterCode = 2;
   string message = 3;
-  string leadId = 4;             // if set → supervisor assigns lead role
+  string leadId = 4;             // if set â†’ supervisor assigns lead role
   repeated string coordinatorIds = 5;
   string leadCode = 6;
   repeated string coordinatorCodes = 7;
@@ -515,6 +519,10 @@ message TaskHistoryData {
   string oldValue = 5;
   string newValue = 6;
   string createdAt = 7;
+  string actorName = 8;
+  string actorAvatar = 9;
+  string assigneeName = 10;
+  repeated string coassigneeNames = 11;
 }
 
 message TaskHistoryResponse {
@@ -523,7 +531,7 @@ message TaskHistoryResponse {
   repeated TaskHistoryData data = 3;
 }
 
-// ─── TaskStep Messages ────────────────────────────────────────────────────────
+// â”€â”€â”€ TaskStep Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 message TaskStep {
   int32 id = 1;
   int32 taskId = 2;
@@ -532,6 +540,10 @@ message TaskStep {
   int32 order = 5;
   string assigneeCode = 6;
   string createdAt = 7;
+  string actorName = 8;
+  string actorAvatar = 9;
+  string assigneeName = 10;
+  repeated string coassigneeNames = 11;
   string updatedAt = 8;
 }
 
