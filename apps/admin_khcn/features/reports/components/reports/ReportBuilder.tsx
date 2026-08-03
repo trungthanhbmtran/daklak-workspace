@@ -49,13 +49,14 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       id: `api-${int.id}`,
       name: `API: ${int.name}`,
       type: 'api',
-      icon: Server
+      icon: Server,
+      endpoints: int.endpoints || []
     }));
     
     // Default DB sources for testing
     const dbSources = [
-      { id: "db-users", name: "CSDL: Người dùng", type: "db", icon: Database },
-      { id: "db-workflows", name: "CSDL: Quy trình", type: "db", icon: Database }
+      { id: "db-users", name: "CSDL: Người dùng", type: "db", icon: Database, endpoints: [] },
+      { id: "db-workflows", name: "CSDL: Quy trình", type: "db", icon: Database, endpoints: [] }
     ];
 
     return [...apiSources, ...dbSources];
@@ -63,9 +64,14 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
 
   const [title, setTitle] = useState("Báo cáo mới");
   const [sourceId, setSourceId] = useState<string>("");
+  const [endpointPath, setEndpointPath] = useState<string>("");
   const [chartType, setChartType] = useState<'bar' | 'line' | 'pie' | 'table'>('bar');
   const [xAxisKey, setXAxisKey] = useState<string>("");
   const [yAxisKey, setYAxisKey] = useState<string>("");
+
+  const selectedSource = useMemo(() => {
+    return systemSources.find(s => s.id === sourceId);
+  }, [sourceId, systemSources]);
 
   const previewData = useMemo(() => {
     if (!sourceId) return [];
@@ -86,7 +92,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   }, [previewData]);
 
   const handleSave = async () => {
-    if (!title || !sourceId || !xAxisKey || !yAxisKey) {
+    if (!title || !sourceId || !xAxisKey || !yAxisKey || (selectedSource?.endpoints?.length > 0 && !endpointPath)) {
       toast.error("Vui lòng điền đầy đủ cấu hình trước khi lưu!");
       return;
     }
@@ -100,9 +106,12 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           title: "Widget 1",
           chartType: chartType.toUpperCase(),
           dataSourceCode: sourceId,
+          endpoint: endpointPath,
           xAxisKey,
           yAxisKey,
-          config: {}
+          config: {
+            endpoint: endpointPath
+          }
         }
       ]
     };
@@ -142,6 +151,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             <Label>Nguồn Dữ Liệu</Label>
             <Select value={sourceId} onValueChange={(val) => {
               setSourceId(val);
+              setEndpointPath("");
               setXAxisKey("");
               setYAxisKey("");
             }}>
@@ -160,6 +170,29 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
               </SelectContent>
             </Select>
           </div>
+
+          {selectedSource?.endpoints && selectedSource.endpoints.length > 0 && (
+            <div className="space-y-2">
+              <Label>Endpoint API</Label>
+              <Select value={endpointPath} onValueChange={setEndpointPath}>
+                <SelectTrigger className="bg-white dark:bg-slate-900">
+                  <SelectValue placeholder="Chọn Endpoint..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedSource.endpoints.map((ep: any, idx: number) => (
+                    <SelectItem key={idx} value={ep.path}>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className={`font-mono text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 ${ep.method === 'GET' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'}`}>
+                          {ep.method}
+                        </span>
+                        {ep.path}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Loại Biểu Đồ</Label>
