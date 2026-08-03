@@ -271,7 +271,7 @@ message TaskTemplateResponse {
   string actorAvatar = 9;
   string assigneeName = 10;
   repeated string coassigneeNames = 11;
-  string updatedAt = 8;
+  string updatedAt = 12;
 }
 
 message FindAllTemplatesRequest {
@@ -544,7 +544,7 @@ message TaskStep {
   string actorAvatar = 9;
   string assigneeName = 10;
   repeated string coassigneeNames = 11;
-  string updatedAt = 8;
+  string updatedAt = 12;
 }
 
 message TaskStepResponse {
