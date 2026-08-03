@@ -50,7 +50,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       name: `API: ${int.name}`,
       type: 'api',
       icon: Server,
-      endpoints: int.endpoints || []
+      endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
     }));
     
     // Default DB sources for testing
