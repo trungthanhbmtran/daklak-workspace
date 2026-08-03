@@ -70,8 +70,12 @@ export class TaskSharedService {
         await this.cache.set(cacheKey, res.id, 3600 * 1000 * 24); // Cache 24h
         return res.id;
       }
-    } catch (e) {
-      this.logger.error(`Failed to fetch workflow id for code ${trigger}`, e);
+    } catch (e: any) {
+      if (e?.code === 2 || e?.code === 5 || (e?.details && e.details.includes('not found')) || (e?.message && e.message.includes('not found')) || (e?.details && e.details.includes('Internal server error'))) {
+        this.logger.debug(`Workflow default '${trigger}' not found. Falling back to native actions.`);
+      } else {
+        this.logger.error(`Failed to fetch workflow id for code ${trigger}`, e);
+      }
     }
     return null;
   }
