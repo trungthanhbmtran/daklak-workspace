@@ -104,8 +104,17 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     if (isApiSourceReady) {
       if (!queryData) return [];
       const dataAny = queryData as any;
-      if (dataAny?.success && Array.isArray(dataAny.data)) {
-        return dataAny.data;
+      if (dataAny?.success) {
+        if (Array.isArray(dataAny.data)) {
+          return dataAny.data;
+        }
+        // Fallback for nested arrays (e.g., { nodes: [...] }, { policies: [...] })
+        if (typeof dataAny.data === 'object' && dataAny.data !== null) {
+          const firstArrayKey = Object.keys(dataAny.data).find(key => Array.isArray(dataAny.data[key]));
+          if (firstArrayKey) {
+            return dataAny.data[firstArrayKey];
+          }
+        }
       }
       return [];
     } 
