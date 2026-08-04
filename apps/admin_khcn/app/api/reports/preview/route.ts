@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import https from "https";
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,12 +34,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Execute request
+    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
     const response = await axios({
       method: method.toUpperCase(),
       url,
       headers: requestHeaders,
       params,
       timeout: 10000, // 10 seconds timeout
+      httpsAgent,
     });
 
     // We assume the response data might be wrapped or an array.
