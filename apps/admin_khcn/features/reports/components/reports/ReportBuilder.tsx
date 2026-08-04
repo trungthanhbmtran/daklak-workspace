@@ -19,7 +19,7 @@ const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartR
 });
 import { toast } from "sonner";
 import { useIntegrationList } from "@/features/integration/api";
-import { useCreateTemplate } from "../../api";
+import { useCreateTemplate, usePreviewReport } from "../../api";
 
 interface ReportBuilderProps {
   onBack: () => void;
@@ -40,16 +40,30 @@ const generateMockDataForSource = (sourceName: string) => {
 
 import { MOCK_DATA } from "./mockData";
 
+interface SystemSource {
+  id: string;
+  name: string;
+  type: string;
+  icon: any;
+  baseUrl?: string;
+  headers?: any;
+  authConfig?: any;
+  endpoints?: any[];
+}
+
 export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const { data: integrations } = useIntegrationList("");
   const { mutateAsync: createTemplate, isPending } = useCreateTemplate();
   
-  const systemSources = useMemo(() => {
+  const systemSources = useMemo<SystemSource[]>(() => {
     const apiSources = (integrations || []).map(int => ({
       id: `api-${int.id}`,
       name: `API: ${int.name}`,
       type: 'api',
       icon: Server,
+      baseUrl: int.baseUrl,
+      headers: int.headers,
+      authConfig: int.authConfig,
       endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
     }));
     
@@ -73,18 +87,44 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     return systemSources.find(s => s.id === sourceId);
   }, [sourceId, systemSources]);
 
+  const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
+  
+  const previewPayload = useMemo(() => ({
+    baseUrl: selectedSource?.baseUrl,
+    endpointPath: endpointPath,
+    method: epInfo?.method || 'GET',
+    headers: selectedSource?.headers,
+    authConfig: selectedSource?.authConfig,
+    params: {},
+    sourceId
+  }), [selectedSource, endpointPath, epInfo, sourceId]);
+
+  const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
+
+  const { data: queryData, isFetching: isPreviewLoading, refetch: refetchPreview } = usePreviewReport(previewPayload, isApiSourceReady);
+
   const previewData = useMemo(() => {
     if (!sourceId) return [];
     
-    // If it's from the old static mock data, use it (for ReportDashboard rendering)
+    // Static mock data check for legacy sources
     if ((MOCK_DATA as any)[sourceId]) {
       return (MOCK_DATA as any)[sourceId];
     }
 
-    // Generate dynamic mock data for new system sources
-    const selectedSource = systemSources.find(s => s.id === sourceId);
-    return generateMockDataForSource(selectedSource?.name || "System");
-  }, [sourceId, systemSources]);
+    if (isApiSourceReady) {
+      const dataAny = queryData as any;
+      if (dataAny?.success && Array.isArray(dataAny.data)) {
+        return dataAny.data;
+      }
+      return generateMockDataForSource(selectedSource?.name || "System");
+    } 
+    
+    if (selectedSource?.type === 'db' || (selectedSource?.type === 'api' && !endpointPath && selectedSource.endpoints?.length === 0)) {
+      return generateMockDataForSource(selectedSource?.name || "System");
+    }
+    
+    return [];
+  }, [sourceId, isApiSourceReady, queryData, selectedSource, endpointPath]);
 
   const availableFields = useMemo(() => {
     if (!previewData || previewData.length === 0) return [];
@@ -92,7 +132,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   }, [previewData]);
 
   const handleSave = async () => {
-    if (!title || !sourceId || !xAxisKey || !yAxisKey || (selectedSource?.endpoints?.length > 0 && !endpointPath)) {
+    if (!title || !sourceId || !xAxisKey || !yAxisKey || ((selectedSource?.endpoints?.length ?? 0) > 0 && !endpointPath)) {
       toast.error("Vui lòng điền đầy đủ cấu hình trước khi lưu!");
       return;
     }
@@ -280,11 +320,17 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             <LayoutGrid className="w-5 h-5 text-violet-500" />
             Xem trước (Preview)
           </h3>
-          <Button variant="outline" size="sm" className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30" iconStart={<Play className="w-4 h-4" />}>Làm mới dữ liệu</Button>
+          <Button variant="outline" size="sm" className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30" iconStart={<Play className="w-4 h-4" />} onClick={() => refetchPreview()}>Làm mới dữ liệu</Button>
         </div>
         
         <div className="flex-1 p-8 overflow-y-auto flex flex-col items-center justify-center">
-          {!sourceId || !xAxisKey || !yAxisKey ? (
+          {isPreviewLoading ? (
+            <div className="text-center p-12 bg-white dark:bg-slate-950 border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl max-w-md w-full shadow-sm flex flex-col items-center justify-center">
+              <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-4"></div>
+              <h4 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">Đang tải dữ liệu...</h4>
+              <p className="text-slate-500 text-sm">Đang truy vấn endpoint API để lấy cấu trúc và dữ liệu mẫu.</p>
+            </div>
+          ) : !sourceId || !xAxisKey || !yAxisKey ? (
             <div className="text-center p-12 bg-white dark:bg-slate-950 border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl max-w-md w-full shadow-sm">
               <div className="w-16 h-16 bg-slate-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <BarChart2 className="w-8 h-8 text-slate-400" />

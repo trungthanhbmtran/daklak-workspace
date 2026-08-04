@@ -58,3 +58,18 @@ export function useDeleteTemplate() {
     },
   });
 }
+
+export const previewReport = async (payload: any) => {
+  // Use baseURL: '' to call Next.js local API route instead of backend API
+  const res = await api.post('/api/reports/preview', payload, { baseURL: '' });
+  return res;
+};
+
+export function usePreviewReport(payload: any, enabled: boolean) {
+  return useQuery({
+    queryKey: ["reports", "preview", payload],
+    queryFn: () => previewReport(payload),
+    enabled,
+    retry: false,
+  });
+}
