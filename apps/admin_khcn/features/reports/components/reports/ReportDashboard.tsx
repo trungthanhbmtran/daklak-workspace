@@ -22,7 +22,7 @@ import { useWidgets, useDeleteTemplate, usePreviewReport } from "../../api";
 import { useIntegrationList } from "@/features/integration/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { MOCK_DATA } from "./mockData";
+import { MOCK_DATA, generateMockDataForSource } from "./mockData";
 
 function ReportWidget({ widget, integrations }: { widget: any; integrations: any[] }) {
   const systemSources = React.useMemo(() => {
@@ -65,7 +65,8 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
       }
       return [];
     }
-    return (MOCK_DATA as any)[sourceId] || [];
+    const mockData = (MOCK_DATA as any)[sourceId];
+    return mockData ? mockData : generateMockDataForSource(sourceId);
   }, [isApiSourceReady, queryData, sourceId]);
 
   return (

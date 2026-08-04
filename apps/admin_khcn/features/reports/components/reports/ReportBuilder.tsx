@@ -26,19 +26,7 @@ interface ReportBuilderProps {
   onSave: (config: any) => void;
 }
 
-// Generic mock data generator for when an API is selected, so we can preview the chart
-// In a real scenario, this would be a fetch to an analytics endpoint or the API itself.
-// eslint-disable-next-line unused-imports/no-unused-vars
-const generateMockDataForSource = (sourceName: string) => {
-  return [
-    { label: "Jan", total_calls: Math.floor(Math.random() * 5000), error_rate: Math.floor(Math.random() * 10) },
-    { label: "Feb", total_calls: Math.floor(Math.random() * 5000), error_rate: Math.floor(Math.random() * 10) },
-    { label: "Mar", total_calls: Math.floor(Math.random() * 5000), error_rate: Math.floor(Math.random() * 10) },
-    { label: "Apr", total_calls: Math.floor(Math.random() * 5000), error_rate: Math.floor(Math.random() * 10) },
-  ];
-};
-
-import { MOCK_DATA } from "./mockData";
+import { MOCK_DATA, generateMockDataForSource } from "./mockData";
 
 interface SystemSource {
   id: string;
