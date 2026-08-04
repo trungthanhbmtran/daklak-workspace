@@ -61,7 +61,8 @@ export function useDeleteTemplate() {
 
 export const previewReport = async (payload: any) => {
   // Use baseURL: '' to call Next.js local API route instead of backend API
-  const res = await api.post('/api/reports/preview', payload, { baseURL: '' });
+  // Note: next.config.ts has basePath: '/admin', so the local route is /admin/api/reports/preview
+  const res = await api.post('/admin/api/reports/preview', payload, { baseURL: '' });
   return res;
 };
 
