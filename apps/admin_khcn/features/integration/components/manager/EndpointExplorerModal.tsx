@@ -2,10 +2,12 @@
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
-import { Plug, Save } from "lucide-react";
+import { Plug, Save, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { IntegrationConfig, useUpdateIntegration } from "../../api";
+import { previewReport } from "../../../reports/api";
 import { toast } from "sonner";
 import { ParsedEndpoint } from "./EndpointTypes";
 import { EndpointSidebar } from "./EndpointSidebar";
@@ -22,6 +24,11 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const updateMutation = useUpdateIntegration();
+
+  // Test API state
+  const [testModalOpen, setTestModalOpen] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
 
   const handleSave = useCallback(() => {
     if (!integration) return;
@@ -126,7 +133,47 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
 
   const selectedEndpoint = endpoints.find(ep => ep.id === selectedId);
 
+  const handleTestEndpoint = useCallback(async () => {
+    if (!integration || !selectedEndpoint) return;
+    
+    setIsTesting(true);
+    setTestResult(null);
+    setTestModalOpen(true);
+
+    try {
+      // Build headers & params object
+      const headersMap: Record<string, string> = {};
+      selectedEndpoint.headers?.forEach(h => {
+        if (h.key && h.value) headersMap[h.key] = h.value;
+      });
+      const paramsMap: Record<string, string> = {};
+      selectedEndpoint.params?.forEach(p => {
+        if (p.key && p.value) paramsMap[p.key] = p.value;
+      });
+
+      const payload = {
+        baseUrl: integration.baseUrl,
+        endpointPath: selectedEndpoint.path,
+        method: selectedEndpoint.method || 'GET',
+        headers: { ...integration.headers, ...headersMap },
+        authConfig: integration.authConfig,
+        params: paramsMap
+      };
+
+      const res = await previewReport(payload);
+      setTestResult({ success: true, data: res.data });
+    } catch (err: any) {
+      setTestResult({
+        success: false,
+        error: err.response?.data?.message || err.message || "Lỗi khi gọi API"
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  }, [integration, selectedEndpoint]);
+
   return (
+    <>
     <ResponsiveModal
       open={isOpen}
       onOpenChange={setIsOpen}
@@ -164,9 +211,31 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
           onAddItem={handleAddItem}
           onRemoveItem={handleRemoveItem}
           onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
+          onTest={handleTestEndpoint}
         />
       </div>
     </ResponsiveModal>
+
+    <Dialog open={testModalOpen} onOpenChange={setTestModalOpen}>
+      <DialogContent className="sm:max-w-[700px] h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <DialogHeader className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
+          <DialogTitle>Test API: {selectedEndpoint?.name}</DialogTitle>
+          <DialogDescription className="font-mono text-xs">{integration?.baseUrl}{selectedEndpoint?.path}</DialogDescription>
+        </DialogHeader>
+        <div className="flex-1 overflow-auto bg-slate-950 p-4">
+          {isTesting ? (
+            <div className="flex items-center justify-center h-full">
+              <span className="text-violet-400 animate-pulse text-sm">Đang gọi API...</span>
+            </div>
+          ) : (
+            <pre className="text-xs font-mono text-emerald-400 break-words whitespace-pre-wrap">
+              {JSON.stringify(testResult, null, 2)}
+            </pre>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 });
 

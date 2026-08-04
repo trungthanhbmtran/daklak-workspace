@@ -44,8 +44,8 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
           <Activity className="w-6 h-6 text-violet-600 dark:text-violet-400" />
         </div>
         <div className="flex flex-col gap-1.5 overflow-hidden">
-          <CardTitle className="text-lg truncate">{item.name}</CardTitle>
-          <CardDescription className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md w-fit truncate">
+          <CardTitle className="text-lg break-words">{item.name}</CardTitle>
+          <CardDescription className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md w-fit break-all">
             {item.code}
           </CardDescription>
         </div>
@@ -56,7 +56,7 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
           {item.baseUrl && (
             <div className="flex items-start gap-2 overflow-hidden">
               <span className="font-medium shrink-0">Base URL:</span>
-              <span className="truncate text-violet-600 dark:text-violet-400" title={item.baseUrl}>
+              <span className="break-all text-violet-600 dark:text-violet-400" title={item.baseUrl}>
                 {item.baseUrl}
               </span>
             </div>

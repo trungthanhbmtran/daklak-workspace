@@ -5,6 +5,7 @@ import React, { memo } from "react";
 import { Server, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +19,7 @@ interface EndpointEditorProps {
   onAddItem: (type: 'headers' | 'params') => void;
   onRemoveItem: (type: 'headers' | 'params', index: number) => void;
   onDelete: () => void;
+  onTest?: () => void;
 }
 
 export const EndpointEditor = memo(({
@@ -26,7 +28,8 @@ export const EndpointEditor = memo(({
   onItemChange,
   onAddItem,
   onRemoveItem,
-  onDelete
+  onDelete,
+  onTest
 }: EndpointEditorProps) => {
 
   if (!selectedEndpoint) {
@@ -50,9 +53,16 @@ export const EndpointEditor = memo(({
               className="font-bold text-lg text-slate-800 dark:text-slate-100 h-auto py-1.5 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 flex-1 min-w-0"
               placeholder="Tên API..."
             />
-            <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0" title="Xóa Endpoint này">
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            <div className="flex gap-1 shrink-0">
+              {onTest && (
+                <Button variant="outline" size="sm" onClick={onTest} className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30 shrink-0 h-8" title="Test API">
+                  <Play className="w-4 h-4 mr-2" /> Test
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0 h-8 w-8" title="Xóa Endpoint này">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
           <Input
             value={selectedEndpoint.description || ""}
