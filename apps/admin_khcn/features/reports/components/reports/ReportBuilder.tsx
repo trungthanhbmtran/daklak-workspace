@@ -82,6 +82,8 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const [chartType, setChartType] = useState<'bar' | 'line' | 'pie' | 'table'>('bar');
   const [xAxisKey, setXAxisKey] = useState<string>("");
   const [yAxisKey, setYAxisKey] = useState<string>("");
+  const [xAxisLabel, setXAxisLabel] = useState<string>("");
+  const [yAxisLabel, setYAxisLabel] = useState<string>("");
 
   const selectedSource = useMemo(() => {
     return systemSources.find(s => s.id === sourceId);
@@ -149,6 +151,8 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           endpoint: endpointPath,
           xAxisKey,
           yAxisKey,
+          xAxisLabel,
+          yAxisLabel,
           config: {
             endpoint: endpointPath
           }
@@ -271,32 +275,50 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
             <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mapping Dữ Liệu</h4>
             
-            <div className="space-y-2">
-              <Label>{chartType === 'pie' ? 'Trường Danh Mục (Name)' : chartType === 'table' ? 'Trường Chính' : 'Trục Hoành (X-Axis)'}</Label>
-              <Select value={xAxisKey} onValueChange={setXAxisKey} disabled={!sourceId}>
-                <SelectTrigger className="bg-white dark:bg-slate-900">
-                  <SelectValue placeholder="Chọn trường dữ liệu..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableFields.map((field) => (
-                    <SelectItem key={field} value={field}>{field}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{chartType === 'pie' ? 'Danh Mục (Name)' : chartType === 'table' ? 'Trường Chính' : 'Trục Hoành (X-Axis)'}</Label>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
+                <Input value={xAxisLabel} onChange={e => setXAxisLabel(e.target.value)} placeholder="VD: Tháng, Phòng ban..." className="bg-white dark:bg-slate-950 h-8 text-sm" />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">Trường dữ liệu nguồn</Label>
+                <Select value={xAxisKey} onValueChange={setXAxisKey} disabled={!sourceId}>
+                  <SelectTrigger className="bg-white dark:bg-slate-950 h-8 text-sm">
+                    <SelectValue placeholder="Chọn trường dữ liệu..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableFields.map((field) => (
+                      <SelectItem key={field} value={field}>{field}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>{chartType === 'pie' ? 'Trường Giá Trị (Value)' : chartType === 'table' ? 'Trường Phụ' : 'Trục Tung (Y-Axis)'}</Label>
-              <Select value={yAxisKey} onValueChange={setYAxisKey} disabled={!sourceId}>
-                <SelectTrigger className="bg-white dark:bg-slate-900">
-                  <SelectValue placeholder="Chọn trường giá trị (số)..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableFields.map((field) => (
-                    <SelectItem key={field} value={field}>{field}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{chartType === 'pie' ? 'Giá Trị (Value)' : chartType === 'table' ? 'Trường Phụ' : 'Trục Tung (Y-Axis)'}</Label>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
+                <Input value={yAxisLabel} onChange={e => setYAxisLabel(e.target.value)} placeholder="VD: Doanh thu, Số lượng..." className="bg-white dark:bg-slate-950 h-8 text-sm" />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">Trường dữ liệu nguồn</Label>
+                <Select value={yAxisKey} onValueChange={setYAxisKey} disabled={!sourceId}>
+                  <SelectTrigger className="bg-white dark:bg-slate-950 h-8 text-sm">
+                    <SelectValue placeholder="Chọn trường giá trị (số)..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableFields.map((field) => (
+                      <SelectItem key={field} value={field}>{field}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
@@ -346,6 +368,8 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
                 data={previewData} 
                 xAxisKey={xAxisKey} 
                 yAxisKey={yAxisKey} 
+                xAxisLabel={xAxisLabel}
+                yAxisLabel={yAxisLabel}
                 height={400} 
               />
             </div>

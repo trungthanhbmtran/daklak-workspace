@@ -24,12 +24,14 @@ interface ChartRendererProps {
   data: any[];
   xAxisKey: string;
   yAxisKey: string;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
   height?: number;
 }
 
 const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
 
-export function ChartRenderer({ type, data, xAxisKey, yAxisKey, height = 300 }: ChartRendererProps) {
+export function ChartRenderer({ type, data, xAxisKey, yAxisKey, xAxisLabel, yAxisLabel, height = 300 }: ChartRendererProps) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center w-full bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800" style={{ height }}>
@@ -65,25 +67,25 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, height = 300 }: 
         {type === 'bar' ? (
           <BarChart data={data} margin={margin}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dx={-10} />
             <Tooltip
               contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
               cursor={{ fill: 'rgba(139, 92, 246, 0.05)' }}
             />
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
-            <Bar dataKey={yAxisKey} fill="#8b5cf6" radius={[6, 6, 0, 0]} maxBarSize={60} />
+            <Bar dataKey={yAxisKey} name={yAxisLabel || yAxisKey} fill="#8b5cf6" radius={[6, 6, 0, 0]} maxBarSize={60} />
           </BarChart>
         ) : type === 'line' ? (
           <LineChart data={data} margin={margin}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dx={-10} />
             <Tooltip
               contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
             />
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
-            <Line type="monotone" dataKey={yAxisKey} stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, fill: '#3b82f6' }} />
+            <Line type="monotone" dataKey={yAxisKey} name={yAxisLabel || yAxisKey} stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, fill: '#3b82f6' }} />
           </LineChart>
         ) : (
           <PieChart margin={margin}>
@@ -96,6 +98,7 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, height = 300 }: 
               fill="#8884d8"
               dataKey={yAxisKey}
               nameKey={xAxisKey}
+              name={yAxisLabel || yAxisKey}
               label={({ name, percent }: { name?: string | number; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
             >
               {data.map((entry, index) => (
