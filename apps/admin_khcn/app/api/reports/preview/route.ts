@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     // If it's an object with a 'data' array property (standard wrapper), unwrap it for preview
     let responseData = response.data;
     if (responseData && !Array.isArray(responseData) && Array.isArray(responseData.data)) {
-        responseData = responseData.data;
+      responseData = responseData.data;
     }
 
     return NextResponse.json({
@@ -57,12 +57,16 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error proxying report preview:", error.message);
+    // Prevent returning 401/403 because it will trigger the frontend global auth interceptor and log the user out
+    const status = error.response?.status;
+    const safeStatus = (status === 401 || status === 403) ? 400 : (status || 500);
+
     return NextResponse.json(
       {
         success: false,
         message: error.response?.data?.message || error.message || "Lỗi proxy data preview",
       },
-      { status: error.response?.status || 500 }
+      { status: safeStatus }
     );
   }
 }
