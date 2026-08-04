@@ -10,9 +10,9 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @GrpcMethod('ChatService', 'GetMessages')
-  async getMessages(data: { conversationId: string; limit: number; offset: number }): Promise<{ items: MessageResponseDto[] }> {
+  async getMessages(data: { conversationId: string; limit: number; offset: number }): Promise<{ data: MessageResponseDto[] }> {
     const messages = await this.messageService.getMessages(data.conversationId, data.limit, data.offset);
-    return { items: messages };
+    return { data: messages };
   }
 
   @GrpcMethod('ChatService', 'MarkRead')

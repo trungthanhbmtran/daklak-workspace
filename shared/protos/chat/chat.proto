@@ -41,7 +41,7 @@ message GetMessagesRequest {
 }
 
 message GetMessagesResponse {
-  repeated Message items = 1;
+  repeated Message data = 1;
 }
 
 message Message {
@@ -76,7 +76,7 @@ message SearchMessageRequest {
 }
 
 message SearchMessageResponse {
-  repeated Message items = 1;
+  repeated Message data = 1;
 }
 
 message ChatMessage {

@@ -41,37 +41,11 @@ export async function POST(req: NextRequest) {
       timeout: 10000, // 10 seconds timeout
     });
 
-    // Helper to find an array in the response object (up to 2 levels deep)
-    const extractArray = (obj: any): any[] | null => {
-        if (!obj || typeof obj !== 'object') return null;
-        if (Array.isArray(obj)) return obj;
-        if (Array.isArray(obj.data)) return obj.data;
-        if (Array.isArray(obj.items)) return obj.items;
-        
-        // Check first level
-        for (const key of Object.keys(obj)) {
-            if (Array.isArray(obj[key])) return obj[key];
-        }
-        // Check second level
-        for (const key of Object.keys(obj)) {
-            const val = obj[key];
-            if (val && typeof val === 'object' && !Array.isArray(val)) {
-                for (const subKey of Object.keys(val)) {
-                    if (Array.isArray(val[subKey])) return val[subKey];
-                }
-            }
-        }
-        return null;
-    };
-
+    // We assume the response data might be wrapped or an array.
+    // If it's an object with a 'data' array property (standard wrapper), unwrap it for preview
     let responseData = response.data;
-    if (responseData && !Array.isArray(responseData)) {
-        const foundArray = extractArray(responseData);
-        if (foundArray) {
-            responseData = foundArray;
-        } else {
-            responseData = [responseData];
-        }
+    if (responseData && !Array.isArray(responseData) && Array.isArray(responseData.data)) {
+        responseData = responseData.data;
     }
 
     return NextResponse.json({
