@@ -42,7 +42,7 @@ interface SystemSource {
 export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const { data: integrations } = useIntegrationList("");
   const { mutateAsync: createTemplate, isPending } = useCreateTemplate();
-  
+
   const systemSources = useMemo<SystemSource[]>(() => {
     const apiSources = (integrations || []).map(int => ({
       id: `api-${int.id}`,
@@ -54,7 +54,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       authConfig: int.authConfig,
       endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
     }));
-    
+
     // Default DB sources for testing
     const dbSources = [
       { id: "db-users", name: "CSDL: Người dùng", type: "db", icon: Database, endpoints: [] },
@@ -78,7 +78,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   }, [sourceId, systemSources]);
 
   const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
-  
+
   const previewPayload = useMemo(() => ({
     baseUrl: selectedSource?.baseUrl,
     endpointPath: endpointPath,
@@ -95,7 +95,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
 
   const previewData = useMemo(() => {
     if (!sourceId) return [];
-    
+
     // Static mock data check for legacy sources
     if ((MOCK_DATA as any)[sourceId]) {
       return (MOCK_DATA as any)[sourceId];
@@ -117,12 +117,12 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
         }
       }
       return [];
-    } 
-    
+    }
+
     if (selectedSource?.type === 'db' || (selectedSource?.type === 'api' && !endpointPath && selectedSource.endpoints?.length === 0)) {
       return generateMockDataForSource(selectedSource?.name || "System");
     }
-    
+
     return [];
   }, [sourceId, isApiSourceReady, queryData, selectedSource, endpointPath]);
 
@@ -136,7 +136,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       toast.error("Vui lòng điền đầy đủ cấu hình trước khi lưu!");
       return;
     }
-    
+
     const config = {
       title,
       description: "Báo cáo tuỳ chỉnh",
@@ -181,9 +181,9 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           <div className="space-y-2">
             <Label>Tên Báo Cáo</Label>
-            <Input 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="Nhập tên báo cáo..."
               className="bg-white dark:bg-slate-900"
             />
@@ -239,43 +239,43 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           <div className="space-y-2">
             <Label>Loại Biểu Đồ</Label>
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                variant={chartType === 'bar' ? 'default' : 'outline'} 
+              <Button
+                variant={chartType === 'bar' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'bar' ? 'bg-violet-600 hover:bg-violet-700 text-white' : ''}`}
                 onClick={() => setChartType('bar')}
               >
                 <BarChart2 className="w-4 h-4 mr-2" /> Cột
               </Button>
-              <Button 
-                variant={chartType === 'line' ? 'default' : 'outline'} 
+              <Button
+                variant={chartType === 'line' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'line' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
                 onClick={() => setChartType('line')}
               >
                 <LineChartIcon className="w-4 h-4 mr-2" /> Đường
               </Button>
-              <Button 
-                variant={chartType === 'pie' ? 'default' : 'outline'} 
+              <Button
+                variant={chartType === 'pie' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'pie' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
                 onClick={() => setChartType('pie')}
               >
                 <PieChart className="w-4 h-4 mr-2" /> Tròn
               </Button>
-              <Button 
-                variant={chartType === 'area' ? 'default' : 'outline'} 
+              <Button
+                variant={chartType === 'area' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'area' ? 'bg-teal-600 hover:bg-teal-700 text-white' : ''}`}
                 onClick={() => setChartType('area')}
               >
                 <LineChartIcon className="w-4 h-4 mr-2" /> Vùng (Area)
               </Button>
-              <Button 
-                variant={chartType === 'doughnut' ? 'default' : 'outline'} 
+              <Button
+                variant={chartType === 'doughnut' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'doughnut' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''}`}
                 onClick={() => setChartType('doughnut')}
               >
                 <PieChart className="w-4 h-4 mr-2" /> Vành Khuyên
               </Button>
-              <Button 
-                variant={chartType === 'table' ? 'default' : 'outline'} 
+              <Button
+                variant={chartType === 'table' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'table' ? 'bg-slate-800 hover:bg-slate-900 text-white' : ''}`}
                 onClick={() => setChartType('table')}
               >
@@ -286,10 +286,10 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
 
           <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
             <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mapping Dữ Liệu</h4>
-            
+
             <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
               <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Danh Mục (Name)' : chartType === 'table' ? 'Trường Chính' : 'Trục Hoành (X-Axis)'}</Label>
-              
+
               <div className="space-y-2">
                 <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
                 <Input value={xAxisLabel} onChange={e => setXAxisLabel(e.target.value)} placeholder="VD: Tháng, Phòng ban..." className="bg-white dark:bg-slate-950 h-8 text-sm" />
@@ -312,7 +312,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
 
             <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
               <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Giá Trị (Value)' : chartType === 'table' ? 'Trường Phụ' : 'Trục Tung (Y-Axis)'}</Label>
-              
+
               <div className="space-y-2">
                 <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
                 <Input value={yAxisLabel} onChange={e => setYAxisLabel(e.target.value)} placeholder="VD: Doanh thu, Số lượng..." className="bg-white dark:bg-slate-950 h-8 text-sm" />
@@ -336,10 +336,10 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
         </div>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={isPending}
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20" 
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20"
             iconStart={isPending ? undefined : <Save className="w-4 h-4" />}
           >
             {isPending ? "Đang lưu..." : "Lưu Báo Cáo"}
@@ -356,7 +356,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           </h3>
           <Button variant="outline" size="sm" className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30" iconStart={<Play className="w-4 h-4" />} onClick={() => refetchPreview()}>Làm mới dữ liệu</Button>
         </div>
-        
+
         <div className="flex-1 p-8 overflow-y-auto flex flex-col items-center justify-center">
           {isPreviewLoading ? (
             <div className="text-center p-12 bg-white dark:bg-slate-950 border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl max-w-md w-full shadow-sm flex flex-col items-center justify-center">
@@ -375,14 +375,14 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           ) : (
             <div className="w-full h-full max-h-[500px] bg-white dark:bg-slate-950 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg">
               <h4 className="text-center font-bold text-xl text-slate-800 dark:text-slate-100 mb-6">{title}</h4>
-              <ChartRenderer 
-                type={chartType} 
-                data={previewData} 
-                xAxisKey={xAxisKey} 
-                yAxisKey={yAxisKey} 
+              <ChartRenderer
+                type={chartType}
+                data={previewData}
+                xAxisKey={xAxisKey}
+                yAxisKey={yAxisKey}
                 xAxisLabel={xAxisLabel}
                 yAxisLabel={yAxisLabel}
-                height={400} 
+                height={400}
               />
             </div>
           )}
