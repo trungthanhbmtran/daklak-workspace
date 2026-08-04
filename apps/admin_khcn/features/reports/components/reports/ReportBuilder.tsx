@@ -114,11 +114,12 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     }
 
     if (isApiSourceReady) {
+      if (!queryData) return [];
       const dataAny = queryData as any;
       if (dataAny?.success && Array.isArray(dataAny.data)) {
         return dataAny.data;
       }
-      return generateMockDataForSource(selectedSource?.name || "System");
+      return [];
     } 
     
     if (selectedSource?.type === 'db' || (selectedSource?.type === 'api' && !endpointPath && selectedSource.endpoints?.length === 0)) {

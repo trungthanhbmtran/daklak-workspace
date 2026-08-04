@@ -58,10 +58,12 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
 
   const data = React.useMemo(() => {
     if (isApiSourceReady) {
+      if (!queryData) return [];
       const dataAny = queryData as any;
       if (dataAny?.success && Array.isArray(dataAny.data)) {
         return dataAny.data;
       }
+      return [];
     }
     return (MOCK_DATA as any)[sourceId] || [];
   }, [isApiSourceReady, queryData, sourceId]);

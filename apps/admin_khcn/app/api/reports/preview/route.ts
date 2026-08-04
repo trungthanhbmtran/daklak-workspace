@@ -44,8 +44,17 @@ export async function POST(req: NextRequest) {
     // We assume the response data might be wrapped or an array.
     // If it's an object with a 'data' array property (standard wrapper), unwrap it for preview
     let responseData = response.data;
-    if (responseData && !Array.isArray(responseData) && Array.isArray(responseData.data)) {
-        responseData = responseData.data;
+    if (responseData && !Array.isArray(responseData)) {
+        if (Array.isArray(responseData.data)) {
+            responseData = responseData.data;
+        } else if (typeof responseData === 'object') {
+            const arrayKey = Object.keys(responseData).find(k => Array.isArray(responseData[k]));
+            if (arrayKey) {
+                responseData = responseData[arrayKey];
+            } else {
+                responseData = [responseData];
+            }
+        }
     }
 
     return NextResponse.json({
