@@ -79,7 +79,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const [title, setTitle] = useState("Báo cáo mới");
   const [sourceId, setSourceId] = useState<string>("");
   const [endpointPath, setEndpointPath] = useState<string>("");
-  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie' | 'table'>('bar');
+  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie' | 'table' | 'area' | 'doughnut' | string>('bar');
   const [xAxisKey, setXAxisKey] = useState<string>("");
   const [yAxisKey, setYAxisKey] = useState<string>("");
   const [xAxisLabel, setXAxisLabel] = useState<string>("");
@@ -263,6 +263,20 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
                 <PieChart className="w-4 h-4 mr-2" /> Tròn
               </Button>
               <Button 
+                variant={chartType === 'area' ? 'default' : 'outline'} 
+                className={`w-full justify-start ${chartType === 'area' ? 'bg-teal-600 hover:bg-teal-700 text-white' : ''}`}
+                onClick={() => setChartType('area')}
+              >
+                <LineChartIcon className="w-4 h-4 mr-2" /> Vùng (Area)
+              </Button>
+              <Button 
+                variant={chartType === 'doughnut' ? 'default' : 'outline'} 
+                className={`w-full justify-start ${chartType === 'doughnut' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''}`}
+                onClick={() => setChartType('doughnut')}
+              >
+                <PieChart className="w-4 h-4 mr-2" /> Vành Khuyên
+              </Button>
+              <Button 
                 variant={chartType === 'table' ? 'default' : 'outline'} 
                 className={`w-full justify-start ${chartType === 'table' ? 'bg-slate-800 hover:bg-slate-900 text-white' : ''}`}
                 onClick={() => setChartType('table')}
@@ -276,7 +290,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mapping Dữ Liệu</h4>
             
             <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{chartType === 'pie' ? 'Danh Mục (Name)' : chartType === 'table' ? 'Trường Chính' : 'Trục Hoành (X-Axis)'}</Label>
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Danh Mục (Name)' : chartType === 'table' ? 'Trường Chính' : 'Trục Hoành (X-Axis)'}</Label>
               
               <div className="space-y-2">
                 <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
@@ -299,7 +313,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             </div>
 
             <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{chartType === 'pie' ? 'Giá Trị (Value)' : chartType === 'table' ? 'Trường Phụ' : 'Trục Tung (Y-Axis)'}</Label>
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Giá Trị (Value)' : chartType === 'table' ? 'Trường Phụ' : 'Trục Tung (Y-Axis)'}</Label>
               
               <div className="space-y-2">
                 <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>

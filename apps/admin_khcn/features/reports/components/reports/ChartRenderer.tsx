@@ -9,6 +9,8 @@ import {
   Line,
   PieChart,
   Pie,
+  AreaChart,
+  Area,
   Cell,
   XAxis,
   YAxis,
@@ -20,7 +22,7 @@ import {
 import { ResponsiveTable } from "@/components/shared/responsive-table";
 
 interface ChartRendererProps {
-  type: 'bar' | 'line' | 'pie' | 'table';
+  type: 'bar' | 'line' | 'pie' | 'table' | 'area' | 'doughnut' | string;
   data: any[];
   xAxisKey: string;
   yAxisKey: string;
@@ -87,6 +89,47 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, xAxisLabel, yAxi
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
             <Line type="monotone" dataKey={yAxisKey} name={yAxisLabel || yAxisKey} stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, fill: '#3b82f6' }} />
           </LineChart>
+        ) : type === 'area' ? (
+          <AreaChart data={data} margin={margin}>
+            <defs>
+              <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dx={-10} />
+            <Tooltip
+              contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+            />
+            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+            <Area type="monotone" dataKey={yAxisKey} name={yAxisLabel || yAxisKey} stroke="#10b981" fillOpacity={1} fill="url(#colorArea)" />
+          </AreaChart>
+        ) : type === 'doughnut' ? (
+          <PieChart margin={margin}>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              innerRadius={height / 2 - 60}
+              outerRadius={height / 2 - 20}
+              fill="#8884d8"
+              dataKey={yAxisKey}
+              nameKey={xAxisKey}
+              name={yAxisLabel || yAxisKey}
+              label={({ name, percent }: { name?: string | number; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+            />
+            <Legend />
+          </PieChart>
         ) : (
           <PieChart margin={margin}>
             <Pie

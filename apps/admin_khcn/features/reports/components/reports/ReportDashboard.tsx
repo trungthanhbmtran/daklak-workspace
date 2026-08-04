@@ -18,15 +18,79 @@ const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartR
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-import { useWidgets, useDeleteTemplate } from "../../api";
+import { useWidgets, useDeleteTemplate, usePreviewReport } from "../../api";
+import { useIntegrationList } from "@/features/integration/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { MOCK_DATA } from "./mockData";
+
+function ReportWidget({ widget, integrations }: { widget: any; integrations: any[] }) {
+  const systemSources = React.useMemo(() => {
+    const apiSources = (integrations || []).map((int: any) => ({
+      id: `api-${int.id}`,
+      name: `API: ${int.name}`,
+      type: 'api',
+      baseUrl: int.baseUrl,
+      headers: int.headers,
+      authConfig: int.authConfig,
+      endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
+    }));
+    return apiSources;
+  }, [integrations]);
+
+  const sourceId = widget.dataSourceCode || widget.sourceId;
+  const endpointPath = widget.endpoint;
+  const selectedSource = systemSources.find(s => s.id === sourceId);
+  const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
+
+  const previewPayload = React.useMemo(() => ({
+    baseUrl: selectedSource?.baseUrl,
+    endpointPath: endpointPath,
+    method: epInfo?.method || 'GET',
+    headers: selectedSource?.headers,
+    authConfig: selectedSource?.authConfig,
+    params: {},
+    sourceId
+  }), [selectedSource, endpointPath, epInfo, sourceId]);
+
+  const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
+  const { data: queryData, isFetching } = usePreviewReport(previewPayload, isApiSourceReady);
+
+  const data = React.useMemo(() => {
+    if (isApiSourceReady) {
+      const dataAny = queryData as any;
+      if (dataAny?.success && Array.isArray(dataAny.data)) {
+        return dataAny.data;
+      }
+    }
+    return (MOCK_DATA as any)[sourceId] || [];
+  }, [isApiSourceReady, queryData, sourceId]);
+
+  return (
+    <div className="w-full relative">
+       {isFetching && (
+         <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center z-10 rounded-xl">
+           <span className="text-sm text-violet-600 animate-pulse font-medium">Đang tải dữ liệu...</span>
+         </div>
+       )}
+       <ChartRenderer
+         type={widget.chartType?.toLowerCase() || 'bar'}
+         data={data}
+         xAxisKey={widget.xAxisKey}
+         yAxisKey={widget.yAxisKey}
+         xAxisLabel={widget.xAxisLabel}
+         yAxisLabel={widget.yAxisLabel}
+         height={280}
+       />
+    </div>
+  );
+}
 
 export function ReportDashboard() {
   const [isBuilding, setIsBuilding] = useState(false);
 
   const { data: widgets = [], isLoading } = useWidgets();
+  const { data: integrations = [] } = useIntegrationList("");
   const { mutateAsync: deleteTemplate } = useDeleteTemplate();
 
   const handleDelete = async (widgetId: string, templateId?: string) => {
@@ -91,7 +155,6 @@ export function ReportDashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
           {widgets.map((widget: any) => {
-            const data = (MOCK_DATA as any)[widget.dataSourceCode || widget.sourceId] || [];
             return (
               <div key={widget.id} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-lg transition-shadow group relative">
                 <div className="flex justify-between items-start mb-6">
@@ -109,13 +172,7 @@ export function ReportDashboard() {
                 </div>
 
                 <div className="w-full">
-                  <ChartRenderer
-                    type={widget.chartType}
-                    data={data}
-                    xAxisKey={widget.xAxisKey}
-                    yAxisKey={widget.yAxisKey}
-                    height={280}
-                  />
+                  <ReportWidget widget={widget} integrations={integrations} />
                 </div>
               </div>
             );
