@@ -130,6 +130,23 @@ export function AuthFields() {
           )}
         />
       )}
+
+      {/* OAUTH2: Scope */}
+      {authType === 'OAUTH2' && (
+        <FormField
+          control={control}
+          name="scope"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Scope (Phạm vi truy cập)</FormLabel>
+              <FormControl>
+                <Input placeholder="read write openid" className="font-mono bg-white dark:bg-slate-950" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </div>
   );
 }

@@ -45,6 +45,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       apiToken: "",
       clientId: "",
       clientSecret: "",
+      scope: "",
       isRawMode: false,
       rawConfig: "{}"
     }
@@ -76,6 +77,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         apiToken: initialData?.authConfig?.apiToken || "",
         clientId: initialData?.authConfig?.clientId || "",
         clientSecret: initialData?.authConfig?.clientSecret || "",
+        scope: initialData?.authConfig?.scope || "",
         isRawMode: !!initialData?.isRawMode,
         rawConfig: initialData?.rawConfig || (initialData?.metadata ? JSON.stringify(initialData.metadata, null, 2) : "{}")
       });
@@ -95,6 +97,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         apiToken: item.authConfig?.apiToken || "",
         clientId: item.authConfig?.clientId || "",
         clientSecret: item.authConfig?.clientSecret || "",
+        scope: item.authConfig?.scope || "",
         isRawMode: false,
         rawConfig: item.metadata ? JSON.stringify(item.metadata, null, 2) : "{}"
       });
@@ -131,7 +134,8 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         authUrl: data.authUrl,
         apiToken: data.apiToken,
         clientId: data.clientId,
-        clientSecret: data.clientSecret
+        clientSecret: data.clientSecret,
+        scope: data.scope
       },
       metadata: metadataObj
     };
