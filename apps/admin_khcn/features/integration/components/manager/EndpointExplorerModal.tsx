@@ -156,6 +156,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         endpointPath: selectedEndpoint.path,
         method: selectedEndpoint.method || 'GET',
         headers: { ...integration.headers, ...headersMap },
+        authType: integration.authType,
         authConfig: integration.authConfig,
         params: paramsMap
       };

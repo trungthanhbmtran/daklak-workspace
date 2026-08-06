@@ -4,7 +4,7 @@ import https from "https";
 
 export async function POST(req: NextRequest) {
   try {
-    const { baseUrl, endpointPath, method = "GET", headers = {}, authConfig = {}, params = {} } = await req.json();
+    const { baseUrl, endpointPath, method = "GET", headers = {}, authType = "NONE", authConfig = {}, params = {} } = await req.json();
 
     if (!baseUrl || !endpointPath) {
       return NextResponse.json(
@@ -26,11 +26,38 @@ export async function POST(req: NextRequest) {
     };
 
     // Add authorization if configured
-    if (authConfig.type === "bearer" && authConfig.token) {
-      requestHeaders["Authorization"] = `Bearer ${authConfig.token}`;
-    } else if (authConfig.type === "basic" && authConfig.username && authConfig.password) {
-      const credentials = Buffer.from(`${authConfig.username}:${authConfig.password}`).toString("base64");
+    const type = authType.toUpperCase();
+    if (type === "BEARER" && authConfig.apiToken) {
+      requestHeaders["Authorization"] = `Bearer ${authConfig.apiToken}`;
+    } else if (type === "BASIC" && authConfig.clientId && authConfig.clientSecret) {
+      const credentials = Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString("base64");
       requestHeaders["Authorization"] = `Basic ${credentials}`;
+    } else if (type === "API_KEY" && authConfig.clientId && authConfig.clientSecret) {
+      requestHeaders[authConfig.clientId] = authConfig.clientSecret;
+    } else if (type === "OAUTH2" && authConfig.authUrl && authConfig.clientId && authConfig.clientSecret) {
+      try {
+        const tokenParams = new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: authConfig.clientId,
+          client_secret: authConfig.clientSecret,
+        });
+        if (authConfig.scope) {
+          tokenParams.append('scope', authConfig.scope);
+        }
+        
+        const tokenRes = await axios.post(authConfig.authUrl, tokenParams.toString(), {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        if (tokenRes.data && tokenRes.data.access_token) {
+          requestHeaders["Authorization"] = `Bearer ${tokenRes.data.access_token}`;
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch OAUTH2 token:", err.message);
+        return NextResponse.json(
+          { success: false, message: "Lỗi lấy token OAUTH2: " + (err.response?.data?.error_description || err.response?.data?.message || err.message) },
+          { status: 400 }
+        );
+      }
     }
 
     // Execute request
