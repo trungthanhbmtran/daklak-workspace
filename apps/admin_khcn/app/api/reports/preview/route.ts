@@ -4,7 +4,7 @@ import https from "https";
 
 export async function POST(req: NextRequest) {
   try {
-    const { baseUrl, endpointPath, method = "GET", headers = {}, authType = "NONE", authConfig = {}, params = {} } = await req.json();
+    const { baseUrl, endpointPath, method = "GET", headers = {}, authType = "NONE", authConfig = {}, params = {}, body } = await req.json();
 
     if (!baseUrl || !endpointPath) {
       return NextResponse.json(
@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Execute request
     const response = await axios({
       method: method.toUpperCase(),
       url,
       headers: requestHeaders,
       params,
+      data: body,
       timeout: 10000, // 10 seconds timeout
       httpsAgent,
     });

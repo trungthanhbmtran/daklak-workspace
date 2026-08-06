@@ -151,6 +151,15 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         if (p.key && p.value) paramsMap[p.key] = p.value;
       });
 
+      let parsedBody: any = undefined;
+      if (selectedEndpoint.body) {
+        try {
+          parsedBody = JSON.parse(selectedEndpoint.body);
+        } catch (e) {
+          parsedBody = selectedEndpoint.body; // Fallback to raw string if not JSON
+        }
+      }
+
       const payload = {
         baseUrl: integration.baseUrl,
         endpointPath: selectedEndpoint.path,
@@ -158,7 +167,8 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         headers: { ...integration.headers, ...headersMap },
         authType: integration.authType,
         authConfig: integration.authConfig,
-        params: paramsMap
+        params: paramsMap,
+        body: parsedBody
       };
 
       const res = await previewReport(payload);
