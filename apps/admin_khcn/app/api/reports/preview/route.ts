@@ -25,6 +25,9 @@ export async function POST(req: NextRequest) {
       ...headers,
     };
 
+    // Create HTTPS agent to ignore self-signed cert errors
+    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
     // Add authorization if configured
     const type = authType.toUpperCase();
     if (type === "BEARER" && authConfig.apiToken) {
@@ -46,7 +49,8 @@ export async function POST(req: NextRequest) {
         }
         
         const tokenRes = await axios.post(authConfig.authUrl, tokenParams.toString(), {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          httpsAgent,
         });
         if (tokenRes.data && tokenRes.data.access_token) {
           requestHeaders["Authorization"] = `Bearer ${tokenRes.data.access_token}`;
@@ -61,7 +65,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Execute request
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
     const response = await axios({
       method: method.toUpperCase(),
       url,
