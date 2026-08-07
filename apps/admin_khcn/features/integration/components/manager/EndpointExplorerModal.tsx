@@ -144,6 +144,15 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     try {
       // Build headers & params object
       const headersMap: Record<string, string> = {};
+      
+      if (Array.isArray(integration.headers)) {
+        integration.headers.forEach((h: any) => {
+          if (h.key && h.value) headersMap[h.key] = h.value;
+        });
+      } else if (typeof integration.headers === 'object' && integration.headers !== null) {
+        Object.assign(headersMap, integration.headers);
+      }
+      
       selectedEndpoint.headers?.forEach(h => {
         if (h.key && h.value) headersMap[h.key] = h.value;
       });
@@ -165,7 +174,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         baseUrl: integration.baseUrl,
         endpointPath: selectedEndpoint.path,
         method: selectedEndpoint.method || 'GET',
-        headers: { ...integration.headers, ...headersMap },
+        headers: headersMap,
         authType: integration.authType,
         authConfig: integration.authConfig,
         params: paramsMap,

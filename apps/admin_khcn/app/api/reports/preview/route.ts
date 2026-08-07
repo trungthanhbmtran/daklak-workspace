@@ -78,12 +78,7 @@ export async function POST(req: NextRequest) {
     
     const time = Date.now() - startTime;
 
-    // We assume the response data might be wrapped or an array.
-    // If it's an object with a 'data' array property (standard wrapper), unwrap it for preview
-    let responseData = response.data;
-    if (responseData && !Array.isArray(responseData) && Array.isArray(responseData.data)) {
-      responseData = responseData.data;
-    }
+    const responseData = response.data;
     
     const size = Buffer.byteLength(JSON.stringify(responseData), 'utf8');
 
