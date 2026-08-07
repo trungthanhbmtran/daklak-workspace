@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ParsedEndpoint } from "./EndpointTypes";
 import { EndpointSidebar } from "./EndpointSidebar";
 import { EndpointEditor } from "./EndpointEditor";
+import { ResponseViewer } from "./ResponseViewer";
 
 export interface EndpointExplorerModalRef {
   open: (item: IntegrationConfig) => void;
@@ -172,10 +173,12 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       };
 
       const res = await previewReport(payload);
-      setTestResult({ success: true, data: res.data });
+      setTestResult(res.data);
     } catch (err: any) {
-      setTestResult({
+      setTestResult(err.response?.data || {
         success: false,
+        status: err.response?.status || 500,
+        statusText: err.response?.statusText || "Error",
         error: err.response?.data?.message || err.message || "Lỗi khi gọi API"
       });
     } finally {
@@ -233,16 +236,8 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
           <DialogTitle>Test API: {selectedEndpoint?.name}</DialogTitle>
           <DialogDescription className="font-mono text-xs">{integration?.baseUrl}{selectedEndpoint?.path}</DialogDescription>
         </DialogHeader>
-        <div className="flex-1 overflow-auto bg-slate-950 p-4">
-          {isTesting ? (
-            <div className="flex items-center justify-center h-full">
-              <span className="text-violet-400 animate-pulse text-sm">Đang gọi API...</span>
-            </div>
-          ) : (
-            <pre className="text-xs font-mono text-emerald-400 break-words whitespace-pre-wrap">
-              {JSON.stringify(testResult, null, 2)}
-            </pre>
-          )}
+        <div className="flex-1 overflow-hidden flex flex-col bg-slate-950">
+          <ResponseViewer result={testResult} isLoading={isTesting} />
         </div>
       </DialogContent>
     </Dialog>

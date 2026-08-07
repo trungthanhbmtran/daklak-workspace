@@ -64,6 +64,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const startTime = Date.now();
+
     const response = await axios({
       method: method.toUpperCase(),
       url,
@@ -73,6 +75,8 @@ export async function POST(req: NextRequest) {
       timeout: 10000, // 10 seconds timeout
       httpsAgent,
     });
+    
+    const time = Date.now() - startTime;
 
     // We assume the response data might be wrapped or an array.
     // If it's an object with a 'data' array property (standard wrapper), unwrap it for preview
@@ -80,12 +84,20 @@ export async function POST(req: NextRequest) {
     if (responseData && !Array.isArray(responseData) && Array.isArray(responseData.data)) {
       responseData = responseData.data;
     }
+    
+    const size = Buffer.byteLength(JSON.stringify(responseData), 'utf8');
 
     return NextResponse.json({
       success: true,
       data: responseData,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      time,
+      size,
     });
   } catch (error: any) {
+    const time = error.config?.metadata?.startTime ? Date.now() - error.config.metadata.startTime : 0;
     console.error("Error proxying report preview:", error.message);
     // Prevent returning 401/403 because it will trigger the frontend global auth interceptor and log the user out
     const status = error.response?.status;
@@ -95,6 +107,11 @@ export async function POST(req: NextRequest) {
       {
         success: false,
         message: error.response?.data?.message || error.message || "Lỗi proxy data preview",
+        status: status,
+        statusText: error.response?.statusText,
+        headers: error.response?.headers,
+        data: error.response?.data,
+        time,
       },
       { status: safeStatus }
     );
