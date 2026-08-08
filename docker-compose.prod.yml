@@ -73,6 +73,10 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      hrm-service:
+        condition: service_started
+      user-service:
+        condition: service_started
     env_file:
       - .env.production
     environment:
