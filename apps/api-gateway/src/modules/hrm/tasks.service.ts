@@ -279,6 +279,28 @@ export class TasksService implements OnModuleInit {
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
+  async respondTask(req: any, id: number, action: string, rejectReason?: string, message?: string) {
+    const user = req.user;
+    const response: any = await firstValueFrom(
+      this.taskService.RespondTask(
+        {
+          taskId: id,
+          action,
+          rejectReason,
+          message,
+          currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
+          currentEmployeeCode: user?.employeeCode || user?.username || '',
+          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+          currentUserPermissions: user?.permissionsFlatten || [],
+        },
+        this.getGrpcMetadata(req),
+      ),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
+  }
 
   async recommendAssignees(req: any, rankCode: string, strategy: string, domainId: string, jobTitleId: string) {
     const user = req.user;

@@ -68,6 +68,16 @@ export class TasksController {
   ) {
     return this.tasksService.updateStatus(req, id, status, rejectReason, actionName);
   }
+  @Post(':id/respond')
+  async respondTask(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body('action') action: string,
+    @Body('rejectReason') rejectReason?: string,
+    @Body('message') message?: string,
+  ) {
+    return this.tasksService.respondTask(req, id, action, rejectReason, message);
+  }
 
   @Get('recommend-assignees')
   async recommendAssignees(

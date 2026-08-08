@@ -183,6 +183,30 @@ export function useUpdateStatus(taskId: number | undefined) {
   });
 }
 
+/** Phản hồi nhận việc (ACCEPT / REJECT / REQUEST_COORDINATION) */
+export function useRespondTask(taskId: number | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { action: string; rejectReason?: string; message?: string }) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.respondTask(taskId, payload);
+    },
+    onSuccess: (res) => {
+      if (taskId && res?.data) {
+        qc.setQueryData(hrmKeys.taskDetail(taskId), res.data);
+      }
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      if (taskId) {
+        qc.invalidateQueries({ queryKey: hrmKeys.taskComments(taskId) });
+      }
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Thao tác thất bại, vui lòng thử lại";
+      toast.error(message);
+    },
+  });
+}
+
 /** Lịch sử thao tác của một task. */
 export function useTaskHistory(taskId: number | undefined) {
   return useQuery({

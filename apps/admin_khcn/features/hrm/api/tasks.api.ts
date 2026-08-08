@@ -50,6 +50,10 @@ export const hrmTasksApi = {
     return apiClient.put(`/hrm/tasks/${id}/status`, payload) as any;
   },
 
+  respondTask(id: number, payload: { action: string; rejectReason?: string; message?: string }): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/tasks/${id}/respond`, payload) as any;
+  },
+
   recommendAssignees(params: { rankCode?: string; strategy?: string; domainId?: number; jobTitleId?: number }): Promise<ApiResponse<any[]>> {
     return apiClient.get('/hrm/tasks/recommend-assignees', { params }) as any;
   },

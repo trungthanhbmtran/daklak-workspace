@@ -21,7 +21,7 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-import { useUpdateStatus, useTaskDetail, useRequestCoordination, useTaskComments } from "../../hooks/useTasks";
+import { useUpdateStatus, useTaskDetail, useRequestCoordination, useTaskComments, useRespondTask } from "../../hooks/useTasks";
 import { toast } from "sonner";
 import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
@@ -29,6 +29,7 @@ import { TaskHistoryTab } from "./task-detail-history-tab";
 import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
 import { TaskAssignDialog } from "./task-assign-dialog";
+import { TaskRespondDialog } from "./task-respond-dialog";
 import { translateTaskStatus, getTaskStatusColor } from "./task-utils";
 
 interface TaskDetailDrawerProps {
@@ -41,6 +42,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const taskId = Number(task.id);
   const { user } = useUser();
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [respondAction, setRespondAction] = useState<"REJECT" | "REQUEST_COORDINATION" | null>(null);
 
   // ── Queries ──
   const { data: detailData } = useTaskDetail(taskId);
@@ -52,33 +54,17 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const isAssigner = user?.employeeCode === currentTask.creatorEmployeeCode || user?.employeeCode === currentTask.assignerCode;
 
   // ── Mutations ──
-  const updateStatus = useUpdateStatus(taskId);
-  const requestCoordination = useRequestCoordination(taskId);
+  const respondTask = useRespondTask(taskId);
 
   const handleAcceptTask = async () => {
     try {
-      const actionName = currentTask.allowedActions?.includes('RECEIVE') ? 'RECEIVE' : 'IN_PROGRESS';
-      await updateStatus.mutateAsync({ status: "IN_PROGRESS", actionName } as any);
+      await respondTask.mutateAsync({ action: "ACCEPT" });
       toast.success("Đã nhận việc thành công");
     } catch { /* handled */ }
   };
 
-  const handleRejectTask = async () => {
-    const reason = window.prompt("Nhập lý do từ chối nhận việc:");
-    if (!reason) return;
-    try {
-      await updateStatus.mutateAsync({ status: "REJECTED", actionName: "REJECT", rejectReason: reason } as any);
-      toast.success("Đã từ chối công việc");
-    } catch { /* handled */ }
-  };
-
-  const handleRequestCoordination = async () => {
-    const reason = window.prompt("Nhập lý do / nội dung xin phối hợp:");
-    if (!reason) return;
-    try {
-      await requestCoordination.mutateAsync({ message: reason });
-    } catch { /* handled */ }
-  };
+  const handleRejectTask = () => setRespondAction("REJECT");
+  const handleRequestCoordination = () => setRespondAction("REQUEST_COORDINATION");
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -290,6 +276,12 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           taskId={taskId}
           currentAssigneeCode={currentTask.assigneeCode}
           currentCoordinatorsCodes={currentTask.coassigneeCodes || []}
+        />
+        <TaskRespondDialog
+          open={respondAction !== null}
+          onOpenChange={(open) => !open && setRespondAction(null)}
+          taskId={taskId}
+          action={respondAction}
         />
       </SheetContent>
     </Sheet>
