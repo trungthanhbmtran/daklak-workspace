@@ -31,6 +31,7 @@ service TaskService {
   rpc BreakdownTask (BreakdownTaskRequest) returns (TaskResponse) {}
   rpc UpdateTaskProgress (UpdateTaskProgressRequest) returns (TaskResponse) {}
   rpc RequestCoordination (RequestCoordinationRequest) returns (CoordinationResponse) {}
+  rpc RespondTask (RespondTaskRequest) returns (RespondTaskResponse) {}
 
   // Steps (Checklist)
   rpc CreateStep (CreateStepRequest) returns (TaskStepResponse) {}
@@ -456,6 +457,23 @@ message RequestCoordinationRequest {
 message CoordinationResponse {
   bool success = 1;
   string message = 2;
+}
+
+message RespondTaskRequest {
+  int32 taskId = 1;
+  string action = 2; // 'ACCEPT' | 'REJECT' | 'REQUEST_COORDINATION'
+  optional string rejectReason = 3;
+  optional string message = 4;
+  int32 currentUserId = 5;
+  string currentEmployeeCode = 6;
+  int32 currentUserDept = 7;
+  repeated string currentUserPermissions = 8;
+}
+
+message RespondTaskResponse {
+  bool success = 1;
+  string message = 2;
+  TaskResponse data = 3;
 }
 
 message UpsertTaskKpiSettingRequest {

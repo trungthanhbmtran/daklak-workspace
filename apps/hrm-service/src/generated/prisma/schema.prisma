@@ -250,7 +250,7 @@ model Task {
   title       String  @map("title")
   description String? @db.Text
 
-  status       String  @default("TODO")
+  status       String  @default("PENDING_ACCEPTANCE")
   priority     String  @default("MEDIUM")
   progress     Float   @default(0) @map("progress")
   rejectReason String? @map("reject_reason") @db.Text

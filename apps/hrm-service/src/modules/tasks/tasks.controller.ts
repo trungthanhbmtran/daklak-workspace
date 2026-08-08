@@ -61,6 +61,9 @@ export class TasksController {
   @GrpcMethod('TaskService', 'RequestCoordination')
   requestCoordination(data: any) { return this.tasksService.requestCoordination(data.taskId, data); }
 
+  @GrpcMethod('TaskService', 'RespondTask')
+  respondTask(data: any) { return this.tasksService.respondTask(data.taskId, data); }
+
   // ─── Comments ─────────────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'AddComment')
