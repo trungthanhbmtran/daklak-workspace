@@ -2,6 +2,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IntegrationFormValues } from "../../../schemas";
@@ -45,7 +46,7 @@ export function ProtocolFields() {
           <FormItem>
             <FormLabel>URL Máy chủ (Base URL)</FormLabel>
             <FormControl>
-              <Input placeholder="https://api.example.com/v1" className="font-mono" {...field} />
+              <Textarea placeholder="https://api.example.com/v1" className="font-mono resize-none min-h-[60px]" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

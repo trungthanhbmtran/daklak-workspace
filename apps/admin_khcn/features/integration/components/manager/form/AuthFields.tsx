@@ -1,12 +1,45 @@
 import React from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Eye, EyeOff } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IntegrationFormValues } from "../../../schemas";
 import { useCategories } from "../../../api";
+
+function SecretInput({ field, placeholder, className }: { field: any, placeholder?: string, className?: string }) {
+  const [show, setShow] = React.useState(false);
+  return (
+    <div className="relative">
+      {show ? (
+        <Textarea 
+          placeholder={placeholder} 
+          className={`font-mono pr-10 resize-none min-h-[80px] break-all ${className || ""}`} 
+          {...field} 
+        />
+      ) : (
+        <Input 
+          type="password" 
+          placeholder={placeholder} 
+          className={`font-mono pr-10 ${className || ""}`} 
+          {...field} 
+        />
+      )}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground"
+        onClick={() => setShow(!show)}
+      >
+        {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+}
 
 export function AuthFields() {
   const { control } = useFormContext<IntegrationFormValues>();
@@ -63,7 +96,7 @@ export function AuthFields() {
             <FormItem>
               <FormLabel>URL lấy Token (Auth URL)</FormLabel>
               <FormControl>
-                <Input placeholder="https://sso.example.com/token" className="font-mono bg-white dark:bg-slate-950" {...field} />
+                <Textarea placeholder="https://sso.example.com/token" className="font-mono bg-white dark:bg-slate-950 resize-none min-h-[80px]" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,11 +113,10 @@ export function AuthFields() {
             <FormItem>
               <FormLabel>Bearer Token (Token tĩnh)</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
+                <SecretInput
+                  field={field}
                   placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."
-                  className="font-mono bg-white dark:bg-slate-950"
-                  {...field}
+                  className="bg-white dark:bg-slate-950"
                 />
               </FormControl>
               <FormMessage />
@@ -123,7 +155,10 @@ export function AuthFields() {
                 {authType === 'BASIC' ? 'Password' : authType === 'API_KEY' ? 'API Key Value' : 'Client Secret (App Secret)'}
               </FormLabel>
               <FormControl>
-                <Input type="password" className="font-mono bg-white dark:bg-slate-950" {...field} />
+                <SecretInput
+                  field={field}
+                  className="bg-white dark:bg-slate-950"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
