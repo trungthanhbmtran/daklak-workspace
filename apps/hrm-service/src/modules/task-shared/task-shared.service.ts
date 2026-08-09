@@ -62,6 +62,7 @@ export class TaskSharedService {
   public async getWorkflowIdByTrigger(trigger: string): Promise<string | null> {
     const cacheKey = `workflow:trigger:${trigger}`;
     const cachedId = await this.cache.get<string>(cacheKey);
+    if (cachedId === 'NOT_FOUND') return null;
     if (cachedId) return cachedId;
 
     try {
@@ -73,6 +74,7 @@ export class TaskSharedService {
     } catch (e: any) {
       if (e?.code === 2 || e?.code === 5 || (e?.details && e.details.includes('not found')) || (e?.message && e.message.includes('not found')) || (e?.details && e.details.includes('Internal server error'))) {
         this.logger.debug(`Workflow default '${trigger}' not found. Falling back to native actions.`);
+        await this.cache.set(cacheKey, 'NOT_FOUND', 300 * 1000); // Cache NOT_FOUND for 5m
       } else {
         this.logger.error(`Failed to fetch workflow id for code ${trigger}`, e);
       }

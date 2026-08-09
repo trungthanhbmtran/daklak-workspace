@@ -170,8 +170,8 @@ export class TaskWorkflowService {
           businessData: this.shared.toProtoStruct(businessData),
         })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
 
-    if (!validateRes.allowed) {
-      return { allowed: false, reason: validateRes.reason };
+    if (!validateRes || !validateRes.allowed) {
+      return { allowed: false, reason: validateRes?.reason || 'Lỗi kết nối đến dịch vụ workflow' };
     }
 
     const nextNodeRes = await firstValueFrom<any>(this.shared.workflowService.GetNextNode({
@@ -180,6 +180,10 @@ export class TaskWorkflowService {
           actionName,
           evalContext: this.shared.toProtoStruct(businessData),
         })).catch(e => { console.error('RPC Call Failed', e.message); return null; });
+
+    if (!nextNodeRes) {
+      return { allowed: false, reason: 'Lỗi kết nối đến dịch vụ workflow khi lấy bước tiếp theo' };
+    }
 
     const nextNodeId = nextNodeRes.nextNodeId || undefined;
     let nextNodeData: any = undefined;

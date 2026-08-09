@@ -9,17 +9,17 @@ export const REPORT_KEYS = {
 
 // --- API FETCHERS ---
 export const fetchTemplates = async () => {
-  const res = await api.get('/reports/templates', { baseURL: '/api/v1' });
+  const res = await api.get('/reports/templates');
   return res.data;
 };
 
 export const createTemplate = async (data: any) => {
-  const res = await api.post('/reports/templates', data, { baseURL: '/api/v1' });
+  const res = await api.post('/reports/templates', data);
   return res.data;
 };
 
 export const deleteTemplate = async (id: string) => {
-  const res = await api.delete(`/reports/templates/${id}`, { baseURL: '/api/v1' });
+  const res = await api.delete(`/reports/templates/${id}`);
   return res.data;
 };
 
@@ -34,7 +34,7 @@ export function useTemplates() {
 export function useWidgets() {
   return useQuery({
     queryKey: ["reports", "widgets", "list"],
-    queryFn: () => api.get("/reports/templates/widgets", { baseURL: '/api/v1' }).then(res => res.data),
+    queryFn: () => api.get("/reports/templates/widgets").then(res => res.data),
   });
 }
 
