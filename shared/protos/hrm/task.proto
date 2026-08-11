@@ -136,6 +136,7 @@ message TaskResponse {
   repeated TaskResponse children = 30;
   repeated string coassigneeNames = 31;
   optional int32 kpiCriteriaId = 32;
+  optional string conversationId = 33;
 }
 
 message TaskPlan {
@@ -372,8 +373,8 @@ message DelegationNode {
   int32 parentId = 10;
   string dueDate = 11;
   string createdAt = 12;
-  bool isParent = 13;      // ÄÃ¢y lÃ  task cha (cáº¥p trÃªn Ä‘Ã£ giao task nÃ y)
-  bool isCurrent = 14;     // ÄÃ¢y lÃ  task Ä‘ang xem
+  bool isParent = 13;      // Ä Ã¢y lÃ  task cha (cáº¥p trÃªn Ä‘Ã£ giao task nÃ y)
+  bool isCurrent = 14;     // Ä Ã¢y lÃ  task Ä‘ang xem
   bool isChild = 15;       // Task con (báº¥t ká»³ cáº¥p nÃ o)
   bool isGrandChild = 16;  // Giá»¯ láº¡i Ä‘á»ƒ tÆ°Æ¡ng thÃ­ch
   int32 level = 17;        // Cáº¥p Ä‘á»™: -1=cha, 0=hiá»‡n táº¡i, 1,2,3...=cÃ¡c cáº¥p con (khÃ´ng giá»›i háº¡n)
@@ -385,6 +386,7 @@ message DelegationNode {
   int32 planId = 23;
   TaskPlan plan = 24;
   int32 rootTaskId = 25;
+  optional string conversationId = 26;
 }
 
 message GetSubTasksRequest {

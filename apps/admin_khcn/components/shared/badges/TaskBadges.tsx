@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 export const TASK_STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string; dot: string }> = {
   TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'bg-slate-100/80 text-slate-700 border-slate-200', dot: 'bg-slate-400' },
   TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-blue-50/80 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
+  PENDING_ACCEPTANCE: { label: 'Chờ tiếp nhận', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-blue-50/80 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
   IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'bg-amber-50/80 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
   REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3.5 h-3.5" />, cls: 'bg-violet-50/80 text-violet-700 border-violet-200', dot: 'bg-violet-500' },
   DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'bg-emerald-50/80 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500' },
@@ -40,7 +41,8 @@ export function TaskStatusBadge({ code, fallbackLabel, className, showIcon = fal
       case 'IN_PROGRESS': 
       case 'PROCESSING':  return <Badge className={cn("bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200", className)}>{label}</Badge>;
       case 'TODO':        
-      case 'PENDING':     return <Badge className={cn("bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200", className)}>{label}</Badge>;
+      case 'PENDING':
+      case 'PENDING_ACCEPTANCE': return <Badge className={cn("bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200", className)}>{label}</Badge>;
       case 'PENDING_APPROVAL': return <Badge className={cn("bg-fuchsia-500/10 text-fuchsia-600 hover:bg-fuchsia-500/20 border-fuchsia-200", className)}>{label}</Badge>;
       case 'OVERDUE':     return <Badge className={cn("bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-200", className)}>{label}</Badge>;
       case 'RETURNED':    return <Badge className={cn("bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-200", className)}>{label}</Badge>;

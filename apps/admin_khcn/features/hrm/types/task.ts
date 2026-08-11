@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HrmEmployee, HrmDepartment } from "../types";
 
-export type TaskStatus = "DRAFT" | "ASSIGNED" | "IN_PROGRESS" | "PENDING_REVIEW" | "COMPLETED" | "OVERDUE" | "REJECTED";
+export type TaskStatus = "DRAFT" | "ASSIGNED" | "IN_PROGRESS" | "PENDING_REVIEW" | "COMPLETED" | "OVERDUE" | "REJECTED" | "PENDING_ACCEPTANCE" | "TODO";
 export type TaskPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 export type KpiQuality = "EXCELLENT" | "GOOD" | "AVERAGE" | "POOR";
 

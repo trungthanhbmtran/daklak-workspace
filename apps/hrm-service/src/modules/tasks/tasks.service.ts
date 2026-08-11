@@ -365,7 +365,7 @@ export class TasksService {
           parentId,
           title: data.title || data.taskName || 'Nhiệm vụ không tên',
           description: data.description,
-          status: data.status || 'TODO',
+          status: data.status || (assigneeCode !== 'UNASSIGNED' ? 'PENDING_ACCEPTANCE' : 'TODO'),
           priority: data.priority || 'MEDIUM',
           startDate: data.startDate ? new Date(data.startDate) : null,
           dueDate: data.dueDate ? new Date(data.dueDate) : null,

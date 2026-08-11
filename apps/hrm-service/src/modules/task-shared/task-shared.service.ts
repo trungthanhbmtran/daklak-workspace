@@ -538,7 +538,8 @@ export class TaskSharedService {
       actions.push('EDIT');
     }
 
-    if (access.isAssignee && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'MỚI GIAO')) {
+    if (access.isAssignee && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'MỚI GIAO' || t.status === 'PENDING_ACCEPTANCE')) {
+      actions.push('ACCEPT');
       actions.push('RECEIVE');
       actions.push('IN_PROGRESS');
       actions.push('REJECT');
