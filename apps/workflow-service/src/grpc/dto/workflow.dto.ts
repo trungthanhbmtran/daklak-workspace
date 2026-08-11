@@ -158,8 +158,20 @@ export class StartWorkflowGrpcDto {
   initialContext?: any;
 
   @IsString()
-  @IsNotEmpty()
-  initiatorId: string;
+  @IsOptional()
+  initiatorId?: string;
+
+  @IsString()
+  @IsOptional()
+  businessId?: string;
+
+  @IsString()
+  @IsOptional()
+  businessType?: string;
+
+  @IsString()
+  @IsOptional()
+  businessKey?: string;
 }
 
 export class FindOneWorkflowGrpcDto {
@@ -247,3 +259,133 @@ export class ListInstancesGrpcDto {
 }
 
 export class EmptyGrpcDto { }
+
+export class ValidateActionGrpcDto {
+  @IsString()
+  @IsOptional()
+  instanceId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  actionName: string;
+
+  @IsArray()
+  @IsOptional()
+  userRoles?: string[];
+
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
+  @IsObject()
+  @IsOptional()
+  businessData?: any;
+
+  @IsString()
+  @IsOptional()
+  workflowId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  currentNodeId: string;
+}
+
+export class GetNextNodeGrpcDto {
+  @IsString()
+  @IsOptional()
+  workflowId?: string;
+
+  @IsString()
+  @IsOptional()
+  instanceId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  currentNodeId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  actionName: string;
+
+  @IsObject()
+  @IsOptional()
+  evalContext?: any;
+}
+
+export class GetInitialNodeGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  workflowId: string;
+}
+
+export class GetAllowedActionsGrpcDto {
+  @IsString()
+  @IsOptional()
+  instanceId?: string;
+
+  @IsArray()
+  @IsOptional()
+  userRoles?: string[];
+
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
+  @IsObject()
+  @IsOptional()
+  businessData?: any;
+
+  @IsString()
+  @IsOptional()
+  workflowId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  currentNodeId: string;
+}
+
+export class TriggerWorkflowGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  trigger: string;
+
+  @IsObject()
+  @IsOptional()
+  initialContext?: any;
+
+  @IsString()
+  @IsOptional()
+  initiatorId?: string;
+
+  @IsString()
+  @IsOptional()
+  businessId?: string;
+
+  @IsString()
+  @IsOptional()
+  businessType?: string;
+}
+
+export class ResumeWorkflowGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  instanceId: string;
+
+  @IsString()
+  @IsOptional()
+  nodeId?: string;
+
+  @IsObject()
+  @IsOptional()
+  actionData?: any;
+
+  @IsArray()
+  @IsOptional()
+  userRoles?: string[];
+}
+
+export class GetInstanceGrpcDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+}

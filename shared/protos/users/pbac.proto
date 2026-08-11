@@ -15,7 +15,7 @@ service PbacService {
   rpc GetResources (common.Empty) returns (GetResourcesResponse);
   rpc CreateResource (CreateResourceRequest) returns (ResourceResponse);
   rpc UpdateResource (UpdateResourceRequest) returns (ResourceResponse);
-  rpc DeleteResource (DeleteResourceRequest) returns (ResourceResponse);
+  rpc DeleteResource (DeleteResourceRequest) returns (DeleteResourceResponse);
 }
 
 message CreateResourceRequest {
@@ -33,6 +33,11 @@ message UpdateResourceRequest {
 
 message DeleteResourceRequest {
   int32 id = 1;
+}
+
+message DeleteResourceResponse {
+  bool success = 1;
+  string message = 2;
 }
 
 message ResourceResponse {

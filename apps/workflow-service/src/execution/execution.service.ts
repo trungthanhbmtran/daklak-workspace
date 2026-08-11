@@ -275,5 +275,137 @@ export class ExecutionService {
 
     return { success: true };
   }
+
+  async getInitialNode(workflowId: string): Promise<{ initialNodeId: string; nodeData: string }> {
+    const def = await this.prisma.processDefinition.findUnique({
+      where: { id: workflowId },
+      include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
+    });
+    if (!def || !def.versions.length) throw new NotFoundException('Workflow not found');
+    const graph = def.versions[0].graph as any;
+    const initialNode = graph.nodes?.find((n: any) => n.type === 'start' || n.type === 'START');
+    if (!initialNode) throw new Error('Start node not found');
+    return { initialNodeId: initialNode.id, nodeData: JSON.stringify(initialNode.data || {}) };
+  }
+
+  async validateAction(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; actionName: string; userRoles?: string[]; userId?: string; businessData?: any }): Promise<{ allowed: boolean; reason: string }> {
+    const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
+    if (!graph) return { allowed: false, reason: 'Workflow graph not found' };
+
+    const currentNode = graph.nodes?.find((n: any) => n.id === payload.currentNodeId);
+    if (!currentNode) return { allowed: false, reason: 'Current node not found' };
+
+    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId && (e.label === payload.actionName || e.action === payload.actionName || (e.data && e.data.action === payload.actionName)));
+    if (!edges || edges.length === 0) return { allowed: false, reason: 'Action not allowed from this state' };
+
+    return { allowed: true, reason: '' };
+  }
+
+  async getNextNode(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; actionName: string; evalContext?: any }): Promise<{ nextNodeId: string; nextNodeData: string; type: string }> {
+    const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
+    if (!graph) throw new NotFoundException('Workflow graph not found');
+
+    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId && (e.label === payload.actionName || e.action === payload.actionName || (e.data && e.data.action === payload.actionName)));
+    if (!edges || edges.length === 0) throw new Error('No path found for action');
+
+    const targetNodeId = edges[0].target;
+    const targetNode = graph.nodes?.find((n: any) => n.id === targetNodeId);
+    if (!targetNode) throw new Error('Target node not found');
+
+    return { nextNodeId: targetNode.id, nextNodeData: JSON.stringify(targetNode.data || {}), type: targetNode.type || '' };
+  }
+
+  async getAllowedActions(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; userRoles?: string[]; userId?: string; businessData?: any }): Promise<{ actions: string[] }> {
+    const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
+    if (!graph) return { actions: [] };
+
+    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId);
+    return { actions: edges?.map((e: any) => e.label || e.action || (e.data && e.data.action)).filter(Boolean) || [] };
+  }
+
+  private async getGraphByContext(workflowId?: string, instanceId?: string): Promise<any> {
+    if (instanceId) {
+      return this.getGraph(instanceId);
+    }
+    if (workflowId) {
+       const def = await this.prisma.processDefinition.findUnique({
+        where: { id: workflowId },
+        include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
+      });
+      return def?.versions[0]?.graph;
+    }
+    return null;
+  }
+
+  /**
+   * Trigger a workflow by its definition code (human-readable trigger code).
+   * Returns the created instance so the caller can persist the instanceId.
+   */
+  async triggerProcess(
+    trigger: string,
+    payload: {
+      businessId?: string;
+      businessType?: string;
+      initiatorId?: string;
+      initialContext?: Record<string, any>;
+    },
+  ) {
+    return this.startProcess(trigger, {
+      businessKey: payload.businessId,
+      organizationId: payload.businessType || 'DEFAULT',
+      startedBy: payload.initiatorId || 'SYSTEM',
+      variables: {
+        ...(payload.initialContext || {}),
+        businessId: payload.businessId,
+        businessType: payload.businessType,
+      },
+    });
+  }
+
+  /**
+   * Resume a running instance at a specific node by completing the pending task.
+   * Finds the PENDING task for the given nodeCode (or first pending task if nodeId omitted).
+   */
+  async resumeInstance(
+    instanceId: string,
+    nodeId: string | undefined,
+    actionData: Record<string, any>,
+    userRoles?: string[],
+  ): Promise<{ success: boolean; message?: string }> {
+    // Find pending task for this instance (and optionally this node)
+    const taskWhere: any = { instanceId, status: 'PENDING' };
+    if (nodeId) {
+      taskWhere.nodeCode = nodeId;
+    }
+
+    const task = await this.prisma.workflowTask.findFirst({ where: taskWhere });
+
+    if (!task) {
+      // No pending task — try to advance directly from the node
+      if (nodeId) {
+        await this.advanceProcess(instanceId, nodeId);
+        return { success: true, message: 'Advanced from node' };
+      }
+      return { success: false, message: 'No pending task found for this instance' };
+    }
+
+    return this.completeTask(task.id, actionData);
+  }
+
+  /**
+   * Get a workflow instance with its tasks.
+   */
+  async getInstance(instanceId: string) {
+    const instance = await this.prisma.processInstance.findUnique({
+      where: { id: instanceId },
+      include: {
+        version: { include: { definition: true } },
+        tasks: true,
+      },
+    });
+
+    if (!instance) throw new NotFoundException(`Instance ${instanceId} not found`);
+    return instance;
+  }
 }
 

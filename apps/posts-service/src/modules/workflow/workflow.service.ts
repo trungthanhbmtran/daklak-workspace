@@ -1,9 +1,11 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Injectable, BadRequestException, Inject, OnModuleInit } from '@nestjs/common';
+import { ClientProxy, ClientGrpc } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { firstValueFrom } from 'rxjs';
 
 export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
+export const WORKFLOW_PACKAGE = 'WORKFLOW_PACKAGE';
 
 export enum PostStatus {
   DRAFT = 'DRAFT',
@@ -17,12 +19,60 @@ export enum PostStatus {
 }
 
 @Injectable()
-export class WorkflowService {
+export class WorkflowService implements OnModuleInit {
+  private workflowService: any;
+
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
     @Inject(WORKFLOW_RMQ_CLIENT) private client: ClientProxy,
+    @Inject(WORKFLOW_PACKAGE) private grpcClient: ClientGrpc,
   ) { }
+
+  onModuleInit() {
+    this.workflowService = this.grpcClient.getService<any>('WorkflowService');
+  }
+
+  // --- Helper to validate action via Workflow-Service ---
+  private async validateTransition(postId: string, actorId: string, actionName: string, currentStatus: string): Promise<string> {
+    // Determine workflow configuration
+    const workflowId = 'POST_WORKFLOW_ID'; // Hardcode or resolve via config
+    const currentNodeId = currentStatus; // Using status as nodeId for simplicity
+
+    const validateRes = await firstValueFrom<any>(
+      this.workflowService.ValidateAction({
+        workflowId,
+        currentNodeId,
+        actionName,
+        userId: actorId,
+      })
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+
+    if (!validateRes || !validateRes.allowed) {
+      throw new BadRequestException(validateRes?.reason || `Action ${actionName} is not allowed from status ${currentStatus}`);
+    }
+
+    const nextNodeRes = await firstValueFrom<any>(
+      this.workflowService.GetNextNode({
+        workflowId,
+        currentNodeId,
+        actionName,
+      })
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
+
+    if (!nextNodeRes || !nextNodeRes.nextNodeId) {
+      throw new BadRequestException(`Could not determine next state for action ${actionName}`);
+    }
+
+    // In a real system we might parse nextNodeData, but for posts we map nodeId to PostStatus
+    return nextNodeRes.nextNodeId as string;
+  }
 
   // --- Atomic Business Actions ---
 
@@ -30,16 +80,12 @@ export class WorkflowService {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new BadRequestException('Post not found');
     const oldStatus = post.status;
+    const nextStatus = await this.validateTransition(postId, actorId, 'SUBMIT', oldStatus);
 
-    const updatedPost = await this.updateStatus(postId, PostStatus.SUBMITTED);
-
-    // Ghi log phê duyệt để theo dõi lịch sử
-    await this.logModeration(postId, actorId, oldStatus, PostStatus.SUBMITTED, 'SUBMIT', note);
+    const updatedPost = await this.updateStatus(postId, nextStatus as PostStatus);
+    await this.logModeration(postId, actorId, oldStatus, nextStatus as PostStatus, 'SUBMIT', note);
     await this.logAudit(postId, actorId, 'SUBMIT', { note });
-
-    // Kích hoạt quy trình động (không làm nghẽn luồng chính nếu lỗi)
     this.triggerDynamicWorkflow(updatedPost, actorId);
-
     return updatedPost;
   }
 
@@ -47,8 +93,10 @@ export class WorkflowService {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new BadRequestException('Post not found');
     const oldStatus = post.status;
-    const updatedPost = await this.updateStatus(postId, PostStatus.UNDER_REVIEW);
-    await this.logModeration(postId, actorId, oldStatus, PostStatus.UNDER_REVIEW, 'REVIEW', note);
+    const nextStatus = await this.validateTransition(postId, actorId, 'REVIEW', oldStatus);
+
+    const updatedPost = await this.updateStatus(postId, nextStatus as PostStatus);
+    await this.logModeration(postId, actorId, oldStatus, nextStatus as PostStatus, 'REVIEW', note);
     await this.logAudit(postId, actorId, 'REVIEW', { note });
     return updatedPost;
   }
@@ -57,8 +105,10 @@ export class WorkflowService {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new BadRequestException('Post not found');
     const oldStatus = post.status;
-    const updatedPost = await this.updateStatus(postId, PostStatus.APPROVED);
-    await this.logModeration(postId, actorId, oldStatus, PostStatus.APPROVED, 'APPROVE', note);
+    const nextStatus = await this.validateTransition(postId, actorId, 'APPROVE', oldStatus);
+
+    const updatedPost = await this.updateStatus(postId, nextStatus as PostStatus);
+    await this.logModeration(postId, actorId, oldStatus, nextStatus as PostStatus, 'APPROVE', note);
     await this.logAudit(postId, actorId, 'APPROVE', { note });
     return updatedPost;
   }
@@ -67,17 +117,24 @@ export class WorkflowService {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new BadRequestException('Post not found');
     const oldStatus = post.status;
-    const updatedPost = await this.updateStatus(postId, PostStatus.REJECTED);
-    await this.logModeration(postId, actorId, oldStatus, PostStatus.REJECTED, 'REJECT', note);
+    const nextStatus = await this.validateTransition(postId, actorId, 'REJECT', oldStatus);
+
+    const updatedPost = await this.updateStatus(postId, nextStatus as PostStatus);
+    await this.logModeration(postId, actorId, oldStatus, nextStatus as PostStatus, 'REJECT', note);
     await this.logAudit(postId, actorId, 'REJECT', { note });
     return updatedPost;
   }
 
   async publish(postId: string, actorId: string, note?: string) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+    const oldStatus = post.status;
+    const nextStatus = await this.validateTransition(postId, actorId, 'PUBLISH', oldStatus);
+
     const updatedPost = await this.prisma.post.update({
       where: { id: postId },
       data: {
-        status: PostStatus.PUBLISHED,
+        status: nextStatus as PostStatus,
         publishedAt: new Date(),
       },
     });
@@ -86,13 +143,23 @@ export class WorkflowService {
   }
 
   async unpublish(postId: string, actorId: string, note?: string) {
-    const updatedPost = await this.updateStatus(postId, PostStatus.UNPUBLISHED);
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+    const oldStatus = post.status;
+    const nextStatus = await this.validateTransition(postId, actorId, 'UNPUBLISH', oldStatus);
+
+    const updatedPost = await this.updateStatus(postId, nextStatus as PostStatus);
     await this.logAudit(postId, actorId, 'UNPUBLISH', { note });
     return updatedPost;
   }
 
   async archive(postId: string, actorId: string, note?: string) {
-    const updatedPost = await this.updateStatus(postId, PostStatus.ARCHIVED);
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+    const oldStatus = post.status;
+    const nextStatus = await this.validateTransition(postId, actorId, 'ARCHIVE', oldStatus);
+
+    const updatedPost = await this.updateStatus(postId, nextStatus as PostStatus);
     await this.logAudit(postId, actorId, 'ARCHIVE', { note });
     return updatedPost;
   }

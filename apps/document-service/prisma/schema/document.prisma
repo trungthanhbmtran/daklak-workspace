@@ -28,6 +28,8 @@ model Document {
   linkedDocumentId   String?   @map("linked_document_id")
   fiscalYear         Int?      @map("fiscal_year") // Năm tài chính (cho công khai ngân sách)
   transparencyCategory String? @map("transparency_category") // ESTIMATE, SETTLEMENT, EXECUTION
+  workflowInstanceId String?   @map("workflow_instance_id") // ID của ProcessInstance trong workflow-service
+  workflowCurrentNode String?  @map("workflow_current_node") // nodeCode hiện tại trong workflow
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
@@ -35,6 +37,7 @@ model Document {
   @@index([typeId])
   @@index([fieldId])
   @@index([status])
+  @@index([workflowInstanceId])
   @@map("documents")
 }
 

@@ -4780,6 +4780,8 @@ export namespace Prisma {
     linkedDocumentId: string | null
     fiscalYear: number | null
     transparencyCategory: string | null
+    workflowInstanceId: string | null
+    workflowCurrentNode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4814,6 +4816,8 @@ export namespace Prisma {
     linkedDocumentId: string | null
     fiscalYear: number | null
     transparencyCategory: string | null
+    workflowInstanceId: string | null
+    workflowCurrentNode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4848,6 +4852,8 @@ export namespace Prisma {
     linkedDocumentId: number
     fiscalYear: number
     transparencyCategory: number
+    workflowInstanceId: number
+    workflowCurrentNode: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4896,6 +4902,8 @@ export namespace Prisma {
     linkedDocumentId?: true
     fiscalYear?: true
     transparencyCategory?: true
+    workflowInstanceId?: true
+    workflowCurrentNode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4930,6 +4938,8 @@ export namespace Prisma {
     linkedDocumentId?: true
     fiscalYear?: true
     transparencyCategory?: true
+    workflowInstanceId?: true
+    workflowCurrentNode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4964,6 +4974,8 @@ export namespace Prisma {
     linkedDocumentId?: true
     fiscalYear?: true
     transparencyCategory?: true
+    workflowInstanceId?: true
+    workflowCurrentNode?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -5085,6 +5097,8 @@ export namespace Prisma {
     linkedDocumentId: string | null
     fiscalYear: number | null
     transparencyCategory: string | null
+    workflowInstanceId: string | null
+    workflowCurrentNode: string | null
     createdAt: Date
     updatedAt: Date
     _count: DocumentCountAggregateOutputType | null
@@ -5138,6 +5152,8 @@ export namespace Prisma {
     linkedDocumentId?: boolean
     fiscalYear?: boolean
     transparencyCategory?: boolean
+    workflowInstanceId?: boolean
+    workflowCurrentNode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["document"]>
@@ -5174,11 +5190,13 @@ export namespace Prisma {
     linkedDocumentId?: boolean
     fiscalYear?: boolean
     transparencyCategory?: boolean
+    workflowInstanceId?: boolean
+    workflowCurrentNode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "isIncoming" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "fiscalYear" | "transparencyCategory" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+  export type DocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "isIncoming" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "fiscalYear" | "transparencyCategory" | "workflowInstanceId" | "workflowCurrentNode" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 
   export type $DocumentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Document"
@@ -5213,6 +5231,8 @@ export namespace Prisma {
       linkedDocumentId: string | null
       fiscalYear: number | null
       transparencyCategory: string | null
+      workflowInstanceId: string | null
+      workflowCurrentNode: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["document"]>
@@ -5613,6 +5633,8 @@ export namespace Prisma {
     readonly linkedDocumentId: FieldRef<"Document", 'String'>
     readonly fiscalYear: FieldRef<"Document", 'Int'>
     readonly transparencyCategory: FieldRef<"Document", 'String'>
+    readonly workflowInstanceId: FieldRef<"Document", 'String'>
+    readonly workflowCurrentNode: FieldRef<"Document", 'String'>
     readonly createdAt: FieldRef<"Document", 'DateTime'>
     readonly updatedAt: FieldRef<"Document", 'DateTime'>
   }
@@ -11789,6 +11811,8 @@ export namespace Prisma {
     linkedDocumentId: 'linkedDocumentId',
     fiscalYear: 'fiscalYear',
     transparencyCategory: 'transparencyCategory',
+    workflowInstanceId: 'workflowInstanceId',
+    workflowCurrentNode: 'workflowCurrentNode',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -11972,7 +11996,9 @@ export namespace Prisma {
     status: 'status',
     fileId: 'fileId',
     linkedDocumentId: 'linkedDocumentId',
-    transparencyCategory: 'transparencyCategory'
+    transparencyCategory: 'transparencyCategory',
+    workflowInstanceId: 'workflowInstanceId',
+    workflowCurrentNode: 'workflowCurrentNode'
   };
 
   export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
@@ -12396,6 +12422,8 @@ export namespace Prisma {
     linkedDocumentId?: StringNullableFilter<"Document"> | string | null
     fiscalYear?: IntNullableFilter<"Document"> | number | null
     transparencyCategory?: StringNullableFilter<"Document"> | string | null
+    workflowInstanceId?: StringNullableFilter<"Document"> | string | null
+    workflowCurrentNode?: StringNullableFilter<"Document"> | string | null
     createdAt?: DateTimeFilter<"Document"> | Date | string
     updatedAt?: DateTimeFilter<"Document"> | Date | string
   }
@@ -12430,6 +12458,8 @@ export namespace Prisma {
     linkedDocumentId?: SortOrderInput | SortOrder
     fiscalYear?: SortOrderInput | SortOrder
     transparencyCategory?: SortOrderInput | SortOrder
+    workflowInstanceId?: SortOrderInput | SortOrder
+    workflowCurrentNode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _relevance?: DocumentOrderByRelevanceInput
@@ -12468,6 +12498,8 @@ export namespace Prisma {
     linkedDocumentId?: StringNullableFilter<"Document"> | string | null
     fiscalYear?: IntNullableFilter<"Document"> | number | null
     transparencyCategory?: StringNullableFilter<"Document"> | string | null
+    workflowInstanceId?: StringNullableFilter<"Document"> | string | null
+    workflowCurrentNode?: StringNullableFilter<"Document"> | string | null
     createdAt?: DateTimeFilter<"Document"> | Date | string
     updatedAt?: DateTimeFilter<"Document"> | Date | string
   }, "id">
@@ -12502,6 +12534,8 @@ export namespace Prisma {
     linkedDocumentId?: SortOrderInput | SortOrder
     fiscalYear?: SortOrderInput | SortOrder
     transparencyCategory?: SortOrderInput | SortOrder
+    workflowInstanceId?: SortOrderInput | SortOrder
+    workflowCurrentNode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: DocumentCountOrderByAggregateInput
@@ -12544,6 +12578,8 @@ export namespace Prisma {
     linkedDocumentId?: StringNullableWithAggregatesFilter<"Document"> | string | null
     fiscalYear?: IntNullableWithAggregatesFilter<"Document"> | number | null
     transparencyCategory?: StringNullableWithAggregatesFilter<"Document"> | string | null
+    workflowInstanceId?: StringNullableWithAggregatesFilter<"Document"> | string | null
+    workflowCurrentNode?: StringNullableWithAggregatesFilter<"Document"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Document"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Document"> | Date | string
   }
@@ -13365,6 +13401,8 @@ export namespace Prisma {
     linkedDocumentId?: string | null
     fiscalYear?: number | null
     transparencyCategory?: string | null
+    workflowInstanceId?: string | null
+    workflowCurrentNode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -13399,6 +13437,8 @@ export namespace Prisma {
     linkedDocumentId?: string | null
     fiscalYear?: number | null
     transparencyCategory?: string | null
+    workflowInstanceId?: string | null
+    workflowCurrentNode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -13433,6 +13473,8 @@ export namespace Prisma {
     linkedDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     fiscalYear?: NullableIntFieldUpdateOperationsInput | number | null
     transparencyCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowCurrentNode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -13467,6 +13509,8 @@ export namespace Prisma {
     linkedDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     fiscalYear?: NullableIntFieldUpdateOperationsInput | number | null
     transparencyCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowCurrentNode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -13501,6 +13545,8 @@ export namespace Prisma {
     linkedDocumentId?: string | null
     fiscalYear?: number | null
     transparencyCategory?: string | null
+    workflowInstanceId?: string | null
+    workflowCurrentNode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -13535,6 +13581,8 @@ export namespace Prisma {
     linkedDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     fiscalYear?: NullableIntFieldUpdateOperationsInput | number | null
     transparencyCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowCurrentNode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -13569,6 +13617,8 @@ export namespace Prisma {
     linkedDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     fiscalYear?: NullableIntFieldUpdateOperationsInput | number | null
     transparencyCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    workflowCurrentNode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14501,6 +14551,8 @@ export namespace Prisma {
     linkedDocumentId?: SortOrder
     fiscalYear?: SortOrder
     transparencyCategory?: SortOrder
+    workflowInstanceId?: SortOrder
+    workflowCurrentNode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -14541,6 +14593,8 @@ export namespace Prisma {
     linkedDocumentId?: SortOrder
     fiscalYear?: SortOrder
     transparencyCategory?: SortOrder
+    workflowInstanceId?: SortOrder
+    workflowCurrentNode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -14575,6 +14629,8 @@ export namespace Prisma {
     linkedDocumentId?: SortOrder
     fiscalYear?: SortOrder
     transparencyCategory?: SortOrder
+    workflowInstanceId?: SortOrder
+    workflowCurrentNode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }

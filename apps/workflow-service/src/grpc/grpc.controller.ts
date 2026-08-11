@@ -11,6 +11,13 @@ import {
   ListInstancesGrpcDto,
   EmptyGrpcDto,
   FindWorkflowByCodeGrpcDto,
+  ValidateActionGrpcDto,
+  GetNextNodeGrpcDto,
+  GetInitialNodeGrpcDto,
+  GetAllowedActionsGrpcDto,
+  TriggerWorkflowGrpcDto,
+  ResumeWorkflowGrpcDto,
+  GetInstanceGrpcDto,
 } from './dto/workflow.dto';
 import { DefinitionService } from '../definition/definition.service';
 import { ExecutionService } from '../execution/execution.service';
@@ -75,17 +82,45 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(@Payload() data: StartWorkflowGrpcDto) {
-    const instance = await this.executionService.startProcess(data.workflowId, {
+    // StartWorkflow uses businessId (UUID of the definition or code string)
+    // We use startProcess which accepts the definition CODE
+    const instance = await this.executionService.startProcess(data.businessId || data.workflowId, {
       variables: data.initialContext,
       startedBy: data.initiatorId,
+      businessKey: data.businessId,
+      organizationId: data.businessType || 'DEFAULT',
     });
-    return {
-      id: instance.id,
-      workflowId: instance.definitionId,
-      status: instance.status,
-      currentNodeId: instance.currentNodeCode,
-      context: instance.variables,
-    };
+    return this.mapInstanceToResponse(instance);
+  }
+
+  @GrpcMethod('WorkflowService', 'TriggerWorkflow')
+  async triggerWorkflow(@Payload() data: TriggerWorkflowGrpcDto) {
+    const instance = await this.executionService.triggerProcess(data.trigger, {
+      businessId: data.businessId,
+      businessType: data.businessType,
+      initiatorId: data.initiatorId,
+      initialContext: data.initialContext,
+    });
+    return this.mapInstanceToResponse(instance);
+  }
+
+  @GrpcMethod('WorkflowService', 'ResumeWorkflow')
+  async resumeWorkflow(@Payload() data: ResumeWorkflowGrpcDto) {
+    const result = await this.executionService.resumeInstance(
+      data.instanceId,
+      data.nodeId,
+      data.actionData || {},
+      data.userRoles,
+    );
+    // Return updated instance after resume
+    const instance = await this.executionService.getInstance(data.instanceId);
+    return this.mapInstanceToResponse(instance);
+  }
+
+  @GrpcMethod('WorkflowService', 'GetInstance')
+  async getInstance(@Payload() data: GetInstanceGrpcDto) {
+    const instance = await this.executionService.getInstance(data.id);
+    return this.mapInstanceToResponse(instance);
   }
 
   @GrpcMethod('WorkflowService', 'ListInstances')
@@ -118,6 +153,26 @@ export class GrpcWorkflowController {
     };
   }
 
+  @GrpcMethod('WorkflowService', 'ValidateAction')
+  async validateAction(@Payload() data: ValidateActionGrpcDto) {
+    return this.executionService.validateAction(data);
+  }
+
+  @GrpcMethod('WorkflowService', 'GetNextNode')
+  async getNextNode(@Payload() data: GetNextNodeGrpcDto) {
+    return this.executionService.getNextNode(data);
+  }
+
+  @GrpcMethod('WorkflowService', 'GetInitialNode')
+  async getInitialNode(@Payload() data: GetInitialNodeGrpcDto) {
+    return this.executionService.getInitialNode(data.workflowId);
+  }
+
+  @GrpcMethod('WorkflowService', 'GetAllowedActions')
+  async getAllowedActions(@Payload() data: GetAllowedActionsGrpcDto) {
+    return this.executionService.getAllowedActions(data);
+  }
+
   private mapToWorkflowResponse(def: any, version: any) {
     if (!def) return {};
     return {
@@ -130,6 +185,29 @@ export class GrpcWorkflowController {
       definition: version?.graph || {},
       trigger: def.code,
       createdAt: def.createdAt?.toISOString(),
+    };
+  }
+
+  private mapInstanceToResponse(instance: any) {
+    if (!instance) return {};
+    return {
+      id: instance.id,
+      workflowId: instance.definitionId,
+      status: instance.status,
+      currentNodeId: instance.currentNodeCode,
+      context: instance.variables,
+      createdAt: instance.startedAt?.toISOString?.() || new Date().toISOString(),
+      updatedAt: instance.updatedAt?.toISOString?.() || new Date().toISOString(),
+      workflowName: instance.version?.definition?.name || '',
+      tasks: (instance.tasks || []).map((t: any) => ({
+        id: t.id,
+        instanceId: t.instanceId,
+        nodeId: t.nodeCode,
+        assigneeId: t.assigneeId || '',
+        status: t.status,
+        startedAt: t.createdAt?.toISOString?.() || '',
+        completedAt: t.completedAt?.toISOString?.() || '',
+      })),
     };
   }
 }

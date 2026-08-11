@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, GrpcStreamMethod, RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 import { MessageService } from './message.service';
 import { Observable, Subject } from 'rxjs';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -44,6 +45,30 @@ export class MessageController {
       error: (err) => subject.error(err)
     });
 
+    return subject.asObservable();
+  }
+
+  @GrpcMethod('ChatService', 'GetUnreadCount')
+  async getUnreadCount(data: { userId: string }): Promise<{ count: number }> {
+    throw new RpcException({ code: status.UNIMPLEMENTED, message: 'Not implemented yet' });
+  }
+
+  @GrpcMethod('ChatService', 'SearchMessage')
+  async searchMessage(data: { query: string; conversationId: string }): Promise<{ data: MessageResponseDto[] }> {
+    throw new RpcException({ code: status.UNIMPLEMENTED, message: 'Not implemented yet' });
+  }
+
+  @GrpcStreamMethod('ChatService', 'WatchPresence')
+  watchPresence(data$: Observable<{ userIds: string[] }>): Observable<any> {
+    const subject = new Subject<any>();
+    subject.error(new RpcException({ code: status.UNIMPLEMENTED, message: 'Not implemented yet' }));
+    return subject.asObservable();
+  }
+
+  @GrpcMethod('ChatService', 'WatchConversation')
+  watchConversation(data: { conversationId: string }): Observable<any> {
+    const subject = new Subject<any>();
+    subject.error(new RpcException({ code: status.UNIMPLEMENTED, message: 'Not implemented yet' }));
     return subject.asObservable();
   }
 }

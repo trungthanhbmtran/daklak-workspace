@@ -46,9 +46,30 @@ export class DocumentService {
       },
     });
 
-    await this.workflowService.receiveDocument(document.id, data.userId, data.userName);
+    // Kích hoạt workflow DOC_RECEIVED và lưu instanceId
+    const workflowResult = await this.workflowService.startDocumentWorkflow(
+      document.id,
+      'DOC_RECEIVED',
+      {
+        initiatorId: data.userId || 'SYSTEM',
+        documentNumber: document.documentNumber,
+        abstract: document.abstract,
+      },
+    );
 
-    return { data: this.mapToProto(document) };
+    // Nếu workflow tạo thành công, cập nhật workflowInstanceId vào document
+    if (workflowResult.instanceId) {
+      await this.prisma.document.update({
+        where: { id: document.id },
+        data: {
+          workflowInstanceId: workflowResult.instanceId,
+          workflowCurrentNode: workflowResult.currentNodeId || null,
+          status: 'RECEIVED',
+        },
+      });
+    }
+
+    return { data: this.mapToProto({ ...document, status: workflowResult.instanceId ? 'RECEIVED' : document.status }) };
   }
 
   async findOne(id: string) {
@@ -150,8 +171,31 @@ export class DocumentService {
   }
 
   async receiveDocument(id: string, actorId?: string, actorName?: string) {
-    const document = await this.workflowService.receiveDocument(id, actorId, actorName);
-    return this.mapToProto(document);
+    // Kích hoạt workflow nếu document chưa có instanceId
+    const doc = await this.prisma.document.findUnique({ where: { id } });
+    if (!doc) throw new Error(`Document ${id} not found`);
+
+    if (!doc.workflowInstanceId) {
+      const workflowResult = await this.workflowService.startDocumentWorkflow(
+        id,
+        'DOC_RECEIVED',
+        { initiatorId: actorId || 'SYSTEM' },
+      );
+
+      if (workflowResult.instanceId) {
+        const updated = await this.prisma.document.update({
+          where: { id },
+          data: {
+            workflowInstanceId: workflowResult.instanceId,
+            workflowCurrentNode: workflowResult.currentNodeId || null,
+            status: 'RECEIVED',
+          },
+        });
+        return this.mapToProto(updated);
+      }
+    }
+
+    return this.mapToProto(doc);
   }
 
   async processDocument(id: string, actorId: string, actorName: string, note?: string) {

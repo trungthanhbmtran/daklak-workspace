@@ -192,6 +192,8 @@ exports.Prisma.DocumentScalarFieldEnum = {
   linkedDocumentId: 'linkedDocumentId',
   fiscalYear: 'fiscalYear',
   transparencyCategory: 'transparencyCategory',
+  workflowInstanceId: 'workflowInstanceId',
+  workflowCurrentNode: 'workflowCurrentNode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -339,7 +341,9 @@ exports.Prisma.DocumentOrderByRelevanceFieldEnum = {
   status: 'status',
   fileId: 'fileId',
   linkedDocumentId: 'linkedDocumentId',
-  transparencyCategory: 'transparencyCategory'
+  transparencyCategory: 'transparencyCategory',
+  workflowInstanceId: 'workflowInstanceId',
+  workflowCurrentNode: 'workflowCurrentNode'
 };
 
 exports.Prisma.DocumentLogOrderByRelevanceFieldEnum = {
