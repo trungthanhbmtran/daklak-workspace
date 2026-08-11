@@ -23,7 +23,7 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { 
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
   const addComment = useAddComment(conversationId);
   const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(conversationId);
-  
+
   const comments: any[] = (commentsData as any)?.data?.items ?? [];
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -89,7 +89,7 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { 
             </div>
           ))
         )}
-        
+
         {typingUsers.length > 0 && (
           <div className="flex gap-3 items-center text-slate-400 italic text-sm">
             <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
@@ -98,7 +98,7 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { 
             Ai đó đang soạn tin...
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 

@@ -269,7 +269,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </TabsContent>
           </ScrollArea>
         </Tabs>
-        
+
         <TaskAssignDialog
           open={isAssignOpen}
           onOpenChange={setIsAssignOpen}

@@ -128,6 +128,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   broadcastMessage(conversationId: string, message: any) {
     this.logger.log(`Broadcasting new_message to room_${conversationId}`);
-    this.server.to(`room_${conversationId}`).emit('new_message', message);
+    if (this.server) {
+      this.server.to(`room_${conversationId}`).emit('new_message', message);
+    } else {
+      this.logger.warn(`WebSocket server is not initialized yet. Skipping broadcast.`);
+    }
   }
 }

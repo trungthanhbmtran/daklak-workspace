@@ -30,12 +30,16 @@ export class ChatController implements OnModuleInit {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
     
-    // Broadcast message via WebSockets
-    if (data && data.conversationId) {
-      this.chatGateway.broadcastMessage(data.conversationId, data);
+    try {
+      // Broadcast message via WebSockets
+      if (data && data.conversationId) {
+        this.chatGateway.broadcastMessage(data.conversationId, data);
+      }
+    } catch (err) {
+      console.error('Error broadcasting message:', err);
+    } finally {
+      channel.ack(originalMsg);
     }
-    
-    channel.ack(originalMsg);
   }
 
   @Post('conversation')
