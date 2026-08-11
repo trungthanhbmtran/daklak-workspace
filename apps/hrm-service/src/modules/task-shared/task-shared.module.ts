@@ -23,6 +23,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
               durable: true,
               arguments: {
                 'x-dead-letter-exchange': 'dlx_notifications',
+                'x-dead-letter-routing-key': 'notifications',
               }
             },
           },

@@ -42,6 +42,7 @@ const protoRoot =
             durable: true, // Queue tạm thời hay bền vững
             arguments: {
               'x-dead-letter-exchange': 'dlx_notifications',
+              'x-dead-letter-routing-key': 'notifications',
             }
           },
         },

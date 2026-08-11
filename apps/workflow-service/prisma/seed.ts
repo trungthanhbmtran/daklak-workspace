@@ -139,7 +139,7 @@ const processDefinitions = [
     },
   },
   {
-    code: 'GOV_COMPLEX_TASK',
+    code: 'TASK_PROCESSING_ID',
     name: 'Quy trình Quản lý Công việc & KPI (CQNN)',
     description: 'Quy trình giao việc, tiếp nhận/từ chối, phối hợp xử lý và đánh giá chấm KPI chuẩn cơ quan nhà nước',
     isActive: true,
