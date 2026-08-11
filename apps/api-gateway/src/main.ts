@@ -102,6 +102,21 @@ async function bootstrap() {
     },
   });
 
+  app.connectMicroservice({
+    transport: 5, // Transport.RMQ
+    options: {
+      urls: [
+        process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672',
+      ],
+      queue: 'chat_events_queue',
+      noAck: false,
+      prefetchCount: 50,
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+
   await app.startAllMicroservices();
   await app.listen(port, '0.0.0.0');
 
