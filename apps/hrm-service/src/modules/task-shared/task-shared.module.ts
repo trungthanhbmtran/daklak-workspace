@@ -19,7 +19,12 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
           options: {
             urls: [config.get<string>('RABBITMQ_URL') || 'amqp://root:mypassword@rabbitmq:5672'],
             queue: config.get<string>('NOTIFICATION_QUEUE') || 'notifications',
-            queueOptions: { durable: true },
+            queueOptions: { 
+              durable: true,
+              arguments: {
+                'x-dead-letter-exchange': 'dlx_notifications',
+              }
+            },
           },
         }),
       },

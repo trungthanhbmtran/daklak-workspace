@@ -40,6 +40,9 @@ const protoRoot =
           queue: process.env.NOTIFICATION_QUEUE || 'notifications', // Cùng queue với notification_service
           queueOptions: {
             durable: true, // Queue tạm thời hay bền vững
+            arguments: {
+              'x-dead-letter-exchange': 'dlx_notifications',
+            }
           },
         },
       },
