@@ -278,6 +278,7 @@ export class MasterPlansService {
 
       const getUserId = (code: string) => codeToUidMap.get(code);
 
+      const ops: any[] = [];
       for (const task of data.tasks) {
         let creatorUserId = 0;
         const creatorUid = getUserId(data.createdByCode || '');
@@ -293,25 +294,30 @@ export class MasterPlansService {
           participants.push({ userId: ownerUid, participantRole: 'OWNER' });
         }
 
-        await this.prisma.task.create({
-          data: {
-            title: task.title,
-            description: task.description,
-            status: 'TEMPLATE',
-            priority: 'MEDIUM',
-            kpiSettings: {
-              create: {
-                weight: task.weight,
-                baseScore: task.targetValue
+        ops.push(
+          this.prisma.task.create({
+            data: {
+              title: task.title,
+              description: task.description,
+              status: 'TEMPLATE',
+              priority: 'MEDIUM',
+              kpiSettings: {
+                create: {
+                  weight: task.weight,
+                  baseScore: task.targetValue
+                }
+              },
+              planId: mp.id,
+              creatorEmployeeCode: 'SYSTEM',
+              participants: {
+                create: participants
               }
-            },
-            planId: mp.id,
-            creatorEmployeeCode: 'SYSTEM',
-            participants: {
-              create: participants
             }
-          }
-        });
+          })
+        );
+      }
+      if (ops.length > 0) {
+        await this.prisma.$transaction(ops);
       }
     }
 

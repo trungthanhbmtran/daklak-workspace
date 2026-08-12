@@ -212,25 +212,25 @@ export class PostsService implements OnModuleInit {
       const translationEntries = typeof translations === 'string' ? JSON.parse(translations) : translations;
       const targetLangs = await this.getTargetLanguages();
 
-      for (const [langCode, trans] of Object.entries(translationEntries)) {
+      const dataToInsert = Object.entries(translationEntries).map(([langCode, trans]) => {
         const t = trans as any;
         const isAuto = targetLangs.includes(langCode);
+        return {
+          postId: post.id,
+          langCode,
+          title: t.title || (isAuto ? `[Đang dịch ${langCode}...]` : post.title),
+          slug: t.slug || generateSlug(t.title || post.title),
+          description: t.description || (isAuto ? "" : post.description),
+          content: t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content),
+          contentHtml: this.lexicalToHtml(t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content)),
+          version: 1,
+          mainVersionRef: 1,
+          isPublished: post.status === PostStatus.PUBLISHED
+        };
+      });
 
-        await this.prisma.postTranslation.create({
-          data: {
-            postId: post.id,
-            langCode,
-            // Nếu là ngôn ngữ tự động dịch và để trống -> dùng nhãn chờ, ngược lại mới fallback VN
-            title: t.title || (isAuto ? `[Đang dịch ${langCode}...]` : post.title),
-            slug: t.slug || generateSlug(t.title || post.title),
-            description: t.description || (isAuto ? "" : post.description),
-            content: t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content),
-            contentHtml: this.lexicalToHtml(t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content)),
-            version: 1,
-            mainVersionRef: 1,
-            isPublished: post.status === PostStatus.PUBLISHED
-          }
-        });
+      if (dataToInsert.length > 0) {
+        await this.prisma.postTranslation.createMany({ data: dataToInsert });
       }
     }
 
@@ -343,15 +343,23 @@ export class PostsService implements OnModuleInit {
     // 1. Xử lý lưu bản dịch vào bảng PostTranslation với versioning
     if (parsedTranslations) {
       const targetLangs = await this.getTargetLanguages();
+      const langCodes = Object.keys(parsedTranslations);
+
+      const existingTransArray = await this.prisma.postTranslation.findMany({
+        where: { postId: id, langCode: { in: langCodes } },
+        orderBy: { version: 'desc' },
+        distinct: ['langCode']
+      });
+      const existingTransMap = new Map(existingTransArray.map(t => [t.langCode, t]));
+
+      const dataToInsert: any[] = [];
+
       for (const [langCode, trans] of Object.entries(parsedTranslations)) {
         const t = trans as any;
         const isAuto = targetLangs.includes(langCode);
 
         // Tìm bản dịch hiện tại của ngôn ngữ này
-        const existingTrans = await this.prisma.postTranslation.findFirst({
-          where: { postId: id, langCode },
-          orderBy: { version: 'desc' }
-        });
+        const existingTrans = existingTransMap.get(langCode);
 
         // Kiểm tra xem có thay đổi nội dung dịch không
         const isChanged = !existingTrans ||
@@ -360,21 +368,23 @@ export class PostsService implements OnModuleInit {
           existingTrans.description !== t.description;
 
         if (isChanged) {
-          await this.prisma.postTranslation.create({
-            data: {
-              postId: id,
-              langCode,
-              title: t.title || (existingTrans?.title || (isAuto ? `[Đang dịch ${langCode}...]` : updatedPost.title)),
-              slug: t.slug || generateSlug(t.title || existingTrans?.title || updatedPost.title),
-              description: t.description || existingTrans?.description || (isAuto ? "" : updatedPost.description),
-              content: t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content)),
-              contentHtml: this.lexicalToHtml(t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content))),
-              version: existingTrans ? existingTrans.version + 1 : 1,
-              mainVersionRef: nextVersion,
-              isPublished: updatedPost.status === PostStatus.PUBLISHED
-            }
+          dataToInsert.push({
+            postId: id,
+            langCode,
+            title: t.title || (existingTrans?.title || (isAuto ? `[Đang dịch ${langCode}...]` : updatedPost.title)),
+            slug: t.slug || generateSlug(t.title || existingTrans?.title || updatedPost.title),
+            description: t.description || existingTrans?.description || (isAuto ? "" : updatedPost.description),
+            content: t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content)),
+            contentHtml: this.lexicalToHtml(t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content))),
+            version: existingTrans ? existingTrans.version + 1 : 1,
+            mainVersionRef: nextVersion,
+            isPublished: updatedPost.status === PostStatus.PUBLISHED
           });
         }
+      }
+
+      if (dataToInsert.length > 0) {
+        await this.prisma.postTranslation.createMany({ data: dataToInsert });
       }
     }
 

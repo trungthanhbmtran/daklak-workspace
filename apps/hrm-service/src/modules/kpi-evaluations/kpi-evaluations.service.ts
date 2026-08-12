@@ -647,24 +647,29 @@ export class KpiEvaluationsService {
       throw new RpcException({ message: 'Phiếu đã được nộp hoặc đã chốt', code: 3 /* INVALID_ARGUMENT */ });
     }
 
-    // Upsert details
+    const ops: any[] = [];
     for (const d of payload.details) {
       if (d.id) {
-        await this.prisma.kpiEvaluationDetail.update({
-          where: { id: d.id },
-          data: { selfScore: d.selfScore, notes: d.notes }
-        });
+        ops.push(
+          this.prisma.kpiEvaluationDetail.update({
+            where: { id: d.id },
+            data: { selfScore: d.selfScore, notes: d.notes }
+          })
+        );
       } else {
-        await this.prisma.kpiEvaluationDetail.create({
-          data: {
-            evaluationId: id,
-            criteriaId: d.criteriaId,
-            selfScore: d.selfScore,
-            notes: d.notes
-          }
-        });
+        ops.push(
+          this.prisma.kpiEvaluationDetail.create({
+            data: {
+              evaluationId: id,
+              criteriaId: d.criteriaId,
+              selfScore: d.selfScore,
+              notes: d.notes
+            }
+          })
+        );
       }
     }
+    await this.prisma.$transaction(ops);
 
     await this.prisma.kpiEvaluation.update({
       where: { id },
@@ -684,26 +689,32 @@ export class KpiEvaluationsService {
 
     let finalTotalScore = 0;
 
+    const ops: any[] = [];
     for (const d of payload.details) {
       if (d.id) {
-        await this.prisma.kpiEvaluationDetail.update({
-          where: { id: d.id },
-          data: { reviewerScore: d.reviewerScore }
-        });
+        ops.push(
+          this.prisma.kpiEvaluationDetail.update({
+            where: { id: d.id },
+            data: { reviewerScore: d.reviewerScore }
+          })
+        );
         finalTotalScore += (d.reviewerScore || 0);
       } else {
-        await this.prisma.kpiEvaluationDetail.create({
-          data: {
-            evaluationId: id,
-            criteriaId: d.criteriaId,
-            selfScore: d.selfScore,
-            reviewerScore: d.reviewerScore,
-            notes: d.notes
-          }
-        });
+        ops.push(
+          this.prisma.kpiEvaluationDetail.create({
+            data: {
+              evaluationId: id,
+              criteriaId: d.criteriaId,
+              selfScore: d.selfScore,
+              reviewerScore: d.reviewerScore,
+              notes: d.notes
+            }
+          })
+        );
         finalTotalScore += (d.reviewerScore || 0);
       }
     }
+    await this.prisma.$transaction(ops);
 
     await this.prisma.kpiEvaluation.update({
       where: { id },
