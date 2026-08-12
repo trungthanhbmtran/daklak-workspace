@@ -88,13 +88,11 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions, part
                   {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
                 </div>
                 <div className={`max-w-[85%] p-3 rounded-lg ${isCurrentUser ? "rounded-tr-none bg-blue-600 text-white" : "rounded-tl-none bg-slate-100 text-slate-900"} ${comment.isOptimistic ? "opacity-60" : ""}`}>
-                  <div className={`flex items-center gap-2 mb-1 ${isCurrentUser ? "justify-end" : "justify-between"}`}>
-                    {!isCurrentUser && (
-                      <Text as="span" variant="small" weight="medium" className="text-slate-900">
-                        {comment.senderName || getSenderName(comment.senderId) || "Người dùng"}
-                      </Text>
-                    )}
-                    <Text as="span" className={isCurrentUser ? "text-blue-100 text-[11px]" : "text-slate-500 text-[11px]"}>
+                  <div className={`flex items-center gap-4 mb-1 justify-between ${isCurrentUser ? "flex-row-reverse" : ""}`}>
+                    <Text as="span" variant="small" weight="medium" className={isCurrentUser ? "text-blue-100" : "text-slate-900"}>
+                      {comment.senderName || getSenderName(comment.senderId) || "Người dùng"}
+                    </Text>
+                    <Text as="span" className={isCurrentUser ? "text-blue-200 text-[11px]" : "text-slate-500 text-[11px]"}>
                       {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
                     </Text>
                   </div>
