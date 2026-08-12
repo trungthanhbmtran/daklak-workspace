@@ -4,8 +4,9 @@
 import React, { useState, useRef } from 'react';
 import { useHrmEmployeesSearch } from '../hooks/useHrmEmployees';
 import { Text } from "@/components/ui/typography";
+import { Textarea } from "@/components/ui/textarea";
 
-interface MentionInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface MentionInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
   onChange: (e: any) => void;
   onSend?: () => void;
@@ -14,7 +15,7 @@ interface MentionInputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 export function MentionInput({ value, onChange, onSend, ...props }: MentionInputProps) {
   const [mentionQuery, setMentionQuery] = useState<{ keyword: string; startIndex: number } | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch employees when mentionQuery is active
   const { data: searchResults, isLoading } = useHrmEmployeesSearch(mentionQuery?.keyword || '', {
@@ -23,7 +24,7 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
   });
   const employees = searchResults || [];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e);
     const val = e.target.value;
     const cursor = e.target.selectionStart || 0;
@@ -60,7 +61,7 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
     // Create a synthetic event
     const event = {
       target: { value: newValue }
-    } as React.ChangeEvent<HTMLInputElement>;
+    } as React.ChangeEvent<HTMLTextAreaElement>;
     
     onChange(event);
     setMentionQuery(null);
@@ -75,7 +76,7 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
     }, 0);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (mentionQuery && employees.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -92,7 +93,7 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
       } else if (e.key === 'Escape') {
         setMentionQuery(null);
       }
-    } else if (e.key === 'Enter' && onSend && !e.nativeEvent.isComposing) {
+    } else if (e.key === 'Enter' && !e.shiftKey && onSend && !e.nativeEvent.isComposing) {
       e.preventDefault();
       onSend();
     } else if (props.onKeyDown) {
@@ -125,14 +126,13 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
           ))}
         </div>
       )}
-      <input
+      <Textarea
         ref={inputRef}
-        type="text"
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         {...props}
-        className={`flex-1 bg-transparent border-none text-[13.5px] focus:ring-0 outline-none disabled:opacity-40 text-slate-800 dark:text-white ${props.className || ''}`}
+        className={`flex-1 bg-transparent border-none text-[13.5px] focus:ring-0 outline-none disabled:opacity-40 text-slate-800 dark:text-white resize-none ${props.className || ''}`}
       />
     </div>
   );

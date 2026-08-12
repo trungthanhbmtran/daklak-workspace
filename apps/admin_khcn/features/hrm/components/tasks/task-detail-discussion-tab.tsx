@@ -6,7 +6,7 @@ import { useTaskComments, useAddComment } from "../../hooks/useTasks";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/typography";
-import { Textarea } from "@/components/ui/textarea";
+import { MentionInput } from "../MentionInput";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -17,6 +17,36 @@ const safeFormatDate = (date: any, fmt: string) => {
   const d = new Date(date);
   if (isNaN(d.getTime())) return "Chưa xác định";
   return format(d, fmt);
+};
+
+const parseMessageContent = (content: string, isCurrentUser: boolean) => {
+  if (!content) return null;
+  const mentionRegex = /@\[(.*?)\]\((.*?)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = mentionRegex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(content.slice(lastIndex, match.index));
+    }
+    const name = match[1];
+    parts.push(
+      <Text 
+        key={match.index} 
+        as="span" 
+        weight="bold" 
+        className={isCurrentUser ? "text-blue-100 bg-blue-700/50 px-1 rounded mx-0.5" : "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 rounded mx-0.5"}
+      >
+        @{name}
+      </Text>
+    );
+    lastIndex = mentionRegex.lastIndex;
+  }
+  if (lastIndex < content.length) {
+    parts.push(content.slice(lastIndex));
+  }
+  return parts.length > 0 ? parts : content;
 };
 
 export function TaskDiscussionTab({ conversationId, allowedActions, participants }: { conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
@@ -100,7 +130,7 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
                     </div>
                   )}
                   <Text variant="small" className={`whitespace-pre-wrap font-normal ${isCurrentUser ? "text-white" : "text-slate-700"}`}>
-                    {comment.content}
+                    {parseMessageContent(comment.content, isCurrentUser)}
                   </Text>
                   {isCurrentUser && (
                     <div className="text-right mt-1">
@@ -130,12 +160,12 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
       <div className="mt-auto flex gap-2 pt-2 border-t">
         {allowedActions?.includes('CHAT') ? (
           <>
-            <Textarea
-              placeholder="Nhập nội dung trao đổi..."
-              className="min-h-[40px] h-[40px] resize-none"
+            <MentionInput
+              placeholder="Nhập nội dung trao đổi (gõ @ để gắn thẻ)..."
+              className="min-h-[40px] max-h-[120px]"
               value={commentText}
               onChange={handleInputChange}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
+              onSend={handleSendComment}
               onBlur={emitStopTyping}
             />
             <Button
