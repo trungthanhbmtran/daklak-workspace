@@ -15,8 +15,7 @@ export const hrmApi = {
   },
 
   search(keyword: string, pageSize = 20): Promise<HrmEmployee[]> {
-    if (!keyword?.trim()) return Promise.resolve([]);
-    return (apiClient.get(HRM_EMPLOYEES_PATH, { params: { keyword: keyword.trim(), pageSize } }) as any as Promise<ApiResponse<any[]>>)
+    return (apiClient.get(HRM_EMPLOYEES_PATH, { params: { keyword: keyword?.trim() || "", pageSize } }) as any as Promise<ApiResponse<any[]>>)
       .then((res) => res.data ?? []);
   },
 

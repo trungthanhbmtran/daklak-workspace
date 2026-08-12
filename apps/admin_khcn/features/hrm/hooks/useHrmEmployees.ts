@@ -24,10 +24,11 @@ export function useHrmEmployeesList(params: HrmEmployeesListParams = {}) {
  */
 export function useHrmEmployeesSearch(keyword: string, options?: { enabled?: boolean; minChars?: number }) {
   const { enabled = true, minChars = 2 } = options ?? {};
-  const shouldRun = enabled && keyword.trim().length >= minChars;
+  const trimmed = keyword?.trim() || "";
+  const shouldRun = enabled && trimmed.length >= minChars;
   return useQuery({
-    queryKey: hrmKeys.search(keyword.trim()),
-    queryFn: () => hrmApi.search(keyword.trim()),
+    queryKey: hrmKeys.search(trimmed),
+    queryFn: () => hrmApi.search(trimmed),
     enabled: shouldRun,
     staleTime: 30_000,
   });

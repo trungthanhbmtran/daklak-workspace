@@ -20,7 +20,7 @@ export function MentionInput({ value, onChange, onSend, ...props }: MentionInput
   // Fetch employees when mentionQuery is active
   const { data: searchResults, isLoading } = useHrmEmployeesSearch(mentionQuery?.keyword || '', {
     enabled: !!mentionQuery,
-    minChars: 1, // trigger immediately after @
+    minChars: 0, // trigger immediately after @
   });
   const employees = searchResults || [];
 
