@@ -19,7 +19,7 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-export function TaskDiscussionTab({ taskId, conversationId, allowedActions, participants }: { taskId: number; conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
+export function TaskDiscussionTab({ conversationId, allowedActions, participants }: { conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
   const [commentText, setCommentText] = useState("");
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
   const addComment = useAddComment(conversationId);
@@ -27,7 +27,6 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions, part
   const { user } = useUser();
 
   const getSenderName = (senderId: string) => {
-    if (user?.employeeCode === senderId) return user.fullName || senderId;
     const participant = participants?.find((p: any) => p.employeeCode === senderId);
     return participant?.employeeName || senderId;
   };
@@ -83,22 +82,33 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions, part
           displayComments.map((comment: any) => {
             const isCurrentUser = comment.senderId === user?.employeeCode;
             return (
-              <div key={comment.id || comment.createdAt} className={`flex gap-3 ${isCurrentUser ? "flex-row-reverse" : ""}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${isCurrentUser ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
-                  {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
-                </div>
-                <div className={`max-w-[85%] p-3 rounded-lg ${isCurrentUser ? "rounded-tr-none bg-blue-600 text-white" : "rounded-tl-none bg-slate-100 text-slate-900"} ${comment.isOptimistic ? "opacity-60" : ""}`}>
-                  <div className={`flex items-center gap-4 mb-1 justify-between ${isCurrentUser ? "flex-row-reverse" : ""}`}>
-                    <Text as="span" variant="small" weight="medium" className={isCurrentUser ? "text-blue-100" : "text-slate-900"}>
-                      {comment.senderName || getSenderName(comment.senderId) || "Người dùng"}
-                    </Text>
-                    <Text as="span" className={isCurrentUser ? "text-blue-200 text-[11px]" : "text-slate-500 text-[11px]"}>
-                      {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
-                    </Text>
+              <div key={comment.id || comment.createdAt} className={`flex gap-3 ${isCurrentUser ? "justify-end" : ""}`}>
+                {!isCurrentUser && (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-blue-100 text-blue-700">
+                    {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
                   </div>
+                )}
+                <div className={`max-w-[85%] p-3 rounded-xl ${isCurrentUser ? "rounded-tr-sm bg-blue-600 text-white" : "rounded-tl-sm bg-slate-100 text-slate-900"} ${comment.isOptimistic ? "opacity-60" : ""}`}>
+                  {!isCurrentUser && (
+                    <div className="flex items-center gap-3 mb-1 justify-between">
+                      <Text as="span" variant="small" weight="medium" className="text-slate-900">
+                        {comment.senderName || getSenderName(comment.senderId) || "Người dùng"}
+                      </Text>
+                      <Text as="span" className="text-slate-500 text-[11px] shrink-0">
+                        {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
+                      </Text>
+                    </div>
+                  )}
                   <Text variant="small" className={`whitespace-pre-wrap font-normal ${isCurrentUser ? "text-white" : "text-slate-700"}`}>
                     {comment.content}
                   </Text>
+                  {isCurrentUser && (
+                    <div className="text-right mt-1">
+                      <Text as="span" className="text-blue-200 text-[10px]">
+                        {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
+                      </Text>
+                    </div>
+                  )}
                 </div>
               </div>
             );
