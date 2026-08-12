@@ -103,9 +103,9 @@ export function MentionInput({ value, onChange, onSend, participants, ...props }
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        const selected = employees[selectedIndex];
+        const selected = employees[selectedIndex] as any;
         if (selected) {
-          handleSelectMention(selected.employeeCode, selected.fullName || (selected as any).lastname);
+          handleSelectMention(selected.employeeCode, selected.fullName || selected.lastname);
         }
       } else if (e.key === 'Escape') {
         setMentionQuery(null);
