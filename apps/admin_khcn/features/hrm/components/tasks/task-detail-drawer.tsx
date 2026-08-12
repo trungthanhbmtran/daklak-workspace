@@ -217,6 +217,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 taskId={taskId}
                 conversationId={currentTask.conversationId}
                 allowedActions={currentTask.allowedActions}
+                participants={currentTask.participants}
               />
             </TabsContent>
 

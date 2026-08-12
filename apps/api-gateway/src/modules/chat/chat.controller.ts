@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Query, Inject, OnModuleInit, UseGuards, Req } from '@nestjs/common';
 import { ClientGrpc, EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { ChatGateway } from './chat.gateway';
 
@@ -11,18 +11,25 @@ interface ChatServiceClient {
   sendMessage(data: any): Observable<any>;
 }
 
+interface EmployeeServiceClient {
+  GetEmployeeByCode(data: { code: string }): Observable<any>;
+}
+
 @Controller('admin/chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController implements OnModuleInit {
   private chatService: ChatServiceClient;
+  private employeeService: EmployeeServiceClient;
 
   constructor(
     @Inject('CHAT_PACKAGE') private client: ClientGrpc,
+    @Inject('EMPLOYEE_PACKAGE') private employeeClient: ClientGrpc,
     private readonly chatGateway: ChatGateway
   ) {}
 
   onModuleInit() {
     this.chatService = this.client.getService<ChatServiceClient>('ChatService');
+    this.employeeService = this.employeeClient.getService<EmployeeServiceClient>('EmployeeHandlers');
   }
 
   @EventPattern('message.created')
@@ -53,16 +60,43 @@ export class ChatController implements OnModuleInit {
   }
 
   @Get('conversation/:id/messages')
-  getMessages(
+  async getMessages(
     @Param('id') conversationId: string,
     @Query('limit') limit: number,
     @Query('offset') offset: number,
   ) {
-    return this.chatService.getMessages({
-      conversationId,
-      limit: limit ? Number(limit) : 20,
-      offset: offset ? Number(offset) : 0,
-    });
+    const res = await firstValueFrom(
+      this.chatService.getMessages({
+        conversationId,
+        limit: limit ? Number(limit) : 20,
+        offset: offset ? Number(offset) : 0,
+      })
+    );
+
+    if (res && res.data && Array.isArray(res.data)) {
+      const uniqueSenderIds = [...new Set(res.data.map((m: any) => m.senderId).filter(Boolean))];
+      const nameMap: Record<string, string> = {};
+
+      await Promise.all(
+        uniqueSenderIds.map(async (code: string) => {
+          try {
+            const empRes = await firstValueFrom(this.employeeService.GetEmployeeByCode({ code }));
+            if (empRes?.success && empRes?.data) {
+              nameMap[code] = empRes.data.fullName || empRes.data.employeeName;
+            }
+          } catch (error) {
+            // ignore if not found
+          }
+        })
+      );
+
+      res.data = res.data.map((m: any) => ({
+        ...m,
+        senderName: nameMap[m.senderId] || m.senderId,
+      }));
+    }
+
+    return res;
   }
 
   @Post('message')

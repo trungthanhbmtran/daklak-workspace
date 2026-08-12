@@ -4,12 +4,16 @@ import { join } from 'path';
 import { ChatController } from './chat.controller';
 import { ChatGateway } from './chat.gateway';
 
+import { registerGrpcService } from '../../core/factories/grpc.factory';
+import { MICROSERVICES } from '../../core/constants/services';
+
 const protoRoot =
   process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
 const chatProtoPath = join(protoRoot, 'chat', 'chat.proto');
 
 @Module({
   imports: [
+    registerGrpcService(MICROSERVICES.EMPLOYEE),
     ClientsModule.register([
       {
         name: 'CHAT_PACKAGE',

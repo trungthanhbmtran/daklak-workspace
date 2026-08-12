@@ -543,6 +543,7 @@ export class TaskSharedService {
       actions.push('RECEIVE');
       actions.push('IN_PROGRESS');
       actions.push('REJECT');
+      actions.push('COORDINATE');
     }
 
     // Nếu người chủ trì giao việc, họ có thể chỉnh sửa/xóa khi task chưa bắt đầu

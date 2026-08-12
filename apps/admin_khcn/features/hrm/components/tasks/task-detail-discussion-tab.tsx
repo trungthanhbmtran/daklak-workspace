@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { useUser } from "@/hooks/useUser";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -18,11 +19,18 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { taskId: number; conversationId?: string; allowedActions?: string[] }) {
+export function TaskDiscussionTab({ taskId, conversationId, allowedActions, participants }: { taskId: number; conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
   const [commentText, setCommentText] = useState("");
   const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
   const addComment = useAddComment(conversationId);
   const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(conversationId);
+  const { user } = useUser();
+
+  const getSenderName = (senderId: string) => {
+    if (user?.employeeCode === senderId) return user.fullName || senderId;
+    const participant = participants?.find((p: any) => p.employeeCode === senderId);
+    return participant?.employeeName || senderId;
+  };
 
   const comments: any[] = Array.isArray((commentsData as any)?.data) ? (commentsData as any).data : ((commentsData as any)?.data?.items ?? []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,11 +83,11 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { 
           displayComments.map((comment: any) => (
             <div key={comment.id || comment.createdAt} className="flex gap-3">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
-                {(comment.senderId || "U")?.[0]?.toUpperCase()}
+                {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
               </div>
               <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
                 <div className="flex justify-between items-center mb-1">
-                  <Text as="span" variant="small" weight="medium">{comment.senderId || "Người dùng"}</Text>
+                  <Text as="span" variant="small" weight="medium">{comment.senderName || getSenderName(comment.senderId) || "Người dùng"}</Text>
                   <Text as="span" className="text-slate-500">
                     {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
                   </Text>
