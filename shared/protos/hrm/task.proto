@@ -102,6 +102,14 @@ message TaskTemplateDataResponse {
   TaskTemplateResponse data = 3;
 }
 
+message TaskParticipantResponse {
+  string employeeCode = 1;
+  string fullName = 2;
+  string role = 3;
+  int32 departmentId = 4;
+  int32 jobTitleId = 5;
+}
+
 message TaskResponse {
   int32 id = 1;
   string title = 2;
@@ -125,9 +133,9 @@ message TaskResponse {
   string startDate = 19;
   int32 parentId = 20;
   string rejectReason = 21;
-  string assignerName = 22;  // TÃªn ngÆ°á»i giao viá»‡c
+  string assignerName = 22;  // TÃªn ngÆ°á» i giao viá»‡c
   string priority = 23;      // Má»©c Ä‘á»™ Æ°u tiÃªn
-  string supervisorName = 24; // TÃªn ngÆ°á»i theo dÃµi chá»‰ Ä‘áº¡o
+  string supervisorName = 24; // TÃªn ngÆ°á» i theo dÃµi chá»‰ Ä‘áº¡o
   repeated string coassigneeCodes = 25;
   repeated string allowedActions = 26;
   TaskPlan plan = 27;
@@ -137,6 +145,7 @@ message TaskResponse {
   repeated string coassigneeNames = 31;
   optional int32 kpiCriteriaId = 32;
   optional string conversationId = 33;
+  repeated TaskParticipantResponse participants = 34;
 }
 
 message TaskPlan {

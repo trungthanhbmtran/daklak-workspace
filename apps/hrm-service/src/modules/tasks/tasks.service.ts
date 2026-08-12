@@ -24,7 +24,11 @@ export class TasksService {
 
   /** Include chuẩn khi load task từ DB */
   private readonly taskInclude = {
-    participants: true,
+    participants: {
+      include: {
+        employee: { select: { fullName: true, employeeCode: true, departmentId: true, jobTitleId: true } }
+      }
+    },
     plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } },
     kpiSettings: true,
   } as const;

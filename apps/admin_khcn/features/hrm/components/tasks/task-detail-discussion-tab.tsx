@@ -72,12 +72,33 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
     scrollToBottom();
   }, [comments, typingUsers]);
 
-  const handleSendComment = async () => {
-    if (!commentText.trim()) return;
+  const handleSendComment = () => {
+    if (!commentText.trim() || !conversationId) return;
+    
+    let textToSend = commentText;
+    if (participants) {
+      // Sort participants by name length descending to avoid partial replacements
+      const sortedParticipants = [...participants].sort((a, b) => {
+        const nameA = a.employeeName || a.fullName || "";
+        const nameB = b.employeeName || b.fullName || "";
+        return nameB.length - nameA.length;
+      });
+      
+      sortedParticipants.forEach(p => {
+        const name = p.employeeName || p.fullName;
+        const code = p.employeeCode;
+        if (name && code) {
+          const regex = new RegExp(`@${name.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'g');
+          textToSend = textToSend.replace(regex, `@[${name}](${code})`);
+        }
+      });
+    }
+
     try {
       emitStopTyping();
-      await addComment.mutateAsync(commentText.trim());
-      setCommentText("");
+      addComment.mutateAsync(textToSend).then(() => {
+        setCommentText("");
+      });
     } catch { /* handled in hook */ }
   };
 

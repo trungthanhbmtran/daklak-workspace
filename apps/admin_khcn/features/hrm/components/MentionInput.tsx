@@ -64,9 +64,9 @@ export function MentionInput({ value, onChange, onSend, participants, ...props }
   const handleSelectMention = (employeeCode: string, fullName: string) => {
     if (!mentionQuery) return;
     const val = value;
-    const mentionText = `@[${fullName}](${employeeCode}) `;
+    const mentionText = `@${fullName} `;
     
-    // Replace the `@...` with `@[FullName](employeeCode) `
+    // Replace the `@...` with `@FullName `
     const before = val.slice(0, mentionQuery.startIndex);
     // Find the end of the word
     const textAfterCursor = val.slice(mentionQuery.startIndex);
