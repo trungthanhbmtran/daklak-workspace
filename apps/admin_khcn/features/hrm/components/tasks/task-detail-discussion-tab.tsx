@@ -167,6 +167,7 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
               onChange={handleInputChange}
               onSend={handleSendComment}
               onBlur={emitStopTyping}
+              participants={participants}
             />
             <Button
               size="icon"

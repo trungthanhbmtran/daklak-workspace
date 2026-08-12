@@ -10,19 +10,36 @@ interface MentionInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaEle
   value: string;
   onChange: (e: any) => void;
   onSend?: () => void;
+  participants?: any[];
 }
 
-export function MentionInput({ value, onChange, onSend, ...props }: MentionInputProps) {
+export function MentionInput({ value, onChange, onSend, participants, ...props }: MentionInputProps) {
   const [mentionQuery, setMentionQuery] = useState<{ keyword: string; startIndex: number } | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch employees when mentionQuery is active
-  const { data: searchResults, isLoading } = useHrmEmployeesSearch(mentionQuery?.keyword || '', {
-    enabled: !!mentionQuery,
+  const { data: searchResults, isLoading: isSearchLoading } = useHrmEmployeesSearch(mentionQuery?.keyword || '', {
+    enabled: !!mentionQuery && !participants,
     minChars: 0, // trigger immediately after @
   });
-  const employees = searchResults || [];
+  
+  const keywordLower = (mentionQuery?.keyword || '').toLowerCase();
+  const employees = participants
+    ? Array.from(new Map(
+        participants
+          .filter(p => p && p.employeeCode && (p.employeeName || p.fullName || p.employeeCode || '').toLowerCase().includes(keywordLower))
+          .map(p => [p.employeeCode, {
+            id: p.id || p.employeeCode,
+            employeeCode: p.employeeCode,
+            fullName: p.employeeName || p.fullName,
+            jobTitle: p.jobTitle,
+            department: p.department
+          }])
+      ).values())
+    : (searchResults || []);
+    
+  const isLoading = !participants && isSearchLoading;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e);
