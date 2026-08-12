@@ -167,9 +167,11 @@ export function TaskProcessingTab({
               <div key={step.id} className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3">
                   <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleToggleStep(step)}
                     disabled={isCompleted || updateStep.isPending}
-                    className="shrink-0 focus:outline-none"
+                    className="shrink-0 focus:outline-none w-6 h-6 p-0 hover:bg-transparent"
                   >
                     {step.status?.toUpperCase() === "COMPLETED" ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
