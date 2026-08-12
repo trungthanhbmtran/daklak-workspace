@@ -24,7 +24,7 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions }: { 
   const addComment = useAddComment(conversationId);
   const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(conversationId);
 
-  const comments: any[] = (commentsData as any)?.data?.items ?? [];
+  const comments: any[] = Array.isArray((commentsData as any)?.data) ? (commentsData as any).data : ((commentsData as any)?.data?.items ?? []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {

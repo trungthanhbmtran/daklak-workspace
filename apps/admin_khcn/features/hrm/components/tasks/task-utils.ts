@@ -10,6 +10,7 @@ export const translateTaskStatus = (status: string) => {
     CANCELLED: "Đã hủy",
     DRAFT: "Bản nháp",
     ASSIGNED: "Đã giao",
+    PENDING_ACCEPTANCE: "Chờ tiếp nhận",
   };
   return map[status.toUpperCase()] || status;
 };
@@ -26,6 +27,7 @@ export const getTaskStatusColor = (status: string) => {
     CANCELLED: "bg-slate-100 text-slate-500 border-slate-200",
     DRAFT: "bg-slate-100 text-slate-500 border-slate-200",
     ASSIGNED: "bg-blue-50 text-blue-700 border-blue-200",
+    PENDING_ACCEPTANCE: "bg-blue-50 text-blue-700 border-blue-200",
   };
   return map[status.toUpperCase()] || "bg-slate-100 text-slate-700 border-slate-200";
 };
