@@ -80,22 +80,31 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions, part
             Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
           </div>
         ) : (
-          displayComments.map((comment: any) => (
-            <div key={comment.id || comment.createdAt} className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shrink-0">
-                {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
-              </div>
-              <div className={`flex-1 p-3 rounded-lg rounded-tl-none ${comment.isOptimistic ? "opacity-60 bg-slate-100" : "bg-slate-100"}`}>
-                <div className="flex justify-between items-center mb-1">
-                  <Text as="span" variant="small" weight="medium">{comment.senderName || getSenderName(comment.senderId) || "Người dùng"}</Text>
-                  <Text as="span" className="text-slate-500">
-                    {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
+          displayComments.map((comment: any) => {
+            const isCurrentUser = comment.senderId === user?.employeeCode;
+            return (
+              <div key={comment.id || comment.createdAt} className={`flex gap-3 ${isCurrentUser ? "flex-row-reverse" : ""}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${isCurrentUser ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"}`}>
+                  {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
+                </div>
+                <div className={`max-w-[85%] p-3 rounded-lg ${isCurrentUser ? "rounded-tr-none bg-blue-600 text-white" : "rounded-tl-none bg-slate-100 text-slate-900"} ${comment.isOptimistic ? "opacity-60" : ""}`}>
+                  <div className={`flex items-center gap-2 mb-1 ${isCurrentUser ? "justify-end" : "justify-between"}`}>
+                    {!isCurrentUser && (
+                      <Text as="span" variant="small" weight="medium" className="text-slate-900">
+                        {comment.senderName || getSenderName(comment.senderId) || "Người dùng"}
+                      </Text>
+                    )}
+                    <Text as="span" className={isCurrentUser ? "text-blue-100 text-[11px]" : "text-slate-500 text-[11px]"}>
+                      {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
+                    </Text>
+                  </div>
+                  <Text variant="small" className={`whitespace-pre-wrap font-normal ${isCurrentUser ? "text-white" : "text-slate-700"}`}>
+                    {comment.content}
                   </Text>
                 </div>
-                <Text variant="small" className="whitespace-pre-wrap font-normal">{comment.content}</Text>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
 
         {typingUsers.length > 0 && (

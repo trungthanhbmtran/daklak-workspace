@@ -21,7 +21,7 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-import { useUpdateStatus, useTaskDetail, useRequestCoordination, useTaskComments, useRespondTask } from "../../hooks/useTasks";
+import { useTaskDetail, useTaskComments, useRespondTask } from "../../hooks/useTasks";
 import { toast } from "sonner";
 import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
@@ -186,8 +186,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue="processing" className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-6 py-4 bg-white border-b">
+        <Tabs defaultValue="processing" className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <div className="px-6 py-4 bg-white border-b shrink-0">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="processing">Xử lý & Cập nhật</TabsTrigger>
               <TabsTrigger value="discussion">
@@ -199,76 +199,89 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </TabsList>
           </div>
 
-          <ScrollArea className="flex-1 p-6">
-
+          <div className="flex-1 min-h-0 overflow-hidden relative">
             {/* ── Tab Xử lý & Cập nhật ── */}
-            <TabsContent value="processing" className="mt-0 space-y-6">
-              <TaskProcessingTab
-                taskId={taskId}
-                currentTask={currentTask}
-                isCompleted={isCompleted}
-                isAssigned={isAssigned}
-              />
+            <TabsContent value="processing" className="m-0 h-full outline-none data-[state=inactive]:hidden">
+              <ScrollArea className="h-full">
+                <div className="p-6 space-y-6">
+                  <TaskProcessingTab
+                    taskId={taskId}
+                    currentTask={currentTask}
+                    isCompleted={isCompleted}
+                    isAssigned={isAssigned}
+                  />
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             {/* ── Tab Trao đổi ── */}
-            <TabsContent value="discussion" className="mt-0 h-full flex flex-col">
-              <TaskDiscussionTab
-                taskId={taskId}
-                conversationId={currentTask.conversationId}
-                allowedActions={currentTask.allowedActions}
-                participants={currentTask.participants}
-              />
+            <TabsContent value="discussion" className="m-0 h-full outline-none data-[state=inactive]:hidden">
+              <div className="p-6 h-full flex flex-col min-h-0 overflow-hidden">
+                <TaskDiscussionTab
+                  taskId={taskId}
+                  conversationId={currentTask.conversationId}
+                  allowedActions={currentTask.allowedActions}
+                  participants={currentTask.participants}
+                />
+              </div>
             </TabsContent>
 
             {/* ── Tab Lịch sử ── */}
-            <TabsContent value="history" className="mt-0">
-              <TaskHistoryTab
-                taskId={taskId}
-                currentTask={currentTask}
-              />
+            <TabsContent value="history" className="m-0 h-full outline-none data-[state=inactive]:hidden">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <TaskHistoryTab
+                    taskId={taskId}
+                    currentTask={currentTask}
+                  />
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             {/* ── Tab KPI ── */}
-            <TabsContent value="kpi" className="mt-0 h-full">
-              {currentTask.kpi ? (
-                <div className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
-                  <Heading level="h4" className="font-semibold">Kết quả đánh giá KPI</Heading>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Xếp loại chất lượng</Text>
-                      <Badge variant="default" className="bg-green-500">{currentTask.kpi.qualityGrade}</Badge>
-                    </div>
-                    <div>
-                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm</Text>
-                      <Text variant="large" weight="bold">{currentTask.kpi.totalScore} / 100</Text>
-                    </div>
-                    <div>
-                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm tiến độ</Text>
-                      <p className="font-medium">{currentTask.kpi.timelinessScore}</p>
-                    </div>
-                    <div>
-                      <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm chất lượng</Text>
-                      <p className="font-medium">{currentTask.kpi.qualityScore}</p>
-                    </div>
-                    {currentTask.kpi.note && (
-                      <div className="col-span-2">
-                        <Text variant="small" className="text-slate-500 mb-1 font-normal">Ghi chú</Text>
-                        <Text variant="small" className="italic bg-slate-50 p-2 rounded font-normal">{currentTask.kpi.note}</Text>
+            <TabsContent value="kpi" className="m-0 h-full outline-none data-[state=inactive]:hidden">
+              <ScrollArea className="h-full">
+                <div className="p-6 h-full">
+                  {currentTask.kpi ? (
+                    <div className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
+                      <Heading level="h4" className="font-semibold">Kết quả đánh giá KPI</Heading>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Xếp loại chất lượng</Text>
+                          <Badge variant="default" className="bg-green-500">{currentTask.kpi.qualityGrade}</Badge>
+                        </div>
+                        <div>
+                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm</Text>
+                          <Text variant="large" weight="bold">{currentTask.kpi.totalScore} / 100</Text>
+                        </div>
+                        <div>
+                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm tiến độ</Text>
+                          <p className="font-medium">{currentTask.kpi.timelinessScore}</p>
+                        </div>
+                        <div>
+                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm chất lượng</Text>
+                          <p className="font-medium">{currentTask.kpi.qualityScore}</p>
+                        </div>
+                        {currentTask.kpi.note && (
+                          <div className="col-span-2">
+                            <Text variant="small" className="text-slate-500 mb-1 font-normal">Ghi chú</Text>
+                            <Text variant="small" className="italic bg-slate-50 p-2 rounded font-normal">{currentTask.kpi.note}</Text>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <Text variant="small" className="text-slate-400 font-normal">
-                    Đánh giá lúc {safeFormatDate(currentTask.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")} bởi {currentTask.kpi.evaluator?.fullName || "Quản lý"}
-                  </Text>
+                      <Text variant="small" className="text-slate-400 font-normal">
+                        Đánh giá lúc {safeFormatDate(currentTask.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")} bởi {currentTask.kpi.evaluator?.fullName || "Quản lý"}
+                      </Text>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-slate-500 italic p-8 text-center">
+                      Công việc chưa được đánh giá KPI.
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="text-sm text-slate-500 italic p-8 text-center">
-                  Công việc chưa được đánh giá KPI.
-                </div>
-              )}
+              </ScrollArea>
             </TabsContent>
-          </ScrollArea>
+          </div>
         </Tabs>
 
         <TaskAssignDialog
