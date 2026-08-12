@@ -231,10 +231,15 @@ export class EmployeesService implements OnModuleInit {
     descendantUnitIds?: number[];
     excludeEmployeeCode?: string;
     ids?: number[];
+    codes?: string[];
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
     const where: Record<string, unknown> = {};
+
+    if (params.codes && params.codes.length > 0) {
+      where.employeeCode = { in: params.codes };
+    }
 
     if (params.assignableOnly && params.callerUserId) {
       try {

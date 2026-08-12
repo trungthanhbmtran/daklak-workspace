@@ -315,6 +315,56 @@ export class ExecutionService {
     return { nextNodeId: targetNode.id, nextNodeData: JSON.stringify(targetNode.data || {}), type: targetNode.type || '' };
   }
 
+  
+  async getAllowedActionsBatch(payloads: Array<{ workflowId?: string; instanceId?: string; currentNodeId: string; userRoles?: string[]; userId?: string; businessData?: any }>): Promise<Array<{ actions: string[] }>> {
+    // Collect unique workflowIds and instanceIds to batch fetch graphs
+    const workflowIds = [...new Set(payloads.map(p => p.workflowId).filter((id): id is string => !!id))];
+    const instanceIds = [...new Set(payloads.map(p => p.instanceId).filter((id): id is string => !!id))];
+
+    const graphMap = new Map<string, any>();
+
+    // Fetch by instanceId
+    if (instanceIds.length > 0) {
+      const instances = await this.prisma.processInstance.findMany({
+        where: { id: { in: instanceIds } },
+        include: { version: true }
+      });
+      for (const inst of instances) {
+        if ((inst.version as any)?.graph) {
+           graphMap.set(`inst:${inst.id}`, (inst.version as any).graph);
+        }
+      }
+    }
+
+    // Fetch by workflowId
+    if (workflowIds.length > 0) {
+      const defs = await this.prisma.processDefinition.findMany({
+        where: { id: { in: workflowIds } },
+        include: { versions: { orderBy: { version: 'desc' }, take: 1 } }
+      });
+      for (const def of defs) {
+        if (def.versions && def.versions[0]) {
+          graphMap.set(`wf:${def.id}`, def.versions[0].graph);
+        }
+      }
+    }
+
+    return payloads.map(payload => {
+      let graph = null;
+      if (payload.instanceId) {
+        graph = graphMap.get(`inst:${payload.instanceId}`);
+      } else if (payload.workflowId) {
+        graph = graphMap.get(`wf:${payload.workflowId}`);
+      }
+
+      if (!graph) return { actions: [] };
+
+      const edges = (graph as any).edges?.filter((e: any) => e.source === payload.currentNodeId);
+      return { actions: edges?.map((e: any) => e.label || e.action || (e.data && e.data.action)).filter(Boolean) || [] };
+    });
+  }
+
+
   async getAllowedActions(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; userRoles?: string[]; userId?: string; businessData?: any }): Promise<{ actions: string[] }> {
     const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
     if (!graph) return { actions: [] };

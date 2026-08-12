@@ -24,6 +24,7 @@ service WorkflowService {
   rpc ValidateAction (ValidateActionRequest) returns (ValidateActionResponse);
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
+  rpc GetAllowedActionsBatch (GetAllowedActionsBatchRequest) returns (GetAllowedActionsBatchResponse);
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
   rpc GetInitialNode (GetInitialNodeRequest) returns (GetInitialNodeResponse);
   rpc GetNextNode (GetNextNodeRequest) returns (GetNextNodeResponse);
@@ -232,6 +233,14 @@ message GetAllowedActionsRequest {
 
 message GetAllowedActionsResponse {
   repeated string actions = 1;
+}
+
+message GetAllowedActionsBatchRequest {
+  repeated GetAllowedActionsRequest requests = 1;
+}
+
+message GetAllowedActionsBatchResponse {
+  repeated GetAllowedActionsResponse results = 1;
 }
 
 message TriggerWorkflowRequest {

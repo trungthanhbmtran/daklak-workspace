@@ -226,11 +226,12 @@ export class TasksService {
 
     const enriched = await this.shared.enrichTasks(tasks);
 
-    const mapped = await Promise.all(enriched.map(async (t: any) => ({
+    const batchActions = await this.shared.computeAllowedActionsBatch(enriched, query);
+    const mapped = enriched.map((t: any) => ({
       ...this.shared.toTaskResponse(t),
-      allowedActions: await this.shared.computeAllowedActions(t, query),
+      allowedActions: batchActions[t.id] || [],
       children: [],
-    })));
+    }));
 
     // Build tree
     const taskMap = new Map(mapped.map(t => [t.id, t]));
@@ -792,10 +793,11 @@ export class TasksService {
 
     const tasks = await this.prisma.task.findMany({ where, include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } } } });
     const enriched = await this.shared.enrichTasks(tasks);
-    const data2 = await Promise.all(enriched.map(async (t: any) => {
-      t.allowedActions = await this.shared.computeAllowedActions(t, query);
+    const batchActions = await this.shared.computeAllowedActionsBatch(enriched, query);
+    const data2 = enriched.map((t: any) => {
+      t.allowedActions = batchActions[t.id] || [];
       return this.shared.toDelegationNode(t);
-    }));
+    });
     return { success: true, data: data2 };
   }
 

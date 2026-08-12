@@ -13,6 +13,7 @@ interface ChatServiceClient {
 
 interface EmployeeServiceClient {
   GetEmployeeByCode(data: { code: string }): Observable<any>;
+  ListEmployees(data: any): Observable<any>;
 }
 
 @Controller('admin/chat')
@@ -77,18 +78,25 @@ export class ChatController implements OnModuleInit {
       const uniqueSenderIds = [...new Set(res.data.map((m: any) => m.senderId).filter(Boolean))];
       const nameMap: Record<string, string> = {};
 
-      await Promise.all(
-        uniqueSenderIds.map(async (code: string) => {
-          try {
-            const empRes = await firstValueFrom(this.employeeService.GetEmployeeByCode({ code }));
-            if (empRes?.success && empRes?.data) {
-              nameMap[code] = empRes.data.fullName || empRes.data.employeeName;
-            }
-          } catch (error) {
-            // ignore if not found
+      if (uniqueSenderIds.length > 0) {
+        try {
+          const empListRes = await firstValueFrom<any>(
+            this.employeeService.ListEmployees({
+              page: 1,
+              pageSize: uniqueSenderIds.length,
+              codes: uniqueSenderIds
+            })
+          );
+          
+          if (empListRes?.success && empListRes.data) {
+            empListRes.data.forEach((emp: any) => {
+              nameMap[emp.employeeCode] = emp.fullName || emp.employeeName;
+            });
           }
-        })
-      );
+        } catch (error) {
+          // ignore if failed
+        }
+      }
 
       res.data = res.data.map((m: any) => ({
         ...m,

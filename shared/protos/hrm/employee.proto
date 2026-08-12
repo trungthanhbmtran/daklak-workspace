@@ -113,6 +113,7 @@ message ListEmployeesRequest {
   string callerJobCode = 13;
   int32 callerUserId = 14;
   repeated int32 ids = 15;
+  repeated string codes = 16;
 }
 
 // ---------------- RESPONSES ----------------

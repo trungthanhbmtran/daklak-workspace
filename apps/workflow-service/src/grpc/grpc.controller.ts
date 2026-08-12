@@ -173,6 +173,12 @@ export class GrpcWorkflowController {
     return this.executionService.getAllowedActions(data);
   }
 
+  @GrpcMethod('WorkflowService', 'GetAllowedActionsBatch')
+  async getAllowedActionsBatch(@Payload() data: { requests: GetAllowedActionsGrpcDto[] }) {
+    const results = await this.executionService.getAllowedActionsBatch(data.requests || []);
+    return { results };
+  }
+
   private mapToWorkflowResponse(def: any, version: any) {
     if (!def) return {};
     return {
