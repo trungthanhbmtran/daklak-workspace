@@ -98,7 +98,7 @@ export function useUpdateTaskStatus() {
   return useMutation({
      
     onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: ({ id, payload }: { id: number; payload: any }) =>
+    mutationFn: ({ id, payload }: { id: number; payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string } }) =>
       hrmTasksApi.updateStatus(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
@@ -162,7 +162,7 @@ export function useAddComment(conversationId: string | undefined) {
 export function useUpdateStatus(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { status?: string; rejectReason?: string; actionName?: string }) => {
+    mutationFn: (payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStatus(taskId, payload);
     },
@@ -252,7 +252,7 @@ export function useCreateStep(taskId: number | undefined) {
 export function useUpdateStep(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string; baseScore?: number } }) => {
+    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string; baseScore?: number; evidence?: string } }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStep(taskId, stepId, payload);
     },
