@@ -112,7 +112,7 @@ export class TasksService {
         ]
       });
     }
-    
+
     if (query.assigneeCode && query.assigneeCode !== 'UNASSIGNED') {
       conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE } } });
     }
@@ -132,7 +132,7 @@ export class TasksService {
     // statsFilter date ranges
     if (query.statsFilter) {
       const now = new Date(); now.setHours(0, 0, 0, 0);
-      switch(query.statsFilter) {
+      switch (query.statsFilter) {
         case 'doneInTime':
         case 'doneOverdue':
           where.isCompleted = true;
@@ -173,26 +173,26 @@ export class TasksService {
       take = limit > 0 ? limitNum : undefined;
     }
 
-    let tasks = await this.prisma.task.findMany({ 
-      where, 
-      orderBy: { createdAt: 'desc' }, 
-      skip, 
-      take, 
-      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true } 
+    let tasks = await this.prisma.task.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
     });
 
-    let paginatedMeta: any = { 
-      total: totalCount, 
-      page, 
-      limit: limitNum, 
-      totalPages: Math.ceil(totalCount / limitNum) 
+    let paginatedMeta: any = {
+      total: totalCount,
+      page,
+      limit: limitNum,
+      totalPages: Math.ceil(totalCount / limitNum)
     };
 
     if (isJsFilter) {
       const operator = query.statsFilter === 'doneOverdue' ? '>' : '<=';
       // Mẹo: Đẩy logic xuống DB thay vì lọc trên mảng
       // Tạm thời lấy các ID thỏa mãn (Do Prisma chưa hỗ trợ so sánh 2 cột trực tiếp trong where)
-      const lateIds = await this.prisma.$queryRawUnsafe<{id: string}[]>(
+      const lateIds = await this.prisma.$queryRawUnsafe<{ id: string }[]>(
         `SELECT id FROM Task WHERE dueDate IS NOT NULL AND (completedAt > dueDate OR (completedAt IS NULL AND updatedAt > dueDate))`
       );
       const ids = lateIds.map(x => x.id);
@@ -201,26 +201,26 @@ export class TasksService {
       } else {
         where.id = { ...where.id, notIn: ids };
       }
-      
+
       // Tính lại totalCount sau khi áp dụng JS filter
       totalCount = await this.prisma.task.count({ where });
       limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
       skip = limit > 0 ? (page - 1) * limitNum : undefined;
       take = limit > 0 ? limitNum : undefined;
-      
-      tasks = await this.prisma.task.findMany({ 
-        where, 
-        orderBy: { createdAt: 'desc' }, 
-        skip, 
-        take, 
-        include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true } 
+
+      tasks = await this.prisma.task.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
       });
-      
-      paginatedMeta = { 
-        total: totalCount, 
-        page, 
-        limit: limitNum, 
-        totalPages: Math.ceil(totalCount / limitNum) 
+
+      paginatedMeta = {
+        total: totalCount,
+        page,
+        limit: limitNum,
+        totalPages: Math.ceil(totalCount / limitNum)
       };
     }
 
@@ -259,7 +259,7 @@ export class TasksService {
     const where: any = {};
     const conditions: any[] = [];
 
-    switch(query.role) {
+    switch (query.role) {
       case 'ASSIGNEE':
         if (query.assigneeCode) conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: 'ASSIGNEE' } } });
         break;
@@ -319,18 +319,18 @@ export class TasksService {
     allTasks.forEach((t: any) => {
       const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
       const isDone = t.isCompleted === true;
-      
+
       if (isDone) {
         const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
         if (dueTime && completedTime > dueTime) { doneOverdue++; } else { doneInTime++; }
         return; // Early return for forEach callback
       }
-      
+
       if (!dueTime) {
         inTime++;
         return; // Early return for forEach callback
       }
-      
+
       const diff = Math.round((dueTime - nowTime) / 86_400_000);
       if (diff < 0) { overdue++; return; }
       if (diff <= 3) { warning++; return; }
@@ -519,7 +519,7 @@ export class TasksService {
     const isUpdated = true;
     if (isUpdated) {
       resultTask = await this.prisma.task.update({ where: { id }, data: updateData });
-      
+
       // Phát event task.completed nếu task vừa được hoàn thành
       if (updateData.isCompleted) {
         this.reportClient.emit('task.completed', {
@@ -531,12 +531,12 @@ export class TasksService {
         });
       }
 
-      if (updateData.isCompleted && context?.evidence) {
-        this.addComment(id, {
+      if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
+        firstValueFrom(this.shared.chatService.SendMessage({
+          conversationId: rawTask.conversationId,
           content: context.evidence,
-          authorCode: actorCode || context?.currentEmployeeCode || 'SYSTEM',
-          isSystemMessage: true
-        }).catch((e) => this.logger.error('Failed to save evidence', e));
+          senderId: actorCode || context?.currentEmployeeCode || 'SYSTEM',
+        })).catch(() => { });
       }
     } else {
       resultTask = rawTask;
@@ -564,7 +564,7 @@ export class TasksService {
     if (transition.nextNodeData?.autoProgress !== undefined) {
       await this.updateTaskProgress(id, transition.nextNodeData.autoProgress, actorCode);
     }
-    
+
     if (transition.nextNodeData?.autoProgress === undefined && updateData.isCompleted) {
       await this.updateTaskProgress(id, 100, actorCode);
     }
@@ -637,8 +637,8 @@ export class TasksService {
         await tx.task.update({ where: { id }, data: { status: 'IN_PROGRESS' } });
       });
       return { success: true, message: 'Đã tiếp nhận công việc', data: await this.toResponse(await this.findTaskOrFail(id)) };
-    } 
-    
+    }
+
     if (data.action === 'REJECT') {
       if (!data.rejectReason) throw new RpcException('Cần có lý do từ chối.');
       await this.prisma.$transaction(async (tx) => {
@@ -649,8 +649,8 @@ export class TasksService {
         await tx.task.update({ where: { id }, data: { status: 'REJECTED', rejectReason: data.rejectReason } });
       });
       return { success: true, message: 'Đã từ chối công việc', data: await this.toResponse(await this.findTaskOrFail(id)) };
-    } 
-    
+    }
+
     if (data.action === 'REQUEST_COORDINATION') {
       if (!data.message) throw new RpcException('Cần có lý do xin phối hợp.');
       await this.prisma.$transaction(async (tx) => {
@@ -835,58 +835,11 @@ export class TasksService {
   // ─── Comments ─────────────────────────────────────────────────────────────
 
   async addComment(id: number, data: any) {
-    const task = await this.prisma.task.findUnique({ where: { id }, include: { participants: true } });
-    if (!task) throw new RpcException('Nhiệm vụ không tồn tại');
-    
-    let conversationId = task.conversationId;
-    if (!conversationId && this.shared.chatService) {
-       const participants = task.participants.map(p => p.employeeCode).filter(Boolean);
-       const creatorCode = task.creatorEmployeeCode;
-       const uniqueParticipants = [...new Set([creatorCode, ...participants].filter(Boolean))];
-       
-       try {
-         const conversationRes = await firstValueFrom<any>(
-            this.shared.chatService.CreateConversation({
-              type: 'TASK',
-              title: `Task: ${task.title}`,
-              participantIds: uniqueParticipants.map(String)
-            })
-         );
-         if (conversationRes && conversationRes.id) {
-            conversationId = conversationRes.id;
-            await this.prisma.task.update({ where: { id: task.id }, data: { conversationId } });
-         }
-       } catch (e) {
-         this.logger.error('Failed to create chat conversation for task ' + task.id, e);
-       }
-    }
-    
-    if (conversationId && this.shared.chatService) {
-       try {
-         await firstValueFrom(this.shared.chatService.SendMessage({
-           conversationId,
-           content: data.content,
-           senderId: data.authorCode || 'SYSTEM',
-           type: data.isSystemMessage ? 'SYSTEM' : 'TEXT'
-         }));
-       } catch (e) {
-         this.logger.error('Failed to send message to chat service', e);
-       }
-    }
-    return { success: true, message: 'Đã gửi bình luận' };
+    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
   }
 
   async getComments(id: number, query: any) {
-    const task = await this.prisma.task.findUnique({ where: { id }, select: { conversationId: true } });
-    if (!task?.conversationId || !this.shared.chatService) return { success: true, data: [] };
-    
-    try {
-      const res = await firstValueFrom<any>(this.shared.chatService.GetMessages({ conversationId: task.conversationId, limit: 100, offset: 0 }));
-      return { success: true, data: res?.data || [] };
-    } catch (e) {
-      this.logger.error('Failed to fetch messages from chat service', e);
-      return { success: true, data: [] };
-    }
+    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
   }
 
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
@@ -924,12 +877,15 @@ export class TasksService {
     const step = await this.prisma.taskStep.update({ where: { id: stepId, taskId }, data: updateData });
     await this.autoComputeTaskProgress(taskId);
 
-    if (data.status === 'COMPLETED' && data.evidence) {
-      this.addComment(taskId, {
-        content: data.evidence,
-        authorCode: data.actorCode || 'SYSTEM',
-        isSystemMessage: true
-      }).catch((e) => this.logger.error('Failed to save step evidence', e));
+    if (data.status === 'COMPLETED' && data.evidence && this.shared.chatService) {
+      const task = await this.prisma.task.findUnique({ where: { id: taskId }, select: { conversationId: true } });
+      if (task?.conversationId) {
+        firstValueFrom(this.shared.chatService.SendMessage({
+          conversationId: task.conversationId,
+          content: data.evidence,
+          senderId: data.actorCode || 'SYSTEM',
+        })).catch(() => { });
+      }
     }
 
     return { success: true, message: 'Cập nhật bước thành công', data: step };
@@ -967,7 +923,7 @@ export class TasksService {
       if (allowed.length > 0) {
         where.employeeCode = { in: allowed };
       }
-      
+
       if (allowed.length === 0 && query.currentEmployeeCode) {
         where.employeeCode = query.currentEmployeeCode;
       }

@@ -32,10 +32,10 @@ const parseMessageContent = (content: string, isCurrentUser: boolean) => {
     }
     const name = match[1];
     parts.push(
-      <Text 
-        key={match.index} 
-        as="span" 
-        weight="bold" 
+      <Text
+        key={match.index}
+        as="span"
+        weight="bold"
         className={isCurrentUser ? "text-blue-100 bg-blue-700/50 px-1 rounded mx-0.5" : "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 rounded mx-0.5"}
       >
         @{name}
@@ -49,10 +49,10 @@ const parseMessageContent = (content: string, isCurrentUser: boolean) => {
   return parts.length > 0 ? parts : content;
 };
 
-export function TaskDiscussionTab({ taskId, conversationId, allowedActions, participants }: { taskId: number; conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
+export function TaskDiscussionTab({ conversationId, allowedActions, participants }: { conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
   const [commentText, setCommentText] = useState("");
-  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
-  const addComment = useAddComment(taskId);
+  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
+  const addComment = useAddComment(conversationId);
   const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(conversationId);
   const { user } = useUser();
 
@@ -73,8 +73,8 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions, part
   }, [comments, typingUsers]);
 
   const handleSendComment = () => {
-    if (!commentText.trim() || !taskId) return;
-    
+    if (!commentText.trim() || !conversationId) return;
+
     let textToSend = commentText;
     if (participants) {
       // Sort participants by name length descending to avoid partial replacements
@@ -83,7 +83,7 @@ export function TaskDiscussionTab({ taskId, conversationId, allowedActions, part
         const nameB = b.employeeName || b.fullName || "";
         return nameB.length - nameA.length;
       });
-      
+
       sortedParticipants.forEach(p => {
         const name = p.employeeName || p.fullName;
         const code = p.employeeCode;

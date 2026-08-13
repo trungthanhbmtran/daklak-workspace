@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useAddComment, useUpdateTaskStatus } from "../../hooks/useTasks";
+import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useUpdateStatus, useUpdateTaskStatus } from "../../hooks/useTasks";
 import { HrmTask } from "../../types/task";
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
@@ -39,7 +39,7 @@ export function TaskProcessingTab({
 
   const [completingItem, setCompletingItem] = useState<{ type: 'step' | 'subtask', data: any } | null>(null);
   const [evidenceText, setEvidenceText] = useState("");
-  const [evidenceFiles, setEvidenceFiles] = useState<{name: string, url: string}[]>([]);
+  const [evidenceFiles, setEvidenceFiles] = useState<{ name: string, url: string }[]>([]);
   const [isSubmittingEvidence, setIsSubmittingEvidence] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, isUploading } = useFileUpload();
@@ -52,8 +52,22 @@ export function TaskProcessingTab({
 
   const updateProgress = useUpdateProgress(taskId);
   const updateStep = useUpdateStep(taskId);
-  const addComment = useAddComment(taskId);
+  const updateStatus = useUpdateStatus(taskId);
   const updateTaskStatus = useUpdateTaskStatus();
+
+  const handleComplete = async () => {
+    try {
+      await updateStatus.mutateAsync({ status: "COMPLETED" } as any);
+      toast.success("Đã hoàn thành công việc");
+    } catch { /* handled */ }
+  };
+
+  const handleStartTask = async () => {
+    try {
+      await updateStatus.mutateAsync({ status: "IN_PROGRESS", actionName: "IN_PROGRESS" } as any);
+      toast.success("Đã bắt đầu thực hiện công việc");
+    } catch { /* handled */ }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -258,7 +272,7 @@ export function TaskProcessingTab({
       {/* Cập nhật tiến độ */}
       {!isCompleted && (
         <div className="space-y-4 bg-white p-4 rounded-lg border">
-          <Heading level="h4" className="font-medium">Tiến độ công việc</Heading>
+          <Heading level="h4" className="font-medium">Báo cáo & Cập nhật</Heading>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-slate-500">
@@ -271,6 +285,33 @@ export function TaskProcessingTab({
             <Text variant="small" className="text-[10px] text-slate-400 mt-1 font-normal">
               Tiến độ được hệ thống tự động tính toán dựa trên mức độ hoàn thành của các Bước thực hiện và Nhiệm vụ con.
             </Text>
+          </div>
+
+          <div className="flex justify-end items-center mt-4">
+            <div className="space-x-2">
+              {currentTask.allowedActions?.includes('IN_PROGRESS') && (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleStartTask}
+                  disabled={updateStatus.isPending}
+                >
+                  {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                  Bắt đầu làm
+                </Button>
+              )}
+              {currentTask.allowedActions?.includes('COMPLETED') || !currentTask.allowedActions?.includes('IN_PROGRESS') ? (
+                <Button
+                  size="sm"
+                  onClick={handleComplete}
+                  disabled={updateStatus.isPending}
+                >
+                  {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                  Báo cáo hoàn thành
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
       )}
@@ -305,8 +346,8 @@ export function TaskProcessingTab({
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm font-medium">Bạn đang đánh dấu hoàn thành: <span className="text-blue-600">{completingItem?.data?.title}</span></p>
-            <Textarea 
-              placeholder="Nhập ghi chú / nội dung báo cáo (không bắt buộc)..." 
+            <Textarea
+              placeholder="Nhập ghi chú / nội dung báo cáo (không bắt buộc)..."
               value={evidenceText}
               onChange={(e) => setEvidenceText(e.target.value)}
             />
@@ -326,14 +367,14 @@ export function TaskProcessingTab({
               </div>
             )}
             <div className="pt-2">
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileChange} 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
               />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
