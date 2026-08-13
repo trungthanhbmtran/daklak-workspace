@@ -530,6 +530,14 @@ export class TasksService {
           assigneeId: resultTask.assigneeId
         });
       }
+
+      if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
+        firstValueFrom(this.shared.chatService.SendMessage({
+          conversationId: rawTask.conversationId,
+          content: context.evidence,
+          senderId: actorCode || context?.currentEmployeeCode || 'SYSTEM',
+        })).catch(() => {});
+      }
     } else {
       resultTask = rawTask;
     }
@@ -868,6 +876,18 @@ export class TasksService {
 
     const step = await this.prisma.taskStep.update({ where: { id: stepId, taskId }, data: updateData });
     await this.autoComputeTaskProgress(taskId);
+
+    if (data.status === 'COMPLETED' && data.evidence && this.shared.chatService) {
+      const task = await this.prisma.task.findUnique({ where: { id: taskId }, select: { conversationId: true } });
+      if (task?.conversationId) {
+        firstValueFrom(this.shared.chatService.SendMessage({
+          conversationId: task.conversationId,
+          content: data.evidence,
+          senderId: data.actorCode || 'SYSTEM',
+        })).catch(() => {});
+      }
+    }
+
     return { success: true, message: 'Cập nhật bước thành công', data: step };
   }
 

@@ -257,7 +257,7 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async updateStatus(req: any, id: number, status: string, rejectReason?: string, actionName?: string) {
+  async updateStatus(req: any, id: number, status: string, rejectReason?: string, actionName?: string, evidence?: string) {
     const user = req.user;
     const response: any = await firstValueFrom(
       this.taskService.UpdateTaskStatus(
@@ -266,6 +266,7 @@ export class TasksService implements OnModuleInit {
           status,
           rejectReason,
           actionName,
+          evidence,
           actorCode: user?.employeeCode || '',
           currentUserPermissions: user?.permissionsFlatten || [],
           currentUserId: user?.id,
@@ -639,7 +640,7 @@ export class TasksService implements OnModuleInit {
   async updateStep(req: any, id: number, stepId: number, body: any) {
     return firstValueFrom(
       this.taskService.UpdateStep(
-        { taskId: id, stepId, ...body },
+        { taskId: id, stepId, actorCode: req.user?.employeeCode || '', ...body },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {

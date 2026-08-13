@@ -246,12 +246,13 @@ message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
   string rejectReason = 3;         // optional
-  string actorCode = 4;             // ngÆ°á»i thá»±c hiá»‡n (tá»« JWT)
+  string actorCode = 4;             // ngÆ°á» i thá»±c hiá»‡n (tá»« JWT)
   string actionName = 5;            // optional â€” tÃªn action workflow (máº·c Ä‘á»‹nh = status)
   int32 currentUserId = 6;
   string currentEmployeeCode = 7;
   repeated string currentUserPermissions = 8;
   int32 currentUserDept = 9;
+  optional string evidence = 10;
 }
 
 message UpdateTaskRequest {
@@ -601,6 +602,8 @@ message UpdateStepRequest {
   optional string title = 3;
   optional string status = 4;
   optional int32 order = 5;
+  optional string evidence = 6;
+  optional string actorCode = 7;
 }
 
 message ListStepsRequest {

@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
-import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useUpdateStatus, useAddComment } from "../../hooks/useTasks";
+import { useState, useRef } from "react";
+import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useUpdateStatus, useAddComment, useUpdateTaskStatus } from "../../hooks/useTasks";
 import { HrmTask } from "../../types/task";
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, X } from "lucide-react";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { CreateTaskDialog } from "./create-task-dialog";
@@ -36,6 +38,13 @@ export function TaskProcessingTab({
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
   const [reportText, setReportText] = useState("");
 
+  const [completingItem, setCompletingItem] = useState<{ type: 'step' | 'subtask', data: any } | null>(null);
+  const [evidenceText, setEvidenceText] = useState("");
+  const [evidenceFiles, setEvidenceFiles] = useState<{name: string, url: string}[]>([]);
+  const [isSubmittingEvidence, setIsSubmittingEvidence] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, isUploading } = useFileUpload();
+
   const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(taskId);
   const { data: stepsData, isLoading: stepsLoading } = useTaskSteps(taskId);
 
@@ -46,6 +55,7 @@ export function TaskProcessingTab({
   const updateStep = useUpdateStep(taskId);
   const addComment = useAddComment(currentTask.conversationId);
   const updateStatus = useUpdateStatus(taskId);
+  const updateTaskStatus = useUpdateTaskStatus();
 
   const handleSaveReport = async () => {
     if (!reportText.trim()) {
@@ -74,9 +84,68 @@ export function TaskProcessingTab({
     } catch { /* handled */ }
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const fileData = await uploadFile(file);
+        if (fileData && fileData.url) {
+          setEvidenceFiles(prev => [...prev, { name: file.name, url: fileData.url }]);
+        }
+      } catch (error) {
+        // useFileUpload already handles toast
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+
+
+  const handleSubmitEvidence = async () => {
+    if (!completingItem) return;
+    setIsSubmittingEvidence(true);
+    try {
+      let content = "";
+      if (evidenceText.trim() || evidenceFiles.length > 0) {
+        content = `📋 Báo cáo hoàn thành [${completingItem.type === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${completingItem.data.title}**\n${evidenceText.trim()}`;
+        if (evidenceFiles.length > 0) {
+          content += "\n\n**Minh chứng đính kèm:**";
+          evidenceFiles.forEach((file, index) => {
+            content += `\n${index + 1}. [${file.name}](${file.url})`;
+          });
+        }
+      }
+
+      if (completingItem.type === 'step') {
+        await updateStep.mutateAsync({ stepId: Number(completingItem.data.id), payload: { status: "COMPLETED", evidence: content || undefined } });
+      } else {
+        await updateTaskStatus.mutateAsync({ id: Number(completingItem.data.id), payload: { status: "COMPLETED", evidence: content || undefined } });
+      }
+
+      setCompletingItem(null);
+      setEvidenceText("");
+      setEvidenceFiles([]);
+    } catch (e) {
+      // hook handles toast
+    } finally {
+      setIsSubmittingEvidence(false);
+    }
+  };
+
   const handleToggleStep = async (step: any) => {
-    const newStatus = step.status === "COMPLETED" ? "TODO" : "COMPLETED";
-    await updateStep.mutateAsync({ stepId: Number(step.id), payload: { status: newStatus } });
+    if (step.status !== "COMPLETED") {
+      setCompletingItem({ type: 'step', data: step });
+    } else {
+      await updateStep.mutateAsync({ stepId: Number(step.id), payload: { status: "TODO" } });
+    }
+  };
+
+  const handleToggleSubTask = async (subTask: HrmTask) => {
+    if (subTask.status !== "COMPLETED") {
+      setCompletingItem({ type: 'subtask', data: subTask });
+    } else {
+      await updateTaskStatus.mutateAsync({ id: Number(subTask.id), payload: { status: "IN_PROGRESS" } });
+    }
   };
 
   if (isAssigned) {
@@ -105,13 +174,21 @@ export function TaskProcessingTab({
             {subTasks.map((subTask: HrmTask) => (
               <div key={subTask.id} className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3">
-                  {subTask.status?.toUpperCase() === "COMPLETED" ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  ) : subTask.status?.toUpperCase() === "IN_PROGRESS" ? (
-                    <Clock className="w-5 h-5 text-blue-500" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleToggleSubTask(subTask)}
+                    disabled={isCompleted || updateTaskStatus.isPending}
+                    className="shrink-0 focus:outline-none w-6 h-6 p-0 hover:bg-transparent"
+                  >
+                    {subTask.status?.toUpperCase() === "COMPLETED" ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : subTask.status?.toUpperCase() === "IN_PROGRESS" ? (
+                      <Clock className="w-5 h-5 text-blue-500 hover:text-green-500 transition-colors" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-slate-300 hover:border-blue-400 transition-colors" />
+                    )}
+                  </Button>
                   <div>
                     <p className={`text-sm ${subTask.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
                       {subTask.title}
@@ -286,6 +363,67 @@ export function TaskProcessingTab({
         onOpenChange={setIsCreateStepOpen}
         task={currentTask}
       />
+
+      <Dialog open={!!completingItem} onOpenChange={(open) => {
+        if (!open) {
+          setCompletingItem(null);
+          setEvidenceText("");
+          setEvidenceFiles([]);
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận hoàn thành</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm font-medium">Bạn đang đánh dấu hoàn thành: <span className="text-blue-600">{completingItem?.data?.title}</span></p>
+            <Textarea 
+              placeholder="Nhập ghi chú / nội dung báo cáo (không bắt buộc)..." 
+              value={evidenceText}
+              onChange={(e) => setEvidenceText(e.target.value)}
+            />
+            {evidenceFiles.length > 0 && (
+              <div className="flex flex-col gap-2 mt-2">
+                <Text variant="small" className="font-medium text-slate-600">Minh chứng đính kèm:</Text>
+                {evidenceFiles.map((file, i) => (
+                  <div key={i} className="flex items-center justify-between bg-slate-50 p-2 rounded border text-sm">
+                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[200px]">
+                      {file.name}
+                    </a>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-400 hover:text-red-500 hover:bg-red-50" onClick={() => setEvidenceFiles(prev => prev.filter((_, idx) => idx !== i))}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="pt-2">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+              />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                Đính kèm file
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCompletingItem(null)}>Hủy</Button>
+            <Button onClick={handleSubmitEvidence} disabled={isSubmittingEvidence || isUploading}>
+              {isSubmittingEvidence && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Lưu minh chứng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
