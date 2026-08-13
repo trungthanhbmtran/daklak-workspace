@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useUpdateStatus, useAddComment, useUpdateTaskStatus } from "../../hooks/useTasks";
+import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useAddComment, useUpdateTaskStatus } from "../../hooks/useTasks";
 import { HrmTask } from "../../types/task";
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
@@ -36,7 +36,6 @@ export function TaskProcessingTab({
 }) {
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
-  const [reportText, setReportText] = useState("");
 
   const [completingItem, setCompletingItem] = useState<{ type: 'step' | 'subtask', data: any } | null>(null);
   const [evidenceText, setEvidenceText] = useState("");
@@ -54,35 +53,7 @@ export function TaskProcessingTab({
   const updateProgress = useUpdateProgress(taskId);
   const updateStep = useUpdateStep(taskId);
   const addComment = useAddComment(taskId);
-  const updateStatus = useUpdateStatus(taskId);
   const updateTaskStatus = useUpdateTaskStatus();
-
-  const handleSaveReport = async () => {
-    if (!reportText.trim()) {
-      toast.info("Vui lòng nhập nội dung báo cáo");
-      return;
-    }
-    try {
-      if (reportText.trim()) {
-        await addComment.mutateAsync(`📋 Báo cáo tiến độ: ${reportText.trim()}`);
-        setReportText("");
-      }
-    } catch { /* handled in hooks */ }
-  };
-
-  const handleComplete = async () => {
-    try {
-      await updateStatus.mutateAsync({ status: "COMPLETED" } as any);
-      toast.success("Đã hoàn thành công việc");
-    } catch { /* handled */ }
-  };
-
-  const handleStartTask = async () => {
-    try {
-      await updateStatus.mutateAsync({ status: "IN_PROGRESS", actionName: "IN_PROGRESS" } as any);
-      toast.success("Đã bắt đầu thực hiện công việc");
-    } catch { /* handled */ }
-  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -287,7 +258,7 @@ export function TaskProcessingTab({
       {/* Cập nhật tiến độ */}
       {!isCompleted && (
         <div className="space-y-4 bg-white p-4 rounded-lg border">
-          <Heading level="h4" className="font-medium">Báo cáo & Cập nhật</Heading>
+          <Heading level="h4" className="font-medium">Tiến độ công việc</Heading>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-slate-500">
@@ -300,49 +271,6 @@ export function TaskProcessingTab({
             <Text variant="small" className="text-[10px] text-slate-400 mt-1 font-normal">
               Tiến độ được hệ thống tự động tính toán dựa trên mức độ hoàn thành của các Bước thực hiện và Nhiệm vụ con.
             </Text>
-          </div>
-
-          <Textarea
-            placeholder="Nhập nội dung báo cáo tiến độ / kết quả..."
-            className="min-h-[100px]"
-            value={reportText}
-            onChange={(e) => setReportText(e.target.value)}
-          />
-          <div className="flex justify-between items-center">
-            <Button variant="outline" size="sm">Đính kèm file</Button>
-            <div className="space-x-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleSaveReport}
-                disabled={updateProgress.isPending || addComment.isPending}
-              >
-                {(updateProgress.isPending || addComment.isPending) ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                Lưu tiến độ
-              </Button>
-              {currentTask.allowedActions?.includes('IN_PROGRESS') && (
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={handleStartTask}
-                  disabled={updateStatus.isPending}
-                >
-                  {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
-                  Bắt đầu làm
-                </Button>
-              )}
-              {currentTask.allowedActions?.includes('COMPLETED') || !currentTask.allowedActions?.includes('IN_PROGRESS') ? (
-                <Button
-                  size="sm"
-                  onClick={handleComplete}
-                  disabled={updateStatus.isPending}
-                >
-                  {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                  Báo cáo hoàn thành
-                </Button>
-              ) : null}
-            </div>
           </div>
         </div>
       )}
