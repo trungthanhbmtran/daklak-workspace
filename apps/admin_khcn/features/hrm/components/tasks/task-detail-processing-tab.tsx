@@ -53,7 +53,7 @@ export function TaskProcessingTab({
 
   const updateProgress = useUpdateProgress(taskId);
   const updateStep = useUpdateStep(taskId);
-  const addComment = useAddComment(currentTask.conversationId);
+  const addComment = useAddComment(taskId);
   const updateStatus = useUpdateStatus(taskId);
   const updateTaskStatus = useUpdateTaskStatus();
 

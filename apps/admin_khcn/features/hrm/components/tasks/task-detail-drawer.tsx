@@ -218,6 +218,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             <TabsContent value="discussion" className="m-0 h-full outline-none data-[state=inactive]:hidden">
               <div className="p-6 h-full flex flex-col min-h-0 overflow-hidden">
                 <TaskDiscussionTab
+                  taskId={taskId}
                   conversationId={currentTask.conversationId}
                   allowedActions={currentTask.allowedActions}
                   participants={currentTask.participants}

@@ -55,10 +55,10 @@ export function useTaskDetail(taskId: number | undefined) {
  * - enabled: chỉ fetch khi taskId có giá trị
  * - staleTime ngắn hơn vì comments thay đổi thường xuyên
  */
-export function useTaskComments(conversationId: string | undefined) {
+export function useTaskComments(taskId: number | undefined) {
   return useQuery({
-    queryKey: conversationId ? hrmKeys.taskComments(conversationId as any) : [...hrmKeys.tasks(), 'comments', 'none'],
-    queryFn: conversationId ? () => hrmTasksApi.getComments(conversationId) : skipToken,
+    queryKey: taskId ? hrmKeys.taskComments(taskId as any) : [...hrmKeys.tasks(), 'comments', 'none'],
+    queryFn: taskId ? () => hrmTasksApi.getComments(taskId) : skipToken,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false, // chat không cần refetch khi focus lại tab
@@ -111,15 +111,15 @@ export function useUpdateTaskStatus() {
  * - Optimistic update: thêm comment vào cache trước khi server confirm
  * - Rollback nếu lỗi
  */
-export function useAddComment(conversationId: string | undefined) {
+export function useAddComment(taskId: number | undefined) {
   const qc = useQueryClient();
-  const key = hrmKeys.taskComments(conversationId as any);
+  const key = hrmKeys.taskComments(taskId as any);
 
   return useMutation({
     mutationFn: (content: string) => {
-      if (!conversationId) return Promise.reject(new Error("Missing conversationId"));
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
       // Assuming senderId will be handled by gateway auth or we can pass empty and let gateway inject
-      return hrmTasksApi.addComment(conversationId, { content });
+      return hrmTasksApi.addComment(taskId, { content });
     },
 
     // Optimistic: thêm ngay vào cache

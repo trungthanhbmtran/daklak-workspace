@@ -49,10 +49,10 @@ const parseMessageContent = (content: string, isCurrentUser: boolean) => {
   return parts.length > 0 ? parts : content;
 };
 
-export function TaskDiscussionTab({ conversationId, allowedActions, participants }: { conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
+export function TaskDiscussionTab({ taskId, conversationId, allowedActions, participants }: { taskId: number; conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
   const [commentText, setCommentText] = useState("");
-  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
-  const addComment = useAddComment(conversationId);
+  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(taskId);
+  const addComment = useAddComment(taskId);
   const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(conversationId);
   const { user } = useUser();
 
@@ -73,7 +73,7 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
   }, [comments, typingUsers]);
 
   const handleSendComment = () => {
-    if (!commentText.trim() || !conversationId) return;
+    if (!commentText.trim() || !taskId) return;
     
     let textToSend = commentText;
     if (participants) {

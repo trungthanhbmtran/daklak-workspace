@@ -531,12 +531,12 @@ export class TasksService {
         });
       }
 
-      if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
-        firstValueFrom(this.shared.chatService.SendMessage({
-          conversationId: rawTask.conversationId,
+      if (updateData.isCompleted && context?.evidence) {
+        this.addComment(id, {
           content: context.evidence,
-          senderId: actorCode || context?.currentEmployeeCode || 'SYSTEM',
-        })).catch(() => {});
+          authorCode: actorCode || context?.currentEmployeeCode || 'SYSTEM',
+          isSystemMessage: true
+        }).catch((e) => this.logger.error('Failed to save evidence', e));
       }
     } else {
       resultTask = rawTask;
@@ -835,11 +835,58 @@ export class TasksService {
   // ─── Comments ─────────────────────────────────────────────────────────────
 
   async addComment(id: number, data: any) {
-    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
+    const task = await this.prisma.task.findUnique({ where: { id }, include: { participants: true } });
+    if (!task) throw new RpcException('Nhiệm vụ không tồn tại');
+    
+    let conversationId = task.conversationId;
+    if (!conversationId && this.shared.chatService) {
+       const participants = task.participants.map(p => p.employeeCode).filter(Boolean);
+       const creatorCode = task.creatorEmployeeCode;
+       const uniqueParticipants = [...new Set([creatorCode, ...participants].filter(Boolean))];
+       
+       try {
+         const conversationRes = await firstValueFrom<any>(
+            this.shared.chatService.CreateConversation({
+              type: 'TASK',
+              title: `Task: ${task.title}`,
+              participantIds: uniqueParticipants.map(String)
+            })
+         );
+         if (conversationRes && conversationRes.id) {
+            conversationId = conversationRes.id;
+            await this.prisma.task.update({ where: { id: task.id }, data: { conversationId } });
+         }
+       } catch (e) {
+         this.logger.error('Failed to create chat conversation for task ' + task.id, e);
+       }
+    }
+    
+    if (conversationId && this.shared.chatService) {
+       try {
+         await firstValueFrom(this.shared.chatService.SendMessage({
+           conversationId,
+           content: data.content,
+           senderId: data.authorCode || 'SYSTEM',
+           type: data.isSystemMessage ? 'SYSTEM' : 'TEXT'
+         }));
+       } catch (e) {
+         this.logger.error('Failed to send message to chat service', e);
+       }
+    }
+    return { success: true, message: 'Đã gửi bình luận' };
   }
 
   async getComments(id: number, query: any) {
-    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
+    const task = await this.prisma.task.findUnique({ where: { id }, select: { conversationId: true } });
+    if (!task?.conversationId || !this.shared.chatService) return { success: true, data: [] };
+    
+    try {
+      const res = await firstValueFrom<any>(this.shared.chatService.GetMessages({ conversationId: task.conversationId, limit: 100, offset: 0 }));
+      return { success: true, data: res?.data || [] };
+    } catch (e) {
+      this.logger.error('Failed to fetch messages from chat service', e);
+      return { success: true, data: [] };
+    }
   }
 
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
@@ -877,15 +924,12 @@ export class TasksService {
     const step = await this.prisma.taskStep.update({ where: { id: stepId, taskId }, data: updateData });
     await this.autoComputeTaskProgress(taskId);
 
-    if (data.status === 'COMPLETED' && data.evidence && this.shared.chatService) {
-      const task = await this.prisma.task.findUnique({ where: { id: taskId }, select: { conversationId: true } });
-      if (task?.conversationId) {
-        firstValueFrom(this.shared.chatService.SendMessage({
-          conversationId: task.conversationId,
-          content: data.evidence,
-          senderId: data.actorCode || 'SYSTEM',
-        })).catch(() => {});
-      }
+    if (data.status === 'COMPLETED' && data.evidence) {
+      this.addComment(taskId, {
+        content: data.evidence,
+        authorCode: data.actorCode || 'SYSTEM',
+        isSystemMessage: true
+      }).catch((e) => this.logger.error('Failed to save step evidence', e));
     }
 
     return { success: true, message: 'Cập nhật bước thành công', data: step };
