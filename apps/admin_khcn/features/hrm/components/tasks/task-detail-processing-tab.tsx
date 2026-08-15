@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useTaskSubtasks, useTaskSteps, useUpdateProgress, useUpdateStep, useUpdateStatus, useUpdateTaskStatus } from "../../hooks/useTasks";
+import { useTaskSubtasks, useTaskSteps, useUpdateStep, useUpdateStatus, useUpdateTaskStatus } from "../../hooks/useTasks";
 import { HrmTask } from "../../types/task";
 import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
@@ -50,17 +50,9 @@ export function TaskProcessingTab({
   const subTasks: HrmTask[] = (subtasksData as any)?.data ?? currentTask.subTasks ?? [];
   const steps: any[] = (stepsData as any)?.data ?? currentTask.steps ?? [];
 
-  const updateProgress = useUpdateProgress(taskId);
   const updateStep = useUpdateStep(taskId);
   const updateStatus = useUpdateStatus(taskId);
   const updateTaskStatus = useUpdateTaskStatus();
-
-  const handleComplete = async () => {
-    try {
-      await updateStatus.mutateAsync({ status: "COMPLETED" } as any);
-      toast.success("Đã hoàn thành công việc");
-    } catch { /* handled */ }
-  };
 
   const handleStartTask = async () => {
     try {
@@ -287,32 +279,20 @@ export function TaskProcessingTab({
             </Text>
           </div>
 
-          <div className="flex justify-end items-center mt-4">
-            <div className="space-x-2">
-              {currentTask.allowedActions?.includes('IN_PROGRESS') && (
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={handleStartTask}
-                  disabled={updateStatus.isPending}
-                >
-                  {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
-                  Bắt đầu làm
-                </Button>
-              )}
-              {currentTask.allowedActions?.includes('COMPLETED') || !currentTask.allowedActions?.includes('IN_PROGRESS') ? (
-                <Button
-                  size="sm"
-                  onClick={handleComplete}
-                  disabled={updateStatus.isPending}
-                >
-                  {updateStatus.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                  Báo cáo hoàn thành
-                </Button>
-              ) : null}
+          {currentTask.allowedActions?.includes('IN_PROGRESS') && (
+            <div className="flex justify-end items-center mt-4">
+              <Button
+                size="sm"
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handleStartTask}
+                disabled={updateStatus.isPending}
+              >
+                {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                Bắt đầu làm
+              </Button>
             </div>
-          </div>
+          )}
         </div>
       )}
 
