@@ -132,15 +132,6 @@ export class TasksController {
     return this.tasksService.requestCoordination(req, id, body);
   }
 
-  @Put(':id/progress')
-  async updateProgress(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-    @Body('progress') progress: number,
-  ) {
-    return this.tasksService.updateProgress(req, id, progress);
-  }
-
   @Get(':id/subtasks')
   async getSubTasks(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     return this.tasksService.getSubTasks(req, id);

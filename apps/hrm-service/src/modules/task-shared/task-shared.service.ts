@@ -580,7 +580,6 @@ export class TaskSharedService {
         actions.push('CREATE_SUBTASK');
         actions.push('ADD_SUBTASK');
         actions.push('CREATE_STEP');
-        actions.push('UPDATE_PROGRESS');
         actions.push('EDIT');
       }
 
@@ -728,7 +727,6 @@ export class TaskSharedService {
       actions.push('CREATE_SUBTASK');
       actions.push('ADD_SUBTASK'); // Required by backend breakdownTask
       actions.push('CREATE_STEP');
-      actions.push('UPDATE_PROGRESS');
       actions.push('EDIT');
     }
 

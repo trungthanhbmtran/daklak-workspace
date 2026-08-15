@@ -527,20 +527,6 @@ export class TasksService implements OnModuleInit {
     });
   }
 
-  async updateProgress(req: any, id: number, progress: number) {
-    return firstValueFrom(
-      this.taskService.UpdateTaskProgress(
-        {
-          id,
-          progress,
-          actorCode: req.user?.employeeCode || '',
-        },
-        this.getGrpcMetadata(req),
-      ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-  }
 
   async getSubTasks(req: any, id: number) {
     const user = req.user;

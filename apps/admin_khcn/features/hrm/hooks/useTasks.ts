@@ -293,25 +293,6 @@ export function useCreateSubTask() {
   });
 }
 
-/** Cập nhật % tiến độ công việc. */
-export function useUpdateProgress(taskId: number | undefined) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (progress: number) => {
-      if (!taskId) return Promise.reject(new Error("Missing taskId"));
-      return hrmTasksApi.updateProgress(taskId, progress);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
-      toast.success("Đã cập nhật tiến độ");
-    },
-
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Cập nhật tiến độ thất bại";
-      toast.error(message);
-    },
-  });
-}
 
 /** Giao việc: chỉ định người thực hiện chính và người phối hợp. */
 export function useAssignTask() {

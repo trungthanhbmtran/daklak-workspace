@@ -29,7 +29,7 @@ service TaskService {
   rpc GetSubTasks (GetSubTasksRequest) returns (GetSubTasksResponse) {}
   rpc GetTask (GetTaskRequest) returns (TaskResponse) {}
   rpc BreakdownTask (BreakdownTaskRequest) returns (TaskResponse) {}
-  rpc UpdateTaskProgress (UpdateTaskProgressRequest) returns (TaskResponse) {}
+
   rpc RequestCoordination (RequestCoordinationRequest) returns (CoordinationResponse) {}
   rpc RespondTask (RespondTaskRequest) returns (RespondTaskResponse) {}
 
@@ -438,17 +438,6 @@ message BreakdownTaskRequest {
   string currentEmployeeCode = 12;
   int32 currentUserDept = 13;
   repeated string currentUserPermissions = 14;
-}
-
-// â”€â”€â”€ UpdateTaskProgress â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-message UpdateTaskProgressRequest {
-  int32 id = 1;
-  float progress = 2;
-  string actorCode = 3;
-  int32 currentUserId = 4;
-  string currentEmployeeCode = 5;
-  int32 currentUserDept = 6;
-  repeated string currentUserPermissions = 7;
 }
 
 // â”€â”€â”€ RequestCoordination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

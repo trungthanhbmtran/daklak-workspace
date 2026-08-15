@@ -84,10 +84,6 @@ export const hrmTasksApi = {
     return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload) as any;
   },
 
-  /** Cập nhật % tiến độ hoàn thành của task (0–100). */
-  updateProgress(id: number, progress: number): Promise<ApiResponse<any>> {
-    return apiClient.put(`/hrm/tasks/${id}/progress`, { progress }) as any;
-  },
 
   getHistory(id: number): Promise<ApiResponse<any[]>> {
     return apiClient.get(`/hrm/tasks/${id}/history`) as any;
