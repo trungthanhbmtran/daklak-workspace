@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import * as jwt from 'jsonwebtoken';
@@ -12,7 +12,7 @@ export class TasksService implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
@@ -627,15 +627,21 @@ export class TasksService implements OnModuleInit {
   }
 
   async listSteps(req: any, id: number) {
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req)),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    if (response?.data) {
+      if (Array.isArray(response.data)) {
+        await this.populateUsers(response.data);
+      }
+    }
+    return response;
   }
 
   async createStep(req: any, id: number, body: any) {
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.CreateStep(
         { taskId: id, ...body },
         this.getGrpcMetadata(req),
@@ -643,10 +649,14 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    if (response?.data) {
+      await this.populateUsers([response.data]);
+    }
+    return response;
   }
 
   async updateStep(req: any, id: number, stepId: number, body: any) {
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.taskService.UpdateStep(
         { taskId: id, stepId, actorCode: req.user?.employeeCode || '', ...body },
         this.getGrpcMetadata(req),
@@ -654,6 +664,10 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    if (response?.data) {
+      await this.populateUsers([response.data]);
+    }
+    return response;
   }
 
   async deleteStep(req: any, id: number, stepId: number) {
