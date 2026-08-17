@@ -123,6 +123,7 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
         unitName: userInfo.unitName || userInfo.unit_name,
         jobTitleCode: userInfo.jobTitleCode || userInfo.job_title_code,
         jobTitleName: userInfo.jobTitleName || userInfo.job_title_name,
+        roles: userInfo.roles || [],
         permissionsFlatten:
           userInfo.permissionsFlatten || userInfo.permissions_flatten || [],
       };
