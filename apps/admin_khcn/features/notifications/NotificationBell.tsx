@@ -117,7 +117,7 @@ export function NotificationBell() {
           </div>
         </div>
 
-        <ScrollArea className="h-[320px]">
+        <ScrollArea className="max-h-[75vh] min-h-[300px]">
           {isLoading && list.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
               <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
