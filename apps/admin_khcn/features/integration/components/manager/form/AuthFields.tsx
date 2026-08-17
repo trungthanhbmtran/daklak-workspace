@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { KeyRound, Eye, EyeOff, Play, Loader2 } from "lucide-react";
+import { KeyRound, Eye, EyeOff, Play, Loader2, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import { IntegrationFormValues } from "../../../schemas";
 import { useCategories } from "../../../api";
 
@@ -42,6 +41,14 @@ function SecretInput({ field, placeholder, className }: { field: any, placeholde
   );
 }
 
+interface TestResult {
+  success: boolean;
+  message?: string;
+  data?: unknown;
+  status?: number;
+  time?: number;
+}
+
 export function AuthFields() {
   const { control, getValues } = useFormContext<IntegrationFormValues>();
   const authTypeValue = useWatch({ control, name: "authType", defaultValue: "NONE" });
@@ -49,10 +56,13 @@ export function AuthFields() {
   const { data: authTypes, isLoading } = useCategories("INTEGRATION_AUTH_TYPE");
 
   const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
 
   const handleTestAuth = async () => {
     const values = getValues();
     const currentAuthType = (values.authType || '').toUpperCase();
+
+    setTestResult(null);
 
     try {
       setIsTesting(true);
@@ -60,7 +70,7 @@ export function AuthFields() {
       if (currentAuthType === 'OAUTH2') {
         const { authUrl, clientId, clientSecret, scope } = values;
         if (!authUrl?.trim() || !clientId?.trim() || !clientSecret?.trim()) {
-          toast.error("Vui lòng nhập đầy đủ Auth URL, Client ID và Client Secret");
+          setTestResult({ success: false, message: "Vui lòng nhập đầy đủ Auth URL, Client ID và Client Secret" });
           return;
         }
 
@@ -71,47 +81,37 @@ export function AuthFields() {
         });
 
         const json = await res.json();
-
-        if (!json.success) {
-          toast.error(`Kết nối thất bại: ${json.message}`);
-          return;
-        }
-
-        if (json.data?.access_token) {
-          toast.success(`Kết nối thành công! Lấy được Access Token (${json.time}ms)`);
-        } else {
-          toast.warning("Phản hồi thành công nhưng không chứa access_token.");
-        }
+        setTestResult(json);
 
       } else if (currentAuthType === 'BASIC') {
         const { clientId, clientSecret } = values;
         if (!clientId?.trim() || !clientSecret?.trim()) {
-          toast.error("Vui lòng nhập đầy đủ Username và Password");
+          setTestResult({ success: false, message: "Vui lòng nhập đầy đủ Username và Password" });
           return;
         }
-        toast.success("Cấu hình Basic Auth hợp lệ.");
+        setTestResult({ success: true, message: "Cấu hình Basic Auth hợp lệ. Hệ thống sẽ sử dụng khi gọi API.", data: { username: clientId } });
 
       } else if (currentAuthType === 'API_KEY') {
         const { clientId, clientSecret } = values;
         if (!clientId?.trim() || !clientSecret?.trim()) {
-          toast.error("Vui lòng nhập đầy đủ API Key Name và API Key Value");
+          setTestResult({ success: false, message: "Vui lòng nhập đầy đủ API Key Name và API Key Value" });
           return;
         }
-        toast.success("Cấu hình API Key hợp lệ.");
+        setTestResult({ success: true, message: "Cấu hình API Key hợp lệ.", data: { keyName: clientId } });
 
       } else if (currentAuthType === 'BEARER') {
         const { apiToken } = values as any;
         if (!apiToken?.trim()) {
-          toast.error("Vui lòng nhập Bearer Token");
+          setTestResult({ success: false, message: "Vui lòng nhập Bearer Token" });
           return;
         }
-        toast.success("Cấu hình Bearer Token hợp lệ.");
+        setTestResult({ success: true, message: "Cấu hình Bearer Token hợp lệ.", data: { tokenLength: apiToken.length } });
 
       } else {
-        toast.info("Không có cấu hình xác thực nào cần kiểm tra.");
+        setTestResult({ success: true, message: "Không có cấu hình xác thực nào cần kiểm tra." });
       }
     } catch (error: any) {
-      toast.error("Lỗi kiểm tra kết nối: " + error.message);
+      setTestResult({ success: false, message: "Lỗi kiểm tra kết nối: " + error.message });
     } finally {
       setIsTesting(false);
     }
@@ -156,7 +156,7 @@ export function AuthFields() {
             ) : (
               <Select
                 value={(field.value || 'NONE').toUpperCase()}
-                onValueChange={(val) => field.onChange(val)}
+                onValueChange={(val) => { field.onChange(val); setTestResult(null); }}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -271,6 +271,56 @@ export function AuthFields() {
             </FormItem>
           )}
         />
+      )}
+
+      {/* Response panel */}
+      {testResult && (
+        <div className="md:col-span-2">
+          <div className={`rounded-lg border text-sm overflow-hidden ${testResult.success
+            ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30'
+            : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30'
+          }`}>
+            {/* Header */}
+            <div className={`flex items-center justify-between px-4 py-2.5 border-b ${testResult.success
+              ? 'border-emerald-200 dark:border-emerald-800'
+              : 'border-red-200 dark:border-red-800'
+            }`}>
+              <div className={`flex items-center gap-2 font-semibold ${testResult.success
+                ? 'text-emerald-700 dark:text-emerald-400'
+                : 'text-red-700 dark:text-red-400'
+              }`}>
+                {testResult.success
+                  ? <CheckCircle2 className="w-4 h-4" />
+                  : <XCircle className="w-4 h-4" />
+                }
+                {testResult.success ? 'Kết nối thành công' : 'Kết nối thất bại'}
+                {testResult.status && (
+                  <span className="font-mono text-xs opacity-70">HTTP {testResult.status}</span>
+                )}
+              </div>
+              {testResult.time !== undefined && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  {testResult.time}ms
+                </div>
+              )}
+            </div>
+
+            {/* Message */}
+            {testResult.message && (
+              <div className="px-4 py-2 text-xs text-muted-foreground border-b border-dashed border-current/10">
+                {testResult.message}
+              </div>
+            )}
+
+            {/* JSON body */}
+            {testResult.data !== undefined && (
+              <pre className="px-4 py-3 text-xs font-mono overflow-x-auto text-slate-700 dark:text-slate-300 max-h-48 overflow-y-auto">
+                {JSON.stringify(testResult.data, null, 2)}
+              </pre>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
