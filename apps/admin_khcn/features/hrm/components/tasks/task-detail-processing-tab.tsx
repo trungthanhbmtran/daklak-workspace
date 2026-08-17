@@ -215,7 +215,7 @@ export function TaskProcessingTab({
           </div>
         ) : steps.length > 0 ? (
           <div className="border rounded-md divide-y bg-white">
-            {steps.map((step: any) => (
+            {steps.map((step: any, index: number) => (
               <div key={step.id} className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3">
                   <Button
@@ -234,6 +234,7 @@ export function TaskProcessingTab({
                   </Button>
                   <div className="flex flex-col">
                     <p className={`text-sm ${step.status?.toUpperCase() === "COMPLETED" ? "line-through text-slate-500" : "font-medium"}`}>
+                      <span className="font-bold mr-1">Bước {index + 1}:</span>
                       {step.title}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
