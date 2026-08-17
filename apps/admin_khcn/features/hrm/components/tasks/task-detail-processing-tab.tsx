@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { CreateStepDialog } from "./create-step-dialog";
+import { useUser } from "@/hooks/useUser";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -34,6 +35,7 @@ export function TaskProcessingTab({
   isCompleted: boolean;
   isAssigned: boolean;
 }) {
+  const { user } = useUser();
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
 
@@ -220,8 +222,9 @@ export function TaskProcessingTab({
                     variant="ghost"
                     size="icon"
                     onClick={() => handleToggleStep(step)}
-                    disabled={isCompleted || updateStep.isPending}
-                    className="shrink-0 focus:outline-none w-6 h-6 p-0 hover:bg-transparent"
+                    disabled={isCompleted || updateStep.isPending || (!!step.assigneeCode && step.assigneeCode !== user?.employeeCode)}
+                    className="shrink-0 focus:outline-none w-6 h-6 p-0 hover:bg-transparent disabled:opacity-50"
+                    title={!!step.assigneeCode && step.assigneeCode !== user?.employeeCode ? "Chỉ người phụ trách mới có quyền hoàn thành" : ""}
                   >
                     {step.status?.toUpperCase() === "COMPLETED" ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -235,8 +238,8 @@ export function TaskProcessingTab({
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       {step.assigneeName && (
-                        <Text as="span" className="text-[11px] text-slate-500 flex items-center font-normal">
-                          👤 {step.assigneeName}
+                        <Text as="span" className="text-[11px] text-slate-500 flex items-center font-normal bg-slate-100 px-1.5 py-0.5 rounded">
+                          Phụ trách: 👤 {step.assigneeName}
                         </Text>
                       )}
                       {step.baseScore > 0 && (

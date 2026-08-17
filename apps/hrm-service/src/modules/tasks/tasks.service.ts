@@ -904,6 +904,9 @@ export class TasksService {
     if (data.baseScore !== undefined) updateData.baseScore = parseFloat(data.baseScore);
 
     if (data.status !== undefined) {
+      if (data.status === 'COMPLETED' && currentStep.assigneeCode && currentStep.assigneeCode !== data.actorCode) {
+        throw new RpcException('Chỉ người được giao phụ trách bước này mới có quyền nhấn hoàn thành.');
+      }
       updateData.status = data.status;
       if (data.status === 'COMPLETED') {
         updateData.completedAt = new Date();
