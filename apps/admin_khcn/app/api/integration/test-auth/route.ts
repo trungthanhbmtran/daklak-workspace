@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// undici là HTTP client mà Next.js sử dụng nội bộ, không cần cài thêm
+import { Agent, fetch as undiciFetch } from 'undici';
 
 interface TestAuthBody {
   authUrl: string;
@@ -67,16 +69,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   let upstream: Response;
   try {
-    upstream = await fetch(targetUrl, {
+    // Dùng undici với rejectUnauthorized: false để hỗ trợ server dùng
+    // chứng chỉ tự ký (self-signed) hoặc CA nội bộ
+    const agent = new Agent({ connect: { rejectUnauthorized: false } });
+    upstream = await undiciFetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: `Basic ${basicAuth}`,
         Accept: 'application/json',
       },
-      body: params,
-      // next: { revalidate: 0 } — không cache kết quả test
-    });
+      body: params.toString(),
+      dispatcher: agent,
+    }) as unknown as Response;
   } catch (err) {
     console.error('[test-auth] fetch error:', err);
     return NextResponse.json(
