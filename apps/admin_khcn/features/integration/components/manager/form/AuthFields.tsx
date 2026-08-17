@@ -63,7 +63,7 @@ export function AuthFields() {
           return;
         }
 
-        const response = await fetch('/api/integration/test-auth', {
+        const response = await fetch('/admin/api/integration/test-auth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
