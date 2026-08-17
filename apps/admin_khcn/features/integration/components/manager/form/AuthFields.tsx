@@ -15,17 +15,17 @@ function SecretInput({ field, placeholder, className }: { field: any, placeholde
   return (
     <div className="relative">
       {show ? (
-        <Textarea 
-          placeholder={placeholder} 
-          className={`font-mono pr-10 resize-none min-h-[80px] break-all ${className || ""}`} 
-          {...field} 
+        <Textarea
+          placeholder={placeholder}
+          className={`font-mono pr-10 resize-none min-h-[80px] break-all ${className || ""}`}
+          {...field}
         />
       ) : (
-        <Input 
-          type="password" 
-          placeholder={placeholder} 
-          className={`font-mono pr-10 ${className || ""}`} 
-          {...field} 
+        <Input
+          type="password"
+          placeholder={placeholder}
+          className={`font-mono pr-10 ${className || ""}`}
+          {...field}
         />
       )}
       <Button
@@ -55,7 +55,7 @@ export function AuthFields() {
           Thông tin Xác thực (Authentication)
         </div>
       </div>
-      
+
       <FormField
         name="authType"
         render={({ field }) => (

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         if (authConfig.scope) {
           tokenParams.append('scope', authConfig.scope);
         }
-        
+
         const tokenRes = await axios.post(authConfig.authUrl, tokenParams.toString(), {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           httpsAgent,
@@ -75,11 +75,11 @@ export async function POST(req: NextRequest) {
       timeout: 10000, // 10 seconds timeout
       httpsAgent,
     });
-    
+
     const time = Date.now() - startTime;
 
     const responseData = response.data;
-    
+
     const size = Buffer.byteLength(JSON.stringify(responseData), 'utf8');
 
     return NextResponse.json({

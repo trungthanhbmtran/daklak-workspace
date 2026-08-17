@@ -13,6 +13,7 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 import { 
   CreateWorkflowDto, 
   UpdateWorkflowDto, 
@@ -120,30 +121,35 @@ export class WorkflowController {
   // --- Integrations ---
 
   @Get('integrations')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:READ')
   @ApiOperation({ summary: 'Danh sách các API integrations' })
   async findAllIntegrations(@Query() query: any) {
     return this.workflowService.findAllIntegrations(query);
   }
 
   @Post('integrations')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:CREATE')
   @ApiOperation({ summary: 'Tạo API integration' })
   async createIntegration(@Body() body: any) {
     return this.workflowService.createIntegration(body);
   }
 
   @Get('integrations/:id')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:READ')
   @ApiOperation({ summary: 'Chi tiết API integration' })
   async findOneIntegration(@Param('id') id: string) {
     return this.workflowService.findOneIntegration(id);
   }
 
   @Put('integrations/:id')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:UPDATE')
   @ApiOperation({ summary: 'Cập nhật API integration' })
   async updateIntegration(@Param('id') id: string, @Body() body: any) {
     return this.workflowService.updateIntegration(id, body);
   }
 
   @Delete('integrations/:id')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:DELETE')
   @ApiOperation({ summary: 'Xóa API integration' })
   async deleteIntegration(@Param('id') id: string) {
     return this.workflowService.deleteIntegration(id);

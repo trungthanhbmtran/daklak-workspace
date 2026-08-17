@@ -14,6 +14,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
 @ApiTags('Integrations')
 @Controller('admin/integrations')
@@ -26,6 +27,7 @@ export class IntegrationsController {
   constructor(private readonly httpService: HttpService) {}
 
   @Get()
+  @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Lấy danh sách các cấu hình thông báo' })
   async list(@Req() req: any) {
     const search = req.query?.search || '';
@@ -39,6 +41,7 @@ export class IntegrationsController {
   }
 
   @Post()
+  @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Tạo cấu hình thông báo mới' })
   async create(@Body() body: any) {
     const { data } = await firstValueFrom(
@@ -51,6 +54,7 @@ export class IntegrationsController {
   }
 
   @Put(':id')
+  @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Cập nhật cấu hình thông báo' })
   async update(@Param('id') id: string, @Body() body: any) {
     const { data } = await firstValueFrom(
@@ -63,6 +67,7 @@ export class IntegrationsController {
   }
 
   @Put(':id/active')
+  @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Cập nhật trạng thái kích hoạt' })
   async toggleActive(@Param('id') id: string, @Body() body: any) {
     const { data } = await firstValueFrom(
@@ -75,6 +80,7 @@ export class IntegrationsController {
   }
 
   @Delete(':id')
+  @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Xóa cấu hình thông báo' })
   async delete(@Param('id') id: string) {
     const { data } = await firstValueFrom(
