@@ -165,8 +165,8 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     <ResponsiveModal
       open={isOpen}
       onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}
-      maxWidth="max-w-full"
-      contentClassName="w-[98vw] sm:w-[95vw] h-[95vh]"
+      maxWidth="max-w-4xl"
+      contentClassName="w-[95vw] max-h-[90vh]"
       icon={<Server className="w-6 h-6 text-violet-600" />}
       title={editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
       description="Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP)."
