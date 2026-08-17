@@ -20,7 +20,20 @@ export async function POST(request: Request) {
 
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
-    const response = await fetch(authUrl, {
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(authUrl);
+      if (!['http:', 'https:'].includes(targetUrl.protocol)) {
+        throw new Error('URL phải bắt đầu bằng http:// hoặc https://');
+      }
+    } catch (err: any) {
+      return NextResponse.json(
+        { success: false, message: `URL không hợp lệ: ${err.message}` },
+        { status: 400 }
+      );
+    }
+
+    const response = await fetch(targetUrl.toString(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -28,7 +41,6 @@ export async function POST(request: Request) {
         'Accept': 'application/json'
       },
       body: params,
-      // Đặt timeout hoặc các cấu hình khác nếu cần thiết (mặc định fetch trong Node.js không có timeout)
     });
 
     const responseText = await response.text();
@@ -56,8 +68,12 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Test Auth Proxy Error:', error);
+    let errorMessage = error.message;
+    if (error.cause) {
+      errorMessage += ` (Nguyên nhân: ${error.cause.message || JSON.stringify(error.cause)})`;
+    }
     return NextResponse.json(
-      { success: false, message: `Lỗi kết nối từ server: ${error.message}` },
+      { success: false, message: `Lỗi kết nối từ server: ${errorMessage}` },
       { status: 500 }
     );
   }
