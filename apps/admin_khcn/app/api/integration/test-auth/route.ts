@@ -1,80 +1,103 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+interface TestAuthBody {
+  authUrl: string;
+  clientId: string;
+  clientSecret: string;
+  scope?: string;
+}
+
+function parseUrl(raw: string): URL {
+  const url = new URL(raw);
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw new Error('URL phải bắt đầu bằng http:// hoặc https://');
+  }
+  return url;
+}
+
+function parseJson(text: string): unknown {
   try {
-    const body = await request.json();
-    const { authUrl, clientId, clientSecret, scope } = body;
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
 
-    if (!authUrl || !clientId || !clientSecret) {
-      return NextResponse.json(
-        { success: false, message: 'Thiếu thông tin bắt buộc (authUrl, clientId, clientSecret)' },
-        { status: 400 }
-      );
-    }
+function buildErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return 'Lỗi không xác định';
+  const cause = (error as NodeJS.ErrnoException).cause as Error | undefined;
+  return cause?.message ? `${error.message} (Nguyên nhân: ${cause.message})` : error.message;
+}
 
-    const params = new URLSearchParams();
-    params.append('grant_type', 'client_credentials');
-    if (scope) {
-      params.append('scope', scope);
-    }
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  let body: TestAuthBody;
 
-    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { success: false, message: 'Request body không hợp lệ (phải là JSON)' },
+      { status: 400 },
+    );
+  }
 
-    let targetUrl: URL;
-    try {
-      targetUrl = new URL(authUrl);
-      if (!['http:', 'https:'].includes(targetUrl.protocol)) {
-        throw new Error('URL phải bắt đầu bằng http:// hoặc https://');
-      }
-    } catch (err: any) {
-      return NextResponse.json(
-        { success: false, message: `URL không hợp lệ: ${err.message}` },
-        { status: 400 }
-      );
-    }
+  const { authUrl, clientId, clientSecret, scope } = body;
 
-    const response = await fetch(targetUrl.toString(), {
+  if (!authUrl?.trim() || !clientId?.trim() || !clientSecret?.trim()) {
+    return NextResponse.json(
+      { success: false, message: 'Thiếu thông tin bắt buộc: authUrl, clientId, clientSecret' },
+      { status: 400 },
+    );
+  }
+
+  let targetUrl: URL;
+  try {
+    targetUrl = parseUrl(authUrl.trim());
+  } catch (err) {
+    return NextResponse.json(
+      { success: false, message: `URL không hợp lệ: ${(err as Error).message}` },
+      { status: 400 },
+    );
+  }
+
+  const params = new URLSearchParams({ grant_type: 'client_credentials' });
+  if (scope?.trim()) params.set('scope', scope.trim());
+
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${basicAuth}`,
-        'Accept': 'application/json'
+        Authorization: `Basic ${basicAuth}`,
+        Accept: 'application/json',
       },
       body: params,
+      // next: { revalidate: 0 } — không cache kết quả test
     });
-
-    const responseText = await response.text();
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      data = responseText;
-    }
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: `HTTP ${response.status}: Lỗi từ máy chủ xác thực.`, 
-          details: data 
-        },
-        { status: response.status }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: data
-    });
-  } catch (error: any) {
-    console.error('Test Auth Proxy Error:', error);
-    let errorMessage = error.message;
-    if (error.cause) {
-      errorMessage += ` (Nguyên nhân: ${error.cause.message || JSON.stringify(error.cause)})`;
-    }
+  } catch (err) {
+    console.error('[test-auth] fetch error:', err);
     return NextResponse.json(
-      { success: false, message: `Lỗi kết nối từ server: ${errorMessage}` },
-      { status: 500 }
+      { success: false, message: `Lỗi kết nối đến máy chủ xác thực: ${buildErrorMessage(err)}` },
+      { status: 502 },
     );
   }
+
+  const responseText = await upstream.text();
+  const data = parseJson(responseText);
+
+  if (!upstream.ok) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: `HTTP ${upstream.status} từ máy chủ xác thực`,
+        details: data,
+      },
+      { status: upstream.status },
+    );
+  }
+
+  return NextResponse.json({ success: true, data });
 }
