@@ -63,28 +63,26 @@ export function AuthFields() {
           return;
         }
 
-        const params = new URLSearchParams();
-        params.append('grant_type', 'client_credentials');
-        if (scope) params.append('scope', scope);
-
-        const basicAuth = btoa(`${clientId}:${clientSecret}`);
-
-        const response = await fetch(authUrl, {
+        const response = await fetch('/api/integration/test-auth', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${basicAuth}`
+            'Content-Type': 'application/json'
           },
-          body: params
+          body: JSON.stringify({
+            authUrl,
+            clientId,
+            clientSecret,
+            scope
+          })
         });
 
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`HTTP ${response.status}: ${errorData}`);
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || `Lỗi không xác định từ server`);
         }
 
-        const data = await response.json();
-        if (data.access_token) {
+        if (data.data?.access_token) {
           toast.success("Kết nối thành công! Đã lấy được Access Token.");
         } else {
           toast.warning("Phản hồi thành công nhưng không chứa access_token.");
