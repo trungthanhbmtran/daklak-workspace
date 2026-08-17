@@ -67,13 +67,15 @@ export default function PagesSidebar({
         ))}
       </div>
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={executeDelete}
-        title="Xóa trang"
-        description="Bạn có chắc chắn muốn xóa trang này? Hành động này không thể hoàn tác."
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={executeDelete}
+                  title="Xóa trang"
+                  description="Bạn có chắc chắn muốn xóa trang này? Hành động này không thể hoàn tác."
+                />
+          )}
     </aside>
   );
 }

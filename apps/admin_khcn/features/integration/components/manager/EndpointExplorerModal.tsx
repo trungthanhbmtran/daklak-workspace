@@ -197,47 +197,49 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
 
   return (
     <>
-    <ResponsiveModal
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      maxWidth="max-w-full"
-      contentClassName="!w-screen !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
-      icon={<Plug className="w-6 h-6 text-violet-500" />}
-      title={`Quản lý Endpoints - ${integration?.name}`}
-      description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
-      bodyClassName="p-0 bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-hidden flex flex-col"
-      footer={
-        <div className="w-full flex justify-end">
-          <Button 
-            onClick={handleSave} 
-            disabled={updateMutation.isPending}
-            className="bg-violet-600 hover:bg-violet-700 text-white"
-           iconStart={<Save className="w-4 h-4" />}>{updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}</Button>
-        </div>
-      }
-      fullHeight={true}
-    >
-      <div className="flex flex-col md:flex-row h-full w-full overflow-hidden">
-        <EndpointSidebar 
-          endpoints={endpoints}
-          selectedId={selectedId}
-          search={search}
-          setSearch={setSearch}
-          onSelect={handleSelect}
-          onAdd={handleAddEndpoint}
-        />
+    {isOpen && (
+          <ResponsiveModal
+                open={isOpen}
+                onOpenChange={setIsOpen}
+                maxWidth="max-w-full"
+                contentClassName="!w-screen !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
+                icon={<Plug className="w-6 h-6 text-violet-500" />}
+                title={`Quản lý Endpoints - ${integration?.name}`}
+                description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
+                bodyClassName="p-0 bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-hidden flex flex-col"
+                footer={
+                  <div className="w-full flex justify-end">
+                    <Button 
+                      onClick={handleSave} 
+                      disabled={updateMutation.isPending}
+                      className="bg-violet-600 hover:bg-violet-700 text-white"
+                     iconStart={<Save className="w-4 h-4" />}>{updateMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}</Button>
+                  </div>
+                }
+                fullHeight={true}
+              >
+                <div className="flex flex-col md:flex-row h-full w-full overflow-hidden">
+                  <EndpointSidebar 
+                    endpoints={endpoints}
+                    selectedId={selectedId}
+                    search={search}
+                    setSearch={setSearch}
+                    onSelect={handleSelect}
+                    onAdd={handleAddEndpoint}
+                  />
 
-        <EndpointEditor 
-          selectedEndpoint={selectedEndpoint}
-          onChange={handleEndpointChange}
-          onItemChange={handleItemChange}
-          onAddItem={handleAddItem}
-          onRemoveItem={handleRemoveItem}
-          onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
-          onTest={handleTestEndpoint}
-        />
-      </div>
-    </ResponsiveModal>
+                  <EndpointEditor 
+                    selectedEndpoint={selectedEndpoint}
+                    onChange={handleEndpointChange}
+                    onItemChange={handleItemChange}
+                    onAddItem={handleAddItem}
+                    onRemoveItem={handleRemoveItem}
+                    onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
+                    onTest={handleTestEndpoint}
+                  />
+                </div>
+              </ResponsiveModal>
+          )}
 
     <Dialog open={testModalOpen} onOpenChange={setTestModalOpen}>
       <DialogContent className="sm:max-w-[700px] h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">

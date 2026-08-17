@@ -276,14 +276,16 @@ export function ProcedureConfigClient() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={executeDelete}
-        title="Xóa mẫu hồ sơ"
-        description="Bạn có chắc chắn muốn xóa mẫu hồ sơ này? Tất cả các thành phần bên trong cũng sẽ bị xóa. Hành động này không thể hoàn tác."
-        isDeleting={deleteProcedure.isPending}
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={executeDelete}
+                  title="Xóa mẫu hồ sơ"
+                  description="Bạn có chắc chắn muốn xóa mẫu hồ sơ này? Tất cả các thành phần bên trong cũng sẽ bị xóa. Hành động này không thể hoàn tác."
+                  isDeleting={deleteProcedure.isPending}
+                />
+          )}
 
       <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
     </div>

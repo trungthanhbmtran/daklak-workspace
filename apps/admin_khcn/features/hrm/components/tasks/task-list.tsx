@@ -369,10 +369,12 @@ export function TaskList() {
         )
       }
 
-      <CreateTaskDialog
-        open={isCreateTaskOpen}
-        onOpenChange={setIsCreateTaskOpen}
-      />
+      {isCreateTaskOpen && (
+          <CreateTaskDialog
+                  open={isCreateTaskOpen}
+                  onOpenChange={setIsCreateTaskOpen}
+                />
+          )}
     </div >
   );
 }

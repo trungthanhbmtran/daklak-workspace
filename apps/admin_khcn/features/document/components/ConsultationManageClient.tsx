@@ -285,7 +285,9 @@ export function ConsultationManageClient() {
         </CardContent>
       </Card>
 
-      <ConsultationCreateModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      {isModalOpen && (
+          <ConsultationCreateModal isOpen={isModalOpen} onClose={handleCloseModal} />
+          )}
     </div>
   );
 }

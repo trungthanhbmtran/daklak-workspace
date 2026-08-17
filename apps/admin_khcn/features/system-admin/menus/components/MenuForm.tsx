@@ -413,14 +413,16 @@ export function MenuForm({ menuId }: MenuFormProps) {
       </div>
 
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={executeDelete}
-        title="Xóa Menu"
-        description="Bạn có chắc chắn muốn xóa Menu này? Hành động này không thể hoàn tác."
-        isDeleting={isDeleting}
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={executeDelete}
+                  title="Xóa Menu"
+                  description="Bạn có chắc chắn muốn xóa Menu này? Hành động này không thể hoàn tác."
+                  isDeleting={isDeleting}
+                />
+          )}
     </Card>
   );
 }

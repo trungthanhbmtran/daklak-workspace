@@ -252,18 +252,20 @@ export function RoleForm({ roleId }: RoleFormProps) {
         </Button>
       </div>
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={(reason) => {
-          onDelete(reason);
-          setIsDeleteDialogOpen(false);
-        }}
-        title="Xóa vai trò"
-        description={`Bạn có chắc chắn muốn xóa vai trò "${roleDetail?.name}"? Hành động này không thể hoàn tác.`}
-        isDeleting={deleteMutation.isPending}
-        requireReason={true}
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={(reason) => {
+                    onDelete(reason);
+                    setIsDeleteDialogOpen(false);
+                  }}
+                  title="Xóa vai trò"
+                  description={`Bạn có chắc chắn muốn xóa vai trò "${roleDetail?.name}"? Hành động này không thể hoàn tác.`}
+                  isDeleting={deleteMutation.isPending}
+                  requireReason={true}
+                />
+          )}
     </Card>
   );
 }

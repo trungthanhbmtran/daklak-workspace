@@ -163,11 +163,13 @@ export function MasterPlanListClient() {
         </CardContent>
       </Card>
 
-      <MasterPlanCreateEditDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        planToEdit={editingPlan}
-      />
+      {isDialogOpen && (
+          <MasterPlanCreateEditDialog
+                  open={isDialogOpen}
+                  onOpenChange={setIsDialogOpen}
+                  planToEdit={editingPlan}
+                />
+          )}
     </div>
   );
 }

@@ -76,25 +76,29 @@ export function UserClient() {
       />
 
       {/* Sheet chi tiết – policies lazy load bên trong */}
-      <UserDetailSheet
-        isOpen={ui.state.detailId !== null}
-        user={
-          ui.state.detailId
-            ? (detailUser ?? serverData.find((u) => u.id === ui.state.detailId)) ?? null
-            : null
-        }
-        isLoading={ui.state.detailId != null && isLoadingDetail}
-        onClose={() => ui.setters.setDetailId(null)}
-        onSetActive={(id, isActive) => setActiveMutation.mutate({ id, isActive })}
-        isSettingActive={setActiveMutation.isPending}
-        onAssignRoles={(payload) => assignRolesMutation.mutate(payload)}
-        isAssigningRoles={assignRolesMutation.isPending}
-      />
+      {ui.state.detailId !== null && (
+          <UserDetailSheet
+                  isOpen={ui.state.detailId !== null}
+                  user={
+                    ui.state.detailId
+                      ? (detailUser ?? serverData.find((u) => u.id === ui.state.detailId)) ?? null
+                      : null
+                  }
+                  isLoading={ui.state.detailId != null && isLoadingDetail}
+                  onClose={() => ui.setters.setDetailId(null)}
+                  onSetActive={(id, isActive) => setActiveMutation.mutate({ id, isActive })}
+                  isSettingActive={setActiveMutation.isPending}
+                  onAssignRoles={(payload) => assignRolesMutation.mutate(payload)}
+                  isAssigningRoles={assignRolesMutation.isPending}
+                />
+          )}
 
-      <CreateUserModal
-        isOpen={ui.state.isCreateOpen}
-        onClose={() => ui.setters.setIsCreateOpen(false)}
-      />
+      {ui.state.isCreateOpen && (
+          <CreateUserModal
+                  isOpen={ui.state.isCreateOpen}
+                  onClose={() => ui.setters.setIsCreateOpen(false)}
+                />
+          )}
     </div>
   );
 }

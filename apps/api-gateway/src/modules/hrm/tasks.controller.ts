@@ -58,6 +58,15 @@ export class TasksController {
     return this.tasksService.update(req, id, body);
   }
 
+  @Post(':id/extend')
+  async extendTask(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: any,
+  ) {
+    return this.tasksService.extendTask(req, id, body);
+  }
+
   @Put(':id/status')
   async updateStatus(
     @Req() req: any,

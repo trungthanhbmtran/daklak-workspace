@@ -106,6 +106,20 @@ export function useUpdateTaskStatus() {
   });
 }
 
+export function useExtendTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    onError: (error: any) => { toast.error(error?.response?.data?.message || "Gia hạn thất bại"); },
+    mutationFn: ({ id, payload }: { id: number; payload: { dueDate: string; reason: string } }) =>
+      hrmTasksApi.extendTask(id, payload),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: hrmKeys.taskDetail(variables.id) });
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      toast.success("Gia hạn công việc thành công");
+    },
+  });
+}
+
 /**
  * Gửi comment.
  * - Optimistic update: thêm comment vào cache trước khi server confirm
@@ -257,7 +271,11 @@ export function useUpdateStep(taskId: number | undefined) {
       return hrmTasksApi.updateStep(taskId, stepId, payload);
     },
     onSuccess: () => {
-      if (taskId) qc.invalidateQueries({ queryKey: hrmKeys.taskSteps(taskId) });
+      if (taskId) {
+        qc.invalidateQueries({ queryKey: hrmKeys.taskSteps(taskId) });
+        qc.invalidateQueries({ queryKey: hrmKeys.taskDetail(taskId) });
+      }
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
     },
 
     onError: (error: any) => {

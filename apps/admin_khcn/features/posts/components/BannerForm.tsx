@@ -270,17 +270,19 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
         </form>
       </Form>
 
-      <BannerClientPreviewModal
-        isOpen={isPreviewModalOpen}
-        onClose={() => setIsPreviewModalOpen(false)}
-        customStyles={customStyles}
-        watchedName={watchedName}
-        watchedDescription={watchedDescription}
-        onSaveAndSubmit={() => {
-          setIsPreviewModalOpen(false);
-          form.handleSubmit(onSubmit, onError)();
-        }}
-      />
+      {isPreviewModalOpen && (
+          <BannerClientPreviewModal
+                  isOpen={isPreviewModalOpen}
+                  onClose={() => setIsPreviewModalOpen(false)}
+                  customStyles={customStyles}
+                  watchedName={watchedName}
+                  watchedDescription={watchedDescription}
+                  onSaveAndSubmit={() => {
+                    setIsPreviewModalOpen(false);
+                    form.handleSubmit(onSubmit, onError)();
+                  }}
+                />
+          )}
     </div>
   );
 }

@@ -485,6 +485,9 @@ export class TasksService {
     if (context) await this.shared.populateQueryHierarchy(context);
 
     const rawTask = await this.findTaskOrFail(id);
+    if (rawTask.status === 'COMPLETED') {
+      throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể thay đổi.');
+    }
     const [enriched] = await this.shared.enrichTasks([rawTask]);
     const access = await this.shared.checkTaskAccess(enriched, context);
     const hasChildren = (await this.prisma.taskClosure.count({ where: { ancestorId: id, depth: 1 } })) > 0;
@@ -664,6 +667,11 @@ export class TasksService {
   }
 
   async updateTask(id: number, data: any) {
+    const rawTask = await this.findTaskOrFail(id);
+    if (rawTask.status === 'COMPLETED') {
+      throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể thay đổi.');
+    }
+
     const { baseScore, weight, scoringMethod, bonusPerDay, penaltyPerDay, kpiCriteriaId, isCrossDomain, crossDomainMultiplier, id: _id, ...taskData } = data;
 
     if (taskData.startDate) taskData.startDate = new Date(taskData.startDate);
@@ -691,6 +699,30 @@ export class TasksService {
         action: 'Cập nhật thông tin',
         actorCode: data?.currentEmployeeCode || null,
         newValue: taskData
+      }
+    });
+
+    return this.toResponse(t);
+  }
+
+  async extendTask(id: number, dueDate: string, reason: string, actorCode: string) {
+    const rawTask = await this.findTaskOrFail(id);
+    if (rawTask.status === 'COMPLETED') {
+      throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể gia hạn.');
+    }
+    const newDueDate = new Date(dueDate);
+    const t = await this.prisma.task.update({
+      where: { id },
+      data: { dueDate: newDueDate },
+      include: this.taskInclude,
+    });
+    
+    await this.prisma.taskHistory.create({
+      data: {
+        taskId: id,
+        action: 'Gia hạn công việc',
+        actorCode: actorCode || null,
+        newValue: { dueDate: newDueDate.toISOString(), reason } as any
       }
     });
 
@@ -859,6 +891,12 @@ export class TasksService {
   }
 
   async updateStep(taskId: number, stepId: number, data: any) {
+    const currentStep = await this.prisma.taskStep.findUnique({ where: { id: stepId, taskId } });
+    if (!currentStep) throw new RpcException('Không tìm thấy bước này');
+    if (currentStep.status === 'COMPLETED') {
+      throw new RpcException('Bước này đã hoàn thành, không thể thay đổi.');
+    }
+
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.order !== undefined) updateData.order = data.order;

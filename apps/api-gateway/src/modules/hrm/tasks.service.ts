@@ -257,6 +257,28 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
+  async extendTask(req: any, id: number, body: any) {
+    const user = req.user;
+    const response: any = await firstValueFrom(
+      this.taskService.ExtendTask(
+        {
+          id,
+          dueDate: body.dueDate,
+          reason: body.reason,
+          actorCode: user?.employeeCode || user?.username,
+          currentUserPermissions: user?.permissionsFlatten || [],
+          currentUserId: user?.id,
+          currentEmployeeCode: user?.employeeCode || user?.username,
+        },
+        this.getGrpcMetadata(req),
+      ),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
+    if (response?.data) this.translateTaskData(response.data);
+    return response;
+  }
+
   async updateStatus(req: any, id: number, status: string, rejectReason?: string, actionName?: string, evidence?: string) {
     const user = req.user;
     const response: any = await firstValueFrom(

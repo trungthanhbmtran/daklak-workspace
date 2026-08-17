@@ -280,11 +280,13 @@ export function OutgoingDocumentsClient() {
       />
 
       {/* Upload modal */}
-      <DocumentUploadModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        isIncoming={false}
-      />
+      {isModalOpen && (
+          <DocumentUploadModal
+                  isOpen={isModalOpen}
+                  onClose={handleCloseModal}
+                  isIncoming={false}
+                />
+          )}
 
       {/* Delete dialog — tự quản lý deleteDocument call */}
       <DeleteDialog itemId={itemToDelete} onClose={handleCloseDelete} />

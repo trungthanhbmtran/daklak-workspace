@@ -167,7 +167,9 @@ export function TransparencyClient() {
         </div>
       </div>
 
-      <DocumentUploadModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      {isModalOpen && (
+          <DocumentUploadModal isOpen={isModalOpen} onClose={handleCloseModal} />
+          )}
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

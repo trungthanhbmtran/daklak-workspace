@@ -471,15 +471,17 @@ export function KpiCriteriaClient() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={executeDelete}
-        title="Xóa tiêu chí KPI"
-        description="Bạn có chắc chắn muốn xóa tiêu chí đánh giá này? Dữ liệu đã xóa không thể khôi phục."
-        isDeleting={deleteMutation.isPending}
-        requireReason={true}
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={executeDelete}
+                  title="Xóa tiêu chí KPI"
+                  description="Bạn có chắc chắn muốn xóa tiêu chí đánh giá này? Dữ liệu đã xóa không thể khôi phục."
+                  isDeleting={deleteMutation.isPending}
+                  requireReason={true}
+                />
+          )}
     </div>
   );
 }

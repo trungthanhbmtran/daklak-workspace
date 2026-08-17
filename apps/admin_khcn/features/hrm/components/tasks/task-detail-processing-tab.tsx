@@ -112,16 +112,12 @@ export function TaskProcessingTab({
   const handleToggleStep = async (step: any) => {
     if (step.status !== "COMPLETED") {
       setCompletingItem({ type: 'step', data: step });
-    } else {
-      await updateStep.mutateAsync({ stepId: Number(step.id), payload: { status: "TODO" } });
     }
   };
 
   const handleToggleSubTask = async (subTask: HrmTask) => {
     if (subTask.status !== "COMPLETED") {
       setCompletingItem({ type: 'subtask', data: subTask });
-    } else {
-      await updateTaskStatus.mutateAsync({ id: Number(subTask.id), payload: { status: "IN_PROGRESS" } });
     }
   };
 
@@ -302,16 +298,20 @@ export function TaskProcessingTab({
         <Text variant="small" className="text-slate-500 italic font-normal">Chưa có tài liệu nào</Text>
       </div>
 
-      <CreateTaskDialog
-        open={isCreateSubTaskOpen}
-        onOpenChange={setIsCreateSubTaskOpen}
-        parentId={String(taskId)}
-      />
-      <CreateStepDialog
-        open={isCreateStepOpen}
-        onOpenChange={setIsCreateStepOpen}
-        task={currentTask}
-      />
+      {isCreateSubTaskOpen && (
+          <CreateTaskDialog
+                  open={isCreateSubTaskOpen}
+                  onOpenChange={setIsCreateSubTaskOpen}
+                  parentId={String(taskId)}
+                />
+          )}
+      {isCreateStepOpen && (
+          <CreateStepDialog
+                  open={isCreateStepOpen}
+                  onOpenChange={setIsCreateStepOpen}
+                  task={currentTask}
+                />
+          )}
 
       <Dialog open={!!completingItem} onOpenChange={(open) => {
         if (!open) {

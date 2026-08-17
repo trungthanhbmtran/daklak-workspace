@@ -205,14 +205,16 @@ export function EmployeeListClient() {
         </div>
       </div>
 
-      <ConfirmDeleteModal
-        isOpen={deleteId !== null}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-        isDeleting={isDeleting}
-        description="Thao tác này sẽ xóa hoàn toàn hồ sơ nhân sự khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
-        requireReason={true}
-      />
+      {deleteId !== null && (
+          <ConfirmDeleteModal
+                  isOpen={deleteId !== null}
+                  onClose={() => setDeleteId(null)}
+                  onConfirm={handleDelete}
+                  isDeleting={isDeleting}
+                  description="Thao tác này sẽ xóa hoàn toàn hồ sơ nhân sự khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
+                  requireReason={true}
+                />
+          )}
     </div>
   );
 }

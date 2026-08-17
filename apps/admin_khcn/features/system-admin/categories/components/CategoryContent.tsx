@@ -136,26 +136,30 @@ export function CategoryContent({ activeGroup }: CategoryContentProps) {
         </div>
       )}
 
-      <CreateCategoryModal
-        isOpen={ui.state.isCreateOpen}
-        onClose={() => ui.setters.setIsCreateOpen(false)}
-        activeGroup={activeGroup}
-        defaultSort={totalItems + 1}
-      />
+      {ui.state.isCreateOpen && (
+          <CreateCategoryModal
+                  isOpen={ui.state.isCreateOpen}
+                  onClose={() => ui.setters.setIsCreateOpen(false)}
+                  activeGroup={activeGroup}
+                  defaultSort={totalItems + 1}
+                />
+          )}
 
       <EditCategoryModal
         editingItem={ui.state.editingItem}
         onClose={() => ui.setters.setEditingItem(null)}
       />
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={executeDelete}
-        title="Xóa danh mục"
-        description={`Bạn có chắc chắn muốn xóa "${itemToDelete?.name}"? Hành động này không thể hoàn tác.`}
-        isDeleting={deleteMutation.isPending}
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={executeDelete}
+                  title="Xóa danh mục"
+                  description={`Bạn có chắc chắn muốn xóa "${itemToDelete?.name}"? Hành động này không thể hoàn tác.`}
+                  isDeleting={deleteMutation.isPending}
+                />
+          )}
     </div>
   );
 }

@@ -392,11 +392,13 @@ export function QuestionsClient() {
       />
 
       {/* Dialog — form state + mutation nằm trong dialog */}
-      <AnswerDialog
-        question={selectedQuestion}
-        open={dialogOpen}
-        onClose={handleClose}
-      />
+      {dialogOpen && (
+          <AnswerDialog
+                  question={selectedQuestion}
+                  open={dialogOpen}
+                  onClose={handleClose}
+                />
+          )}
     </div>
   );
 }

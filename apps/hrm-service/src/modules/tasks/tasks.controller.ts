@@ -22,6 +22,9 @@ export class TasksController {
   @GrpcMethod('TaskService', 'UpdateTask')
   updateTask(data: any) { return this.tasksService.updateTask(data.id, data); }
 
+  @GrpcMethod('TaskService', 'ExtendTask')
+  extendTask(data: any) { return this.tasksService.extendTask(data.id, data.dueDate, data.reason, data.actorCode || data.currentEmployeeCode); }
+
   @GrpcMethod('TaskService', 'DeleteTask')
   deleteTask(data: any) { return this.tasksService.deleteTask(data.id); }
 

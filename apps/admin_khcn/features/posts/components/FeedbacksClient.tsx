@@ -399,11 +399,13 @@ export function FeedbacksClient() {
       />
 
       {/* Dialog — component riêng, tự quản lý mutation "Đã xử lý" */}
-      <FeedbackDetailDialog
-        feedback={selectedFeedback}
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-      />
+      {dialogOpen && (
+          <FeedbackDetailDialog
+                  feedback={selectedFeedback}
+                  open={dialogOpen}
+                  onClose={handleCloseDialog}
+                />
+          )}
     </div>
   );
 }

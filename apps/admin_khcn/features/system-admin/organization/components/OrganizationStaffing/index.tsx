@@ -316,17 +316,19 @@ export function OrganizationStaffing() {
         </TabsContent>
       </Tabs>
 
-      <JobTitleConfigDialog
-        open={configOpen}
-        onOpenChange={setConfigOpen}
-        jobTitle={configJobTitle}
-        domainId={configDomainId}
-        onDomainIdChange={setConfigDomainId}
-        onSave={handleSaveConfig}
-        isSaving={updateJobTitle.isPending}
-        domainsForUnit={domainsForUnit}
-        unitName={unit?.name}
-      />
+      {configOpen && (
+          <JobTitleConfigDialog
+                  open={configOpen}
+                  onOpenChange={setConfigOpen}
+                  jobTitle={configJobTitle}
+                  domainId={configDomainId}
+                  onDomainIdChange={setConfigDomainId}
+                  onSave={handleSaveConfig}
+                  isSaving={updateJobTitle.isPending}
+                  domainsForUnit={domainsForUnit}
+                  unitName={unit?.name}
+                />
+          )}
     </div>
   );
 }

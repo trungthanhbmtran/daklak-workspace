@@ -22,6 +22,7 @@ service TaskService {
   rpc GetTaskStats (ListTasksRequest) returns (GetTaskStatsResponse) {}
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
   rpc UpdateTask (UpdateTaskRequest) returns (TaskResponse) {}
+  rpc ExtendTask (ExtendTaskRequest) returns (TaskResponse) {}
   rpc RecommendAssignees (RecommendAssigneesRequest) returns (RecommendAssigneesResponse) {}
   rpc AssignTask (AssignTaskRequest) returns (TaskResponse) {}
   rpc AddComment (AddCommentRequest) returns (TaskCommentResponse) {}
@@ -269,6 +270,17 @@ message UpdateTaskRequest {
   string currentEmployeeCode = 11;
   int32 currentUserDept = 12;
   repeated string currentUserPermissions = 13;
+}
+
+message ExtendTaskRequest {
+  int32 id = 1;
+  string dueDate = 2;
+  string reason = 3;
+  string actorCode = 4;
+  int32 currentUserId = 5;
+  string currentEmployeeCode = 6;
+  int32 currentUserDept = 7;
+  repeated string currentUserPermissions = 8;
 }
 
 message TaskTemplateResponse {

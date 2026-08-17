@@ -278,13 +278,15 @@ export function UserDetailSheet({
         </SheetContent>
       </Sheet>
 
-      <EditRolesModal
-        user={user}
-        isOpen={editRolesOpen}
-        onClose={() => setEditRolesOpen(false)}
-        onSave={(userId, roleIds) => onAssignRoles?.({ id: userId, roleIds })}
-        isSaving={!!isAssigningRoles}
-      />
+      {editRolesOpen && (
+          <EditRolesModal
+                  user={user}
+                  isOpen={editRolesOpen}
+                  onClose={() => setEditRolesOpen(false)}
+                  onSave={(userId, roleIds) => onAssignRoles?.({ id: userId, roleIds })}
+                  isSaving={!!isAssigningRoles}
+                />
+          )}
     </>
   );
 }

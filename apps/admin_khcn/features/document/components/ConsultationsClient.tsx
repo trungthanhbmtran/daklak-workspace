@@ -246,10 +246,12 @@ export function ConsultationsClient() {
                );
             })}
          </div>
-         <ConsultationCreateModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-         />
+         {isModalOpen && (
+           <ConsultationCreateModal
+                       isOpen={isModalOpen}
+                       onClose={() => setIsModalOpen(false)}
+                    />
+           )}
       </div>
    );
 }

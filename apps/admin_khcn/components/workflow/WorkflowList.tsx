@@ -373,14 +373,16 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
         </div>
       )}
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={executeDelete}
-        title="Xóa quy trình"
-        description="Bạn có chắc chắn muốn xóa quy trình này? Hành động này không thể hoàn tác."
-        isDeleting={isDeleting}
-      />
+      {isDeleteDialogOpen && (
+          <ConfirmDeleteModal
+                  isOpen={isDeleteDialogOpen}
+                  onClose={() => setIsDeleteDialogOpen(false)}
+                  onConfirm={executeDelete}
+                  title="Xóa quy trình"
+                  description="Bạn có chắc chắn muốn xóa quy trình này? Hành động này không thể hoàn tác."
+                  isDeleting={isDeleting}
+                />
+          )}
 
       <Sheet open={!!selectedWorkflow} onOpenChange={(open) => !open && setSelectedWorkflow(null)}>
         <SheetContent className="sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto border-border/60 shadow-2xl p-0 flex flex-col">

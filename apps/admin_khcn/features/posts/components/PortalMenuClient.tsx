@@ -114,22 +114,26 @@ export function PortalMenuClient() {
         />
       </div>
 
-      <QuickSetupModal
-        isOpen={isQuickSetupOpen}
-        onClose={() => setIsQuickSetupOpen(false)}
-        activeTab={activeTab}
-        menusLength={menus.length}
-        onSuccess={fetchMenus}
-      />
+      {isQuickSetupOpen && (
+          <QuickSetupModal
+                  isOpen={isQuickSetupOpen}
+                  onClose={() => setIsQuickSetupOpen(false)}
+                  activeTab={activeTab}
+                  menusLength={menus.length}
+                  onSuccess={fetchMenus}
+                />
+          )}
 
-      <EditMenuModal
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        menu={editingMenu}
-        languages={languages}
-        menus={menus}
-        onSave={handleSave}
-      />
+      {isDialogOpen && (
+          <EditMenuModal
+                  isOpen={isDialogOpen}
+                  onClose={handleCloseDialog}
+                  menu={editingMenu}
+                  languages={languages}
+                  menus={menus}
+                  onSave={handleSave}
+                />
+          )}
 
       <AlertDialog open={!!deletingMenuId} onOpenChange={(open) => !open && setDeletingMenuId(null)}>
         <AlertDialogContent>

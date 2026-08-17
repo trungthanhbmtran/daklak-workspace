@@ -46,6 +46,10 @@ export const hrmTasksApi = {
     return apiClient.put(`/hrm/tasks/${id}`, payload) as any;
   },
 
+  extendTask(id: number, payload: { dueDate: string; reason: string }): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/tasks/${id}/extend`, payload) as any;
+  },
+
   updateStatus(id: number, payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/status`, payload) as any;
   },

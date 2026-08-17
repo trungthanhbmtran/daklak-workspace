@@ -55,11 +55,13 @@ export function DossierListClient() {
         </div>
       )}
 
-      <CreateDossierModal
-        open={isModalOpen}
-        onOpenChange={handleModalChange}
-        onSuccess={handleSuccess}
-      />
+      {isModalOpen && (
+          <CreateDossierModal
+                  open={isModalOpen}
+                  onOpenChange={handleModalChange}
+                  onSuccess={handleSuccess}
+                />
+          )}
     </div>
   );
 }

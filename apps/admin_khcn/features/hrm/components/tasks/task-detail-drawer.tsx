@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
   BellRing, MessageSquare, CheckCircle2,
-  ArrowRightCircle, Repeat, Briefcase
+  ArrowRightCircle, Repeat, Briefcase, Calendar
 } from "lucide-react";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -30,6 +30,7 @@ import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
 import { TaskAssignDialog } from "./task-assign-dialog";
 import { TaskRespondDialog } from "./task-respond-dialog";
+import { TaskExtendDialog } from "./task-extend-dialog";
 import { translateTaskStatus, getTaskStatusColor } from "./task-utils";
 
 interface TaskDetailDrawerProps {
@@ -42,6 +43,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const taskId = Number(task.id);
   const { user } = useUser();
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isExtendOpen, setIsExtendOpen] = useState(false);
   const [respondAction, setRespondAction] = useState<"REJECT" | "REQUEST_COORDINATION" | null>(null);
 
   // ── Queries ──
@@ -113,6 +115,12 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                     <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
                       <Briefcase className="w-3 h-3 mr-1" />
                       Giao lại / Phối hợp
+                    </Button>
+                  )}
+                  {isAssigner && !isCompleted && (
+                    <Button variant="outline" size="sm" onClick={() => setIsExtendOpen(true)} className="text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-100 hover:text-purple-700">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Gia hạn
                     </Button>
                   )}
                   {!isCompleted && (
@@ -283,19 +291,31 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           </div>
         </Tabs>
 
-        <TaskAssignDialog
-          open={isAssignOpen}
-          onOpenChange={setIsAssignOpen}
-          taskId={taskId}
-          currentAssigneeCode={currentTask.assigneeCode}
-          currentCoordinatorsCodes={currentTask.coassigneeCodes || []}
-        />
-        <TaskRespondDialog
-          open={respondAction !== null}
-          onOpenChange={(open) => !open && setRespondAction(null)}
-          taskId={taskId}
-          action={respondAction}
-        />
+        {isAssignOpen && (
+          <TaskAssignDialog
+            open={isAssignOpen}
+            onOpenChange={setIsAssignOpen}
+            taskId={taskId}
+            currentAssigneeCode={currentTask.assigneeCode}
+            currentCoordinatorsCodes={currentTask.coassigneeCodes || []}
+          />
+        )}
+        {respondAction !== null && (
+          <TaskRespondDialog
+            open={respondAction !== null}
+            onOpenChange={(open) => !open && setRespondAction(null)}
+            taskId={taskId}
+            action={respondAction}
+          />
+        )}
+        {isExtendOpen && (
+          <TaskExtendDialog
+            open={isExtendOpen}
+            onOpenChange={setIsExtendOpen}
+            taskId={taskId}
+            currentDueDate={currentTask.dueDate}
+          />
+        )}
       </SheetContent>
     </Sheet>
   );
