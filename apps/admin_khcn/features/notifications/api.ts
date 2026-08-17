@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
-import { pickData, pickOne, type ApiResponse } from "@/lib/api.types";
+import { pickData, pickOne, pickMeta, type ApiResponse } from "@/lib/api.types";
 
 export interface NotificationItem {
   id: string;
@@ -10,13 +10,16 @@ export interface NotificationItem {
   createdAt: string;
   read: boolean;
   type?: string;
+  category?: 'REMINDER' | 'TODAY' | 'EARLIER';
   metadata?: Record<string, any>;
 }
 
-export async function getNotifications(): Promise<NotificationItem[]> {
-  const res = await apiClient.get<any, ApiResponse<NotificationItem[]>>("/notifications");
+export async function getNotifications({ pageParam = 1 }: { pageParam?: number } = {}): Promise<{ data: NotificationItem[], nextCursor: number | undefined }> {
+  const limit = 10;
+  const res = await apiClient.get<any, ApiResponse<NotificationItem[]>>(`/notifications?page=${pageParam}&limit=${limit}`);
   const data = pickData(res);
-  return data.map((n) => ({
+  const meta = pickMeta(res) as any;
+  const items = data.map((n) => ({
     id: n.id,
     userId: n.userId,
     title: n.title ?? "",
@@ -24,8 +27,18 @@ export async function getNotifications(): Promise<NotificationItem[]> {
     createdAt: n.createdAt ?? "",
     read: Boolean(n.read),
     type: n.type,
+    category: n.category,
     metadata: n.metadata,
   }));
+
+  let nextCursor: number | undefined = undefined;
+  if (meta && meta.page && meta.totalPages && meta.page < meta.totalPages) {
+    nextCursor = Number(meta.page) + 1;
+  } else if (items.length === limit) {
+    nextCursor = pageParam + 1;
+  }
+
+  return { data: items, nextCursor };
 }
 
 export async function markNotificationRead(id: string): Promise<{ success: boolean }> {

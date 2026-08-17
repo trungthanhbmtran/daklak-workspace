@@ -141,8 +141,24 @@ export class NotificationsService {
       .map((p) => (p ? JSON.parse(p) : null))
       .filter(Boolean);
 
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const notificationsWithCategory = notifications.map(n => {
+      let category = 'EARLIER';
+      if (n.type === 'REMINDER' || n.title?.toLowerCase().includes('nhắc')) {
+        category = 'REMINDER';
+      } else if (n.createdAt) {
+        const createdAt = new Date(n.createdAt);
+        if (createdAt >= now) {
+          category = 'TODAY';
+        }
+      }
+      return { ...n, category };
+    });
+
     return {
-      data: notifications,
+      data: notificationsWithCategory,
       meta: {
         total: totalCount,
         page,
