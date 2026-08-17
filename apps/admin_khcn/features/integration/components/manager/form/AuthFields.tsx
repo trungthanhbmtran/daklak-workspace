@@ -432,17 +432,15 @@ export function AuthFields() {
 
         {/* ── Response panel ──────────────────────────────────────────────────── */}
         {testResult && (
-          <div className={`rounded-lg border overflow-hidden text-sm animate-in fade-in slide-in-from-top-2 duration-200 ${
-            testResult.success
+          <div className={`rounded-lg border overflow-hidden text-sm animate-in fade-in slide-in-from-top-2 duration-200 ${testResult.success
               ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/20"
               : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
-          }`}>
+            }`}>
             {/* Panel header */}
-            <div className={`flex items-center justify-between px-4 py-2.5 border-b text-xs font-semibold ${
-              testResult.success
+            <div className={`flex items-center justify-between px-4 py-2.5 border-b text-xs font-semibold ${testResult.success
                 ? "border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-900/20"
                 : "border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 bg-red-100/50 dark:bg-red-900/20"
-            }`}>
+              }`}>
               <div className="flex items-center gap-2">
                 {testResult.success
                   ? <CheckCircle2 className="w-3.5 h-3.5" />
@@ -470,7 +468,7 @@ export function AuthFields() {
 
             {/* JSON response body */}
             {testResult.data !== undefined && (
-              <pre className="px-4 py-3 text-xs font-mono overflow-x-auto overflow-y-auto max-h-52 text-slate-700 dark:text-slate-300 leading-relaxed">
+              <pre className="px-4 py-3 text-xs font-mono overflow-x-auto overflow-y-auto max-h-52 text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-all">
                 {JSON.stringify(testResult.data, null, 2)}
               </pre>
             )}
