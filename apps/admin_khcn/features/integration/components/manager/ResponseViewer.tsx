@@ -69,7 +69,46 @@ export function ResponseViewer({ result, isLoading }: ResponseViewerProps) {
   const statusColor = status >= 200 && status < 300 ? "text-emerald-500" : "text-rose-500";
   
   const data = result.data !== undefined ? result.data : result;
-  const jsonString = typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+  
+  let jsonString = "";
+  let isXml = false;
+
+  if (typeof data === 'object' && data !== null) {
+    jsonString = JSON.stringify(data, null, 2);
+  } else if (typeof data === 'string') {
+    jsonString = data;
+    // Kiểm tra xem có phải là XML không
+    if (data.trim().startsWith('<') && data.trim().endsWith('>')) {
+      isXml = true;
+      // Format XML đơn giản
+      try {
+        let formattedXml = '';
+        let pad = 0;
+        data.split(/(?=<)|(?<=>)/).forEach(node => {
+          if (!node.trim()) return;
+          let indent = 0;
+          if (node.match(/^\/\w/)) {
+            pad -= 1;
+          } else if (node.match(/^<\/\w/)) {
+            if (pad !== 0) pad -= 1;
+          } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+            indent = 1;
+          } else {
+            indent = 0;
+          }
+          formattedXml += '  '.repeat(Math.max(0, pad)) + node + '\n';
+          pad += indent;
+        });
+        jsonString = formattedXml.trim();
+      } catch (e) {
+        // Fallback to raw if formatting fails
+        jsonString = data;
+      }
+    }
+  } else {
+    jsonString = String(data);
+  }
+
   const headers = result.headers || {};
 
   const handleCopy = () => {
@@ -128,10 +167,16 @@ export function ResponseViewer({ result, isLoading }: ResponseViewerProps) {
       {/* Content */}
       <div className="flex-1 overflow-auto p-4 custom-scrollbar">
         {activeTab === 'body' ? (
-          <pre 
-            className="text-[13px] leading-relaxed font-mono whitespace-pre-wrap break-words"
-            dangerouslySetInnerHTML={{ __html: syntaxHighlight(jsonString) }}
-          />
+          jsonString.trim() ? (
+            <pre 
+              className="text-[13px] leading-relaxed font-mono whitespace-pre-wrap break-words"
+              dangerouslySetInnerHTML={{ __html: syntaxHighlight(jsonString) }}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-slate-500 italic text-sm">
+              Không có nội dung (No Content)
+            </div>
+          )
         ) : (
           <div className="grid grid-cols-[150px_1fr] gap-2 text-sm font-mono">
             {Object.entries(headers).map(([k, v]) => (
