@@ -100,6 +100,7 @@ interface TestResult {
   success: boolean;
   message?: string;
   data?: unknown;
+  extractedToken?: string;
   status?: number;
   time?: number;
 }
@@ -125,7 +126,7 @@ export function AuthFields() {
 
     try {
       if (currentAuthType === "OAUTH2") {
-        const { authUrl, clientId, clientSecret, scope } = values;
+        const { authUrl, clientId, clientSecret, scope, tokenPath } = values;
         if (!authUrl?.trim() || !clientId?.trim() || !clientSecret?.trim()) {
           setTestResult({ success: false, message: "Vui lòng nhập đầy đủ Auth URL, Client ID và Client Secret." });
           return;
@@ -133,7 +134,7 @@ export function AuthFields() {
         const res = await fetch("/admin/api/integration/test-auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ authUrl, clientId, clientSecret, scope }),
+          body: JSON.stringify({ authUrl, clientId, clientSecret, scope, tokenPath }),
         });
         setTestResult(await res.json());
 
@@ -326,6 +327,22 @@ export function AuthFields() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={control} name="tokenPath"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1.5">
+                        <Link2 className="w-3.5 h-3.5 text-muted-foreground" />
+                        Đường dẫn trích xuất Token (Token Path)
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="access_token" className="font-mono bg-white dark:bg-slate-950" {...field} />
+                      </FormControl>
+                      <FormDescription>Mặc định là <code>access_token</code>. Sửa nếu token nằm ở đường dẫn khác trong JSON (VD: <code>data.token</code>).</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
 
@@ -463,6 +480,16 @@ export function AuthFields() {
             {testResult.message && (
               <div className="px-4 py-2 text-xs text-muted-foreground border-b border-dashed border-slate-200 dark:border-slate-700">
                 {testResult.message}
+              </div>
+            )}
+
+            {/* Extracted Token Panel */}
+            {testResult.extractedToken && (
+              <div className="px-4 py-2 text-xs bg-emerald-100/30 dark:bg-emerald-900/10 border-b border-dashed border-emerald-200 dark:border-emerald-800">
+                <span className="font-semibold text-emerald-800 dark:text-emerald-400">Token bóc tách được:</span>
+                <pre className="mt-1 font-mono text-[10px] bg-white dark:bg-slate-950 p-2 rounded border border-emerald-100 dark:border-emerald-900 overflow-hidden text-ellipsis whitespace-nowrap opacity-80">
+                  {testResult.extractedToken}
+                </pre>
               </div>
             )}
 

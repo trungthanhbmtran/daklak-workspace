@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import https from 'https';
+import { get } from 'lodash';
 
 // Shared HTTPS agent — bỏ qua chứng chỉ tự ký (self-signed / CA nội bộ)
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 export async function POST(req: NextRequest) {
   try {
-    const { authUrl, clientId, clientSecret, scope } = await req.json();
+    const { authUrl, clientId, clientSecret, scope, tokenPath } = await req.json();
 
     if (!authUrl?.trim() || !clientId?.trim() || !clientSecret?.trim()) {
       return NextResponse.json(
@@ -39,9 +40,12 @@ export async function POST(req: NextRequest) {
 
     const time = Date.now() - startTime;
 
+    const extractedToken = get(tokenRes.data, tokenPath || 'access_token');
+
     return NextResponse.json({
       success: true,
       data: tokenRes.data,
+      extractedToken,
       status: tokenRes.status,
       time,
     });

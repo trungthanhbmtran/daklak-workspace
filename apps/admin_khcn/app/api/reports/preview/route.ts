@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import https from "https";
+import { get } from "lodash";
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,8 +53,12 @@ export async function POST(req: NextRequest) {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           httpsAgent,
         });
-        if (tokenRes.data && tokenRes.data.access_token) {
-          requestHeaders["Authorization"] = `Bearer ${tokenRes.data.access_token}`;
+        const extractedToken = get(tokenRes.data, authConfig.tokenPath || 'access_token');
+        if (extractedToken) {
+          requestHeaders["Authorization"] = `Bearer ${extractedToken}`;
+        } else {
+          console.warn(`[preview] Token not found at path: ${authConfig.tokenPath || 'access_token'}`, tokenRes.data);
+          throw new Error(`Không tìm thấy token tại đường dẫn: ${authConfig.tokenPath || 'access_token'}`);
         }
       } catch (err: any) {
         console.error("Failed to fetch OAUTH2 token:", err.message);

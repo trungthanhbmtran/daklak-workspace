@@ -12,6 +12,7 @@ export const integrationFormSchema = z.object({
   clientId: z.string().optional(),
   clientSecret: z.string().optional(),
   scope: z.string().optional(),
+  tokenPath: z.string().optional(),
   isRawMode: z.boolean(),
   rawConfig: z.string()
 }).refine((data) => {
