@@ -143,13 +143,7 @@ export async function POST(req: NextRequest) {
 
     const time = Date.now() - startTime;
     const responseData = response.data;
-    let size = 0;
-    try {
-      const jsonString = responseData !== undefined ? JSON.stringify(responseData) : "";
-      size = Buffer.byteLength(jsonString || "", "utf8");
-    } catch (e) {
-      size = 0; // Fallback in case of circular JSON or other stringify errors
-    }
+    const size = Buffer.byteLength(JSON.stringify(responseData), "utf8");
 
     return NextResponse.json({
       success: true,

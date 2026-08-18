@@ -182,7 +182,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       };
 
       const res = await previewReport(payload);
-      setTestResult(res.data);
+      setTestResult(res);
     } catch (err: any) {
       setTestResult(err.response?.data || {
         success: false,
