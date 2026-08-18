@@ -147,18 +147,20 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       
       if (Array.isArray(integration.headers)) {
         integration.headers.forEach((h: any) => {
-          if (h.key && h.value) headersMap[h.key] = h.value;
+          if (h.key && h.value) headersMap[h.key.trim()] = h.value.trim();
         });
       } else if (typeof integration.headers === 'object' && integration.headers !== null) {
-        Object.assign(headersMap, integration.headers);
+        Object.entries(integration.headers).forEach(([k, v]) => {
+          headersMap[k.trim()] = String(v).trim();
+        });
       }
       
       selectedEndpoint.headers?.forEach(h => {
-        if (h.key && h.value) headersMap[h.key] = h.value;
+        if (h.key && h.value) headersMap[h.key.trim()] = h.value.trim();
       });
       const paramsMap: Record<string, string> = {};
       selectedEndpoint.params?.forEach(p => {
-        if (p.key && p.value) paramsMap[p.key] = p.value;
+        if (p.key && p.value) paramsMap[p.key.trim()] = p.value.trim();
       });
 
       let parsedBody: any = undefined;
