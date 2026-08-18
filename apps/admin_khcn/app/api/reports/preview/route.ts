@@ -131,6 +131,14 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
+    console.log("[reports/preview] Đang gọi API:", {
+      method: method.toUpperCase(),
+      url,
+      params,
+      authType,
+      hasBody: !!body,
+    });
+
     const response = await axios({
       method: method.toUpperCase(),
       url,
@@ -143,7 +151,9 @@ export async function POST(req: NextRequest) {
 
     const time = Date.now() - startTime;
     const responseData = response.data;
-    const size = Buffer.byteLength(JSON.stringify(responseData), "utf8");
+    const size = Buffer.byteLength(JSON.stringify(responseData) || "", "utf8");
+
+    console.log(`[reports/preview] API trả về HTTP ${response.status}. Kích thước data (bytes): ${size}`);
 
     return NextResponse.json({
       success: true,
