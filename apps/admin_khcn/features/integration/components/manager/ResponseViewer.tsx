@@ -131,66 +131,87 @@ export function ResponseViewer({ result, isLoading }: ResponseViewerProps) {
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-950 text-slate-300">
-      {/* Response Meta Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 font-medium">
-            Status: <span className={`${statusColor}`}>{status} {statusText}</span>
+      {/* Response Header - Single Bar (Tabs + Status) */}
+      <div className="flex items-center justify-between px-4 bg-slate-900 border-b border-slate-800 shrink-0">
+        <div className="flex gap-4">
+          <button 
+            className={`py-2 text-[13px] font-medium border-b-2 transition-colors ${activeTab === 'body' ? 'border-violet-500 text-violet-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+            onClick={() => setActiveTab('body')}
+          >
+            Body
+          </button>
+          <button 
+            className={`py-2 text-[13px] font-medium border-b-2 transition-colors ${activeTab === 'headers' ? 'border-violet-500 text-violet-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+            onClick={() => setActiveTab('headers')}
+          >
+            Headers ({Object.keys(headers).length})
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-500">Status:</span>
+            <span className={`${statusColor} font-medium`}>{status} {statusText}</span>
           </div>
-          <div className="flex items-center gap-1.5 font-medium text-slate-400">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{time} ms</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-500">Time:</span>
+            <span className="text-emerald-500 font-medium">{time} ms</span>
           </div>
-          <div className="flex items-center gap-1.5 font-medium text-slate-400">
-            <Database className="w-3.5 h-3.5" />
-            <span>{formatBytes(sizeBytes)}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-500">Size:</span>
+            <span className="text-emerald-500 font-medium">{formatBytes(sizeBytes)}</span>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
+      </div>
+
+      {/* Sub-toolbar for Body tab */}
+      {activeTab === 'body' && (
+        <div className="flex items-center justify-between px-4 py-1.5 bg-[#0d1117] border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-4 text-xs font-medium">
+            <span className="text-slate-200 cursor-default">Pretty</span>
+            <span className="text-slate-600 cursor-not-allowed">Raw</span>
+            <span className="text-slate-600 cursor-not-allowed">Preview</span>
+            <div className="h-3 w-px bg-slate-700 mx-1"></div>
+            <span className="text-violet-400">{isXml ? 'XML' : 'JSON'}</span>
+          </div>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-7 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded"
+            className="h-6 px-2 text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-800"
             onClick={handleCopy}
           >
             {copied ? <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
             Copy
           </Button>
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex px-2 bg-slate-900 border-b border-slate-800 shrink-0">
-        <button 
-          className={`px-4 py-1.5 text-xs font-medium border-b-2 transition-colors ${activeTab === 'body' ? 'border-violet-500 text-violet-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
-          onClick={() => setActiveTab('body')}
-        >
-          Body
-        </button>
-        <button 
-          className={`px-4 py-1.5 text-xs font-medium border-b-2 transition-colors ${activeTab === 'headers' ? 'border-violet-500 text-violet-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
-          onClick={() => setActiveTab('headers')}
-        >
-          Headers
-        </button>
-      </div>
+      )}
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-4 custom-scrollbar">
+      <div className="flex-1 overflow-auto custom-scrollbar relative bg-[#0d1117]">
         {activeTab === 'body' ? (
           jsonString.trim() ? (
-            <pre 
-              className="text-[13px] leading-relaxed font-mono whitespace-pre-wrap break-words"
-              dangerouslySetInnerHTML={{ __html: syntaxHighlight(jsonString) }}
-            />
+            <div className="flex min-w-fit min-h-full">
+              {/* Line Numbers Gutter */}
+              <div className="sticky left-0 flex flex-col text-right pr-3 pl-3 py-4 text-slate-600 select-none border-r border-slate-800 bg-[#0d1117] text-[13px] font-mono leading-relaxed z-10">
+                {jsonString.split('\n').map((_, i) => (
+                  <div key={i}>{i + 1}</div>
+                ))}
+              </div>
+              {/* Actual Content */}
+              <div className="p-4 bg-transparent">
+                <pre 
+                  className="text-[13px] leading-relaxed font-mono whitespace-pre break-normal"
+                  dangerouslySetInnerHTML={{ __html: syntaxHighlight(jsonString) }}
+                />
+              </div>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-slate-500 italic text-sm">
+            <div className="flex items-center justify-center h-full text-slate-500 italic text-sm bg-slate-950 w-full">
               Không có nội dung (No Content)
             </div>
           )
         ) : (
-          <div className="grid grid-cols-[150px_1fr] gap-2 text-sm font-mono">
+          <div className="p-4 grid grid-cols-[150px_1fr] gap-2 text-sm font-mono bg-slate-950 min-h-full">
             {Object.entries(headers).map(([k, v]) => (
               <React.Fragment key={k}>
                 <div className="text-slate-400 font-medium truncate py-1" title={k}>{k}</div>

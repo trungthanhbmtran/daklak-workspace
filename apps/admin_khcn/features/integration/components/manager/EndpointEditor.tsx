@@ -2,15 +2,15 @@
 "use client";
 
 import React, { memo } from "react";
-import { Server, Trash2 } from "lucide-react";
+import { Server, Trash2, Send, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ParsedEndpoint, getMethodColor } from "./EndpointTypes";
 import { EndpointEditorKeyValueTab } from "./endpoint/EndpointEditorKeyValueTab";
+import { ResponseViewer } from "./ResponseViewer";
 
 interface EndpointEditorProps {
   selectedEndpoint: ParsedEndpoint | undefined;
@@ -20,6 +20,9 @@ interface EndpointEditorProps {
   onRemoveItem: (type: 'headers' | 'params', index: number) => void;
   onDelete: () => void;
   onTest?: () => void;
+  isTesting?: boolean;
+  testResult?: any;
+  baseUrl?: string;
 }
 
 export const EndpointEditor = memo(({
@@ -29,7 +32,10 @@ export const EndpointEditor = memo(({
   onAddItem,
   onRemoveItem,
   onDelete,
-  onTest
+  onTest,
+  isTesting,
+  testResult,
+  baseUrl
 }: EndpointEditorProps) => {
 
   if (!selectedEndpoint) {
@@ -42,8 +48,11 @@ export const EndpointEditor = memo(({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 overflow-hidden min-w-0">
-      <div className="flex flex-col h-full min-w-0">
+    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden min-w-0 h-full">
+      
+      {/* Top Half: Request Config */}
+      <div className="flex-1 flex flex-col min-h-[50%] bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+        
         {/* Top Header URL */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -54,11 +63,6 @@ export const EndpointEditor = memo(({
               placeholder="Tên API..."
             />
             <div className="flex gap-1 shrink-0">
-              {onTest && (
-                <Button variant="outline" size="sm" onClick={onTest} className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30 shrink-0 h-8" title="Test API">
-                  <Play className="w-4 h-4 mr-2" /> Test
-                </Button>
-              )}
               <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0 h-8 w-8" title="Xóa Endpoint này">
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -70,12 +74,12 @@ export const EndpointEditor = memo(({
             className="text-sm text-slate-500 h-auto py-1 px-2 bg-transparent border-transparent hover:border-slate-200 dark:hover:border-slate-800 focus-visible:ring-1 w-full"
             placeholder="Mô tả API..."
           />
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-0 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <Select
               value={selectedEndpoint.method}
               onValueChange={(val) => onChange('method', val)}
             >
-              <SelectTrigger className={`w-[110px] h-8 text-xs font-bold border-0 ${getMethodColor(selectedEndpoint.method)}`}>
+              <SelectTrigger className={`w-[100px] h-10 text-sm font-bold border-0 bg-transparent rounded-none focus:ring-0 ${getMethodColor(selectedEndpoint.method)}`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -87,42 +91,60 @@ export const EndpointEditor = memo(({
               </SelectContent>
             </Select>
 
-            <Input
-              value={selectedEndpoint.path}
-              onChange={(e) => onChange('path', e.target.value)}
-              placeholder="/api/v1/..."
-              className="font-mono text-sm h-8 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 flex-1 min-w-0"
-            />
+            <div className="flex-1 flex items-center bg-white dark:bg-slate-950 border-x border-slate-200 dark:border-slate-800 px-3 min-w-0 h-10">
+              {baseUrl && (
+                <span className="text-sm text-slate-500 shrink-0 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]" title={baseUrl}>
+                  {baseUrl}
+                </span>
+              )}
+              <Input
+                value={selectedEndpoint.path}
+                onChange={(e) => onChange('path', e.target.value)}
+                placeholder="/api/v1/..."
+                className="font-mono text-sm h-full bg-transparent border-0 focus-visible:ring-0 px-1 min-w-0 w-full"
+              />
+            </div>
+
+            {onTest && (
+              <Button 
+                onClick={onTest} 
+                disabled={isTesting}
+                className="bg-violet-600 hover:bg-violet-700 text-white rounded-none h-10 px-6 font-bold shrink-0 transition-colors"
+              >
+                {isTesting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Send
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex-1 overflow-hidden p-4 min-w-0">
-          <Tabs defaultValue="headers" className="w-full h-full flex flex-col min-w-0">
+        <div className="flex-1 overflow-hidden p-4 min-w-0 flex flex-col">
+          <Tabs defaultValue="params" className="w-full h-full flex flex-col min-w-0">
             <TabsList className="w-fit bg-slate-100 dark:bg-slate-900">
-              <TabsTrigger value="headers">Headers ({selectedEndpoint.headers?.length || 0})</TabsTrigger>
               <TabsTrigger value="params">Params ({selectedEndpoint.params?.length || 0})</TabsTrigger>
+              <TabsTrigger value="headers">Headers ({selectedEndpoint.headers?.length || 0})</TabsTrigger>
               <TabsTrigger value="body">Body</TabsTrigger>
             </TabsList>
 
             <div className="flex-1 overflow-hidden mt-4 min-w-0">
-              <EndpointEditorKeyValueTab
-                value="headers"
-                type="headers"
-                items={selectedEndpoint.headers || []}
-                emptyMessage="Không có Headers"
-                addButtonText="Thêm Header"
-                onAddItem={onAddItem}
-                onItemChange={onItemChange}
-                onRemoveItem={onRemoveItem}
-              />
-
               <EndpointEditorKeyValueTab
                 value="params"
                 type="params"
                 items={selectedEndpoint.params || []}
                 emptyMessage="Không có Query Params"
                 addButtonText="Thêm Query Param"
+                onAddItem={onAddItem}
+                onItemChange={onItemChange}
+                onRemoveItem={onRemoveItem}
+              />
+
+              <EndpointEditorKeyValueTab
+                value="headers"
+                type="headers"
+                items={selectedEndpoint.headers || []}
+                emptyMessage="Không có Headers"
+                addButtonText="Thêm Header"
                 onAddItem={onAddItem}
                 onItemChange={onItemChange}
                 onRemoveItem={onRemoveItem}
@@ -143,6 +165,12 @@ export const EndpointEditor = memo(({
           </Tabs>
         </div>
       </div>
+
+      {/* Bottom Half: Response Viewer */}
+      <div className="flex-[0.8] flex flex-col bg-slate-950 border-t border-slate-800 overflow-hidden relative">
+        <ResponseViewer result={testResult} isLoading={isTesting} />
+      </div>
+
     </div>
   );
 });

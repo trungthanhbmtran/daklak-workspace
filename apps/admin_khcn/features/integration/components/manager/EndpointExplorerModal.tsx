@@ -27,7 +27,6 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
   const updateMutation = useUpdateIntegration();
 
   // Test API state
-  const [testModalOpen, setTestModalOpen] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<any>(null);
 
@@ -106,7 +105,10 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     });
   }, [selectedId]);
 
-  const handleSelect = useCallback((id: string) => setSelectedId(id), []);
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    setTestResult(null);
+  }, []);
   const handleAddEndpoint = useCallback(() => {
     const newId = Math.random().toString(36).substring(2, 11);
     setEndpoints(prev => [{
@@ -136,10 +138,8 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
 
   const handleTestEndpoint = useCallback(async () => {
     if (!integration || !selectedEndpoint) return;
-    
     setIsTesting(true);
     setTestResult(null);
-    setTestModalOpen(true);
 
     try {
       // Build headers & params object
@@ -254,22 +254,13 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
                     onRemoveItem={handleRemoveItem}
                     onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
                     onTest={handleTestEndpoint}
+                    isTesting={isTesting}
+                    testResult={testResult}
+                    baseUrl={integration?.baseUrl}
                   />
                 </div>
               </ResponsiveModal>
           )}
-
-    <Dialog open={testModalOpen} onOpenChange={setTestModalOpen}>
-      <DialogContent className="sm:max-w-[700px] h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <DialogTitle>Test API: {selectedEndpoint?.name}</DialogTitle>
-          <DialogDescription className="font-mono text-xs">{integration?.baseUrl}{selectedEndpoint?.path}</DialogDescription>
-        </DialogHeader>
-        <div className="flex-1 overflow-hidden flex flex-col bg-slate-950">
-          <ResponseViewer result={testResult} isLoading={isTesting} />
-        </div>
-      </DialogContent>
-    </Dialog>
     </>
   );
 });
