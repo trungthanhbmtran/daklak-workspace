@@ -5,9 +5,11 @@ export interface ParsedEndpoint {
   folder: string;
   method: string;
   path: string;
-  headers: Array<{ key: string; value: string }>;
-  params: Array<{ key: string; value: string }>;
+  headers: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
+  params: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
   body: string;
+  bodyType?: 'none' | 'raw' | 'x-www-form-urlencoded' | 'form-data';
+  formItems?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
 }
 
 export const getMethodColor = (method: string) => {

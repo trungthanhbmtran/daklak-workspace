@@ -2,7 +2,7 @@
 "use client";
 
 import React, { memo } from "react";
-import { Server, Trash2, Send, Loader2 } from "lucide-react";
+import { Server, Trash2, Loader2, Play } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,18 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ParsedEndpoint, getMethodColor } from "./EndpointTypes";
 import { EndpointEditorKeyValueTab } from "./endpoint/EndpointEditorKeyValueTab";
-import { ResponseViewer } from "./ResponseViewer";
 
 interface EndpointEditorProps {
   selectedEndpoint: ParsedEndpoint | undefined;
   onChange: (field: keyof ParsedEndpoint, value: any) => void;
-  onItemChange: (type: 'headers' | 'params', index: number, field: 'key' | 'value', val: string) => void;
-  onAddItem: (type: 'headers' | 'params') => void;
-  onRemoveItem: (type: 'headers' | 'params', index: number) => void;
+  onItemChange: (type: 'headers' | 'params' | 'formItems', index: number, field: 'key' | 'value' | 'description' | 'enabled', val: any) => void;
+  onAddItem: (type: 'headers' | 'params' | 'formItems') => void;
+  onRemoveItem: (type: 'headers' | 'params' | 'formItems', index: number) => void;
   onDelete: () => void;
   onTest?: () => void;
   isTesting?: boolean;
-  testResult?: any;
   baseUrl?: string;
 }
 
@@ -34,7 +32,6 @@ export const EndpointEditor = memo(({
   onDelete,
   onTest,
   isTesting,
-  testResult,
   baseUrl
 }: EndpointEditorProps) => {
 
@@ -51,7 +48,7 @@ export const EndpointEditor = memo(({
     <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden min-w-0 h-full">
       
       {/* Top Half: Request Config */}
-      <div className="flex-1 flex flex-col min-h-[50%] bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 min-h-[50%] border-b border-slate-200 dark:border-slate-800">
         
         {/* Top Header URL */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
@@ -63,6 +60,11 @@ export const EndpointEditor = memo(({
               placeholder="Tên API..."
             />
             <div className="flex gap-1 shrink-0">
+              {onTest && (
+                <Button variant="outline" size="sm" onClick={onTest} disabled={isTesting} className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30 shrink-0 h-8" title="Test API">
+                  {isTesting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />} Test
+                </Button>
+              )}
               <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0 h-8 w-8" title="Xóa Endpoint này">
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -91,7 +93,7 @@ export const EndpointEditor = memo(({
               </SelectContent>
             </Select>
 
-            <div className="flex-1 flex items-center bg-white dark:bg-slate-950 border-x border-slate-200 dark:border-slate-800 px-3 min-w-0 h-10">
+            <div className="flex-1 flex items-center bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 px-3 min-w-0 h-10">
               {baseUrl && (
                 <span className="text-sm text-slate-500 shrink-0 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]" title={baseUrl}>
                   {baseUrl}
@@ -104,17 +106,6 @@ export const EndpointEditor = memo(({
                 className="font-mono text-sm h-full bg-transparent border-0 focus-visible:ring-0 px-1 min-w-0 w-full"
               />
             </div>
-
-            {onTest && (
-              <Button 
-                onClick={onTest} 
-                disabled={isTesting}
-                className="bg-violet-600 hover:bg-violet-700 text-white rounded-none h-10 px-6 font-bold shrink-0 transition-colors"
-              >
-                {isTesting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                Send
-              </Button>
-            )}
           </div>
         </div>
 
@@ -151,24 +142,89 @@ export const EndpointEditor = memo(({
               />
 
               <TabsContent value="body" className="h-full m-0 data-[state=active]:flex flex-col">
+                {/* Body Type Radio Row */}
+                <div className="flex items-center gap-4 mb-3 text-sm text-slate-400">
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200">
+                    <input 
+                      type="radio" 
+                      name="bodyType" 
+                      value="none" 
+                      checked={!selectedEndpoint.bodyType || selectedEndpoint.bodyType === 'none'} 
+                      onChange={(e) => onChange('bodyType', e.target.value)}
+                      className="accent-violet-500"
+                    />
+                    none
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200">
+                    <input 
+                      type="radio" 
+                      name="bodyType" 
+                      value="form-data" 
+                      checked={selectedEndpoint.bodyType === 'form-data'} 
+                      onChange={(e) => onChange('bodyType', e.target.value)}
+                      className="accent-violet-500"
+                    />
+                    form-data
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200">
+                    <input 
+                      type="radio" 
+                      name="bodyType" 
+                      value="x-www-form-urlencoded" 
+                      checked={selectedEndpoint.bodyType === 'x-www-form-urlencoded'} 
+                      onChange={(e) => onChange('bodyType', e.target.value)}
+                      className="accent-violet-500"
+                    />
+                    x-www-form-urlencoded
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200">
+                    <input 
+                      type="radio" 
+                      name="bodyType" 
+                      value="raw" 
+                      checked={selectedEndpoint.bodyType === 'raw' || (selectedEndpoint.body && !selectedEndpoint.bodyType)} 
+                      onChange={(e) => onChange('bodyType', e.target.value)}
+                      className="accent-violet-500"
+                    />
+                    raw
+                  </label>
+                </div>
+
                 <div className="bg-slate-900 rounded-xl flex-1 overflow-hidden border border-slate-800 p-1 flex">
-                  <Textarea
-                    className="flex-1 resize-none bg-transparent border-0 text-slate-300 font-mono text-sm focus-visible:ring-0 custom-scrollbar p-3"
-                    value={selectedEndpoint.body}
-                    onChange={(e) => onChange('body', e.target.value)}
-                    placeholder="Nhập JSON body..."
-                    spellCheck={false}
-                  />
+                  {(!selectedEndpoint.bodyType || selectedEndpoint.bodyType === 'none') && (
+                    <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
+                      This request does not have a body
+                    </div>
+                  )}
+                  {(selectedEndpoint.bodyType === 'raw' || (selectedEndpoint.body && !selectedEndpoint.bodyType)) && (
+                    <Textarea
+                      className="flex-1 resize-none bg-transparent border-0 text-slate-300 font-mono text-sm focus-visible:ring-0 custom-scrollbar p-3"
+                      value={selectedEndpoint.body || ''}
+                      onChange={(e) => onChange('body', e.target.value)}
+                      placeholder="Nhập JSON body..."
+                      spellCheck={false}
+                    />
+                  )}
+                  {(selectedEndpoint.bodyType === 'form-data' || selectedEndpoint.bodyType === 'x-www-form-urlencoded') && (
+                    <div className="flex-1 w-full flex flex-col bg-slate-950 p-2 overflow-hidden">
+                      <EndpointEditorKeyValueTab
+                        value="body"
+                        type="formItems"
+                        items={selectedEndpoint.formItems || []}
+                        emptyMessage="Không có Form Data"
+                        addButtonText="Thêm Key"
+                        onAddItem={onAddItem}
+                        onItemChange={onItemChange}
+                        onRemoveItem={onRemoveItem}
+                        hideTabsContent={true}
+                      />
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </div>
           </Tabs>
         </div>
-      </div>
-
-      {/* Bottom Half: Response Viewer */}
-      <div className="flex-[0.8] flex flex-col bg-slate-950 border-t border-slate-800 overflow-hidden relative">
-        <ResponseViewer result={testResult} isLoading={isTesting} />
       </div>
 
     </div>

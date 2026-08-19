@@ -27,6 +27,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
   const updateMutation = useUpdateIntegration();
 
   // Test API state
+  const [testModalOpen, setTestModalOpen] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<any>(null);
 
@@ -76,7 +77,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     ));
   }, [selectedId]);
 
-  const handleItemChange = useCallback((type: 'headers' | 'params', index: number, field: 'key' | 'value', val: string) => {
+  const handleItemChange = useCallback((type: 'headers' | 'params' | 'formItems', index: number, field: 'key' | 'value' | 'description' | 'enabled', val: any) => {
     setEndpoints(prev => {
       const ep = prev.find(e => e.id === selectedId);
       if (!ep) return prev;
@@ -86,16 +87,16 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     });
   }, [selectedId]);
   
-  const handleAddItem = useCallback((type: 'headers' | 'params') => {
+  const handleAddItem = useCallback((type: 'headers' | 'params' | 'formItems') => {
     setEndpoints(prev => {
       const ep = prev.find(e => e.id === selectedId);
       if (!ep) return prev;
-      const items = [...(ep[type] || []), { key: '', value: '' }];
+      const items = [...(ep[type] || []), { key: '', value: '', enabled: true, description: '' }];
       return prev.map(e => e.id === selectedId ? { ...e, [type]: items } : e);
     });
   }, [selectedId]);
 
-  const handleRemoveItem = useCallback((type: 'headers' | 'params', index: number) => {
+  const handleRemoveItem = useCallback((type: 'headers' | 'params' | 'formItems', index: number) => {
     setEndpoints(prev => {
       const ep = prev.find(e => e.id === selectedId);
       if (!ep) return prev;
@@ -140,6 +141,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
     if (!integration || !selectedEndpoint) return;
     setIsTesting(true);
     setTestResult(null);
+    setTestModalOpen(true);
 
     try {
       // Build headers & params object
@@ -156,7 +158,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       }
       
       selectedEndpoint.headers?.forEach(h => {
-        if (h.key) {
+        if (h.key && h.enabled !== false) {
           headersMap[h.key.trim()] = (h.value || "").trim();
         }
       });
@@ -164,7 +166,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       const queryParamsMap: Record<string, string> = {};
 
       selectedEndpoint.params?.forEach(p => {
-        if (p.key) {
+        if (p.key && p.enabled !== false) {
           const key = p.key.trim();
           const val = (p.value || "").trim();
           
@@ -180,12 +182,33 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       });
 
       let parsedBody: any = undefined;
-      if (selectedEndpoint.body) {
-        try {
-          parsedBody = JSON.parse(selectedEndpoint.body);
-        } catch (e) {
-          parsedBody = selectedEndpoint.body; // Fallback to raw string if not JSON
+      const bodyType = selectedEndpoint.bodyType || 'raw';
+
+      if (bodyType === 'raw') {
+        if (selectedEndpoint.body) {
+          try {
+            parsedBody = JSON.parse(selectedEndpoint.body);
+          } catch (e) {
+            parsedBody = selectedEndpoint.body; // Fallback to raw string if not JSON
+          }
         }
+      } else if (bodyType === 'x-www-form-urlencoded') {
+        const urlSearchParams = new URLSearchParams();
+        selectedEndpoint.formItems?.forEach(item => {
+          if (item.key && item.enabled !== false) urlSearchParams.append(item.key.trim(), item.value);
+        });
+        parsedBody = urlSearchParams.toString();
+        headersMap['Content-Type'] = 'application/x-www-form-urlencoded';
+      } else if (bodyType === 'form-data') {
+        const formObj: Record<string, string> = {};
+        selectedEndpoint.formItems?.forEach(item => {
+          if (item.key && item.enabled !== false) formObj[item.key.trim()] = item.value;
+        });
+        parsedBody = formObj;
+        // Setting multipart/form-data for proxy. Note: proxy may need further adaptation to handle multipart correctly if it only accepts JSON body right now.
+        headersMap['Content-Type'] = 'multipart/form-data';
+      } else if (bodyType === 'none') {
+        parsedBody = undefined;
       }
 
       const payload = {
@@ -255,12 +278,23 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
                     onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
                     onTest={handleTestEndpoint}
                     isTesting={isTesting}
-                    testResult={testResult}
                     baseUrl={integration?.baseUrl}
                   />
                 </div>
               </ResponsiveModal>
           )}
+
+      <Dialog open={testModalOpen} onOpenChange={setTestModalOpen}>
+        <DialogContent className="sm:max-w-[800px] h-[85vh] flex flex-col p-0 gap-0 overflow-hidden bg-[#0d1117] border-slate-800">
+          <DialogHeader className="p-4 border-b border-slate-800 shrink-0 bg-slate-950">
+            <DialogTitle className="text-slate-200">Test API: {selectedEndpoint?.name}</DialogTitle>
+            <DialogDescription className="font-mono text-xs text-slate-400 mt-1">{integration?.baseUrl}{selectedEndpoint?.path}</DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden flex flex-col bg-[#0d1117]">
+            <ResponseViewer result={testResult} isLoading={isTesting} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 });
