@@ -68,7 +68,17 @@ export function ResponseViewer({ result, isLoading }: ResponseViewerProps) {
   
   const statusColor = status >= 200 && status < 300 ? "text-emerald-500" : "text-rose-500";
   
-  const data = result.data !== undefined ? result.data : result;
+  let data = result.data !== undefined ? result.data : result;
+
+  // Nếu có lỗi (từ proxy hoặc API endpoint) nhưng data rỗng, hiển thị chi tiết lỗi
+  if (!isSuccess && (data === "" || data === null || data === undefined)) {
+    data = {
+      success: false,
+      message: result.message || result.error || "Có lỗi xảy ra trong quá trình gọi API.",
+      status: status,
+      statusText: statusText
+    };
+  }
   
   let jsonString = "";
   let isXml = false;

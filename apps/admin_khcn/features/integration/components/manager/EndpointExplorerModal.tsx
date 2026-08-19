@@ -158,9 +158,23 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       selectedEndpoint.headers?.forEach(h => {
         if (h.key && h.value) headersMap[h.key.trim()] = h.value.trim();
       });
-      const paramsMap: Record<string, string> = {};
+      let finalPath = selectedEndpoint.path || "";
+      const queryParamsMap: Record<string, string> = {};
+
       selectedEndpoint.params?.forEach(p => {
-        if (p.key && p.value) paramsMap[p.key.trim()] = p.value.trim();
+        if (p.key && p.value) {
+          const key = p.key.trim();
+          const val = p.value.trim();
+          
+          // Substitute path variables like {key} or :key
+          if (finalPath.includes(`{${key}}`)) {
+            finalPath = finalPath.replace(`{${key}}`, encodeURIComponent(val));
+          } else if (finalPath.includes(`:${key}`)) {
+            finalPath = finalPath.replace(`:${key}`, encodeURIComponent(val));
+          } else {
+            queryParamsMap[key] = val;
+          }
+        }
       });
 
       let parsedBody: any = undefined;
@@ -174,12 +188,12 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
 
       const payload = {
         baseUrl: integration.baseUrl,
-        endpointPath: selectedEndpoint.path,
+        endpointPath: finalPath,
         method: selectedEndpoint.method || 'GET',
         headers: headersMap,
         authType: integration.authType,
         authConfig: integration.authConfig,
-        params: paramsMap,
+        params: queryParamsMap,
         body: parsedBody
       };
 
