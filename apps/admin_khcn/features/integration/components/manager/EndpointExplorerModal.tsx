@@ -156,15 +156,17 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       }
       
       selectedEndpoint.headers?.forEach(h => {
-        if (h.key && h.value) headersMap[h.key.trim()] = h.value.trim();
+        if (h.key) {
+          headersMap[h.key.trim()] = (h.value || "").trim();
+        }
       });
       let finalPath = selectedEndpoint.path || "";
       const queryParamsMap: Record<string, string> = {};
 
       selectedEndpoint.params?.forEach(p => {
-        if (p.key && p.value) {
+        if (p.key) {
           const key = p.key.trim();
-          const val = p.value.trim();
+          const val = (p.value || "").trim();
           
           // Substitute path variables like {key} or :key
           if (finalPath.includes(`{${key}}`)) {
