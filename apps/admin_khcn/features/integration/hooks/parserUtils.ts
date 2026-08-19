@@ -171,14 +171,45 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
   return endpoints;
 }
 
+function extractSwaggerAuth(data: any): any {
+  let authType = "NONE";
+  let authConfig: any = {};
+
+  const schemes = data.securityDefinitions || data.components?.securitySchemes;
+  if (schemes) {
+    const keys = Object.keys(schemes);
+    if (keys.length > 0) {
+      const scheme = schemes[keys[0]];
+      if (scheme.type === "oauth2") {
+        authType = "OAUTH2";
+        authConfig.authUrl = scheme.tokenUrl || scheme.authorizationUrl || "";
+        authConfig.scope = scheme.scopes ? Object.keys(scheme.scopes).join(" ") : "";
+      } else if (scheme.type === "basic") {
+        authType = "BASIC";
+      } else if (scheme.type === "apiKey") {
+        authType = "API_KEY";
+        authConfig.clientId = scheme.name || "api_key";
+      } else if (scheme.type === "http" && scheme.scheme === "bearer") {
+        authType = "BEARER";
+      }
+    }
+  }
+
+  return { authType, authConfig };
+}
+
 export function processSwaggerData(data: any): any {
+  const authInfo = extractSwaggerAuth(data);
+
   const initialData: any = {
     isRawMode: false,
     rawConfig: JSON.stringify(data, null, 2),
     type: "LGSP",
     systemName: data.info?.title || "Swagger API",
     integrationCode: toValidCode(data.info?.title || "SWAGGER"),
-    apiUrl: extractSwaggerBaseUrl(data)
+    apiUrl: extractSwaggerBaseUrl(data),
+    authType: authInfo.authType,
+    authConfig: authInfo.authConfig
   };
 
   const endpoints = extractSwaggerEndpoints(data);
@@ -327,14 +358,65 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
   return endpoints;
 }
 
+function extractPostmanAuth(data: any): any {
+  let authType = "NONE";
+  let authConfig: any = {};
+
+  if (data.auth && data.auth.type) {
+    if (data.auth.type === "oauth2") authType = "OAUTH2";
+    else if (data.auth.type === "bearer") authType = "BEARER";
+    else if (data.auth.type === "basic") authType = "BASIC";
+    else if (data.auth.type === "apikey") authType = "API_KEY";
+    
+    if (Array.isArray(data.auth[data.auth.type])) {
+      data.auth[data.auth.type].forEach((item: any) => {
+        if (item.key === "accessTokenUrl" || item.key === "authUrl") authConfig.authUrl = item.value;
+        if (item.key === "clientId") authConfig.clientId = item.value;
+        if (item.key === "clientSecret") authConfig.clientSecret = item.value;
+        if (item.key === "scope") authConfig.scope = item.value;
+        if (item.key === "token") authConfig.apiToken = item.value;
+      });
+    }
+  }
+
+  const scanForTokenRequest = (items: any[]) => {
+    if (!items || !Array.isArray(items)) return;
+    for (const item of items) {
+      if (item.request && item.request.body?.mode === 'urlencoded') {
+        const urlencoded = item.request.body.urlencoded;
+        if (Array.isArray(urlencoded)) {
+          const isClientCredentials = urlencoded.some(x => x.key === 'grant_type' && x.value === 'client_credentials');
+          if (isClientCredentials) {
+            authType = "OAUTH2";
+            const rawUrl = item.request.url?.raw || (typeof item.request.url === 'string' ? item.request.url : "");
+            if (rawUrl) authConfig.authUrl = rawUrl.split('?')[0];
+            authConfig.clientId = urlencoded.find(x => x.key === 'client_id')?.value || authConfig.clientId;
+            authConfig.clientSecret = urlencoded.find(x => x.key === 'client_secret')?.value || authConfig.clientSecret;
+            authConfig.scope = urlencoded.find(x => x.key === 'scope')?.value || authConfig.scope;
+          }
+        }
+      }
+      if (item.item) scanForTokenRequest(item.item);
+    }
+  };
+
+  scanForTokenRequest(data.item);
+
+  return { authType, authConfig };
+}
+
 export function processPostmanData(data: any): any {
+  const authInfo = extractPostmanAuth(data);
+
   const initialData: any = {
     isRawMode: false,
     rawConfig: JSON.stringify(data, null, 2),
     type: "POSTMAN",
     systemName: data.info?.name || "Postman API",
     integrationCode: toValidCode(data.info?.name || "POSTMAN"),
-    apiUrl: extractPostmanBaseUrl(data)
+    apiUrl: extractPostmanBaseUrl(data),
+    authType: authInfo.authType,
+    authConfig: authInfo.authConfig
   };
 
   const endpoints = extractPostmanEndpoints(data);
