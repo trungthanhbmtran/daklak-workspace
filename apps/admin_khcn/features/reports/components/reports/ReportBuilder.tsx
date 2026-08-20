@@ -72,6 +72,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const [yAxisKey, setYAxisKey] = useState<string>("");
   const [xAxisLabel, setXAxisLabel] = useState<string>("");
   const [yAxisLabel, setYAxisLabel] = useState<string>("");
+  const [apiPayload, setApiPayload] = useState<string>("{}");
 
   const selectedSource = useMemo(() => {
     return systemSources.find(s => s.id === sourceId);
@@ -79,15 +80,24 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
 
   const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
 
+  const parsedPayload = useMemo(() => {
+    try {
+      return JSON.parse(apiPayload || "{}");
+    } catch {
+      return {};
+    }
+  }, [apiPayload]);
+
   const previewPayload = useMemo(() => ({
     baseUrl: selectedSource?.baseUrl,
     endpointPath: endpointPath,
     method: epInfo?.method || 'GET',
     headers: selectedSource?.headers,
     authConfig: selectedSource?.authConfig,
-    params: {},
+    params: epInfo?.method === 'GET' ? parsedPayload : {},
+    body: epInfo?.method !== 'GET' ? parsedPayload : undefined,
     sourceId
-  }), [selectedSource, endpointPath, epInfo, sourceId]);
+  }), [selectedSource, endpointPath, epInfo, sourceId, parsedPayload]);
 
   const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
 
@@ -146,13 +156,13 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           title: "Widget 1",
           chartType: chartType.toUpperCase(),
           dataSourceCode: sourceId,
-          endpoint: endpointPath,
           xAxisKey,
           yAxisKey,
-          xAxisLabel,
-          yAxisLabel,
           config: {
-            endpoint: endpointPath
+            endpoint: endpointPath,
+            xAxisLabel,
+            yAxisLabel,
+            apiPayload: parsedPayload
           }
         }
       ]
@@ -214,25 +224,40 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           </div>
 
           {selectedSource?.endpoints && selectedSource.endpoints.length > 0 && (
-            <div className="space-y-2">
-              <Label>Endpoint API</Label>
-              <Select value={endpointPath} onValueChange={setEndpointPath}>
-                <SelectTrigger className="bg-white dark:bg-slate-900">
-                  <SelectValue placeholder="Chọn Endpoint..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectedSource.endpoints.map((ep: any, idx: number) => (
-                    <SelectItem key={idx} value={ep.path}>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className={`font-mono text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 ${ep.method === 'GET' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'}`}>
-                          {ep.method}
-                        </span>
-                        {ep.path}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Endpoint API</Label>
+                <Select value={endpointPath} onValueChange={setEndpointPath}>
+                  <SelectTrigger className="bg-white dark:bg-slate-900">
+                    <SelectValue placeholder="Chọn Endpoint..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedSource.endpoints.map((ep: any, idx: number) => (
+                      <SelectItem key={idx} value={ep.path}>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className={`font-mono text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 ${ep.method === 'GET' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'}`}>
+                            {ep.method}
+                          </span>
+                          {ep.path}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {endpointPath && (
+                <div className="space-y-2">
+                  <Label>Tham số (JSON)</Label>
+                  <textarea
+                    value={apiPayload}
+                    onChange={(e) => setApiPayload(e.target.value)}
+                    placeholder='{"key": "value"}'
+                    className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:focus-visible:ring-violet-800"
+                  />
+                  <p className="text-[10px] text-slate-500">Query params (cho GET) hoặc Body payload (cho POST).</p>
+                </div>
+              )}
             </div>
           )}
 

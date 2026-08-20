@@ -39,19 +39,23 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
   }, [integrations]);
 
   const sourceId = widget.dataSourceCode || widget.sourceId;
-  const endpointPath = widget.endpoint;
+  const endpointPath = widget.config?.endpoint || widget.endpoint;
   const selectedSource = systemSources.find(s => s.id === sourceId);
   const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
 
-  const previewPayload = React.useMemo(() => ({
-    baseUrl: selectedSource?.baseUrl,
-    endpointPath: endpointPath,
-    method: epInfo?.method || 'GET',
-    headers: selectedSource?.headers,
-    authConfig: selectedSource?.authConfig,
-    params: {},
-    sourceId
-  }), [selectedSource, endpointPath, epInfo, sourceId]);
+  const previewPayload = React.useMemo(() => {
+    const apiPayload = widget.config?.apiPayload || {};
+    return {
+      baseUrl: selectedSource?.baseUrl,
+      endpointPath: endpointPath,
+      method: epInfo?.method || 'GET',
+      headers: selectedSource?.headers,
+      authConfig: selectedSource?.authConfig,
+      params: epInfo?.method === 'GET' ? apiPayload : {},
+      body: epInfo?.method !== 'GET' ? apiPayload : undefined,
+      sourceId
+    };
+  }, [selectedSource, endpointPath, epInfo, sourceId, widget.config?.apiPayload]);
 
   const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
   const { data: queryData, isFetching } = usePreviewReport(previewPayload, isApiSourceReady);
@@ -60,8 +64,17 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
     if (isApiSourceReady) {
       if (!queryData) return [];
       const dataAny = queryData as any;
-      if (dataAny?.success && Array.isArray(dataAny.data)) {
-        return dataAny.data;
+      if (dataAny?.success) {
+        if (Array.isArray(dataAny.data)) {
+          return dataAny.data;
+        }
+        // Fallback for nested arrays (e.g., { nodes: [...] }, { policies: [...] }, { data: [...] })
+        if (typeof dataAny.data === 'object' && dataAny.data !== null) {
+          const firstArrayKey = Object.keys(dataAny.data).find(key => Array.isArray(dataAny.data[key]));
+          if (firstArrayKey) {
+            return dataAny.data[firstArrayKey];
+          }
+        }
       }
       return [];
     }
@@ -81,8 +94,8 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
          data={data}
          xAxisKey={widget.xAxisKey}
          yAxisKey={widget.yAxisKey}
-         xAxisLabel={widget.xAxisLabel}
-         yAxisLabel={widget.yAxisLabel}
+         xAxisLabel={widget.config?.xAxisLabel || widget.xAxisLabel}
+         yAxisLabel={widget.config?.yAxisLabel || widget.yAxisLabel}
          height={280}
        />
     </div>
