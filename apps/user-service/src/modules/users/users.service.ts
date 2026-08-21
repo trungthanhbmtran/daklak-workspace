@@ -59,11 +59,19 @@ export class UsersService implements OnModuleInit {
     jobTitleId: number;
     isPrimary: boolean;
   }) {
-    // 1. Kiểm tra Định biên (Staffing Check)
+    await this.checkStaffingLimit(dto.unitId, dto.jobTitleId);
+    
+    const newPosition = await this.createJobPositionRecord(dto);
+    
+    this.notifyPositionAssigned(newPosition);
+    await this.clearUserProfileCache(dto.userId);
+
+    return newPosition;
+  }
+
+  private async checkStaffingLimit(unitId: number, jobTitleId: number) {
     const staffing = await this.prisma.organizationStaffing.findUnique({
-      where: {
-        unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId },
-      },
+      where: { unitId_jobTitleId: { unitId, jobTitleId } },
     });
 
     if (!staffing) {
@@ -73,33 +81,31 @@ export class UsersService implements OnModuleInit {
       });
     }
 
-    // 2. Logic so sánh: Nếu Đã dùng >= Chỉ tiêu -> Chặn
     if (staffing.currentCount >= staffing.quantity) {
       throw new RpcException({
         message: `Đã hết chỉ tiêu định biên! (Hiện có: ${staffing.currentCount}/${staffing.quantity})`,
         code: GRPC.INVALID_ARGUMENT,
       });
     }
+  }
 
-    // 3. Thực hiện bổ nhiệm
-    // Trigger SQL sẽ tự động +1 currentCount sau khi lệnh này chạy xong
-    const newPosition = await this.prisma.jobPosition.create({
+  private async createJobPositionRecord(dto: { userId: number; unitId: number; jobTitleId: number; isPrimary: boolean }) {
+    return this.prisma.jobPosition.create({
       data: {
         userId: dto.userId,
         unitId: dto.unitId,
         jobTitleId: dto.jobTitleId,
         isPrimary: dto.isPrimary,
       },
-      // Include để lấy tên Unit và JobTitle gửi thông báo
       include: {
         unit: true,
         jobTitle: true,
         user: true,
       },
     });
+  }
 
-    // 3. 🚀 BẮN SỰ KIỆN RABBITMQ (FIRE & FORGET)
-    // Notification Service sẽ lắng nghe sự kiện này
+  private notifyPositionAssigned(newPosition: any) {
     this.notiClient.emit('notification.position_assigned', {
       email: newPosition.user.email,
       fullName: newPosition.user.fullName,
@@ -107,13 +113,11 @@ export class UsersService implements OnModuleInit {
       department: newPosition.unit.name,
       timestamp: new Date(),
     });
+    console.log(`📡 Đã bắn event bổ nhiệm cho User ${newPosition.userId}`);
+  }
 
-    console.log(`📡 Đã bắn event bổ nhiệm cho User ${dto.userId}`);
-
-    // Xoá Cache Profile để user cập nhật phân quyền ngay lập tức
-    await this.cache.del(`user:profile:${dto.userId}`);
-
-    return newPosition;
+  private async clearUserProfileCache(userId: number) {
+    await this.cache.del(`user:profile:${userId}`);
   }
 
   async createUser(data: {
@@ -128,20 +132,36 @@ export class UsersService implements OnModuleInit {
     createdByUserId?: number;
     createdByEmail?: string;
   }) {
-    if (data.username) {
-      const existing = await this.prisma.user.findUnique({
-        where: { username: data.username },
+    await this.validateUsername(data.username);
+    
+    const user = await this.insertUserRecord(data);
+    
+    await this.createCredential(user.id, data.password);
+    
+    this.sendUserCreationNotifications(user, data);
+    
+    await this.triggerUserCreatedWorkflow(user, data.createdByUserId);
+
+    return this.toUserResponse(user);
+  }
+
+  private async validateUsername(username?: string) {
+    if (!username) return;
+    const existing = await this.prisma.user.findUnique({
+      where: { username },
+    });
+    if (existing) {
+      throw new RpcException({
+        message: 'Username đã tồn tại',
+        code: GRPC.INVALID_ARGUMENT,
       });
-      if (existing)
-        throw new RpcException({
-          message: 'Username đã tồn tại',
-          code: GRPC.INVALID_ARGUMENT,
-        });
     }
-    const roleIds = (data.roleIds ?? []).filter((id) => id > 0);
-    let user;
+  }
+
+  private async insertUserRecord(data: any) {
+    const roleIds = (data.roleIds ?? []).filter((id: number) => id > 0);
     try {
-      user = await this.prisma.user.create({
+      return await this.prisma.user.create({
         data: {
           email: data.email,
           username: data.username || null,
@@ -150,7 +170,7 @@ export class UsersService implements OnModuleInit {
           cccd: data.cccd?.trim() || null,
           employeeCode: data.employeeCode?.trim() || null,
           ...(roleIds.length > 0 && {
-            roles: { connect: roleIds.map((id) => ({ id })) },
+            roles: { connect: roleIds.map((id: number) => ({ id })) },
           }),
         },
       });
@@ -171,13 +191,18 @@ export class UsersService implements OnModuleInit {
       }
       throw e;
     }
-    if (data.password && data.password.trim()) {
-      const hash = await bcrypt.hash(data.password, 10);
+  }
+
+  private async createCredential(userId: number, password?: string) {
+    if (password && password.trim()) {
+      const hash = await bcrypt.hash(password, 10);
       await this.prisma.credential.create({
-        data: { userId: user.id, passwordHash: hash },
+        data: { userId, passwordHash: hash },
       });
     }
+  }
 
+  private sendUserCreationNotifications(user: any, data: any) {
     const tempPassword = data.password?.trim() ? data.password : undefined;
     const newUserDisplay = user.fullName?.trim() || user.username || user.email;
 
@@ -211,17 +236,16 @@ export class UsersService implements OnModuleInit {
         (err as Error)?.message ?? err,
       );
     }
+  }
 
-    // Kích hoạt quy trình động
+  private async triggerUserCreatedWorkflow(user: any, createdByUserId?: number) {
     await this.triggerWorkflow('USER_CREATED', {
       userId: user.id,
       email: user.email,
       username: user.username,
       fullName: user.fullName,
-      initiatorId: data.createdByUserId?.toString() || 'system',
+      initiatorId: createdByUserId?.toString() || 'system',
     });
-
-    return this.toUserResponse(user);
   }
 
   /** Chuyển JWT expiresIn (vd "24h", "7d") sang số giây */
@@ -246,8 +270,43 @@ export class UsersService implements OnModuleInit {
     deviceInfo?: string;
     ipAddress?: string;
   }) {
-    const key = String(data.usernameOrEmail ?? '').trim();
-    const pwd = String(data.password ?? '').trim();
+    const user = await this.validateUserCredentials(data.usernameOrEmail, data.password);
+    const tokens = await this.generateAuthTokens(user.id);
+    return this.formatAuthResponse(user, tokens);
+  }
+
+  /** Làm mới access_token bằng refresh_token (rotation). Refresh token lưu Redis. */
+  async refresh(data: {
+    refreshToken: string;
+    deviceInfo?: string;
+    ipAddress?: string;
+  }) {
+    const userId = await this.validateRefreshTokenString(data.refreshToken);
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, isActive: true },
+      include: {
+        roles: {
+          include: { policies: { include: { resource: true } } },
+        },
+        jobPositions: {
+          include: { unit: true, jobTitle: true },
+          orderBy: [{ isPrimary: 'desc' }],
+        },
+      },
+    });
+    if (!user) {
+      throw new RpcException({
+        message: 'User không tồn tại',
+        code: GRPC.UNAUTHENTICATED,
+      });
+    }
+    const tokens = await this.generateAuthTokens(user.id);
+    return this.formatAuthResponse(user, tokens);
+  }
+
+  private async validateUserCredentials(usernameOrEmail?: string, password?: string) {
+    const key = String(usernameOrEmail ?? '').trim();
+    const pwd = String(password ?? '').trim();
     if (!key || !pwd) {
       throw new RpcException({
         message: 'Thiếu username/email hoặc mật khẩu',
@@ -262,13 +321,7 @@ export class UsersService implements OnModuleInit {
       include: {
         credential: true,
         roles: {
-          include: {
-            policies: {
-              include: {
-                resource: true,
-              },
-            },
-          },
+          include: { policies: { include: { resource: true } } },
         },
         jobPositions: {
           include: { unit: true, jobTitle: true },
@@ -284,8 +337,7 @@ export class UsersService implements OnModuleInit {
     }
     if (!user.credential) {
       throw new RpcException({
-        message:
-          'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.',
+        message: 'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.',
         code: GRPC.UNAUTHENTICATED,
       });
     }
@@ -296,44 +348,11 @@ export class UsersService implements OnModuleInit {
         code: GRPC.UNAUTHENTICATED,
       });
     }
-    const refreshToken = randomBytes(40).toString('hex');
-    await this.cache.set(
-      REFRESH_TOKEN_PREFIX + refreshToken,
-      String(user.id),
-      REFRESH_TTL_SECONDS,
-    );
-    const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
-
-    const accessToken = this.jwt.sign(
-      {
-        iss: 'daklak-user-service',
-        sub: String(user.id),
-        aud: 'daklak-api-gateway',
-        jti: randomUUID(),
-      },
-      { expiresIn: jwtExpiresIn },
-    );
-    const expiresIn = this.getAccessTokenExpiresInSeconds();
-    const firstPos = user.jobPositions?.[0];
-
-    return {
-      accessToken,
-      refreshToken,
-      expiresIn,
-      refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
-      ...this.toUserResponse(user),
-      userId: user.id,
-      unitName: firstPos?.unit?.name ?? '',
-    };
+    return user;
   }
 
-  /** Làm mới access_token bằng refresh_token (rotation). Refresh token lưu Redis. */
-  async refresh(data: {
-    refreshToken: string;
-    deviceInfo?: string;
-    ipAddress?: string;
-  }) {
-    const token = String(data.refreshToken ?? '').trim();
+  private async validateRefreshTokenString(refreshToken?: string) {
+    const token = String(refreshToken ?? '').trim();
     if (!token) {
       throw new RpcException({
         message: 'Thiếu refresh_token',
@@ -348,56 +367,37 @@ export class UsersService implements OnModuleInit {
         code: GRPC.UNAUTHENTICATED,
       });
     }
-    const userId = parseInt(userIdStr, 10);
     await this.cache.del(redisKey);
-    const user = await this.prisma.user.findFirst({
-      where: { id: userId, isActive: true },
-      include: {
-        roles: {
-          include: {
-            policies: {
-              include: {
-                resource: true,
-              },
-            },
-          },
-        },
-        jobPositions: {
-          include: { unit: true, jobTitle: true },
-          orderBy: [{ isPrimary: 'desc' }],
-        },
-      },
-    });
-    if (!user) {
-      throw new RpcException({
-        message: 'User không tồn tại',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
-    const newRefreshToken = randomBytes(40).toString('hex');
+    return parseInt(userIdStr, 10);
+  }
+
+  private async generateAuthTokens(userId: number) {
+    const refreshToken = randomBytes(40).toString('hex');
     await this.cache.set(
-      REFRESH_TOKEN_PREFIX + newRefreshToken,
-      String(user.id),
+      REFRESH_TOKEN_PREFIX + refreshToken,
+      String(userId),
       REFRESH_TTL_SECONDS,
     );
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
-
     const accessToken = this.jwt.sign(
       {
         iss: 'daklak-user-service',
-        sub: String(user.id),
+        sub: String(userId),
         aud: 'daklak-api-gateway',
         jti: randomUUID(),
       },
       { expiresIn: jwtExpiresIn },
     );
     const expiresIn = this.getAccessTokenExpiresInSeconds();
-    const firstPos = user.jobPositions?.[0];
+    return { accessToken, refreshToken, expiresIn };
+  }
 
+  private formatAuthResponse(user: any, tokens: any) {
+    const firstPos = user.jobPositions?.[0];
     return {
-      accessToken,
-      refreshToken: newRefreshToken,
-      expiresIn,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
       refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
       ...this.toUserResponse(user),
       userId: user.id,
@@ -439,15 +439,22 @@ export class UsersService implements OnModuleInit {
 
   async findOne(data: { id: number }) {
     const cacheKey = `user:profile:${data.id}`;
-
-    // 1. Kiểm tra Cache
     const cachedData = await this.cache.get<any>(cacheKey);
     if (cachedData) {
       return cachedData;
     }
 
+    const user = await this.fetchUserWithRelations(data.id);
+    const response = this.mapUserPermissionsAndRoles(user);
+    
+    await this.cache.set(cacheKey, response, 600000);
+
+    return response;
+  }
+
+  private async fetchUserWithRelations(id: number) {
     const user = await this.prisma.user.findUnique({
-      where: { id: data.id },
+      where: { id },
       include: {
         roles: {
           include: { policies: { include: { resource: true } } },
@@ -462,20 +469,22 @@ export class UsersService implements OnModuleInit {
 
     if (!user) {
       throw new RpcException({
-        message: `User with id ${data.id} not found`,
+        message: `User with id ${id} not found`,
         code: GRPC.NOT_FOUND,
       });
     }
+    return user;
+  }
 
+  private mapUserPermissionsAndRoles(user: any) {
     const base = this.toUserResponse(user);
-    const roles = (user as any).roles ?? [];
+    const roles = user.roles ?? [];
     const roleNames = roles.map(
-      (r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
+      (r: any) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
     );
 
     const permissionsFlattenSet = new Set<string>();
-    const isSuperAdmin = roles.some((r) => r.code === 'SUPER_ADMIN');
-
+    const isSuperAdmin = roles.some((r: any) => r.code === 'SUPER_ADMIN');
     const policiesList: any[] = [];
 
     for (const role of user.roles ?? []) {
@@ -497,12 +506,12 @@ export class UsersService implements OnModuleInit {
       ? []
       : Array.from(permissionsFlattenSet);
 
-    const firstPosition = (user as any).jobPositions?.[0];
+    const firstPosition = user.jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;
     const unitCode = firstPosition?.unit?.code ?? null;
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
-    const response = {
+    return {
       ...base,
       roleNames,
       role_names: roleNames,
@@ -517,11 +526,6 @@ export class UsersService implements OnModuleInit {
       unitCode,
       unit_code: unitCode,
     };
-
-    // Lưu Cache TTL 10 phút (600,000 ms)
-    await this.cache.set(cacheKey, response, 600000);
-
-    return response;
   }
 
   /** Danh sách user (trả về id, email, username, fullName, phoneNumber, avatarUrl, isActive) */
@@ -695,8 +699,36 @@ export class UsersService implements OnModuleInit {
 
   
   async getSubordinates(data: { userId: number }) {
+    const user = await this.fetchUserForSubordinates(data.userId);
+    const activeJobPositions = user.jobPositions.filter(pos => pos.unitId && pos.jobTitle);
+    const unitIds = activeJobPositions.map(pos => pos.unitId);
+
+    const result = {
+      deptIds: new Set<number>(),
+      empCodes: new Set<string>(),
+      domainIds: new Set<number>(),
+    };
+
+    if (unitIds.length > 0) {
+      const orgData = await this.fetchOrganizationDataForSubordinates(unitIds, activeJobPositions);
+      
+      for (const pos of activeJobPositions) {
+        this.processJobPositionSubordinates(pos, orgData, user.employeeCode, result);
+      }
+    }
+
+    await this.processChildUnitsPositions(result);
+
+    if (user.employeeCode) {
+      result.empCodes.delete(user.employeeCode);
+    }
+
+    return this.formatSubordinatesResponse(result);
+  }
+
+  private async fetchUserForSubordinates(userId: number) {
     const user = await this.prisma.user.findUnique({
-      where: { id: data.userId },
+      where: { id: userId },
       include: {
         jobPositions: {
           where: { endDate: null },
@@ -704,132 +736,120 @@ export class UsersService implements OnModuleInit {
         },
       },
     });
-
     if (!user) {
       throw new RpcException({
         message: 'User không tồn tại',
         code: GRPC.NOT_FOUND,
       });
     }
+    return user;
+  }
 
-    const deptIds = new Set<number>();
-    const empCodes = new Set<string>();
-    const domainIds = new Set<number>();
+  private async fetchOrganizationDataForSubordinates(unitIds: number[], activeJobPositions: any[]) {
+    const [allRanksData, childUnitsData, staffingsData] = await Promise.all([
+      this.prisma.jobPosition.findMany({
+        where: { unitId: { in: unitIds }, endDate: null, user: { isActive: true } },
+        include: { jobTitle: true, user: true },
+      }),
+      this.prisma.organizationUnit.findMany({
+        where: { parentId: { in: unitIds } },
+      }),
+      this.prisma.organizationStaffing.findMany({
+        where: {
+          OR: activeJobPositions.map(pos => ({ unitId: pos.unitId, jobTitleId: pos.jobTitleId }))
+        },
+        include: { slots: { include: { monitoredUnits: true, domains: true } } },
+      })
+    ]);
+    return { allRanksData, childUnitsData, staffingsData };
+  }
 
-    const activeJobPositions = user.jobPositions.filter(pos => pos.unitId && pos.jobTitle);
-    const unitIds = activeJobPositions.map(pos => pos.unitId);
+  private processJobPositionSubordinates(pos: any, orgData: any, employeeCode: string | null, result: any) {
+    const { allRanksData, childUnitsData, staffingsData } = orgData;
+    const myRank = pos.jobTitle.rank;
+    const allRanksInUnit = allRanksData.filter((p: any) => p.unitId === pos.unitId);
 
-    if (unitIds.length > 0) {
-      const [allRanksData, childUnitsData, staffingsData] = await Promise.all([
-        this.prisma.jobPosition.findMany({
-          where: { unitId: { in: unitIds }, endDate: null, user: { isActive: true } },
-          include: { jobTitle: true, user: true },
-        }),
-        this.prisma.organizationUnit.findMany({
-          where: { parentId: { in: unitIds } },
-        }),
-        this.prisma.organizationStaffing.findMany({
-          where: {
-            OR: activeJobPositions.map(pos => ({ unitId: pos.unitId, jobTitleId: pos.jobTitleId }))
-          },
-          include: { slots: { include: { monitoredUnits: true, domains: true } } },
-        })
-      ]);
+    const distinctRanksInUnit = [
+      ...new Set(allRanksInUnit.map((p: any) => p.jobTitle.rank)),
+    ].sort((a: any, b: any) => a - b) as number[];
+    const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
+    const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
 
-      for (const pos of activeJobPositions) {
-        const myRank = pos.jobTitle.rank;
-        const allRanksInUnit = allRanksData.filter(p => p.unitId === pos.unitId);
+    const childUnits = childUnitsData.filter((c: any) => c.parentId === pos.unitId);
+    const hasChildUnits = childUnits.length > 0;
 
-        const distinctRanksInUnit = [
-          ...new Set(allRanksInUnit.map((p) => p.jobTitle.rank)),
-        ].sort((a, b) => a - b);
-        const minRank =
-          distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
-        const secondMinRank =
-          distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
+    // 1. Giao việc trong cùng đơn vị
+    const sameUnitSubordinates = this.getSubordinatesInSameUnitMemory(
+      pos, myRank, distinctRanksInUnit, hasChildUnits, allRanksInUnit
+    );
+    sameUnitSubordinates.forEach((code) => result.empCodes.add(code));
 
-        const childUnits = childUnitsData.filter(c => c.parentId === pos.unitId);
-        const hasChildUnits = childUnits.length > 0;
+    // 2. Đối với đơn vị cấp dưới
+    const isHead = myRank === minRank;
+    const isDeputy = myRank === secondMinRank && myRank > minRank;
+    if (isHead || isDeputy) {
+      childUnits.forEach((child: any) => result.deptIds.add(child.id));
+    }
 
-        // 1. Giao việc trong cùng đơn vị
-        const sameUnitSubordinates = this.getSubordinatesInSameUnitMemory(
-          pos,
-          myRank,
-          distinctRanksInUnit,
-          hasChildUnits,
-          allRanksInUnit
-        );
-        sameUnitSubordinates.forEach((code) => empCodes.add(code));
-
-        // 2. Đối với đơn vị cấp dưới (Chỉ cấp trưởng hoặc phó mới được giao việc xuống đơn vị con)
-        const isHead = myRank === minRank;
-        const isDeputy = myRank === secondMinRank && myRank > minRank;
-
-        if (isHead || isDeputy) {
-          childUnits.forEach((child) => deptIds.add(child.id));
-        }
-
-        // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots)
-        const staffings = staffingsData.filter(st => st.unitId === pos.unitId && st.jobTitleId === pos.jobTitleId);
-
-        for (const st of staffings) {
-          for (const slot of st.slots) {
-            if (slot.assignedEmployeeCode === user.employeeCode) {
-              for (const mu of slot.monitoredUnits) {
-                deptIds.add(mu.unitId);
-              }
-              if (slot.domains) {
-                for (const d of slot.domains) {
-                  domainIds.add(d.domainId);
-                }
-              }
+    // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots)
+    const staffings = staffingsData.filter((st: any) => st.unitId === pos.unitId && st.jobTitleId === pos.jobTitleId);
+    for (const st of staffings) {
+      for (const slot of st.slots) {
+        if (slot.assignedEmployeeCode === employeeCode) {
+          for (const mu of slot.monitoredUnits) {
+            result.deptIds.add(mu.unitId);
+          }
+          if (slot.domains) {
+            for (const d of slot.domains) {
+              result.domainIds.add(d.domainId);
             }
           }
         }
       }
     }
+  }
 
-    // 4. Với các đơn vị cấp dưới (từ tất cả các chức vụ), lấy người có rank cao nhất
-    const deptIdsArray = Array.from(deptIds);
-    if (deptIdsArray.length > 0) {
-      const allChildPositions = await this.prisma.jobPosition.findMany({
-        where: {
-          unitId: { in: deptIdsArray },
-          endDate: null,
-          user: { isActive: true },
-        },
-        include: { jobTitle: true, user: true },
-      });
+  private async processChildUnitsPositions(result: any) {
+    const deptIdsArray = Array.from(result.deptIds) as number[];
+    if (deptIdsArray.length === 0) return;
 
-      for (const deptId of deptIdsArray) {
-        const positions = allChildPositions.filter(p => p.unitId === deptId);
-        if (positions.length === 0) continue;
+    const allChildPositions = await this.prisma.jobPosition.findMany({
+      where: {
+        unitId: { in: deptIdsArray },
+        endDate: null,
+        user: { isActive: true },
+      },
+      include: { jobTitle: true, user: true },
+    });
 
-        const distinctRanks = [
-          ...new Set(positions.map((p) => p.jobTitle.rank)),
-        ].sort((a, b) => a - b);
-        const topRank = distinctRanks[0]; // Lấy duy nhất rank cao nhất
+    for (const deptId of deptIdsArray) {
+      const positions = allChildPositions.filter(p => p.unitId === deptId);
+      if (positions.length === 0) continue;
 
-        for (const p of positions) {
-          if (p.jobTitle.rank === topRank && p.user && p.user.employeeCode) {
-            empCodes.add(p.user.employeeCode);
-          }
+      const distinctRanks = [
+        ...new Set(positions.map((p) => p.jobTitle.rank)),
+      ].sort((a, b) => a - b);
+      const topRank = distinctRanks[0];
+
+      for (const p of positions) {
+        if (p.jobTitle.rank === topRank && p.user && p.user.employeeCode) {
+          result.empCodes.add(p.user.employeeCode);
         }
       }
     }
+  }
 
-    // Xóa chính mình khỏi danh sách được giao việc
-    if (user.employeeCode) {
-      empCodes.delete(user.employeeCode);
-    }
-
+  private formatSubordinatesResponse(result: any) {
+    const deptIds = Array.from(result.deptIds);
+    const empCodes = Array.from(result.empCodes);
+    const domainIds = Array.from(result.domainIds);
     return {
-      allowedDepartmentIds: Array.from(deptIds),
-      allowedEmployeeCodes: Array.from(empCodes),
-      allowedDomainIds: Array.from(domainIds),
-      allowed_department_ids: Array.from(deptIds),
-      allowed_employee_codes: Array.from(empCodes),
-      allowed_domain_ids: Array.from(domainIds),
+      allowedDepartmentIds: deptIds,
+      allowedEmployeeCodes: empCodes,
+      allowedDomainIds: domainIds,
+      allowed_department_ids: deptIds,
+      allowed_employee_codes: empCodes,
+      allowed_domain_ids: domainIds,
     };
   }
 

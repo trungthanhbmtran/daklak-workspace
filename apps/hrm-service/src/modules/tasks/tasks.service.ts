@@ -90,9 +90,7 @@ export class TasksService {
 
   // ─── Queries ──────────────────────────────────────────────────────────────
 
-  async listTasks(query: any) {
-    await this.shared.populateQueryHierarchy(query);
-
+  private async buildListTasksWhereClause(query: any) {
     const where: any = {};
     const conditions: any[] = [];
 
@@ -156,7 +154,10 @@ export class TasksService {
         }
       }
     }
+    return where;
+  }
 
+  private async applyPostDbFiltersAndPaginate(where: any, query: any) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 20;
     const isJsFilter = query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue';
@@ -171,27 +172,8 @@ export class TasksService {
       limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
       skip = limit > 0 ? (page - 1) * limitNum : undefined;
       take = limit > 0 ? limitNum : undefined;
-    }
-
-    let tasks = await this.prisma.task.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take,
-      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
-    });
-
-    let paginatedMeta: any = {
-      total: totalCount,
-      page,
-      limit: limitNum,
-      totalPages: Math.ceil(totalCount / limitNum)
-    };
-
-    if (isJsFilter) {
+    } else {
       const operator = query.statsFilter === 'doneOverdue' ? '>' : '<=';
-      // Mẹo: Đẩy logic xuống DB thay vì lọc trên mảng
-      // Tạm thời lấy các ID thỏa mãn (Do Prisma chưa hỗ trợ so sánh 2 cột trực tiếp trong where)
       const lateIds = await this.prisma.$queryRawUnsafe<{ id: string }[]>(
         `SELECT id FROM Task WHERE dueDate IS NOT NULL AND (completedAt > dueDate OR (completedAt IS NULL AND updatedAt > dueDate))`
       );
@@ -202,30 +184,46 @@ export class TasksService {
         where.id = { ...where.id, notIn: ids };
       }
 
-      // Tính lại totalCount sau khi áp dụng JS filter
       totalCount = await this.prisma.task.count({ where });
       limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
       skip = limit > 0 ? (page - 1) * limitNum : undefined;
       take = limit > 0 ? limitNum : undefined;
-
-      tasks = await this.prisma.task.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take,
-        include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
-      });
-
-      paginatedMeta = {
-        total: totalCount,
-        page,
-        limit: limitNum,
-        totalPages: Math.ceil(totalCount / limitNum)
-      };
     }
 
-    const enriched = await this.shared.enrichTasks(tasks);
+    const tasks = await this.prisma.task.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
+    });
 
+    const paginatedMeta = {
+      total: totalCount,
+      page,
+      limit: limitNum,
+      totalPages: Math.ceil(totalCount / limitNum)
+    };
+
+    return { tasks, paginatedMeta };
+  }
+
+  private buildTaskTree(mappedTasks: any[]) {
+    const taskMap = new Map(mappedTasks.map(t => [t.id, t]));
+    const roots: any[] = [];
+    taskMap.forEach(t => {
+      if (t.parentId && taskMap.has(t.parentId)) taskMap.get(t.parentId).children.push(t);
+      else roots.push(t);
+    });
+    return roots;
+  }
+
+  async listTasks(query: any) {
+    await this.shared.populateQueryHierarchy(query);
+    const where = await this.buildListTasksWhereClause(query);
+    const { tasks, paginatedMeta } = await this.applyPostDbFiltersAndPaginate(where, query);
+
+    const enriched = await this.shared.enrichTasks(tasks);
     const batchActions = await this.shared.computeAllowedActionsBatch(enriched, query);
     const mapped = enriched.map((t: any) => ({
       ...this.shared.toTaskResponse(t),
@@ -233,14 +231,7 @@ export class TasksService {
       children: [],
     }));
 
-    // Build tree
-    const taskMap = new Map(mapped.map(t => [t.id, t]));
-    const roots: any[] = [];
-    taskMap.forEach(t => {
-      if (t.parentId && taskMap.has(t.parentId)) taskMap.get(t.parentId).children.push(t);
-      else roots.push(t);
-    });
-
+    const roots = this.buildTaskTree(mapped);
     return { success: true, message: 'Lấy danh sách nhiệm vụ thành công', data: roots, meta: paginatedMeta };
   }
 
@@ -255,7 +246,7 @@ export class TasksService {
   }
 
 
-  async getTaskStats(query: any) {
+  private buildStatsWhereClause(query: any) {
     const where: any = {};
     const conditions: any[] = [];
 
@@ -303,15 +294,10 @@ export class TasksService {
     }
 
     if (conditions.length > 0) where.AND = conditions;
+    return where;
+  }
 
-    const allTasks = await this.prisma.task.findMany({
-      where,
-      select: {
-        status: true, isCompleted: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
-        participants: { where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, select: { employeeCode: true, participantRole: true } }
-      },
-    });
-
+  private calculateTaskStatistics(allTasks: any[]) {
     const now = new Date(); now.setHours(0, 0, 0, 0);
     const nowTime = now.getTime();
     let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
@@ -323,12 +309,12 @@ export class TasksService {
       if (isDone) {
         const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
         if (dueTime && completedTime > dueTime) { doneOverdue++; } else { doneInTime++; }
-        return; // Early return for forEach callback
+        return;
       }
 
       if (!dueTime) {
         inTime++;
-        return; // Early return for forEach callback
+        return;
       }
 
       const diff = Math.round((dueTime - nowTime) / 86_400_000);
@@ -337,40 +323,40 @@ export class TasksService {
       inTime++;
     });
 
-    return { success: true, message: 'Lấy thống kê nhiệm vụ thành công', data: { overdue, warning, inTime, doneInTime, doneOverdue } };
+    return { overdue, warning, inTime, doneInTime, doneOverdue };
+  }
+
+  async getTaskStats(query: any) {
+    const where = this.buildStatsWhereClause(query);
+    const allTasks = await this.prisma.task.findMany({
+      where,
+      select: {
+        status: true, isCompleted: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
+        participants: { where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, select: { employeeCode: true, participantRole: true } }
+      },
+    });
+
+    const stats = this.calculateTaskStatistics(allTasks);
+    return { success: true, message: 'Lấy thống kê nhiệm vụ thành công', data: stats };
   }
 
   // ─── Mutations ────────────────────────────────────────────────────────────
 
-  async createTask(data: any) {
-    let planId = data.planId || null;
-    let parentId = data.parentId ? parseInt(data.parentId, 10) : null;
-
-    if (parentId) {
-      const parent = await this.prisma.task.findUnique({ where: { id: parentId }, select: { planId: true } });
-      planId = parent?.planId || null;
-    }
-
-    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
-    const creatorCode = data.currentEmployeeCode || 'SYSTEM';
-
-    // Validate assignee nếu có
+  private async validateTaskAssignee(assigneeCode: string) {
     if (assigneeCode !== 'UNASSIGNED') {
       const emp = await this.prisma.employee.findUnique({ where: { employeeCode: assigneeCode } });
       if (!emp) throw new RpcException('Người được giao không tồn tại trong hệ thống.');
     }
+  }
 
-    const kpi = await this.resolveKpiSettings(data, planId);
-    const isCrossDomain = await this.checkCrossDomain(assigneeCode, data.domainId);
-
-    // Tạo task + participants + closure trong transaction
-    const newTask = await this.prisma.$transaction(async (tx) => {
+  private async executeCreateTaskTransaction(data: any, kpi: any, isCrossDomain: boolean, planId: number | null, parentId: number | null, creatorCode: string) {
+    return this.prisma.$transaction(async (tx) => {
       const task = await tx.task.create({
         data: {
           parentId,
           title: data.title || data.taskName || 'Nhiệm vụ không tên',
           description: data.description,
-          status: data.status || (assigneeCode !== 'UNASSIGNED' ? 'PENDING_ACCEPTANCE' : 'TODO'),
+          status: data.status || (data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? 'PENDING_ACCEPTANCE' : 'TODO'),
           priority: data.priority || 'MEDIUM',
           startDate: data.startDate ? new Date(data.startDate) : null,
           dueDate: data.dueDate ? new Date(data.dueDate) : null,
@@ -421,32 +407,32 @@ export class TasksService {
 
       return task;
     });
+  }
 
-    // Khởi tạo Conversation từ ChatService
+  private async createTaskConversation(taskId: number, title: string, participants: string[]) {
     try {
-      const participants = [creatorCode, assigneeCode, ...(data.coassigneeCodes || [])]
-        .filter(Boolean)
-        .map(code => code.toString());
-      const uniqueParticipants = [...new Set(participants)];
-
+      const uniqueParticipants = [...new Set(participants.filter(Boolean))];
       if (this.shared.chatService) {
         const conversationRes = await firstValueFrom<any>(
           this.shared.chatService.CreateConversation({
             type: 'TASK',
-            title: `Task: ${newTask.title}`,
+            title: `Task: ${title}`,
             participantIds: uniqueParticipants
           })
         );
         if (conversationRes && conversationRes.id) {
-          await this.prisma.task.update({ where: { id: newTask.id }, data: { conversationId: conversationRes.id } });
-          newTask.conversationId = conversationRes.id;
+          await this.prisma.task.update({ where: { id: taskId }, data: { conversationId: conversationRes.id } });
+          return conversationRes.id;
         }
       }
     } catch (e) {
-      this.logger.error('Failed to create chat conversation for task ' + newTask.id, e);
+      this.logger.error('Failed to create chat conversation for task ' + taskId, e);
     }
+    return null;
+  }
 
-    // Khởi động workflow — workflow điều hướng mọi hành động tiếp theo
+  private async handlePostCreateWorkflow(newTask: any, data: any, planId: number | null, parentId: number | null, creatorCode: string) {
+    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
     const workflowCode = await this.wf.resolveWorkflowCode(data, planId, parentId);
     const wfInit = workflowCode
       ? await this.wf.initWorkflow(newTask.id, workflowCode, { initiatorId: data.currentUserId?.toString() || creatorCode, assigneeCode, assignerCode: creatorCode })
@@ -454,7 +440,6 @@ export class TasksService {
 
     if (wfInit) {
       const nodeData = await this.wf.getCurrentNodeData(wfInit.workflowId, wfInit.currentNodeId);
-
       const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
       const metadata = { ...existingMetadata, workflowId: wfInit.workflowId, workflowCode: wfInit.workflowCode, currentNodeId: wfInit.currentNodeId, ...(wfInit.workflowInstId && { workflowInstId: wfInit.workflowInstId }) };
 
@@ -464,35 +449,51 @@ export class TasksService {
       }
 
       await this.prisma.task.update({ where: { id: newTask.id }, data: updateData });
-
-      // Seed checklist steps từ workflow node (nếu workflow designer đã cấu hình)
       await this.wf.seedStepsFromNode(newTask.id, nodeData);
 
-      // Gửi thông báo theo cấu hình của workflow node
       const notifCfg = this.wf.resolveNotificationConfig(nodeData);
       const createdTask = await this.toResponse(newTask, { currentEmployeeCode: creatorCode, currentUserPermissions: data.currentUserPermissions || [] });
       await this.notif.notifyNewTask(createdTask, { assigneeCode: data.assigneeCode, coassigneeCodes: data.coassigneeCodes, monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : undefined }, notifCfg);
       return createdTask;
     }
 
-    // Không có workflow → vẫn trả về task và notify mặc định
     const createdTask = await this.toResponse(newTask, { currentEmployeeCode: creatorCode, currentUserPermissions: data.currentUserPermissions || [] });
     await this.notif.notifyNewTask(createdTask, { assigneeCode: data.assigneeCode, coassigneeCodes: data.coassigneeCodes, monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : undefined }, { sendNotify: true, nodeLabel: 'Giao việc' });
     return createdTask;
   }
 
-  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionName?: string) {
-    if (context) await this.shared.populateQueryHierarchy(context);
+  async createTask(data: any) {
+    let planId = data.planId || null;
+    let parentId = data.parentId ? parseInt(data.parentId, 10) : null;
 
-    const rawTask = await this.findTaskOrFail(id);
-    if (rawTask.status === 'COMPLETED') {
-      throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể thay đổi.');
+    if (parentId) {
+      const parent = await this.prisma.task.findUnique({ where: { id: parentId }, select: { planId: true } });
+      planId = parent?.planId || null;
     }
-    const [enriched] = await this.shared.enrichTasks([rawTask]);
-    const access = await this.shared.checkTaskAccess(enriched, context);
-    const hasChildren = (await this.prisma.taskClosure.count({ where: { ancestorId: id, depth: 1 } })) > 0;
 
-    const action = actionName || status;
+    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
+    const creatorCode = data.currentEmployeeCode || 'SYSTEM';
+
+    await this.validateTaskAssignee(assigneeCode);
+
+    const kpi = await this.resolveKpiSettings(data, planId);
+    const isCrossDomain = await this.checkCrossDomain(assigneeCode, data.domainId);
+
+    const newTask = await this.executeCreateTaskTransaction(data, kpi, isCrossDomain, planId, parentId, creatorCode);
+
+    newTask.conversationId = await this.createTaskConversation(
+      newTask.id,
+      newTask.title,
+      [creatorCode, assigneeCode, ...(data.coassigneeCodes || [])]
+    );
+
+    return this.handlePostCreateWorkflow(newTask, data, planId, parentId, creatorCode);
+  }
+
+  private async validateWorkflowTransition(enriched: any, action: string, context: any, actorCode?: string) {
+    const hasChildren = (await this.prisma.taskClosure.count({ where: { ancestorId: enriched.id, depth: 1 } })) > 0;
+    const access = await this.shared.checkTaskAccess(enriched, context);
+
     const transition = await this.wf.validateAndTransition(enriched, action, {
       actorCode: actorCode || context?.currentEmployeeCode,
       permissions: context?.currentUserPermissions || [],
@@ -504,10 +505,78 @@ export class TasksService {
       throw new RpcException(`Workflow không cho phép hành động ${action}${transition.reason ? ` (${transition.reason})` : ''}.`);
     }
 
-    // Notify trước khi update (cần task data cũ)
-    await this.notif.notifyApprovalRequired(enriched, transition.nextNodeData, actorCode || context?.currentEmployeeCode);
+    return transition;
+  }
 
-    // Update DB
+  private async recordTaskStatusHistory(id: number, rawTask: any, updateData: any, transition: any, action: string, actorCode?: string, rejectReason?: string) {
+    const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
+    if (isReject) {
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode, newValue: { reason: rejectReason } } });
+      await this.prisma.taskParticipant.deleteMany({
+        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
+      });
+    }
+
+    const isStartProgress = !isReject && updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS';
+    if (isStartProgress) {
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode } });
+    }
+
+    const isStatusChange = !isReject && !isStartProgress && rawTask.status !== updateData.status;
+    if (isStatusChange) {
+      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode, newValue: { status: updateData.status } } });
+    }
+  }
+
+  private async handleStatusSideEffects(id: number, rawTask: any, resultTask: any, enriched: any, updateData: any, transition: any, context: any, actorCode?: string) {
+    if (updateData.isCompleted) {
+      this.reportClient.emit('task.completed', {
+        taskId: resultTask.id,
+        title: resultTask.title,
+        completedAt: resultTask.completedAt,
+        progress: resultTask.progress,
+        assigneeId: resultTask.assigneeId
+      });
+    }
+
+    if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
+      firstValueFrom(this.shared.chatService.SendMessage({
+        conversationId: rawTask.conversationId,
+        content: context.evidence,
+        senderId: actorCode || context?.currentEmployeeCode || 'SYSTEM',
+      })).catch(() => { });
+    }
+
+    if (transition.nextNodeData?.autoProgress !== undefined) {
+      await this.updateTaskProgress(id, transition.nextNodeData.autoProgress, actorCode);
+    }
+
+    if (transition.nextNodeData?.autoProgress === undefined && updateData.isCompleted) {
+      await this.updateTaskProgress(id, 100, actorCode);
+    }
+
+    if (transition.nextNodeId) {
+      await this.wf.seedStepsFromNode(id, transition.nextNodeData);
+    }
+
+    await this.notif.notifyTransition(enriched, transition.nextNodeData, actorCode || context?.currentEmployeeCode);
+  }
+
+  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionName?: string) {
+    if (context) await this.shared.populateQueryHierarchy(context);
+
+    const rawTask = await this.findTaskOrFail(id);
+    if (rawTask.status === 'COMPLETED') {
+      throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể thay đổi.');
+    }
+    const [enriched] = await this.shared.enrichTasks([rawTask]);
+
+    const action = actionName || status;
+    const actor = actorCode || context?.currentEmployeeCode;
+    const transition = await this.validateWorkflowTransition(enriched, action, context, actor);
+
+    await this.notif.notifyApprovalRequired(enriched, transition.nextNodeData, actor);
+
     const updateData: any = { status: transition.targetStatus || status };
     if (transition.isCompleted !== undefined) {
       updateData.isCompleted = transition.isCompleted;
@@ -518,69 +587,21 @@ export class TasksService {
       updateData.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: transition.nextNodeId };
     }
 
-    let resultTask;
-    const isUpdated = true;
-    if (isUpdated) {
-      resultTask = await this.prisma.task.update({ where: { id }, data: updateData });
+    const resultTask = await this.prisma.task.update({ where: { id }, data: updateData });
 
-      // Phát event task.completed nếu task vừa được hoàn thành
-      if (updateData.isCompleted) {
-        this.reportClient.emit('task.completed', {
-          taskId: resultTask.id,
-          title: resultTask.title,
-          completedAt: resultTask.completedAt,
-          progress: resultTask.progress,
-          assigneeId: resultTask.assigneeId
-        });
-      }
-
-      if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
-        firstValueFrom(this.shared.chatService.SendMessage({
-          conversationId: rawTask.conversationId,
-          content: context.evidence,
-          senderId: actorCode || context?.currentEmployeeCode || 'SYSTEM',
-        })).catch(() => { });
-      }
-    } else {
-      resultTask = rawTask;
-    }
-
-    const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
-    if (isReject) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode: actorCode || context?.currentEmployeeCode || null, newValue: { reason: rejectReason } } });
-      await this.prisma.taskParticipant.deleteMany({
-        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
-      });
-    }
-
-    const isStartProgress = !isReject && updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS';
-    if (isStartProgress) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode: actorCode || context?.currentEmployeeCode || null } });
-    }
-
-    const isStatusChange = !isReject && !isStartProgress && rawTask.status !== updateData.status;
-    if (isStatusChange) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode: actorCode || context?.currentEmployeeCode || null, newValue: { status: updateData.status } } });
-    }
-
-    // Auto-progress từ workflow node hoặc default khi DONE
-    if (transition.nextNodeData?.autoProgress !== undefined) {
-      await this.updateTaskProgress(id, transition.nextNodeData.autoProgress, actorCode);
-    }
-
-    if (transition.nextNodeData?.autoProgress === undefined && updateData.isCompleted) {
-      await this.updateTaskProgress(id, 100, actorCode);
-    }
-
-    // Seed steps từ node mới (nếu workflow designer cấu hình)
-    if (transition.nextNodeId) {
-      await this.wf.seedStepsFromNode(id, transition.nextNodeData);
-    }
-
-    // Notify chuyển trạng thái
-    await this.notif.notifyTransition(enriched, transition.nextNodeData, actorCode || context?.currentEmployeeCode);
+    await this.recordTaskStatusHistory(id, rawTask, updateData, transition, action, actor, rejectReason);
+    await this.handleStatusSideEffects(id, rawTask, resultTask, enriched, updateData, transition, context, actor);
 
     return this.toResponse(await this.findTaskOrFail(id), context);
+  }
+
+  private async executeAssignTaskTransaction(id: number, data: any) {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.taskParticipant.deleteMany({ where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] } } });
+      const participants = this.shared.buildParticipantsData(id, data);
+      if (participants.length > 0) await tx.taskParticipant.createMany({ data: participants, skipDuplicates: true });
+      await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
+    });
   }
 
   async assignTask(id: number, data: any) {
@@ -592,18 +613,12 @@ export class TasksService {
     const [enriched] = await this.shared.enrichTasks([rawTask]);
     const access = await this.shared.checkTaskAccess(enriched, data);
 
-    // Validate ASSIGN action qua workflow (bypass nếu là owner/admin)
     if (!access.isOwner && !access.isAdmin && !access.isDeptLeader) {
       const transition = await this.wf.validateAndTransition(enriched, 'ASSIGN', { actorCode: data?.currentEmployeeCode, permissions: data?.currentUserPermissions || [], access });
       if (!transition.allowed) throw new RpcException('Workflow không cho phép thực hiện phân công/giao việc.');
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.taskParticipant.deleteMany({ where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] } } });
-      const participants = this.shared.buildParticipantsData(id, data);
-      if (participants.length > 0) await tx.taskParticipant.createMany({ data: participants, skipDuplicates: true });
-      await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
-    });
+    await this.executeAssignTaskTransaction(id, data);
 
     await this.prisma.taskHistory.create({
       data: {
@@ -945,11 +960,8 @@ export class TasksService {
 
   // ─── Misc ─────────────────────────────────────────────────────────────────
 
-  async recommendAssignees(query: any) {
-    const perms = query.currentUserPermissions || [];
-    const isAdmin = perms.includes('TASK:MANAGE');
+  private async getAssigneeScopeWhere(query: any, isAdmin: boolean) {
     const where: any = { employmentStatus: 'active' };
-
     if (query.excludeEmployeeCode) where.employeeCode = { not: query.excludeEmployeeCode };
 
     if (!isAdmin && query.currentUserId) {
@@ -969,16 +981,22 @@ export class TasksService {
         where.employeeCode = query.currentEmployeeCode;
       }
     }
+    return where;
+  }
 
+  private async fetchEmployeeMetrics(where: any) {
     const [employees, loadCounts, evaluations] = await Promise.all([
       this.prisma.employee.findMany({ where }),
       this.prisma.taskParticipant.groupBy({ by: ['employeeCode'], where: { participantRole: 'ASSIGNEE', task: { isCompleted: false } }, _count: { taskId: true } }),
       this.prisma.kpiEvaluation.findMany({ orderBy: { createdAt: 'desc' }, select: { employeeCode: true, totalScore: true } }),
     ]);
 
-    const loadMap = new Map(loadCounts.map(i => [i.employeeCode, i._count.taskId]));
-    const kpiMap = new Map(evaluations.map(i => [i.employeeCode, i.totalScore || 75]));
+    const loadMap = new Map(loadCounts.map((i: any) => [i.employeeCode, i._count.taskId]));
+    const kpiMap = new Map(evaluations.map((i: any) => [i.employeeCode, i.totalScore || 75]));
+    return { employees, loadMap, kpiMap };
+  }
 
+  private async scoreAndSortEmployees(employees: any[], loadMap: Map<string, number>, kpiMap: Map<string, number>, query: any) {
     const targetDomainId = query.domainId ? parseInt(query.domainId, 10) : null;
     const targetJobTitleId = query.jobTitleId ? parseInt(query.jobTitleId, 10) : null;
     let scopeCodes: string[] = [];
@@ -991,17 +1009,26 @@ export class TasksService {
     }
 
     const strategy = query.strategy || 'LOW_PERFORMANCE';
-    const scored = employees.map(emp => ({
+    return employees.map((emp: any) => ({
       id: emp.id, employeeCode: emp.employeeCode, fullName: emp.fullName, departmentId: emp.departmentId, jobTitleId: emp.jobTitleId,
       currentLoad: loadMap.get(emp.employeeCode) || 0,
       performanceScore: kpiMap.get(emp.employeeCode) || 75,
       matchScore: (targetJobTitleId && emp.jobTitleId === targetJobTitleId ? 50 : 0) + (scopeCodes.includes(emp.employeeCode) ? 30 : 0),
-    })).sort((a, b) => {
+    })).sort((a: any, b: any) => {
       if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
       if (strategy === 'HIGH_PERFORMANCE') return b.performanceScore - a.performanceScore || a.currentLoad - b.currentLoad;
       if (strategy === 'UNDER_QUOTA') return a.currentLoad - b.currentLoad || b.performanceScore - a.performanceScore;
       return a.performanceScore - b.performanceScore || a.currentLoad - b.currentLoad;
     });
+  }
+
+  async recommendAssignees(query: any) {
+    const perms = query.currentUserPermissions || [];
+    const isAdmin = perms.includes('TASK:MANAGE');
+
+    const where = await this.getAssigneeScopeWhere(query, isAdmin);
+    const { employees, loadMap, kpiMap } = await this.fetchEmployeeMetrics(where);
+    const scored = await this.scoreAndSortEmployees(employees, loadMap, kpiMap, query);
 
     return { success: true, data: { topEmployees: scored } };
   }
