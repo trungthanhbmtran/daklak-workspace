@@ -51,11 +51,10 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const currentTask = (detailData as any)?.data ?? task;
   const { data: commentsData } = useTaskComments(currentTask.conversationId);
   const isCompleted = currentTask.status?.toUpperCase() === "COMPLETED" || currentTask.status?.toUpperCase() === "DONE";
-  const isAssigned = (currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "MỚI GIAO" || currentTask.status?.toUpperCase() === "PENDING_ACCEPTANCE" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('ACCEPT'));
+  const isAssigned = currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('ACCEPT');
   const comments: any[] = (commentsData as any)?.data ?? [];
   const isAssigner = user?.employeeCode === currentTask.creatorEmployeeCode || user?.employeeCode === currentTask.assignerCode;
-  const allowedReassignStatuses = ["ASSIGNED", "MỚI GIAO", "PENDING_ACCEPTANCE", "TODO", "REJECTED", "REQUEST_COORDINATION"];
-  const canReassign = isAssigner && allowedReassignStatuses.includes(currentTask.status?.toUpperCase() || "");
+  const canReassign = currentTask.allowedActions?.includes('ASSIGN') || currentTask.allowedActions?.includes('REASSIGN');
 
   // ── Mutations ──
   const respondTask = useRespondTask(taskId);
