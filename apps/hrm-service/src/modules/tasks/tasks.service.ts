@@ -512,9 +512,6 @@ export class TasksService {
     const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
     if (isReject) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode, newValue: { reason: rejectReason } } });
-      await this.prisma.taskParticipant.deleteMany({
-        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
-      });
     }
 
     const isStartProgress = !isReject && updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS';
@@ -640,31 +637,55 @@ export class TasksService {
     return result;
   }
 
-  private async handleAcceptTask(id: number, actorCode: string | null) {
+  private async getParticipantOrThrow(taskId: number, actorCode: string | null) {
+    if (!actorCode) throw new RpcException('Không xác định được người thao tác.');
+    const participant = await this.prisma.taskParticipant.findFirst({
+      where: { taskId, employeeCode: actorCode, participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] } }
+    });
+    if (!participant) throw new RpcException('Bạn không phải là người xử lý hoặc người phối hợp của công việc này.');
+    return participant;
+  }
+
+  private async handleAcceptTask(id: number, actorCode: string | null, participant: any) {
     await this.prisma.$transaction(async (tx) => {
       await tx.taskHistory.create({ data: { taskId: id, action: 'Tiếp nhận công việc', actorCode } });
-      await tx.task.update({ where: { id }, data: { status: 'IN_PROGRESS' } });
+      await tx.taskParticipant.update({
+        where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: actorCode!, participantRole: participant.participantRole } },
+        data: { status: 'ACCEPTED' }
+      });
+      if (participant.participantRole === 'ASSIGNEE') {
+        await tx.task.update({ where: { id }, data: { status: 'IN_PROGRESS' } });
+      }
     });
     return { success: true, message: 'Đã tiếp nhận công việc', data: await this.toResponse(await this.findTaskOrFail(id)) };
   }
 
-  private async handleRejectTask(id: number, actorCode: string | null, rejectReason?: string) {
+  private async handleRejectTask(id: number, actorCode: string | null, participant: any, rejectReason?: string) {
     if (!rejectReason) throw new RpcException('Cần có lý do từ chối.');
     await this.prisma.$transaction(async (tx) => {
       await tx.taskHistory.create({ data: { taskId: id, action: 'Từ chối nhận việc', actorCode, newValue: { reason: rejectReason } } });
-      await tx.taskParticipant.deleteMany({
-        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
+      await tx.taskParticipant.update({
+        where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: actorCode!, participantRole: participant.participantRole } },
+        data: { status: 'REJECTED', reason: rejectReason }
       });
-      await tx.task.update({ where: { id }, data: { status: 'REJECTED', rejectReason } });
+      if (participant.participantRole === 'ASSIGNEE') {
+        await tx.task.update({ where: { id }, data: { status: 'REJECTED', rejectReason } });
+      }
     });
     return { success: true, message: 'Đã từ chối công việc', data: await this.toResponse(await this.findTaskOrFail(id)) };
   }
 
-  private async handleRequestCoordinationTask(id: number, actorCode: string | null, message?: string) {
+  private async handleRequestCoordinationTask(id: number, actorCode: string | null, participant: any, message?: string) {
     if (!message) throw new RpcException('Cần có lý do xin phối hợp.');
     await this.prisma.$transaction(async (tx) => {
-      await tx.taskHistory.create({ data: { taskId: id, action: 'Xin phối hợp (Assignee)', actorCode, newValue: { message } } });
-      await tx.task.update({ where: { id }, data: { status: 'PENDING_COORDINATION' } });
+      await tx.taskHistory.create({ data: { taskId: id, action: 'Xin phối hợp', actorCode, newValue: { message } } });
+      await tx.taskParticipant.update({
+        where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: actorCode!, participantRole: participant.participantRole } },
+        data: { status: 'PENDING_COORDINATION', reason: message }
+      });
+      if (participant.participantRole === 'ASSIGNEE') {
+        await tx.task.update({ where: { id }, data: { status: 'PENDING_COORDINATION' } });
+      }
     });
     return { success: true, message: 'Đã gửi yêu cầu xin phối hợp', data: await this.toResponse(await this.findTaskOrFail(id)) };
   }
@@ -672,15 +693,17 @@ export class TasksService {
   async respondTask(id: number, data: { action: 'ACCEPT' | 'REJECT' | 'REQUEST_COORDINATION', rejectReason?: string, message?: string, currentEmployeeCode?: string }) {
     if (data) await this.shared.populateQueryHierarchy(data);
     const rawTask = await this.findTaskOrFail(id);
-    if (rawTask.status !== 'PENDING_ACCEPTANCE' && rawTask.status !== 'PENDING_COORDINATION') {
-      throw new RpcException('Nhiệm vụ không ở trạng thái chờ phản hồi.');
-    }
 
     const actorCode = data.currentEmployeeCode || null;
+    const participant = await this.getParticipantOrThrow(id, actorCode);
 
-    if (data.action === 'ACCEPT') return this.handleAcceptTask(id, actorCode);
-    if (data.action === 'REJECT') return this.handleRejectTask(id, actorCode, data.rejectReason);
-    if (data.action === 'REQUEST_COORDINATION') return this.handleRequestCoordinationTask(id, actorCode, data.message);
+    if (participant.status !== 'PENDING_ACCEPTANCE' && participant.status !== 'PENDING_COORDINATION') {
+      throw new RpcException('Bạn đã phản hồi công việc này hoặc không ở trạng thái chờ phản hồi.');
+    }
+
+    if (data.action === 'ACCEPT') return this.handleAcceptTask(id, actorCode, participant);
+    if (data.action === 'REJECT') return this.handleRejectTask(id, actorCode, participant, data.rejectReason);
+    if (data.action === 'REQUEST_COORDINATION') return this.handleRequestCoordinationTask(id, actorCode, participant, data.message);
 
     throw new RpcException('Hành động không hợp lệ.');
   }

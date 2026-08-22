@@ -139,22 +139,64 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             </div>
             <div>
               <Text variant="small" className="text-slate-500 mb-1 font-normal">Đơn vị / Người xử lý</Text>
-              <p className="font-medium">
-                {currentTask.assigneeName || currentTask.assigneeDepartment?.name || currentTask.assignee?.fullName || "Chưa phân công"}
-              </p>
-            </div>
-            {currentTask.coassigneeNames && currentTask.coassigneeNames.length > 0 && (
-              <div className="col-span-2">
-                <Text variant="small" className="text-slate-500 mb-1 font-normal">Người phối hợp xử lý</Text>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {currentTask.coassigneeNames.map((name: string, idx: number) => (
-                    <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200">
-                      {name}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex flex-col gap-1">
+                {(() => {
+                  const assignees = currentTask.participants?.filter((p: any) => p.role === 'ASSIGNEE') || [];
+                  if (assignees.length > 0) {
+                    return assignees.map((p: any, idx: number) => (
+                      <div key={idx} className="flex flex-col">
+                        <span className="font-medium">{p.fullName}</span>
+                        <div className="text-[11px] mt-0.5 flex flex-wrap items-center gap-1">
+                          {p.status === 'REJECTED' && <span className="text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">Đã từ chối</span>}
+                          {p.status === 'PENDING_COORDINATION' && <span className="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">Xin phối hợp</span>}
+                          {p.status === 'PENDING_ACCEPTANCE' && <span className="text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">Chờ tiếp nhận</span>}
+                          {p.status === 'ACCEPTED' && <span className="text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-100">Đã tiếp nhận</span>}
+                          {p.reason && <span className="text-slate-500 mt-0.5 w-full block">Lý do: {p.reason}</span>}
+                        </div>
+                      </div>
+                    ));
+                  }
+                  return <span className="font-medium">{currentTask.assigneeName || currentTask.assigneeDepartment?.name || currentTask.assignee?.fullName || "Chưa phân công"}</span>;
+                })()}
               </div>
-            )}
+            </div>
+            
+            {(() => {
+              const coordinators = currentTask.participants?.filter((p: any) => p.role === 'COORDINATOR') || [];
+              const hasCoordinators = coordinators.length > 0 || (currentTask.coassigneeNames && currentTask.coassigneeNames.length > 0);
+              
+              if (!hasCoordinators) return null;
+              
+              return (
+                <div className="col-span-2 mt-2">
+                  <Text variant="small" className="text-slate-500 mb-1 font-normal">Người phối hợp xử lý</Text>
+                  <div className="flex flex-col gap-2 mt-1">
+                    {coordinators.length > 0 ? (
+                      coordinators.map((p: any, idx: number) => (
+                        <div key={idx} className="flex flex-col bg-slate-50 p-2 rounded-md border border-slate-100">
+                          <span className="font-medium text-slate-700">{p.fullName}</span>
+                          <div className="text-[11px] mt-1 flex flex-wrap items-center gap-1">
+                            {p.status === 'REJECTED' && <span className="text-red-600 bg-red-100 px-1.5 py-0.5 rounded">Đã từ chối</span>}
+                            {p.status === 'PENDING_COORDINATION' && <span className="text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded">Xin phối hợp</span>}
+                            {p.status === 'PENDING_ACCEPTANCE' && <span className="text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">Chờ tiếp nhận</span>}
+                            {p.status === 'ACCEPTED' && <span className="text-green-600 bg-green-100 px-1.5 py-0.5 rounded">Đã tiếp nhận</span>}
+                            {p.reason && <span className="text-slate-500 mt-0.5 w-full block">Lý do: {p.reason}</span>}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {currentTask.coassigneeNames.map((name: string, idx: number) => (
+                          <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200">
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             <div>
               <Text variant="small" className="text-slate-500 mb-1 font-normal">Thời hạn</Text>
               <p className={`font-medium ${new Date(currentTask.dueDate) < new Date() && !isCompleted ? "text-red-500" : ""}`}>

@@ -18094,6 +18094,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole | null
     assignedAt: Date | null
     contributionPercentage: number | null
+    status: string | null
+    reason: string | null
   }
 
   export type TaskParticipantMaxAggregateOutputType = {
@@ -18102,6 +18104,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole | null
     assignedAt: Date | null
     contributionPercentage: number | null
+    status: string | null
+    reason: string | null
   }
 
   export type TaskParticipantCountAggregateOutputType = {
@@ -18110,6 +18114,8 @@ export namespace Prisma {
     participantRole: number
     assignedAt: number
     contributionPercentage: number
+    status: number
+    reason: number
     _all: number
   }
 
@@ -18130,6 +18136,8 @@ export namespace Prisma {
     participantRole?: true
     assignedAt?: true
     contributionPercentage?: true
+    status?: true
+    reason?: true
   }
 
   export type TaskParticipantMaxAggregateInputType = {
@@ -18138,6 +18146,8 @@ export namespace Prisma {
     participantRole?: true
     assignedAt?: true
     contributionPercentage?: true
+    status?: true
+    reason?: true
   }
 
   export type TaskParticipantCountAggregateInputType = {
@@ -18146,6 +18156,8 @@ export namespace Prisma {
     participantRole?: true
     assignedAt?: true
     contributionPercentage?: true
+    status?: true
+    reason?: true
     _all?: true
   }
 
@@ -18241,6 +18253,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt: Date
     contributionPercentage: number
+    status: string
+    reason: string | null
     _count: TaskParticipantCountAggregateOutputType | null
     _avg: TaskParticipantAvgAggregateOutputType | null
     _sum: TaskParticipantSumAggregateOutputType | null
@@ -18268,6 +18282,8 @@ export namespace Prisma {
     participantRole?: boolean
     assignedAt?: boolean
     contributionPercentage?: boolean
+    status?: boolean
+    reason?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     employee?: boolean | EmployeeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskParticipant"]>
@@ -18280,9 +18296,11 @@ export namespace Prisma {
     participantRole?: boolean
     assignedAt?: boolean
     contributionPercentage?: boolean
+    status?: boolean
+    reason?: boolean
   }
 
-  export type TaskParticipantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt" | "contributionPercentage", ExtArgs["result"]["taskParticipant"]>
+  export type TaskParticipantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt" | "contributionPercentage" | "status" | "reason", ExtArgs["result"]["taskParticipant"]>
   export type TaskParticipantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     employee?: boolean | EmployeeDefaultArgs<ExtArgs>
@@ -18300,6 +18318,8 @@ export namespace Prisma {
       participantRole: $Enums.TaskRole
       assignedAt: Date
       contributionPercentage: number
+      status: string
+      reason: string | null
     }, ExtArgs["result"]["taskParticipant"]>
     composites: {}
   }
@@ -18676,6 +18696,8 @@ export namespace Prisma {
     readonly participantRole: FieldRef<"TaskParticipant", 'TaskRole'>
     readonly assignedAt: FieldRef<"TaskParticipant", 'DateTime'>
     readonly contributionPercentage: FieldRef<"TaskParticipant", 'Float'>
+    readonly status: FieldRef<"TaskParticipant", 'String'>
+    readonly reason: FieldRef<"TaskParticipant", 'String'>
   }
     
 
@@ -23230,7 +23252,9 @@ export namespace Prisma {
     employeeCode: 'employeeCode',
     participantRole: 'participantRole',
     assignedAt: 'assignedAt',
-    contributionPercentage: 'contributionPercentage'
+    contributionPercentage: 'contributionPercentage',
+    status: 'status',
+    reason: 'reason'
   };
 
   export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]
@@ -23452,7 +23476,9 @@ export namespace Prisma {
 
 
   export const TaskParticipantOrderByRelevanceFieldEnum: {
-    employeeCode: 'employeeCode'
+    employeeCode: 'employeeCode',
+    status: 'status',
+    reason: 'reason'
   };
 
   export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
@@ -24862,6 +24888,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
     assignedAt?: DateTimeFilter<"TaskParticipant"> | Date | string
     contributionPercentage?: FloatFilter<"TaskParticipant"> | number
+    status?: StringFilter<"TaskParticipant"> | string
+    reason?: StringNullableFilter<"TaskParticipant"> | string | null
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
   }
@@ -24872,6 +24900,8 @@ export namespace Prisma {
     participantRole?: SortOrder
     assignedAt?: SortOrder
     contributionPercentage?: SortOrder
+    status?: SortOrder
+    reason?: SortOrderInput | SortOrder
     task?: TaskOrderByWithRelationInput
     employee?: EmployeeOrderByWithRelationInput
     _relevance?: TaskParticipantOrderByRelevanceInput
@@ -24887,6 +24917,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
     assignedAt?: DateTimeFilter<"TaskParticipant"> | Date | string
     contributionPercentage?: FloatFilter<"TaskParticipant"> | number
+    status?: StringFilter<"TaskParticipant"> | string
+    reason?: StringNullableFilter<"TaskParticipant"> | string | null
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
   }, "taskId_employeeCode_participantRole">
@@ -24897,6 +24929,8 @@ export namespace Prisma {
     participantRole?: SortOrder
     assignedAt?: SortOrder
     contributionPercentage?: SortOrder
+    status?: SortOrder
+    reason?: SortOrderInput | SortOrder
     _count?: TaskParticipantCountOrderByAggregateInput
     _avg?: TaskParticipantAvgOrderByAggregateInput
     _max?: TaskParticipantMaxOrderByAggregateInput
@@ -24913,6 +24947,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleWithAggregatesFilter<"TaskParticipant"> | $Enums.TaskRole
     assignedAt?: DateTimeWithAggregatesFilter<"TaskParticipant"> | Date | string
     contributionPercentage?: FloatWithAggregatesFilter<"TaskParticipant"> | number
+    status?: StringWithAggregatesFilter<"TaskParticipant"> | string
+    reason?: StringNullableWithAggregatesFilter<"TaskParticipant"> | string | null
   }
 
   export type TaskClosureWhereInput = {
@@ -26597,6 +26633,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
     task: TaskCreateNestedOneWithoutParticipantsInput
     employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
@@ -26607,12 +26645,16 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
   }
 
   export type TaskParticipantUpdateInput = {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
     employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
@@ -26623,6 +26665,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskParticipantCreateManyInput = {
@@ -26631,12 +26675,16 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
   }
 
   export type TaskParticipantUpdateManyMutationInput = {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskParticipantUncheckedUpdateManyInput = {
@@ -26645,6 +26693,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskClosureCreateInput = {
@@ -28302,6 +28352,8 @@ export namespace Prisma {
     participantRole?: SortOrder
     assignedAt?: SortOrder
     contributionPercentage?: SortOrder
+    status?: SortOrder
+    reason?: SortOrder
   }
 
   export type TaskParticipantAvgOrderByAggregateInput = {
@@ -28315,6 +28367,8 @@ export namespace Prisma {
     participantRole?: SortOrder
     assignedAt?: SortOrder
     contributionPercentage?: SortOrder
+    status?: SortOrder
+    reason?: SortOrder
   }
 
   export type TaskParticipantMinOrderByAggregateInput = {
@@ -28323,6 +28377,8 @@ export namespace Prisma {
     participantRole?: SortOrder
     assignedAt?: SortOrder
     contributionPercentage?: SortOrder
+    status?: SortOrder
+    reason?: SortOrder
   }
 
   export type TaskParticipantSumOrderByAggregateInput = {
@@ -30214,6 +30270,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
     task: TaskCreateNestedOneWithoutParticipantsInput
   }
 
@@ -30222,6 +30280,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
   }
 
   export type TaskParticipantCreateOrConnectWithoutEmployeeInput = {
@@ -30333,6 +30393,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
     assignedAt?: DateTimeFilter<"TaskParticipant"> | Date | string
     contributionPercentage?: FloatFilter<"TaskParticipant"> | number
+    status?: StringFilter<"TaskParticipant"> | string
+    reason?: StringNullableFilter<"TaskParticipant"> | string | null
   }
 
   export type EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput = {
@@ -32413,6 +32475,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
     employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
 
@@ -32421,6 +32485,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
   }
 
   export type TaskParticipantCreateOrConnectWithoutTaskInput = {
@@ -33821,6 +33887,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
   }
 
   export type EmployeeKpiTargetCreateManyEmployeeInput = {
@@ -33904,6 +33972,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
     task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
   }
 
@@ -33912,6 +33982,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskParticipantUncheckedUpdateManyWithoutEmployeeInput = {
@@ -33919,6 +33991,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmployeeKpiTargetUpdateWithoutEmployeeInput = {
@@ -34466,6 +34540,8 @@ export namespace Prisma {
     participantRole: $Enums.TaskRole
     assignedAt?: Date | string
     contributionPercentage?: number
+    status?: string
+    reason?: string | null
   }
 
   export type TaskAttachmentCreateManyTaskInput = {
@@ -34512,6 +34588,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
     employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
 
@@ -34520,6 +34598,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskParticipantUncheckedUpdateManyWithoutTaskInput = {
@@ -34527,6 +34607,8 @@ export namespace Prisma {
     participantRole?: EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
     assignedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
+    status?: StringFieldUpdateOperationsInput | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskAttachmentUpdateWithoutTaskInput = {

@@ -583,7 +583,10 @@ export class TaskSharedService {
         actions.push('EDIT');
       }
 
-      if (access.isAssignee && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'MỚI GIAO' || t.status === 'PENDING_ACCEPTANCE')) {
+      const currentParticipant = t.participants?.find((p: any) => p.employeeCode === query.currentEmployeeCode);
+      const participantStatus = currentParticipant?.status || 'PENDING_ACCEPTANCE';
+
+      if ((access.isAssignee || access.isCoordinator) && (participantStatus === 'PENDING_ACCEPTANCE' || participantStatus === 'PENDING_COORDINATION')) {
         actions.push('ACCEPT');
         actions.push('RECEIVE');
         actions.push('IN_PROGRESS');
@@ -594,6 +597,11 @@ export class TaskSharedService {
       if (access.isOwner && (t.status === 'DRAFT' || t.status === 'ASSIGNED')) {
         actions.push('EDIT');
         actions.push('DELETE');
+      }
+
+      if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION')) {
+        actions.push('ASSIGN');
+        actions.push('REASSIGN');
       }
 
       if (meta.isTreeParticipant || t.creatorEmployeeCode === query.currentEmployeeCode) {
@@ -721,7 +729,7 @@ export class TaskSharedService {
     }
 
     // Natively inject actions for the assignee when the task is in progress or TODO
-    const isTaskActive = !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'MỚI GIAO';
+    const isTaskActive = !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'PENDING_ACCEPTANCE';
     
     if (access.isAssignee && isTaskActive) {
       actions.push('CREATE_SUBTASK');
@@ -730,7 +738,10 @@ export class TaskSharedService {
       actions.push('EDIT');
     }
 
-    if (access.isAssignee && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'MỚI GIAO' || t.status === 'PENDING_ACCEPTANCE')) {
+    const currentParticipant = t.participants?.find((p: any) => p.employeeCode === query.currentEmployeeCode);
+    const participantStatus = currentParticipant?.status || 'PENDING_ACCEPTANCE';
+
+    if ((access.isAssignee || access.isCoordinator) && (participantStatus === 'PENDING_ACCEPTANCE' || participantStatus === 'PENDING_COORDINATION')) {
       actions.push('ACCEPT');
       actions.push('RECEIVE');
       actions.push('IN_PROGRESS');
@@ -742,6 +753,12 @@ export class TaskSharedService {
     if (access.isOwner && (t.status === 'DRAFT' || t.status === 'ASSIGNED')) {
       actions.push('EDIT');
       actions.push('DELETE');
+    }
+    
+    // Natively inject REASSIGN for the owner when task is new, rejected or pending coordination
+    if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION')) {
+      actions.push('ASSIGN');
+      actions.push('REASSIGN');
     }
 
     // Always allow chat for participants
@@ -793,6 +810,8 @@ export class TaskSharedService {
         employeeCode: p.employeeCode || '',
         fullName: p.employee?.fullName || p.employeeName || '',
         role: p.participantRole || '',
+        status: p.status || 'PENDING_ACCEPTANCE',
+        reason: p.reason || '',
         departmentId: p.employee?.departmentId || 0,
         jobTitleId: p.employee?.jobTitleId || 0,
       })) : [],

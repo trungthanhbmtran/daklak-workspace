@@ -344,6 +344,9 @@ model TaskParticipant {
   assignedAt             DateTime @default(now()) @map("assigned_at")
   contributionPercentage Float    @default(100.0) @map("contribution_percentage")
 
+  status String  @default("PENDING_ACCEPTANCE") @map("status")
+  reason String? @map("reason") @db.Text
+
   task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   employee Employee @relation("EmployeeTasks", fields: [employeeCode], references: [employeeCode])
 

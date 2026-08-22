@@ -318,7 +318,9 @@ exports.Prisma.TaskParticipantScalarFieldEnum = {
   employeeCode: 'employeeCode',
   participantRole: 'participantRole',
   assignedAt: 'assignedAt',
-  contributionPercentage: 'contributionPercentage'
+  contributionPercentage: 'contributionPercentage',
+  status: 'status',
+  reason: 'reason'
 };
 
 exports.Prisma.TaskClosureScalarFieldEnum = {
@@ -474,7 +476,9 @@ exports.Prisma.TaskAttachmentOrderByRelevanceFieldEnum = {
 };
 
 exports.Prisma.TaskParticipantOrderByRelevanceFieldEnum = {
-  employeeCode: 'employeeCode'
+  employeeCode: 'employeeCode',
+  status: 'status',
+  reason: 'reason'
 };
 
 exports.Prisma.TaskHistoryOrderByRelevanceFieldEnum = {
