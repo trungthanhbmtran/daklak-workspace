@@ -123,7 +123,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
             <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
               <UserCircle2 className="w-4 h-4 text-slate-400"/> Người xử lý chính <Text as="span" className="text-red-500">*</Text>
             </Label>
-            <Select required value={assignee} onValueChange={setAssignee}>
+            <Select required value={assignee || undefined} onValueChange={setAssignee}>
               <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm">
                 <SelectValue placeholder="Chọn người chịu trách nhiệm chính..." />
               </SelectTrigger>
@@ -156,7 +156,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
             <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
               <UsersIcon className="w-4 h-4 text-slate-400"/> Phối hợp thực hiện
             </Label>
-            <Select value="" onValueChange={handleAddCoordinator}>
+            <Select value={undefined} onValueChange={handleAddCoordinator}>
               <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm">
                 <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
               </SelectTrigger>

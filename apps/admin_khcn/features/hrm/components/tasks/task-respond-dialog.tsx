@@ -119,9 +119,9 @@ export function TaskRespondDialog({ open, onOpenChange, taskId, action }: TaskRe
 
               <div className="space-y-3">
                 <Label>Thêm người phối hợp</Label>
-                <Select onValueChange={handleAddCoordinator} value="">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn người phối hợp..." />
+                <Select onValueChange={handleAddCoordinator} value={undefined}>
+                  <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200">
+                    <SelectValue placeholder="+ Chọn người / phòng ban phối hợp..." />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
