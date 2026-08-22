@@ -36,10 +36,11 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
 
   useEffect(() => {
     if (open) {
-      setAssignee(currentAssigneeCode || "");
+      setAssignee(currentAssigneeCode ? String(currentAssigneeCode) : "");
       
       if (currentCoordinatorsCodes && currentCoordinatorsCodes.length > 0) {
-        const mapped = currentCoordinatorsCodes.map(code => {
+        const mapped = currentCoordinatorsCodes.map(c => {
+          const code = String(c);
           let name = code;
           if (code.startsWith("DEPT_")) {
             const deptId = parseInt(code.replace("DEPT_", ""), 10);
