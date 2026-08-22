@@ -54,6 +54,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const isAssigned = (currentTask.status?.toUpperCase() === "ASSIGNED" || currentTask.status?.toUpperCase() === "MỚI GIAO" || currentTask.status?.toUpperCase() === "PENDING_ACCEPTANCE" || currentTask.status?.toUpperCase() === "TODO") && (currentTask.allowedActions?.includes('RECEIVE') || currentTask.allowedActions?.includes('ACCEPT'));
   const comments: any[] = (commentsData as any)?.data ?? [];
   const isAssigner = user?.employeeCode === currentTask.creatorEmployeeCode || user?.employeeCode === currentTask.assignerCode;
+  const allowedReassignStatuses = ["ASSIGNED", "MỚI GIAO", "PENDING_ACCEPTANCE", "TODO", "REJECTED", "REQUEST_COORDINATION"];
+  const canReassign = isAssigner && allowedReassignStatuses.includes(currentTask.status?.toUpperCase() || "");
 
   // ── Mutations ──
   const respondTask = useRespondTask(taskId);
@@ -111,7 +113,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                   {translateTaskStatus(currentTask.status || "")}
                 </Badge>
                 <div className="flex gap-2">
-                  {isAssigner && !isCompleted && (
+                  {canReassign && !isCompleted && (
                     <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
                       <Briefcase className="w-3 h-3 mr-1" />
                       Giao lại / Phối hợp
