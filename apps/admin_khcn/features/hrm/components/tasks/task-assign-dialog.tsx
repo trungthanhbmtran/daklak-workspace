@@ -38,16 +38,16 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
     if (open) {
       setAssignee(currentAssigneeCode ? String(currentAssigneeCode) : "");
       
-      if (currentCoordinatorsCodes && currentCoordinatorsCodes.length > 0) {
+      if (Array.isArray(currentCoordinatorsCodes) && currentCoordinatorsCodes.length > 0) {
         const mapped = currentCoordinatorsCodes.map(c => {
           const code = String(c);
           let name = code;
           if (code.startsWith("DEPT_")) {
             const deptId = parseInt(code.replace("DEPT_", ""), 10);
-            const dept = departments.find((d: any) => d.id === deptId);
+            const dept = departments.find((d: any) => d?.id === deptId);
             if (dept) name = `🏢 ${dept.name}`;
           } else {
-            const emp = employees.find((e: any) => e.employeeCode === code);
+            const emp = employees.find((e: any) => e?.employeeCode === code);
             if (emp) name = `👤 ${emp.fullName}`;
           }
           return { id: code, name };
@@ -131,7 +131,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                 {departments.length > 0 && (
                   <SelectGroup>
                     <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Phòng ban</SelectLabel>
-                    {departments.map((dept: any) => (
+                    {departments.filter((dept: any) => dept?.id != null).map((dept: any) => (
                       <SelectItem key={`DEPT_${dept.id}`} value={`DEPT_${dept.id}`}>
                         🏢 {dept.name}
                       </SelectItem>
@@ -141,7 +141,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                 {employees.length > 0 && (
                   <SelectGroup>
                     <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
-                    {employees.map((emp: any) => (
+                    {employees.filter((emp: any) => !!emp?.employeeCode).map((emp: any) => (
                       <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
                         👤 {emp.fullName}
                       </SelectItem>
@@ -165,7 +165,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                   <SelectGroup>
                     <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Phòng ban</SelectLabel>
                     {departments
-                      .filter((d: any) => `DEPT_${d.id}` !== assignee && !coordinators.find(c => c.id === `DEPT_${d.id}`))
+                      .filter((d: any) => d?.id != null && `DEPT_${d.id}` !== assignee && !coordinators.find(c => c.id === `DEPT_${d.id}`))
                       .map((dept: any) => (
                         <SelectItem key={`DEPT_${dept.id}`} value={`DEPT_${dept.id}`}>
                           🏢 {dept.name}
@@ -177,7 +177,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                   <SelectGroup>
                     <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
                     {employees
-                      .filter((e: any) => e.employeeCode !== assignee && !coordinators.find(c => c.id === e.employeeCode))
+                      .filter((e: any) => !!e?.employeeCode && e.employeeCode !== assignee && !coordinators.find(c => c.id === e.employeeCode))
                       .map((emp: any) => (
                         <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
                           👤 {emp.fullName}
