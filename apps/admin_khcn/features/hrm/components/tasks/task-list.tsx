@@ -170,9 +170,12 @@ export function TaskList() {
   const taskIdParam = searchParams?.get("taskId");
   const { data: detailData } = useTaskDetail(taskIdParam ? Number(taskIdParam) : undefined);
 
+  const lastOpenedTaskId = React.useRef<string | null>(null);
+
   React.useEffect(() => {
-    if (taskIdParam && detailData?.data && !selectedTask) {
+    if (taskIdParam && detailData?.data && !selectedTask && lastOpenedTaskId.current !== taskIdParam) {
       setSelectedTask(detailData.data);
+      lastOpenedTaskId.current = taskIdParam;
     }
   }, [taskIdParam, detailData, selectedTask]);
 
