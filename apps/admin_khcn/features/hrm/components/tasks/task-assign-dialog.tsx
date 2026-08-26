@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,12 +27,11 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
 
   // ── Danh sách nhân viên từ API ──
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true });
-  const employees = (employeesData as any)?.data ?? [];
+  const employees = useMemo(() => (employeesData as any)?.data ?? [], [employeesData]);
 
   // ── Danh sách phòng ban từ API ──
   const { data: orgData } = useOrganizationFlatListQuery();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const departments = orgData?.data ?? [];
+  const departments = useMemo(() => orgData?.data ?? [], [orgData]);
 
   useEffect(() => {
     if (open) {
