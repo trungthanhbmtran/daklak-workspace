@@ -592,12 +592,83 @@ export class TasksService {
     return this.toResponse(await this.findTaskOrFail(id), context);
   }
 
-  private async executeAssignTaskTransaction(id: number, data: any) {
+  private async executeAssignTaskTransaction(id: number, data: any, rawTask: any) {
     await this.prisma.$transaction(async (tx) => {
-      await tx.taskParticipant.deleteMany({ where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.OWNER, TaskRole.COORDINATOR] } } });
-      const participants = this.shared.buildParticipantsData(id, data);
-      if (participants.length > 0) await tx.taskParticipant.createMany({ data: participants, skipDuplicates: true });
-      await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
+      const existingAssignee = rawTask.participants.find((p: any) => p.participantRole === 'ASSIGNEE');
+      const existingOwner = rawTask.participants.find((p: any) => p.participantRole === 'OWNER');
+      const existingCoordinators = rawTask.participants.filter((p: any) => p.participantRole === 'COORDINATOR');
+
+      const participantsToCreate: any[] = [];
+      const participantsToDelete: any[] = [];
+      const participantsToUpdate: any[] = [];
+
+      let resetTaskStatus = false;
+
+      // 1. Assignee
+      const newAssigneeCode = data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? data.assigneeCode : null;
+      if (newAssigneeCode) {
+        if (!existingAssignee) {
+          participantsToCreate.push({ taskId: id, employeeCode: newAssigneeCode, participantRole: 'ASSIGNEE', status: 'PENDING_ACCEPTANCE', contributionPercentage: data.assigneePercentage ?? 100 });
+          resetTaskStatus = true;
+        } else if (existingAssignee.employeeCode !== newAssigneeCode) {
+          participantsToDelete.push(existingAssignee);
+          participantsToCreate.push({ taskId: id, employeeCode: newAssigneeCode, participantRole: 'ASSIGNEE', status: 'PENDING_ACCEPTANCE', contributionPercentage: data.assigneePercentage ?? 100 });
+          resetTaskStatus = true;
+        } else if (existingAssignee.status === 'REJECTED') {
+          participantsToUpdate.push({ where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: newAssigneeCode, participantRole: 'ASSIGNEE' } }, data: { status: 'PENDING_ACCEPTANCE', reason: null } });
+          resetTaskStatus = true;
+        }
+      } else if (existingAssignee) {
+        participantsToDelete.push(existingAssignee);
+      }
+
+      // 2. Owner
+      const newAssignerCode = data.assignerCode && data.assignerCode !== 'UNASSIGNED' ? data.assignerCode : null;
+      if (newAssignerCode) {
+        if (!existingOwner) {
+          participantsToCreate.push({ taskId: id, employeeCode: newAssignerCode, participantRole: 'OWNER', status: 'ACCEPTED' });
+        } else if (existingOwner.employeeCode !== newAssignerCode) {
+          participantsToDelete.push(existingOwner);
+          participantsToCreate.push({ taskId: id, employeeCode: newAssignerCode, participantRole: 'OWNER', status: 'ACCEPTED' });
+        }
+      } else if (existingOwner) {
+        participantsToDelete.push(existingOwner);
+      }
+
+      // 3. Coordinators
+      const newCoordCodes = data.coAssigneeCodes || data.coassigneeCodes || [];
+      const existingCoordMap = new Map<string, any>(existingCoordinators.map((c: any) => [c.employeeCode, c]));
+
+      for (const code of newCoordCodes) {
+        const existing = existingCoordMap.get(code);
+        if (!existing) {
+          participantsToCreate.push({ taskId: id, employeeCode: code, participantRole: 'COORDINATOR', status: 'PENDING_ACCEPTANCE' });
+        } else {
+          if (existing.status === 'REJECTED') {
+            participantsToUpdate.push({ where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: code, participantRole: 'COORDINATOR' } }, data: { status: 'PENDING_ACCEPTANCE', reason: null } });
+          }
+          existingCoordMap.delete(code);
+        }
+      }
+
+      for (const removed of existingCoordMap.values()) {
+        participantsToDelete.push(removed);
+      }
+
+      // 4. Execute queries
+      for (const p of participantsToDelete) {
+        await tx.taskParticipant.delete({ where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: p.employeeCode, participantRole: p.participantRole } } });
+      }
+      if (participantsToCreate.length > 0) {
+        await tx.taskParticipant.createMany({ data: participantsToCreate, skipDuplicates: true });
+      }
+      for (const u of participantsToUpdate) {
+        await tx.taskParticipant.update({ where: u.where, data: u.data });
+      }
+
+      if (resetTaskStatus) {
+        await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
+      }
     });
   }
 
@@ -615,7 +686,7 @@ export class TasksService {
       if (!transition.allowed) throw new RpcException('Workflow không cho phép thực hiện phân công/giao việc.');
     }
 
-    await this.executeAssignTaskTransaction(id, data);
+    await this.executeAssignTaskTransaction(id, data, rawTask);
 
     await this.prisma.taskHistory.create({
       data: {

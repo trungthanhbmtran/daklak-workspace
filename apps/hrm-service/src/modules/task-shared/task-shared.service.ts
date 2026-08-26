@@ -599,7 +599,8 @@ export class TaskSharedService {
         actions.push('DELETE');
       }
 
-      if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION')) {
+      const hasRejectedCoordinator = t.participants?.some((p: any) => p.participantRole === 'COORDINATOR' && p.status === 'REJECTED');
+      if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION' || hasRejectedCoordinator)) {
         actions.push('ASSIGN');
         actions.push('REASSIGN');
       }
@@ -755,8 +756,9 @@ export class TaskSharedService {
       actions.push('DELETE');
     }
     
-    // Natively inject REASSIGN for the owner when task is new, rejected or pending coordination
-    if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION')) {
+    // Natively inject REASSIGN for the owner when task is new, rejected, pending coordination, or has rejected coordinators
+    const hasRejectedCoordinator = t.participants?.some((p: any) => p.participantRole === 'COORDINATOR' && p.status === 'REJECTED');
+    if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION' || hasRejectedCoordinator)) {
       actions.push('ASSIGN');
       actions.push('REASSIGN');
     }
