@@ -18,10 +18,10 @@ interface TaskAssignDialogProps {
   onOpenChange: (open: boolean) => void;
   taskId: number;
   currentAssigneeCode?: string;
-  currentCoordinatorsCodes?: string[];
+  currentCoordinators?: { id: string, name: string }[];
 }
 
-export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCode, currentCoordinatorsCodes }: TaskAssignDialogProps) {
+export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCode, currentCoordinators }: TaskAssignDialogProps) {
   const [assignee, setAssignee] = useState<string>("");
   const [coordinators, setCoordinators] = useState<{id: string, name: string}[]>([]);
 
@@ -36,27 +36,9 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
   useEffect(() => {
     if (open) {
       setAssignee(currentAssigneeCode ? String(currentAssigneeCode) : "");
-      
-      if (Array.isArray(currentCoordinatorsCodes) && currentCoordinatorsCodes.length > 0) {
-        const mapped = currentCoordinatorsCodes.map(c => {
-          const code = String(c);
-          let name = code;
-          if (code.startsWith("DEPT_")) {
-            const deptId = parseInt(code.replace("DEPT_", ""), 10);
-            const dept = departments.find((d: any) => d?.id === deptId);
-            if (dept) name = `🏢 ${dept.name}`;
-          } else {
-            const emp = employees.find((e: any) => e?.employeeCode === code);
-            if (emp) name = `👤 ${emp.fullName}`;
-          }
-          return { id: code, name };
-        });
-        setCoordinators(mapped);
-      } else {
-        setCoordinators([]);
-      }
+      setCoordinators(currentCoordinators || []);
     }
-  }, [open, currentAssigneeCode, currentCoordinatorsCodes, employees, departments]);
+  }, [open, currentAssigneeCode, currentCoordinators]);
 
   const assignTask = useAssignTask();
   const isPending = assignTask.isPending;
@@ -89,8 +71,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
       await assignTask.mutateAsync({
         id: taskId,
         payload: {
-          assigneeCode: assignee.startsWith("DEPT_") ? undefined : assignee,
-          departmentId: assignee.startsWith("DEPT_") ? parseInt(assignee.replace("DEPT_", ""), 10) : undefined,
+          assigneeCode: assignee,
           coAssigneeCodes: coordinators.map(c => c.id),
         }
       });

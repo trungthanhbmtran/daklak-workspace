@@ -340,7 +340,10 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             onOpenChange={setIsAssignOpen}
             taskId={taskId}
             currentAssigneeCode={currentTask.assigneeCode}
-            currentCoordinatorsCodes={currentTask.coassigneeCodes || []}
+            currentCoordinators={(currentTask.participants?.filter((p: any) => p.role === 'COORDINATOR') || []).map((p: any) => ({
+              id: p.employeeCode,
+              name: p.fullName || p.employeeName || p.employeeCode
+            }))}
           />
         )}
         {respondAction !== null && (
