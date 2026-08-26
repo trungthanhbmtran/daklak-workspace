@@ -80,7 +80,7 @@ export class NotificationsService {
     limit: number = 50,
   ): Promise<{
     data: InAppNotification[];
-    meta: { total: number; page: number; limit: number; totalPages: number };
+    meta: { total: number; page: number; limit: number; totalPages: number; unreadCount?: number };
   }> {
     const uid = String(userId);
     const redis = this.redisService.getClient();
@@ -157,6 +157,17 @@ export class NotificationsService {
       return { ...n, category };
     });
 
+    const allPayloadKeys = sortedIds.map((id) => `notification:data:${id}`);
+    let unreadCount = 0;
+    if (allPayloadKeys.length > 0) {
+      const allPayloadsForCount = await redis.mget(...allPayloadKeys);
+      for (const p of allPayloadsForCount) {
+        if (p && p.includes('"read":false')) {
+          unreadCount++;
+        }
+      }
+    }
+
     return {
       data: notificationsWithCategory,
       meta: {
@@ -164,6 +175,7 @@ export class NotificationsService {
         page,
         limit,
         totalPages: Math.ceil(totalCount / limit),
+        unreadCount,
       },
     };
   }
@@ -175,7 +187,8 @@ export class NotificationsService {
     email?: string,
   ): Promise<boolean> {
     const redis = this.redisService.getClient();
-    const payloadStr = await redis.hget('notifications:data', id);
+    const key = `notification:data:${id}`;
+    const payloadStr = await redis.get(key);
     if (!payloadStr) return false;
 
     const n = JSON.parse(payloadStr) as InAppNotification;
@@ -187,9 +200,63 @@ export class NotificationsService {
       (email && n.userId === email)
     ) {
       n.read = true;
-      await redis.hset('notifications:data', id, JSON.stringify(n));
+      await redis.set(key, JSON.stringify(n), 'KEEPTTL');
       return true;
     }
     return false;
+  }
+
+  async markAllRead(
+    userId: string | number,
+    employeeCode?: string,
+    email?: string,
+  ): Promise<number> {
+    const uid = String(userId);
+    const redis = this.redisService.getClient();
+
+    const userZset = `notifications:user:${uid}`;
+    const employeeZset = employeeCode ? `notifications:user:${employeeCode}` : null;
+    const emailZset = email ? `notifications:user:${email}` : null;
+
+    const fetchZset = async (key: string) => {
+      const result = await redis.zrevrange(key, 0, -1);
+      return result;
+    };
+
+    const promises = [fetchZset(userZset)];
+    if (employeeZset) promises.push(fetchZset(employeeZset));
+    if (emailZset) promises.push(fetchZset(emailZset));
+
+    const results = await Promise.all(promises);
+    const allIds = new Set<string>();
+    for (const arr of results) {
+      for (const id of arr) {
+        allIds.add(id);
+      }
+    }
+
+    if (allIds.size === 0) return 0;
+
+    const keys = Array.from(allIds).map((id) => `notification:data:${id}`);
+    const payloads = await redis.mget(...keys);
+    
+    let markedCount = 0;
+    const pipeline = redis.pipeline();
+
+    for (let i = 0; i < payloads.length; i++) {
+      const p = payloads[i];
+      if (p && p.includes('"read":false')) {
+        const n = JSON.parse(p) as InAppNotification;
+        n.read = true;
+        pipeline.set(keys[i], JSON.stringify(n), 'KEEPTTL');
+        markedCount++;
+      }
+    }
+
+    if (markedCount > 0) {
+      await pipeline.exec();
+    }
+
+    return markedCount;
   }
 }

@@ -30,14 +30,14 @@ export function NotificationRow({
       className={`
         group relative flex gap-3 px-3 sm:px-4 py-3 border-b border-border/40 last:border-0 cursor-pointer
         transition-colors hover:bg-muted/50
-        ${item.read ? "bg-transparent" : "bg-muted/10"}
+        ${item.read ? "bg-transparent opacity-80" : "bg-primary/[0.04] dark:bg-primary/10"}
       `}
     >
-      <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${item.read ? 'bg-muted/50 border-border text-muted-foreground' : 'bg-primary/10 border-primary/20 text-primary'}`}>
+      <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${item.read ? 'bg-muted/50 border-border text-muted-foreground' : 'bg-primary/10 border-primary/20 text-primary'}`}>
         {item.type === 'SYSTEM' ? <FileText className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
       </div>
       <div className="flex flex-1 flex-col gap-1 pr-6">
-        <p className={`text-sm ${item.read ? 'font-medium text-foreground/80' : 'font-semibold text-foreground'}`}>
+        <p className={`text-[14px] leading-snug ${item.read ? 'font-normal text-muted-foreground' : 'font-semibold text-foreground'}`}>
           {item.title}
         </p>
         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">

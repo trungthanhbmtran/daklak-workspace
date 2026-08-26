@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
-import { getNotifications, markNotificationRead, type NotificationItem } from "./api";
+import { getNotifications, markNotificationRead, markAllNotificationsRead, type NotificationItem } from "./api";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -40,11 +40,70 @@ export function NotificationBell() {
   });
 
   const list = data?.pages.flatMap((page) => page.data) || [];
+  // Lấy unreadCount từ backend trả về ở trang đầu tiên
+  const unreadCount = data?.pages[0]?.unreadCount ?? 0;
 
   const markRead = useMutation({
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
+      const previousData = queryClient.getQueryData(NOTIFICATIONS_KEY);
+      
+      queryClient.setQueryData(NOTIFICATIONS_KEY, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any, index: number) => ({
+            ...page,
+            data: page.data.map((item: any) => 
+              item.id === id ? { ...item, read: true } : item
+            ),
+            unreadCount: index === 0 ? Math.max(0, (page.unreadCount || 0) - 1) : page.unreadCount
+          }))
+        };
+      });
+      
+      return { previousData };
+    },
+    onError: (error: any, _, context) => { 
+      if (context?.previousData) {
+        queryClient.setQueryData(NOTIFICATIONS_KEY, context.previousData);
+      }
+      toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); 
+    },
     mutationFn: markNotificationRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+    },
+  });
+
+  const markAllRead = useMutation({
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
+      const previousData = queryClient.getQueryData(NOTIFICATIONS_KEY);
+      
+      queryClient.setQueryData(NOTIFICATIONS_KEY, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any, index: number) => ({
+            ...page,
+            data: page.data.map((item: any) => ({ ...item, read: true })),
+            unreadCount: index === 0 ? 0 : page.unreadCount
+          }))
+        };
+      });
+      
+      return { previousData };
+    },
+    onError: (error: any, _, context) => { 
+      if (context?.previousData) {
+        queryClient.setQueryData(NOTIFICATIONS_KEY, context.previousData);
+      }
+      toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); 
+    },
+    mutationFn: markAllNotificationsRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
     },
@@ -56,8 +115,6 @@ export function NotificationBell() {
     }
     setOpen(false);
   };
-
-  const unreadCount = list.filter((n) => !n.read).length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -91,10 +148,8 @@ export function NotificationBell() {
                 variant="ghost"
                 size="sm"
                 className="h-auto p-0 text-xs text-muted-foreground hover:text-primary hover:bg-transparent"
-                onClick={() => {
-                  const unreadItems = list.filter(n => !n.read);
-                  unreadItems.forEach(n => markRead.mutate(n.id));
-                }}
+                onClick={() => markAllRead.mutate()}
+                disabled={markAllRead.isPending}
               >
                 Đánh dấu tất cả đã đọc
               </Button>

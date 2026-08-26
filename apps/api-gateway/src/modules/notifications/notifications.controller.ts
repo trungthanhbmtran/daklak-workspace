@@ -55,6 +55,22 @@ export class NotificationsController {
     );
   }
 
+  @Patch('read-all')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @ApiOperation({ summary: 'Đánh dấu tất cả đã đọc' })
+  @ApiResponse({ status: 200, description: 'success' })
+  markAllRead(
+    @Req()
+    req: {
+      user?: { id?: string | number; employeeCode?: string; email?: string };
+    },
+  ) {
+    const userId = req.user?.id ?? 0;
+    const employeeCode = req.user?.employeeCode;
+    const email = req.user?.email;
+    return this.notificationsService.markAllRead(userId, employeeCode, email).then(count => ({ success: true, count }));
+  }
+
   @Patch(':id/read')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Đánh dấu đã đọc' })

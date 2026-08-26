@@ -14,7 +14,7 @@ export interface NotificationItem {
   metadata?: Record<string, any>;
 }
 
-export async function getNotifications({ pageParam = 1 }: { pageParam?: number } = {}): Promise<{ data: NotificationItem[], nextCursor: number | undefined }> {
+export async function getNotifications({ pageParam = 1 }: { pageParam?: number } = {}): Promise<{ data: NotificationItem[], nextCursor: number | undefined, unreadCount?: number }> {
   const limit = 10;
   const res = await apiClient.get<any, ApiResponse<NotificationItem[]>>(`/notifications?page=${pageParam}&limit=${limit}`);
   const data = pickData(res);
@@ -38,12 +38,17 @@ export async function getNotifications({ pageParam = 1 }: { pageParam?: number }
     nextCursor = pageParam + 1;
   }
 
-  return { data: items, nextCursor };
+  return { data: items, nextCursor, unreadCount: meta?.unreadCount };
 }
 
 export async function markNotificationRead(id: string): Promise<{ success: boolean }> {
   const res = await apiClient.patch<any, ApiResponse<{ success?: boolean }>>(`/notifications/${id}/read`);
   return { success: res.success ?? false };
+}
+
+export async function markAllNotificationsRead(): Promise<{ success: boolean, count?: number }> {
+  const res = await apiClient.patch<any, ApiResponse<{ success?: boolean, count?: number }>>(`/notifications/read-all`);
+  return { success: res.success ?? false, count: res.data?.count };
 }
 
 export const notificationConfigApi = {
