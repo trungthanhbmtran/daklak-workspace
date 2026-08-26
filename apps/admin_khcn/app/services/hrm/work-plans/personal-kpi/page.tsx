@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function PersonalKpiPage() {
   return (
-    <div className="p-6">
+    <div className="flex-col flex-1 min-h-0 overflow-y-auto flex pr-2 pb-4">
       <PersonalKpiClient />
     </div>
   );
