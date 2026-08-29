@@ -25,26 +25,6 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
       href: "/services/hrm/work-plans/tasks/dashboard",
       icon: LayoutDashboard,
     },
-    {
-      name: "Dự án / Kế hoạch",
-      href: "/services/hrm/work-plans/projects",
-      icon: FolderKanban,
-    },
-    {
-      name: "KPI cá nhân",
-      href: "/services/hrm/work-plans/personal-kpi",
-      icon: UserCheck,
-    },
-    {
-      name: "Duyệt KPI",
-      href: "/services/hrm/work-plans/review-kpi",
-      icon: ClipboardCheck,
-    },
-    {
-      name: "Thống kê KPI",
-      href: "/services/hrm/work-plans/dashboard-kpi",
-      icon: PieChart,
-    },
   ];
 
   return (

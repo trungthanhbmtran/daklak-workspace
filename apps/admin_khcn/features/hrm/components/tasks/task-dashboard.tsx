@@ -20,7 +20,7 @@ export function TaskDashboard() {
     let completed = 0;
     let inProgress = 0;
     let overdue = 0;
-    const assigneeMap: Record<string, { name: string, count: number, totalProgress: number }> = {};
+    const assigneeMap: Record<string, { name: string, hoanThanh: number, trongHan: number, hoanThanhQuaHan: number, quaHan: number, total: number }> = {};
     const kpiMap: Record<string, number> = {};
 
     tasks.forEach(t => {
@@ -35,10 +35,28 @@ export function TaskDashboard() {
       // Assignee stats
       const assignee = t.assigneeName || t.assigneeDepartment?.name || t.assignee?.fullName || "Chưa phân công";
       if (!assigneeMap[assignee]) {
-        assigneeMap[assignee] = { name: assignee, count: 0, totalProgress: 0 };
+        assigneeMap[assignee] = { name: assignee, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
       }
-      assigneeMap[assignee].count++;
-      assigneeMap[assignee].totalProgress += (t.progress || 0);
+      
+      const dueDate = new Date(t.dueDate);
+      const isCompleted = t.status === "COMPLETED" || t.status === "DONE";
+      
+      if (isCompleted) {
+        const completedDate = t.completedAt ? new Date(t.completedAt) : new Date(t.updatedAt || new Date());
+        if (completedDate > dueDate) {
+          assigneeMap[assignee].hoanThanhQuaHan++;
+        } else {
+          assigneeMap[assignee].hoanThanh++;
+        }
+      } else {
+        const now = new Date();
+        if (now > dueDate) {
+          assigneeMap[assignee].quaHan++;
+        } else {
+          assigneeMap[assignee].trongHan++;
+        }
+      }
+      assigneeMap[assignee].total++;
 
       // KPI stats
       if (t.kpi?.qualityGrade) {
@@ -50,11 +68,7 @@ export function TaskDashboard() {
     });
 
     const assigneeStatsArray = Object.values(assigneeMap)
-      .map(item => ({
-        name: item.name,
-        avgProgress: Math.round(item.totalProgress / item.count)
-      }))
-      .sort((a, b) => b.avgProgress - a.avgProgress)
+      .sort((a, b) => b.total - a.total)
       .slice(0, 10); // top 10
 
     const kpiStatsArray = Object.entries(kpiMap).map(([name, value]) => ({ name, value }));
@@ -126,21 +140,24 @@ export function TaskDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Tiến độ trung bình theo người xử lý</CardTitle>
+            <CardTitle>Tiến độ công việc theo cá nhân / phòng ban</CardTitle>
           </CardHeader>
           <CardContent className="pl-0">
             {assigneeStats.length > 0 ? (
-              <div className="h-[280px] w-full">
+              <div className="h-[320px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={assigneeStats} margin={{ top: 10, right: 30, left: 0, bottom: 25 }}>
+                  <BarChart data={assigneeStats} margin={{ top: 10, right: 30, left: 0, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" />
-                    <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                    <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                     <RechartsTooltip 
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                      formatter={(value) => [`${value}%`, 'Tiến độ']}
                     />
-                    <Bar dataKey="avgProgress" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+                    <Bar dataKey="hoanThanh" name="Hoàn thành" stackId="a" fill="#10b981" maxBarSize={40} />
+                    <Bar dataKey="trongHan" name="Trong hạn" stackId="a" fill="#3b82f6" maxBarSize={40} />
+                    <Bar dataKey="hoanThanhQuaHan" name="Hoàn thành quá hạn" stackId="a" fill="#f59e0b" maxBarSize={40} />
+                    <Bar dataKey="quaHan" name="Quá hạn" stackId="a" fill="#ef4444" maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
