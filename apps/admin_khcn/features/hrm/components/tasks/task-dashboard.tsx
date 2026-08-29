@@ -15,13 +15,43 @@ export function TaskDashboard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tasks: any[] = (responseData as any)?.data ?? [];
 
-  const { totalTasks, completedTasks, inProgressTasks, overdueTasks, assigneeStats, kpiStats } = useMemo(() => {
+  const { totalTasks, completedTasks, inProgressTasks, overdueTasks, individualStats, departmentStats, kpiStats } = useMemo(() => {
     const total = tasks.length;
     let completed = 0;
     let inProgress = 0;
     let overdue = 0;
-    const assigneeMap: Record<string, { name: string, hoanThanh: number, trongHan: number, hoanThanhQuaHan: number, quaHan: number, total: number }> = {};
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const individualMap: Record<string, any> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const departmentMap: Record<string, any> = {};
     const kpiMap: Record<string, number> = {};
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const incrementMap = (map: Record<string, any>, key: string, t: any) => {
+      if (!map[key]) {
+        map[key] = { name: key, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
+      }
+      const dueDate = new Date(t.dueDate);
+      const isCompleted = t.status === "COMPLETED" || t.status === "DONE";
+      
+      if (isCompleted) {
+        const completedDate = t.completedAt ? new Date(t.completedAt) : new Date(t.updatedAt || new Date());
+        if (completedDate > dueDate) {
+          map[key].hoanThanhQuaHan++;
+        } else {
+          map[key].hoanThanh++;
+        }
+      } else {
+        const now = new Date();
+        if (now > dueDate) {
+          map[key].quaHan++;
+        } else {
+          map[key].trongHan++;
+        }
+      }
+      map[key].total++;
+    };
 
     tasks.forEach(t => {
       // Basic metrics
@@ -32,31 +62,15 @@ export function TaskDashboard() {
         overdue++;
       }
 
-      // Assignee stats
-      const assignee = t.assigneeName || t.assigneeDepartment?.name || t.assignee?.fullName || "Chưa phân công";
-      if (!assigneeMap[assignee]) {
-        assigneeMap[assignee] = { name: assignee, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
+      // Assignee stats (Individual)
+      if (t.assigneeId || t.assigneeName || t.assignee) {
+        const indName = t.assigneeName || t.assignee?.fullName || "Chưa phân công";
+        incrementMap(individualMap, indName, t);
       }
-      
-      const dueDate = new Date(t.dueDate);
-      const isCompleted = t.status === "COMPLETED" || t.status === "DONE";
-      
-      if (isCompleted) {
-        const completedDate = t.completedAt ? new Date(t.completedAt) : new Date(t.updatedAt || new Date());
-        if (completedDate > dueDate) {
-          assigneeMap[assignee].hoanThanhQuaHan++;
-        } else {
-          assigneeMap[assignee].hoanThanh++;
-        }
-      } else {
-        const now = new Date();
-        if (now > dueDate) {
-          assigneeMap[assignee].quaHan++;
-        } else {
-          assigneeMap[assignee].trongHan++;
-        }
-      }
-      assigneeMap[assignee].total++;
+
+      // Department stats
+      const deptName = t.assigneeDepartment?.name || t.assigneeUnitName || "Chưa phân công bộ phận";
+      incrementMap(departmentMap, deptName, t);
 
       // KPI stats
       if (t.kpi?.qualityGrade) {
@@ -67,13 +81,17 @@ export function TaskDashboard() {
       }
     });
 
-    const assigneeStatsArray = Object.values(assigneeMap)
+    const individualStatsArray = Object.values(individualMap)
       .sort((a, b) => b.total - a.total)
-      .slice(0, 10); // top 10
+      .slice(0, 10);
+
+    const departmentStatsArray = Object.values(departmentMap)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
 
     const kpiStatsArray = Object.entries(kpiMap).map(([name, value]) => ({ name, value }));
 
-    return { totalTasks: total, completedTasks: completed, inProgressTasks: inProgress, overdueTasks: overdue, assigneeStats: assigneeStatsArray, kpiStats: kpiStatsArray };
+    return { totalTasks: total, completedTasks: completed, inProgressTasks: inProgress, overdueTasks: overdue, individualStats: individualStatsArray, departmentStats: departmentStatsArray, kpiStats: kpiStatsArray };
   }, [tasks]);
 
   if (isLoading) {
@@ -140,13 +158,13 @@ export function TaskDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Tiến độ công việc theo cá nhân / phòng ban</CardTitle>
+            <CardTitle>Tiến độ công việc theo phòng ban</CardTitle>
           </CardHeader>
           <CardContent className="pl-0">
-            {assigneeStats.length > 0 ? (
+            {departmentStats.length > 0 ? (
               <div className="h-[320px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={assigneeStats} margin={{ top: 10, right: 30, left: 0, bottom: 40 }}>
+                  <BarChart data={departmentStats} margin={{ top: 10, right: 30, left: 0, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" />
                     <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
@@ -163,7 +181,7 @@ export function TaskDashboard() {
               </div>
             ) : (
               <div className="h-[280px] flex items-center justify-center text-slate-400 border border-dashed rounded-md mx-6">
-                Chưa có dữ liệu người xử lý
+                Chưa có dữ liệu phòng ban
               </div>
             )}
           </CardContent>
@@ -206,6 +224,40 @@ export function TaskDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <div className="grid gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Tiến độ công việc theo cá nhân</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-0">
+            {individualStats.length > 0 ? (
+              <div className="h-[320px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={individualStats} margin={{ top: 10, right: 30, left: 0, bottom: 40 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" />
+                    <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <RechartsTooltip 
+                      contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+                    <Bar dataKey="hoanThanh" name="Hoàn thành" stackId="a" fill="#10b981" maxBarSize={40} />
+                    <Bar dataKey="trongHan" name="Trong hạn" stackId="a" fill="#3b82f6" maxBarSize={40} />
+                    <Bar dataKey="hoanThanhQuaHan" name="Hoàn thành quá hạn" stackId="a" fill="#f59e0b" maxBarSize={40} />
+                    <Bar dataKey="quaHan" name="Quá hạn" stackId="a" fill="#ef4444" maxBarSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[280px] flex items-center justify-center text-slate-400 border border-dashed rounded-md mx-6">
+                Chưa có dữ liệu cá nhân
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
+
