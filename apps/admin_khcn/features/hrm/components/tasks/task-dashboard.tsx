@@ -3,96 +3,40 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Text } from "@/components/ui/typography";
 import { CheckCircle, Clock, AlertTriangle, FileText, Loader2 } from "lucide-react";
-import { useTasksList } from "../../hooks/useTasks";
+import { useTaskStats } from "../../hooks/useTasks";
+import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useMemo } from "react";
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export function TaskDashboard() {
-  const { data: responseData, isLoading } = useTasksList({ status: undefined, search: undefined });
+  const { data: statsResponse, isLoading } = useTaskStats({ status: undefined, search: undefined });
+  const { data: orgResponse } = useOrganizationFlatListQuery();
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tasks: any[] = (responseData as any)?.data ?? [];
+  const organizations: any[] = (orgResponse as any)?.data ?? [];
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stats: any = (statsResponse as any)?.data ?? {
+    totalTasks: 0, completedTasks: 0, inProgressTasks: 0, overdueTasks: 0,
+    individualStats: [], departmentStats: [], kpiStats: []
+  };
 
-  const { totalTasks, completedTasks, inProgressTasks, overdueTasks, individualStats, departmentStats, kpiStats } = useMemo(() => {
-    const total = tasks.length;
-    let completed = 0;
-    let inProgress = 0;
-    let overdue = 0;
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const individualMap: Record<string, any> = {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const departmentMap: Record<string, any> = {};
-    const kpiMap: Record<string, number> = {};
+  const { totalTasks, completedTasks, inProgressTasks, overdueTasks, individualStats, kpiStats } = stats;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const incrementMap = (map: Record<string, any>, key: string, t: any) => {
-      if (!map[key]) {
-        map[key] = { name: key, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
-      }
-      const dueDate = new Date(t.dueDate);
-      const isCompleted = t.status === "COMPLETED" || t.status === "DONE";
-      
-      if (isCompleted) {
-        const completedDate = t.completedAt ? new Date(t.completedAt) : new Date(t.updatedAt || new Date());
-        if (completedDate > dueDate) {
-          map[key].hoanThanhQuaHan++;
-        } else {
-          map[key].hoanThanh++;
-        }
-      } else {
-        const now = new Date();
-        if (now > dueDate) {
-          map[key].quaHan++;
-        } else {
-          map[key].trongHan++;
-        }
-      }
-      map[key].total++;
-    };
-
-    tasks.forEach(t => {
-      // Basic metrics
-      if (t.status === "COMPLETED" || t.status === "DONE") completed++;
-      else if (t.status === "IN_PROGRESS" || t.status === "ASSIGNED") inProgress++;
-      
-      if (t.status !== "COMPLETED" && t.status !== "DONE" && new Date(t.dueDate) < new Date()) {
-        overdue++;
-      }
-
-      // Assignee stats (Individual)
-      if (t.assigneeId || t.assigneeName || t.assignee) {
-        const indName = t.assigneeName || t.assignee?.fullName || "Chưa phân công";
-        incrementMap(individualMap, indName, t);
-      }
-
-      // Department stats
-      const deptName = t.assigneeDepartment?.name || t.assigneeUnitName || "Chưa phân công bộ phận";
-      incrementMap(departmentMap, deptName, t);
-
-      // KPI stats
-      if (t.kpi?.qualityGrade) {
-        const grade = t.kpi.qualityGrade;
-        kpiMap[grade] = (kpiMap[grade] || 0) + 1;
-      } else if (t.status === "COMPLETED" || t.status === "DONE") {
-        kpiMap["Chưa đánh giá"] = (kpiMap["Chưa đánh giá"] || 0) + 1;
-      }
+  const departmentStats = useMemo(() => {
+    if (!stats.departmentStats || !Array.isArray(stats.departmentStats)) return [];
+    return stats.departmentStats.map((stat: any) => {
+      const deptId = parseInt(stat.name, 10);
+      if (isNaN(deptId)) return stat;
+      const dept = organizations.find((org: any) => org.id === deptId);
+      return {
+        ...stat,
+        name: dept?.name || "Chưa phân công bộ phận"
+      };
     });
-
-    const individualStatsArray = Object.values(individualMap)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-
-    const departmentStatsArray = Object.values(departmentMap)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-
-    const kpiStatsArray = Object.entries(kpiMap).map(([name, value]) => ({ name, value }));
-
-    return { totalTasks: total, completedTasks: completed, inProgressTasks: inProgress, overdueTasks: overdue, individualStats: individualStatsArray, departmentStats: departmentStatsArray, kpiStats: kpiStatsArray };
-  }, [tasks]);
+  }, [stats.departmentStats, organizations]);
 
   if (isLoading) {
     return (
@@ -204,7 +148,7 @@ export function TaskDashboard() {
                       paddingAngle={2}
                       dataKey="value"
                     >
-                      {kpiStats.map((entry, index) => (
+                      {kpiStats.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

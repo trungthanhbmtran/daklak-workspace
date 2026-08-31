@@ -301,10 +301,94 @@ export class TasksService {
     const now = new Date(); now.setHours(0, 0, 0, 0);
     const nowTime = now.getTime();
     let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
+    let totalTasks = allTasks.length;
+    let completedTasks = 0;
+    let inProgressTasks = 0;
+    let overdueTasks = 0;
+
+    const individualMap: Record<string, any> = {};
+    const departmentMap: Record<string, any> = {};
+    const kpiMap: Record<string, number> = {};
+
+    const incrementMap = (map: Record<string, any>, key: string, t: any) => {
+      if (!map[key]) {
+        map[key] = { name: key, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
+      }
+      const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
+      const isCompleted = t.isCompleted === true || t.status === "COMPLETED" || t.status === "DONE";
+      
+      if (isCompleted) {
+        const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
+        if (dueTime && completedTime > dueTime) {
+          map[key].hoanThanhQuaHan++;
+        } else {
+          map[key].hoanThanh++;
+        }
+      } else {
+        if (dueTime && nowTime > dueTime) {
+          map[key].quaHan++;
+        } else {
+          map[key].trongHan++;
+        }
+      }
+      map[key].total++;
+    };
 
     allTasks.forEach((t: any) => {
       const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
       const isDone = t.isCompleted === true;
+
+      // basic stats
+      if (t.status === "COMPLETED" || t.status === "DONE") completedTasks++;
+      else if (t.status === "IN_PROGRESS" || t.status === "ASSIGNED") inProgressTasks++;
+      
+      if (t.status !== "COMPLETED" && t.status !== "DONE" && t.dueDate && new Date(t.dueDate) < new Date()) {
+        overdueTasks++;
+      }
+
+      // Assignee stats
+      const assignee = t.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
+      if (assignee) {
+        const indName = assignee.employee?.fullName || assignee.employeeCode || "Chưa phân công";
+        incrementMap(individualMap, indName, t);
+        
+        const deptId = assignee.employee?.departmentId;
+        const deptName = deptId ? deptId.toString() : "Chưa phân công bộ phận";
+        incrementMap(departmentMap, deptName, t);
+      }
+
+      // kpi fallback
+      if (t.status === "COMPLETED" || t.status === "DONE") {
+        let qualityName = "Chưa đánh giá";
+        
+        if (t.kpiSettings) {
+          const baseScore = t.kpiSettings.baseScore ?? 100;
+          const bonus = t.kpiSettings.bonusPerDay ?? 0;
+          const penalty = t.kpiSettings.penaltyPerDay ?? 0;
+          
+          let finalScore = baseScore;
+          
+          if (t.dueDate) {
+             const dueTime = new Date(t.dueDate).setHours(0, 0, 0, 0);
+             const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
+             
+             const diffDays = Math.round((dueTime - completedTime) / 86400000);
+             
+             if (diffDays > 0) {
+                 finalScore += diffDays * bonus;
+             } else if (diffDays < 0) {
+                 finalScore -= Math.abs(diffDays) * penalty;
+             }
+          }
+          
+          if (finalScore >= 120) qualityName = "Xuất sắc";
+          else if (finalScore >= 100) qualityName = "Tốt";
+          else if (finalScore >= 80) qualityName = "Đạt";
+          else qualityName = "Không đạt";
+        }
+
+        kpiMap[qualityName] = (kpiMap[qualityName] || 0) + 1;
+      }
 
       if (isDone) {
         const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
@@ -323,7 +407,15 @@ export class TasksService {
       inTime++;
     });
 
-    return { overdue, warning, inTime, doneInTime, doneOverdue };
+    const individualStats = Object.values(individualMap).sort((a, b) => b.total - a.total).slice(0, 10);
+    const departmentStats = Object.values(departmentMap).sort((a, b) => b.total - a.total).slice(0, 10);
+    const kpiStats = Object.entries(kpiMap).map(([name, value]) => ({ name, value }));
+
+    return { 
+      overdue, warning, inTime, doneInTime, doneOverdue,
+      totalTasks, completedTasks, inProgressTasks, overdueTasks,
+      individualStats, departmentStats, kpiStats
+    };
   }
 
   async getTaskStats(query: any) {
@@ -332,7 +424,15 @@ export class TasksService {
       where,
       select: {
         status: true, isCompleted: true, progress: true, dueDate: true, completedAt: true, updatedAt: true,
-        participants: { where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, select: { employeeCode: true, participantRole: true } }
+        participants: { 
+          where: { participantRole: { in: ['ASSIGNEE', 'OWNER'] } }, 
+          select: { 
+            employeeCode: true, 
+            participantRole: true,
+            employee: { select: { fullName: true, departmentId: true } }
+          } 
+        },
+        kpiSettings: true
       },
     });
 
