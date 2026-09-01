@@ -123,10 +123,10 @@ export function TaskDashboard() {
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-                    <Bar dataKey="hoanThanh" name="Hoàn thành" stackId="a" fill="#10b981" maxBarSize={40} />
-                    <Bar dataKey="trongHan" name="Trong hạn" stackId="a" fill="#3b82f6" maxBarSize={40} />
-                    <Bar dataKey="hoanThanhQuaHan" name="Hoàn thành quá hạn" stackId="a" fill="#f59e0b" maxBarSize={40} />
-                    <Bar dataKey="quaHan" name="Quá hạn" stackId="a" fill="#ef4444" maxBarSize={40} />
+                    <Bar dataKey="completed" name="Hoàn thành" stackId="a" fill="#10b981" maxBarSize={40} />
+                    <Bar dataKey="inTime" name="Trong hạn" stackId="a" fill="#3b82f6" maxBarSize={40} />
+                    <Bar dataKey="completedOverdue" name="Hoàn thành quá hạn" stackId="a" fill="#f59e0b" maxBarSize={40} />
+                    <Bar dataKey="overdue" name="Quá hạn" stackId="a" fill="#ef4444" maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -193,10 +193,10 @@ export function TaskDashboard() {
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-                    <Bar dataKey="hoanThanh" name="Hoàn thành" stackId="a" fill="#10b981" maxBarSize={40} />
-                    <Bar dataKey="trongHan" name="Trong hạn" stackId="a" fill="#3b82f6" maxBarSize={40} />
-                    <Bar dataKey="hoanThanhQuaHan" name="Hoàn thành quá hạn" stackId="a" fill="#f59e0b" maxBarSize={40} />
-                    <Bar dataKey="quaHan" name="Quá hạn" stackId="a" fill="#ef4444" maxBarSize={40} />
+                    <Bar dataKey="completed" name="Hoàn thành" stackId="a" fill="#10b981" maxBarSize={40} />
+                    <Bar dataKey="inTime" name="Trong hạn" stackId="a" fill="#3b82f6" maxBarSize={40} />
+                    <Bar dataKey="completedOverdue" name="Hoàn thành quá hạn" stackId="a" fill="#f59e0b" maxBarSize={40} />
+                    <Bar dataKey="overdue" name="Quá hạn" stackId="a" fill="#ef4444" maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
