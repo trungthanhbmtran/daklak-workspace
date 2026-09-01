@@ -220,6 +220,20 @@ message LeaderStats {
   string fullName = 3;
 }
 
+message GroupStat {
+  string name = 1;
+  int32 completed = 2;
+  int32 inTime = 3;
+  int32 completedOverdue = 4;
+  int32 overdue = 5;
+  int32 total = 6;
+}
+
+message KpiStat {
+  string name = 1;
+  int32 value = 2;
+}
+
 message TaskStats {
   int32 overdue = 1;
   int32 warning = 2;
@@ -228,6 +242,13 @@ message TaskStats {
   int32 doneOverdue = 5;
   repeated UnitStats statsByUnit = 6;
   repeated LeaderStats statsByLeader = 7;
+  int32 totalTasks = 8;
+  int32 completedTasks = 9;
+  int32 inProgressTasks = 10;
+  int32 overdueTasks = 11;
+  repeated GroupStat individualStats = 12;
+  repeated GroupStat departmentStats = 13;
+  repeated KpiStat kpiStats = 14;
 }
 
 message ListTasksResponse {

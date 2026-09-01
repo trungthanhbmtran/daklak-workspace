@@ -375,7 +375,7 @@ export class TasksService {
 
     const incrementMap = (map: Record<string, any>, key: string, t: any) => {
       if (!map[key]) {
-        map[key] = { name: key, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
+        map[key] = { name: key, completed: 0, inTime: 0, completedOverdue: 0, overdue: 0, total: 0 };
       }
       const taskDueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
       const isCompleted = t.isCompleted === true || t.status === 'COMPLETED' || t.status === 'DONE';
@@ -383,11 +383,11 @@ export class TasksService {
         const completedTime = t.completedAt
           ? new Date(t.completedAt).setHours(0, 0, 0, 0)
           : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
-        if (taskDueTime && completedTime > taskDueTime) map[key].hoanThanhQuaHan++;
-        else map[key].hoanThanh++;
+        if (taskDueTime && completedTime > taskDueTime) map[key].completedOverdue++;
+        else map[key].completed++;
       } else {
-        if (taskDueTime && nowTime > taskDueTime) map[key].quaHan++;
-        else map[key].trongHan++;
+        if (taskDueTime && nowTime > taskDueTime) map[key].overdue++;
+        else map[key].inTime++;
       }
       map[key].total++;
     };
