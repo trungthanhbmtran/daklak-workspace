@@ -25,6 +25,7 @@ export class StatisticsController {
     const filter = data.payload ? JSON.parse(data.payload) : {};
     const user = data.userData ? JSON.parse(data.userData) : null;
     const res: any = await this.statisticsService.getTaskStatistics(filter, user, metadata);
+    console.log('DEBUG getTaskStatistics res:', JSON.stringify(res, null, 2));
     return { success: res.success, message: res.message, data: JSON.stringify(res.data) };
   }
 
