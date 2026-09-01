@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { TaskRole } from '../../../src/generated/prisma/client'
+import { TaskRole } from '../../../src/generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { RpcException, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -7,6 +7,38 @@ import { TaskSharedService } from '../task-shared/task-shared.service';
 import { TaskWorkflowService } from '../task-workflow/task-workflow.service';
 import { TaskNotificationService } from '../task-workflow/task-notification.service';
 
+// ─── Internal Interfaces ──────────────────────────────────────────────────────
+
+interface KpiSettings {
+  baseScore: number;
+  weight: number;
+  scoringMethod: string;
+  bonusPerDay: number;
+  penaltyPerDay: number;
+  autoKpiCriteriaId: number | null;
+}
+
+export interface TaskStatsResult {
+  overdue: number;
+  warning: number;
+  inTime: number;
+  doneInTime: number;
+  doneOverdue: number;
+  totalTasks: number;
+  completedTasks: number;
+  inProgressTasks: number;
+  overdueTasks: number;
+  individualStats: any[];
+  departmentStats: any[];
+  kpiStats: Array<{ name: string; value: number }>;
+}
+
+export interface PaginatedMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 @Injectable()
 export class TasksService {
@@ -49,11 +81,35 @@ export class TasksService {
     return this.shared.toTaskResponse(enriched);
   }
 
-  // ─── KPI helpers (dùng nội bộ khi tạo task) ──────────────────────────────
+  // ─── KPI helpers ──────────────────────────────────────────────────────────
 
-  private async resolveKpiSettings(data: any, planId: any): Promise<any> {
+  /**
+   * Tính điểm KPI cuối cùng dựa trên baseScore + bonus/penalty theo ngày.
+   * H10-FIX: Extract logic tái dùng ở nhiều nơi.
+   */
+  private computeKpiScore(
+    baseScore: number,
+    bonusPerDay: number,
+    penaltyPerDay: number,
+    dueDate: Date | null,
+    completedAt: Date | null,
+    updatedAt: Date | null,
+  ): number {
+    if (!dueDate) return baseScore;
+    const nowTime = new Date().setHours(0, 0, 0, 0);
+    const dueDateNorm = new Date(dueDate).setHours(0, 0, 0, 0);
+    const completedTime = completedAt
+      ? new Date(completedAt).setHours(0, 0, 0, 0)
+      : (updatedAt ? new Date(updatedAt).setHours(0, 0, 0, 0) : nowTime);
+    const diffDays = Math.round((dueDateNorm - completedTime) / 86_400_000);
+    if (diffDays > 0) return baseScore + diffDays * bonusPerDay;
+    if (diffDays < 0) return baseScore - Math.abs(diffDays) * penaltyPerDay;
+    return baseScore;
+  }
+
+  private async resolveKpiSettings(data: any, planId: number | null): Promise<KpiSettings> {
     let { baseScore, weight, scoringMethod = 'MANUAL', bonusPerDay, penaltyPerDay } = data;
-    let autoKpiCriteriaId = data.kpiCriteriaId ? parseInt(data.kpiCriteriaId, 10) : null;
+    let autoKpiCriteriaId: number | null = data.kpiCriteriaId ? parseInt(data.kpiCriteriaId, 10) : null;
 
     if (!autoKpiCriteriaId) {
       const keyword = planId ? 'định mức' : 'đột xuất';
@@ -91,12 +147,19 @@ export class TasksService {
   // ─── Queries ──────────────────────────────────────────────────────────────
 
   private async buildListTasksWhereClause(query: any) {
-    const where: any = {};
+    // H4/H5-FIX: Tránh dùng delete trên object – xây dựng where object rõ ràng
+    const baseWhere: any = {};
     const conditions: any[] = [];
 
-    if (query.id) where.id = parseInt(query.id, 10);
-    if (query.status && query.status !== 'ALL') where.status = query.status;
-    else if (!query.statsFilter) where.isCompleted = false;
+    if (query.id) baseWhere.id = parseInt(query.id, 10);
+
+    // Status filter – chỉ áp dụng khi không bị override bởi planId
+    let statusFilter: any = {};
+    if (query.status && query.status !== 'ALL') {
+      statusFilter = { status: query.status };
+    } else if (!query.statsFilter) {
+      statusFilter = { isCompleted: false };
+    }
 
     if (query.role && query.currentEmployeeCode) {
       conditions.push({ participants: { some: { employeeCode: query.currentEmployeeCode, participantRole: query.role } } });
@@ -121,67 +184,71 @@ export class TasksService {
 
     const scopeWhere = await this.shared.buildScopingWhereClause(query);
     if (scopeWhere) conditions.push(scopeWhere);
-    if (conditions.length > 0) where.AND = conditions;
+    if (conditions.length > 0) baseWhere.AND = conditions;
 
-    if (query.search) where.title = { contains: query.search };
-    if (query.priority && query.priority !== 'ALL') where.priority = query.priority;
-    if (query.planId) { where.planId = parseInt(query.planId, 10); delete where.isCompleted; delete where.status; }
+    if (query.search) baseWhere.title = { contains: query.search };
+    if (query.priority && query.priority !== 'ALL') baseWhere.priority = query.priority;
+
+    // planId override: bỏ qua status/isCompleted filter
+    if (query.planId) {
+      return { ...baseWhere, planId: parseInt(query.planId, 10) };
+    }
 
     // statsFilter date ranges
     if (query.statsFilter) {
-      const now = new Date(); now.setHours(0, 0, 0, 0);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
       switch (query.statsFilter) {
         case 'doneInTime':
         case 'doneOverdue':
-          where.isCompleted = true;
-          break;
+          return { ...baseWhere, isCompleted: true };
         case 'overdue':
-          where.isCompleted = false;
-          where.dueDate = { lt: now };
-          break;
+          return { ...baseWhere, isCompleted: false, dueDate: { lt: now } };
         case 'warning': {
           const t3 = new Date(now); t3.setDate(now.getDate() + 3);
-          where.isCompleted = false;
-          where.dueDate = { gte: now, lte: t3 };
-          break;
+          return { ...baseWhere, isCompleted: false, dueDate: { gte: now, lte: t3 } };
         }
         case 'inTime': {
           const t3 = new Date(now); t3.setDate(now.getDate() + 3);
-          where.isCompleted = false;
-          where.dueDate = { gt: t3 };
-          where.OR = [{ dueDate: { gt: t3 } }, { dueDate: null }];
-          break;
+          return { ...baseWhere, isCompleted: false, dueDate: { gt: t3 } };
         }
       }
     }
-    return where;
+
+    return { ...baseWhere, ...statusFilter };
   }
 
-  private async applyPostDbFiltersAndPaginate(where: any, query: any) {
+  private async applyPostDbFiltersAndPaginate(where: any, query: any): Promise<{ tasks: any[]; paginatedMeta: PaginatedMeta }> {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 20;
-    const isJsFilter = query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue';
+    // H8-FIX: Đổi tên biến cho rõ nghĩa hơn
+    const isDoneTimingFilter = query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue';
 
     let skip: number | undefined;
     let take: number | undefined;
     let totalCount = 0;
     let limitNum = limit;
 
-    if (!isJsFilter) {
+    if (!isDoneTimingFilter) {
       totalCount = await this.prisma.task.count({ where });
       limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
       skip = limit > 0 ? (page - 1) * limitNum : undefined;
       take = limit > 0 ? limitNum : undefined;
     } else {
-      const operator = query.statsFilter === 'doneOverdue' ? '>' : '<=';
-      const lateIds = await this.prisma.$queryRawUnsafe<{ id: string }[]>(
-        `SELECT id FROM Task WHERE dueDate IS NOT NULL AND (completedAt > dueDate OR (completedAt IS NULL AND updatedAt > dueDate))`
-      );
+      // C1-FIX: Dùng $queryRaw tagged template thay vì $queryRawUnsafe
+      // C2-FIX: Thêm WHERE isCompleted = 1 – chỉ lấy task đã hoàn thành
+      const lateIds = await this.prisma.$queryRaw<{ id: number }[]>`
+        SELECT id FROM Task
+        WHERE isCompleted = 1
+          AND dueDate IS NOT NULL
+          AND completedAt > dueDate
+      `;
+      // C3-FIX: Bỏ biến `operator` không dùng – logic rõ ràng qua if/else
       const ids = lateIds.map(x => x.id);
       if (query.statsFilter === 'doneOverdue') {
-        where.id = { ...where.id, in: ids };
+        where = { ...where, id: { in: ids } };
       } else {
-        where.id = { ...where.id, notIn: ids };
+        where = { ...where, id: { notIn: ids } };
       }
 
       totalCount = await this.prisma.task.count({ where });
@@ -198,11 +265,11 @@ export class TasksService {
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
     });
 
-    const paginatedMeta = {
+    const paginatedMeta: PaginatedMeta = {
       total: totalCount,
       page,
       limit: limitNum,
-      totalPages: Math.ceil(totalCount / limitNum)
+      totalPages: Math.ceil(totalCount / (limitNum || 1)),
     };
 
     return { tasks, paginatedMeta };
@@ -297,125 +364,123 @@ export class TasksService {
     return where;
   }
 
-  private calculateTaskStatistics(allTasks: any[]) {
-    const now = new Date(); now.setHours(0, 0, 0, 0);
-    const nowTime = now.getTime();
-    let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
-    let totalTasks = allTasks.length;
-    let completedTasks = 0;
-    let inProgressTasks = 0;
-    let overdueTasks = 0;
+  // H6-FIX: Tách calculateTaskStatistics thành các sub-method
 
+  private buildIndividualAndDeptStats(
+    allTasks: any[],
+    nowTime: number,
+  ): { individualMap: Record<string, any>; departmentMap: Record<string, any> } {
     const individualMap: Record<string, any> = {};
     const departmentMap: Record<string, any> = {};
-    const kpiMap: Record<string, number> = {};
 
     const incrementMap = (map: Record<string, any>, key: string, t: any) => {
       if (!map[key]) {
         map[key] = { name: key, hoanThanh: 0, trongHan: 0, hoanThanhQuaHan: 0, quaHan: 0, total: 0 };
       }
-      const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
-      const isCompleted = t.isCompleted === true || t.status === "COMPLETED" || t.status === "DONE";
-      
+      const taskDueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
+      const isCompleted = t.isCompleted === true || t.status === 'COMPLETED' || t.status === 'DONE';
       if (isCompleted) {
-        const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
-        if (dueTime && completedTime > dueTime) {
-          map[key].hoanThanhQuaHan++;
-        } else {
-          map[key].hoanThanh++;
-        }
+        const completedTime = t.completedAt
+          ? new Date(t.completedAt).setHours(0, 0, 0, 0)
+          : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
+        if (taskDueTime && completedTime > taskDueTime) map[key].hoanThanhQuaHan++;
+        else map[key].hoanThanh++;
       } else {
-        if (dueTime && nowTime > dueTime) {
-          map[key].quaHan++;
-        } else {
-          map[key].trongHan++;
-        }
+        if (taskDueTime && nowTime > taskDueTime) map[key].quaHan++;
+        else map[key].trongHan++;
       }
       map[key].total++;
     };
 
     allTasks.forEach((t: any) => {
-      const dueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
-      const isDone = t.isCompleted === true;
-
-      // basic stats
-      if (t.status === "COMPLETED" || t.status === "DONE") completedTasks++;
-      else if (t.status === "IN_PROGRESS" || t.status === "ASSIGNED") inProgressTasks++;
-      
-      if (t.status !== "COMPLETED" && t.status !== "DONE" && t.dueDate && new Date(t.dueDate) < new Date()) {
-        overdueTasks++;
-      }
-
-      // Assignee stats
       const assignee = t.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
       if (assignee) {
-        const indName = assignee.employee?.fullName || assignee.employeeCode || "Chưa phân công";
+        const indName = assignee.employee?.fullName || assignee.employeeCode || 'Chưa phân công';
         incrementMap(individualMap, indName, t);
-        
         const deptId = assignee.employee?.departmentId;
-        const deptName = deptId ? deptId.toString() : "Chưa phân công bộ phận";
+        const deptName = deptId ? deptId.toString() : 'Chưa phân công bộ phận';
         incrementMap(departmentMap, deptName, t);
       }
+    });
 
-      // kpi fallback
-      if (t.status === "COMPLETED" || t.status === "DONE") {
-        let qualityName = "Chưa đánh giá";
-        
-        if (t.kpiSettings) {
-          const baseScore = t.kpiSettings.baseScore ?? 100;
-          const bonus = t.kpiSettings.bonusPerDay ?? 0;
-          const penalty = t.kpiSettings.penaltyPerDay ?? 0;
-          
-          let finalScore = baseScore;
-          
-          if (t.dueDate) {
-             const dueTime = new Date(t.dueDate).setHours(0, 0, 0, 0);
-             const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
-             
-             const diffDays = Math.round((dueTime - completedTime) / 86400000);
-             
-             if (diffDays > 0) {
-                 finalScore += diffDays * bonus;
-             } else if (diffDays < 0) {
-                 finalScore -= Math.abs(diffDays) * penalty;
-             }
-          }
-          
-          if (finalScore >= 120) qualityName = "Xuất sắc";
-          else if (finalScore >= 100) qualityName = "Tốt";
-          else if (finalScore >= 80) qualityName = "Đạt";
-          else qualityName = "Không đạt";
-        }
+    return { individualMap, departmentMap };
+  }
 
-        kpiMap[qualityName] = (kpiMap[qualityName] || 0) + 1;
+  private buildKpiStats(allTasks: any[]): Record<string, number> {
+    const kpiMap: Record<string, number> = {};
+    allTasks.forEach((t: any) => {
+      if (t.status !== 'COMPLETED' && t.status !== 'DONE') return;
+      let qualityName = 'Chưa đánh giá';
+      if (t.kpiSettings) {
+        // H10-FIX: Dùng helper computeKpiScore thay vì duplicate logic
+        const finalScore = this.computeKpiScore(
+          t.kpiSettings.baseScore ?? 100,
+          t.kpiSettings.bonusPerDay ?? 0,
+          t.kpiSettings.penaltyPerDay ?? 0,
+          t.dueDate,
+          t.completedAt,
+          t.updatedAt,
+        );
+        if (finalScore >= 120) qualityName = 'Xuất sắc';
+        else if (finalScore >= 100) qualityName = 'Tốt';
+        else if (finalScore >= 80) qualityName = 'Đạt';
+        else qualityName = 'Không đạt';
       }
+      kpiMap[qualityName] = (kpiMap[qualityName] || 0) + 1;
+    });
+    return kpiMap;
+  }
+
+  private computeTaskCounters(allTasks: any[], nowTime: number) {
+    // S3-FIX: dùng const cho giá trị không thay đổi
+    const totalTasks = allTasks.length;
+    let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
+    let completedTasks = 0, inProgressTasks = 0, overdueTasks = 0;
+
+    allTasks.forEach((t: any) => {
+      const taskDueTime = t.dueDate ? new Date(t.dueDate).setHours(0, 0, 0, 0) : null;
+      const isDone = t.isCompleted === true;
+
+      if (t.status === 'COMPLETED' || t.status === 'DONE') completedTasks++;
+      else if (t.status === 'IN_PROGRESS' || t.status === 'ASSIGNED') inProgressTasks++;
+
+      // H9-FIX: Dùng isDone thay vì kiểm tra status string – nhất quán với counter bên dưới
+      if (!isDone && taskDueTime && nowTime > taskDueTime) overdueTasks++;
 
       if (isDone) {
-        const completedTime = t.completedAt ? new Date(t.completedAt).setHours(0, 0, 0, 0) : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
-        if (dueTime && completedTime > dueTime) { doneOverdue++; } else { doneInTime++; }
+        const completedTime = t.completedAt
+          ? new Date(t.completedAt).setHours(0, 0, 0, 0)
+          : (t.updatedAt ? new Date(t.updatedAt).setHours(0, 0, 0, 0) : nowTime);
+        if (taskDueTime && completedTime > taskDueTime) doneOverdue++;
+        else doneInTime++;
         return;
       }
 
-      if (!dueTime) {
-        inTime++;
-        return;
-      }
+      if (!taskDueTime) { inTime++; return; }
 
-      const diff = Math.round((dueTime - nowTime) / 86_400_000);
+      const diff = Math.round((taskDueTime - nowTime) / 86_400_000);
       if (diff < 0) { overdue++; return; }
       if (diff <= 3) { warning++; return; }
       inTime++;
     });
 
+    return { overdue, warning, inTime, doneInTime, doneOverdue, totalTasks, completedTasks, inProgressTasks, overdueTasks };
+  }
+
+  private calculateTaskStatistics(allTasks: any[]): TaskStatsResult {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const nowTime = now.getTime();
+
+    const counters = this.computeTaskCounters(allTasks, nowTime);
+    const { individualMap, departmentMap } = this.buildIndividualAndDeptStats(allTasks, nowTime);
+    const kpiMap = this.buildKpiStats(allTasks);
+
     const individualStats = Object.values(individualMap).sort((a, b) => b.total - a.total).slice(0, 10);
     const departmentStats = Object.values(departmentMap).sort((a, b) => b.total - a.total).slice(0, 10);
     const kpiStats = Object.entries(kpiMap).map(([name, value]) => ({ name, value }));
 
-    return { 
-      overdue, warning, inTime, doneInTime, doneOverdue,
-      totalTasks, completedTasks, inProgressTasks, overdueTasks,
-      individualStats, departmentStats, kpiStats
-    };
+    return { ...counters, individualStats, departmentStats, kpiStats };
   }
 
   async getTaskStats(query: any) {
@@ -627,13 +692,14 @@ export class TasksService {
 
   private async handleStatusSideEffects(id: number, rawTask: any, resultTask: any, enriched: any, updateData: any, transition: any, context: any, actorCode?: string) {
     if (updateData.isCompleted) {
+      // C4-FIX: Thêm error handling – tránh unhandled rejection khi RabbitMQ down
       this.reportClient.emit('task.completed', {
         taskId: resultTask.id,
         title: resultTask.title,
         completedAt: resultTask.completedAt,
         progress: resultTask.progress,
-        assigneeId: resultTask.assigneeId
-      });
+        assigneeId: resultTask.assigneeId,
+      }).subscribe({ error: (err: any) => this.logger.warn('Failed to emit task.completed event', err) });
     }
 
     if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
@@ -684,12 +750,13 @@ export class TasksService {
       updateData.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: transition.nextNodeId };
     }
 
-    const resultTask = await this.prisma.task.update({ where: { id }, data: updateData });
+    // P1-FIX: Dùng include trong update thay vì gọi findTaskOrFail lần 2
+    const resultTask = await this.prisma.task.update({ where: { id }, data: updateData, include: this.taskInclude });
 
     await this.recordTaskStatusHistory(id, rawTask, updateData, transition, action, actor, rejectReason);
     await this.handleStatusSideEffects(id, rawTask, resultTask, enriched, updateData, transition, context, actor);
 
-    return this.toResponse(await this.findTaskOrFail(id), context);
+    return this.toResponse(resultTask, context);
   }
 
   private async executeAssignTaskTransaction(id: number, data: any, rawTask: any) {
@@ -956,14 +1023,15 @@ export class TasksService {
 
   async updateTaskProgress(id: number, progress: number, actorCode?: string) {
     const p = Math.max(0, Math.min(100, Math.round(progress)));
-    await this.prisma.task.update({ where: { id }, data: { progress: p } });
+    // P2-FIX: Dùng include trong update thay vì gọi findTaskOrFail lần 2
+    const updatedTask = await this.prisma.task.update({ where: { id }, data: { progress: p }, include: this.taskInclude });
 
     await this.prisma.taskHistory.create({
       data: {
         taskId: id,
         action: 'Cập nhật tiến độ',
         actorCode: actorCode || null,
-        newValue: { progress: p }
+        newValue: { progress: p },
       }
     });
 
@@ -972,7 +1040,7 @@ export class TasksService {
       await this.autoComputeTaskProgress(closure.ancestorId, actorCode);
     }
 
-    return this.toResponse(await this.findTaskOrFail(id));
+    return this.toResponse(updatedTask);
   }
 
   private calculateStepsProgress(steps: any[]) {
@@ -1087,12 +1155,13 @@ export class TasksService {
 
   // ─── Comments ─────────────────────────────────────────────────────────────
 
-  async addComment(id: number, data: any) {
-    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
+  // S5-FIX: Dùng RpcException nhất quán thay vì Error
+  async addComment(_id: number, _data: any): Promise<never> {
+    throw new RpcException('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
   }
 
-  async getComments(id: number, query: any) {
-    throw new Error('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
+  async getComments(_id: number, _query: any): Promise<never> {
+    throw new RpcException('Chat functionality has been moved to Chat Service. Please use the task.conversationId.');
   }
 
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
@@ -1178,12 +1247,11 @@ export class TasksService {
     }
 
     if (!isAdmin) {
-      const allowed = query.allowedEmployeeCodes || [];
+      const allowed: string[] = query.allowedEmployeeCodes || [];
       if (allowed.length > 0) {
         where.employeeCode = { in: allowed };
-      }
-
-      if (allowed.length === 0 && query.currentEmployeeCode) {
+      } else if (query.currentEmployeeCode) {
+        // Tránh if-else tách rời dễ gây bug khi refactor
         where.employeeCode = query.currentEmployeeCode;
       }
     }
@@ -1194,7 +1262,8 @@ export class TasksService {
     const [employees, loadCounts, evaluations] = await Promise.all([
       this.prisma.employee.findMany({ where }),
       this.prisma.taskParticipant.groupBy({ by: ['employeeCode'], where: { participantRole: 'ASSIGNEE', task: { isCompleted: false } }, _count: { taskId: true } }),
-      this.prisma.kpiEvaluation.findMany({ orderBy: { createdAt: 'desc' }, select: { employeeCode: true, totalScore: true } }),
+      // P5-FIX: Dùng distinct để chỉ lấy record mới nhất per employeeCode thay vì load tất cả
+      this.prisma.kpiEvaluation.findMany({ orderBy: { createdAt: 'desc' }, select: { employeeCode: true, totalScore: true }, distinct: ['employeeCode'] }),
     ]);
 
     const loadMap = new Map(loadCounts.map((i: any) => [i.employeeCode, i._count.taskId]));
@@ -1249,26 +1318,30 @@ export class TasksService {
   }
 
   private async executeClearCoordination(id: number, requesterCode: string | null, message?: string) {
-    if (message) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Xin phối hợp', actorCode: requesterCode, newValue: { message } } });
-    }
-    await this.prisma.taskParticipant.deleteMany({
-      where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
+    // C6-FIX: Gom taskHistory.create vào cùng transaction với participant changes
+    await this.prisma.$transaction(async (tx) => {
+      if (message) {
+        await tx.taskHistory.create({ data: { taskId: id, action: 'Xin phối hợp', actorCode: requesterCode, newValue: { message } } });
+      }
+      await tx.taskParticipant.deleteMany({
+        where: { taskId: id, participantRole: { in: [TaskRole.ASSIGNEE, TaskRole.COORDINATOR] } }
+      });
+      await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
     });
-    await this.prisma.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
   }
 
   private async executeUpdateCoordination(id: number, leadCode: string | undefined, coordinatorCodes: string[], requesterCode: string | null, message?: string) {
-    await this.prisma.taskHistory.create({
-      data: {
-        taskId: id,
-        action: 'Xin phối hợp',
-        actorCode: requesterCode,
-        newValue: { message, leadCode, coordinatorCodes }
-      }
-    });
-
+    // C6-FIX: Gom taskHistory.create vào cùng transaction
     await this.prisma.$transaction(async (tx) => {
+      await tx.taskHistory.create({
+        data: {
+          taskId: id,
+          action: 'Xin phối hợp',
+          actorCode: requesterCode,
+          newValue: { message, leadCode, coordinatorCodes }
+        }
+      });
+
       if (leadCode) {
         await tx.taskParticipant.deleteMany({ where: { taskId: id, participantRole: TaskRole.ASSIGNEE } });
         await tx.taskParticipant.create({ data: { taskId: id, employeeCode: leadCode, participantRole: TaskRole.ASSIGNEE } });
@@ -1288,7 +1361,11 @@ export class TasksService {
     await this.shared.populateQueryHierarchy(data);
     await this.validateCoordinationAccess(id, data);
 
-    const { leadCode, coordinatorCodes = [], message, requesterCode } = { leadCode: data.leadCode || data.leadId, coordinatorCodes: data.coordinatorCodes || data.coordinatorIds || [], message: data.message, requesterCode: data.requesterCode || null };
+    // H11-FIX: Tách fallback logic ra rõ ràng
+    const leadCode: string | undefined = data.leadCode || data.leadId;
+    const coordinatorCodes: string[] = data.coordinatorCodes || data.coordinatorIds || [];
+    const message: string | undefined = data.message;
+    const requesterCode: string | null = data.requesterCode || null;
 
     if (!leadCode && coordinatorCodes.length === 0) {
       await this.executeClearCoordination(id, requesterCode, message);
@@ -1299,12 +1376,20 @@ export class TasksService {
     return { success: true, data: await this.toResponse(await this.findTaskOrFail(id), data) };
   }
 
-  // Aliases
-  async getTasks(query: any) { return this.listTasks(query); }
-  async importTasks(_data: any[]) { return { success: true }; }
-  async exportTasks(_query: any) { return { success: true }; }
+  // ─── Aliases ──────────────────────────────────────────────────────────────
 
-  // Cache invalidation (vẫn cần expose ra ngoài vì tasks.cron.ts dùng)
+  /** @deprecated Use listTasks instead */
+  async getTasks(query: any) { return this.listTasks(query); }
+
+  /** Stub – import not yet implemented */
+  async importTasks(_data: any[]): Promise<{ success: boolean }> { return { success: true }; }
+
+  /** Stub – export not yet implemented */
+  async exportTasks(_query: any): Promise<{ success: boolean }> { return { success: true }; }
+
+  // ─── Cache ────────────────────────────────────────────────────────────────
+
+  /** Cache invalidation – exposed vì tasks.cron.ts dùng */
   invalidateWorkflowCache(workflowId: string, newDefinition?: any) {
     this.shared.invalidateWorkflowCache(workflowId, newDefinition);
   }

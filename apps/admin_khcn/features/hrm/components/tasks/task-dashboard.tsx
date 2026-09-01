@@ -13,17 +13,24 @@ const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 export function TaskDashboard() {
   const { data: statsResponse, isLoading } = useTaskStats({ status: undefined, search: undefined });
   const { data: orgResponse } = useOrganizationFlatListQuery();
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const organizations: any[] = (orgResponse as any)?.data ?? [];
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stats: any = (statsResponse as any)?.data ?? {
     totalTasks: 0, completedTasks: 0, inProgressTasks: 0, overdueTasks: 0,
     individualStats: [], departmentStats: [], kpiStats: []
   };
 
-  const { totalTasks, completedTasks, inProgressTasks, overdueTasks, individualStats, kpiStats } = stats;
+  const {
+    totalTasks = 0,
+    completedTasks = 0,
+    inProgressTasks = 0,
+    overdueTasks = 0,
+    individualStats = [],
+    kpiStats = []
+  } = stats || {};
 
   const departmentStats = useMemo(() => {
     if (!stats.departmentStats || !Array.isArray(stats.departmentStats)) return [];
@@ -112,7 +119,7 @@ export function TaskDashboard() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" />
                     <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <RechartsTooltip 
+                    <RechartsTooltip
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
@@ -152,7 +159,7 @@ export function TaskDashboard() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <RechartsTooltip 
+                    <RechartsTooltip
                       formatter={(value) => [`${value} công việc`, 'Số lượng']}
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
                     />
@@ -182,7 +189,7 @@ export function TaskDashboard() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" />
                     <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <RechartsTooltip 
+                    <RechartsTooltip
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
                     <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
