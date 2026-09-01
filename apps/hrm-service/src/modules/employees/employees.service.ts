@@ -1,16 +1,26 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { firstValueFrom } from 'rxjs';
+import { Prisma } from '@generated/prisma';
 
+export enum EmployeeErrorCode {
+  NOT_FOUND = 5,
+  CONFLICT = 6,
+}
+
+interface UserServiceClient {
+  GetSubordinates(req: { userId: number }): unknown; // thay bằng type thực từ .proto nếu có
+}
 
 @Injectable()
 export class EmployeesService implements OnModuleInit {
-  private userService: any;
+  private readonly logger = new Logger(EmployeesService.name);
+  private userService: UserServiceClient;
 
   constructor(
     private readonly prisma: PrismaService,
-    @Inject('USER_PACKAGE') private readonly userClient: any,
+    @Inject('USER_PACKAGE') private readonly userClient: { getService: (name: string) => UserServiceClient },
   ) { }
 
   onModuleInit() {
@@ -19,30 +29,28 @@ export class EmployeesService implements OnModuleInit {
 
   // ─── Private mapping helper ──────────────────────────────────────────────────
 
-  private toEmployee(
-    row: {
-      id: number;
-      firstname: string;
-      lastname: string;
-      fullName: string;
-      employeeCode: string;
-      email: string | null;
-      phone: string | null;
-      gender: string | null;
-      birthday: Date | null;
-      identityCard: string | null;
-      employmentStatus: string;
-      address: string | null;
-      avatar: string | null;
-      departmentId: number | null;
-      jobTitleId: number | null;
-      civilServantRankId?: number | null;
-      partyTitleId?: number | null;
-      startDate: Date;
-      createdAt: Date;
-      updatedAt: Date;
-    }
-  ) {
+  private toEmployee(row: {
+    id: number;
+    firstname: string;
+    lastname: string;
+    fullName: string;
+    employeeCode: string;
+    email: string | null;
+    phone: string | null;
+    gender: string | null;
+    birthday: Date | null;
+    identityCard: string | null;
+    employmentStatus: string;
+    address: string | null;
+    avatar: string | null;
+    departmentId: number | null;
+    jobTitleId: number | null;
+    civilServantRankId?: number | null;
+    partyTitleId?: number | null;
+    startDate: Date;
+    createdAt: Date;
+    updatedAt: Date;
+  }) {
     return {
       id: row.id,
       firstname: row.firstname,
@@ -73,8 +81,22 @@ export class EmployeesService implements OnModuleInit {
       .trim()
       .replace(/\s+/g, ' ')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  }
+
+  private parseDateOrThrow(value: string, fieldName: string): Date {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      throw new RpcException({ message: `${fieldName} không hợp lệ: ${value}`, code: EmployeeErrorCode.CONFLICT });
+    }
+    return date;
+  }
+
+  private generateEmployeeCode(): string {
+    // Timestamp đơn thuần dễ trùng khi tạo hàng loạt cùng millisecond.
+    // Thêm phần random để giảm rủi ro va chạm; vẫn cần unique constraint ở DB làm lớp bảo vệ cuối.
+    return `E${Date.now()}${Math.floor(Math.random() * 1000)}`;
   }
 
   // ─── CRUD ────────────────────────────────────────────────────────────────────
@@ -98,38 +120,55 @@ export class EmployeesService implements OnModuleInit {
     address?: string;
     avatar?: string;
   }) {
-    const code = (data.employeeCode ?? '').trim() || `E${Date.now()}`;
+    const code = (data.employeeCode ?? '').trim() || this.generateEmployeeCode();
+
+    // Pre-check để trả lỗi thân thiện sớm (UX), nhưng KHÔNG phải lớp bảo vệ duy nhất — xem catch P2002 bên dưới.
     const existing = await this.prisma.employee.findUnique({ where: { employeeCode: code } });
-    if (existing) throw new RpcException({ message: `Mã nhân viên ${code} đã tồn tại`, code: 6 });
+    if (existing) {
+      throw new RpcException({ message: `Mã nhân viên ${code} đã tồn tại`, code: EmployeeErrorCode.CONFLICT });
+    }
     if (data.email) {
       const ex = await this.prisma.employee.findFirst({ where: { email: data.email } });
-      if (ex) throw new RpcException({ message: `Email ${data.email} đã được sử dụng`, code: 6 });
+      if (ex) {
+        throw new RpcException({ message: `Email ${data.email} đã được sử dụng`, code: EmployeeErrorCode.CONFLICT });
+      }
     }
+
     const formattedFirstname = this.formatVietnameseName(data.firstname);
     const formattedLastname = this.formatVietnameseName(data.lastname);
     const generatedFullName = `${formattedLastname} ${formattedFirstname}`.trim();
 
-    const emp = await this.prisma.employee.create({
-      data: {
-        firstname: formattedFirstname,
-        lastname: formattedLastname,
-        fullName: generatedFullName,
-        employeeCode: code,
-        email: data.email ?? null,
-        phone: data.phone ?? null,
-        gender: data.gender ?? 'male',
-        birthday: data.birthday ? new Date(data.birthday) : null,
-        identityCard: data.identityCard ?? null,
-        address: data.address ?? null,
-        departmentId: data.departmentId,
-        jobTitleId: data.jobTitleId,
-        civilServantRankId: data.civilServantRankId ?? null,
-        partyTitleId: data.partyTitleId ?? null,
-        startDate: data.startDate ? new Date(data.startDate) : new Date(),
-        avatar: data.avatar ?? null,
-      },
-    });
-    return { success: true, message: 'Thêm mới nhân sự thành công', data: this.toEmployee(emp) };
+    try {
+      const emp = await this.prisma.employee.create({
+        data: {
+          firstname: formattedFirstname,
+          lastname: formattedLastname,
+          fullName: generatedFullName,
+          employeeCode: code,
+          email: data.email ?? null,
+          phone: data.phone ?? null,
+          gender: data.gender ?? 'male',
+          birthday: data.birthday ? this.parseDateOrThrow(data.birthday, 'birthday') : null,
+          identityCard: data.identityCard ?? null,
+          address: data.address ?? null,
+          departmentId: data.departmentId,
+          jobTitleId: data.jobTitleId,
+          civilServantRankId: data.civilServantRankId ?? null,
+          partyTitleId: data.partyTitleId ?? null,
+          startDate: data.startDate ? this.parseDateOrThrow(data.startDate, 'startDate') : new Date(),
+          avatar: data.avatar ?? null,
+        },
+      });
+      return { success: true, message: 'Thêm mới nhân sự thành công', data: this.toEmployee(emp) };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        // Bắt race condition: request khác vừa insert cùng employeeCode/email giữa lúc pre-check và create.
+        const target = (error.meta?.target as string[])?.join(', ') ?? 'employeeCode/email';
+        throw new RpcException({ message: `Dữ liệu bị trùng (${target})`, code: EmployeeErrorCode.CONFLICT });
+      }
+      this.logger.error('Failed to create employee', error instanceof Error ? error.stack : String(error));
+      throw error;
+    }
   }
 
   async update(
@@ -155,64 +194,89 @@ export class EmployeesService implements OnModuleInit {
     }>,
   ) {
     const emp = await this.prisma.employee.findUnique({ where: { id } });
-    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: 5 });
+    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: EmployeeErrorCode.NOT_FOUND });
+
     if (data.employeeCode && data.employeeCode !== emp.employeeCode) {
       const ex = await this.prisma.employee.findUnique({ where: { employeeCode: data.employeeCode } });
-      if (ex) throw new RpcException({ message: `Mã nhân viên ${data.employeeCode} đã tồn tại`, code: 6 });
+      if (ex) {
+        throw new RpcException({
+          message: `Mã nhân viên ${data.employeeCode} đã tồn tại`,
+          code: EmployeeErrorCode.CONFLICT,
+        });
+      }
     }
-    let updateData: any = {
-        ...(data.employeeCode != null && { employeeCode: data.employeeCode }),
-        ...(data.email != null && { email: data.email }),
-        ...(data.phone != null && { phone: data.phone }),
-        ...(data.gender != null && { gender: data.gender }),
-        ...(data.birthday != null && { birthday: new Date(data.birthday) }),
-        ...(data.identityCard != null && { identityCard: data.identityCard }),
-        ...(data.employmentStatus != null && { employmentStatus: data.employmentStatus }),
-        ...(data.address != null && { address: data.address }),
-        ...(data.avatar != null && { avatar: data.avatar }),
-        ...(data.departmentId != null && { departmentId: data.departmentId }),
-        ...(data.jobTitleId != null && { jobTitleId: data.jobTitleId }),
-        ...(data.civilServantRankId !== undefined && { civilServantRankId: data.civilServantRankId }),
-        ...(data.partyTitleId !== undefined && { partyTitleId: data.partyTitleId }),
-        ...(data.startDate != null && { startDate: new Date(data.startDate) })
+
+    const updateData: Prisma.EmployeeUpdateInput = {
+      ...(data.employeeCode != null && { employeeCode: data.employeeCode }),
+      ...(data.email != null && { email: data.email }),
+      ...(data.phone != null && { phone: data.phone }),
+      ...(data.gender != null && { gender: data.gender }),
+      ...(data.birthday != null && { birthday: this.parseDateOrThrow(data.birthday, 'birthday') }),
+      ...(data.identityCard != null && { identityCard: data.identityCard }),
+      ...(data.employmentStatus != null && { employmentStatus: data.employmentStatus }),
+      ...(data.address != null && { address: data.address }),
+      ...(data.avatar != null && { avatar: data.avatar }),
+      ...(data.departmentId != null && { department: { connect: { id: data.departmentId } } }),
+      ...(data.jobTitleId != null && { jobTitle: { connect: { id: data.jobTitleId } } }),
+      ...(data.civilServantRankId !== undefined && { civilServantRankId: data.civilServantRankId }),
+      ...(data.partyTitleId !== undefined && { partyTitleId: data.partyTitleId }),
+      ...(data.startDate != null && { startDate: this.parseDateOrThrow(data.startDate, 'startDate') }),
     };
 
+    // Dùng lại `emp` đã fetch ở trên thay vì query lại DB lần 2.
     if (data.firstname != null || data.lastname != null) {
-      const current = await this.prisma.employee.findUnique({ where: { id } });
-      const newFirstname = this.formatVietnameseName(data.firstname ?? current?.firstname ?? '');
-      const newLastname = this.formatVietnameseName(data.lastname ?? current?.lastname ?? '');
+      const newFirstname = this.formatVietnameseName(data.firstname ?? emp.firstname);
+      const newLastname = this.formatVietnameseName(data.lastname ?? emp.lastname);
       updateData.firstname = newFirstname;
       updateData.lastname = newLastname;
       updateData.fullName = `${newLastname} ${newFirstname}`.trim();
-    }
-    
-    if (data.firstname == null && data.lastname == null && data.fullName != null) {
-      updateData.fullName = data.fullName;
+    } else if (data.fullName != null) {
+      // Format luôn cho nhất quán với nhánh trên.
+      updateData.fullName = this.formatVietnameseName(data.fullName);
     }
 
-    const updated = await this.prisma.employee.update({
-      where: { id },
-      data: updateData,
-    });
-    return { success: true, message: 'Cập nhật hồ sơ thành công', data: this.toEmployee(updated) };
+    try {
+      const updated = await this.prisma.employee.update({ where: { id }, data: updateData });
+      return { success: true, message: 'Cập nhật hồ sơ thành công', data: this.toEmployee(updated) };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const target = (error.meta?.target as string[])?.join(', ') ?? 'employeeCode/email';
+        throw new RpcException({ message: `Dữ liệu bị trùng (${target})`, code: EmployeeErrorCode.CONFLICT });
+      }
+      this.logger.error(`Failed to update employee id=${id}`, error instanceof Error ? error.stack : String(error));
+      throw error;
+    }
   }
 
   async delete(id: number) {
     const emp = await this.prisma.employee.findUnique({ where: { id } });
-    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: 5 });
-    await this.prisma.employee.delete({ where: { id } });
-    return { success: true, message: 'Xóa nhân sự thành công' };
+    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: EmployeeErrorCode.NOT_FOUND });
+
+    try {
+      await this.prisma.employee.delete({ where: { id } });
+      return { success: true, message: 'Xóa nhân sự thành công' };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+        // Vi phạm khóa ngoại: nhân viên đang được tham chiếu ở bảng khác (task, assignment...).
+        throw new RpcException({
+          message: 'Không thể xóa nhân viên đang được gán trong dữ liệu khác. Hãy chuyển sang trạng thái nghỉ việc.',
+          code: EmployeeErrorCode.CONFLICT,
+        });
+      }
+      this.logger.error(`Failed to delete employee id=${id}`, error instanceof Error ? error.stack : String(error));
+      throw error;
+    }
   }
 
   async getOne(id: number) {
     const emp = await this.prisma.employee.findUnique({ where: { id } });
-    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: 5 });
+    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: EmployeeErrorCode.NOT_FOUND });
     return { success: true, message: 'OK', data: this.toEmployee(emp) };
   }
 
   async getByCode(code: string) {
     const emp = await this.prisma.employee.findUnique({ where: { employeeCode: code } });
-    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: 5 });
+    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: EmployeeErrorCode.NOT_FOUND });
     return { success: true, message: 'OK', data: this.toEmployee(emp) };
   }
 
@@ -235,39 +299,47 @@ export class EmployeesService implements OnModuleInit {
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
-    const where: Record<string, unknown> = {};
+    const where: Prisma.EmployeeWhereInput = {};
 
+    // Gom các điều kiện lọc theo employeeCode, giao (intersect) thay vì để nhánh sau ghi đè nhánh trước.
+    let allowedCodesFromCodesParam: string[] | null = null;
     if (params.codes && params.codes.length > 0) {
-      where.employeeCode = { in: params.codes };
+      allowedCodesFromCodesParam = params.codes;
     }
 
+    let allowedCodesFromAssignable: string[] | null = null;
     if (params.assignableOnly && params.callerUserId) {
       try {
-        const subordinatesRes: any = await firstValueFrom(
-          this.userService.GetSubordinates({ userId: params.callerUserId })
-        );
-        const allowedCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
-        where.employeeCode = { in: allowedCodes };
-        
-        // Nếu allowedCodes rỗng thì không có ai, trả về luôn [] để tối ưu
-        if (allowedCodes.length === 0) {
-          return {
-            success: true,
-            message: 'OK',
-            data: [],
-            meta: {
-              total: 0, skip: (page - 1) * pageSize, take: pageSize
-            },
-          };
-        }
-      } catch (e) {
-        console.error('Failed to get subordinates:', e);
-        where.employeeCode = { in: [] }; // Fallback an toàn
+        const subordinatesRes: { allowedEmployeeCodes?: string[]; allowed_employee_codes?: string[] } =
+          await firstValueFrom(this.userService.GetSubordinates({ userId: params.callerUserId }) as any);
+        allowedCodesFromAssignable = subordinatesRes?.allowedEmployeeCodes ?? subordinatesRes?.allowed_employee_codes ?? [];
+      } catch (error) {
+        this.logger.error('Failed to get subordinates', error instanceof Error ? error.stack : String(error));
+        allowedCodesFromAssignable = []; // Fallback an toàn: không lộ dữ liệu ngoài phạm vi cho phép
       }
+    }
+
+    if (allowedCodesFromCodesParam && allowedCodesFromAssignable) {
+      const intersection = allowedCodesFromCodesParam.filter((c) => allowedCodesFromAssignable!.includes(c));
+      where.employeeCode = { in: intersection };
+    } else if (allowedCodesFromAssignable) {
+      where.employeeCode = { in: allowedCodesFromAssignable };
+      if (allowedCodesFromAssignable.length === 0) {
+        return {
+          success: true,
+          message: 'OK',
+          data: [],
+          meta: { total: 0, skip: (page - 1) * pageSize, take: pageSize },
+        };
+      }
+    } else if (allowedCodesFromCodesParam) {
+      where.employeeCode = { in: allowedCodesFromCodesParam };
     }
 
     if (params.keyword) {
       const kw = params.keyword.trim();
+      // MySQL: collation mặc định (*_ci) đã case-insensitive sẵn, không cần "mode".
+      // Nếu cột nào dùng collation *_bin thì cần ALTER COLLATION ở DB, không xử lý ở code.
       where.OR = [
         { firstname: { contains: kw } },
         { lastname: { contains: kw } },
@@ -277,12 +349,13 @@ export class EmployeesService implements OnModuleInit {
         { identityCard: { contains: kw } },
       ];
     }
+
     // Proto3 gửi mặc định int32 = 0; chỉ lọc khi client thực sự truyền id > 0
     if (params.jobTitleId != null && params.jobTitleId > 0) where.jobTitleId = params.jobTitleId;
     if (params.civilServantRankId != null && params.civilServantRankId > 0) where.civilServantRankId = params.civilServantRankId;
     if (params.partyTitleId != null && params.partyTitleId > 0) where.partyTitleId = params.partyTitleId;
     if (params.employmentStatus) where.employmentStatus = params.employmentStatus;
-    
+
     if (params.descendantUnitIds && params.descendantUnitIds.length > 0) {
       where.departmentId = { in: params.descendantUnitIds };
     } else if (params.departmentId != null && params.departmentId > 0) {
@@ -290,11 +363,8 @@ export class EmployeesService implements OnModuleInit {
     }
 
     if (params.excludeEmployeeCode) {
-      if (typeof where.employeeCode === 'object' && where.employeeCode !== null) {
-        (where.employeeCode as any).not = params.excludeEmployeeCode;
-      } else if (!where.employeeCode) {
-        where.employeeCode = { not: params.excludeEmployeeCode };
-      }
+      const current = where.employeeCode as Prisma.StringFilter | undefined;
+      where.employeeCode = { ...current, not: params.excludeEmployeeCode };
     }
 
     if (params.ids && params.ids.length > 0) {
@@ -314,10 +384,8 @@ export class EmployeesService implements OnModuleInit {
     return {
       success: true,
       message: 'OK',
-      data: items.map(e => this.toEmployee(e)),
-      meta: {
-        total: totalCount, skip, take: pageSize
-      },
+      data: items.map((e) => this.toEmployee(e)),
+      meta: { total: totalCount, skip, take: pageSize },
     };
   }
 }
