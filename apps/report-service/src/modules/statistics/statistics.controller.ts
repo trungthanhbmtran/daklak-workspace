@@ -24,29 +24,29 @@ export class StatisticsController {
   async getTaskStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
     const filter = data.payload ? JSON.parse(data.payload) : {};
     const user = data.userData ? JSON.parse(data.userData) : null;
-    const res = await this.statisticsService.getTaskStatistics(filter, user, metadata);
-    return { success: true, data: JSON.stringify(res) };
+    const res: any = await this.statisticsService.getTaskStatistics(filter, user, metadata);
+    return { success: res.success, message: res.message, data: JSON.stringify(res.data) };
   }
 
   @GrpcMethod('ReportService', 'GetPostStats')
   async getPostStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
     const filter = data.payload ? JSON.parse(data.payload) : {};
-    const res = await this.statisticsService.getPostStatistics(filter, metadata);
-    return { success: true, data: JSON.stringify(res) };
+    const res: any = await this.statisticsService.getPostStatistics(filter, metadata);
+    return { success: res.success, message: res.message, data: JSON.stringify(res.data) };
   }
 
   @GrpcMethod('ReportService', 'GetKpiStats')
   async getKpiStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
     const filter = data.payload ? JSON.parse(data.payload) : {};
     const user = data.userData ? JSON.parse(data.userData) : null;
-    const res = await this.statisticsService.getKpiStatistics(filter, user, metadata);
-    return { success: true, data: JSON.stringify(res) };
+    const res: any = await this.statisticsService.getKpiStatistics(filter, user, metadata);
+    return { success: res.success, message: res.message, data: JSON.stringify(res.data) };
   }
 
   @GrpcMethod('ReportService', 'GetDocumentStats')
   async getDocumentStatistics(data: { payload: string; userData: string }, metadata: Metadata) {
     const filter = data.payload ? JSON.parse(data.payload) : {};
-    const res = await this.statisticsService.getDocumentStatistics(filter, metadata);
-    return { success: true, data: JSON.stringify(res) };
+    const res: any = await this.statisticsService.getDocumentStatistics(filter, metadata);
+    return { success: res.success, message: res.message, data: JSON.stringify(res.data) };
   }
 }
