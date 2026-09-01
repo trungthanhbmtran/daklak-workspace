@@ -42,9 +42,9 @@ export const hrmKpiEvaluationsApi = {
   approveReviewerScore: (id: number, payload: any) => {
     return apiClient.post(`/hrm/kpis/evaluations/${id}/approve`, payload) as any;
   },
-  getDashboardStats: (params?: any) => {
-    return apiClient.get('/reports/kpis', { params }) as any;
-  }
+  getDashboardStats: async (params?: any) => {
+    return apiClient.get('/admin/reports/kpis', { params }) as any;
+  },
 };
 
 export const hrmKpiPeriodsApi = {

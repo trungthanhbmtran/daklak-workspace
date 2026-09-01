@@ -8,7 +8,7 @@ export const hrmTasksApi = {
   },
 
   getStats: async (params?: any) => {
-    return apiClient.get("/reports/tasks", { params }) as any;
+    return apiClient.get("/admin/reports/tasks", { params }) as any;
   },
 
   getTask(id: number): Promise<ApiResponse<any>> {
