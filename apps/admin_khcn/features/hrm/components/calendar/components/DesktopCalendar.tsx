@@ -16,24 +16,21 @@ import {
   parseISO
 } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heading } from "@/components/ui/typography";
-import { Tabs } from "@/components/ui/tabs";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import { CalendarHeader, CalendarViewMode } from "./CalendarHeader";
-import { CalendarTabs } from "./CalendarTabs";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
 const CalendarGrid = dynamic(
-  () => import("./CalendarGrid").then(mod => mod.CalendarGrid), 
+  () => import("./CalendarGrid").then(mod => mod.CalendarGrid),
   { ssr: false, loading: () => <Skeleton className="w-full min-h-[500px] rounded-xl" /> }
 );
 
 const CalendarTimeGrid = dynamic(
-  () => import("./CalendarTimeGrid").then(mod => mod.CalendarTimeGrid), 
+  () => import("./CalendarTimeGrid").then(mod => mod.CalendarTimeGrid),
   { ssr: false, loading: () => <Skeleton className="w-full min-h-[500px] rounded-xl" /> }
 );
 
@@ -59,7 +56,7 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
   // Calculate fetch boundaries based on viewMode to optimize data fetching
   const { fetchStartDate, fetchEndDate } = useMemo(() => {
     let start, end;
-    switch(viewMode) {
+    switch (viewMode) {
       case 'day':
         start = startOfDay(currentDate);
         end = endOfDay(currentDate);
@@ -92,7 +89,7 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
   }, [currentDate, viewMode]);
 
   // --- GET REAL DATA ---
-  const { data: tasksRes, isLoading } = useTasksList({ 
+  const { data: tasksRes, isLoading } = useTasksList({
     limit: 500,
     startDate: fetchStartDate,
     endDate: fetchEndDate,
@@ -173,54 +170,39 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
 
   return (
     <>
-      <div className="flex flex-col gap-4 sm:gap-6 p-2 sm:p-4 lg:p-6 w-full max-w-[1800px] mx-auto h-[calc(100vh-64px)] min-h-0 animate-in fade-in duration-500">
-        <div className="flex flex-col md:flex-row md:items-center justify-between shrink-0">
-          <Heading level="h1" className="text-foreground flex items-center gap-3">
-            <CalendarIcon className="h-7 w-7 text-primary" />
-            Lịch công tác
-          </Heading>
-        </div>
+      <Card className="flex flex-col flex-1 min-h-0 border-border shadow-md overflow-hidden bg-card rounded-xl h-full">
+        <CalendarHeader
+          currentDate={currentDate}
+          isLoading={isLoading}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onGoToToday={goToToday}
+          onPrevDate={prevDate}
+          onNextDate={nextDate}
+        />
 
-        <Tabs value={activeTab} className="flex flex-col flex-1 min-h-0 space-y-4" onValueChange={(val) => router.push(`/services/hrm/calendar/${val}`)}>
-          <div className="shrink-0">
-            <CalendarTabs />
-          </div>
-
-          <Card className="flex flex-col flex-1 min-h-0 border-border shadow-md overflow-hidden bg-card rounded-xl">
-            <CalendarHeader
+        <CardContent className="flex flex-col flex-1 min-h-0 p-0 relative">
+          {viewMode === "month" || viewMode === "quarter" || viewMode === "year" ? (
+            <CalendarGrid
               currentDate={currentDate}
+              filteredEvents={filteredEvents}
               isLoading={isLoading}
               viewMode={viewMode}
-              setViewMode={setViewMode}
-              onGoToToday={goToToday}
-              onPrevDate={prevDate}
-              onNextDate={nextDate}
+              onSelectDayEvents={setSelectedDayEvents}
+              onDateClick={handleDateClick}
             />
-
-            <CardContent className="flex flex-col flex-1 min-h-0 p-0 relative">
-              {viewMode === "month" || viewMode === "quarter" || viewMode === "year" ? (
-                <CalendarGrid
-                  currentDate={currentDate}
-                  filteredEvents={filteredEvents}
-                  isLoading={isLoading}
-                  viewMode={viewMode}
-                  onSelectDayEvents={setSelectedDayEvents}
-                  onDateClick={handleDateClick}
-                />
-              ) : (
-                <CalendarTimeGrid
-                  currentDate={currentDate}
-                  filteredEvents={filteredEvents}
-                  isLoading={isLoading}
-                  viewMode={viewMode}
-                  onSelectDayEvents={setSelectedDayEvents}
-                  onTimeSlotClick={handleDateClick}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </Tabs>
-      </div>
+          ) : (
+            <CalendarTimeGrid
+              currentDate={currentDate}
+              filteredEvents={filteredEvents}
+              isLoading={isLoading}
+              viewMode={viewMode}
+              onSelectDayEvents={setSelectedDayEvents}
+              onTimeSlotClick={handleDateClick}
+            />
+          )}
+        </CardContent>
+      </Card>
 
       {selectedDayEvents && (
         <CalendarEventModal

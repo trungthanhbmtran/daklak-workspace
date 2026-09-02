@@ -7,9 +7,7 @@ import { vi as viLocale } from "date-fns/locale";
 import { Heading, Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs } from "@/components/ui/tabs";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Video, CheckCircle2 } from "lucide-react";
-import { CalendarTabs } from "./CalendarTabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -113,7 +111,7 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
 
   return (
     <>
-      <div className="flex flex-col h-[calc(100vh-64px)] bg-background">
+      <div className="flex flex-col h-full w-full max-w-md mx-auto bg-background relative animate-in slide-in-from-bottom-2 duration-300 rounded-xl overflow-hidden shadow-sm border border-border">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-card shrink-0">
           <div className="flex items-center gap-2">
@@ -161,11 +159,7 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
           </div>
         </div>
 
-        <div className="px-4 py-2 bg-card border-b border-border shrink-0">
-          <Tabs value={activeTab} onValueChange={(val) => router.push(`/services/hrm/calendar/${val}`)}>
-            <CalendarTabs />
-          </Tabs>
-        </div>
+
 
         {/* Agenda / Event List */}
         <ScrollArea className="flex-1 bg-muted/30 p-4">
