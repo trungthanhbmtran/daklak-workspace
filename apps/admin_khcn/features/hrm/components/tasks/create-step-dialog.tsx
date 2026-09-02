@@ -39,8 +39,8 @@ export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogP
     try {
       await createStep.mutateAsync({ 
         title: title.trim(),
-        baseScore: baseScore === "" ? 0 : Number(baseScore),
-        assigneeCode: assigneeCode || undefined
+        baseScore,
+        assignee: assigneeCode
       });
       resetForm();
       onOpenChange(false);

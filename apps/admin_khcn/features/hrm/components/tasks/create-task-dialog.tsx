@@ -108,33 +108,16 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
     if (!assignee) { toast.error("Vui lòng chọn người/đơn vị nhận việc"); return; }
     if (!dueDate) { toast.error("Vui lòng chọn thời hạn"); return; }
 
-    const selectedDate = new Date(dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (selectedDate < today) {
-      toast.error("Thời gian hạn chót không được trước thời gian giao việc (hiện tại)");
-      return;
-    }
-
-    // Phân tích assignee: nếu bắt đầu bằng DEPT_ → departmentId, ngược lại → assigneeCode
-    const isDept = assignee.startsWith("DEPT_");
     const payload: any = {
       title: title.trim(),
       description: description.trim() || undefined,
       priority,
-      dueDate: new Date(dueDate).toISOString(),
-      coAssigneeCodes: coordinators.map(c => c.id),
-      metadata: {
-        taskType,
-        ...(taskType === "PERIODIC" && { recurrence })
-      }
+      dueDate, // Send raw dueDate, backend will validate and format
+      assignee, // Send raw assignee, backend will parse DEPT_ vs Code
+      coordinators: coordinators.map(c => c.id), // Send raw list
+      taskType,
+      recurrence: taskType === "PERIODIC" ? recurrence : undefined
     };
-
-    if (isDept) {
-      payload.departmentId = parseInt(assignee.replace("DEPT_", ""), 10);
-    } else {
-      payload.assigneeCode = assignee;
-    }
 
     try {
       if (isSubTask) {

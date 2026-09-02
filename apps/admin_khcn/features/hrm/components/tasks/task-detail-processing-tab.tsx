@@ -84,21 +84,23 @@ export function TaskProcessingTab({
     if (!completingItem) return;
     setIsSubmittingEvidence(true);
     try {
-      let content = "";
-      if (evidenceText.trim() || evidenceFiles.length > 0) {
-        content = `📋 Báo cáo hoàn thành [${completingItem.type === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${completingItem.data.title}**\n${evidenceText.trim()}`;
-        if (evidenceFiles.length > 0) {
-          content += "\n\n**Minh chứng đính kèm:**";
-          evidenceFiles.forEach((file, index) => {
-            content += `\n${index + 1}. [${file.name}](${file.url})`;
-          });
-        }
-      }
+      const evidencePayload = (evidenceText.trim() || evidenceFiles.length > 0) ? {
+        text: evidenceText.trim(),
+        files: evidenceFiles,
+        itemType: completingItem.type,
+        itemTitle: completingItem.data.title
+      } : undefined;
 
       if (completingItem.type === 'step') {
-        await updateStep.mutateAsync({ stepId: Number(completingItem.data.id), payload: { status: "COMPLETED", evidence: content || undefined } });
+        await updateStep.mutateAsync({ 
+          stepId: Number(completingItem.data.id), 
+          payload: { status: "COMPLETED", evidenceData: evidencePayload } 
+        });
       } else {
-        await updateTaskStatus.mutateAsync({ id: Number(completingItem.data.id), payload: { status: "COMPLETED", evidence: content || undefined } });
+        await updateTaskStatus.mutateAsync({ 
+          id: Number(completingItem.data.id), 
+          payload: { status: "COMPLETED", evidenceData: evidencePayload } 
+        });
       }
 
       setCompletingItem(null);

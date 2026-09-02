@@ -50,7 +50,7 @@ export const hrmTasksApi = {
     return apiClient.post(`/hrm/tasks/${id}/extend`, payload) as any;
   },
 
-  updateStatus(id: number, payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string }): Promise<ApiResponse<any>> {
+  updateStatus(id: number, payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string; evidenceData?: any }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/status`, payload) as any;
   },
 
@@ -62,7 +62,7 @@ export const hrmTasksApi = {
     return apiClient.get('/hrm/tasks/recommend-assignees', { params }) as any;
   },
 
-  assignTask(id: number, payload: { assigneeCode?: string; assigneePercentage?: number; coAssigneeCodes?: string[]; coassigneePercentages?: number[]; departmentId?: number }): Promise<ApiResponse<any>> {
+  assignTask(id: number, payload: { assigneeCode?: string; assignee?: string; assigneePercentage?: number; coAssigneeCodes?: string[]; coordinators?: string[]; coassigneePercentages?: number[]; departmentId?: number }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/assign`, payload) as any;
   },
 
@@ -106,11 +106,11 @@ export const hrmTasksApi = {
     return apiClient.get(`/hrm/tasks/${taskId}/steps`) as any;
   },
 
-  createStep(taskId: number, payload: { title: string; order?: number; assigneeCode?: string; baseScore?: number }): Promise<ApiResponse<any>> {
+  createStep(taskId: number, payload: { title: string; order?: number; assigneeCode?: string; assignee?: string; baseScore?: number | ""; }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${taskId}/steps`, payload) as any;
   },
 
-  updateStep(taskId: number, stepId: number, payload: { title?: string; status?: string; order?: number; assigneeCode?: string; baseScore?: number; evidence?: string }): Promise<ApiResponse<any>> {
+  updateStep(taskId: number, stepId: number, payload: { title?: string; status?: string; order?: number; assigneeCode?: string; baseScore?: number; evidence?: string; evidenceData?: any }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${taskId}/steps/${stepId}`, payload) as any;
   },
 

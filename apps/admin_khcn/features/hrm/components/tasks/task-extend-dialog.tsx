@@ -30,11 +30,8 @@ export function TaskExtendDialog({ open, onOpenChange, taskId, currentDueDate }:
       toast.error("Vui lòng chọn thời hạn mới");
       return;
     }
-    // Convert to ISO string
-    const dueDateIso = new Date(newDueDate).toISOString();
-    
     extendMutation.mutate(
-      { id: taskId, payload: { dueDate: dueDateIso, reason } },
+      { id: taskId, payload: { dueDate: newDueDate, reason } },
       { onSuccess: handleSuccess }
     );
   };

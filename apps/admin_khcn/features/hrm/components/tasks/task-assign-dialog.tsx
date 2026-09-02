@@ -71,8 +71,8 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
       await assignTask.mutateAsync({
         id: taskId,
         payload: {
-          assigneeCode: assignee,
-          coAssigneeCodes: coordinators.map(c => c.id),
+          assignee: assignee,
+          coordinators: coordinators.map(c => c.id),
         }
       });
       onOpenChange(false);

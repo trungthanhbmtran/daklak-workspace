@@ -148,6 +148,40 @@ export class TasksService implements OnModuleInit {
 
   // --- Endpoints ---
   async create(req: any, body: any) {
+    if (body.dueDate) {
+      const selectedDate = new Date(body.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        throw new InternalServerErrorException("Thời gian hạn chót không được trước thời gian giao việc (hiện tại)");
+      }
+      body.dueDate = new Date(body.dueDate).toISOString();
+    }
+
+    if (body.assignee) {
+      if (body.assignee.startsWith("DEPT_")) {
+        body.departmentId = parseInt(body.assignee.replace("DEPT_", ""), 10);
+      } else {
+        body.assigneeCode = body.assignee;
+      }
+      delete body.assignee;
+    }
+
+    if (body.coordinators) {
+      body.coassigneeCodes = body.coordinators;
+      delete body.coordinators;
+    }
+
+    if (body.taskType) {
+      body.metadata = body.metadata || {};
+      body.metadata.taskType = body.taskType;
+      if (body.taskType === 'PERIODIC' && body.recurrence) {
+        body.metadata.recurrence = body.recurrence;
+      }
+      delete body.taskType;
+      delete body.recurrence;
+    }
+
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
       body.currentEmployeeCode = req.user.employeeCode;
@@ -258,6 +292,9 @@ export class TasksService implements OnModuleInit {
   }
 
   async extendTask(req: any, id: number, body: any) {
+    if (body.dueDate) {
+      body.dueDate = new Date(body.dueDate).toISOString();
+    }
     const user = req.user;
     const response: any = await firstValueFrom(
       this.taskService.ExtendTask(
@@ -279,7 +316,18 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async updateStatus(req: any, id: number, status: string, rejectReason?: string, actionName?: string, evidence?: string) {
+  async updateStatus(req: any, id: number, status: string, rejectReason?: string, actionName?: string, evidence?: string, evidenceData?: any) {
+    let finalEvidence = evidence;
+    if (evidenceData) {
+      finalEvidence = `📋 Báo cáo hoàn thành [${evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${evidenceData.itemTitle}**\n${evidenceData.text || ''}`.trim();
+      if (evidenceData.files && evidenceData.files.length > 0) {
+        finalEvidence += "\n\n**Minh chứng đính kèm:**";
+        evidenceData.files.forEach((file: any, index: number) => {
+          finalEvidence += `\n${index + 1}. [${file.name}](${file.url})`;
+        });
+      }
+    }
+
     const user = req.user;
     const response: any = await firstValueFrom(
       this.taskService.UpdateTaskStatus(
@@ -288,7 +336,7 @@ export class TasksService implements OnModuleInit {
           status,
           rejectReason,
           actionName,
-          evidence,
+          evidence: finalEvidence,
           actorCode: user?.employeeCode || '',
           currentUserPermissions: user?.permissionsFlatten || [],
           currentUserId: user?.id,
@@ -382,6 +430,20 @@ export class TasksService implements OnModuleInit {
   }
 
   async assignTask(req: any, id: number, body: any) {
+    if (body.assignee) {
+      if (body.assignee.startsWith("DEPT_")) {
+        body.departmentId = parseInt(body.assignee.replace("DEPT_", ""), 10);
+      } else {
+        body.assigneeCode = body.assignee;
+      }
+      delete body.assignee;
+    }
+    
+    if (body.coordinators) {
+      body.coassigneeCodes = body.coordinators;
+      delete body.coordinators;
+    }
+
     const assigneeCode = body.assigneeCode;
     const coassigneeCodes = body.coassigneeCodes || body.coAssigneeCodes || [];
     const departmentId = body.departmentId;
@@ -439,7 +501,7 @@ export class TasksService implements OnModuleInit {
       this.taskService.BreakdownTask(
         {
           ...body,
-          coassigneeCodes: body.coassigneeCodes || body.coAssigneeCodes,
+          coassigneeCodes: body.coordinators || body.coassigneeCodes || body.coAssigneeCodes,
           id: id,
           parentId: id,
           assignerCode,
@@ -641,6 +703,14 @@ export class TasksService implements OnModuleInit {
   }
 
   async createStep(req: any, id: number, body: any) {
+    if (body.baseScore !== undefined && body.baseScore !== null) {
+      body.baseScore = body.baseScore === "" ? 0 : Number(body.baseScore);
+    }
+    if (body.assignee) {
+      body.assigneeCode = body.assignee || undefined;
+      delete body.assignee;
+    }
+
     const response: any = await firstValueFrom(
       this.taskService.CreateStep(
         { taskId: id, ...body },
@@ -656,6 +726,18 @@ export class TasksService implements OnModuleInit {
   }
 
   async updateStep(req: any, id: number, stepId: number, body: any) {
+    if (body.evidenceData) {
+      let finalEvidence = `📋 Báo cáo hoàn thành [${body.evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${body.evidenceData.itemTitle}**\n${body.evidenceData.text || ''}`.trim();
+      if (body.evidenceData.files && body.evidenceData.files.length > 0) {
+        finalEvidence += "\n\n**Minh chứng đính kèm:**";
+        body.evidenceData.files.forEach((file: any, index: number) => {
+          finalEvidence += `\n${index + 1}. [${file.name}](${file.url})`;
+        });
+      }
+      body.evidence = finalEvidence;
+      delete body.evidenceData;
+    }
+
     const response: any = await firstValueFrom(
       this.taskService.UpdateStep(
         { taskId: id, stepId, actorCode: req.user?.employeeCode || '', ...body },

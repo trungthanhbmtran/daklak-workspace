@@ -75,8 +75,9 @@ export class TasksController {
     @Body('rejectReason') rejectReason?: string,
     @Body('actionName') actionName?: string,
     @Body('evidence') evidence?: string,
+    @Body('evidenceData') evidenceData?: any,
   ) {
-    return this.tasksService.updateStatus(req, id, status, rejectReason, actionName, evidence);
+    return this.tasksService.updateStatus(req, id, status, rejectReason, actionName, evidence, evidenceData);
   }
   @Post(':id/respond')
   async respondTask(

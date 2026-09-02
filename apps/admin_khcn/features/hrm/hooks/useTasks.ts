@@ -98,7 +98,7 @@ export function useUpdateTaskStatus() {
   return useMutation({
 
     onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: ({ id, payload }: { id: number; payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string } }) =>
+    mutationFn: ({ id, payload }: { id: number; payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string; evidenceData?: any } }) =>
       hrmTasksApi.updateStatus(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
@@ -176,7 +176,7 @@ export function useAddComment(conversationId: string | undefined) {
 export function useUpdateStatus(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string }) => {
+    mutationFn: (payload: { status: string; rejectReason?: string; actionName?: string; evidence?: string; evidenceData?: any }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStatus(taskId, payload);
     },
@@ -246,7 +246,7 @@ export function useTaskSteps(taskId: number | undefined) {
 export function useCreateStep(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { title: string; order?: number; assigneeCode?: string; baseScore?: number }) => {
+    mutationFn: (payload: { title: string; order?: number; assigneeCode?: string; assignee?: string; baseScore?: number | ""; }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.createStep(taskId, payload);
     },
@@ -266,7 +266,7 @@ export function useCreateStep(taskId: number | undefined) {
 export function useUpdateStep(taskId: number | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string; baseScore?: number; evidence?: string } }) => {
+    mutationFn: ({ stepId, payload }: { stepId: number; payload: { title?: string; status?: string; baseScore?: number; evidence?: string; evidenceData?: any } }) => {
       if (!taskId) return Promise.reject(new Error("Missing taskId"));
       return hrmTasksApi.updateStep(taskId, stepId, payload);
     },
@@ -320,8 +320,10 @@ export function useAssignTask() {
       id: number;
       payload: {
         assigneeCode?: string;
+        assignee?: string;
         departmentId?: number;
         coAssigneeCodes?: string[];
+        coordinators?: string[];
       };
     }) => hrmTasksApi.assignTask(id, payload),
     onSuccess: (res, variables) => {
