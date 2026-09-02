@@ -4,19 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Text } from "@/components/ui/typography";
 import { CheckCircle, Clock, AlertTriangle, FileText, Loader2 } from "lucide-react";
 import { useTaskStats } from "../../hooks/useTasks";
-import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { useMemo } from "react";
+
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export function TaskDashboard() {
   const { data: statsResponse, isLoading } = useTaskStats({ status: undefined, search: undefined });
-  const { data: orgResponse } = useOrganizationFlatListQuery();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const organizations: any[] = (orgResponse as any)?.data ?? [];
-
   // API trả về chuẩn { success: true, data: { totalTasks: ..., departmentStats: ... } }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stats: any = (statsResponse as any)?.data ?? statsResponse ?? {
@@ -33,18 +28,7 @@ export function TaskDashboard() {
     kpiStats = []
   } = stats || {};
 
-  const departmentStats = useMemo(() => {
-    if (!stats.departmentStats || !Array.isArray(stats.departmentStats)) return [];
-    return stats.departmentStats.map((stat: any) => {
-      const deptId = parseInt(stat.name, 10);
-      if (isNaN(deptId)) return stat;
-      const dept = organizations.find((org: any) => org.id === deptId);
-      return {
-        ...stat,
-        name: dept?.name || "Chưa phân công bộ phận"
-      };
-    });
-  }, [stats.departmentStats, organizations]);
+  const departmentStats = Array.isArray(stats.departmentStats) ? stats.departmentStats : [];
 
   if (isLoading) {
     return (

@@ -56,10 +56,25 @@ export class StatisticsService implements OnModuleInit {
       role: filter.role,
     };
 
-    return firstValueFrom(this.taskService.GetTaskStats(requestPayload, metadata)).catch(e => {
+    const res: any = await firstValueFrom(this.taskService.GetTaskStats(requestPayload, metadata)).catch(e => {
       console.error('TaskService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê nhiệm vụ');
     });
+
+    if (res?.success && res.data?.departmentStats) {
+      let unitMap: Record<number, any> = {};
+      try { unitMap = await this.getUnitMap(); } catch (e) {}
+      
+      res.data.departmentStats = res.data.departmentStats.map((s: any) => {
+        const deptId = parseInt(s.name, 10);
+        if (!isNaN(deptId) && unitMap[deptId]) {
+          return { ...s, name: unitMap[deptId].name };
+        }
+        return { ...s, name: isNaN(deptId) ? s.name : "Chưa phân công bộ phận" };
+      });
+    }
+
+    return res;
   }
 
   async getPostStatistics(filter: any, metadata: Metadata) {
