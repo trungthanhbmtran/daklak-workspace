@@ -25,7 +25,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
         options: {
           package: 'post',
           protoPath: join(PROTO_ROOT, 'posts/post.proto'),
-          url: process.env.POST_GRPC_URL || '0.0.0.0:50054',
+          url: process.env.POSTS_GRPC_URL || process.env.POST_GRPC_URL || '0.0.0.0:50054',
           loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
         },
       },
@@ -55,7 +55,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
         options: {
           package: 'organization',
           protoPath: join(PROTO_ROOT, 'users/organization.proto'),
-          url: process.env.USER_GRPC_URL || '0.0.0.0:50051',
+          url: process.env.USERS_GRPC_URL || process.env.USER_GRPC_URL || '0.0.0.0:50051',
           loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
         },
       }

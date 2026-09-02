@@ -95,7 +95,8 @@ export class StatisticsService implements OnModuleInit {
       });
       this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
       return unitMap;
-    } catch {
+    } catch (error) {
+      console.error('getUnitMap failed:', error);
       return {};
     }
   }
