@@ -38,7 +38,7 @@ export function ProgressByUnitChart({ isLoading, data }: ChartProps) {
         margin={{ top: 5, right: 30, left: -20, bottom: 5 }}
       >
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-        <XAxis dataKey="unitName" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+        <XAxis dataKey="unitName" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} interval="preserveEnd" />
         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
         <Tooltip
           cursor={{ fill: 'transparent' }}

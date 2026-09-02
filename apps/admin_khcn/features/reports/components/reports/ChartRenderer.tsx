@@ -69,7 +69,7 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, xAxisLabel, yAxi
         {type === 'bar' ? (
           <BarChart data={data} margin={margin}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
+            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} interval="preserveEnd" label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dx={-10} />
             <Tooltip
               contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
@@ -81,7 +81,7 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, xAxisLabel, yAxi
         ) : type === 'line' ? (
           <LineChart data={data} margin={margin}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
+            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} interval="preserveEnd" label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dx={-10} />
             <Tooltip
               contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
@@ -98,7 +98,7 @@ export function ChartRenderer({ type, data, xAxisKey, yAxisKey, xAxisLabel, yAxi
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
+            <XAxis dataKey={xAxisKey} axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} interval="preserveEnd" label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottomRight', offset: -5, fill: '#64748b', fontSize: 12 } : undefined} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dx={-10} />
             <Tooltip
               contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}

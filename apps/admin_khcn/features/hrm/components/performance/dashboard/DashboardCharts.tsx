@@ -40,8 +40,7 @@ export function DashboardCharts({ selectedPeriod }: { selectedPeriod: string }) 
                   axisLine={false}
                   tickLine={false}
                   tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                  angle={-45}
-                  textAnchor="end"
+                  interval="preserveEnd"
                 />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
                 <Tooltip
