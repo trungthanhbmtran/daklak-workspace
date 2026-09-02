@@ -120,6 +120,8 @@ export class TransformInterceptor<T> implements NestInterceptor<T, any> {
       req.query?.limit ||
       req.query?.pageSize
     );
+    const isStats = /\/(reports|stats|metrics|dashboard|kpis)/i.test(path);
+    if (isStats && !hasPaginationQuery) return false;
     return !endsWithId || hasPaginationQuery;
   }
 

@@ -18,7 +18,10 @@ export function TaskDashboard() {
   const organizations: any[] = (orgResponse as any)?.data ?? [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stats: any = (statsResponse as any)?.data ?? {
+  const statsData = Array.isArray(statsResponse) ? statsResponse[0] : (statsResponse as any)?.data ?? statsResponse;
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stats: any = statsData ?? {
     totalTasks: 0, completedTasks: 0, inProgressTasks: 0, overdueTasks: 0,
     individualStats: [], departmentStats: [], kpiStats: []
   };
