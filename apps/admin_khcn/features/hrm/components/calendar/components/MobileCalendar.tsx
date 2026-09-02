@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState, useMemo, useCallback } from "react";
 import { format, startOfWeek, endOfWeek, addDays, isSameDay, startOfDay, endOfDay, parseISO, addWeeks, subWeeks } from "date-fns";
 import { vi as viLocale } from "date-fns/locale";
@@ -24,9 +25,9 @@ const CalendarCreateEventModal = dynamic(
   { ssr: false }
 );
 
-export function MobileCalendar() {
+export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 'unit' | 'meeting' }) {
+  const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState("all");
   const [selectedDayEvents, setSelectedDayEvents] = useState<{ day: Date, events: any[] } | null>(null);
 
   const [createEventDate, setCreateEventDate] = useState<Date | null>(null);
@@ -43,9 +44,10 @@ export function MobileCalendar() {
   }, [currentDate]);
 
   const { data: tasksRes, isLoading } = useTasksList({ 
-    limit: 100, // Ít hơn Desktop
+    limit: 500,
     startDate: fetchStartDate,
-    endDate: fetchEndDate
+    endDate: fetchEndDate,
+    role: activeTab === 'personal' ? 'ASSIGNEE' : undefined
   });
   
   const allTasks = tasksRes?.data || [];
@@ -54,17 +56,10 @@ export function MobileCalendar() {
   const filteredEvents = useMemo(() => {
     let tasksToMap: any[] = [];
 
-    if (activeTab === "all") {
+    if (activeTab === "all" || activeTab === "unit") {
       tasksToMap = allTasks;
     } else if (activeTab === "personal") {
-      tasksToMap = allTasks.filter((_, i) => i % 3 === 0);
-    } else if (activeTab === "unit") {
-      tasksToMap = allTasks.filter((task: any) => {
-        const assignee = task.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
-        return assignee?.employee?.department?.name?.includes("Kỹ Thuật") ||
-          assignee?.departmentName?.includes("Phòng");
-      });
-      if (tasksToMap.length === 0) tasksToMap = allTasks.slice(0, 50);
+      tasksToMap = allTasks;
     }
 
     const events = tasksToMap.map((t: any) => {
@@ -89,37 +84,6 @@ export function MobileCalendar() {
         isCompleted
       };
     });
-
-    if (activeTab === "meeting") {
-      const meetingEvents = [];
-      const baseDate = new Date();
-      for (let i = 1; i <= 5; i++) {
-        const mDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), i * 5);
-        meetingEvents.push({
-          id: `meet-${i}`,
-          title: `Họp giao ban tuần ${i}`,
-          startDate: mDate,
-          endDate: mDate,
-          type: "meeting",
-          colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
-          isCompleted: false
-        });
-      }
-      return meetingEvents;
-    }
-
-    if (activeTab === "all") {
-      const mDate = new Date(new Date().getFullYear(), new Date().getMonth(), 15);
-      events.push({
-        id: `meet-all`,
-        title: `Họp phòng chuyên môn`,
-        startDate: mDate,
-        endDate: mDate,
-        type: "meeting",
-        colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
-        isCompleted: false
-      });
-    }
 
     return events;
   }, [allTasks, activeTab]);
@@ -198,7 +162,7 @@ export function MobileCalendar() {
         </div>
 
         <div className="px-4 py-2 bg-card border-b border-border shrink-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={(val) => router.push(`/services/hrm/calendar/${val}`)}>
             <CalendarTabs />
           </Tabs>
         </div>

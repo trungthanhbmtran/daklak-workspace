@@ -18,8 +18,12 @@ const MobileCalendar = dynamic(
   { ssr: false, loading: () => <Skeleton className="w-full h-[calc(100vh-64px)] rounded-none" /> }
 );
 
-export function WorkCalendarClient() {
+interface WorkCalendarClientProps {
+  activeTab: 'all' | 'personal' | 'unit' | 'meeting';
+}
+
+export function WorkCalendarClient({ activeTab }: WorkCalendarClientProps) {
   const isMobile = useIsMobile();
 
-  return isMobile ? <MobileCalendar /> : <DesktopCalendar />;
+  return isMobile ? <MobileCalendar activeTab={activeTab} /> : <DesktopCalendar activeTab={activeTab} />;
 }

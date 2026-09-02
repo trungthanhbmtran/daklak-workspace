@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState, useMemo, useCallback } from "react";
 import {
   addMonths, subMonths,
@@ -46,9 +47,9 @@ const CalendarCreateEventModal = dynamic(
   { ssr: false }
 );
 
-export function DesktopCalendar() {
+export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 'unit' | 'meeting' }) {
+  const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [selectedDayEvents, setSelectedDayEvents] = useState<{ day: Date, events: any[] } | null>(null);
 
@@ -94,7 +95,8 @@ export function DesktopCalendar() {
   const { data: tasksRes, isLoading } = useTasksList({ 
     limit: 500,
     startDate: fetchStartDate,
-    endDate: fetchEndDate
+    endDate: fetchEndDate,
+    role: activeTab === 'personal' ? 'ASSIGNEE' : undefined
   });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const allTasks = tasksRes?.data || [];
@@ -103,17 +105,11 @@ export function DesktopCalendar() {
   const filteredEvents = useMemo(() => {
     let tasksToMap: any[] = [];
 
-    if (activeTab === "all") {
+    if (activeTab === "all" || activeTab === "unit") {
       tasksToMap = allTasks;
     } else if (activeTab === "personal") {
-      tasksToMap = allTasks.filter((_, i) => i % 3 === 0);
-    } else if (activeTab === "unit") {
-      tasksToMap = allTasks.filter((task: any) => {
-        const assignee = task.participants?.find((p: any) => p.participantRole === 'ASSIGNEE');
-        return assignee?.employee?.department?.name?.includes("Kỹ Thuật") ||
-          assignee?.departmentName?.includes("Phòng");
-      });
-      if (tasksToMap.length === 0) tasksToMap = allTasks.slice(0, 50);
+      // Tạm thời nếu dùng API thì backend có thể lọc, ở đây tạm map bằng allTasks nếu không có param
+      tasksToMap = allTasks;
     }
 
     const events = tasksToMap.map((t: any) => {
@@ -138,37 +134,6 @@ export function DesktopCalendar() {
         isCompleted
       };
     });
-
-    if (activeTab === "meeting") {
-      const meetingEvents = [];
-      const baseDate = new Date();
-      for (let i = 1; i <= 5; i++) {
-        const mDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), i * 5);
-        meetingEvents.push({
-          id: `meet-${i}`,
-          title: `Họp giao ban tuần ${i}`,
-          startDate: mDate,
-          endDate: mDate,
-          type: "meeting",
-          colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
-          isCompleted: false
-        });
-      }
-      return meetingEvents;
-    }
-
-    if (activeTab === "all") {
-      const mDate = new Date(new Date().getFullYear(), new Date().getMonth(), 15);
-      events.push({
-        id: `meet-all`,
-        title: `Họp phòng chuyên môn`,
-        startDate: mDate,
-        endDate: mDate,
-        type: "meeting",
-        colorClass: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800",
-        isCompleted: false
-      });
-    }
 
     return events;
   }, [allTasks, activeTab]);
@@ -216,7 +181,7 @@ export function DesktopCalendar() {
           </Heading>
         </div>
 
-        <Tabs value={activeTab} className="flex flex-col flex-1 min-h-0 space-y-4" onValueChange={setActiveTab}>
+        <Tabs value={activeTab} className="flex flex-col flex-1 min-h-0 space-y-4" onValueChange={(val) => router.push(`/services/hrm/calendar/${val}`)}>
           <div className="shrink-0">
             <CalendarTabs />
           </div>
