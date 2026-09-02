@@ -43,7 +43,7 @@ export const hrmKpiEvaluationsApi = {
     return apiClient.post(`/hrm/kpis/evaluations/${id}/approve`, payload) as any;
   },
   getDashboardStats: async (params?: any) => {
-    return apiClient.get('/admin/reports/kpis', { params }) as any;
+    return apiClient.get('/reports/kpis', { params }) as any;
   },
 };
 
