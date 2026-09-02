@@ -17,11 +17,9 @@ export function TaskDashboard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const organizations: any[] = (orgResponse as any)?.data ?? [];
 
+  // API trả về chuẩn { success: true, data: { totalTasks: ..., departmentStats: ... } }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const statsData = Array.isArray(statsResponse) ? statsResponse[0] : (statsResponse as any)?.data ?? statsResponse;
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stats: any = statsData ?? {
+  const stats: any = (statsResponse as any)?.data ?? statsResponse ?? {
     totalTasks: 0, completedTasks: 0, inProgressTasks: 0, overdueTasks: 0,
     individualStats: [], departmentStats: [], kpiStats: []
   };
