@@ -17,7 +17,7 @@ import {
 } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
-import { Calendar as CalendarIcon, Loader2, Video, CheckCircle2, BarChart3, Clock } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Video, CheckCircle2, BarChart, Clock } from "lucide-react";
 import dynamic from "next/dynamic";
 
 import { CalendarHeader, CalendarViewMode } from "./CalendarHeader";
@@ -213,7 +213,7 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
 
         <div className="px-6 py-3 border-b border-border bg-muted/10 flex flex-wrap gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-primary" />
+            <BarChart className="w-4 h-4 text-primary" />
             <span className="font-medium text-foreground/80">Tổng sự kiện:</span>
             <span className="font-semibold text-foreground">{stats.total}</span>
           </div>

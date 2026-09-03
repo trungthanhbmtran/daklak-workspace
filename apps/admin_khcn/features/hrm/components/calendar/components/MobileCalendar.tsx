@@ -7,7 +7,7 @@ import { vi as viLocale } from "date-fns/locale";
 import { Heading, Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Video, CheckCircle2, BarChart3 } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Video, CheckCircle2, BarChart } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -186,7 +186,7 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
         <div className="bg-muted/10 border-b border-border shrink-0 p-2">
           <div className="flex justify-start items-center max-w-full overflow-x-auto gap-3 px-2 pb-1 scrollbar-none text-xs">
             <div className="flex items-center gap-1 shrink-0">
-              <BarChart3 className="w-3.5 h-3.5 text-primary" />
+              <BarChart className="w-3.5 h-3.5 text-primary" />
               <span className="font-medium text-foreground/80">Tổng:</span>
               <span className="font-semibold text-foreground">{stats.total}</span>
             </div>
