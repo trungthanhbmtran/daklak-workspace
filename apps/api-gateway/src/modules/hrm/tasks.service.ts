@@ -203,7 +203,7 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async list(req: any, role: string, assigneeCode: string, assignerCode: string, filter: string, search: string, departmentId: string, planId: string, isSupervisor: string, status: string, priority: string, page: string, limit: string, statsFilter: string) {
+  async list(req: any, role: string, assigneeCode: string, assignerCode: string, filter: string, search: string, departmentId: string, planId: string, isSupervisor: string, status: string, priority: string, page: string, limit: string, statsFilter: string, type: string) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
     let finalAssignerCode: string | undefined = assignerCode;
@@ -231,6 +231,7 @@ export class TasksService implements OnModuleInit {
       search,
       status,
       priority,
+      type,
       statsFilter,
       departmentId: finalDepartmentId,
       planId:
@@ -756,6 +757,42 @@ export class TasksService implements OnModuleInit {
     return firstValueFrom(
       this.taskService.DeleteStep(
         { taskId: id, stepId },
+        this.getGrpcMetadata(req),
+      ),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
+  }
+
+  async recordAttendance(req: any, id: number) {
+    const user = req.user;
+    return firstValueFrom(
+      this.taskService.RecordAttendance(
+        {
+          taskId: id,
+          currentUserId: user?.id,
+          currentEmployeeCode: user?.employeeCode || user?.username,
+          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+          currentUserPermissions: user?.permissionsFlatten || [],
+        },
+        this.getGrpcMetadata(req),
+      ),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
+  }
+
+  async getAttendanceStats(req: any, id: number) {
+    const user = req.user;
+    return firstValueFrom(
+      this.taskService.GetAttendanceStats(
+        {
+          taskId: id,
+          currentUserId: user?.id,
+          currentEmployeeCode: user?.employeeCode || user?.username,
+          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+          currentUserPermissions: user?.permissionsFlatten || [],
+        },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {

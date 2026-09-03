@@ -188,6 +188,7 @@ export class TasksService {
 
     if (query.search) baseWhere.title = { contains: query.search };
     if (query.priority && query.priority !== 'ALL') baseWhere.priority = query.priority;
+    if (query.type && query.type !== 'ALL') baseWhere.type = query.type;
 
     // planId override: bỏ qua status/isCompleted filter
     if (query.planId) {
@@ -523,6 +524,8 @@ export class TasksService {
           description: data.description,
           status: data.status || (data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? 'PENDING_ACCEPTANCE' : 'TODO'),
           priority: data.priority || 'MEDIUM',
+          type: data.type || 'TASK',
+          meetingLink: data.meetingLink || null,
           startDate: data.startDate ? new Date(data.startDate) : null,
           dueDate: data.dueDate ? new Date(data.dueDate) : null,
           creatorEmployeeCode: creatorCode,
@@ -1374,6 +1377,49 @@ export class TasksService {
 
     await this.executeUpdateCoordination(id, leadCode, coordinatorCodes, requesterCode, message);
     return { success: true, data: await this.toResponse(await this.findTaskOrFail(id), data) };
+  }
+
+  async recordAttendance(taskId: number, employeeCode: string) {
+    const p = await this.prisma.taskParticipant.findFirst({
+      where: { taskId, employeeCode }
+    });
+    if (!p) throw new RpcException('Người dùng không phải là thành viên của sự kiện này.');
+    if (!p.attendedAt) {
+      await this.prisma.taskParticipant.update({
+        where: { taskId_employeeCode_participantRole: { taskId, employeeCode, participantRole: p.participantRole } },
+        data: { attendedAt: new Date() }
+      });
+      // Optionally create history
+      await this.prisma.taskHistory.create({
+        data: { taskId, action: 'Tham gia họp/học', actorCode: employeeCode }
+      });
+    }
+    return { success: true, message: 'Đã điểm danh thành công.' };
+  }
+
+  async getAttendanceStats(taskId: number) {
+    const participants = await this.prisma.taskParticipant.findMany({
+      where: { taskId },
+      include: { employee: { select: { fullName: true, departmentId: true, jobTitleId: true } } }
+    });
+
+    const total = participants.length;
+    const attended = participants.filter((p: any) => p.attendedAt != null).length;
+    
+    return {
+      success: true,
+      data: {
+        total,
+        attended,
+        attendanceRate: total > 0 ? (attended / total) * 100 : 0,
+        participants: participants.map((p: any) => ({
+          employeeCode: p.employeeCode,
+          fullName: p.employee?.fullName,
+          role: p.participantRole,
+          attendedAt: p.attendedAt
+        }))
+      }
+    };
   }
 
   // ─── Aliases ──────────────────────────────────────────────────────────────

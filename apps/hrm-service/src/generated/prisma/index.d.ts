@@ -14669,6 +14669,8 @@ export namespace Prisma {
     description: string | null
     status: string | null
     priority: string | null
+    type: string | null
+    meetingLink: string | null
     progress: number | null
     rejectReason: string | null
     startDate: Date | null
@@ -14695,6 +14697,8 @@ export namespace Prisma {
     description: string | null
     status: string | null
     priority: string | null
+    type: string | null
+    meetingLink: string | null
     progress: number | null
     rejectReason: string | null
     startDate: Date | null
@@ -14721,6 +14725,8 @@ export namespace Prisma {
     description: number
     status: number
     priority: number
+    type: number
+    meetingLink: number
     progress: number
     rejectReason: number
     startDate: number
@@ -14768,6 +14774,8 @@ export namespace Prisma {
     description?: true
     status?: true
     priority?: true
+    type?: true
+    meetingLink?: true
     progress?: true
     rejectReason?: true
     startDate?: true
@@ -14794,6 +14802,8 @@ export namespace Prisma {
     description?: true
     status?: true
     priority?: true
+    type?: true
+    meetingLink?: true
     progress?: true
     rejectReason?: true
     startDate?: true
@@ -14820,6 +14830,8 @@ export namespace Prisma {
     description?: true
     status?: true
     priority?: true
+    type?: true
+    meetingLink?: true
     progress?: true
     rejectReason?: true
     startDate?: true
@@ -14934,6 +14946,8 @@ export namespace Prisma {
     description: string | null
     status: string
     priority: string
+    type: string
+    meetingLink: string | null
     progress: number
     rejectReason: string | null
     startDate: Date | null
@@ -14980,6 +14994,8 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     priority?: boolean
+    type?: boolean
+    meetingLink?: boolean
     progress?: boolean
     rejectReason?: boolean
     startDate?: boolean
@@ -15018,6 +15034,8 @@ export namespace Prisma {
     description?: boolean
     status?: boolean
     priority?: boolean
+    type?: boolean
+    meetingLink?: boolean
     progress?: boolean
     rejectReason?: boolean
     startDate?: boolean
@@ -15038,7 +15056,7 @@ export namespace Prisma {
     isDeleted?: boolean
   }
 
-  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "isDeadlineWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
+  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "type" | "meetingLink" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "isDeadlineWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     plan?: boolean | Task$planArgs<ExtArgs>
     kpiSettings?: boolean | Task$kpiSettingsArgs<ExtArgs>
@@ -15070,6 +15088,8 @@ export namespace Prisma {
       description: string | null
       status: string
       priority: string
+      type: string
+      meetingLink: string | null
       progress: number
       rejectReason: string | null
       startDate: Date | null
@@ -15471,6 +15491,8 @@ export namespace Prisma {
     readonly description: FieldRef<"Task", 'String'>
     readonly status: FieldRef<"Task", 'String'>
     readonly priority: FieldRef<"Task", 'String'>
+    readonly type: FieldRef<"Task", 'String'>
+    readonly meetingLink: FieldRef<"Task", 'String'>
     readonly progress: FieldRef<"Task", 'Float'>
     readonly rejectReason: FieldRef<"Task", 'String'>
     readonly startDate: FieldRef<"Task", 'DateTime'>
@@ -18096,6 +18118,7 @@ export namespace Prisma {
     contributionPercentage: number | null
     status: string | null
     reason: string | null
+    attendedAt: Date | null
   }
 
   export type TaskParticipantMaxAggregateOutputType = {
@@ -18106,6 +18129,7 @@ export namespace Prisma {
     contributionPercentage: number | null
     status: string | null
     reason: string | null
+    attendedAt: Date | null
   }
 
   export type TaskParticipantCountAggregateOutputType = {
@@ -18116,6 +18140,7 @@ export namespace Prisma {
     contributionPercentage: number
     status: number
     reason: number
+    attendedAt: number
     _all: number
   }
 
@@ -18138,6 +18163,7 @@ export namespace Prisma {
     contributionPercentage?: true
     status?: true
     reason?: true
+    attendedAt?: true
   }
 
   export type TaskParticipantMaxAggregateInputType = {
@@ -18148,6 +18174,7 @@ export namespace Prisma {
     contributionPercentage?: true
     status?: true
     reason?: true
+    attendedAt?: true
   }
 
   export type TaskParticipantCountAggregateInputType = {
@@ -18158,6 +18185,7 @@ export namespace Prisma {
     contributionPercentage?: true
     status?: true
     reason?: true
+    attendedAt?: true
     _all?: true
   }
 
@@ -18255,6 +18283,7 @@ export namespace Prisma {
     contributionPercentage: number
     status: string
     reason: string | null
+    attendedAt: Date | null
     _count: TaskParticipantCountAggregateOutputType | null
     _avg: TaskParticipantAvgAggregateOutputType | null
     _sum: TaskParticipantSumAggregateOutputType | null
@@ -18284,6 +18313,7 @@ export namespace Prisma {
     contributionPercentage?: boolean
     status?: boolean
     reason?: boolean
+    attendedAt?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     employee?: boolean | EmployeeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskParticipant"]>
@@ -18298,9 +18328,10 @@ export namespace Prisma {
     contributionPercentage?: boolean
     status?: boolean
     reason?: boolean
+    attendedAt?: boolean
   }
 
-  export type TaskParticipantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt" | "contributionPercentage" | "status" | "reason", ExtArgs["result"]["taskParticipant"]>
+  export type TaskParticipantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt" | "contributionPercentage" | "status" | "reason" | "attendedAt", ExtArgs["result"]["taskParticipant"]>
   export type TaskParticipantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     employee?: boolean | EmployeeDefaultArgs<ExtArgs>
@@ -18320,6 +18351,7 @@ export namespace Prisma {
       contributionPercentage: number
       status: string
       reason: string | null
+      attendedAt: Date | null
     }, ExtArgs["result"]["taskParticipant"]>
     composites: {}
   }
@@ -18698,6 +18730,7 @@ export namespace Prisma {
     readonly contributionPercentage: FieldRef<"TaskParticipant", 'Float'>
     readonly status: FieldRef<"TaskParticipant", 'String'>
     readonly reason: FieldRef<"TaskParticipant", 'String'>
+    readonly attendedAt: FieldRef<"TaskParticipant", 'DateTime'>
   }
     
 
@@ -23195,6 +23228,8 @@ export namespace Prisma {
     description: 'description',
     status: 'status',
     priority: 'priority',
+    type: 'type',
+    meetingLink: 'meetingLink',
     progress: 'progress',
     rejectReason: 'rejectReason',
     startDate: 'startDate',
@@ -23254,7 +23289,8 @@ export namespace Prisma {
     assignedAt: 'assignedAt',
     contributionPercentage: 'contributionPercentage',
     status: 'status',
-    reason: 'reason'
+    reason: 'reason',
+    attendedAt: 'attendedAt'
   };
 
   export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]
@@ -23449,6 +23485,8 @@ export namespace Prisma {
     description: 'description',
     status: 'status',
     priority: 'priority',
+    type: 'type',
+    meetingLink: 'meetingLink',
     rejectReason: 'rejectReason',
     workflowInstId: 'workflowInstId',
     conversationId: 'conversationId',
@@ -24564,6 +24602,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"Task"> | string | null
     status?: StringFilter<"Task"> | string
     priority?: StringFilter<"Task"> | string
+    type?: StringFilter<"Task"> | string
+    meetingLink?: StringNullableFilter<"Task"> | string | null
     progress?: FloatFilter<"Task"> | number
     rejectReason?: StringNullableFilter<"Task"> | string | null
     startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
@@ -24599,6 +24639,8 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     status?: SortOrder
     priority?: SortOrder
+    type?: SortOrder
+    meetingLink?: SortOrderInput | SortOrder
     progress?: SortOrder
     rejectReason?: SortOrderInput | SortOrder
     startDate?: SortOrderInput | SortOrder
@@ -24638,6 +24680,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"Task"> | string | null
     status?: StringFilter<"Task"> | string
     priority?: StringFilter<"Task"> | string
+    type?: StringFilter<"Task"> | string
+    meetingLink?: StringNullableFilter<"Task"> | string | null
     progress?: FloatFilter<"Task"> | number
     rejectReason?: StringNullableFilter<"Task"> | string | null
     startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
@@ -24673,6 +24717,8 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     status?: SortOrder
     priority?: SortOrder
+    type?: SortOrder
+    meetingLink?: SortOrderInput | SortOrder
     progress?: SortOrder
     rejectReason?: SortOrderInput | SortOrder
     startDate?: SortOrderInput | SortOrder
@@ -24708,6 +24754,8 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"Task"> | string | null
     status?: StringWithAggregatesFilter<"Task"> | string
     priority?: StringWithAggregatesFilter<"Task"> | string
+    type?: StringWithAggregatesFilter<"Task"> | string
+    meetingLink?: StringNullableWithAggregatesFilter<"Task"> | string | null
     progress?: FloatWithAggregatesFilter<"Task"> | number
     rejectReason?: StringNullableWithAggregatesFilter<"Task"> | string | null
     startDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
@@ -24890,6 +24938,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFilter<"TaskParticipant"> | number
     status?: StringFilter<"TaskParticipant"> | string
     reason?: StringNullableFilter<"TaskParticipant"> | string | null
+    attendedAt?: DateTimeNullableFilter<"TaskParticipant"> | Date | string | null
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
   }
@@ -24902,6 +24951,7 @@ export namespace Prisma {
     contributionPercentage?: SortOrder
     status?: SortOrder
     reason?: SortOrderInput | SortOrder
+    attendedAt?: SortOrderInput | SortOrder
     task?: TaskOrderByWithRelationInput
     employee?: EmployeeOrderByWithRelationInput
     _relevance?: TaskParticipantOrderByRelevanceInput
@@ -24919,6 +24969,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFilter<"TaskParticipant"> | number
     status?: StringFilter<"TaskParticipant"> | string
     reason?: StringNullableFilter<"TaskParticipant"> | string | null
+    attendedAt?: DateTimeNullableFilter<"TaskParticipant"> | Date | string | null
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
   }, "taskId_employeeCode_participantRole">
@@ -24931,6 +24982,7 @@ export namespace Prisma {
     contributionPercentage?: SortOrder
     status?: SortOrder
     reason?: SortOrderInput | SortOrder
+    attendedAt?: SortOrderInput | SortOrder
     _count?: TaskParticipantCountOrderByAggregateInput
     _avg?: TaskParticipantAvgOrderByAggregateInput
     _max?: TaskParticipantMaxOrderByAggregateInput
@@ -24949,6 +25001,7 @@ export namespace Prisma {
     contributionPercentage?: FloatWithAggregatesFilter<"TaskParticipant"> | number
     status?: StringWithAggregatesFilter<"TaskParticipant"> | string
     reason?: StringNullableWithAggregatesFilter<"TaskParticipant"> | string | null
+    attendedAt?: DateTimeNullableWithAggregatesFilter<"TaskParticipant"> | Date | string | null
   }
 
   export type TaskClosureWhereInput = {
@@ -26269,6 +26322,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -26303,6 +26358,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -26336,6 +26393,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26370,6 +26429,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26404,6 +26465,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -26430,6 +26493,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26456,6 +26521,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -26635,6 +26702,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
     task: TaskCreateNestedOneWithoutParticipantsInput
     employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
@@ -26647,6 +26715,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
   }
 
   export type TaskParticipantUpdateInput = {
@@ -26655,6 +26724,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
     employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
@@ -26667,6 +26737,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TaskParticipantCreateManyInput = {
@@ -26677,6 +26748,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
   }
 
   export type TaskParticipantUpdateManyMutationInput = {
@@ -26685,6 +26757,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TaskParticipantUncheckedUpdateManyInput = {
@@ -26695,6 +26768,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TaskClosureCreateInput = {
@@ -28132,6 +28206,8 @@ export namespace Prisma {
     description?: SortOrder
     status?: SortOrder
     priority?: SortOrder
+    type?: SortOrder
+    meetingLink?: SortOrder
     progress?: SortOrder
     rejectReason?: SortOrder
     startDate?: SortOrder
@@ -28168,6 +28244,8 @@ export namespace Prisma {
     description?: SortOrder
     status?: SortOrder
     priority?: SortOrder
+    type?: SortOrder
+    meetingLink?: SortOrder
     progress?: SortOrder
     rejectReason?: SortOrder
     startDate?: SortOrder
@@ -28194,6 +28272,8 @@ export namespace Prisma {
     description?: SortOrder
     status?: SortOrder
     priority?: SortOrder
+    type?: SortOrder
+    meetingLink?: SortOrder
     progress?: SortOrder
     rejectReason?: SortOrder
     startDate?: SortOrder
@@ -28354,6 +28434,7 @@ export namespace Prisma {
     contributionPercentage?: SortOrder
     status?: SortOrder
     reason?: SortOrder
+    attendedAt?: SortOrder
   }
 
   export type TaskParticipantAvgOrderByAggregateInput = {
@@ -28369,6 +28450,7 @@ export namespace Prisma {
     contributionPercentage?: SortOrder
     status?: SortOrder
     reason?: SortOrder
+    attendedAt?: SortOrder
   }
 
   export type TaskParticipantMinOrderByAggregateInput = {
@@ -28379,6 +28461,7 @@ export namespace Prisma {
     contributionPercentage?: SortOrder
     status?: SortOrder
     reason?: SortOrder
+    attendedAt?: SortOrder
   }
 
   export type TaskParticipantSumOrderByAggregateInput = {
@@ -30272,6 +30355,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
     task: TaskCreateNestedOneWithoutParticipantsInput
   }
 
@@ -30282,6 +30366,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
   }
 
   export type TaskParticipantCreateOrConnectWithoutEmployeeInput = {
@@ -30395,6 +30480,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFilter<"TaskParticipant"> | number
     status?: StringFilter<"TaskParticipant"> | string
     reason?: StringNullableFilter<"TaskParticipant"> | string | null
+    attendedAt?: DateTimeNullableFilter<"TaskParticipant"> | Date | string | null
   }
 
   export type EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput = {
@@ -30464,6 +30550,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -30497,6 +30585,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -30583,6 +30673,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -30616,6 +30708,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32291,6 +32385,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -32324,6 +32420,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -32386,6 +32484,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"Task"> | string | null
     status?: StringFilter<"Task"> | string
     priority?: StringFilter<"Task"> | string
+    type?: StringFilter<"Task"> | string
+    meetingLink?: StringNullableFilter<"Task"> | string | null
     progress?: FloatFilter<"Task"> | number
     rejectReason?: StringNullableFilter<"Task"> | string | null
     startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
@@ -32477,6 +32577,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
     employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
 
@@ -32487,6 +32588,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
   }
 
   export type TaskParticipantCreateOrConnectWithoutTaskInput = {
@@ -32856,6 +32958,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -32889,6 +32993,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -32937,6 +33043,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32970,6 +33078,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33002,6 +33112,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33035,6 +33147,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33083,6 +33197,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33116,6 +33232,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33148,6 +33266,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33181,6 +33301,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33293,6 +33415,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33326,6 +33450,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33428,6 +33554,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33461,6 +33589,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33498,6 +33628,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33531,6 +33663,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33579,6 +33713,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33612,6 +33748,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33655,6 +33793,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33688,6 +33828,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33720,6 +33862,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33753,6 +33897,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -33801,6 +33947,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33834,6 +33982,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -33889,6 +34039,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
   }
 
   export type EmployeeKpiTargetCreateManyEmployeeInput = {
@@ -33974,6 +34125,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
   }
 
@@ -33984,6 +34136,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TaskParticipantUncheckedUpdateManyWithoutEmployeeInput = {
@@ -33993,6 +34146,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type EmployeeKpiTargetUpdateWithoutEmployeeInput = {
@@ -34425,6 +34579,8 @@ export namespace Prisma {
     description?: string | null
     status?: string
     priority?: string
+    type?: string
+    meetingLink?: string | null
     progress?: number
     rejectReason?: string | null
     startDate?: Date | string | null
@@ -34450,6 +34606,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34483,6 +34641,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34516,6 +34676,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
     progress?: FloatFieldUpdateOperationsInput | number
     rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34542,6 +34704,7 @@ export namespace Prisma {
     contributionPercentage?: number
     status?: string
     reason?: string | null
+    attendedAt?: Date | string | null
   }
 
   export type TaskAttachmentCreateManyTaskInput = {
@@ -34590,6 +34753,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
 
@@ -34600,6 +34764,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TaskParticipantUncheckedUpdateManyWithoutTaskInput = {
@@ -34609,6 +34774,7 @@ export namespace Prisma {
     contributionPercentage?: FloatFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
+    attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TaskAttachmentUpdateWithoutTaskInput = {

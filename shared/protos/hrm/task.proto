@@ -34,6 +34,9 @@ service TaskService {
   rpc RequestCoordination (RequestCoordinationRequest) returns (CoordinationResponse) {}
   rpc RespondTask (RespondTaskRequest) returns (RespondTaskResponse) {}
 
+  rpc RecordAttendance (RecordAttendanceRequest) returns (RecordAttendanceResponse) {}
+  rpc GetAttendanceStats (GetAttendanceStatsRequest) returns (GetAttendanceStatsResponse) {}
+
   // Steps (Checklist)
   rpc CreateStep (CreateStepRequest) returns (TaskStepResponse) {}
   rpc UpdateStep (UpdateStepRequest) returns (TaskStepResponse) {}
@@ -109,6 +112,7 @@ message TaskParticipantResponse {
   string role = 3;
   int32 departmentId = 4;
   int32 jobTitleId = 5;
+  string attendedAt = 6;
 }
 
 message TaskResponse {
@@ -147,6 +151,8 @@ message TaskResponse {
   optional int32 kpiCriteriaId = 32;
   optional string conversationId = 33;
   repeated TaskParticipantResponse participants = 34;
+  string type = 35;
+  string meetingLink = 36;
 }
 
 message TaskPlan {
@@ -181,6 +187,8 @@ message CreateTaskRequest {
   string currentEmployeeCode = 23;
   int32 currentUserDept = 24;
   repeated string currentUserPermissions = 25;
+  string type = 26;
+  string meetingLink = 27;
 }
 
 message ListTasksRequest {
@@ -205,6 +213,7 @@ message ListTasksRequest {
   int32 currentUserDept = 19;
   int32 currentUserId = 20;
   repeated string currentUserPermissions = 21;
+  string type = 22; // optional - filter by type
 }
 
 message UnitStats {
@@ -640,4 +649,45 @@ message DeleteStepRequest {
 message DeleteStepResponse {
   bool success = 1;
   string message = 2;
+}
+
+message RecordAttendanceRequest {
+  int32 taskId = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
+}
+
+message RecordAttendanceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetAttendanceStatsRequest {
+  int32 taskId = 1;
+  int32 currentUserId = 2;
+  string currentEmployeeCode = 3;
+  int32 currentUserDept = 4;
+  repeated string currentUserPermissions = 5;
+}
+
+message AttendanceParticipant {
+  string employeeCode = 1;
+  string fullName = 2;
+  string role = 3;
+  string attendedAt = 4;
+}
+
+message AttendanceStatsData {
+  int32 total = 1;
+  int32 attended = 2;
+  float attendanceRate = 3;
+  repeated AttendanceParticipant participants = 4;
+}
+
+message GetAttendanceStatsResponse {
+  bool success = 1;
+  string message = 2;
+  AttendanceStatsData data = 3;
 }

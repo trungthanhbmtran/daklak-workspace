@@ -7,7 +7,7 @@ import { vi as viLocale } from "date-fns/locale";
 import { Heading, Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Video, CheckCircle2 } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, Video, CheckCircle2, BarChart3 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,12 +72,18 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
       const startD = t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date());
       const endD = t.dueDate ? parseISO(t.dueDate) : (t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date()));
 
+      let eventType = "task";
+      if (t.type === 'MEETING') eventType = 'meeting';
+      else if (t.type === 'STUDY') eventType = 'study';
+
       return {
         id: `task-${t.id}`,
+        rawId: t.id,
         title: t.title,
         startDate: startD,
         endDate: endD,
-        type: "task",
+        type: eventType,
+        meetingLink: t.meetingLink,
         colorClass,
         isCompleted
       };
@@ -85,6 +91,23 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
 
     return events;
   }, [allTasks, activeTab]);
+
+  const stats = useMemo(() => {
+    let total = 0;
+    let meetings = 0;
+    let studies = 0;
+    let completed = 0;
+    
+    filteredEvents.forEach(evt => {
+      total++;
+      if (evt.type === 'meeting') meetings++;
+      else if (evt.type === 'study') studies++;
+      
+      if (evt.isCompleted) completed++;
+    });
+
+    return { total, meetings, studies, completed };
+  }, [filteredEvents]);
 
   const nextDate = useCallback(() => setCurrentDate(prev => addWeeks(prev, 1)), []);
   const prevDate = useCallback(() => setCurrentDate(prev => subWeeks(prev, 1)), []);
@@ -159,7 +182,36 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
           </div>
         </div>
 
-
+        {/* Stats */}
+        <div className="bg-muted/10 border-b border-border shrink-0 p-2">
+          <div className="flex justify-start items-center max-w-full overflow-x-auto gap-3 px-2 pb-1 scrollbar-none text-xs">
+            <div className="flex items-center gap-1 shrink-0">
+              <BarChart3 className="w-3.5 h-3.5 text-primary" />
+              <span className="font-medium text-foreground/80">Tổng:</span>
+              <span className="font-semibold text-foreground">{stats.total}</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="font-medium text-foreground/80">Hoàn thành:</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.completed}</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Clock className="w-3.5 h-3.5 text-amber-500" />
+              <span className="font-medium text-foreground/80">Đang xử lý:</span>
+              <span className="font-semibold text-amber-600 dark:text-amber-400">{stats.total - stats.completed}</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Video className="w-3.5 h-3.5 text-blue-500" />
+              <span className="font-medium text-foreground/80">Họp:</span>
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.meetings}</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <CalendarIcon className="w-3.5 h-3.5 text-purple-500" />
+              <span className="font-medium text-foreground/80">Học:</span>
+              <span className="font-semibold text-purple-600 dark:text-purple-400">{stats.studies}</span>
+            </div>
+          </div>
+        </div>
 
         {/* Agenda / Event List */}
         <ScrollArea className="flex-1 bg-muted/30 p-4">

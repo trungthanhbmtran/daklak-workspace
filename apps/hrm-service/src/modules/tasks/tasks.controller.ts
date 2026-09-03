@@ -35,6 +35,12 @@ export class TasksController {
   @GrpcMethod('TaskService', 'GetTaskTree')
   getTaskTree(data: any) { return this.tasksService.getTaskTree(data.id, data); }
 
+  @GrpcMethod('TaskService', 'RecordAttendance')
+  recordAttendance(data: any) { return this.tasksService.recordAttendance(data.taskId, data.currentEmployeeCode || data.employeeCode); }
+
+  @GrpcMethod('TaskService', 'GetAttendanceStats')
+  getAttendanceStats(data: any) { return this.tasksService.getAttendanceStats(data.taskId); }
+
   // ─── Status & Progress ────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')

@@ -6,6 +6,8 @@ model Task {
 
   status       String  @default("PENDING_ACCEPTANCE")
   priority     String  @default("MEDIUM")
+  type         String  @default("TASK") @map("type")
+  meetingLink  String? @map("meeting_link") @db.Text
   progress     Float   @default(0) @map("progress")
   rejectReason String? @map("reject_reason") @db.Text
 
@@ -100,6 +102,7 @@ model TaskParticipant {
   
   status                 String   @default("PENDING_ACCEPTANCE") @map("status")
   reason                 String?  @map("reason") @db.Text
+  attendedAt             DateTime? @map("attended_at")
 
   task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   employee Employee @relation("EmployeeTasks", fields: [employeeCode], references: [employeeCode])

@@ -270,6 +270,8 @@ exports.Prisma.TaskScalarFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
+  type: 'type',
+  meetingLink: 'meetingLink',
   progress: 'progress',
   rejectReason: 'rejectReason',
   startDate: 'startDate',
@@ -320,7 +322,8 @@ exports.Prisma.TaskParticipantScalarFieldEnum = {
   assignedAt: 'assignedAt',
   contributionPercentage: 'contributionPercentage',
   status: 'status',
-  reason: 'reason'
+  reason: 'reason',
+  attendedAt: 'attendedAt'
 };
 
 exports.Prisma.TaskClosureScalarFieldEnum = {
@@ -458,6 +461,8 @@ exports.Prisma.TaskOrderByRelevanceFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
+  type: 'type',
+  meetingLink: 'meetingLink',
   rejectReason: 'rejectReason',
   workflowInstId: 'workflowInstId',
   conversationId: 'conversationId',

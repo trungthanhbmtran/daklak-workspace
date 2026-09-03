@@ -44,8 +44,9 @@ export class TasksController {
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('statsFilter') statsFilter: string,
+    @Query('type') type: string,
   ) {
-    return this.tasksService.list(req, role, assigneeCode, assignerCode, filter, search, departmentId, planId, isSupervisor, status, priority, page, limit, statsFilter);
+    return this.tasksService.list(req, role, assigneeCode, assignerCode, filter, search, departmentId, planId, isSupervisor, status, priority, page, limit, statsFilter, type);
   }
 
 
@@ -201,5 +202,15 @@ export class TasksController {
     @Param('stepId', ParseIntPipe) stepId: number,
   ) {
     return this.tasksService.deleteStep(req, id, stepId);
+  }
+
+  @Post(':id/attend')
+  async recordAttendance(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.recordAttendance(req, id);
+  }
+
+  @Get(':id/attendance-stats')
+  async getAttendanceStats(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.getAttendanceStats(req, id);
   }
 }

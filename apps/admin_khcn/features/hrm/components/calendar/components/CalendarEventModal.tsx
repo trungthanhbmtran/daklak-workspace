@@ -4,6 +4,9 @@ import { format } from 'date-fns';
 import { Calendar as CalendarIcon, CheckCircle2, Clock, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Text } from '@/components/ui/typography';
+import { Button } from '@/components/ui/button';
+import { useUpdateTaskStatus } from '@/features/hrm/hooks/useTasks';
+import { ExternalLink } from 'lucide-react';
 
 interface CalendarEventModalProps {
   selectedDayEvents: { day: Date, events: any[] } | null;
@@ -14,6 +17,18 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
   selectedDayEvents,
   onClose
 }: CalendarEventModalProps) {
+  const { mutate: updateStatus } = useUpdateTaskStatus();
+
+  const handleJoinMeeting = React.useCallback((evt: any) => {
+    if (evt.meetingLink) {
+      window.open(evt.meetingLink, '_blank');
+      // Auto confirm completed
+      if (!evt.isCompleted && evt.rawId) {
+        updateStatus({ id: evt.rawId, payload: { status: 'COMPLETED' } });
+      }
+    }
+  }, [updateStatus]);
+
   return (
     <Dialog open={!!selectedDayEvents} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md">
@@ -38,8 +53,22 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
                   <Text as="span" variant="small" weight="semibold" className="leading-tight">{evt.title}</Text>
                 </div>
                 <Text as="span" variant="small" className="opacity-80 ml-6 font-normal">
-                  {evt.type === 'meeting' ? 'Lịch họp' : (evt.isCompleted ? 'Hoàn thành' : 'Đang xử lý / Trễ hạn')}
+                  {evt.type === 'meeting' ? 'Lịch họp' : (evt.type === 'study' ? 'Lịch học' : (evt.isCompleted ? 'Hoàn thành' : 'Đang xử lý / Trễ hạn'))}
                 </Text>
+                
+                {evt.meetingLink && (
+                  <div className="ml-6 mt-2">
+                    <Button 
+                      size="sm" 
+                      variant="default"
+                      onClick={() => handleJoinMeeting(evt)}
+                      className="gap-2"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Tham gia
+                    </Button>
+                  </div>
+                )}
               </div>
             ))
           )}
