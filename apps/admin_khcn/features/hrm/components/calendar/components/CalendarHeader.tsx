@@ -54,7 +54,7 @@ export const CalendarHeader = React.memo(function CalendarHeader({
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="inline-flex items-center bg-muted/50 rounded-lg p-1 border border-border/50 shadow-inner">
+        <div className="inline-flex items-center bg-muted rounded-lg p-1">
           {[
             { id: 'day', label: 'Ngày' },
             { id: 'week', label: 'Tuần' },
@@ -66,11 +66,10 @@ export const CalendarHeader = React.memo(function CalendarHeader({
               key={mode.id}
               variant="ghost"
               onClick={() => setViewMode(mode.id as CalendarViewMode)}
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-md transition-all h-8 ${
-                viewMode === mode.id
-                  ? 'bg-background text-primary shadow-sm ring-1 ring-border/50'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-              }`}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${viewMode === mode.id
+                  ? 'bg-background text-primary shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
             >
               {mode.label}
             </Button>
