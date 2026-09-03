@@ -15,6 +15,7 @@ interface CalendarHeaderProps {
   onPrevDate: () => void;
   onNextDate: () => void;
   onGoToToday: () => void;
+  onOpenAiModal?: () => void;
 }
 
 export const CalendarHeader = React.memo(function CalendarHeader({
@@ -25,6 +26,7 @@ export const CalendarHeader = React.memo(function CalendarHeader({
   onPrevDate,
   onNextDate,
   onGoToToday,
+  onOpenAiModal,
 }: CalendarHeaderProps) {
 
   const getTitle = () => {
@@ -54,7 +56,7 @@ export const CalendarHeader = React.memo(function CalendarHeader({
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="inline-flex items-center bg-muted rounded-lg p-1">
+        <div className="inline-flex items-center bg-muted/50 rounded-lg p-1 border border-border/50 shadow-inner">
           {[
             { id: 'day', label: 'Ngày' },
             { id: 'week', label: 'Tuần' },
@@ -66,9 +68,9 @@ export const CalendarHeader = React.memo(function CalendarHeader({
               key={mode.id}
               variant="ghost"
               onClick={() => setViewMode(mode.id as CalendarViewMode)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${viewMode === mode.id
-                  ? 'bg-background text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              className={`px-3.5 py-1.5 text-sm font-medium rounded-md transition-all h-8 ${viewMode === mode.id
+                  ? 'bg-background text-primary shadow-sm ring-1 ring-border/50'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                 }`}
             >
               {mode.label}
@@ -77,11 +79,21 @@ export const CalendarHeader = React.memo(function CalendarHeader({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onGoToToday} className="mr-1">
+          {onOpenAiModal && (
+            <Button 
+              onClick={onOpenAiModal} 
+              className="mr-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md border-0 transition-all hover:scale-105 active:scale-95 px-3 py-1.5 h-8 font-medium rounded-md"
+              size="sm"
+            >
+              <Sparkles className="w-4 h-4 mr-1.5" />
+              AI Trợ lý
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onGoToToday} className="mr-1 h-8 rounded-md px-3 font-medium">
             Hôm nay
           </Button>
-          <Button variant="ghost" size="icon" onClick={onPrevDate} className="w-8 h-8 rounded-full" iconStart={<ChevronLeft className="w-4 h-4" />}></Button>
-          <Button variant="ghost" size="icon" onClick={onNextDate} className="w-8 h-8 rounded-full" iconStart={<ChevronRight className="w-4 h-4" />}></Button>
+          <Button variant="ghost" size="icon" onClick={onPrevDate} className="w-8 h-8 rounded-full bg-muted/50 hover:bg-muted"><ChevronLeft className="w-4 h-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={onNextDate} className="w-8 h-8 rounded-full bg-muted/50 hover:bg-muted"><ChevronRight className="w-4 h-4" /></Button>
         </div>
       </div>
     </CardHeader>

@@ -44,6 +44,11 @@ const CalendarCreateEventModal = dynamic(
   { ssr: false }
 );
 
+const CalendarAiModal = dynamic(
+  () => import("./CalendarAiModal").then(mod => mod.CalendarAiModal),
+  { ssr: false }
+);
+
 export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 'unit' | 'meeting' }) {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -52,6 +57,7 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
 
   const [createEventDate, setCreateEventDate] = useState<Date | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Calculate fetch boundaries based on viewMode to optimize data fetching
   const { fetchStartDate, fetchEndDate } = useMemo(() => {
@@ -179,6 +185,7 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
           onGoToToday={goToToday}
           onPrevDate={prevDate}
           onNextDate={nextDate}
+          onOpenAiModal={() => setIsAiModalOpen(true)}
         />
 
         <CardContent className="flex flex-col flex-1 min-h-0 p-0 relative">
@@ -216,6 +223,13 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           initialDate={createEventDate}
+        />
+      )}
+
+      {isAiModalOpen && (
+        <CalendarAiModal
+          isOpen={isAiModalOpen}
+          onClose={() => setIsAiModalOpen(false)}
         />
       )}
     </>
