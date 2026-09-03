@@ -6,15 +6,16 @@ export const metadata = {
 };
 
 interface CalendarTabPageProps {
-  params: {
+  params: Promise<{
     tab: string;
-  };
+  }>;
 }
 
 const validTabs = ["all", "personal", "unit", "meeting"];
 
-export default function CalendarTabPage({ params }: CalendarTabPageProps) {
-  const { tab } = params;
+export default async function CalendarTabPage({ params }: CalendarTabPageProps) {
+  const resolvedParams = await params;
+  const { tab } = resolvedParams;
 
   if (!validTabs.includes(tab)) {
     redirect("/services/hrm/calendar/all");

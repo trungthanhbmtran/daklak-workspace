@@ -5,7 +5,7 @@ import { Briefcase, User, Users, Video } from 'lucide-react';
 
 export const CalendarTabs = React.memo(function CalendarTabs() {
   return (
-    <>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full">
       <TabsList className="bg-muted border border-border p-1 shadow-sm rounded-lg flex-wrap h-auto shrink-0 self-start">
         <TabsTrigger value="all" className="data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
           <Briefcase className="w-4 h-4 mr-2" />
@@ -26,7 +26,7 @@ export const CalendarTabs = React.memo(function CalendarTabs() {
       </TabsList>
       
       {/* Chú thích màu sắc */}
-      <div className="flex items-center gap-6 pt-1 pb-1 px-1 shrink-0">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-1 pb-1 px-1 shrink-0">
         <Text variant="small" className="flex items-center gap-2 text-muted-foreground font-normal">
           <span className="w-3 h-3 rounded-full bg-blue-400"></span> Đang xử lý
         </Text>
@@ -40,6 +40,6 @@ export const CalendarTabs = React.memo(function CalendarTabs() {
           <span className="w-3 h-3 rounded-full bg-purple-400"></span> Cuộc họp
         </Text>
       </div>
-    </>
+    </div>
   );
 });
