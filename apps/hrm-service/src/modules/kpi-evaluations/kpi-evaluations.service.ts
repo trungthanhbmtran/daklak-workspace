@@ -51,7 +51,12 @@ export class KpiEvaluationsService {
         endDate: p.endDate ? new Date(p.endDate).toISOString() : '',
       })),
       meta: {
-        total: periods.length, skip, take: actualLimit
+        pagination: {
+          total: periods.length,
+          page: 1,
+          pageSize: actualLimit,
+          totalPages: 1
+        }
       }
     };
   }
@@ -114,10 +119,12 @@ export class KpiEvaluationsService {
       message: 'Lấy danh sách tiêu chí thành công',
       data: mappedCriteria,
       meta: {
-        total: totalCount,
-        page,
-        limit: limitNum,
-        totalPages: Math.ceil(totalCount / limitNum),
+        pagination: {
+          total: totalCount,
+          page,
+          pageSize: limitNum,
+          totalPages: Math.ceil(totalCount / limitNum)
+        },
         allowedActions
       }
     };
@@ -251,10 +258,12 @@ export class KpiEvaluationsService {
         employeeName: e.employee ? e.employee.fullName : e.employeeCode
       })),
       meta: {
-        total: totalCount,
-        page,
-        limit: limitNum,
-        totalPages: Math.ceil(totalCount / limitNum)
+        pagination: {
+          total: totalCount,
+          page,
+          pageSize: limitNum,
+          totalPages: Math.ceil(totalCount / limitNum)
+        }
       }
     };
   }

@@ -300,7 +300,19 @@ export class TasksService {
     }));
 
     const roots = this.buildTaskTree(mapped);
-    return { success: true, message: 'Lấy danh sách nhiệm vụ thành công', data: roots, meta: paginatedMeta };
+    return { 
+      success: true, 
+      message: 'Lấy danh sách nhiệm vụ thành công', 
+      data: roots, 
+      meta: {
+        pagination: {
+          total: paginatedMeta.total,
+          page: paginatedMeta.page,
+          pageSize: paginatedMeta.limit,
+          totalPages: paginatedMeta.totalPages
+        }
+      }
+    };
   }
 
   async getTask(id: number, query: any) {

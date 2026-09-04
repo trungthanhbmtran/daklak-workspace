@@ -130,10 +130,12 @@ export class MasterPlansService {
         };
       }),
       meta: {
-        total: totalCount,
-        page,
-        limit: limitNum,
-        totalPages: Math.ceil(totalCount / limitNum)
+        pagination: {
+          total: totalCount,
+          page,
+          pageSize: limitNum,
+          totalPages: Math.ceil(totalCount / limitNum)
+        }
       }
     };
   }

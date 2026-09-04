@@ -329,7 +329,14 @@ export class EmployeesService implements OnModuleInit {
           success: true,
           message: 'OK',
           data: [],
-          meta: { total: 0, skip: (page - 1) * pageSize, take: pageSize },
+          meta: {
+            pagination: {
+              total: 0,
+              page: page,
+              pageSize: pageSize,
+              totalPages: 0
+            }
+          },
         };
       }
     } else if (allowedCodesFromCodesParam) {
@@ -385,7 +392,14 @@ export class EmployeesService implements OnModuleInit {
       success: true,
       message: 'OK',
       data: items.map((e) => this.toEmployee(e)),
-      meta: { total: totalCount, skip, take: pageSize },
+      meta: {
+        pagination: {
+          total: totalCount,
+          page: page,
+          pageSize: pageSize,
+          totalPages: pageSize > 0 ? Math.ceil(totalCount / pageSize) : 1
+        }
+      },
     };
   }
 }

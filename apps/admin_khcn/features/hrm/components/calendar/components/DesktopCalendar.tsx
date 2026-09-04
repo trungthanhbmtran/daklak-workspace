@@ -101,7 +101,7 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
     endDate: fetchEndDate,
     role: activeTab === 'personal' ? 'ASSIGNEE' : undefined
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   const allTasks = tasksRes?.data || [];
 
   // --- FILTER TASKS BY TAB ---
