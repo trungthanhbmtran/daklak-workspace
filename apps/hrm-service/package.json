@@ -38,6 +38,7 @@
     "cache-manager-redis-store": "^3.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.4",
+    "date-fns": "^4.4.0",
     "ioredis": "^5.9.3",
     "joi": "^17.13.3",
     "jsdom": "^22.1.0",

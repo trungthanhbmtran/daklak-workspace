@@ -214,6 +214,8 @@ message ListTasksRequest {
   int32 currentUserId = 20;
   repeated string currentUserPermissions = 21;
   string type = 22; // optional - filter by type
+  string viewMode = 23; // optional - day | week | month | quarter | year
+  string referenceDate = 24; // optional - ISO date string
 }
 
 message UnitStats {

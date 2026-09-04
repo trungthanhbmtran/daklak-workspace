@@ -3,6 +3,7 @@ import { TaskRole } from '../../../src/generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { RpcException, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, addDays, addWeeks, addMonths, addQuarters, addYears, subDays, subWeeks, subMonths, subQuarters, subYears, parseISO } from 'date-fns';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 import { TaskWorkflowService } from '../task-workflow/task-workflow.service';
 import { TaskNotificationService } from '../task-workflow/task-notification.service';
@@ -287,8 +288,70 @@ export class TasksService {
   }
 
   async listTasks(query: any) {
+    let calendarMeta: any = null;
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    if (query.viewMode && query.referenceDate) {
+      const refDate = parseISO(query.referenceDate);
+      const viewMode = query.viewMode;
+      const weekStartsOn = 1;
+
+      let nextD: Date, prevD: Date;
+      switch (viewMode) {
+        case 'day':
+          startDate = startOfDay(refDate);
+          endDate = endOfDay(refDate);
+          nextD = addDays(refDate, 1);
+          prevD = subDays(refDate, 1);
+          break;
+        case 'week':
+          startDate = startOfWeek(refDate, { weekStartsOn });
+          endDate = endOfWeek(refDate, { weekStartsOn });
+          nextD = addWeeks(refDate, 1);
+          prevD = subWeeks(refDate, 1);
+          break;
+        case 'quarter':
+          startDate = startOfWeek(startOfQuarter(refDate), { weekStartsOn });
+          endDate = endOfWeek(endOfQuarter(refDate), { weekStartsOn });
+          nextD = addQuarters(refDate, 1);
+          prevD = subQuarters(refDate, 1);
+          break;
+        case 'year':
+          startDate = startOfWeek(startOfYear(refDate), { weekStartsOn });
+          endDate = endOfWeek(endOfYear(refDate), { weekStartsOn });
+          nextD = addYears(refDate, 1);
+          prevD = subYears(refDate, 1);
+          break;
+        case 'month':
+        default:
+          startDate = startOfWeek(startOfMonth(refDate), { weekStartsOn });
+          endDate = endOfWeek(endOfMonth(refDate), { weekStartsOn });
+          nextD = addMonths(refDate, 1);
+          prevD = subMonths(refDate, 1);
+          break;
+      }
+
+      calendarMeta = {
+        fetchStartDate: startDate.toISOString(),
+        fetchEndDate: endDate.toISOString(),
+        nextDate: nextD.toISOString(),
+        prevDate: prevD.toISOString(),
+      };
+    }
+
     await this.shared.populateQueryHierarchy(query);
     const where = await this.buildListTasksWhereClause(query);
+    
+    // Áp dụng calendar filter
+    if (startDate && endDate) {
+      where.AND = where.AND || [];
+      where.AND.push({
+        startDate: { lte: endDate },
+        dueDate: { gte: startDate }
+      });
+    }
+
     const { tasks, paginatedMeta } = await this.applyPostDbFiltersAndPaginate(where, query);
 
     const enriched = await this.shared.enrichTasks(tasks);
@@ -300,18 +363,24 @@ export class TasksService {
     }));
 
     const roots = this.buildTaskTree(mapped);
+    const meta: any = {
+      pagination: {
+        total: paginatedMeta.total,
+        page: paginatedMeta.page,
+        pageSize: paginatedMeta.limit,
+        totalPages: paginatedMeta.totalPages
+      }
+    };
+    
+    if (calendarMeta) {
+      meta.calendar = calendarMeta;
+    }
+
     return { 
       success: true, 
       message: 'Lấy danh sách nhiệm vụ thành công', 
       data: roots, 
-      meta: {
-        pagination: {
-          total: paginatedMeta.total,
-          page: paginatedMeta.page,
-          pageSize: paginatedMeta.limit,
-          totalPages: paginatedMeta.totalPages
-        }
-      }
+      meta 
     };
   }
 

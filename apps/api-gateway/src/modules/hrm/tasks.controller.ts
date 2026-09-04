@@ -45,8 +45,10 @@ export class TasksController {
     @Query('limit') limit: string,
     @Query('statsFilter') statsFilter: string,
     @Query('type') type: string,
+    @Query('viewMode') viewMode: string,
+    @Query('referenceDate') referenceDate: string,
   ) {
-    return this.tasksService.list(req, role, assigneeCode, assignerCode, filter, search, departmentId, planId, isSupervisor, status, priority, page, limit, statsFilter, type);
+    return this.tasksService.list(req, role, assigneeCode, assignerCode, filter, search, departmentId, planId, isSupervisor, status, priority, page, limit, statsFilter, type, viewMode, referenceDate);
   }
 
 

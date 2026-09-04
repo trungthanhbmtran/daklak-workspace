@@ -203,7 +203,7 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async list(req: any, role: string, assigneeCode: string, assignerCode: string, filter: string, search: string, departmentId: string, planId: string, isSupervisor: string, status: string, priority: string, page: string, limit: string, statsFilter: string, type: string) {
+  async list(req: any, role: string, assigneeCode: string, assignerCode: string, filter: string, search: string, departmentId: string, planId: string, isSupervisor: string, status: string, priority: string, page: string, limit: string, statsFilter: string, type: string, viewMode: string, referenceDate: string) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
     let finalAssignerCode: string | undefined = assignerCode;
@@ -245,6 +245,8 @@ export class TasksService implements OnModuleInit {
       role,
       page: page ? parseInt(page, 10) : 1,
       limit: limit ? parseInt(limit, 10) : 20,
+      viewMode,
+      referenceDate,
     };
 
     const response: any = await firstValueFrom(

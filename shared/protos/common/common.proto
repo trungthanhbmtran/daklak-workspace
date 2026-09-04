@@ -28,6 +28,7 @@ message Meta {
   google.protobuf.Struct filters = 3;
   google.protobuf.Struct extra = 10;
   repeated string allowedActions = 11;
+  google.protobuf.Struct calendar = 12;
 }
 
 /* ================= REQUEST ================= */

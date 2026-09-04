@@ -17,6 +17,12 @@ export interface ApiMeta {
     pageSize: number;
     totalPages: number;
   };
+  calendar?: {
+    fetchStartDate: string;
+    fetchEndDate: string;
+    nextDate: string;
+    prevDate: string;
+  };
   filter?: Record<string, unknown>;
   [key: string]: unknown;
 }
