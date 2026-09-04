@@ -12,7 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
-import { safeParseDate } from "@/lib/utils";
 
 
 const CalendarEventModal = dynamic(
@@ -73,8 +72,8 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
         colorClass = "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-800";
       }
 
-      const startD = safeParseDate(t.startDate || t.createdAt);
-      const endD = safeParseDate(t.dueDate || t.startDate || t.createdAt);
+      const startD = parseISO(t.startDate);
+      const endD = parseISO(t.dueDate);
 
       let eventType = "task";
       if (t.type === 'MEETING') eventType = 'meeting';
