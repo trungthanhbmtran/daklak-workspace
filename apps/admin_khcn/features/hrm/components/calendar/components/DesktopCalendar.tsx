@@ -19,23 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Calendar as CalendarIcon, Loader2, Video, CheckCircle2, BarChart, Clock } from "lucide-react";
 import dynamic from "next/dynamic";
-import { isValid } from "date-fns";
-
-const safeParseDate = (val: any): Date => {
-  if (!val) return new Date();
-  if (val instanceof Date) return isValid(val) ? val : new Date();
-  if (typeof val === 'number') {
-    const d = new Date(val);
-    return isValid(d) ? d : new Date();
-  }
-  if (typeof val === 'string') {
-    const d = parseISO(val);
-    if (isValid(d)) return d;
-    const fallback = new Date(val);
-    if (isValid(fallback)) return fallback;
-  }
-  return new Date();
-};
+import { safeParseDate } from "@/lib/utils";
 
 import { CalendarHeader, CalendarViewMode } from "./CalendarHeader";
 

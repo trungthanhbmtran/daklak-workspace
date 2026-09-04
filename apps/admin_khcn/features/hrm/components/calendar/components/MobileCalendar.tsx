@@ -12,22 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
+import { safeParseDate } from "@/lib/utils";
 
-const safeParseDate = (val: any): Date => {
-  if (!val) return new Date();
-  if (val instanceof Date) return isValid(val) ? val : new Date();
-  if (typeof val === 'number') {
-    const d = new Date(val);
-    return isValid(d) ? d : new Date();
-  }
-  if (typeof val === 'string') {
-    const d = parseISO(val);
-    if (isValid(d)) return d;
-    const fallback = new Date(val);
-    if (isValid(fallback)) return fallback;
-  }
-  return new Date();
-};
 
 const CalendarEventModal = dynamic(
   () => import("./CalendarEventModal").then(mod => mod.CalendarEventModal),
