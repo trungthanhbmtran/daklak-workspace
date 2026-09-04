@@ -772,6 +772,11 @@ export class TaskSharedService {
   }
   public toTaskResponse(t: any): any {
     if (!t) return null;
+    const createdAtStr = t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || new Date().toISOString());
+    const startDateStr = t.startDate instanceof Date ? t.startDate.toISOString() : (t.startDate || createdAtStr);
+    const dueDateStr = t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || startDateStr);
+    const updatedAtStr = t.updatedAt instanceof Date ? t.updatedAt.toISOString() : (t.updatedAt || createdAtStr);
+
     return {
       id: t.id ?? 0,
       title: t.title ?? '',
@@ -779,10 +784,10 @@ export class TaskSharedService {
       assigneeCode: t.assigneeCode ?? '',
       assignerCode: t.assignerCode ?? '',
       status: t.status ?? '',
-      dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || ''),
-      startDate: t.startDate instanceof Date ? t.startDate.toISOString() : (t.startDate || ''),
-      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
-      updatedAt: t.updatedAt instanceof Date ? t.updatedAt.toISOString() : (t.updatedAt || ''),
+      dueDate: dueDateStr,
+      startDate: startDateStr,
+      createdAt: createdAtStr,
+      updatedAt: updatedAtStr,
       baseScore: t.kpiSettings?.baseScore ?? 0,
       weight: t.kpiSettings?.weight ?? 0,
       scoringMethod: t.kpiSettings?.scoringMethod ?? '',
@@ -822,6 +827,9 @@ export class TaskSharedService {
 
   public toDelegationNode(t: any): any {
     if (!t) return null;
+    const createdAtStr = t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || new Date().toISOString());
+    const dueDateStr = t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || createdAtStr);
+
     return {
       id: t.id ?? 0,
       title: t.title ?? '',
@@ -833,8 +841,8 @@ export class TaskSharedService {
       assignerName: t.assignerName ?? '',
       departmentId: t.departmentId ?? 0,
       parentId: t.parentId ?? 0,
-      dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || ''),
-      createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || ''),
+      dueDate: dueDateStr,
+      createdAt: createdAtStr,
       isParent: t.isParent ?? false,
       isCurrent: t.isCurrent ?? false,
       isChild: t.isChild ?? false,
