@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React, { useState, useMemo, useCallback } from "react";
-import { format, startOfWeek, endOfWeek, addDays, isSameDay, startOfDay, endOfDay, parseISO, addWeeks, subWeeks } from "date-fns";
+import { format, startOfWeek, endOfWeek, addDays, isSameDay, startOfDay, endOfDay, parseISO, addWeeks, subWeeks, isValid } from "date-fns";
 import { vi as viLocale } from "date-fns/locale";
 import { Heading, Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
+
+const safeParseDate = (val: any): Date => {
+  if (!val) return new Date();
+  if (val instanceof Date) return isValid(val) ? val : new Date();
+  if (typeof val === 'number') {
+    const d = new Date(val);
+    return isValid(d) ? d : new Date();
+  }
+  if (typeof val === 'string') {
+    const d = parseISO(val);
+    if (isValid(d)) return d;
+    const fallback = new Date(val);
+    if (isValid(fallback)) return fallback;
+  }
+  return new Date();
+};
 
 const CalendarEventModal = dynamic(
   () => import("./CalendarEventModal").then(mod => mod.CalendarEventModal),
@@ -60,6 +76,8 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
       tasksToMap = allTasks;
     }
 
+    if (!Array.isArray(tasksToMap)) tasksToMap = [];
+
     const events = tasksToMap.map((t: any) => {
       const isCompleted = t.status === 'COMPLETED' || t.progress === 100;
       let colorClass = "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800";
@@ -69,8 +87,8 @@ export function MobileCalendar({ activeTab }: { activeTab: 'all' | 'personal' | 
         colorClass = "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-800";
       }
 
-      const startD = t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date());
-      const endD = t.dueDate ? parseISO(t.dueDate) : (t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date()));
+      const startD = safeParseDate(t.startDate || t.createdAt);
+      const endD = safeParseDate(t.dueDate || t.startDate || t.createdAt);
 
       let eventType = "task";
       if (t.type === 'MEETING') eventType = 'meeting';

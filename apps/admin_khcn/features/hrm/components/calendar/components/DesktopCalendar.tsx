@@ -19,6 +19,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useTasksList } from "@/features/hrm/hooks/useTasks";
 import { Calendar as CalendarIcon, Loader2, Video, CheckCircle2, BarChart, Clock } from "lucide-react";
 import dynamic from "next/dynamic";
+import { isValid } from "date-fns";
+
+const safeParseDate = (val: any): Date => {
+  if (!val) return new Date();
+  if (val instanceof Date) return isValid(val) ? val : new Date();
+  if (typeof val === 'number') {
+    const d = new Date(val);
+    return isValid(d) ? d : new Date();
+  }
+  if (typeof val === 'string') {
+    const d = parseISO(val);
+    if (isValid(d)) return d;
+    const fallback = new Date(val);
+    if (isValid(fallback)) return fallback;
+  }
+  return new Date();
+};
 
 import { CalendarHeader, CalendarViewMode } from "./CalendarHeader";
 
@@ -126,8 +143,8 @@ export function DesktopCalendar({ activeTab }: { activeTab: 'all' | 'personal' |
         colorClass = "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-800";
       }
 
-      const startD = t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date());
-      const endD = t.dueDate ? parseISO(t.dueDate) : (t.startDate ? parseISO(t.startDate) : (t.createdAt ? parseISO(t.createdAt) : new Date()));
+      const startD = safeParseDate(t.startDate || t.createdAt);
+      const endD = safeParseDate(t.dueDate || t.startDate || t.createdAt);
 
       let eventType = "task";
       if (t.type === 'MEETING') eventType = 'meeting';
