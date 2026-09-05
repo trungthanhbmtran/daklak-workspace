@@ -3,7 +3,7 @@ import { format, getWeekOfMonth, getQuarter } from 'date-fns';
 import { vi as viLocale } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 
 export type CalendarViewMode = "day" | "week" | "month" | "quarter" | "year";
 
