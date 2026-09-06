@@ -38,13 +38,7 @@ const CalendarEventModal = dynamic(
   { ssr: false }
 );
 
-const CalendarCreateEventModal = dynamic(
-  () =>
-    import("./CalendarCreateEventModal").then(
-      (mod) => mod.CalendarCreateEventModal
-    ),
-  { ssr: false }
-);
+import { CreateTaskDialog } from "../../tasks/create-task-dialog";
 
 const CalendarAiModal = dynamic(
   () => import("./CalendarAiModal").then((mod) => mod.CalendarAiModal),
@@ -285,9 +279,9 @@ export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
       )}
 
       {isCreateModalOpen && (
-        <CalendarCreateEventModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+        <CreateTaskDialog
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
           initialDate={createEventDate}
         />
       )}

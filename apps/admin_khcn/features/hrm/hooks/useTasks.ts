@@ -367,3 +367,32 @@ export function useRequestCoordination(taskId: number | undefined) {
     },
   });
 }
+
+/** Ghi nhận tham gia (điểm danh) sự kiện/họp. */
+export function useRecordAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (taskId: number) => {
+      if (!taskId) return Promise.reject(new Error("Missing taskId"));
+      return hrmTasksApi.recordAttendance(taskId);
+    },
+    onSuccess: (_, taskId) => {
+      qc.invalidateQueries({ queryKey: [...hrmKeys.tasks(), 'attendance-stats', taskId] });
+      toast.success("Đã điểm danh thành công");
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Điểm danh thất bại";
+      toast.error(message);
+    },
+  });
+}
+
+/** Lấy thống kê điểm danh của sự kiện/họp. */
+export function useAttendanceStats(taskId: number | undefined) {
+  return useQuery({
+    queryKey: taskId ? [...hrmKeys.tasks(), 'attendance-stats', taskId] : [...hrmKeys.tasks(), 'attendance-stats', 'none'],
+    queryFn: taskId ? () => hrmTasksApi.getAttendanceStats(taskId) : skipToken,
+    staleTime: DETAIL_STALE_TIME,
+    gcTime: DETAIL_GC_TIME,
+  });
+}

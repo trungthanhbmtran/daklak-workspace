@@ -20,9 +20,10 @@ interface CreateTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   parentId?: string | number;
+  initialDate?: Date | null;
 }
 
-export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: CreateTaskDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("NORMAL");
@@ -31,13 +32,22 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
   const [coordinators, setCoordinators] = useState<{id: string, name: string}[]>([]);
   const [taskType, setTaskType] = useState("ONE_TIME"); // ONE_TIME, REGULAR, PERIODIC
   const [recurrence, setRecurrence] = useState("MONTHLY"); // DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY
+  const [type, setType] = useState("TASK"); // TASK, MEETING, STUDY
+  const [meetingLink, setMeetingLink] = useState("");
 
   const isSubTask = !!parentId;
 
   // ── Smart Defaults ──
   useEffect(() => {
     if (open) {
-      if (!dueDate) {
+      if (initialDate) {
+        // Format to YYYY-MM-DDThh:mm
+        const d = new Date(initialDate);
+        if (d.getHours() === 0) d.setHours(9, 0, 0, 0);
+        const tzoffset = (d.getTimezoneOffset() * 60000);
+        const localISOTime = (new Date(d.getTime() - tzoffset)).toISOString().slice(0, 16);
+        setDueDate(localISOTime);
+      } else if (!dueDate) {
         const today = new Date();
         today.setHours(23, 59, 59, 999);
         // Format to YYYY-MM-DDThh:mm for input type datetime-local (or we just use date)
@@ -49,10 +59,11 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const applyQuickPreset = (presetTitle: string, presetPriority: string = "NORMAL", type: string = "ONE_TIME", presetRecurrence?: string) => {
+  const applyQuickPreset = (presetTitle: string, presetPriority: string = "NORMAL", tType: string = "ONE_TIME", presetRecurrence?: string, evtType: string = "TASK") => {
     setTitle(presetTitle);
     setPriority(presetPriority);
-    setTaskType(type);
+    setTaskType(tType);
+    setType(evtType);
     if (presetRecurrence) {
       setRecurrence(presetRecurrence);
     }
@@ -100,6 +111,8 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
     setCoordinators([]);
     setTaskType("ONE_TIME");
     setRecurrence("MONTHLY");
+    setType("TASK");
+    setMeetingLink("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,6 +129,8 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
       assignee, // Send raw assignee, backend will parse DEPT_ vs Code
       coordinators: coordinators.map(c => c.id), // Send raw list
       taskType,
+      type, // TASK, MEETING, STUDY
+      meetingLink: (type === 'MEETING' || type === 'STUDY') && meetingLink.trim() ? meetingLink.trim() : undefined,
       recurrence: taskType === "PERIODIC" ? recurrence : undefined
     };
 
@@ -195,7 +210,34 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
               {/* Loại công việc (Mới thêm) */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  <BriefcaseIcon className="w-4 h-4 text-slate-400"/> Tính chất công việc
+                  <CalendarIcon className="w-4 h-4 text-slate-400"/> Loại sự kiện
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <div 
+                    onClick={() => setType("TASK")}
+                    className={`cursor-pointer text-center px-1 py-2 text-xs font-medium rounded-md border transition-all ${type === "TASK" ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                  >
+                    Công việc
+                  </div>
+                  <div 
+                    onClick={() => setType("MEETING")}
+                    className={`cursor-pointer text-center px-1 py-2 text-xs font-medium rounded-md border transition-all ${type === "MEETING" ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                  >
+                    Lịch họp
+                  </div>
+                  <div 
+                    onClick={() => setType("STUDY")}
+                    className={`cursor-pointer text-center px-1 py-2 text-xs font-medium rounded-md border transition-all ${type === "STUDY" ? "bg-purple-50 border-purple-200 text-purple-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                  >
+                    Lịch học
+                  </div>
+                </div>
+              </div>
+
+              {/* Tính chất công việc */}
+              <div className="space-y-3 pt-2 border-t border-slate-200 border-dashed">
+                <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <BriefcaseIcon className="w-4 h-4 text-slate-400"/> Tính chất
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div 
@@ -208,7 +250,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                     onClick={() => { setTaskType("PERIODIC"); if(recurrence === "NONE") setRecurrence("MONTHLY"); }}
                     className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${(taskType === "PERIODIC" || taskType === "REGULAR") ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                   >
-                    Thường xuyên / Định kỳ
+                    Định kỳ
                   </div>
                 </div>
               </div>
@@ -242,6 +284,20 @@ export function CreateTaskDialog({ open, onOpenChange, parentId }: CreateTaskDia
                 </div>
               )}
 
+              {/* Link họp online nếu là Lịch họp / học */}
+              {(type === "MEETING" || type === "STUDY") && (
+                <div className="space-y-3 pt-2 border-t border-slate-200 border-dashed animate-in fade-in slide-in-from-top-2 duration-200">
+                  <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <CalendarIcon className="w-4 h-4 text-slate-400"/> Link trực tuyến
+                  </Label>
+                  <Input 
+                    placeholder="VD: https://meet.google.com/..." 
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    className="bg-white dark:bg-slate-950 h-11 focus-visible:ring-blue-500 shadow-sm" 
+                  />
+                </div>
+              )}
 
               <div className="space-y-3 pt-2 border-t border-slate-200 border-dashed">
                 <Label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">

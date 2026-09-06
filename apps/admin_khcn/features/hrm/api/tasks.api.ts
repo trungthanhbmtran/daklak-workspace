@@ -117,4 +117,12 @@ export const hrmTasksApi = {
   deleteStep(taskId: number, stepId: number): Promise<ApiResponse<any>> {
     return apiClient.delete(`/hrm/tasks/${taskId}/steps/${stepId}`) as any;
   },
+
+  recordAttendance(id: number): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/tasks/${id}/attend`) as any;
+  },
+
+  getAttendanceStats(id: number): Promise<ApiResponse<any>> {
+    return apiClient.get(`/hrm/tasks/${id}/attendance-stats`) as any;
+  },
 };

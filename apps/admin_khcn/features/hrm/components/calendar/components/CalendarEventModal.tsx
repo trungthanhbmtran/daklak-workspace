@@ -6,8 +6,23 @@ import { Calendar as CalendarIcon, CheckCircle2, Clock, Video } from 'lucide-rea
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Text } from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
-import { useUpdateTaskStatus } from '@/features/hrm/hooks/useTasks';
-import { ExternalLink } from 'lucide-react';
+import { useUpdateTaskStatus, useRecordAttendance, useAttendanceStats } from '@/features/hrm/hooks/useTasks';
+import { ExternalLink, Users } from 'lucide-react';
+
+// Thành phần phụ để hiển thị thống kê điểm danh cho từng sự kiện
+function AttendanceStats({ taskId }: { taskId: number }) {
+  const { data } = useAttendanceStats(taskId);
+  const stats = data?.data;
+  
+  if (!stats) return null;
+  
+  return (
+    <div className="flex items-center gap-2 text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded-md border border-slate-100">
+      <Users className="w-3.5 h-3.5" />
+      <span>Đã tham gia: <b>{stats.attended}</b> / {stats.total} người ({Math.round(stats.attendanceRate)}%)</span>
+    </div>
+  );
+}
 
 interface CalendarEventModalProps {
   selectedDayEvents: { day: Date, events: any[] } | null;
@@ -19,16 +34,21 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
   onClose
 }: CalendarEventModalProps) {
   const { mutate: updateStatus } = useUpdateTaskStatus();
+  const { mutate: recordAttendance } = useRecordAttendance();
 
   const handleJoinMeeting = React.useCallback((evt: any) => {
     if (evt.meetingLink) {
       window.open(evt.meetingLink, '_blank');
+      // Ghi nhận điểm danh
+      if (evt.rawId) {
+        recordAttendance(evt.rawId);
+      }
       // Auto confirm completed
       if (!evt.isCompleted && evt.rawId) {
         updateStatus({ id: evt.rawId, payload: { status: 'COMPLETED' } });
       }
     }
-  }, [updateStatus]);
+  }, [updateStatus, recordAttendance]);
 
   return (
     <Dialog open={!!selectedDayEvents} onOpenChange={(open) => !open && onClose()}>
@@ -68,6 +88,12 @@ export const CalendarEventModal = React.memo(function CalendarEventModal({
                       <ExternalLink className="w-4 h-4" />
                       Tham gia
                     </Button>
+                  </div>
+                )}
+                
+                {(evt.type === 'meeting' || evt.type === 'study') && evt.rawId && (
+                  <div className="ml-6">
+                    <AttendanceStats taskId={evt.rawId} />
                   </div>
                 )}
               </div>
