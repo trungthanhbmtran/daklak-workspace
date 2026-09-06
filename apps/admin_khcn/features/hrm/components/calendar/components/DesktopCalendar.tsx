@@ -111,7 +111,7 @@ function resolveColorClass(isCompleted: boolean, dueDate: Date | null): string {
 }
 
 export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [selectedDayEvents, setSelectedDayEvents] = useState<{
     day: Date;
@@ -138,9 +138,13 @@ export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
     const events: CalendarEventItem[] = [];
 
     for (const t of allTasks) {
-      const startD = safeParseDate(t.startDate);
       const endD = safeParseDate(t.dueDate);
-      if (!startD || !endD) continue;
+      const startD = safeParseDate(t.startDate) || endD;
+      
+      // Bỏ qua các công việc chưa được lên lịch (không có cả ngày bắt đầu và ngày kết thúc)
+      if (!startD && !endD) continue;
+      
+      const finalEndD = endD || startD!; // We know at least one exists
 
       const isCompleted = t.status === "COMPLETED" || t.progress === 100;
       const eventType = resolveEventType(t.type);
@@ -152,11 +156,11 @@ export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
         id: `task-${t.id}`,
         rawId: t.id,
         title: t.title,
-        startDate: startD,
-        endDate: endD,
+        startDate: startD!,
+        endDate: finalEndD,
         type: eventType,
         meetingLink: t.meetingLink,
-        colorClass: resolveColorClass(isCompleted, endD),
+        colorClass: resolveColorClass(isCompleted, finalEndD),
         isCompleted,
       });
     }
@@ -178,18 +182,28 @@ export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
   }, [filteredEvents]);
 
   const nextDate = useCallback(() => {
-    if (tasksRes?.meta?.calendar?.nextDate) {
-      setCurrentDate(new Date(tasksRes.meta.calendar.nextDate));
-    }
-  }, [tasksRes]);
+    setCurrentDate((prev) => {
+      if (viewMode === "day") return addDays(prev, 1);
+      if (viewMode === "week") return addWeeks(prev, 1);
+      if (viewMode === "month") return addMonths(prev, 1);
+      if (viewMode === "quarter") return addQuarters(prev, 1);
+      if (viewMode === "year") return addYears(prev, 1);
+      return addMonths(prev, 1);
+    });
+  }, [viewMode]);
 
   const prevDate = useCallback(() => {
-    if (tasksRes?.meta?.calendar?.prevDate) {
-      setCurrentDate(new Date(tasksRes.meta.calendar.prevDate));
-    }
-  }, [tasksRes]);
+    setCurrentDate((prev) => {
+      if (viewMode === "day") return subDays(prev, 1);
+      if (viewMode === "week") return subWeeks(prev, 1);
+      if (viewMode === "month") return subMonths(prev, 1);
+      if (viewMode === "quarter") return subQuarters(prev, 1);
+      if (viewMode === "year") return subYears(prev, 1);
+      return subMonths(prev, 1);
+    });
+  }, [viewMode]);
 
-  const goToToday = useCallback(() => setCurrentDate(new Date()), []);
+  const goToToday = useCallback(() => setCurrentDate(startOfDay(new Date())), []);
 
   const handleDateClick = useCallback((date: Date) => {
     setCreateEventDate(date);

@@ -6,6 +6,8 @@ import {
   startOfWeek,
   endOfWeek,
   addDays,
+  addWeeks,
+  subWeeks,
   isSameDay,
   startOfDay,
   endOfDay,
@@ -104,7 +106,7 @@ function resolveColorClass(isCompleted: boolean, dueDate: Date | null): string {
 }
 
 export function MobileCalendar({ activeTab }: { activeTab: TabType }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [selectedDayEvents, setSelectedDayEvents] = useState<{
     day: Date;
     events: CalendarEventItem[];
@@ -129,9 +131,13 @@ export function MobileCalendar({ activeTab }: { activeTab: TabType }) {
     const events: CalendarEventItem[] = [];
 
     for (const t of allTasks) {
-      const startD = safeParseDate(t.startDate);
       const endD = safeParseDate(t.dueDate);
-      if (!startD || !endD) continue; // dữ liệu thiếu ngày -> không hiển thị lên lịch
+      const startD = safeParseDate(t.startDate) || endD;
+
+      // Bỏ qua công việc chưa lên lịch
+      if (!startD && !endD) continue;
+      
+      const finalEndD = endD || startD!;
 
       const isCompleted = t.status === "COMPLETED" || t.progress === 100;
       const eventType = resolveEventType(t.type);
@@ -143,11 +149,11 @@ export function MobileCalendar({ activeTab }: { activeTab: TabType }) {
         id: `task-${t.id}`,
         rawId: t.id,
         title: t.title,
-        startDate: startD,
-        endDate: endD,
+        startDate: startD!,
+        endDate: finalEndD,
         type: eventType,
         meetingLink: t.meetingLink,
-        colorClass: resolveColorClass(isCompleted, endD),
+        colorClass: resolveColorClass(isCompleted, finalEndD),
         isCompleted,
       });
     }
@@ -169,16 +175,12 @@ export function MobileCalendar({ activeTab }: { activeTab: TabType }) {
   }, [filteredEvents]);
 
   const nextDate = useCallback(() => {
-    if (tasksRes?.meta?.calendar?.nextDate) {
-      setCurrentDate(new Date(tasksRes.meta.calendar.nextDate));
-    }
-  }, [tasksRes]);
+    setCurrentDate((prev) => addWeeks(prev, 1));
+  }, []);
   const prevDate = useCallback(() => {
-    if (tasksRes?.meta?.calendar?.prevDate) {
-      setCurrentDate(new Date(tasksRes.meta.calendar.prevDate));
-    }
-  }, [tasksRes]);
-  const goToToday = useCallback(() => setCurrentDate(new Date()), []);
+    setCurrentDate((prev) => subWeeks(prev, 1));
+  }, []);
+  const goToToday = useCallback(() => setCurrentDate(startOfDay(new Date())), []);
   const handleDateClick = useCallback((date: Date) => {
     setCreateEventDate(date);
     setIsCreateModalOpen(true);
