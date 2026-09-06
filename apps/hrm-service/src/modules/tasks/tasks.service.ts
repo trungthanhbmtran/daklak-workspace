@@ -343,12 +343,27 @@ export class TasksService {
     await this.shared.populateQueryHierarchy(query);
     const where = await this.buildListTasksWhereClause(query);
     
-    // Áp dụng calendar filter
+    // Áp dụng calendar filter (xử lý trường hợp task chỉ có 1 trong 2 ngày startDate hoặc dueDate)
     if (startDate && endDate) {
       where.AND = where.AND || [];
       where.AND.push({
-        startDate: { lte: endDate },
-        dueDate: { gte: startDate }
+        OR: [
+          // Case 1: Cả hai đều có, và giao với [startDate, endDate]
+          {
+            startDate: { lte: endDate },
+            dueDate: { gte: startDate }
+          },
+          // Case 2: Chỉ có startDate, và nằm trong [startDate, endDate]
+          {
+            startDate: { gte: startDate, lte: endDate },
+            dueDate: null
+          },
+          // Case 3: Chỉ có dueDate, và nằm trong [startDate, endDate]
+          {
+            startDate: null,
+            dueDate: { gte: startDate, lte: endDate }
+          }
+        ]
       });
     }
 
