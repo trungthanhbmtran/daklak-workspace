@@ -46,10 +46,10 @@ export class AiController {
   }
 
   @EventPattern('ai_generate_task')
-  async handleAiGenerateTask(data: { jobId: string; prompt: string }) {
+  async handleAiGenerateTask(data: { jobId: string; prompt: string; systemPrompt?: string }) {
     this.logger.log(`Worker received AI task: ${data.jobId}`);
     try {
-      const resultStr = await this.aiService.generateText(data.prompt);
+      const resultStr = await this.aiService.generateText(data.prompt, data.systemPrompt);
 
       let parsedResult = resultStr;
       if (typeof resultStr === 'string') {

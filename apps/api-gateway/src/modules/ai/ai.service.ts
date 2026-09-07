@@ -62,7 +62,7 @@ export class AiService implements OnModuleInit {
     }
   }
 
-  async generateText(prompt: string): Promise<string> {
+  async generateText(prompt: string, systemPrompt?: string): Promise<string> {
     const providers = await this.getProviders();
 
     if (providers.length === 0) {
@@ -96,7 +96,7 @@ export class AiService implements OnModuleInit {
           `Attempting to use AI Provider: ${provider.provider} (Priority: ${provider.priority}, Model: ${provider.model})`,
         );
 
-        const result = await this.callProvider(provider, prompt);
+        const result = await this.callProvider(provider, prompt, systemPrompt);
 
         // Success: Reset circuit breaker
         if (breaker) {
@@ -134,14 +134,15 @@ export class AiService implements OnModuleInit {
   private async callProvider(
     config: AiProviderConfig,
     prompt: string,
+    systemPrompt?: string,
   ): Promise<string> {
     switch (config.provider) {
       case 'OPENAI':
-        return this.callOpenAI(config, prompt);
+        return this.callOpenAI(config, prompt, systemPrompt);
       case 'GEMINI':
-        return this.callGemini(config, prompt);
+        return this.callGemini(config, prompt, systemPrompt);
       case 'CLAUDE':
-        return this.callClaude(config, prompt);
+        return this.callClaude(config, prompt, systemPrompt);
       default:
         throw new Error(`Unsupported AI provider: ${config.provider}`);
     }
@@ -168,6 +169,7 @@ export class AiService implements OnModuleInit {
   private async callOpenAI(
     config: AiProviderConfig,
     prompt: string,
+    systemPrompt?: string,
   ): Promise<string> {
     const response = await this.fetchWithTimeout(
       'https://api.openai.com/v1/chat/completions',
@@ -179,7 +181,10 @@ export class AiService implements OnModuleInit {
         },
         body: JSON.stringify({
           model: config.model || 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+            { role: 'user', content: prompt }
+          ],
         }),
       },
     );
@@ -196,6 +201,7 @@ export class AiService implements OnModuleInit {
   private async callGemini(
     config: AiProviderConfig,
     prompt: string,
+    systemPrompt?: string,
   ): Promise<string> {
     const model = config.model || 'gemini-1.5-pro';
     const response = await this.fetchWithTimeout(
@@ -206,6 +212,7 @@ export class AiService implements OnModuleInit {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
           contents: [{ parts: [{ text: prompt }] }],
         }),
       },
@@ -223,6 +230,7 @@ export class AiService implements OnModuleInit {
   private async callClaude(
     config: AiProviderConfig,
     prompt: string,
+    systemPrompt?: string,
   ): Promise<string> {
     const response = await this.fetchWithTimeout(
       'https://api.anthropic.com/v1/messages',
@@ -235,6 +243,7 @@ export class AiService implements OnModuleInit {
         },
         body: JSON.stringify({
           model: config.model || 'claude-3-opus-20240229',
+          system: systemPrompt || undefined,
           max_tokens: 1024,
           messages: [{ role: 'user', content: prompt }],
         }),

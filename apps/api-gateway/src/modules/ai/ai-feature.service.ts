@@ -63,7 +63,14 @@ export class AiFeatureService implements OnModuleInit {
         JSON.stringify({ status: 'PROCESSING' }),
         3600,
       );
-      this.rmqClient.emit('ai_generate_task', { jobId, prompt });
+      const sysConfigRes: any = await firstValueFrom(
+        this.sysConfigService.GetSystemConfigs({}),
+      );
+      const configs = sysConfigRes?.configs || [];
+      const assistantConfig = configs.find((c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT');
+      const systemPrompt = assistantConfig?.value || '';
+
+      this.rmqClient.emit('ai_generate_task', { jobId, prompt, systemPrompt });
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing AI task', err);
@@ -79,6 +86,9 @@ export class AiFeatureService implements OnModuleInit {
         this.sysConfigService.GetSystemConfigs({}),
       );
       const configs = sysConfigRes?.configs || [];
+      const assistantConfig = configs.find((c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT');
+      const systemPrompt = assistantConfig?.value || '';
+
       const promptConfig = configs.find((c: any) => c.key === `AI_PROMPT_${action}`);
 
       const promptTemplate = promptConfig?.value || '';
@@ -212,7 +222,7 @@ export class AiFeatureService implements OnModuleInit {
         3600,
       );
 
-      this.rmqClient.emit('ai_generate_task', { jobId, prompt });
+      this.rmqClient.emit('ai_generate_task', { jobId, prompt, systemPrompt });
 
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {

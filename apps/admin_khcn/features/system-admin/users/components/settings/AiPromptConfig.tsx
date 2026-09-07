@@ -15,6 +15,7 @@ export function AiPromptConfig() {
   const [promptProjectTasks, setPromptProjectTasks] = useState('');
   const [promptSubtaskAssignment, setPromptSubtaskAssignment] = useState('');
   const [promptCalendarReuse, setPromptCalendarReuse] = useState('');
+  const [promptSystemAssistant, setPromptSystemAssistant] = useState('');
 
   useEffect(() => {
     if (configs['AI_PROMPT_MASTER_PLAN_TASKS'] !== undefined) {
@@ -101,8 +102,20 @@ Dựa vào yêu cầu chỉnh sửa sau: "{userInput}".
 Hãy tạo một lịch trình mới hợp lý dựa trên lịch cũ nhưng áp dụng các thay đổi trên.
 Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "Câu chào mừng ngắn gọn", "events": [{"title": "Tên sự kiện", "time": "Thời gian (VD: 07:00 - 11:30, Ngày mai)"}]}`);
     }
+
+    if (configs['AI_PROMPT_SYSTEM_ASSISTANT'] !== undefined) {
+      setPromptSystemAssistant(configs['AI_PROMPT_SYSTEM_ASSISTANT']);
+    } else {
+      setPromptSystemAssistant(`Bạn là một trợ lý AI thông minh cấp cao của hệ thống HRM (Quản trị Nhân sự & Lập kế hoạch).
+Vai trò của bạn là hỗ trợ nhân viên lập kế hoạch, sắp xếp công việc, phân bổ nguồn lực một cách khoa học.
+Tuân thủ các nguyên tắc sau:
+1. Luôn trả lời ngắn gọn, chuẩn mực, lịch sự.
+2. Trả về ĐÚNG cấu trúc JSON được yêu cầu (nếu có), không kèm theo markdown block như \`\`\`json.
+3. Luôn bám sát các cơ sở pháp lý và quy chế nội bộ nếu có.
+4. Tránh bịa đặt số liệu hoặc thông tin không có thực. Nếu thiếu dữ kiện, hãy sử dụng các ước lượng hợp lý nhưng chỉ ra rõ ràng.`);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS'], configs['AI_PROMPT_SUBTASK_ASSIGNMENT'], configs['AI_PROMPT_CALENDAR_SCHEDULE_REUSE']]);
+  }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS'], configs['AI_PROMPT_SUBTASK_ASSIGNMENT'], configs['AI_PROMPT_CALENDAR_SCHEDULE_REUSE'], configs['AI_PROMPT_SYSTEM_ASSISTANT']]);
 
   const handleSavePrompts = async () => {
     try {
@@ -126,6 +139,11 @@ Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "C�
           key: 'AI_PROMPT_CALENDAR_SCHEDULE_REUSE',
           value: promptCalendarReuse,
           description: 'Mẫu Prompt tái sử dụng lịch tuần trước'
+        },
+        {
+          key: 'AI_PROMPT_SYSTEM_ASSISTANT',
+          value: promptSystemAssistant,
+          description: 'Mẫu System Prompt chung cho Trợ lý AI'
         }
       ]);
       toast.success('Đã lưu cấu hình AI Prompt thành công!');
@@ -147,6 +165,16 @@ Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "C�
         </Button>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
+        <div className="space-y-3 pb-6 border-b border-border">
+          <label className="text-sm font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wide">0. Prompt Trợ lý Hệ thống (System Persona & Legal Basis)</label>
+          <p className="text-xs text-muted-foreground">Đây là kịch bản Gốc (System Prompt) sẽ được gửi ngầm cho mọi chức năng AI, nhằm định hướng tính cách, nguyên tắc và cơ sở pháp lý chung của Trợ lý.</p>
+          <Textarea 
+            className="min-h-[200px] font-mono text-sm bg-violet-50/50 dark:bg-violet-900/10 border-violet-200 dark:border-violet-800/50 focus-visible:ring-violet-500 rounded-xl"
+            value={promptSystemAssistant}
+            onChange={(e) => setPromptSystemAssistant(e.target.value)}
+          />
+        </div>
+
         <div className="space-y-3">
           <label className="text-sm font-bold text-muted-foreground">1. Prompt sinh Chỉ tiêu/Hành động (Master Plan)</label>
           <p className="text-xs text-muted-foreground">Các biến hỗ trợ: <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{framework}`}</code>, <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{planTitle}`}</code>, <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{planObjective}`}</code>, <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{orgContext}`}</code>, <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{rolesContext}`}</code></p>
