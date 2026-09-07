@@ -195,6 +195,12 @@ export class AiFeatureService implements OnModuleInit {
             .replace(/{employeesContext}/g, payload.employeesContext || '');
           break;
         }
+        case 'CALENDAR_SCHEDULE_REUSE': {
+          prompt = promptTemplate
+            .replace(/{historyContext}/g, payload.historyContext || '')
+            .replace(/{userInput}/g, payload.userInput || '');
+          break;
+        }
         default:
           throw new BadRequestException(`Hành động AI không được hỗ trợ: ${action}`);
       }

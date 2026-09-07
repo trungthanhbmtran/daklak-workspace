@@ -4,27 +4,80 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, Send, Loader2, CalendarPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
-export function CalendarAiModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+import { aiApi } from '../../../api/ai.api';
+import { toast } from 'sonner';
+
+export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpen: boolean, onClose: () => void, currentEvents?: any[] }) {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResult, setGeneratedResult] = useState<any>(null);
 
-  const handleGenerate = () => {
+  const pollJobStatus = (jobId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const job = await aiApi.getAiJobStatus(jobId);
+        if (job.status === 'COMPLETED') {
+          clearInterval(interval);
+          setIsGenerating(false);
+          setGeneratedResult(job.result);
+        } else if (job.status === 'FAILED') {
+          clearInterval(interval);
+          setIsGenerating(false);
+          toast.error("AI tạo lịch thất bại: " + job.error);
+        }
+      } catch (err) {
+        clearInterval(interval);
+        setIsGenerating(false);
+        toast.error("Lỗi khi kiểm tra trạng thái AI");
+      }
+    }, 2000);
+  };
+
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
     setGeneratedResult(null);
-    // Simulate AI generation
-    setTimeout(() => {
+    
+    try {
+      const promptText = `Bạn là một trợ lý AI chuyên tạo lịch trình thông minh. Dựa vào yêu cầu: "${prompt}". Hãy tạo một lịch trình hợp lý. Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "Câu chào mừng ngắn gọn", "events": [{"title": "Tên sự kiện", "time": "Thời gian (VD: 07:00 - 11:30, Ngày mai)"}]}`;
+      const res = await aiApi.generateText(promptText);
+      if (res && res.jobId) {
+        pollJobStatus(res.jobId);
+      } else {
+        throw new Error("Không lấy được jobId");
+      }
+    } catch (error) {
       setIsGenerating(false);
-      setGeneratedResult({
-        message: "Tôi đã tạo một lịch trình nháp dựa trên yêu cầu của bạn. Bạn có muốn áp dụng lịch trình này không?",
-        events: [
-          { title: "Di chuyển ra sân bay và bay đến Hà Nội", time: "07:00 - 11:30, Ngày mai" },
-          { title: "Họp chiến lược phát triển với đối tác", time: "14:00 - 16:30, Ngày mai" },
-          { title: "Tham quan khảo sát thực địa", time: "08:30 - 11:00, Ngày mốt" }
-        ]
+      toast.error("Có lỗi xảy ra khi gọi AI");
+    }
+  };
+
+  const handleReuseCalendar = async () => {
+    if (currentEvents.length === 0) {
+      toast.warning("Không có dữ liệu sự kiện hiện tại để tái sử dụng.");
+      return;
+    }
+    setIsGenerating(true);
+    setGeneratedResult(null);
+    
+    try {
+      const historyContext = currentEvents.map(e => 
+        `- [${e.type === 'meeting' ? 'Họp' : 'Việc'}] ${e.title} (Từ ${e.startDate.toLocaleString()} đến ${e.endDate.toLocaleString()})`
+      ).join('\\n');
+
+      const res = await aiApi.requestAiExecution('CALENDAR_SCHEDULE_REUSE', { 
+        historyContext, 
+        userInput: prompt || "Giữ nguyên lịch cũ, chỉ điều chỉnh ngày cho phù hợp với tuần mới." 
       });
-    }, 2500);
+      if (res && res.jobId) {
+        pollJobStatus(res.jobId);
+      } else {
+        throw new Error("Không lấy được jobId");
+      }
+    } catch (error) {
+      setIsGenerating(false);
+      toast.error("Có lỗi xảy ra khi gọi AI");
+    }
   };
 
   return (
@@ -88,26 +141,38 @@ export function CalendarAiModal({ isOpen, onClose }: { isOpen: boolean, onClose:
           )}
         </div>
 
-        <div className="p-5 bg-slate-50/50 dark:bg-slate-900/50 border-t border-border/50">
+        <div className="p-5 bg-slate-50/50 dark:bg-slate-900/50 border-t border-border/50 flex flex-col gap-3">
           {!generatedResult && (
-            <div className="flex gap-3">
-              <Input
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="VD: Tạo lịch công tác Hà Nội 3 ngày tới..."
-                className="flex-1 border-violet-200/60 focus-visible:ring-violet-500/50 focus-visible:border-violet-500 shadow-sm h-11 rounded-xl px-4"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleGenerate();
-                }}
-              />
-              <Button 
-                onClick={handleGenerate} 
-                disabled={!prompt.trim() || isGenerating}
-                className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 h-11 w-11 p-0 rounded-xl transition-transform active:scale-95"
-              >
-                <Send className="w-5 h-5 ml-1" />
-              </Button>
-            </div>
+            <>
+              <div className="flex flex-wrap gap-2 mb-1">
+                <span className="text-xs font-semibold text-muted-foreground mr-1 mt-1.5">Gợi ý nhanh:</span>
+                <button 
+                  onClick={handleReuseCalendar}
+                  className="text-xs px-3 py-1.5 bg-white dark:bg-slate-800 border border-border hover:border-violet-300 hover:text-violet-600 rounded-full transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <CalendarPlus className="w-3.5 h-3.5" />
+                  Tạo lịch dựa trên dữ liệu tuần này
+                </button>
+              </div>
+              <div className="flex gap-3">
+                <Input
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="VD: Tạo lịch công tác Hà Nội 3 ngày tới..."
+                  className="flex-1 border-violet-200/60 focus-visible:ring-violet-500/50 focus-visible:border-violet-500 shadow-sm h-11 rounded-xl px-4"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleGenerate();
+                  }}
+                />
+                <Button 
+                  onClick={handleGenerate} 
+                  disabled={!prompt.trim() || isGenerating}
+                  className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 h-11 w-11 p-0 rounded-xl transition-transform active:scale-95"
+                >
+                  <Send className="w-5 h-5 ml-1" />
+                </Button>
+              </div>
+            </>
           )}
           {generatedResult && (
             <div className="flex gap-3 justify-end">

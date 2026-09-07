@@ -14,6 +14,7 @@ export function AiPromptConfig() {
   const [promptMasterPlan, setPromptMasterPlan] = useState('');
   const [promptProjectTasks, setPromptProjectTasks] = useState('');
   const [promptSubtaskAssignment, setPromptSubtaskAssignment] = useState('');
+  const [promptCalendarReuse, setPromptCalendarReuse] = useState('');
 
   useEffect(() => {
     if (configs['AI_PROMPT_MASTER_PLAN_TASKS'] !== undefined) {
@@ -89,8 +90,19 @@ Trả về duy nhất một mảng JSON thuần túy (không bọc markdown \`\`
   }
 ]`);
     }
+    if (configs['AI_PROMPT_CALENDAR_SCHEDULE_REUSE'] !== undefined) {
+      setPromptCalendarReuse(configs['AI_PROMPT_CALENDAR_SCHEDULE_REUSE']);
+    } else {
+      setPromptCalendarReuse(`Bạn là một trợ lý AI chuyên tạo lịch trình thông minh.
+Dưới đây là lịch trình của tuần trước:
+{historyContext}
+
+Dựa vào yêu cầu chỉnh sửa sau: "{userInput}".
+Hãy tạo một lịch trình mới hợp lý dựa trên lịch cũ nhưng áp dụng các thay đổi trên.
+Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "Câu chào mừng ngắn gọn", "events": [{"title": "Tên sự kiện", "time": "Thời gian (VD: 07:00 - 11:30, Ngày mai)"}]}`);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS'], configs['AI_PROMPT_SUBTASK_ASSIGNMENT']]);
+  }, [configs['AI_PROMPT_MASTER_PLAN_TASKS'], configs['AI_PROMPT_PROJECT_TASKS'], configs['AI_PROMPT_SUBTASK_ASSIGNMENT'], configs['AI_PROMPT_CALENDAR_SCHEDULE_REUSE']]);
 
   const handleSavePrompts = async () => {
     try {
@@ -109,6 +121,11 @@ Trả về duy nhất một mảng JSON thuần túy (không bọc markdown \`\`
           key: 'AI_PROMPT_SUBTASK_ASSIGNMENT',
           value: promptSubtaskAssignment,
           description: 'Mẫu Prompt phân rã công việc & giao việc'
+        },
+        {
+          key: 'AI_PROMPT_CALENDAR_SCHEDULE_REUSE',
+          value: promptCalendarReuse,
+          description: 'Mẫu Prompt tái sử dụng lịch tuần trước'
         }
       ]);
       toast.success('Đã lưu cấu hình AI Prompt thành công!');
@@ -157,6 +174,16 @@ Trả về duy nhất một mảng JSON thuần túy (không bọc markdown \`\`
             className="min-h-[300px] font-mono text-sm bg-background rounded-xl border-input"
             value={promptSubtaskAssignment}
             onChange={(e) => setPromptSubtaskAssignment(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-3 pt-6 border-t border-border">
+          <label className="text-sm font-bold text-muted-foreground">4. Prompt Tái sử dụng lịch tuần trước (Calendar)</label>
+          <p className="text-xs text-muted-foreground">Các biến hỗ trợ: <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{historyContext}`}</code>, <code className="bg-muted px-1 py-0.5 rounded text-primary">{`{userInput}`}</code></p>
+          <Textarea 
+            className="min-h-[200px] font-mono text-sm bg-background rounded-xl border-input"
+            value={promptCalendarReuse}
+            onChange={(e) => setPromptCalendarReuse(e.target.value)}
           />
         </div>
       </CardContent>

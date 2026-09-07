@@ -4,6 +4,17 @@ import type { ApiResponse } from "@/lib/api.types";
 
 export const aiApi = {
   /**
+   * Sinh văn bản bằng AI (trả về jobId)
+   */
+  async generateText(prompt: string): Promise<any> {
+    const res = await apiClient.post(`/ai/generate`, { prompt }) as any as ApiResponse<any>;
+    if (!res.success) {
+      throw new Error(res.message || "Lỗi khi gọi AI sinh văn bản");
+    }
+    return res.data;
+  },
+
+  /**
    * Truy vấn trạng thái của một AI Job đang chạy trong Background.
    * Trả về entity job (đã bóc .data).
    */

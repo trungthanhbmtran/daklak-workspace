@@ -287,7 +287,11 @@ export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
       )}
 
       {isAiModalOpen && (
-        <CalendarAiModal isOpen={isAiModalOpen} onClose={() => setIsAiModalOpen(false)} />
+        <CalendarAiModal 
+          isOpen={isAiModalOpen} 
+          onClose={() => setIsAiModalOpen(false)} 
+          currentEvents={filteredEvents}
+        />
       )}
     </>
   );
