@@ -5,12 +5,16 @@ import { Sparkles, Send, Loader2, CalendarPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 import { aiApi } from '../../../api/ai.api';
+import { useCreateTask } from '../../../hooks/useTasks';
 import { toast } from 'sonner';
 
 export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpen: boolean, onClose: () => void, currentEvents?: any[] }) {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResult, setGeneratedResult] = useState<any>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const createTask = useCreateTask();
 
   const pollJobStatus = (jobId: string) => {
     const interval = setInterval(async () => {
@@ -39,7 +43,7 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
     setGeneratedResult(null);
     
     try {
-      const promptText = `Bạn là một trợ lý AI chuyên tạo lịch trình thông minh. Dựa vào yêu cầu: "${prompt}". Hãy tạo một lịch trình hợp lý. Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "Câu chào mừng ngắn gọn", "events": [{"title": "Tên sự kiện", "time": "Thời gian (VD: 07:00 - 11:30, Ngày mai)"}]}`;
+      const promptText = `Bạn là một trợ lý AI chuyên tạo lịch trình thông minh. Dựa vào yêu cầu: "${prompt}". Hãy tạo một lịch trình hợp lý. Trả về CHỈ định dạng JSON (không Markdown) như sau: {"message": "Câu chào mừng ngắn gọn", "events": [{"title": "Tên sự kiện", "time": "Thời gian (VD: 07:00 - 11:30, 20/10/2023)", "startDate": "ISO 8601 string", "endDate": "ISO 8601 string"}]}. LƯU Ý: Thời gian hiện tại là: ${new Date().toISOString()}`;
       const res = await aiApi.generateText(promptText);
       if (res && res.jobId) {
         pollJobStatus(res.jobId);
@@ -63,7 +67,7 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
     try {
       const historyContext = currentEvents.map(e => 
         `- [${e.type === 'meeting' ? 'Họp' : 'Việc'}] ${e.title} (Từ ${e.startDate.toLocaleString()} đến ${e.endDate.toLocaleString()})`
-      ).join('\\n');
+      ).join('\n');
 
       const res = await aiApi.requestAiExecution('CALENDAR_SCHEDULE_REUSE', { 
         historyContext, 
@@ -77,6 +81,34 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
     } catch (error) {
       setIsGenerating(false);
       toast.error("Có lỗi xảy ra khi gọi AI");
+    }
+  };
+
+  const handleAddEvents = async () => {
+    if (!generatedResult || !generatedResult.events || generatedResult.events.length === 0) {
+      return;
+    }
+    setIsAdding(true);
+    try {
+      // Loop over events and create them
+      for (const evt of generatedResult.events) {
+        const payload = {
+          title: evt.title,
+          priority: "NORMAL",
+          dueDate: evt.endDate, 
+          startDate: evt.startDate,
+          assignee: "UNASSIGNED", 
+          taskType: "ONE_TIME",
+          type: "MEETING",
+        };
+        await createTask.mutateAsync(payload);
+      }
+      toast.success("Đã thêm lịch thành công!");
+      onClose();
+    } catch (error) {
+      toast.error("Có lỗi khi thêm vào lịch");
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -176,10 +208,11 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
           )}
           {generatedResult && (
             <div className="flex gap-3 justify-end">
-              <Button variant="outline" className="rounded-xl h-10 px-6 font-medium" onClick={() => { setPrompt(""); setGeneratedResult(null); }}>
+              <Button variant="outline" className="rounded-xl h-10 px-6 font-medium" onClick={() => { setPrompt(""); setGeneratedResult(null); }} disabled={isAdding}>
                 Hủy bỏ
               </Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 rounded-xl h-10 px-6 font-medium transition-transform active:scale-95" onClick={onClose}>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 rounded-xl h-10 px-6 font-medium transition-transform active:scale-95" onClick={handleAddEvents} disabled={isAdding}>
+                {isAdding ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Thêm vào Lịch
               </Button>
             </div>
