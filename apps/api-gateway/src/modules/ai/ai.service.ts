@@ -289,15 +289,21 @@ export class AiService implements OnModuleInit {
         const data = await res.json();
 
         result = (data.data || []).reduce((acc: any[], m: any) => {
-          if (m.id.includes('gpt') || m.id.includes('o1')) {
-            let ctx: number | undefined = undefined;
-            if (m.id.includes('gpt-4o')) ctx = 128000;
-            else if (m.id.includes('gpt-4-turbo')) ctx = 128000;
-            else if (m.id.includes('gpt-4')) ctx = 8192;
-            else if (m.id.includes('gpt-3.5')) ctx = 16385;
-            else if (m.id.includes('o1-mini') || m.id.includes('o1-preview'))
-              ctx = 128000;
-            acc.push({ id: m.id, name: m.id, contextWindow: ctx });
+          // OpenAI không có trường capabilities trong API /v1/models,
+          // nên bắt buộc phải lọc theo tiền tố để chỉ lấy các model hỗ trợ /chat/completions
+          const id = m.id;
+          if (
+            id.startsWith('gpt-') ||
+            id.startsWith('o1') ||
+            id.startsWith('o3')
+          ) {
+            if (id.includes('audio') || id.includes('realtime') || id.includes('vision') || id.includes('instruct')) return acc;
+            
+            let ctx = 128000;
+            if (id.includes('gpt-4') && !id.includes('turbo') && !id.includes('o')) ctx = 8192;
+            if (id.includes('gpt-3.5')) ctx = 16385;
+            
+            acc.push({ id: id, name: id, contextWindow: ctx });
           }
           return acc;
         }, []);
@@ -312,9 +318,10 @@ export class AiService implements OnModuleInit {
         const data = await res.json();
 
         result = (data.models || []).reduce((acc: any[], m: any) => {
+          // Google cung cấp sẵn trường supportedGenerationMethods để xác định model có hỗ trợ generateContent hay không
           if (m.supportedGenerationMethods?.includes('generateContent')) {
             const id = m.name.replace('models/', '');
-            acc.push({ id, name: id, contextWindow: m.inputTokenLimit });
+            acc.push({ id, name: m.displayName || id, contextWindow: m.inputTokenLimit });
           }
           return acc;
         }, []);
@@ -334,15 +341,8 @@ export class AiService implements OnModuleInit {
         const data = await res.json();
 
         result = (data.data || []).reduce((acc: any[], m: any) => {
-          let ctx: number | undefined = undefined;
-          if (
-            m.id.includes('claude-3-5') ||
-            m.id.includes('claude-3-opus') ||
-            m.id.includes('claude-3-sonnet') ||
-            m.id.includes('claude-3-haiku')
-          )
-            ctx = 200000;
-          acc.push({ id: m.id, name: m.id, contextWindow: ctx });
+          // API /v1/models của Anthropic mặc định chỉ trả về các model đang active và sử dụng được
+          acc.push({ id: m.id, name: m.display_name || m.id, contextWindow: 200000 });
           return acc;
         }, []);
         break;
