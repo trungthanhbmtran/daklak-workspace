@@ -23,17 +23,19 @@ export function useAiFetchModels() {
   const [isFetchingMap, setIsFetchingMap] = useState<Record<string, boolean>>({});
 
   const mutation = useMutation({
-    mutationFn: async ({ providerType, apiKey }: { providerId: string; providerType: string; apiKey: string }) => {
+    mutationFn: async ({ providerType, apiKey, showToast }: { providerId: string; providerType: string; apiKey: string, showToast?: boolean }) => {
       const res = await apiClient.post("/ai/models", { provider: providerType, apiKey }) as any;
       if (!res.success) throw new Error(res.message || "Lỗi tải danh sách Model");
-      return res.data;
+      return { data: res.data, showToast };
     },
     onMutate: (variables) => {
       setIsFetchingMap(prev => ({ ...prev, [variables.providerId]: true }));
     },
-    onSuccess: (data, variables) => {
-      setFetchedModels(prev => ({ ...prev, [variables.providerId]: data }));
-      toast.success(`Đã tải ${data.length} model từ ${variables.providerType}!`);
+    onSuccess: (result, variables) => {
+      setFetchedModels(prev => ({ ...prev, [variables.providerId]: result.data }));
+      if (result.showToast !== false) {
+        toast.success(`Đã tải ${result.data.length} model từ ${variables.providerType}!`);
+      }
     },
     onError: (err: any, variables) => {
       toast.error(err.message || "Lỗi kết nối đến Backend");
@@ -44,12 +46,12 @@ export function useAiFetchModels() {
   });
 
   const fetchModels = useCallback(
-    (providerId: string, providerType: string, apiKey: string) => {
+    (providerId: string, providerType: string, apiKey: string, showToast: boolean = true) => {
       if (!apiKey) {
-        toast.error("Vui lòng nhập API Key trước khi tải danh sách Model!");
+        if (showToast) toast.error("Vui lòng nhập API Key trước khi tải danh sách Model!");
         return;
       }
-      mutation.mutate({ providerId, providerType, apiKey });
+      mutation.mutate({ providerId, providerType, apiKey, showToast });
     },
     [mutation]
   );

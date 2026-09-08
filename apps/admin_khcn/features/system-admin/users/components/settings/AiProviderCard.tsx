@@ -23,14 +23,22 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
   // Hook xử lý fetch model được đóng gói độc lập trong Component con
   const { fetchedModels, isFetching, fetchModels } = useAiFetchModels();
 
+  React.useEffect(() => {
+    // Tự động tải danh sách model nếu đã có API Key khi màn hình vừa khởi tạo
+    if (provider.apiKey && !fetchedModels[provider.id]) {
+      fetchModels(provider.id, provider.provider, provider.apiKey, false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleFetchModels = () => {
     fetchModels(provider.id, provider.provider, provider.apiKey);
   };
 
   const currentModels = fetchedModels[provider.id] || (
-    provider.provider === 'OPENAI' ? [{ id: 'gpt-4o', name: 'gpt-4o', contextWindow: 128000 }, { id: 'gpt-4o-mini', name: 'gpt-4o-mini', contextWindow: 128000 }, { id: 'gpt-4-turbo', name: 'gpt-4-turbo', contextWindow: 128000 }, { id: 'o1-mini', name: 'o1-mini', contextWindow: 128000 }, { id: 'o1-preview', name: 'o1-preview', contextWindow: 128000 }] :
-    provider.provider === 'GEMINI' ? [{ id: 'gemini-1.5-pro', name: 'gemini-1.5-pro', contextWindow: 2097152 }, { id: 'gemini-1.5-flash', name: 'gemini-1.5-flash', contextWindow: 1048576 }, { id: 'gemini-2.0-flash', name: 'gemini-2.0-flash', contextWindow: 1048576 }, { id: 'gemini-1.0-pro', name: 'gemini-1.0-pro', contextWindow: 32768 }] :
-    provider.provider === 'CLAUDE' ? [{ id: 'claude-3-5-sonnet-20241022', name: 'claude-3-5-sonnet-20241022', contextWindow: 200000 }, { id: 'claude-3-5-haiku-20241022', name: 'claude-3-5-haiku-20241022', contextWindow: 200000 }, { id: 'claude-3-opus-20240229', name: 'claude-3-opus-20240229', contextWindow: 200000 }] : []
+    provider.provider === 'OPENAI' ? [{ id: 'gpt-4o', name: 'gpt-4o', contextWindow: 128000 }, { id: 'gpt-4o-mini', name: 'gpt-4o-mini', contextWindow: 128000 }, { id: 'o1', name: 'o1', contextWindow: 200000 }, { id: 'o3-mini', name: 'o3-mini', contextWindow: 200000 }] :
+    provider.provider === 'GEMINI' ? [{ id: 'gemini-1.5-pro', name: 'gemini-1.5-pro', contextWindow: 2097152 }, { id: 'gemini-1.5-flash', name: 'gemini-1.5-flash', contextWindow: 1048576 }, { id: 'gemini-2.0-flash', name: 'gemini-2.0-flash', contextWindow: 1048576 }] :
+    provider.provider === 'CLAUDE' ? [{ id: 'claude-3-7-sonnet-20250219', name: 'claude-3-7-sonnet-20250219', contextWindow: 200000 }, { id: 'claude-3-5-sonnet-20241022', name: 'claude-3-5-sonnet-20241022', contextWindow: 200000 }, { id: 'claude-3-5-haiku-20241022', name: 'claude-3-5-haiku-20241022', contextWindow: 200000 }, { id: 'claude-3-opus-20240229', name: 'claude-3-opus-20240229', contextWindow: 200000 }] : []
   );
 
   return (
