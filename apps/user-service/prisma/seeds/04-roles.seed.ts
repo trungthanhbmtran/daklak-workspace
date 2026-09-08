@@ -49,9 +49,9 @@ export async function seedRoles(prisma: PrismaClient) {
     'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_DRAFT', 'DOC_TEMPLATE', 'DOC_PUBLISH', 'DOC_PROCESSING', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES',
     'HRM_EMPLOYEE',
     'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION',
-    'INTEGRATION', 'TASK', 'PROJECT', 'PLAN', 'WORKFLOW', 'OBJECTIVE', 'KPI', 'REPORT'
+    'INTEGRATION', 'TASK', 'PROJECT', 'PLAN', 'WORKFLOW', 'OBJECTIVE', 'KPI', 'REPORT', 'MEETING', 'STUDY'
   ];
-  const adminActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'PUBLISH', 'APPROVE'];
+  const adminActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'PUBLISH', 'APPROVE', 'ASSIGN', 'PARTICIPATE'];
   const adminPolicyIds: number[] = [];
   for (const resCode of adminResourceCodes) {
     const resId = resources[resCode]?.id;
@@ -149,7 +149,43 @@ export async function seedRoles(prisma: PrismaClient) {
       code: 'TASK:*',
       name: 'Toàn quyền công việc (Wildcard)',
       resource: 'TASK',
-      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE'],
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE', 'ASSIGN', 'PARTICIPATE'],
+    },
+    {
+      code: 'TASK:ASSIGN',
+      name: 'Giao việc',
+      resource: 'TASK',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'VIEW', 'ASSIGN'],
+    },
+    {
+      code: 'TASK:PARTICIPATE',
+      name: 'Tham gia công việc',
+      resource: 'TASK',
+      permissions: ['READ', 'VIEW', 'PARTICIPATE'],
+    },
+    {
+      code: 'MEETING:MANAGE',
+      name: 'Thiết lập lịch họp',
+      resource: 'MEETING',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE', 'ASSIGN'],
+    },
+    {
+      code: 'MEETING:PARTICIPATE',
+      name: 'Tham gia lịch họp',
+      resource: 'MEETING',
+      permissions: ['READ', 'VIEW', 'PARTICIPATE'],
+    },
+    {
+      code: 'STUDY:MANAGE',
+      name: 'Thiết lập lịch học',
+      resource: 'STUDY',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE', 'ASSIGN'],
+    },
+    {
+      code: 'STUDY:PARTICIPATE',
+      name: 'Tham gia lịch học',
+      resource: 'STUDY',
+      permissions: ['READ', 'VIEW', 'PARTICIPATE'],
     }
   ];
 

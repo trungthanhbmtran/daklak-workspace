@@ -42,6 +42,8 @@ export async function seedResources(prisma: PrismaClient) {
     // Integration & Workflow
     { code: 'INTEGRATION', name: 'Liên thông hệ thống', serviceCode: 'WORKFLOW_SERVICE' },
     { code: 'TASK', name: 'Công việc', serviceCode: 'WORKFLOW_SERVICE' },
+    { code: 'MEETING', name: 'Lịch họp', serviceCode: 'HRM_SERVICE' },
+    { code: 'STUDY', name: 'Lịch học', serviceCode: 'HRM_SERVICE' },
     { code: 'PROJECT', name: 'Dự án', serviceCode: 'WORKFLOW_SERVICE' },
     { code: 'PLAN', name: 'Kế hoạch công tác', serviceCode: 'WORKFLOW_SERVICE' },
     { code: 'WORKFLOW', name: 'Quy trình công việc', serviceCode: 'WORKFLOW_SERVICE' },
