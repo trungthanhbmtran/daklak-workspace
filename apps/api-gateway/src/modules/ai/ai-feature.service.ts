@@ -64,7 +64,7 @@ export class AiFeatureService implements OnModuleInit {
         3600,
       );
       const sysConfigRes: any = await firstValueFrom(
-        this.sysConfigService.GetSystemConfigs({}),
+        this.sysConfigService.GetConfigs({}),
       );
       const configs = sysConfigRes?.configs || [];
       const assistantConfig = configs.find((c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT');
@@ -83,7 +83,7 @@ export class AiFeatureService implements OnModuleInit {
       const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
       const sysConfigRes: any = await firstValueFrom(
-        this.sysConfigService.GetSystemConfigs({}),
+        this.sysConfigService.GetConfigs({}),
       );
       const configs = sysConfigRes?.configs || [];
       const assistantConfig = configs.find((c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT');
