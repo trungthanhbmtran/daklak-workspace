@@ -180,7 +180,7 @@ export class AiService implements OnModuleInit {
           Authorization: `Bearer ${config.apiKey}`,
         },
         body: JSON.stringify({
-          model: config.model || 'gpt-4o-mini',
+          model: (config.model || 'gpt-4o-mini').trim(),
           messages: [
             ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
             { role: 'user', content: prompt }
@@ -203,7 +203,7 @@ export class AiService implements OnModuleInit {
     prompt: string,
     systemPrompt?: string,
   ): Promise<string> {
-    const model = config.model || 'gemini-1.5-pro';
+    const model = (config.model || 'gemini-1.5-pro').trim().replace(/^models\//, '');
     const response = await this.fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`,
       {
@@ -242,7 +242,7 @@ export class AiService implements OnModuleInit {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: config.model || 'claude-3-opus-20240229',
+          model: (config.model || 'claude-3-opus-20240229').trim(),
           system: systemPrompt || undefined,
           max_tokens: 1024,
           messages: [{ role: 'user', content: prompt }],
