@@ -60,11 +60,10 @@ export function LoginClient() {
     },
     onSuccess: () => {
       setIsRedirecting(true);
-      const toastId = toast.loading("Đang xác thực phiên đăng nhập...");
+      toast.success("Đăng nhập thành công! Đang chuyển hướng...");
 
       // Delay nhỏ để toast hiển thị, sau đó navigate bằng Next.js router
       setTimeout(() => {
-        toast.success("Đăng nhập thành công! Đang chuyển hướng...", { id: toastId });
         // useRouter().replace() tự động thêm basePath '/admin', không cần xử lý thủ công
         // Dùng replace() thay push() để không có nút Back về trang login
         router.replace(callbackUrl || '/hub');
