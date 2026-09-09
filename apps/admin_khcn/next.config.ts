@@ -4,21 +4,13 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   basePath: '/admin',
   reactCompiler: true,
-  //   cacheComponents: true,
-  //   experimental: {
-  //     useCache: true,
-  //   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  // images: {
-  //   remotePatterns: [
-  //     {
-  //       protocol: 'https',
-  //       hostname: 'api.your-backend.com',
-  //     },
-  //   ],
-  // },
+  // Expose env vars cho Edge Runtime (proxy.ts)
+  env: {
+    JWT_SECRET: process.env.JWT_SECRET || '',
+  },
   logging: {
     fetches: {
       fullUrl: true,

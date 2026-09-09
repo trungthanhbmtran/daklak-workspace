@@ -9,7 +9,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,12 +37,10 @@ const formSchema = z.object({
 });
 
 export function LoginClient() {
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  const router = useRouter();
   const searchParams = useSearchParams();
-  // eslint-disable-next-line unused-imports/no-unused-vars
   const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,19 +58,28 @@ export function LoginClient() {
       });
     },
     onSuccess: () => {
-      toast.success("Đăng nhập thành công! Đang chuyển hướng...");
-      // Thay vì redirect tĩnh, ta gọi reload để Hard Navigation.
-      // Middleware (proxy.ts -> middleware.ts) sẽ nhận thấy cookie và tự động redirect về /hub hoặc callbackUrl,
-      // giữ nguyên basePath và đảm bảo clear sạch memory state.
-      window.location.reload();
+      setIsRedirecting(true);
+      const toastId = toast.loading("Đang xác thực phiên đăng nhập...");
+
+      // Delay nhỏ để toast hiển thị, sau đó proxy.ts sẽ tự redirect về callbackUrl hoặc /hub
+      setTimeout(() => {
+        toast.success("Đăng nhập thành công! Đang chuyển hướng...", { id: toastId });
+        // Hard navigation: proxy.ts verify JWT → redirect về callbackUrl hoặc /hub
+        const target = callbackUrl || "/hub";
+        window.location.href = target;
+      }, 600);
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
-      toast.error(message);
+      setIsRedirecting(false);
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Tên đăng nhập hoặc mật khẩu không chính xác.";
+      toast.error(message, { duration: 4000 });
     },
   });
 
-  const isPending = loginMutation.isPending;
+  const isPending = loginMutation.isPending || isRedirecting;
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     loginMutation.mutate(values);
@@ -157,7 +164,12 @@ export function LoginClient() {
                 className="w-full mt-2"
                 disabled={isPending}
               >
-                {isPending ? (
+                {isRedirecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang chuyển hướng...
+                  </>
+                ) : loginMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Đang xác thực...

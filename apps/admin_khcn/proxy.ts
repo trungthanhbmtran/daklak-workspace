@@ -1,49 +1,82 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://api-gateway:8080/api/v1/admin';
+const JWT_SECRET = process.env.JWT_SECRET || '';
+
+// ⚡ Verify JWT tại Edge — không gọi API, không tốn network
+async function verifyJWT(token: string): Promise<{ valid: boolean; userId?: string }> {
+  if (!JWT_SECRET || !token) return { valid: false };
+  try {
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+    return { valid: true, userId: payload.sub };
+  } catch {
+    return { valid: false };
+  }
+}
 
 export async function proxy(request: NextRequest) {
-    // Theo cấu hình dal.ts, cookie được lưu tên là 'session'
-    const token = request.cookies.get("session")?.value || request.cookies.get("accessToken")?.value;
-    const { pathname } = request.nextUrl;
+  const token =
+    request.cookies.get('session')?.value ||
+    request.cookies.get('accessToken')?.value;
 
-    // ✅ Public routes
-    const publicPaths = [
-        "/login",
-        "/api/admin/auth",
-    ];
+  const { pathname } = request.nextUrl;
 
-    const isPublic = publicPaths.some((path) =>
-        pathname === path || pathname.startsWith(path + "/")
-    );
+  // ✅ Public routes — không cần auth
+  const publicPaths = ['/login', '/api/admin/auth', '/api/'];
+  const isPublic = publicPaths.some(
+    (path) => pathname === path || pathname.startsWith(path + '/')
+  );
 
-    // ❌ Chưa login → redirect login
-    if (!token && !isPublic) {
-        const loginUrl = request.nextUrl.clone();
-        loginUrl.pathname = "/login";
-        loginUrl.searchParams.set("callbackUrl", pathname);
-        return NextResponse.redirect(loginUrl);
+  if (isPublic) {
+    // Đã login mà cố vào login → redirect hub
+    if (token && pathname === '/login') {
+      const { valid } = await verifyJWT(token);
+      if (valid) {
+        const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
+        const target = request.nextUrl.clone();
+        target.pathname = callbackUrl || '/hub';
+        target.searchParams.delete('callbackUrl');
+        return NextResponse.redirect(target);
+      }
     }
-
-    // ✅ Đã login mà vào login → đẩy về trang hub (hoặc callbackUrl)
-    if (token && pathname === "/login") {
-        const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
-        const targetUrl = request.nextUrl.clone();
-        targetUrl.pathname = callbackUrl || "/hub";
-        targetUrl.searchParams.delete("callbackUrl");
-        return NextResponse.redirect(targetUrl);
-    }
-
-    // 🔒 Chú ý: Đã chuyển logic kiểm tra quyền (RBAC) bằng API ra khỏi Edge Middleware
-    // để tránh tình trạng block request gây chậm/giật trang. Việc bảo mật
-    // hiện được giao cho Backend API tự động từ chối (403) và layout kiểm tra.
-
     return NextResponse.next();
+  }
+
+  // ❌ Chưa có token → redirect login ngay tại Edge
+  if (!token) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    loginUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // ⚡ Verify JWT signature + expiry — không gọi API
+  const { valid, userId } = await verifyJWT(token);
+
+  if (!valid) {
+    // Token hỏng/hết hạn → xóa cookie và redirect login
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    loginUrl.searchParams.set('callbackUrl', pathname);
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete('session');
+    response.cookies.delete('accessToken');
+    return response;
+  }
+
+  // ✅ Token hợp lệ — forward userId qua header để Server Components dùng
+  const requestHeaders = new Headers(request.headers);
+  if (userId) requestHeaders.set('x-user-id', userId);
+  requestHeaders.set('x-pathname', pathname);
+
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
-    matcher: [
-        '/((?!_next/static|_next/image|favicon.ico).*)',
-    ],
+  matcher: [
+    // Bỏ qua static files, images, favicon
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

@@ -8,6 +8,8 @@ interface ServiceLayoutProps {
   children: React.ReactNode;
 }
 
+// ServiceLayout là layout thuần túy — không xử lý auth ở đây.
+// Auth được guard ở Server Layout cụ thể của từng service (vd: app/services/admin/layout.tsx)
 export function ServiceLayout({ children }: ServiceLayoutProps) {
   return (
     <SidebarProvider>
@@ -25,7 +27,7 @@ export function ServiceLayout({ children }: ServiceLayoutProps) {
           <ServiceHeader />
         </Suspense>
 
-        {/* Content area — scroll nội bộ do các page tự quản lý */}
+        {/* Content area */}
         <div className="flex flex-1 flex-col bg-muted/20 overflow-hidden min-h-0 p-2 sm:p-4 lg:p-6">
           <Suspense fallback={
             <div className="flex flex-1 items-center justify-center h-full">

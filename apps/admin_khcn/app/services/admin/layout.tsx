@@ -1,14 +1,15 @@
 import { ServiceLayout } from "@/components/layouts/service-layout";
+import { requireMenuAccess, getCurrentPathname } from "@/lib/auth";
 
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // 🔒 Server-side authorization — không thể bypass từ client
+  // proxy.ts đã forward pathname qua header x-pathname
+  const pathname = await getCurrentPathname();
+  await requireMenuAccess(pathname);
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Quyền truy cập đã được chặn từ xa thông qua Next.js Middleware (tầng Edge)
-  // Không cần check phụ ở đây nữa để tránh gọi API 2 lần
-
-
-  return (
-    <ServiceLayout>
-      {children}
-    </ServiceLayout>
-  );
+  return <ServiceLayout>{children}</ServiceLayout>;
 }
