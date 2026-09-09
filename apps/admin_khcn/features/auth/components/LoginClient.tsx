@@ -61,13 +61,9 @@ export function LoginClient() {
     onSuccess: () => {
       setIsRedirecting(true);
       toast.success("Đăng nhập thành công! Đang chuyển hướng...");
-
-      // Delay nhỏ để toast hiển thị, sau đó navigate bằng Next.js router
-      setTimeout(() => {
-        // useRouter().replace() tự động thêm basePath '/admin', không cần xử lý thủ công
-        // Dùng replace() thay push() để không có nút Back về trang login
-        router.replace(callbackUrl || '/hub');
-      }, 600);
+      // Không cần delay nữa, Next.js sẽ chuyển trang tức thì bằng client-side routing
+      // Toaster component (sonner) nằm ngoài page nên thông báo sẽ không bị mất
+      router.replace(callbackUrl || '/hub');
     },
     onError: (error: any) => {
       setIsRedirecting(false);
