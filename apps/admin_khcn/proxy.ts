@@ -5,7 +5,7 @@ const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://api-gateway:808
 
 export async function proxy(request: NextRequest) {
     // Theo cấu hình dal.ts, cookie được lưu tên là 'session'
-    const token = request.cookies.get("session")?.value;
+    const token = request.cookies.get("session")?.value || request.cookies.get("accessToken")?.value;
     const { pathname } = request.nextUrl;
 
     // ✅ Public routes
