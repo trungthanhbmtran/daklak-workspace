@@ -65,9 +65,9 @@ export function LoginClient() {
       // Delay nhỏ để toast hiển thị, sau đó navigate bằng Next.js router
       setTimeout(() => {
         toast.success("Đăng nhập thành công! Đang chuyển hướng...", { id: toastId });
-        // useRouter().push() tự động thêm basePath '/admin' → không cần xử lý thủ công
-        // callbackUrl được lưu KHÔNG có basePath (vd: '/hub', '/services/admin/...')
-        router.push(callbackUrl || '/hub');
+        // useRouter().replace() tự động thêm basePath '/admin', không cần xử lý thủ công
+        // Dùng replace() thay push() để không có nút Back về trang login
+        router.replace(callbackUrl || '/hub');
       }, 600);
     },
     onError: (error: any) => {
