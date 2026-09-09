@@ -35,49 +35,9 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(targetUrl);
     }
 
-    // 🔒 Chặn quyền truy cập Admin UI (dựa trên API phân quyền Backend)
-    if (token && pathname.startsWith('/services/admin')) {
-      try {
-        const res = await fetch(`${INTERNAL_API_URL}/menus/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
-          cache: 'no-store' // Không dùng cache ở Edge middleware
-        });
-  
-        if (!res.ok) {
-          // Token hỏng hoặc bị chặn
-          return NextResponse.redirect(new URL('/login', request.url));
-        }
-  
-        const json = await res.json();
-        const menus = json?.data || [];
-        
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const extractPaths = (items: any[]): string[] => {
-          const paths: string[] = [];
-          for (const item of items) {
-            if (item.path) paths.push(item.path);
-            if (item.children && Array.isArray(item.children)) {
-              paths.push(...extractPaths(item.children));
-            }
-          }
-          return paths;
-        };
-        
-        const allowedPaths = extractPaths(menus);
-        // Kiểm tra xem user có path menu này không
-        const hasAccess = allowedPaths.some(p => p && p.length > 1 && pathname.startsWith(p));
-        
-        if (!hasAccess) {
-          // Bắt buộc Rewrite (đánh lạc hướng) về Not Found nếu không có quyền!
-          request.nextUrl.pathname = '/not-found';
-          return NextResponse.rewrite(request.nextUrl);
-        }
-      } catch (error) {
-        console.error('Middleware check auth error:', error);
-      }
-    }
+    // 🔒 Chú ý: Đã chuyển logic kiểm tra quyền (RBAC) bằng API ra khỏi Edge Middleware
+    // để tránh tình trạng block request gây chậm/giật trang. Việc bảo mật
+    // hiện được giao cho Backend API tự động từ chối (403) và layout kiểm tra.
 
     return NextResponse.next();
 }
