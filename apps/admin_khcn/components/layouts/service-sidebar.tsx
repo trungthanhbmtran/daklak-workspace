@@ -91,7 +91,7 @@ export function AppSidebar({
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild tooltip={item.name} isActive={isActive}>
-                      <Link href={item.href}>
+                      <Link href={item.href} prefetch={false}>
                         <Icon className="size-4" />
                         <span>{item.name}</span>
                       </Link>
@@ -109,7 +109,7 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Hỗ trợ kỹ thuật">
-              <Link href="/support">
+              <Link href="/support" prefetch={false}>
                 <Headset className="size-4" />
                 <span>Hỗ trợ kỹ thuật</span>
               </Link>
