@@ -9,7 +9,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +37,7 @@ const formSchema = z.object({
 });
 
 export function LoginClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);
@@ -61,12 +62,12 @@ export function LoginClient() {
       setIsRedirecting(true);
       const toastId = toast.loading("Đang xác thực phiên đăng nhập...");
 
-      // Delay nhỏ để toast hiển thị, sau đó proxy.ts sẽ tự redirect về callbackUrl hoặc /hub
+      // Delay nhỏ để toast hiển thị, sau đó navigate bằng Next.js router
       setTimeout(() => {
         toast.success("Đăng nhập thành công! Đang chuyển hướng...", { id: toastId });
-        // Hard navigation: proxy.ts verify JWT → redirect về callbackUrl hoặc /hub
-        const target = callbackUrl || "/hub";
-        window.location.href = target;
+        // useRouter().push() tự động thêm basePath '/admin' → không cần xử lý thủ công
+        // callbackUrl được lưu KHÔNG có basePath (vd: '/hub', '/services/admin/...')
+        router.push(callbackUrl || '/hub');
       }, 600);
     },
     onError: (error: any) => {
