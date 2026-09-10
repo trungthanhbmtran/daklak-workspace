@@ -33,6 +33,7 @@ message MenuNode {
 
 message GetMyMenusResponse {
   repeated MenuNode data = 1;
+  repeated string allowed_paths = 2;
 }
 
 message GetAllRequest {

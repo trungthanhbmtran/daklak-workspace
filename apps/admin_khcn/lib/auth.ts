@@ -39,42 +39,6 @@ export async function getServerUser() {
 }
 
 // ─────────────────────────────────────────────
-// Cached menu paths per-user (TTL 5 phút)
-// Chỉ gọi API khi cache miss — nhanh, tiết kiệm tài nguyên
-// ─────────────────────────────────────────────
-function getCachedMenuPaths(token: string) {
-  return unstable_cache(
-    async (): Promise<string[]> => {
-      const res = await fetch(`${INTERNAL_API_URL}/menus/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store',
-      });
-      if (!res.ok) return [];
-      const json = await res.json();
-      const menus = json?.data || [];
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const extractPaths = (items: any[]): string[] => {
-        const paths: string[] = [];
-        for (const item of items) {
-          const path = item.path || item.route;
-          if (path) paths.push(path);
-          if (item.children && Array.isArray(item.children)) {
-            paths.push(...extractPaths(item.children));
-          }
-        }
-        return paths;
-      };
-
-      return extractPaths(menus);
-    },
-    // Cache key dựa vào token (unique per user session)
-    [`menu-paths-${token.slice(-16)}`],
-    { revalidate: 300, tags: ['user-menus'] } // 5 phút
-  )();
-}
-
-// ─────────────────────────────────────────────
 // requireAuth — bắt buộc đăng nhập, dùng trong layout
 // ─────────────────────────────────────────────
 export async function requireAuth() {
@@ -84,23 +48,54 @@ export async function requireAuth() {
 }
 
 // ─────────────────────────────────────────────
-// requireMenuAccess — kiểm tra quyền menu server-side
+// Cached menu paths per-user (TTL 5 phút)
+// Lấy danh sách allowed_paths (có wildcard) từ Backend
+// ─────────────────────────────────────────────
+function getCachedAllowedPaths(token: string) {
+  return unstable_cache(
+    async (): Promise<string[]> => {
+      try {
+        const res = await fetch(`${INTERNAL_API_URL}/menus/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        });
+        if (!res.ok) return [];
+        const json = await res.json();
+        return json?.data?.allowedPaths || json?.allowedPaths || json?.allowed_paths || [];
+      } catch {
+        return [];
+      }
+    },
+    // Cache key dựa vào token (unique per user session)
+    [`menu-paths-${token.slice(-16)}`],
+    { revalidate: 300, tags: ['user-menus'] } // 5 phút
+  )();
+}
+
+// ─────────────────────────────────────────────
+// requireMenuAccess — kiểm tra quyền menu server-side (Dumb Frontend)
 // Gọi ở Server Component layout, notFound() nếu không có quyền
-// Cache 5 phút per user session
 // ─────────────────────────────────────────────
 export async function requireMenuAccess(pathname: string) {
   const token = await requireAuth();
+  const allowedPaths = await getCachedAllowedPaths(token);
 
-  const allowedPaths = await getCachedMenuPaths(token);
-
-  // allowedPaths rỗng = API lỗi hoặc user chưa được cấp menu nào
   if (allowedPaths.length === 0) {
     notFound();
   }
 
-  const hasAccess = allowedPaths.some(
-    (p) => p && p.length > 1 && pathname.startsWith(p)
-  );
+  const hasAccess = allowedPaths.some((policy) => {
+    if (!policy) return false;
+    
+    // Nếu policy có wildcard ở cuối (ví dụ: /services/admin/users/*)
+    if (policy.endsWith('/*')) {
+      const base = policy.slice(0, -2);
+      return pathname === base || pathname.startsWith(base + '/');
+    }
+    
+    // Nếu không có wildcard thì phải khớp chính xác
+    return pathname === policy;
+  });
 
   if (!hasAccess) {
     notFound();

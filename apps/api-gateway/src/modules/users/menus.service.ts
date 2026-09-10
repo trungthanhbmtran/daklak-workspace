@@ -152,6 +152,7 @@ export class MenusService implements OnModuleInit {
       const branches = getRealBranches(response.data ?? []);
       response.hubApps = this.buildHubApps(branches);
       response.sidebarMenus = this.buildSidebarMenus(branches);
+      response.allowedPaths = response.allowedPaths || response.allowed_paths || [];
     }
     return response;
   }

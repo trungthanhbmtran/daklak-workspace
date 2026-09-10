@@ -204,6 +204,22 @@ export class MenusService {
     // 4. Cắt tỉa menu cha rỗng
     const result = pruneEmptyParents(menuTree);
 
-    return result;
+    // 5. Build allowed_paths (Security Policies)
+    const allowedPaths = new Set<string>();
+    for (const menu of visibleMenus) {
+      const p = menu.route;
+      if (!p) continue;
+
+      allowedPaths.add(p);
+      const segmentsCount = p.split('/').filter(Boolean).length;
+      if (segmentsCount >= 3) {
+        allowedPaths.add(`${p}/*`);
+      }
+    }
+
+    return {
+      data: result,
+      allowed_paths: Array.from(allowedPaths),
+    };
   }
 }

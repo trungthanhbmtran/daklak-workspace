@@ -32,11 +32,12 @@ export class MenusController {
   @GrpcMethod('MenuService', 'GetMyMenus')
   async getMyMenus(@Payload() data: Record<string, any>) {
     const userId = data.userId ?? data.user_id;
-    const tree = await this.menusService.getMyMenus(
+    const result = await this.menusService.getMyMenus(
       typeof userId === 'number' ? userId : Number(userId),
     );
     return {
-      data: tree.map((node: any) => this.mapMenuNode(node)),
+      data: result.data.map((node: any) => this.mapMenuNode(node)),
+      allowed_paths: result.allowed_paths,
     };
   }
 
