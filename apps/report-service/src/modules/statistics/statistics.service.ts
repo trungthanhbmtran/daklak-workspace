@@ -102,7 +102,7 @@ export class StatisticsService implements OnModuleInit {
   }
 
   async getKpiStatistics(filter: any, user: any, metadata: Metadata) {
-    const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE') || user?.roles?.some((r: any) => r === 'ADMIN' || r?.code === 'ADMIN');
+    const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE');
     
     let callerDescendantUnitIds: number[] = [];
     let unitMap: Record<number, any> = {};

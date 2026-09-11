@@ -484,7 +484,6 @@ export class UsersService implements OnModuleInit {
     );
 
     const permissionsFlattenSet = new Set<string>();
-    const isSuperAdmin = roles.some((r: any) => r.code === 'SUPER_ADMIN');
     const policiesList: any[] = [];
 
     for (const role of user.roles ?? []) {

@@ -166,9 +166,6 @@ export class MenusService {
       },
     });
 
-    const isSuperAdmin =
-      user?.roles?.some((r) => r.code === 'SUPER_ADMIN') ?? false;
-
     // PBAC chuẩn: Set resource codes mà user có quyền (bất kỳ action nào)
     const allowedResources = new Set<string>();
 
@@ -187,8 +184,6 @@ export class MenusService {
     });
 
     const visibleMenus = rawMenus.filter((menu) => {
-      if (isSuperAdmin) return true;
-
       // PBAC chuẩn: dùng linkedResourceCode (ưu tiên)
       if (menu.linkedResourceCode) {
         return allowedResources.has(menu.linkedResourceCode);

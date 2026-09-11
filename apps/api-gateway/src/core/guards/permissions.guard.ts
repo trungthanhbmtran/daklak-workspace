@@ -30,18 +30,6 @@ export class PermissionsGuard implements CanActivate {
       );
     }
 
-    // SUPER_ADMIN và ADMIN có toàn quyền
-    const isSuperAdmin = user.roles?.some(
-      (role: any) =>
-        role === 'SUPER_ADMIN' ||
-        role?.code === 'SUPER_ADMIN' ||
-        role === 'ADMIN' ||
-        role?.code === 'ADMIN',
-    );
-    if (isSuperAdmin) {
-      return true;
-    }
-
     const userPermissions = user.permissionsFlatten || [];
 
     // Kiểm tra xem user có ÍT NHẤT MỘT trong các quyền yêu cầu hay không (hoặc có thể cấu hình yêu cầu TẤT CẢ)
