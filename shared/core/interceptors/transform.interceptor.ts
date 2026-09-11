@@ -94,6 +94,10 @@ export class TransformInterceptor<T> implements NestInterceptor<T, any> {
             timestamp,
           };
           if (message) result.message = message;
+          if (payload.hubApps) result.hubApps = payload.hubApps;
+          if (payload.sidebarMenus) result.sidebarMenus = payload.sidebarMenus;
+          if (payload.allowedPaths) result.allowedPaths = payload.allowedPaths;
+          if (payload.allowed_paths) result.allowedPaths = payload.allowed_paths;
           return result;
         }
 

@@ -103,25 +103,6 @@ export async function requireMenuAccess(pathname: string) {
 }
 
 // ─────────────────────────────────────────────
-// requirePermissions — kiểm tra quyền PBAC cụ thể
-// ─────────────────────────────────────────────
-export async function requirePermissions(policies: string[]) {
-  const user = await getServerUser();
-  if (!user) redirect('/login');
-
-  if (!policies || policies.length === 0) return user;
-
-  const userPolicies: string[] = user.permissionsFlatten || [];
-  const hasPermission = policies.some((policy) =>
-    userPolicies.includes(policy)
-  );
-
-  if (!hasPermission) notFound();
-
-  return user;
-}
-
-// ─────────────────────────────────────────────
 // getCurrentPathname — đọc pathname từ header (forward bởi proxy.ts)
 // ─────────────────────────────────────────────
 export async function getCurrentPathname(): Promise<string> {
