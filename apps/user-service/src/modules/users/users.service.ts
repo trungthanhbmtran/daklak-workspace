@@ -502,9 +502,7 @@ export class UsersService implements OnModuleInit {
       }
     }
 
-    const permissionsFlatten = isSuperAdmin
-      ? []
-      : Array.from(permissionsFlattenSet);
+    const permissionsFlatten = Array.from(permissionsFlattenSet);
 
     const firstPosition = user.jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;

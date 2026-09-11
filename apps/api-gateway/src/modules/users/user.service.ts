@@ -41,11 +41,7 @@ export class UserService implements OnModuleInit {
         )
       : null;
 
-    const isSuperAdmin = userInfo?.roles?.some(
-      (r: any) => r.code === 'SUPER_ADMIN',
-    );
-    const isAdmin: boolean =
-      isSuperAdmin || !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
+    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
