@@ -492,6 +492,14 @@ export class UsersService implements OnModuleInit {
         const resourceCode = policy.resource?.code ?? '';
         if (resourceCode && policy.action) {
           permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);
+          if (policy.action === '*') {
+            const commonActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'MANAGE', 'PUBLISH', 'APPROVE', 'ASSIGN', 'PARTICIPATE'];
+            commonActions.forEach(a => {
+              permissionsFlattenSet.add(`${resourceCode}:${a}`);
+              permissionsFlattenSet.add(`${resourceCode}.${a}`);
+            });
+            permissionsFlattenSet.add(`${resourceCode}.*`);
+          }
         }
         policiesList.push({
           description: `${policy.action} trên ${policy.resource?.name ?? policy.resource?.code ?? policy.resourceId ?? '—'}`,

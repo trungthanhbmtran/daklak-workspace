@@ -69,9 +69,7 @@ export class OrganizationsService implements OnModuleInit {
         )
       : null;
 
-    const isAdmin: boolean = !!userInfo?.roles?.some(
-      (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN',
-    );
+    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
 
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
@@ -124,9 +122,7 @@ export class OrganizationsService implements OnModuleInit {
         )
       : null;
 
-    const isAdmin: boolean = !!userInfo?.roles?.some(
-      (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN',
-    );
+    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
 
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
