@@ -20,6 +20,24 @@ export async function seedRoles(prisma: PrismaClient) {
     },
   });
 
+  // Gán policy wildcard (*) cho tất cả resource cho SUPER_ADMIN
+  const allResources = Object.values(resources);
+  const superAdminPolicyIds: number[] = [];
+  for (const res of allResources) {
+    let policy = await prisma.policy.findFirst({ where: { resourceId: res.id, action: '*', effect: 'ALLOW' } });
+    if (!policy) {
+      policy = await prisma.policy.create({ data: { resourceId: res.id, action: '*', effect: 'ALLOW' } });
+    }
+    superAdminPolicyIds.push(policy.id);
+  }
+  
+  if (superAdminPolicyIds.length > 0) {
+    await prisma.role.update({
+      where: { id: superAdminRole.id },
+      data: { policies: { connect: superAdminPolicyIds.map(id => ({ id })) } },
+    });
+  }
+
   const adminRole = await prisma.role.upsert({
     where: { code: 'ADMIN' },
     update: {
