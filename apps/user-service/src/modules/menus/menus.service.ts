@@ -214,7 +214,7 @@ export class MenusService {
 
     return {
       data: result,
-      allowed_paths: Array.from(allowedPaths),
+      allowedPaths: Array.from(allowedPaths),
     };
   }
 }

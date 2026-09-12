@@ -37,7 +37,7 @@ export class MenusController {
     );
     return {
       data: result.data.map((node: any) => this.mapMenuNode(node)),
-      allowed_paths: result.allowed_paths,
+      allowedPaths: result.allowedPaths,
     };
   }
 
