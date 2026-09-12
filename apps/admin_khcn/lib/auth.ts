@@ -59,11 +59,19 @@ function getCachedAllowedPaths(token: string) {
           headers: { Authorization: `Bearer ${token}` },
           cache: 'no-store',
         });
-        if (!res.ok) return [];
+        if (!res.ok) {
+          const errText = await res.text().catch(() => 'No text');
+          console.error(`[fetch menus/me] FAILED! Status: ${res.status} ${res.statusText}. Response: ${errText}`);
+          return [];
+        }
         const json = await res.json();
-        return json?.data?.allowedPaths || json?.allowedPaths || json?.allowed_paths || [];
+        const paths = json?.data?.allowedPaths || json?.allowedPaths || json?.allowed_paths || [];
+        if (paths.length === 0) {
+           console.error(`[fetch menus/me] SUCCESS but paths is empty. JSON:`, JSON.stringify(json));
+        }
+        return paths;
       } catch (err) {
-        console.error('Fetch menus/me error:', err);
+        console.error('[fetch menus/me] ERROR EXCEPTION:', err);
         return [];
       }
     },
