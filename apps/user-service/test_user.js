@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); prisma.user.findFirst({ include: { roles: { include: { policies: { include: { resource: true } } } } } }).then(u => console.dir(u, {depth: null})).finally(() => prisma.$disconnect());

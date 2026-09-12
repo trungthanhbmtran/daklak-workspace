@@ -184,3 +184,18 @@ Dưới đây là danh sách các tài khoản tiêu biểu dùng để test cá
   - Username: `admin` / Email: `admin@sys.com` (Mật khẩu: `Admin@123`)
 - **Quản trị viên Đơn vị** (Giới hạn trong đơn vị)
   - Username: `orgadmin` / Email: `orgadmin@daklak.gov.vn` (Mật khẩu: `Admin@123`)
+
+## 8. Nhật ký gỡ lỗi & Các lỗi thường gặp (Troubleshooting)
+
+### Lỗi 404 (Không tìm thấy trang) sau khi đăng nhập bằng SuperAdmin
+- **Hiện tượng:** Truy cập `/services/admin` bị chuyển hướng sang trang 404, log api-gateway báo `[requireMenuAccess] allowedPaths empty for token`.
+- **Nguyên nhân:** Quá trình giao tiếp gRPC giữa `user-service` và `api-gateway` sử dụng tùy chọn `keepCase: false`. Tùy chọn này ép `@grpc/grpc-js` chuyển đổi các keys từ `snake_case` (trong protobuf) sang `camelCase`. Nếu backend Controller trả về object chứa key `allowed_paths`, framework sẽ âm thầm loại bỏ key này (silent stripping) do không khớp với schema `allowedPaths`.
+- **Bài học rút ra:** Luôn sử dụng `camelCase` khi trả về các fields trong NestJS gRPC Controller. Dùng các interface sinh tự động bởi `ts-proto` để phát hiện lỗi từ lúc biên dịch. Khi code logic, không được hardcode trả về JSON object nếu tên key là `snake_case`.
+
+### Lưu ý khi sửa code trực tiếp (Hotfix) trên Container Docker Compose
+- Các dịch vụ backend (như `user-service`) được cấu hình kéo image từ Docker Hub (vd: `image: ${DOCKER_USERNAME}/daklak-user-service:latest`).
+- Nếu bạn sửa file `.ts` ở local, những thay đổi này **không tự động cập nhật** vào container.
+- Để áp dụng bản fix vĩnh viễn:
+  1. Hãy build lại Docker image cục bộ: `docker build -t thanhtran1993/daklak-user-service:latest -f apps/user-service/Dockerfile .`
+  2. Restart container bằng `docker compose restart user-service`.
+  3. Đẩy image lên hub để server remote có thể tự động pull.
