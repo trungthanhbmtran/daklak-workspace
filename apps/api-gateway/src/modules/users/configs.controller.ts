@@ -6,7 +6,7 @@ import {
   OnModuleInit,
   Put,
   UseGuards,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';

@@ -6,7 +6,7 @@ import {
   Query,
   Inject,
   OnModuleInit,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
@@ -27,7 +27,7 @@ export class PublicPostsController implements OnModuleInit {
   @Get()
   async findAll(@Query() query: any) {
     const req = { ...query };
-    
+
     // Map Frontend ?type=notification to isNotification=true
     if (req.type === 'notification') {
       req.isNotification = 'true';

@@ -1,4 +1,10 @@
-import { Injectable, Inject, OnModuleInit, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { randomUUID } from 'crypto';
 import type { Response } from 'express';
@@ -18,13 +24,20 @@ export class AuthService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.authGrpcService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
-    this.userGrpcService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    this.employeeGrpcService = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.authGrpcService = this.authClient.getService(
+      MICROSERVICES.AUTH.SERVICE,
+    );
+    this.userGrpcService = this.userClient.getService(
+      MICROSERVICES.USER.SERVICE,
+    );
+    this.employeeGrpcService = this.employeeClient.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   async login(body: any, res: Response) {
-    const hasPassword = body.password && String(body.password).trim().length > 0;
+    const hasPassword =
+      body.password && String(body.password).trim().length > 0;
     const loginKey = body.username?.trim() || body.email?.trim();
     if (!loginKey || !hasPassword) {
       throw new BadRequestException(
@@ -49,7 +62,9 @@ export class AuthService implements OnModuleInit {
       res.cookie('accessToken', result.accessToken, cookieConfig);
       res.cookie('refreshToken', result.refreshToken, cookieConfig);
 
-      const expiresAt = new Date(Date.now() + (result.expiresIn || 86400) * 1000).toISOString();
+      const expiresAt = new Date(
+        Date.now() + (result.expiresIn || 86400) * 1000,
+      ).toISOString();
 
       return {
         sessionId: randomUUID(),
@@ -85,14 +100,17 @@ export class AuthService implements OnModuleInit {
       res.cookie('accessToken', result.accessToken, cookieConfig);
       res.cookie('refreshToken', result.refreshToken, cookieConfig);
 
-      const expiresAt = new Date(Date.now() + (result.expiresIn || 86400) * 1000).toISOString();
+      const expiresAt = new Date(
+        Date.now() + (result.expiresIn || 86400) * 1000,
+      ).toISOString();
 
       return {
         sessionId: randomUUID(),
         expiresAt,
       };
     } catch (err: any) {
-      const message = err?.details || err?.message || 'Refresh token không hợp lệ';
+      const message =
+        err?.details || err?.message || 'Refresh token không hợp lệ';
       throw new UnauthorizedException(message);
     }
   }
@@ -121,7 +139,9 @@ export class AuthService implements OnModuleInit {
     const employeeId = req.user?.employeeId;
     const userId = req.user?.id;
     if (!userId) {
-      throw new UnauthorizedException('Không tìm thấy thông tin user trong token');
+      throw new UnauthorizedException(
+        'Không tìm thấy thông tin user trong token',
+      );
     }
 
     const user: any = await firstValueFrom(

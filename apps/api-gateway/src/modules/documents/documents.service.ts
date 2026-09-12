@@ -1,4 +1,9 @@
-import { InternalServerErrorException, Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  Injectable,
+  Inject,
+  OnModuleInit,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -15,12 +20,16 @@ export class DocumentsService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.documentService = this.documentClient.getService(MICROSERVICES.DOCUMENT.SERVICE);
-    this.cabinetService = this.cabinetClient.getService(MICROSERVICES.CABINET.SERVICE);
-    this.dossierService = this.dossierClient.getService(MICROSERVICES.DOSSIER.SERVICE);
+    this.documentService = this.documentClient.getService(
+      MICROSERVICES.DOCUMENT.SERVICE,
+    );
+    this.cabinetService = this.cabinetClient.getService(
+      MICROSERVICES.CABINET.SERVICE,
+    );
+    this.dossierService = this.dossierClient.getService(
+      MICROSERVICES.DOSSIER.SERVICE,
+    );
   }
-
-
 
   async listDocuments(query: any) {
     const req: any = {
@@ -40,10 +49,12 @@ export class DocumentsService implements OnModuleInit {
       req.transparencyCategory = query.transparencyCategory;
     if (query.isIncoming !== undefined)
       req.isIncoming = query.isIncoming === 'true';
-    return firstValueFrom(this.documentService.ListDocuments(req)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.ListDocuments(req)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async listAdminProcedures(query: any) {
@@ -53,24 +64,30 @@ export class DocumentsService implements OnModuleInit {
       search: query.search || '',
       category: query.category || 'ALL',
     };
-    return firstValueFrom(this.documentService.ListProcedures(req)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.ListProcedures(req)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async getAdminProcedure(id: string) {
-    return firstValueFrom(this.documentService.GetProcedure({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.GetProcedure({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async createAdminProcedure(body: any) {
-    return firstValueFrom(this.documentService.CreateProcedure(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.CreateProcedure(body)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async updateAdminProcedure(id: string, body: any) {
@@ -83,10 +100,12 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async deleteAdminProcedure(id: string) {
-    return firstValueFrom(this.documentService.DeleteProcedure({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.DeleteProcedure({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async listAdminDossiers(query: any) {
@@ -103,17 +122,21 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async getAdminDossier(id: string) {
-    return firstValueFrom(this.documentService.GetDossier({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.GetDossier({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async createAdminDossier(body: any) {
-    return firstValueFrom(this.documentService.CreateDossier(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.CreateDossier(body)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async updateAdminDossier(id: string, body: any) {
@@ -126,10 +149,12 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async deleteAdminDossier(id: string) {
-    return firstValueFrom(this.documentService.DeleteDossier({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.DeleteDossier({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async listCabinetFiles(user: any, userId: string, orgId: string) {
@@ -161,10 +186,12 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async getComponents(id: string) {
-    return firstValueFrom(this.dossierService.GetComponents({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.dossierService.GetComponents({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async updateComponent(id: string, body: any) {
@@ -176,7 +203,10 @@ export class DocumentsService implements OnModuleInit {
     });
   }
 
-  async createDossierFromTemplate(body: { procedureId: string; senderName: string }) {
+  async createDossierFromTemplate(body: {
+    procedureId: string;
+    senderName: string;
+  }) {
     return firstValueFrom(
       this.dossierService.CreateDossierFromTemplate(body),
     ).catch((e) => {
@@ -185,14 +215,22 @@ export class DocumentsService implements OnModuleInit {
     });
   }
 
-  async createBlankDossier(body: { procedureName: string; senderName: string }) {
-    return firstValueFrom(this.dossierService.CreateBlankDossier(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+  async createBlankDossier(body: {
+    procedureName: string;
+    senderName: string;
+  }) {
+    return firstValueFrom(this.dossierService.CreateBlankDossier(body)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
-  async addComponentFromCabinet(dossierId: string, body: { name: string; fileUrl: string }) {
+  async addComponentFromCabinet(
+    dossierId: string,
+    body: { name: string; fileUrl: string },
+  ) {
     return firstValueFrom(
       this.dossierService.AddComponentFromCabinet({ dossierId, ...body }),
     ).catch((e) => {
@@ -202,19 +240,23 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async getDocument(id: string) {
-    return firstValueFrom(this.documentService.GetDocument({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.GetDocument({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async createDocument(user: any, body: any) {
     body.userId = user?.id ? String(user.id) : undefined;
     body.userName = user?.fullname || user?.username || undefined;
-    return firstValueFrom(this.documentService.CreateDocument(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.CreateDocument(body)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async updateDocument(id: string, user: any, body: any) {
@@ -224,17 +266,21 @@ export class DocumentsService implements OnModuleInit {
       userId: user?.id ? String(user.id) : undefined,
       userName: user?.fullname || user?.username || undefined,
     };
-    return firstValueFrom(this.documentService.UpdateDocument(payload)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.UpdateDocument(payload)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async extractMetadata(body: { fileId: string }) {
-    return firstValueFrom(this.documentService.ExtractMetadata(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.ExtractMetadata(body)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async syncOnline() {
@@ -254,9 +300,11 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async deleteDocument(id: string) {
-    return firstValueFrom(this.documentService.DeleteDocument({ id })).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.DeleteDocument({ id })).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 }

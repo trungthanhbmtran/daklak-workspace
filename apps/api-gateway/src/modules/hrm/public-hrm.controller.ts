@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -26,7 +33,13 @@ export class PublicHrmController implements OnModuleInit {
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
     if (req.ids) {
-      req.ids = typeof req.ids === 'string' ? req.ids.split(',').map((id: string) => parseInt(id, 10)).filter((id: number) => !isNaN(id)) : req.ids;
+      req.ids =
+        typeof req.ids === 'string'
+          ? req.ids
+              .split(',')
+              .map((id: string) => parseInt(id, 10))
+              .filter((id: number) => !isNaN(id))
+          : req.ids;
     }
 
     const response = await firstValueFrom(

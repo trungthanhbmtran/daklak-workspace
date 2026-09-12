@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import * as jwt from 'jsonwebtoken';
@@ -12,7 +17,7 @@ export class TasksService implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
@@ -153,14 +158,16 @@ export class TasksService implements OnModuleInit {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       if (selectedDate < today) {
-        throw new InternalServerErrorException("Thời gian hạn chót không được trước thời gian giao việc (hiện tại)");
+        throw new InternalServerErrorException(
+          'Thời gian hạn chót không được trước thời gian giao việc (hiện tại)',
+        );
       }
       body.dueDate = new Date(body.dueDate).toISOString();
     }
 
     if (body.assignee) {
-      if (body.assignee.startsWith("DEPT_")) {
-        body.departmentId = parseInt(body.assignee.replace("DEPT_", ""), 10);
+      if (body.assignee.startsWith('DEPT_')) {
+        body.departmentId = parseInt(body.assignee.replace('DEPT_', ''), 10);
       } else {
         body.assigneeCode = body.assignee;
       }
@@ -203,7 +210,25 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async list(req: any, role: string, assigneeCode: string, assignerCode: string, filter: string, search: string, departmentId: string, planId: string, isSupervisor: string, status: string, priority: string, page: string, limit: string, statsFilter: string, type: string, viewMode: string, referenceDate: string) {
+  async list(
+    req: any,
+    role: string,
+    assigneeCode: string,
+    assignerCode: string,
+    filter: string,
+    search: string,
+    departmentId: string,
+    planId: string,
+    isSupervisor: string,
+    status: string,
+    priority: string,
+    page: string,
+    limit: string,
+    statsFilter: string,
+    type: string,
+    viewMode: string,
+    referenceDate: string,
+  ) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
     let finalAssignerCode: string | undefined = assignerCode;
@@ -319,12 +344,21 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async updateStatus(req: any, id: number, status: string, rejectReason?: string, actionName?: string, evidence?: string, evidenceData?: any) {
+  async updateStatus(
+    req: any,
+    id: number,
+    status: string,
+    rejectReason?: string,
+    actionName?: string,
+    evidence?: string,
+    evidenceData?: any,
+  ) {
     let finalEvidence = evidence;
     if (evidenceData) {
-      finalEvidence = `📋 Báo cáo hoàn thành [${evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${evidenceData.itemTitle}**\n${evidenceData.text || ''}`.trim();
+      finalEvidence =
+        `📋 Báo cáo hoàn thành [${evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${evidenceData.itemTitle}**\n${evidenceData.text || ''}`.trim();
       if (evidenceData.files && evidenceData.files.length > 0) {
-        finalEvidence += "\n\n**Minh chứng đính kèm:**";
+        finalEvidence += '\n\n**Minh chứng đính kèm:**';
         evidenceData.files.forEach((file: any, index: number) => {
           finalEvidence += `\n${index + 1}. [${file.name}](${file.url})`;
         });
@@ -353,7 +387,13 @@ export class TasksService implements OnModuleInit {
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
-  async respondTask(req: any, id: number, action: string, rejectReason?: string, message?: string) {
+  async respondTask(
+    req: any,
+    id: number,
+    action: string,
+    rejectReason?: string,
+    message?: string,
+  ) {
     const user = req.user;
     const response: any = await firstValueFrom(
       this.taskService.RespondTask(
@@ -376,7 +416,13 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async recommendAssignees(req: any, rankCode: string, strategy: string, domainId: string, jobTitleId: string) {
+  async recommendAssignees(
+    req: any,
+    rankCode: string,
+    strategy: string,
+    domainId: string,
+    jobTitleId: string,
+  ) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     let res: any;
@@ -434,14 +480,14 @@ export class TasksService implements OnModuleInit {
 
   async assignTask(req: any, id: number, body: any) {
     if (body.assignee) {
-      if (body.assignee.startsWith("DEPT_")) {
-        body.departmentId = parseInt(body.assignee.replace("DEPT_", ""), 10);
+      if (body.assignee.startsWith('DEPT_')) {
+        body.departmentId = parseInt(body.assignee.replace('DEPT_', ''), 10);
       } else {
         body.assigneeCode = body.assignee;
       }
       delete body.assignee;
     }
-    
+
     if (body.coordinators) {
       body.coassigneeCodes = body.coordinators;
       delete body.coordinators;
@@ -504,7 +550,8 @@ export class TasksService implements OnModuleInit {
       this.taskService.BreakdownTask(
         {
           ...body,
-          coassigneeCodes: body.coordinators || body.coassigneeCodes || body.coAssigneeCodes,
+          coassigneeCodes:
+            body.coordinators || body.coassigneeCodes || body.coAssigneeCodes,
           id: id,
           parentId: id,
           assignerCode,
@@ -542,7 +589,11 @@ export class TasksService implements OnModuleInit {
     });
   }
 
-  async addComment(req: any, id: number, body: { content: string; isSystemMessage?: boolean }) {
+  async addComment(
+    req: any,
+    id: number,
+    body: { content: string; isSystemMessage?: boolean },
+  ) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
     const isLeader =
@@ -613,7 +664,6 @@ export class TasksService implements OnModuleInit {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
-
 
   async getSubTasks(req: any, id: number) {
     const user = req.user;
@@ -707,7 +757,7 @@ export class TasksService implements OnModuleInit {
 
   async createStep(req: any, id: number, body: any) {
     if (body.baseScore !== undefined && body.baseScore !== null) {
-      body.baseScore = body.baseScore === "" ? 0 : Number(body.baseScore);
+      body.baseScore = body.baseScore === '' ? 0 : Number(body.baseScore);
     }
     if (body.assignee) {
       body.assigneeCode = body.assignee || undefined;
@@ -730,9 +780,10 @@ export class TasksService implements OnModuleInit {
 
   async updateStep(req: any, id: number, stepId: number, body: any) {
     if (body.evidenceData) {
-      let finalEvidence = `📋 Báo cáo hoàn thành [${body.evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${body.evidenceData.itemTitle}**\n${body.evidenceData.text || ''}`.trim();
+      let finalEvidence =
+        `📋 Báo cáo hoàn thành [${body.evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${body.evidenceData.itemTitle}**\n${body.evidenceData.text || ''}`.trim();
       if (body.evidenceData.files && body.evidenceData.files.length > 0) {
-        finalEvidence += "\n\n**Minh chứng đính kèm:**";
+        finalEvidence += '\n\n**Minh chứng đính kèm:**';
         body.evidenceData.files.forEach((file: any, index: number) => {
           finalEvidence += `\n${index + 1}. [${file.name}](${file.url})`;
         });
@@ -743,7 +794,12 @@ export class TasksService implements OnModuleInit {
 
     const response: any = await firstValueFrom(
       this.taskService.UpdateStep(
-        { taskId: id, stepId, actorCode: req.user?.employeeCode || '', ...body },
+        {
+          taskId: id,
+          stepId,
+          actorCode: req.user?.employeeCode || '',
+          ...body,
+        },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => {

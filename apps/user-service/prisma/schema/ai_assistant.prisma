@@ -1,0 +1,18 @@
+model AiAssistant {
+  id           String   @id @default(cuid())
+  userId       Int      @map("user_id") // owner of the assistant
+  name         String
+  description  String?  @db.Text
+  systemPrompt String   @db.Text @map("system_prompt")
+  isPublic     Boolean  @default(false) @map("is_public")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  knowledgeSources AiKnowledgeSource[]
+  tools            AiAssistantTool[]
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_assistants")
+}

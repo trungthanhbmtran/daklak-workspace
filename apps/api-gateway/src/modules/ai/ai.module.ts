@@ -5,10 +5,12 @@ import { AiFeatureService } from './ai-feature.service';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { AiController } from './ai.controller';
+import { QdrantService } from './qdrant.service';
 
 @Module({
   imports: [
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
+    registerGrpcService(MICROSERVICES.USER_CONFIG),
     registerGrpcService(MICROSERVICES.USER),
     registerGrpcService(MICROSERVICES.TASK),
     registerGrpcService(MICROSERVICES.MASTER_PLAN),
@@ -29,7 +31,7 @@ import { AiController } from './ai.controller';
     ]),
   ],
   controllers: [AiController],
-  providers: [AiService, AiFeatureService],
-  exports: [AiService],
+  providers: [AiService, AiFeatureService, QdrantService],
+  exports: [AiService, AiFeatureService, QdrantService],
 })
 export class AiModule {}

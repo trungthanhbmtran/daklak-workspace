@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package user_config;
+
+service UserConfigService {
+  rpc GetConfigs (GetUserConfigsRequest) returns (GetUserConfigsResponse);
+  rpc SetConfig (SetUserConfigRequest) returns (UserConfigResponse);
+}
+
+message GetUserConfigsRequest {
+  int32 user_id = 1;
+}
+
+message UserConfigMessage {
+  string key = 1;
+  string value = 2;
+}
+
+message GetUserConfigsResponse {
+  repeated UserConfigMessage configs = 1;
+}
+
+message SetUserConfigRequest {
+  int32 user_id = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message UserConfigResponse {
+  string key = 1;
+  string value = 2;
+  bool success = 3;
+}

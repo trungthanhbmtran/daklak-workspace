@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -19,9 +24,15 @@ export class EmployeeService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.employeeService = this.client.getService(MICROSERVICES.EMPLOYEE.SERVICE);
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
-    this.catService = this.catClient.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
+    this.employeeService = this.client.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
+    this.catService = this.catClient.getService(
+      MICROSERVICES.SYS_CATEGORY.SERVICE,
+    );
   }
 
   private async fetchDictionaries() {
@@ -145,9 +156,14 @@ export class EmployeeService implements OnModuleInit {
 
     if (req.ids) {
       if (typeof req.ids === 'string') {
-        req.ids = req.ids.split(',').map((id: string) => parseInt(id, 10)).filter((id: number) => !isNaN(id));
+        req.ids = req.ids
+          .split(',')
+          .map((id: string) => parseInt(id, 10))
+          .filter((id: number) => !isNaN(id));
       } else if (Array.isArray(req.ids)) {
-        req.ids = req.ids.map((id: any) => parseInt(id, 10)).filter((id: number) => !isNaN(id));
+        req.ids = req.ids
+          .map((id: any) => parseInt(id, 10))
+          .filter((id: number) => !isNaN(id));
       }
     }
 
@@ -181,7 +197,7 @@ export class EmployeeService implements OnModuleInit {
 
     const res: any = await this.executeWithDicts(
       firstValueFrom(this.employeeService.ListEmployees(req)),
-      true
+      true,
     );
 
     if (res) {
@@ -201,20 +217,20 @@ export class EmployeeService implements OnModuleInit {
 
   async getDetail(id: string) {
     return this.executeWithDicts(
-      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) }))
+      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })),
     );
   }
 
   async create(body: any) {
     return this.executeWithDicts(
-      firstValueFrom(this.employeeService.CreateEmployee(body))
+      firstValueFrom(this.employeeService.CreateEmployee(body)),
     );
   }
 
   async update(id: string, body: any) {
     const payload = { ...body, id: parseInt(id) };
     return this.executeWithDicts(
-      firstValueFrom(this.employeeService.UpdateEmployee(payload))
+      firstValueFrom(this.employeeService.UpdateEmployee(payload)),
     );
   }
 

@@ -1,0 +1,17 @@
+model AiKnowledgeSource {
+  id           String   @id @default(cuid())
+  assistantId  String   @map("assistant_id")
+  type         String   // TEXT, FILE, URL
+  title        String
+  content      String?  @db.LongText // Mined text or raw text
+  metadata     String?  @db.Text // JSON string: { fileUrl: string, fileSize: number } etc.
+  qdrantId     String?  @map("qdrant_id") // ID of the collection or point in Qdrant
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assistant    AiAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+
+  @@index([assistantId])
+  @@map("ai_knowledge_sources")
+}

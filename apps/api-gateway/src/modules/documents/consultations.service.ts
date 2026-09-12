@@ -1,4 +1,9 @@
-import { InternalServerErrorException, Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  Injectable,
+  Inject,
+  OnModuleInit,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -11,7 +16,9 @@ export class ConsultationsService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.consultationGrpcService = this.client.getService('ConsultationService');
+    this.consultationGrpcService = this.client.getService(
+      'ConsultationService',
+    );
   }
 
   async listConsultations(query: any) {
@@ -77,7 +84,10 @@ export class ConsultationsService implements OnModuleInit {
 
   async listPublicComments(consultationId: string, status: string) {
     return firstValueFrom(
-      this.consultationGrpcService.ListPublicComments({ consultationId, status }),
+      this.consultationGrpcService.ListPublicComments({
+        consultationId,
+        status,
+      }),
     ).catch((e) => {
       console.error('RPC Call Failed', e.message);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');

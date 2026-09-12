@@ -80,7 +80,13 @@ export class NotificationsService {
     limit: number = 50,
   ): Promise<{
     data: InAppNotification[];
-    meta: { total: number; page: number; limit: number; totalPages: number; unreadCount?: number };
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+      unreadCount?: number;
+    };
   }> {
     const uid = String(userId);
     const redis = this.redisService.getClient();
@@ -144,7 +150,7 @@ export class NotificationsService {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    const notificationsWithCategory = notifications.map(n => {
+    const notificationsWithCategory = notifications.map((n) => {
       let category = 'EARLIER';
       if (n.type === 'REMINDER' || n.title?.toLowerCase().includes('nhắc')) {
         category = 'REMINDER';
@@ -215,7 +221,9 @@ export class NotificationsService {
     const redis = this.redisService.getClient();
 
     const userZset = `notifications:user:${uid}`;
-    const employeeZset = employeeCode ? `notifications:user:${employeeCode}` : null;
+    const employeeZset = employeeCode
+      ? `notifications:user:${employeeCode}`
+      : null;
     const emailZset = email ? `notifications:user:${email}` : null;
 
     const fetchZset = async (key: string) => {
@@ -239,7 +247,7 @@ export class NotificationsService {
 
     const keys = Array.from(allIds).map((id) => `notification:data:${id}`);
     const payloads = await redis.mget(...keys);
-    
+
     let markedCount = 0;
     const pipeline = redis.pipeline();
 

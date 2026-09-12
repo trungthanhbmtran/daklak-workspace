@@ -31,7 +31,6 @@ export class PostsController {
     return this.postsService.findAll(query);
   }
 
-
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.postsService.findOne(id);

@@ -10,7 +10,9 @@ export class PostsService implements OnModuleInit {
   constructor(@Inject(MICROSERVICES.POST.SYMBOL) private client: ClientGrpc) {}
 
   onModuleInit() {
-    this.postGrpcService = this.client.getService<any>(MICROSERVICES.POST.SERVICE);
+    this.postGrpcService = this.client.getService<any>(
+      MICROSERVICES.POST.SERVICE,
+    );
   }
 
   async create(createPostDto: any, req: any) {

@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package users;
+
+message AiAssistant {
+  string id = 1;
+  int32 user_id = 2;
+  string name = 3;
+  string description = 4;
+  string system_prompt = 5;
+  bool is_public = 6;
+  string created_at = 7;
+  string updated_at = 8;
+  repeated AiKnowledgeSource knowledge_sources = 9;
+  repeated AiAssistantTool tools = 10;
+}
+
+message AiKnowledgeSource {
+  string id = 1;
+  string assistant_id = 2;
+  string type = 3;
+  string title = 4;
+  string content = 5;
+  string metadata = 6;
+  string qdrant_id = 7;
+}
+
+message AiAssistantTool {
+  string id = 1;
+  string assistant_id = 2;
+  string tool_name = 3;
+}
+
+// Queries
+message GetAiAssistantsRequest {
+  int32 user_id = 1;
+}
+
+message GetAiAssistantsResponse {
+  repeated AiAssistant assistants = 1;
+}
+
+message GetAiAssistantRequest {
+  string id = 1;
+}
+
+message GetAiAssistantResponse {
+  AiAssistant assistant = 1;
+}
+
+// Mutations
+message CreateAiAssistantRequest {
+  int32 user_id = 1;
+  string name = 2;
+  string description = 3;
+  string system_prompt = 4;
+  bool is_public = 5;
+}
+
+message UpdateAiAssistantRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string system_prompt = 4;
+  bool is_public = 5;
+}
+
+message DeleteAiAssistantRequest {
+  string id = 1;
+}
+
+message EmptyResponse {
+  bool success = 1;
+}
+
+// Knowledge & Tools
+message AddKnowledgeSourceRequest {
+  string assistant_id = 1;
+  string type = 2;
+  string title = 3;
+  string content = 4;
+  string metadata = 5;
+  string qdrant_id = 6;
+}
+
+message AddAssistantToolRequest {
+  string assistant_id = 1;
+  string tool_name = 2;
+}
+
+message RemoveKnowledgeSourceRequest {
+  string id = 1;
+}
+
+message RemoveAssistantToolRequest {
+  string id = 1;
+}
+
+service AiAssistantService {
+  rpc GetAssistants(GetAiAssistantsRequest) returns (GetAiAssistantsResponse);
+  rpc GetAssistant(GetAiAssistantRequest) returns (GetAiAssistantResponse);
+  rpc CreateAssistant(CreateAiAssistantRequest) returns (GetAiAssistantResponse);
+  rpc UpdateAssistant(UpdateAiAssistantRequest) returns (GetAiAssistantResponse);
+  rpc DeleteAssistant(DeleteAiAssistantRequest) returns (EmptyResponse);
+  
+  rpc AddKnowledgeSource(AddKnowledgeSourceRequest) returns (EmptyResponse);
+  rpc RemoveKnowledgeSource(RemoveKnowledgeSourceRequest) returns (EmptyResponse);
+  
+  rpc AddAssistantTool(AddAssistantToolRequest) returns (EmptyResponse);
+  rpc RemoveAssistantTool(RemoveAssistantToolRequest) returns (EmptyResponse);
+}

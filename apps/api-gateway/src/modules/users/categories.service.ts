@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -23,7 +28,9 @@ export class CategoriesService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.categoryService = this.client.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
+    this.categoryService = this.client.getService(
+      MICROSERVICES.SYS_CATEGORY.SERVICE,
+    );
   }
 
   async getGroups() {
@@ -32,7 +39,11 @@ export class CategoriesService implements OnModuleInit {
         this.categoryService.GetAllGroups({}),
       );
       return { success: true, data: res.groups };
-    } catch (error) { throw new InternalServerErrorException('Chưa thể kết nối tới dịch vụ danh mục'); }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Chưa thể kết nối tới dịch vụ danh mục',
+      );
+    }
   }
 
   async updateGroup(code: string, body: { name: string; order?: number }) {
@@ -45,7 +56,9 @@ export class CategoriesService implements OnModuleInit {
         }),
       );
       return { success: true, data: res };
-    } catch (error) { throw new InternalServerErrorException('Lỗi cập nhật nhóm danh mục'); }
+    } catch (error) {
+      throw new InternalServerErrorException('Lỗi cập nhật nhóm danh mục');
+    }
   }
 
   async getByGroup(

@@ -14,12 +14,12 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RequirePermissions } from '../../core/decorators/permissions.decorator';
-import { 
-  CreateWorkflowDto, 
-  UpdateWorkflowDto, 
+import {
+  CreateWorkflowDto,
+  UpdateWorkflowDto,
   StartWorkflowDto,
   ResumeWorkflowDto,
-  ApplyModuleDto
+  ApplyModuleDto,
 } from './dto/workflow.dto';
 import { WorkflowService } from './workflow.service';
 
@@ -103,7 +103,13 @@ export class WorkflowController {
     @Query('status') status?: string,
     @Query('search') search?: string,
   ) {
-    return this.workflowService.listInstances(skip, take, workflowId, status, search);
+    return this.workflowService.listInstances(
+      skip,
+      take,
+      workflowId,
+      status,
+      search,
+    );
   }
 
   @Get('instances/:id')
@@ -177,16 +183,17 @@ export class WorkflowController {
 
   @Post(':id/apply-module')
   @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
-  async applyModule(
-    @Param('id') id: string,
-    @Body() body: ApplyModuleDto,
-  ) {
+  async applyModule(@Param('id') id: string, @Body() body: ApplyModuleDto) {
     return this.workflowService.applyModule(id, body.moduleCode);
   }
 
   @Post(':id/start')
   @ApiOperation({ summary: 'Kích hoạt chạy một quy trình' })
-  async start(@Param('id') id: string, @Body() body: StartWorkflowDto, @Req() req: any) {
+  async start(
+    @Param('id') id: string,
+    @Body() body: StartWorkflowDto,
+    @Req() req: any,
+  ) {
     return this.workflowService.start(id, body, req.user);
   }
 }

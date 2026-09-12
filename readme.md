@@ -98,6 +98,7 @@ Thông tin đăng nhập mặc định cho các dịch vụ:
 | **RabbitMQ** | `5672`, `15672` | `admin` | `admin123` |
 | **MinIO** | `9000` | `admin` | `password123` |
 | **Redis** | `6379` | - | - |
+| **Qdrant (Vector DB)** | `6333`, `6334` | - | - |
 
 ### 5.2. Microservices
 | Dịch vụ | Port (Internal) | Database Name |

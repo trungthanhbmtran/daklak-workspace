@@ -1,4 +1,12 @@
-import { Injectable, Inject, OnModuleInit, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,8 +27,10 @@ export class AiFeatureService implements OnModuleInit {
     @Inject('AI_QUEUE_SERVICE') private readonly rmqClient: ClientProxy,
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly taskClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-    @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly sysConfigClient: any,
-    @Inject(MICROSERVICES.MASTER_PLAN.SYMBOL) private readonly masterPlanClient: any,
+    @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL)
+    private readonly sysConfigClient: any,
+    @Inject(MICROSERVICES.MASTER_PLAN.SYMBOL)
+    private readonly masterPlanClient: any,
   ) {}
 
   onModuleInit() {
@@ -51,7 +61,7 @@ export class AiFeatureService implements OnModuleInit {
     return meta;
   }
 
-  async generateText(prompt: string) {
+  async generateText(prompt: string, userId?: number) {
     if (!prompt) {
       throw new BadRequestException('Prompt is required');
     }
@@ -67,10 +77,17 @@ export class AiFeatureService implements OnModuleInit {
         this.sysConfigService.GetConfigs({}),
       );
       const configs = sysConfigRes?.configs || [];
-      const assistantConfig = configs.find((c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT');
+      const assistantConfig = configs.find(
+        (c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT',
+      );
       const systemPrompt = assistantConfig?.value || '';
 
-      this.rmqClient.emit('ai_generate_task', { jobId, prompt, systemPrompt });
+      this.rmqClient.emit('ai_generate_task', {
+        jobId,
+        prompt,
+        systemPrompt,
+        userId,
+      });
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing AI task', err);
@@ -78,23 +95,35 @@ export class AiFeatureService implements OnModuleInit {
     }
   }
 
-  async executeAiFeature(action: string, payload: any, user: any, headers?: any) {
+  async executeAiFeature(
+    action: string,
+    payload: any,
+    user: any,
+    headers?: any,
+  ) {
     try {
-      const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
+      const isAdmin =
+        user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
       const sysConfigRes: any = await firstValueFrom(
         this.sysConfigService.GetConfigs({}),
       );
       const configs = sysConfigRes?.configs || [];
-      const assistantConfig = configs.find((c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT');
+      const assistantConfig = configs.find(
+        (c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT',
+      );
       const systemPrompt = assistantConfig?.value || '';
 
-      const promptConfig = configs.find((c: any) => c.key === `AI_PROMPT_${action}`);
+      const promptConfig = configs.find(
+        (c: any) => c.key === `AI_PROMPT_${action}`,
+      );
 
       const promptTemplate = promptConfig?.value || '';
 
       if (!promptTemplate) {
-        throw new BadRequestException(`Chưa cấu hình AI Prompt cho hành động: ${action}`);
+        throw new BadRequestException(
+          `Chưa cấu hình AI Prompt cho hành động: ${action}`,
+        );
       }
 
       let prompt = promptTemplate;
@@ -212,7 +241,9 @@ export class AiFeatureService implements OnModuleInit {
           break;
         }
         default:
-          throw new BadRequestException(`Hành động AI không được hỗ trợ: ${action}`);
+          throw new BadRequestException(
+            `Hành động AI không được hỗ trợ: ${action}`,
+          );
       }
 
       const jobId = uuidv4();
@@ -222,12 +253,19 @@ export class AiFeatureService implements OnModuleInit {
         3600,
       );
 
-      this.rmqClient.emit('ai_generate_task', { jobId, prompt, systemPrompt });
+      this.rmqClient.emit('ai_generate_task', {
+        jobId,
+        prompt,
+        systemPrompt,
+        userId: user?.id,
+      });
 
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error(`Error in executeAiFeature for action ${action}`, err);
-      throw new InternalServerErrorException('Không thể khởi tạo tiến trình AI');
+      throw new InternalServerErrorException(
+        'Không thể khởi tạo tiến trình AI',
+      );
     }
   }
 

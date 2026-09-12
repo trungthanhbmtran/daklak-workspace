@@ -23,8 +23,8 @@ export class AiController {
   ) {}
 
   @Post('generate')
-  async generateText(@Body() body: { prompt: string }) {
-    return this.aiFeatureService.generateText(body.prompt);
+  async generateText(@Req() req: any, @Body() body: { prompt: string }) {
+    return this.aiFeatureService.generateText(body.prompt, req.user?.id);
   }
 
   @Post('execute')
@@ -46,10 +46,19 @@ export class AiController {
   }
 
   @EventPattern('ai_generate_task')
-  async handleAiGenerateTask(data: { jobId: string; prompt: string; systemPrompt?: string }) {
+  async handleAiGenerateTask(data: {
+    jobId: string;
+    prompt: string;
+    systemPrompt?: string;
+    userId?: number;
+  }) {
     this.logger.log(`Worker received AI task: ${data.jobId}`);
     try {
-      const resultStr = await this.aiService.generateText(data.prompt, data.systemPrompt);
+      const resultStr = await this.aiService.generateText(
+        data.prompt,
+        data.systemPrompt,
+        data.userId,
+      );
 
       let parsedResult = resultStr;
       if (typeof resultStr === 'string') {

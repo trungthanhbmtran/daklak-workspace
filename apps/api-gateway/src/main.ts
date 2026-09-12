@@ -4,7 +4,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { MicroserviceOptions, Transport, RmqOptions } from '@nestjs/microservices';
+import {
+  MicroserviceOptions,
+  Transport,
+  RmqOptions,
+} from '@nestjs/microservices';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 

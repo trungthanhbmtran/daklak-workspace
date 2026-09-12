@@ -46,12 +46,12 @@ export class InteractionsService implements OnModuleInit {
   }
 
   async deleteComment(id: string) {
-    return firstValueFrom(this.interactionGrpcService.deleteComment({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return firstValueFrom(
+      this.interactionGrpcService.deleteComment({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   // --- Citizen Questions (Hỏi đáp) ---
@@ -87,12 +87,12 @@ export class InteractionsService implements OnModuleInit {
   }
 
   async getQuestion(id: string) {
-    return firstValueFrom(this.interactionGrpcService.getQuestion({ id })).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return firstValueFrom(
+      this.interactionGrpcService.getQuestion({ id }),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   // --- Citizen Feedback (Góp ý) ---

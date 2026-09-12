@@ -1,4 +1,12 @@
-import { Injectable, Inject, OnModuleInit, BadRequestException, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -15,9 +23,15 @@ export class OrganizationsService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.orgGrpcService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
-    this.userGrpcService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    this.reportGrpcService = this.reportClient.getService(MICROSERVICES.REPORT.SERVICE);
+    this.orgGrpcService = this.client.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
+    this.userGrpcService = this.userClient.getService(
+      MICROSERVICES.USER.SERVICE,
+    );
+    this.reportGrpcService = this.reportClient.getService(
+      MICROSERVICES.REPORT.SERVICE,
+    );
   }
 
   async create(body: any) {
@@ -46,30 +60,32 @@ export class OrganizationsService implements OnModuleInit {
   }
 
   async getUnitTypes() {
-    const res = (await firstValueFrom(this.orgGrpcService.ListUnitTypes({})).catch(
-      (e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      },
-    )) as any;
+    const res = (await firstValueFrom(
+      this.orgGrpcService.ListUnitTypes({}),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
     return { success: true, data: res.data };
   }
 
   async getFullTree(user: any, q?: string) {
-    const res = (await firstValueFrom(this.orgGrpcService.GetFullTree({ q: q || '' })).catch(
-      (e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      },
-    )) as any;
+    const res = (await firstValueFrom(
+      this.orgGrpcService.GetFullTree({ q: q || '' }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
     let nodes = res.nodes || [];
 
     const userId = user?.id;
     const userInfo: any = userId
-      ? await firstValueFrom(this.userGrpcService.FindOne({ id: userId })).catch(
-          () => null,
-        )
+      ? await firstValueFrom(
+          this.userGrpcService.FindOne({ id: userId }),
+        ).catch(() => null)
       : null;
 
-    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
+    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes(
+      'ORGANIZATION:MANAGE',
+    );
 
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
@@ -117,12 +133,14 @@ export class OrganizationsService implements OnModuleInit {
 
     const userId = user?.id;
     const userInfo: any = userId
-      ? await firstValueFrom(this.userGrpcService.FindOne({ id: userId })).catch(
-          () => null,
-        )
+      ? await firstValueFrom(
+          this.userGrpcService.FindOne({ id: userId }),
+        ).catch(() => null)
       : null;
 
-    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
+    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes(
+      'ORGANIZATION:MANAGE',
+    );
 
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
@@ -244,11 +262,11 @@ export class OrganizationsService implements OnModuleInit {
   }
 
   async getSubTree(id: number) {
-    const res = (await firstValueFrom(this.orgGrpcService.GetSubTree({ id })).catch(
-      (e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      },
-    )) as any;
+    const res = (await firstValueFrom(
+      this.orgGrpcService.GetSubTree({ id }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
     return { success: true, data: res.nodes };
   }
 
@@ -275,10 +293,16 @@ export class OrganizationsService implements OnModuleInit {
   }
 
   async setStaffingSlot(body: any) {
-    if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+    if (
+      body.geographicAreaIds !== undefined &&
+      !Array.isArray(body.geographicAreaIds)
+    ) {
       throw new BadRequestException('geographicAreaIds phải là một mảng');
     }
-    if (body.monitoredUnitIds !== undefined && !Array.isArray(body.monitoredUnitIds)) {
+    if (
+      body.monitoredUnitIds !== undefined &&
+      !Array.isArray(body.monitoredUnitIds)
+    ) {
       throw new BadRequestException('monitoredUnitIds phải là một mảng');
     }
     const result = await firstValueFrom(
@@ -305,7 +329,9 @@ export class OrganizationsService implements OnModuleInit {
       const flatList = this.flattenTree(nodes);
       return { success: true, data: flatList };
     } catch (error: any) {
-      throw new InternalServerErrorException(error?.message || 'Failed to fetch public org units');
+      throw new InternalServerErrorException(
+        error?.message || 'Failed to fetch public org units',
+      );
     }
   }
 

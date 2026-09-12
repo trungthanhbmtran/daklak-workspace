@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
 import { MICROSERVICES } from '../../core/constants/services';
@@ -23,8 +28,12 @@ export class KpisService implements OnModuleInit {
 
   onModuleInit() {
     this.kpiService = this.client.getService(MICROSERVICES.KPI.SERVICE);
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
-    this.employeeService = this.empClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
+    this.employeeService = this.empClient.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   // Gateway Aggregation: Chỉ dùng để map departmentName
@@ -74,7 +83,8 @@ export class KpisService implements OnModuleInit {
     const userRoles = user?.roles || [];
     const checkRole = (roleCode: string) =>
       userRoles.some((r: any) => r === roleCode || r?.code === roleCode);
-    const hasGlobalAccess = checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
+    const hasGlobalAccess =
+      checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
     const res: any = await firstValueFrom(
       this.kpiService.FindCriteria({
         isAdmin: hasGlobalAccess,
@@ -165,16 +175,20 @@ export class KpisService implements OnModuleInit {
     });
   }
 
-
-
-  async calculatePersonalKpi(user: any, body: { periodId: number; employeeCode?: string; staffingSlotId?: number }) {
-    const targetCode = body.employeeCode || user?.employeeCode || user?.username;
+  async calculatePersonalKpi(
+    user: any,
+    body: { periodId: number; employeeCode?: string; staffingSlotId?: number },
+  ) {
+    const targetCode =
+      body.employeeCode || user?.employeeCode || user?.username;
 
     return firstValueFrom(
       this.kpiService.CalculatePersonalKpi({
         periodId: Number(body.periodId),
         employeeCode: targetCode,
-        staffingSlotId: body.staffingSlotId ? Number(body.staffingSlotId) : undefined,
+        staffingSlotId: body.staffingSlotId
+          ? Number(body.staffingSlotId)
+          : undefined,
       }),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');

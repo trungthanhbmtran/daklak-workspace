@@ -4,6 +4,20 @@ Tài liệu này ghi chép lại toàn bộ lịch sử các bản cập nhật,
 
 ## [Unreleased]
 
+### Added (Tính năng mới)
+- **Personal AI Models**: Thêm tính năng cho phép người dùng tự cấu hình khóa API cho các mô hình AI của riêng họ (OpenAI, Gemini, Claude).
+  - Bổ sung bảng `user_configs` trong cơ sở dữ liệu `user-service`.
+  - Bổ sung gRPC `UserConfigService` để giao tiếp giữa API Gateway và User Service.
+  - Cập nhật `AiService` và AI Worker để ưu tiên sử dụng khóa API cá nhân nếu người dùng đã cấu hình, nếu không sẽ tự động fallback sang cấu hình hệ thống chung.
+  - Cập nhật giao diện thanh Header: bấm vào avatar sẽ có thêm nút "Cài đặt AI & Ứng dụng" để mở bảng điều khiển AI cá nhân bằng `Dialog`.
+
+- **Personal AI Assistants (Custom RAG & Bot)**: Khởi tạo hệ thống Trợ lý AI Cá nhân.
+  - Bổ sung cấu hình `qdrant` vào `docker-compose.prod.yml` làm Vector Database.
+  - Thiết kế và triển khai CSDL (Prisma schema) cho `AiAssistant`, `AiKnowledgeSource`, `AiAssistantTool` bên trong `user-service`.
+  - Khai báo file protobuf `ai_assistant.proto` và tích hợp REST Controller `AiAssistantGatewayController` tại API Gateway.
+  - Hỗ trợ các API cho chức năng: Quản lý Trợ lý (CRUD), Thêm bớt công cụ (Tools), Quản lý Nguồn tài liệu (Knowledge Sources).
+  - Hỗ trợ tải lên tài liệu định dạng PDF, DOCX (tích hợp `pdf-parse`, `mammoth` tại API Gateway) để tự động trích xuất văn bản, tạo vector và lưu vào Qdrant.
+
 ## [1.0.1] - 2026-09-12
 
 ### Fixed (Đã sửa lỗi)

@@ -73,7 +73,13 @@ export class CategoriesController {
     @Query('skip') skip?: string,
     @Query('selectedIds') selectedIds?: string,
   ) {
-    return this.categoriesService.getByGroup(group, q, limit, skip, selectedIds);
+    return this.categoriesService.getByGroup(
+      group,
+      q,
+      limit,
+      skip,
+      selectedIds,
+    );
   }
 
   @Post()

@@ -52,21 +52,21 @@ export class MediaService implements OnModuleInit {
   async requestUpload(req: any, body: RequestUploadDto) {
     const ownerId = req.user?.id || req.user?.sub || 'anonymous';
     const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaGrpcService.RequestUpload(payload)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return await firstValueFrom(
+      this.mediaGrpcService.RequestUpload(payload),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   async confirmUpload(body: ConfirmUploadDto) {
-    return await firstValueFrom(this.mediaGrpcService.ConfirmUpload(body)).catch(
-      (e) => {
-        console.error('RPC Call Failed', e.message);
-        return null;
-      },
-    );
+    return await firstValueFrom(
+      this.mediaGrpcService.ConfirmUpload(body),
+    ).catch((e) => {
+      console.error('RPC Call Failed', e.message);
+      return null;
+    });
   }
 
   async initMultipartUpload(req: any, body: InitMultipartUploadDto) {

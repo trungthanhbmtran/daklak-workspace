@@ -1,0 +1,11 @@
+model UserConfig {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  key       String
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@map("user_configs")
+}

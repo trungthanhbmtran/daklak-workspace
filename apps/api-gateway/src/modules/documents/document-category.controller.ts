@@ -1,4 +1,5 @@
-import { InternalServerErrorException,
+import {
+  InternalServerErrorException,
   Controller,
   Get,
   Post,

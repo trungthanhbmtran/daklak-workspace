@@ -4,7 +4,7 @@ import {
   OnModuleInit,
   BadRequestException,
   NotAcceptableException,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -25,7 +25,9 @@ export class UserService implements OnModuleInit {
 
   onModuleInit() {
     this.userGrpcService = this.client.getService(MICROSERVICES.USER.SERVICE);
-    this.employeeGrpcService = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.employeeGrpcService = this.employeeClient.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   async list(user: any, pageStr?: string, limitStr?: string, search?: string) {
@@ -36,12 +38,13 @@ export class UserService implements OnModuleInit {
     const take = limit;
 
     const userInfo: any = userId
-      ? await firstValueFrom(this.userGrpcService.FindOne({ id: userId })).catch(
-          () => null,
-        )
+      ? await firstValueFrom(
+          this.userGrpcService.FindOne({ id: userId }),
+        ).catch(() => null)
       : null;
 
-    const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
+    const isAdmin: boolean =
+      !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
@@ -52,7 +55,12 @@ export class UserService implements OnModuleInit {
     }
 
     const response = (await firstValueFrom(
-      this.userGrpcService.ListUsers({ skip, take, search, unitCodeStartsWith }),
+      this.userGrpcService.ListUsers({
+        skip,
+        take,
+        search,
+        unitCodeStartsWith,
+      }),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;

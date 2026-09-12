@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
@@ -8,7 +18,7 @@ import { ReportsService } from './reports.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) { }
+  constructor(private readonly reportsService: ReportsService) {}
 
   @Post('templates')
   async createTemplate(@Body() body: any) {
@@ -42,22 +52,37 @@ export class ReportsController {
 
   @Get('tasks')
   async getTaskStats(@Req() req: any) {
-    return this.reportsService.getTaskStats(req.query, req.user, req.headers.authorization);
+    return this.reportsService.getTaskStats(
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
   }
 
   @Get('posts')
   async getPostStats(@Req() req: any) {
-    return this.reportsService.getPostStats(req.query, req.user, req.headers.authorization);
+    return this.reportsService.getPostStats(
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
   }
 
   @Get('kpis')
   async getKpiStats(@Req() req: any) {
-    return this.reportsService.getKpiStats(req.query, req.user, req.headers.authorization);
+    return this.reportsService.getKpiStats(
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
   }
 
   @Get('documents')
   async getDocumentStats(@Req() req: any) {
-    return this.reportsService.getDocumentStats(req.query, req.user, req.headers.authorization);
+    return this.reportsService.getDocumentStats(
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
   }
 }
-

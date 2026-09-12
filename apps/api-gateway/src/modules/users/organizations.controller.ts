@@ -96,10 +96,7 @@ export class OrganizationsController {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật đơn vị tổ chức' })
   @ApiResponse({ status: 200, description: 'Đơn vị đã cập nhật (camelCase)' })
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
-  ) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     return this.orgService.update(id, body);
   }
 

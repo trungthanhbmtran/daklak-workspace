@@ -1,7 +1,21 @@
-import { Injectable, Inject, OnModuleInit, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { type ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom, Observable, interval, from } from 'rxjs';
-import { switchMap, map, distinctUntilChanged, takeWhile, filter } from 'rxjs/operators';
+import {
+  switchMap,
+  map,
+  distinctUntilChanged,
+  takeWhile,
+  filter,
+} from 'rxjs/operators';
 import { MICROSERVICES } from '../../core/constants/services';
 import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -65,9 +79,14 @@ export class TranslateService implements OnModuleInit {
         return JSON.parse(jobData);
       }),
       filter((job) => job !== null),
-      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-      takeWhile((job) => job.status !== 'COMPLETED' && job.status !== 'FAILED', true),
-      map((job) => ({ data: job }))
+      distinctUntilChanged(
+        (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr),
+      ),
+      takeWhile(
+        (job) => job.status !== 'COMPLETED' && job.status !== 'FAILED',
+        true,
+      ),
+      map((job) => ({ data: job })),
     );
   }
 
@@ -84,8 +103,6 @@ export class TranslateService implements OnModuleInit {
     }
   }
 
-
-
   async handleTranslateTask(data: {
     jobId: string;
     text: string;
@@ -98,13 +115,13 @@ export class TranslateService implements OnModuleInit {
           text: data.text,
           target_lang: data.targetLang,
         }) as any,
-      ) as { translated_text: string };
+      );
 
       await this.redisService.set(
         `translate_job_${data.jobId}`,
         JSON.stringify({
           status: 'COMPLETED',
-          result: { translated_text: result.translated_text },
+          result: { translated_text: (result as any).translated_text },
         }),
         3600,
       );

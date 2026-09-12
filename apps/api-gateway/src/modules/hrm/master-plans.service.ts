@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit , InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
 import { MICROSERVICES } from '../../core/constants/services';
@@ -22,7 +27,9 @@ export class MasterPlansService implements OnModuleInit {
 
   onModuleInit() {
     this.masterPlanService = this.client.getService('MasterPlanService');
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
@@ -156,7 +163,12 @@ export class MasterPlansService implements OnModuleInit {
     return ids;
   }
 
-  async findAll(user: any, type?: string, status?: string, reqDepartmentId?: string) {
+  async findAll(
+    user: any,
+    type?: string,
+    status?: string,
+    reqDepartmentId?: string,
+  ) {
     const isAdmin =
       user?.permissionsFlatten?.includes('PLAN:MANAGE') ||
       user?.username === 'admin' ||
@@ -202,7 +214,11 @@ export class MasterPlansService implements OnModuleInit {
     return res;
   }
 
-  async getHistoricalFeasibility(type: string, title: string, durationDays: string) {
+  async getHistoricalFeasibility(
+    type: string,
+    title: string,
+    durationDays: string,
+  ) {
     return firstValueFrom(
       this.masterPlanService.GetHistoricalFeasibility({
         type,
@@ -262,7 +278,8 @@ export class MasterPlansService implements OnModuleInit {
       tasks: [
         {
           title: 'Khảo sát hiện trạng bệnh án điện tử',
-          description: 'Làm việc với các bệnh viện tuyến tỉnh để rà soát hạ tầng server.',
+          description:
+            'Làm việc với các bệnh viện tuyến tỉnh để rà soát hạ tầng server.',
           priority: 'HIGH',
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           assigneeCode: 'E001',
@@ -271,7 +288,9 @@ export class MasterPlansService implements OnModuleInit {
           title: 'Đào tạo sử dụng phần mềm quản lý',
           description: 'Mở lớp tập huấn cho 500 y bác sĩ.',
           priority: 'MEDIUM',
-          dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          dueDate: new Date(
+            Date.now() + 14 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
           assigneeCode: 'E002',
         },
         {

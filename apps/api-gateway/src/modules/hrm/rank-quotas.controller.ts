@@ -6,7 +6,7 @@ import {
   Param,
   Query,
   Inject,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';

@@ -16,6 +16,8 @@ model User {
   refreshTokens   RefreshToken[]
   jobPositions    JobPosition[]
   roles           Role[]            @relation("RoleToUser")
+  userConfigs     UserConfig[]
+  aiAssistants    AiAssistant[]
 
   @@map("users")
 }

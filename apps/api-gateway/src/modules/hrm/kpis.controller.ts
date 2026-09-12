@@ -73,8 +73,6 @@ export class KpisController {
     return this.kpisService.findEvaluations(req.user, employeeCode);
   }
 
-
-
   @Post('evaluations/calculate-personal')
   async calculatePersonalKpi(
     @Req() req: any,

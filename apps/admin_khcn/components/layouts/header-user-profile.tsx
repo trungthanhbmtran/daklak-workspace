@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { LogOut, User, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,16 +12,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLogout } from "@/hooks/useLogout";
 import { useUser } from "@/hooks/useUser";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/typography";
+import { PersonalAiRouterConfig } from "@/features/system-admin/users/components/settings/PersonalAiRouterConfig";
+import { PersonalAiAssistants } from "@/features/system-admin/users/components/settings/PersonalAiAssistants";
 
 interface HeaderUserProfileProps {
   showName?: boolean;
 }
 
 export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { handleLogout, isPending } = useLogout();
   const { user } = useUser();
 
@@ -29,6 +34,7 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
   const email = user?.email || "user@daklak.gov.vn";
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -80,8 +86,8 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
         <DropdownMenuItem className="cursor-pointer">
           <User className="mr-2 h-4 w-4" /> Hồ sơ cá nhân
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
-          <Settings className="mr-2 h-4 w-4" /> Cài đặt
+        <DropdownMenuItem className="cursor-pointer" onSelect={() => setIsSettingsOpen(true)}>
+          <Settings className="mr-2 h-4 w-4" /> Cài đặt AI & Ứng dụng
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
@@ -94,5 +100,18 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    
+    <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Cài đặt Cá nhân</DialogTitle>
+        </DialogHeader>
+        <div className="py-4 space-y-8">
+          <PersonalAiRouterConfig />
+          <PersonalAiAssistants />
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

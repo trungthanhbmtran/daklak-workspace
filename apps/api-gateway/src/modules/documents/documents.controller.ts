@@ -22,8 +22,6 @@ import { DocumentsService } from './documents.service';
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
-
-
   @Get()
   async listDocuments(@Query() query: any) {
     return this.documentsService.listDocuments(query);

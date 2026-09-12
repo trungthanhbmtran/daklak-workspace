@@ -33,11 +33,6 @@ import { EmployeeService } from './employee.service';
     TaskTemplatesController,
     RankQuotasController,
   ],
-  providers: [
-    TasksService,
-    MasterPlansService,
-    KpisService,
-    EmployeeService,
-  ],
+  providers: [TasksService, MasterPlansService, KpisService, EmployeeService],
 })
 export class HrmModule {}

@@ -3,7 +3,7 @@ import {
   Inject,
   OnModuleInit,
   BadRequestException,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -152,7 +152,8 @@ export class MenusService implements OnModuleInit {
       const branches = getRealBranches(response.data ?? []);
       response.hubApps = this.buildHubApps(branches);
       response.sidebarMenus = this.buildSidebarMenus(branches);
-      response.allowedPaths = response.allowedPaths || response.allowed_paths || [];
+      response.allowedPaths =
+        response.allowedPaths || response.allowed_paths || [];
     }
     return response;
   }
@@ -315,11 +316,11 @@ export class MenusService implements OnModuleInit {
   }
 
   async delete(id: number) {
-    const res = (await firstValueFrom(this.menuGrpcService.Delete({ id })).catch(
-      (e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      },
-    )) as any;
+    const res = (await firstValueFrom(
+      this.menuGrpcService.Delete({ id }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    })) as any;
     return {
       success: res?.success ?? true,
       message: res?.message ?? 'Đã xóa menu',

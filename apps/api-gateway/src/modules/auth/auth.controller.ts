@@ -27,12 +27,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({
     status: 200,
-    description: 'Trả về sessionId và expiresAt. Token được gán qua HTTP-Only Cookie.',
+    description:
+      'Trả về sessionId và expiresAt. Token được gán qua HTTP-Only Cookie.',
   })
-  async login(
-    @Body() body: any,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(body, res);
   }
 
@@ -42,7 +40,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Trả về sessionId và expiresAt. Token mới được gán qua HTTP-Only Cookie.',
+    description:
+      'Trả về sessionId và expiresAt. Token mới được gán qua HTTP-Only Cookie.',
   })
   async refresh(
     @Body() body: any,

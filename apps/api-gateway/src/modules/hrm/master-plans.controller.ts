@@ -29,7 +29,12 @@ export class MasterPlansController {
     @Query('status') status?: string,
     @Query('departmentId') reqDepartmentId?: string,
   ) {
-    return this.masterPlansService.findAll(req.user, type, status, reqDepartmentId);
+    return this.masterPlansService.findAll(
+      req.user,
+      type,
+      status,
+      reqDepartmentId,
+    );
   }
 
   @Get('advanced/historical-feasibility')
@@ -38,7 +43,11 @@ export class MasterPlansController {
     @Query('title') title: string,
     @Query('durationDays') durationDays: string,
   ) {
-    return this.masterPlansService.getHistoricalFeasibility(type, title, durationDays);
+    return this.masterPlansService.getHistoricalFeasibility(
+      type,
+      title,
+      durationDays,
+    );
   }
 
   @Get(':id')

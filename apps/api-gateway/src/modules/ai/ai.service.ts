@@ -19,6 +19,7 @@ interface CircuitBreakerState {
 @Injectable()
 export class AiService implements OnModuleInit {
   private configService: any;
+  private userConfigService: any;
   private readonly logger = new Logger(AiService.name);
 
   // Circuit Breaker Config
@@ -32,21 +33,40 @@ export class AiService implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.USER_CONFIG.SYMBOL)
+    private readonly userConfigClient: any,
   ) {}
 
   onModuleInit() {
     this.configService = this.client.getService('SystemConfigService');
+    this.userConfigService =
+      this.userConfigClient.getService('UserConfigService');
   }
 
-  private async getProviders(): Promise<AiProviderConfig[]> {
+  private async getProviders(userId?: number): Promise<AiProviderConfig[]> {
     try {
-      const response = (await firstValueFrom(
-        this.configService.GetConfigs({}),
-      )) as any;
-      const configs = response.configs || [];
-      const aiProvidersConfig = configs.find(
-        (c: any) => c.key === 'AI_PROVIDERS',
-      );
+      let aiProvidersConfig;
+
+      // Try user config first
+      if (userId) {
+        const userConfigResponse = (await firstValueFrom(
+          this.userConfigService.GetConfigs({ userId }),
+        ).catch(() => null)) as any;
+
+        const userConfigs = userConfigResponse?.configs || [];
+        aiProvidersConfig = userConfigs.find(
+          (c: any) => c.key === 'AI_PROVIDERS',
+        );
+      }
+
+      // Fallback to system config
+      if (!aiProvidersConfig || !aiProvidersConfig.value) {
+        const response = (await firstValueFrom(
+          this.configService.GetConfigs({}),
+        )) as any;
+        const configs = response.configs || [];
+        aiProvidersConfig = configs.find((c: any) => c.key === 'AI_PROVIDERS');
+      }
 
       if (!aiProvidersConfig || !aiProvidersConfig.value) return [];
 
@@ -62,8 +82,12 @@ export class AiService implements OnModuleInit {
     }
   }
 
-  async generateText(prompt: string, systemPrompt?: string): Promise<string> {
-    const providers = await this.getProviders();
+  async generateText(
+    prompt: string,
+    systemPrompt?: string,
+    userId?: number,
+  ): Promise<string> {
+    const providers = await this.getProviders(userId);
 
     if (providers.length === 0) {
       throw new Error(
@@ -131,6 +155,35 @@ export class AiService implements OnModuleInit {
     );
   }
 
+  async generateEmbedding(text: string, userId?: number): Promise<number[]> {
+    const providers = await this.getProviders(userId);
+    if (providers.length === 0) {
+      throw new Error('Không có cấu hình AI nào khả dụng.');
+    }
+
+    // We prefer OpenAI for embeddings, fallback to Gemini. Claude does not have native text embeddings endpoint easily accessible.
+    let lastError: any = null;
+    for (const provider of providers) {
+      try {
+        if (provider.provider === 'OPENAI') {
+          return await this.getOpenAIEmbedding(provider, text);
+        } else if (provider.provider === 'GEMINI') {
+          return await this.getGeminiEmbedding(provider, text);
+        }
+      } catch (err: any) {
+        this.logger.warn(
+          `Failed getting embedding from ${provider.provider}: ${err.message}`,
+        );
+        lastError = err;
+      }
+    }
+
+    throw new Error(
+      'Tất cả các dịch vụ AI đều không hỗ trợ tạo Embedding hoặc đang lỗi. ' +
+        lastError?.message,
+    );
+  }
+
   private async callProvider(
     config: AiProviderConfig,
     prompt: string,
@@ -182,8 +235,10 @@ export class AiService implements OnModuleInit {
         body: JSON.stringify({
           model: (config.model || 'gpt-4o-mini').trim(),
           messages: [
-            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
-            { role: 'user', content: prompt }
+            ...(systemPrompt
+              ? [{ role: 'system', content: systemPrompt }]
+              : []),
+            { role: 'user', content: prompt },
           ],
         }),
       },
@@ -203,7 +258,9 @@ export class AiService implements OnModuleInit {
     prompt: string,
     systemPrompt?: string,
   ): Promise<string> {
-    const model = (config.model || 'gemini-1.5-pro').trim().replace(/^models\//, '');
+    const model = (config.model || 'gemini-1.5-pro')
+      .trim()
+      .replace(/^models\//, '');
     const response = await this.fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`,
       {
@@ -212,7 +269,9 @@ export class AiService implements OnModuleInit {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
+          systemInstruction: systemPrompt
+            ? { parts: [{ text: systemPrompt }] }
+            : undefined,
           contents: [{ parts: [{ text: prompt }] }],
         }),
       },
@@ -225,6 +284,57 @@ export class AiService implements OnModuleInit {
 
     const data = await response.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  private async getOpenAIEmbedding(
+    config: AiProviderConfig,
+    text: string,
+  ): Promise<number[]> {
+    const response = await this.fetchWithTimeout(
+      'https://api.openai.com/v1/embeddings',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'text-embedding-ada-002',
+          input: text,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`OpenAI Embedding Error: ${await response.text()}`);
+    }
+    const data = await response.json();
+    return data.data[0].embedding;
+  }
+
+  private async getGeminiEmbedding(
+    config: AiProviderConfig,
+    text: string,
+  ): Promise<number[]> {
+    const response = await this.fetchWithTimeout(
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${config.apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'models/text-embedding-004',
+          content: { parts: [{ text: text }] },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Gemini Embedding Error: ${await response.text()}`);
+    }
+    const data = await response.json();
+    return data.embedding.values;
   }
 
   private async callClaude(
@@ -297,12 +407,23 @@ export class AiService implements OnModuleInit {
             id.startsWith('o1') ||
             id.startsWith('o3')
           ) {
-            if (id.includes('audio') || id.includes('realtime') || id.includes('vision') || id.includes('instruct')) return acc;
-            
+            if (
+              id.includes('audio') ||
+              id.includes('realtime') ||
+              id.includes('vision') ||
+              id.includes('instruct')
+            )
+              return acc;
+
             let ctx = 128000;
-            if (id.includes('gpt-4') && !id.includes('turbo') && !id.includes('o')) ctx = 8192;
+            if (
+              id.includes('gpt-4') &&
+              !id.includes('turbo') &&
+              !id.includes('o')
+            )
+              ctx = 8192;
             if (id.includes('gpt-3.5')) ctx = 16385;
-            
+
             acc.push({ id: id, name: id, contextWindow: ctx });
           }
           return acc;
@@ -321,7 +442,11 @@ export class AiService implements OnModuleInit {
           // Google cung cấp sẵn trường supportedGenerationMethods để xác định model có hỗ trợ generateContent hay không
           if (m.supportedGenerationMethods?.includes('generateContent')) {
             const id = m.name.replace('models/', '');
-            acc.push({ id, name: m.displayName || id, contextWindow: m.inputTokenLimit });
+            acc.push({
+              id,
+              name: m.displayName || id,
+              contextWindow: m.inputTokenLimit,
+            });
           }
           return acc;
         }, []);
@@ -342,7 +467,11 @@ export class AiService implements OnModuleInit {
 
         result = (data.data || []).reduce((acc: any[], m: any) => {
           // API /v1/models của Anthropic mặc định chỉ trả về các model đang active và sử dụng được
-          acc.push({ id: m.id, name: m.display_name || m.id, contextWindow: 200000 });
+          acc.push({
+            id: m.id,
+            name: m.display_name || m.id,
+            contextWindow: 200000,
+          });
           return acc;
         }, []);
         break;

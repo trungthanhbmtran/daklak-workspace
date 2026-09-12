@@ -10,7 +10,7 @@ import {
   UseGuards,
   OnModuleInit,
   ParseIntPipe,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiTags,

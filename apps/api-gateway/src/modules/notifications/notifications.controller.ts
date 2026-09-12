@@ -68,7 +68,9 @@ export class NotificationsController {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
     const email = req.user?.email;
-    return this.notificationsService.markAllRead(userId, employeeCode, email).then(count => ({ success: true, count }));
+    return this.notificationsService
+      .markAllRead(userId, employeeCode, email)
+      .then((count) => ({ success: true, count }));
   }
 
   @Patch(':id/read')

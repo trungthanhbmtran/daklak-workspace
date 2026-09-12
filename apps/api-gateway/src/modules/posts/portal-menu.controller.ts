@@ -9,7 +9,7 @@ import {
   Inject,
   Query,
   UseGuards,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';

@@ -48,9 +48,26 @@ export class TasksController {
     @Query('viewMode') viewMode: string,
     @Query('referenceDate') referenceDate: string,
   ) {
-    return this.tasksService.list(req, role, assigneeCode, assignerCode, filter, search, departmentId, planId, isSupervisor, status, priority, page, limit, statsFilter, type, viewMode, referenceDate);
+    return this.tasksService.list(
+      req,
+      role,
+      assigneeCode,
+      assignerCode,
+      filter,
+      search,
+      departmentId,
+      planId,
+      isSupervisor,
+      status,
+      priority,
+      page,
+      limit,
+      statsFilter,
+      type,
+      viewMode,
+      referenceDate,
+    );
   }
-
 
   @Put(':id')
   async update(
@@ -80,7 +97,15 @@ export class TasksController {
     @Body('evidence') evidence?: string,
     @Body('evidenceData') evidenceData?: any,
   ) {
-    return this.tasksService.updateStatus(req, id, status, rejectReason, actionName, evidence, evidenceData);
+    return this.tasksService.updateStatus(
+      req,
+      id,
+      status,
+      rejectReason,
+      actionName,
+      evidence,
+      evidenceData,
+    );
   }
   @Post(':id/respond')
   async respondTask(
@@ -90,7 +115,13 @@ export class TasksController {
     @Body('rejectReason') rejectReason?: string,
     @Body('message') message?: string,
   ) {
-    return this.tasksService.respondTask(req, id, action, rejectReason, message);
+    return this.tasksService.respondTask(
+      req,
+      id,
+      action,
+      rejectReason,
+      message,
+    );
   }
 
   @Get('recommend-assignees')
@@ -101,7 +132,13 @@ export class TasksController {
     @Query('domainId') domainId: string,
     @Query('jobTitleId') jobTitleId: string,
   ) {
-    return this.tasksService.recommendAssignees(req, rankCode, strategy, domainId, jobTitleId);
+    return this.tasksService.recommendAssignees(
+      req,
+      rankCode,
+      strategy,
+      domainId,
+      jobTitleId,
+    );
   }
 
   @Put(':id/assign')
@@ -207,12 +244,18 @@ export class TasksController {
   }
 
   @Post(':id/attend')
-  async recordAttendance(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+  async recordAttendance(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     return this.tasksService.recordAttendance(req, id);
   }
 
   @Get(':id/attendance-stats')
-  async getAttendanceStats(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+  async getAttendanceStats(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     return this.tasksService.getAttendanceStats(req, id);
   }
 }

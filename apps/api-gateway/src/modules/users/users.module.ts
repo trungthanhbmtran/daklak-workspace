@@ -20,7 +20,10 @@ import {
 } from './organizations.controller';
 import { OrganizationsService } from './organizations.service';
 import { ConfigsController } from './configs.controller';
+import { UserConfigsController } from './user-configs.controller';
+import { AiAssistantGatewayController } from './ai-assistant.controller';
 import { IntegrationsController } from './integrations.controller';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [
@@ -32,8 +35,11 @@ import { IntegrationsController } from './integrations.controller';
     registerGrpcService(MICROSERVICES.MENU),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
+    registerGrpcService(MICROSERVICES.USER_CONFIG),
+    registerGrpcService(MICROSERVICES.AI_ASSISTANT),
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.REPORT),
+    AiModule,
   ],
   controllers: [
     UserController,
@@ -45,8 +51,15 @@ import { IntegrationsController } from './integrations.controller';
     OrganizationsController,
     PublicOrganizationsController,
     ConfigsController,
+    UserConfigsController,
+    AiAssistantGatewayController,
     IntegrationsController,
   ],
-  providers: [OrganizationsService, MenusService, UserService, CategoriesService],
+  providers: [
+    OrganizationsService,
+    MenusService,
+    UserService,
+    CategoriesService,
+  ],
 })
 export class UsersModule {}

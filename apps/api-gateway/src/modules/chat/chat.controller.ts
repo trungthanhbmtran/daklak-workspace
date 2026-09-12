@@ -1,5 +1,22 @@
-import { Controller, Get, Post, Body, Param, Query, Inject, OnModuleInit, UseGuards, Req } from '@nestjs/common';
-import { ClientGrpc, EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Inject,
+  OnModuleInit,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import {
+  ClientGrpc,
+  EventPattern,
+  Payload,
+  Ctx,
+  RmqContext,
+} from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { ChatGateway } from './chat.gateway';
@@ -25,19 +42,20 @@ export class ChatController implements OnModuleInit {
   constructor(
     @Inject('CHAT_PACKAGE') private client: ClientGrpc,
     @Inject('EMPLOYEE_PACKAGE') private employeeClient: ClientGrpc,
-    private readonly chatGateway: ChatGateway
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   onModuleInit() {
     this.chatService = this.client.getService<ChatServiceClient>('ChatService');
-    this.employeeService = this.employeeClient.getService<EmployeeServiceClient>('EmployeeHandlers');
+    this.employeeService =
+      this.employeeClient.getService<EmployeeServiceClient>('EmployeeHandlers');
   }
 
   @EventPattern('message.created')
   async handleMessageCreated(@Payload() data: any, @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
-    
+
     try {
       // Broadcast message via WebSockets
       if (data && data.conversationId) {
@@ -71,11 +89,13 @@ export class ChatController implements OnModuleInit {
         conversationId,
         limit: limit ? Number(limit) : 20,
         offset: offset ? Number(offset) : 0,
-      })
+      }),
     );
 
     if (res && res.data && Array.isArray(res.data)) {
-      const uniqueSenderIds = [...new Set(res.data.map((m: any) => m.senderId).filter(Boolean))];
+      const uniqueSenderIds = [
+        ...new Set(res.data.map((m: any) => m.senderId).filter(Boolean)),
+      ];
       const nameMap: Record<string, string> = {};
 
       if (uniqueSenderIds.length > 0) {
@@ -84,10 +104,10 @@ export class ChatController implements OnModuleInit {
             this.employeeService.ListEmployees({
               page: 1,
               pageSize: uniqueSenderIds.length,
-              codes: uniqueSenderIds
-            })
+              codes: uniqueSenderIds,
+            }),
           );
-          
+
           if (empListRes?.success && empListRes.data) {
             empListRes.data.forEach((emp: any) => {
               nameMap[emp.employeeCode] = emp.fullName || emp.employeeName;
