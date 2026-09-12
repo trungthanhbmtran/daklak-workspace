@@ -18,8 +18,8 @@ import type { NextRequest } from 'next/server';
  */
 export async function proxy(request: NextRequest) {
     const token =
-        request.cookies.get('session')?.value ||
-        request.cookies.get('accessToken')?.value;
+        request.cookies.get('accessToken')?.value ||
+        request.cookies.get('session')?.value;
 
     const { pathname } = request.nextUrl;
 

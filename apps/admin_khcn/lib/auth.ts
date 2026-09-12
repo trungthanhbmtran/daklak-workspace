@@ -12,8 +12,8 @@ const INTERNAL_API_URL =
 async function getToken(): Promise<string | null> {
   const cookieStore = await cookies();
   return (
-    cookieStore.get('session')?.value ||
     cookieStore.get('accessToken')?.value ||
+    cookieStore.get('session')?.value ||
     null
   );
 }
@@ -62,13 +62,14 @@ function getCachedAllowedPaths(token: string) {
         if (!res.ok) return [];
         const json = await res.json();
         return json?.data?.allowedPaths || json?.allowedPaths || json?.allowed_paths || [];
-      } catch {
+      } catch (err) {
+        console.error('Fetch menus/me error:', err);
         return [];
       }
     },
     // Cache key dựa vào token (unique per user session)
     [`menu-paths-${token.slice(-16)}`],
-    { revalidate: 300, tags: ['user-menus'] } // 5 phút
+    { revalidate: 10, tags: ['user-menus'] } // 10 giây (giảm để debug)
   )();
 }
 
@@ -81,8 +82,14 @@ export async function requireMenuAccess(pathname: string) {
   const allowedPaths = await getCachedAllowedPaths(token);
 
   if (allowedPaths.length === 0) {
+    console.error(`[requireMenuAccess] allowedPaths empty for token: ${token.slice(-10)}`);
     notFound();
   }
+
+  // Chuẩn hoá pathname: bỏ trailing slash nếu có
+  const normalizedPathname = pathname.endsWith('/') && pathname.length > 1 
+    ? pathname.slice(0, -1) 
+    : pathname;
 
   const hasAccess = allowedPaths.some((policy) => {
     if (!policy) return false;
@@ -90,14 +97,15 @@ export async function requireMenuAccess(pathname: string) {
     // Nếu policy có wildcard ở cuối (ví dụ: /services/admin/users/*)
     if (policy.endsWith('/*')) {
       const base = policy.slice(0, -2);
-      return pathname === base || pathname.startsWith(base + '/');
+      return normalizedPathname === base || normalizedPathname.startsWith(base + '/');
     }
     
     // Nếu không có wildcard thì phải khớp chính xác
-    return pathname === policy;
+    return normalizedPathname === policy;
   });
 
   if (!hasAccess) {
+    console.error(`[requireMenuAccess] no access for pathname: ${normalizedPathname}. Allowed: ${allowedPaths}`);
     notFound();
   }
 }
@@ -108,5 +116,11 @@ export async function requireMenuAccess(pathname: string) {
 export async function getCurrentPathname(): Promise<string> {
   const headersList = await headers();
   // proxy.ts forward x-pathname, bỏ basePath '/admin' nếu có
-  return headersList.get('x-pathname') || '/services/admin';
+  let pathname = headersList.get('x-pathname') || '/services/admin';
+  if (pathname.startsWith('/admin/')) {
+    pathname = pathname.replace(/^\/admin/, '') || '/';
+  } else if (pathname === '/admin') {
+    pathname = '/';
+  }
+  return pathname;
 }
