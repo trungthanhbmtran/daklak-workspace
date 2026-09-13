@@ -35,6 +35,8 @@ async function bootstrap() {
           'menu',
           'organization',
           'users',
+          'auth',
+          'user_config',
         ],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50051',
