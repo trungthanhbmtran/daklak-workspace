@@ -61,6 +61,31 @@ export class AiFeatureService implements OnModuleInit {
     return meta;
   }
 
+  private parseAiConfig(value: string) {
+    if (!value) return '';
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed === 'object' && parsed !== null) {
+        const parts = [];
+        if (parsed.name || parsed.description || parsed.knowledge) {
+          parts.push('<SystemContext>');
+          if (parsed.name) parts.push(`<Name>\n${parsed.name}\n</Name>`);
+          if (parsed.description) parts.push(`<Description>\n${parsed.description}\n</Description>`);
+          if (parsed.knowledge) parts.push(`<KnowledgeBase>\n${parsed.knowledge}\n</KnowledgeBase>`);
+          parts.push('</SystemContext>');
+        }
+        if (parsed.instructions) {
+          parts.push(`<Instructions>\n${parsed.instructions}\n</Instructions>`);
+        }
+        return parts.join('\n\n');
+      }
+    } catch (e) {
+      // Fallback for legacy text or XML
+      return value;
+    }
+    return value;
+  }
+
   async generateText(prompt: string, userId?: number) {
     if (!prompt) {
       throw new BadRequestException('Prompt is required');
@@ -80,7 +105,7 @@ export class AiFeatureService implements OnModuleInit {
       const assistantConfig = configs.find(
         (c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT',
       );
-      const systemPrompt = assistantConfig?.value || '';
+      const systemPrompt = this.parseAiConfig(assistantConfig?.value || '');
 
       this.rmqClient.emit('ai_generate_task', {
         jobId,
@@ -112,13 +137,13 @@ export class AiFeatureService implements OnModuleInit {
       const assistantConfig = configs.find(
         (c: any) => c.key === 'AI_PROMPT_SYSTEM_ASSISTANT',
       );
-      const systemPrompt = assistantConfig?.value || '';
+      const systemPrompt = this.parseAiConfig(assistantConfig?.value || '');
 
       const promptConfig = configs.find(
         (c: any) => c.key === `AI_PROMPT_${action}`,
       );
 
-      const promptTemplate = promptConfig?.value || '';
+      const promptTemplate = this.parseAiConfig(promptConfig?.value || '');
 
       if (!promptTemplate) {
         throw new BadRequestException(

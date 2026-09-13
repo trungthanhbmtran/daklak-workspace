@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash2, RefreshCw, Link2, Cpu, Hash, KeyRound } from 'lucide-react';
+import { Trash2, RefreshCw, Link2, Cpu, Hash, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -25,6 +25,7 @@ interface AiProviderCardProps {
 
 export function AiProviderCard({ provider, aiProviderCategories, onChange, onRemove }: AiProviderCardProps) {
   const { fetchedModels, isFetching, fetchModels } = useAiFetchModels();
+  const [showApiKey, setShowApiKey] = useState(false);
 
   React.useEffect(() => {
     if (provider.apiKey && !fetchedModels[provider.id]) {
@@ -167,14 +168,25 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
             <KeyRound className="w-3.5 h-3.5" /> API Key
           </label>
-          <Input
-            type="password"
-            className="h-10 bg-background border-input font-mono text-sm tracking-widest w-full"
-            value={provider.apiKey}
-            onChange={(e) => onChange('apiKey', e.target.value)}
-            placeholder="Nhập token bảo mật (sk-...)"
-            autoComplete="off"
-          />
+          <div className="relative">
+            <Input
+              type={showApiKey ? "text" : "password"}
+              className={`h-10 bg-background border-input font-mono text-sm w-full pr-10 ${!showApiKey ? "tracking-widest" : ""}`}
+              value={provider.apiKey}
+              onChange={(e) => onChange('apiKey', e.target.value)}
+              placeholder="Nhập token bảo mật (sk-...)"
+              autoComplete="off"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-10 w-10 px-0 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowApiKey(!showApiKey)}
+            >
+              {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </Button>
+          </div>
         </div>
         
       </div>

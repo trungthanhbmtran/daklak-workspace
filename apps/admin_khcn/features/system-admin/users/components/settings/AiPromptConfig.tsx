@@ -4,10 +4,140 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Save, Bot, BrainCircuit, ListTodo, CalendarClock, Target } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useGetSystemConfigs, useUpdateMultipleSystemConfigs } from '../../hooks/useSystemConfigs';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+
+const safeParseJson = (text: string) => {
+  if (!text) return null;
+  try {
+    const parsed = JSON.parse(text);
+    if (typeof parsed === 'object' && parsed !== null) {
+      return parsed;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+};
+
+// Legacy fallback helper for XML tags previously used
+const extractTag = (text: string, tag: string) => {
+  if (!text) return '';
+  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
+  const match = text.match(regex);
+  return match ? match[1].trim() : '';
+};
+
+const hasAnyTag = (text: string) => {
+  return /<(Name|Description|Instructions|Knowledge)>/.test(text || '');
+};
+
+function AiAgentForm({ value, onChange, title, badge, desc, varsInfo }: any) {
+  // Parse value from JSON, fallback to XML, then raw text
+  let parsedName = '';
+  let parsedDesc = '';
+  let parsedKnow = '';
+  let parsedInst = '';
+
+  const jsonValue = safeParseJson(value);
+  if (jsonValue) {
+    parsedName = jsonValue.name || '';
+    parsedDesc = jsonValue.description || '';
+    parsedKnow = jsonValue.knowledge || '';
+    parsedInst = jsonValue.instructions || '';
+  } else if (hasAnyTag(value)) {
+    parsedName = extractTag(value, 'Name');
+    parsedDesc = extractTag(value, 'Description');
+    parsedKnow = extractTag(value, 'Knowledge');
+    parsedInst = extractTag(value, 'Instructions');
+  } else {
+    parsedInst = value || '';
+  }
+
+  const handleUpdate = (field: string, val: string) => {
+    const n = field === 'name' ? val : parsedName;
+    const d = field === 'desc' ? val : parsedDesc;
+    const k = field === 'know' ? val : parsedKnow;
+    const i = field === 'inst' ? val : parsedInst;
+    
+    const obj = {
+      name: n,
+      description: d,
+      instructions: i,
+      knowledge: k
+    };
+    
+    onChange(JSON.stringify(obj, null, 2));
+  };
+
+  return (
+    <div className="bg-muted/5 border border-border rounded-xl p-5 space-y-6">
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Badge variant="secondary" className="bg-muted text-foreground">{badge}</Badge>
+          <h3 className="font-bold text-foreground text-lg">{title}</h3>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tên Trợ lý</label>
+          <Input 
+            value={parsedName} 
+            onChange={(e) => handleUpdate('name', e.target.value)} 
+            placeholder="Ví dụ: Trợ lý Lập Kế hoạch..."
+            className="bg-background"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mô tả nhiệm vụ</label>
+          <Input 
+            value={parsedDesc} 
+            onChange={(e) => handleUpdate('desc', e.target.value)} 
+            placeholder="Tóm tắt vai trò của trợ lý..."
+            className="bg-background"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-2 border-t border-border/50">
+        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Chỉ dẫn Hệ thống (System Instructions)</label>
+        {varsInfo && (
+          <p className="text-xs text-muted-foreground flex flex-wrap gap-1.5 items-center mb-3">
+            Biến khả dụng:
+            {varsInfo.map((v: string) => (
+              <span key={v} className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{v}</span>
+            ))}
+          </p>
+        )}
+        <Textarea
+          className="min-h-[200px] font-mono text-sm bg-background rounded-xl border-input p-4 leading-relaxed focus-visible:ring-primary/50"
+          value={parsedInst}
+          onChange={(e) => handleUpdate('inst', e.target.value)}
+          placeholder="Bạn là một chuyên gia..."
+        />
+      </div>
+
+      <div className="space-y-2 pt-2 border-t border-border/50">
+        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          Trích nguồn Tri thức (Knowledge Base) 
+          <Badge variant="outline" className="text-[10px] h-5 font-normal">Tùy chọn</Badge>
+        </label>
+        <p className="text-xs text-muted-foreground mb-2">Cung cấp các quy định, tài liệu tham khảo cố định hoặc dữ liệu nền tảng cho Trợ lý.</p>
+        <Textarea
+          className="min-h-[100px] font-mono text-sm bg-background rounded-xl border-input p-4 leading-relaxed focus-visible:ring-primary/50"
+          value={parsedKnow}
+          onChange={(e) => handleUpdate('know', e.target.value)}
+          placeholder="Nhập các kiến thức hoặc văn bản quy phạm..."
+        />
+      </div>
+    </div>
+  );
+}
 
 export function AiPromptConfig() {
   const { data: configs = {} } = useGetSystemConfigs();
@@ -202,122 +332,55 @@ Nhiệm vụ cốt lõi của bạn là hỗ trợ ban lãnh đạo và cán b�
           </TabsList>
 
           <TabsContent value="persona" className="space-y-4 outline-none">
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="default" className="bg-primary/20 text-primary hover:bg-primary/20 border-none">Core Persona</Badge>
-                <h3 className="font-bold text-primary text-lg">Trợ lý Hệ thống (System AI Assistant)</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Đây là bộ não trung tâm định hình cách AI giao tiếp, tư duy và đảm bảo an toàn thông tin trên toàn hệ thống. Kịch bản này được nhúng ngầm vào mọi Trợ lý chuyên môn khác.
-              </p>
-              <Textarea
-                className="min-h-[320px] font-mono text-sm leading-relaxed bg-background/80 backdrop-blur-sm border-primary/20 focus-visible:ring-primary shadow-inner rounded-xl p-4 mt-2"
-                value={promptSystemAssistant}
-                onChange={(e) => setPromptSystemAssistant(e.target.value)}
-                placeholder="<Identity>...</Identity>"
-              />
-            </div>
+            <AiAgentForm 
+              badge="Core Persona"
+              title="Trợ lý Hệ thống (System AI Assistant)"
+              desc="Đây là bộ não trung tâm định hình cách AI giao tiếp, tư duy và đảm bảo an toàn thông tin trên toàn hệ thống. Kịch bản này được nhúng ngầm vào mọi Trợ lý chuyên môn khác."
+              value={promptSystemAssistant}
+              onChange={setPromptSystemAssistant}
+            />
           </TabsContent>
 
           <TabsContent value="planning" className="space-y-4 outline-none">
-            <div className="border border-border rounded-xl p-5 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="secondary" className="bg-muted text-foreground">Specialist</Badge>
-                <h3 className="font-bold text-foreground text-lg">Trợ lý Lập Kế hoạch (Planning Agent)</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Chuyên gia AI chuyên trách việc xây dựng kế hoạch, sinh các chỉ tiêu chiến lược và hành động dựa trên dữ liệu phòng ban, năng lực tổ chức.
-              </p>
-              <div className="pt-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">System Instructions</p>
-                <p className="text-xs text-muted-foreground flex flex-wrap gap-1.5 items-center mb-3">
-                  Biến khả dụng:
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{framework}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{planTitle}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{planObjective}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{orgContext}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{rolesContext}`}</span>
-                </p>
-                <Textarea
-                  className="min-h-[300px] font-mono text-sm bg-muted/10 rounded-xl border-input p-4 leading-relaxed focus-visible:ring-primary/50"
-                  value={promptMasterPlan}
-                  onChange={(e) => setPromptMasterPlan(e.target.value)}
-                />
-              </div>
-            </div>
+            <AiAgentForm 
+              badge="Specialist"
+              title="Trợ lý Lập Kế hoạch (Planning Agent)"
+              desc="Chuyên gia AI chuyên trách việc xây dựng kế hoạch, sinh các chỉ tiêu chiến lược và hành động dựa trên dữ liệu phòng ban, năng lực tổ chức."
+              value={promptMasterPlan}
+              onChange={setPromptMasterPlan}
+              varsInfo={['{framework}', '{planTitle}', '{planObjective}', '{orgContext}', '{rolesContext}']}
+            />
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-5 outline-none">
-            <div className="bg-muted/5 border border-border rounded-xl p-5 space-y-6">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="secondary" className="bg-muted text-foreground">Specialist</Badge>
-                  <h3 className="font-bold text-foreground text-lg">Trợ lý Quản trị Dự án (PM Agent)</h3>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Chuyên gia AI phân rã cấu trúc công việc (WBS) và giao việc thông minh dựa trên năng lực, vị trí của nhân sự.
-                </p>
-              </div>
+            <AiAgentForm 
+              badge="Specialist"
+              title="Trợ lý Quản trị Dự án - Kỹ năng Phân rã WBS"
+              desc="Kỹ năng phân rã cấu trúc công việc (WBS) từ mục tiêu cấp cao xuống các hạng mục công việc cụ thể."
+              value={promptProjectTasks}
+              onChange={setPromptProjectTasks}
+              varsInfo={['{modelContext}', '{title}', '{objective}']}
+            />
 
-              <div className="space-y-3 pt-2">
-                <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary"></div> Kỹ năng Phân rã Cấu trúc Công việc (WBS)
-                </h4>
-                <p className="text-xs text-muted-foreground flex flex-wrap gap-1.5 items-center">
-                  Biến khả dụng:
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{modelContext}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{title}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{objective}`}</span>
-                </p>
-                <Textarea
-                  className="min-h-[200px] font-mono text-sm bg-background rounded-xl border-input p-4 leading-relaxed focus-visible:ring-primary/50"
-                  value={promptProjectTasks}
-                  onChange={(e) => setPromptProjectTasks(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-3 pt-4 border-t border-border/50">
-                <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary"></div> Kỹ năng Phân rã & Gán việc thông minh (Subtasks)
-                </h4>
-                <p className="text-xs text-muted-foreground flex flex-wrap gap-1.5 items-center">
-                  Biến khả dụng:
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{parentTitle}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{parentDescription}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{employeesContext}`}</span>
-                </p>
-                <Textarea
-                  className="min-h-[250px] font-mono text-sm bg-background rounded-xl border-input p-4 leading-relaxed focus-visible:ring-primary/50"
-                  value={promptSubtaskAssignment}
-                  onChange={(e) => setPromptSubtaskAssignment(e.target.value)}
-                />
-              </div>
-            </div>
+            <AiAgentForm 
+              badge="Specialist"
+              title="Trợ lý Quản trị Dự án - Kỹ năng Gán việc thông minh"
+              desc="Kỹ năng tự động đề xuất phân công nhân sự (Assignee) cho các công việc dựa trên năng lực và mô tả công việc."
+              value={promptSubtaskAssignment}
+              onChange={setPromptSubtaskAssignment}
+              varsInfo={['{parentTitle}', '{parentDescription}', '{employeesContext}']}
+            />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-4 outline-none">
-            <div className="border border-border rounded-xl p-5 space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="secondary" className="bg-muted text-foreground">Specialist</Badge>
-                <h3 className="font-bold text-foreground text-lg">Trợ lý Lịch trình (Calendar Agent)</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Trợ lý AI chuyên sắp xếp thời gian, tự động tái sử dụng lịch sử và tinh chỉnh lịch làm việc cá nhân/tổ chức.
-              </p>
-              <div className="pt-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">System Instructions</p>
-                <p className="text-xs text-muted-foreground flex flex-wrap gap-1.5 items-center mb-3">
-                  Biến khả dụng:
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{historyContext}`}</span>
-                  <span className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">{`{userInput}`}</span>
-                </p>
-                <Textarea
-                  className="min-h-[250px] font-mono text-sm bg-muted/10 rounded-xl border-input p-4 leading-relaxed focus-visible:ring-primary/50"
-                  value={promptCalendarReuse}
-                  onChange={(e) => setPromptCalendarReuse(e.target.value)}
-                />
-              </div>
-            </div>
+            <AiAgentForm 
+              badge="Specialist"
+              title="Trợ lý Lịch trình (Calendar Agent)"
+              desc="Trợ lý AI chuyên sắp xếp thời gian, tự động tái sử dụng lịch sử và tinh chỉnh lịch làm việc cá nhân/tổ chức."
+              value={promptCalendarReuse}
+              onChange={setPromptCalendarReuse}
+              varsInfo={['{historyContext}', '{userInput}']}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>

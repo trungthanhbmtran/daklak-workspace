@@ -294,7 +294,7 @@ export class TaskSharedService {
     }
   }
 
-  public async checkTaskAccess(t: any, query: any): Promise<{
+  public async checkTaskAccess(t: any, query: any, employeeDeptMap?: Map<string, number>): Promise<{
     isOwner: boolean;
     isAssignee: boolean;
     isSupervisor: boolean;
@@ -307,12 +307,12 @@ export class TaskSharedService {
     const cacheKey = `task_access:${t.id}:${query.currentEmployeeCode || 'anon'}`;
     const cached = await this.cache.get<any>(cacheKey);
     if (cached) return cached;
-    const access = await this._checkTaskAccessInternal(t, query);
+    const access = await this._checkTaskAccessInternal(t, query, employeeDeptMap);
     await this.cache.set(cacheKey, access, 5 * 60 * 1000); // 5 mins cache
     return access;
   }
 
-  private async _checkTaskAccessInternal(t: any, query: any): Promise<{
+  private async _checkTaskAccessInternal(t: any, query: any, employeeDeptMap?: Map<string, number>): Promise<{
     hasAccess: boolean;
     isAdmin: boolean;
     isOwner: boolean;
@@ -322,6 +322,18 @@ export class TaskSharedService {
     isDeptLeader: boolean;
     isLowestLevel: boolean;
   }> {
+    if (!t) {
+      return {
+        hasAccess: false,
+        isAdmin: false,
+        isOwner: false,
+        isAssignee: false,
+        isSupervisor: false,
+        isCoordinator: false,
+        isDeptLeader: false,
+        isLowestLevel: false,
+      };
+    }
     if (!query) {
       return {
         hasAccess: true,
@@ -385,11 +397,21 @@ export class TaskSharedService {
         if (assigneeCode && allowedCodes.includes(assigneeCode)) {
           isDeptLeader = true;
         } else if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
-          const assigneeEmp = await this.prisma.employee.findUnique({
-            where: { employeeCode: assigneeCode },
-            select: { departmentId: true }
-          });
-          if (assigneeEmp?.departmentId && allowedDepts.includes(Number(assigneeEmp.departmentId))) {
+          let assigneeDeptId: number | null = null;
+          
+          if (employeeDeptMap && employeeDeptMap.has(assigneeCode)) {
+            assigneeDeptId = employeeDeptMap.get(assigneeCode)!;
+          } else {
+            const assigneeEmp = await this.prisma.employee.findUnique({
+              where: { employeeCode: assigneeCode },
+              select: { departmentId: true }
+            });
+            if (assigneeEmp?.departmentId) {
+              assigneeDeptId = Number(assigneeEmp.departmentId);
+            }
+          }
+          
+          if (assigneeDeptId && allowedDepts.includes(assigneeDeptId)) {
             isDeptLeader = true;
           }
         }
@@ -421,7 +443,27 @@ export class TaskSharedService {
     const taskIds = tasks.map(t => t.id);
 
     // 1. Batch check access
-    const accesses = await Promise.all(tasks.map(t => this.checkTaskAccess(t, query)));
+    // Gom tất cả assigneeCode duy nhất để truy vấn employee
+    const uniqueAssigneeCodes = [...new Set(
+      tasks
+        .map(t => t.assigneeCode)
+        .filter(code => code && code !== 'UNASSIGNED')
+    )];
+    
+    const employeeDeptMap = new Map<string, number>();
+    if (uniqueAssigneeCodes.length > 0) {
+      const employees = await this.prisma.employee.findMany({
+        where: { employeeCode: { in: uniqueAssigneeCodes as string[] } },
+        select: { employeeCode: true, departmentId: true }
+      });
+      employees.forEach(emp => {
+        if (emp.departmentId) {
+          employeeDeptMap.set(emp.employeeCode, Number(emp.departmentId));
+        }
+      });
+    }
+
+    const accesses = await Promise.all(tasks.map(t => this.checkTaskAccess(t, query, employeeDeptMap)));
     const accessMap = new Map();
     tasks.forEach((t, i) => accessMap.set(t.id, accesses[i]));
 
