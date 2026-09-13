@@ -5,7 +5,7 @@ import { Bot, Plus, Trash2, Edit, Save, FileText, Send } from 'lucide-react';
 import { useGetAiAssistants, useCreateAiAssistant, useUpdateAiAssistant, useDeleteAiAssistant, useAddKnowledgeSource, AiAssistant } from '../../hooks/useAiAssistants';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -164,164 +164,212 @@ export function PersonalAiAssistants() {
     setKnFile(null);
   };
 
-  if (isLoading) return <div>Đang tải danh sách trợ lý...</div>;
+  if (isLoading) return <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin"/> Đang tải danh sách trợ lý...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
           <Bot className="w-6 h-6 text-primary" />
           Quản lý Trợ lý AI (Custom Assistants)
         </h3>
-        <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4" />}>Tạo Trợ lý</Button>
+        <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4 mr-1" />} className="w-full sm:w-auto h-10 px-4">
+          Tạo Trợ lý
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {assistants.map((assistant) => (
-          <Card key={assistant.id} className="border border-border">
-            <CardHeader className="bg-muted/30 p-4 pb-2">
-              <CardTitle className="text-md font-bold">{assistant.name}</CardTitle>
+          <Card key={assistant.id} className="border border-border/60 hover:border-primary/30 transition-colors shadow-sm overflow-hidden flex flex-col">
+            <CardHeader className="bg-muted/10 p-5 border-b border-border/30">
+              <CardTitle className="text-base font-bold text-foreground truncate" title={assistant.name}>
+                {assistant.name}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <p className="text-sm text-muted-foreground line-clamp-2">{assistant.description}</p>
+            <CardContent className="p-5 flex flex-col flex-1 gap-5">
+              <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]" title={assistant.description}>
+                {assistant.description || "Không có mô tả."}
+              </p>
               
-              <div className="text-xs space-y-1">
-                <div><strong>Nguồn tri thức:</strong> {assistant.knowledge_sources?.length || 0} tài liệu</div>
-                <div><strong>Trạng thái:</strong> {assistant.is_public ? 'Công khai' : 'Cá nhân'}</div>
+              <div className="flex items-center gap-4 text-xs bg-muted/20 p-2.5 rounded-lg border border-border/40">
+                <div className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-muted-foreground"/> <strong>Tri thức:</strong> {assistant.knowledge_sources?.length || 0} mục</div>
+                <div className="w-px h-3 bg-border"></div>
+                <div className="flex items-center gap-1.5"><strong>Trạng thái:</strong> <span className={assistant.is_public ? 'text-primary' : 'text-muted-foreground'}>{assistant.is_public ? 'Công khai' : 'Cá nhân'}</span></div>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Button size="sm" variant="outline" onClick={() => handleOpenEdit(assistant)}><Edit className="w-4 h-4 mr-2"/> Sửa</Button>
-                <Button size="sm" variant="outline" onClick={() => handleOpenKnowledge(assistant)}><FileText className="w-4 h-4 mr-2"/> Tri thức</Button>
-                <Button size="sm" onClick={() => handleOpenChat(assistant)}><Bot className="w-4 h-4 mr-2"/> Chat</Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(assistant.id)}><Trash2 className="w-4 h-4" /></Button>
+              <div className="flex flex-wrap gap-2 pt-1 mt-auto">
+                <Button size="sm" variant="outline" className="flex-1 min-w-[80px]" onClick={() => handleOpenEdit(assistant)}><Edit className="w-3.5 h-3.5 mr-1.5"/> Sửa</Button>
+                <Button size="sm" variant="outline" className="flex-1 min-w-[90px]" onClick={() => handleOpenKnowledge(assistant)}><FileText className="w-3.5 h-3.5 mr-1.5"/> Tri thức</Button>
+                <Button size="sm" className="flex-1 min-w-[80px]" onClick={() => handleOpenChat(assistant)}><Bot className="w-3.5 h-3.5 mr-1.5"/> Chat</Button>
+                <Button size="icon" variant="outline" className="text-red-500 hover:bg-red-50 border-red-100 hover:border-red-200" onClick={() => handleDelete(assistant.id)}><Trash2 className="w-4 h-4" /></Button>
               </div>
             </CardContent>
           </Card>
         ))}
         {assistants.length === 0 && (
-          <div className="col-span-full text-center py-12 text-muted-foreground">
-            Bạn chưa có trợ lý AI nào. Hãy tạo mới.
+          <div className="col-span-full text-center py-16 px-4 border-2 border-dashed border-border/60 rounded-2xl bg-muted/10">
+            <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+            <h4 className="text-lg font-semibold text-foreground mb-1">Chưa có trợ lý AI</h4>
+            <p className="text-sm text-muted-foreground mb-4">Bạn chưa tạo bất kỳ trợ lý AI nào. Hãy tạo một trợ lý để bắt đầu.</p>
+            <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4 mr-1" />}>Tạo Trợ lý AI đầu tiên</Button>
           </div>
         )}
       </div>
 
       {/* Dialog Tạo/Sửa */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto w-[95vw] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Sửa Trợ lý' : 'Tạo Trợ lý AI'}</DialogTitle>
+            <DialogTitle className="text-xl">{editingId ? 'Sửa Trợ lý AI' : 'Tạo Trợ lý AI mới'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
+          <div className="grid gap-5 py-4">
             <div className="space-y-2">
-              <Label>Tên Trợ lý</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="Vd: Chuyên viên Hỗ trợ Pháp lý" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tên Trợ lý</Label>
+              <Input className="h-11" value={name} onChange={e => setName(e.target.value)} placeholder="Vd: Chuyên viên Hỗ trợ Pháp lý" />
             </div>
             <div className="space-y-2">
-              <Label>Mô tả ngắn</Label>
-              <Input value={description} onChange={e => setDescription(e.target.value)} />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Mô tả ngắn</Label>
+              <Input className="h-11" value={description} onChange={e => setDescription(e.target.value)} placeholder="Nhập mô tả về nhiệm vụ của trợ lý..." />
             </div>
             <div className="space-y-2">
-              <Label>System Prompt (Chỉ dẫn hệ thống)</Label>
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">System Prompt (Chỉ dẫn hệ thống)</Label>
               <Textarea 
                 value={systemPrompt} 
                 onChange={e => setSystemPrompt(e.target.value)} 
-                className="min-h-[150px]"
+                className="min-h-[160px] resize-y p-3 leading-relaxed"
                 placeholder="Vd: Bạn là một trợ lý pháp lý xuất sắc. Hãy trả lời câu hỏi dựa trên các tài liệu được cung cấp..."
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={isPublic} onCheckedChange={setIsPublic} />
-              <Label>Công khai (Mọi người đều dùng được)</Label>
+            <div className="flex items-center gap-3 bg-muted/20 p-3 rounded-xl border border-border/40">
+              <Switch checked={isPublic} onCheckedChange={setIsPublic} id="isPublicAssist" />
+              <div className="space-y-0.5">
+                <Label htmlFor="isPublicAssist" className="cursor-pointer text-sm font-semibold">Công khai trợ lý này</Label>
+                <p className="text-xs text-muted-foreground">Mọi người trong hệ thống đều có thể sử dụng.</p>
+              </div>
             </div>
-            <Button className="w-full" onClick={handleSave}>Lưu thông tin</Button>
           </div>
+          <DialogFooter>
+            <Button className="w-full sm:w-auto h-11 px-8" onClick={handleSave}>
+              <Save className="w-4 h-4 mr-2" />
+              Lưu thông tin
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Dialog Knowledge */}
       <Dialog open={isKnowledgeOpen} onOpenChange={setIsKnowledgeOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="sm:max-w-[700px] max-h-[95vh] overflow-y-auto w-[95vw] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Thêm nguồn tri thức (Knowledge Base)</DialogTitle>
+            <DialogTitle className="text-xl">Thêm Nguồn Tri thức</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">Nhập dữ liệu văn bản hoặc tải lên file (PDF, DOCX) để Trợ lý "{activeKnowledgeAssistant?.name}" học.</p>
+          <div className="grid gap-5 py-4">
+            <p className="text-sm text-muted-foreground">
+              Nhập dữ liệu văn bản hoặc tải lên file (PDF, DOCX) để huấn luyện Trợ lý <strong className="text-foreground">"{activeKnowledgeAssistant?.name}"</strong>.
+            </p>
             <div className="space-y-2">
-              <Label>Tiêu đề tài liệu</Label>
-              <Input value={knTitle} onChange={e => setKnTitle(e.target.value)} placeholder="Vd: Quy định nội bộ năm 2025" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tiêu đề tài liệu</Label>
+              <Input className="h-11" value={knTitle} onChange={e => setKnTitle(e.target.value)} placeholder="Vd: Quy định nội bộ năm 2025" />
             </div>
 
             <Tabs value={knType} onValueChange={(v) => setKnType(v as any)} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="TEXT">Nhập Văn Bản</TabsTrigger>
-                <TabsTrigger value="FILE">Tải Lên File</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-muted/40">
+                <TabsTrigger value="TEXT" className="rounded-md">Nhập Văn Bản</TabsTrigger>
+                <TabsTrigger value="FILE" className="rounded-md">Tải Lên File</TabsTrigger>
               </TabsList>
-              <TabsContent value="TEXT" className="space-y-2 mt-4">
-                <Label>Nội dung (Text thô)</Label>
-                <Textarea 
-                  value={knContent} 
-                  onChange={e => setKnContent(e.target.value)} 
-                  className="min-h-[200px]"
-                  placeholder="Dán nội dung vào đây để máy học..."
-                />
-              </TabsContent>
-              <TabsContent value="FILE" className="space-y-2 mt-4">
-                <Label>Tải lên File đính kèm</Label>
-                <div 
-                  className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => document.getElementById("kn-file-upload")?.click()}
-                >
-                  <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-4" />
-                  <p className="font-semibold text-foreground">
-                    {knFile ? knFile.name : "Nhấn để chọn file tải lên"}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Hỗ trợ: PDF, DOCX, TXT</p>
-                  <input 
-                    id="kn-file-upload" 
-                    type="file" 
-                    className="hidden" 
-                    accept=".pdf,.doc,.docx,.txt,.md" 
-                    onChange={(e) => setKnFile(e.target.files?.[0] || null)} 
+              <div className="mt-5 border border-border rounded-xl bg-card overflow-hidden">
+                <TabsContent value="TEXT" className="m-0 border-0 p-4">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Nội dung (Text thô)</Label>
+                  <Textarea 
+                    value={knContent} 
+                    onChange={e => setKnContent(e.target.value)} 
+                    className="min-h-[220px] resize-y border-0 focus-visible:ring-0 px-0 leading-relaxed bg-transparent"
+                    placeholder="Dán nội dung văn bản vào đây để máy học..."
                   />
-                </div>
-              </TabsContent>
+                </TabsContent>
+                <TabsContent value="FILE" className="m-0 border-0 p-4 space-y-4">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">Tải lên File đính kèm</Label>
+                  <div 
+                    className="border-2 border-dashed border-border/60 hover:border-primary/50 bg-muted/10 rounded-xl p-10 text-center cursor-pointer transition-all hover:bg-muted/30 flex flex-col items-center justify-center"
+                    onClick={() => document.getElementById("kn-file-upload")?.click()}
+                  >
+                    <div className="w-14 h-14 bg-background border shadow-sm rounded-full flex items-center justify-center mb-4">
+                      <FileText className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="font-semibold text-foreground text-sm">
+                      {knFile ? knFile.name : "Nhấn để chọn file tải lên"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">Hỗ trợ định dạng: PDF, DOCX, TXT</p>
+                    <input 
+                      id="kn-file-upload" 
+                      type="file" 
+                      className="hidden" 
+                      accept=".pdf,.doc,.docx,.txt,.md" 
+                      onChange={(e) => setKnFile(e.target.files?.[0] || null)} 
+                    />
+                  </div>
+                </TabsContent>
+              </div>
             </Tabs>
-
-            <Button className="w-full" onClick={handleSaveKnowledge} disabled={addKnowledgeSource.isPending || isUploading}>
-              {(addKnowledgeSource.isPending || isUploading) ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử lý...</>
-              ) : 'Học tài liệu này'}
-            </Button>
           </div>
+          <DialogFooter>
+            <Button className="w-full h-11" onClick={handleSaveKnowledge} disabled={addKnowledgeSource.isPending || isUploading}>
+              {(addKnowledgeSource.isPending || isUploading) ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử lý tải lên...</>
+              ) : (
+                <><Save className="w-4 h-4 mr-2" /> Lưu & Học tài liệu này</>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Dialog Chat Playground */}
       <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <DialogContent className="max-w-2xl h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Chat với {activeChatAssistant?.name}</DialogTitle>
+        <DialogContent className="sm:max-w-[700px] h-[85vh] sm:h-[80vh] flex flex-col w-[95vw] rounded-2xl p-0 overflow-hidden gap-0">
+          <DialogHeader className="p-5 border-b bg-card">
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="w-5 h-5 text-primary"/>
+              Chat với {activeChatAssistant?.name}
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto bg-muted/20 p-4 rounded-xl mt-4 space-y-4 border border-border">
+          
+          <div className="flex-1 overflow-y-auto bg-muted/10 p-5 space-y-5">
+            {chatLog.length === 0 && (
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-60">
+                <Bot className="w-12 h-12 mb-3" />
+                <p>Bắt đầu trò chuyện với trợ lý này.</p>
+              </div>
+            )}
             {chatLog.map((log, idx) => (
               <div key={idx} className={`flex ${log.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`p-3 max-w-[80%] rounded-2xl ${log.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-background border border-border'}`}>
+                <div className={`p-3.5 text-sm max-w-[85%] sm:max-w-[75%] rounded-2xl shadow-sm leading-relaxed ${log.role === 'user' ? 'bg-primary text-primary-foreground rounded-tr-sm' : 'bg-background border border-border/50 rounded-tl-sm'}`}>
                   {log.content}
                 </div>
               </div>
             ))}
-            {isChatting && <div className="text-muted-foreground text-sm italic">AI đang suy nghĩ...</div>}
+            {isChatting && (
+              <div className="flex justify-start">
+                <div className="p-3.5 bg-background border border-border/50 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary/40 animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/60 animate-pulse delay-75"></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/80 animate-pulse delay-150"></div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="mt-4 flex gap-2">
+          
+          <div className="p-4 border-t bg-card flex gap-3">
             <Input 
               value={chatMessage} 
               onChange={e => setChatMessage(e.target.value)} 
               onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Nhập tin nhắn..." 
-              className="flex-1"
+              placeholder="Hỏi trợ lý điều gì đó..." 
+              className="flex-1 h-11 rounded-xl bg-muted/20"
             />
-            <Button onClick={handleSendMessage} disabled={isChatting}><Send className="w-4 h-4" /></Button>
+            <Button onClick={handleSendMessage} disabled={isChatting || !chatMessage.trim()} className="h-11 w-11 rounded-xl p-0 flex-shrink-0">
+              <Send className="w-4 h-4" />
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

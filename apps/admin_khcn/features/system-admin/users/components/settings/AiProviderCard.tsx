@@ -82,16 +82,18 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
       </div>
 
       {/* Form Fields - Grid Layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-y-5 gap-x-6 items-start mt-2">
         
-        {/* Provider Select - 4 cols on desktop */}
-        <div className="sm:col-span-4 space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground">Nhà cung cấp</label>
+        {/* Provider Select - 6 cols on md */}
+        <div className="md:col-span-6 space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <Link2 className="w-3.5 h-3.5" /> Nhà cung cấp
+          </label>
           <Select 
             value={provider.provider} 
             onValueChange={(val) => onChange('provider', val)}
           >
-            <SelectTrigger className="h-10 bg-background border-input">
+            <SelectTrigger className="h-10 bg-background border-input w-full">
               <SelectValue placeholder="Chọn..." />
             </SelectTrigger>
             <SelectContent>
@@ -104,17 +106,19 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           </Select>
         </div>
 
-        {/* Model Combobox - 5 cols on desktop */}
-        <div className="sm:col-span-5 space-y-1.5">
+        {/* Model Combobox - 6 cols on md */}
+        <div className="md:col-span-6 space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-muted-foreground">Tên Model</label>
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5" /> Tên Model
+            </label>
             <button
               type="button"
               onClick={handleFetchModels}
               disabled={isFetching[provider.id]}
-              className="text-[10px] flex items-center text-primary hover:underline disabled:opacity-50"
+              className="text-[11px] flex items-center text-primary hover:underline disabled:opacity-50"
             >
-              <RefreshCw className={`w-3 h-3 mr-1 ${isFetching[provider.id] ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3 h-3 mr-1.5 ${isFetching[provider.id] ? 'animate-spin' : ''}`} />
               Làm mới
             </button>
           </div>
@@ -124,7 +128,7 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           >
             <ComboboxInput
               placeholder="Nhập hoặc chọn model..."
-              className="h-10 bg-background border-input"
+              className="h-10 bg-background border-input w-full"
               onChange={(e: any) => onChange('model', e.target.value)}
             />
             <ComboboxContent>
@@ -143,12 +147,14 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           </Combobox>
         </div>
 
-        {/* Priority - 3 cols on desktop */}
-        <div className="sm:col-span-3 space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground">Độ ưu tiên</label>
+        {/* Priority - 4 cols on md */}
+        <div className="md:col-span-4 space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <Hash className="w-3.5 h-3.5" /> Độ ưu tiên
+          </label>
           <Input
             type="number"
-            className="h-10 bg-background border-input font-mono"
+            className="h-10 bg-background border-input font-mono w-full"
             value={provider.priority}
             onChange={(e) => onChange('priority', parseInt(e.target.value) || 1)}
             min="1"
@@ -156,12 +162,14 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           />
         </div>
 
-        {/* API Key - 12 cols (Full width) */}
-        <div className="sm:col-span-12 space-y-1.5">
-          <label className="text-xs font-semibold text-muted-foreground">API Key</label>
+        {/* API Key - 8 cols on md */}
+        <div className="md:col-span-8 space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <KeyRound className="w-3.5 h-3.5" /> API Key
+          </label>
           <Input
             type="password"
-            className="h-10 bg-background border-input font-mono text-sm tracking-widest"
+            className="h-10 bg-background border-input font-mono text-sm tracking-widest w-full"
             value={provider.apiKey}
             onChange={(e) => onChange('apiKey', e.target.value)}
             placeholder="Nhập token bảo mật (sk-...)"
