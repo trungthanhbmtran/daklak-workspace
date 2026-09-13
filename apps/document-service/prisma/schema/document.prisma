@@ -1,56 +1,59 @@
 model Document {
-  id                 String    @id @default(cuid())
-  documentNumber     String    @map("document_number") // Số văn bản (đi/đến)
-  notation           String?   // Ký hiệu (ví dụ: QĐ-UBND)
-  abstract           String    @db.Text // Trích yếu
-  content            String?   @db.LongText // Nội dung
-  typeId             String?   @map("type_id") // Loại văn bản (Quyết định, Công văn...)
-  fieldId            String?   @map("field_id") // Lĩnh vực (Khoa học, Công nghệ...)
-  issuingAuthorityId String?   @map("issuing_authority_id") // Cơ quan ban hành
-  issuerName         String?   @map("issuer_name")
-  signerId           String?   @map("signer_id")
-  signerName         String?   @map("signer_name")
-  signerPosition     String?   @map("signer_position")
-  issueDate          DateTime? @map("issue_date")
-  arrivalDate        DateTime? @map("arrival_date")
-  arrivalNumber      String?   @map("arrival_number") // Số đến (dành cho văn bản đến)
-  processingDeadline DateTime? @map("processing_deadline") // Hạn xử lý
-  recipients         String?   @db.Text // Nơi nhận
-  urgency            String    @default("NORMAL") // NORMAL, URGENT, FLASH
-  securityLevel      String    @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
-  status             String    @default("DRAFT")  // DRAFT, PUBLISHED, ARCHIVED
-  isPublic           Boolean   @default(false) @map("is_public")
-  isIncoming         Boolean   @default(true) @map("is_incoming")
-  fileId             String?   @map("file_id")
-  signatureValid     Boolean   @default(false) @map("signature_valid")
-  pageCount          Int       @default(1) @map("page_count")
-  attachmentCount    Int       @default(0) @map("attachment_count")
-  linkedDocumentId   String?   @map("linked_document_id")
-  fiscalYear         Int?      @map("fiscal_year") // Năm tài chính (cho công khai ngân sách)
-  transparencyCategory String? @map("transparency_category") // ESTIMATE, SETTLEMENT, EXECUTION
-  workflowInstanceId String?   @map("workflow_instance_id") // ID của ProcessInstance trong workflow-service
-  workflowCurrentNode String?  @map("workflow_current_node") // nodeCode hiện tại trong workflow
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
+  id                   String    @id @default(cuid())
+  documentNumber       String    @map("document_number") // Số văn bản (đi/đến)
+  notation             String? // Ký hiệu (ví dụ: QĐ-UBND)
+  abstract             String    @db.Text // Trích yếu
+  content              String?   @db.LongText // Nội dung
+  typeId               String?   @map("type_id") // Loại văn bản (Quyết định, Công văn...)
+  fieldId              String?   @map("field_id") // Lĩnh vực (Khoa học, Công nghệ...)
+  issuingAuthorityId   String?   @map("issuing_authority_id") // Cơ quan ban hành
+  issuerName           String?   @map("issuer_name")
+  signerId             String?   @map("signer_id")
+  signerName           String?   @map("signer_name")
+  signerPosition       String?   @map("signer_position")
+  issueDate            DateTime? @map("issue_date")
+  arrivalDate          DateTime? @map("arrival_date")
+  arrivalNumber        String?   @map("arrival_number") // Số đến (dành cho văn bản đến)
+  processingDeadline   DateTime? @map("processing_deadline") // Hạn xử lý
+  recipients           String?   @db.Text // Nơi nhận
+  urgency              String    @default("NORMAL") // NORMAL, URGENT, FLASH
+  securityLevel        String    @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
+  status               String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  isPublic             Boolean   @default(false) @map("is_public")
+  isIncoming           Boolean   @default(true) @map("is_incoming")
+  fileId               String?   @map("file_id")
+  signatureValid       Boolean   @default(false) @map("signature_valid")
+  pageCount            Int       @default(1) @map("page_count")
+  attachmentCount      Int       @default(0) @map("attachment_count")
+  linkedDocumentId     String?   @map("linked_document_id")
+  fiscalYear           Int?      @map("fiscal_year") // Năm tài chính (cho công khai ngân sách)
+  transparencyCategory String?   @map("transparency_category") // ESTIMATE, SETTLEMENT, EXECUTION
+  workflowInstanceId   String?   @map("workflow_instance_id") // ID của ProcessInstance trong workflow-service
+  workflowCurrentNode  String?   @map("workflow_current_node") // nodeCode hiện tại trong workflow
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   @@index([documentNumber])
   @@index([typeId])
   @@index([fieldId])
   @@index([status])
   @@index([workflowInstanceId])
+  @@index([issuingAuthorityId])
+  @@index([issueDate])
+  @@index([createdAt])
+  @@index([isIncoming])
   @@map("documents")
 }
 
 model DocumentLog {
-  id          String   @id @default(cuid())
-  documentId  String   @map("document_id")
-  userId      String?  @map("user_id")
-  userName    String?  @map("user_name")
-  action      String   // VÀO SỔ, PHÂN XỬ LÝ, TIẾP NHẬN, CHUYỂN XỬ LÝ, KẾT THÚC
-  note        String?  @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(cuid())
+  documentId String   @map("document_id")
+  userId     String?  @map("user_id")
+  userName   String?  @map("user_name")
+  action     String // VÀO SỔ, PHÂN XỬ LÝ, TIẾP NHẬN, CHUYỂN XỬ LÝ, KẾT THÚC
+  note       String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@index([documentId])
   @@map("document_logs")
 }
-

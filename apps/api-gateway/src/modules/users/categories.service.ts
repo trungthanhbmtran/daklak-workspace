@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { RedisService } from '../../core/redis/redis.service';
 
 function toFrontendItem(c: any) {
   return {
@@ -25,6 +26,7 @@ export class CategoriesService implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
+    private readonly redisService: RedisService,
   ) {}
 
   onModuleInit() {
@@ -77,17 +79,27 @@ export class CategoriesService implements OnModuleInit {
           .filter((n) => !isNaN(n) && n > 0)
       : [];
 
+    const cacheKey = `category_group:${group || 'all'}:q${q || ''}:l${limitNum}:s${skipNum}:ids${selectedIdsArr.join('-')}`;
+    const cachedStr = await this.redisService.get(cacheKey);
+    if (cachedStr) {
+      try {
+        return JSON.parse(cachedStr);
+      } catch (e) {}
+    }
+
     if (!group) {
       const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({}),
       ).catch((e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       });
-      return {
+      const response = {
         success: true,
-        data: result?.data,
+        data: result?.data?.map(toFrontendItem) || [],
         meta: { total: result?.total || result?.data?.length || 0 },
       };
+      await this.redisService.set(cacheKey, JSON.stringify(response), 5 * 60); // 5 mins cache
+      return response;
     }
     const result: any = await firstValueFrom(
       this.categoryService.GetByGroup({
@@ -100,11 +112,14 @@ export class CategoriesService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
-    return {
+
+    const response = {
       success: true,
-      data: result?.data,
-      meta: { total: result?.total || result?.data?.length || 0 },
+      data: result?.categories?.map(toFrontendItem) || [],
+      meta: { total: result?.total || 0 },
     };
+    await this.redisService.set(cacheKey, JSON.stringify(response), 5 * 60); // 5 mins cache
+    return response;
   }
 
   async create(body: {
@@ -125,6 +140,10 @@ export class CategoriesService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+
+    await this.redisService.delPattern(`category_group:${body.group}*`);
+    await this.redisService.delPattern(`category_group:all*`);
+
     return { success: true, data: toFrontendItem(res as any) };
   }
 
@@ -152,6 +171,11 @@ export class CategoriesService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+
+    // Invalidate all cache pattern for categories since we don't know the exact group before fetching, 
+    // or we can just invalidate all to be safe.
+    await this.redisService.delPattern(`category_group:*`);
+
     return { success: true, data: toFrontendItem(res as any) };
   }
 
@@ -161,6 +185,9 @@ export class CategoriesService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
+
+    await this.redisService.delPattern(`category_group:*`);
+
     return {
       success: res?.success ?? true,
       message: res?.message ?? 'Đã xóa danh mục',

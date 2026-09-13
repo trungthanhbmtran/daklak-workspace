@@ -3,7 +3,7 @@ model AiAssistant {
   userId       Int      @map("user_id") // owner of the assistant
   name         String
   description  String?  @db.Text
-  systemPrompt String   @db.Text @map("system_prompt")
+  systemPrompt String   @map("system_prompt") @db.Text
   isPublic     Boolean  @default(false) @map("is_public")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -11,7 +11,7 @@ model AiAssistant {
   knowledgeSources AiKnowledgeSource[]
   tools            AiAssistantTool[]
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("ai_assistants")

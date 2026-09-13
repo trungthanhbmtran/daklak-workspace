@@ -12,6 +12,7 @@ model Category {
 
   @@unique([groupCode, code])
   @@index([groupCode])
+  @@index([isActive])
   @@map("sys_categories")
 }
 

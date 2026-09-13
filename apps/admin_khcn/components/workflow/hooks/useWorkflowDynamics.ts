@@ -1,41 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { workflowApi } from "@/features/workflow/api";
 
 export function useWorkflowDynamics() {
-  const [dynamicServices, setDynamicServices] = useState<any[]>([]);
-  const [dynamicTriggers, setDynamicTriggers] = useState<any[]>([]);
-  const [taskRoles, setTaskRoles] = useState<any[]>([]);
-  const [workflowModules, setWorkflowModules] = useState<{ id: string; code: string; name: string; description?: string }[]>([]);
-  const [orgRoles, setOrgRoles] = useState<{ code: string; name: string; rank: number; authorityLevel?: string; category?: string }[]>([]);
-
-  useEffect(() => {
-    const fetchDynamics = async () => {
-      try {
-        const [svcs, trigs, roles, modules, org] = await Promise.all([
-          workflowApi.getServices(),
-          workflowApi.getTriggers(),
-          workflowApi.getTaskRoles().catch(() => []),
-          workflowApi.getModules().catch(() => []),
-          workflowApi.getOrgRoles().catch(() => []),
-        ]);
-        setDynamicServices(svcs);
-        setDynamicTriggers(trigs);
-        setTaskRoles(roles);
-        setWorkflowModules(modules || []);
-        setOrgRoles(org || []);
-      } catch (e) {
-        console.error("Failed to fetch dynamic workflow data", e);
-      }
-    };
-    fetchDynamics();
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: ["workflow-dynamics"],
+    queryFn: async () => {
+      const [svcs, trigs, roles, modules, org] = await Promise.all([
+        workflowApi.getServices(),
+        workflowApi.getTriggers(),
+        workflowApi.getTaskRoles().catch(() => []),
+        workflowApi.getModules().catch(() => []),
+        workflowApi.getOrgRoles().catch(() => []),
+      ]);
+      return {
+        dynamicServices: svcs || [],
+        dynamicTriggers: trigs || [],
+        taskRoles: roles || [],
+        workflowModules: modules || [],
+        orgRoles: org || [],
+      };
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
   return {
-    dynamicServices,
-    dynamicTriggers,
-    taskRoles,
-    workflowModules,
-    orgRoles,
+    dynamicServices: data?.dynamicServices || [],
+    dynamicTriggers: data?.dynamicTriggers || [],
+    taskRoles: data?.taskRoles || [],
+    workflowModules: data?.workflowModules || [],
+    orgRoles: data?.orgRoles || [],
+    isLoading,
   };
 }

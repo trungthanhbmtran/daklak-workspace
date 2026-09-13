@@ -66,7 +66,7 @@ export class AiFeatureService implements OnModuleInit {
     try {
       const parsed = JSON.parse(value);
       if (typeof parsed === 'object' && parsed !== null) {
-        const parts = [];
+        const parts: string[] = [];
         if (parsed.name || parsed.description || parsed.knowledge) {
           parts.push('<SystemContext>');
           if (parsed.name) parts.push(`<Name>\n${parsed.name}\n</Name>`);

@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { RedisModule } from '../../core/redis/redis.module';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -40,6 +41,7 @@ import { AiModule } from '../ai/ai.module';
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.REPORT),
     AiModule,
+    RedisModule,
   ],
   controllers: [
     UserController,
