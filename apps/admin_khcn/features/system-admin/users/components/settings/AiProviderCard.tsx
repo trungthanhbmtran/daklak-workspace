@@ -2,6 +2,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import {
   Combobox,
   ComboboxInput,
@@ -20,11 +24,9 @@ interface AiProviderCardProps {
 }
 
 export function AiProviderCard({ provider, aiProviderCategories, onChange, onRemove }: AiProviderCardProps) {
-  // Hook xử lý fetch model được đóng gói độc lập trong Component con
   const { fetchedModels, isFetching, fetchModels } = useAiFetchModels();
 
   React.useEffect(() => {
-    // Tự động tải danh sách model nếu đã có API Key khi màn hình vừa khởi tạo
     if (provider.apiKey && !fetchedModels[provider.id]) {
       fetchModels(provider.id, provider.provider, provider.apiKey, false);
     }
@@ -42,56 +44,87 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
   );
 
   return (
-    <div className={`p-5 bg-card rounded-2xl border ${provider.enabled ? 'border-primary/50 shadow-md' : 'border-border opacity-60'} relative transition-all`}>
-      <div className="flex justify-between items-start mb-4">
+    <div className={`flex flex-col gap-4 p-4 sm:p-5 bg-card rounded-xl border transition-colors ${provider.enabled ? 'border-border shadow-sm' : 'border-border/40 opacity-70 bg-muted/30'}`}>
+      
+      {/* Header Row: Priority, Status, Delete */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${provider.enabled ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+          <Badge variant={provider.enabled ? "default" : "secondary"} className="h-7 px-2 font-mono text-sm">
             #{provider.priority}
-          </div>
-          <h4 className="font-bold text-foreground text-lg">Ưu tiên {provider.priority} {provider.enabled ? '' : '(Đã tắt)'}</h4>
+          </Badge>
+          <span className="font-semibold text-sm sm:text-base hidden sm:inline-block text-foreground">
+            {provider.provider} - {provider.model || 'Chưa chọn model'}
+          </span>
         </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onChange('enabled', !provider.enabled)} className={provider.enabled ? 'text-primary bg-primary/10' : 'text-muted-foreground bg-muted'}>
-            {provider.enabled ? 'Đang Bật' : 'Đang Tắt'}
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground hidden sm:inline-block">
+              {provider.enabled ? 'Đang bật' : 'Đã tắt'}
+            </span>
+            <Switch 
+              checked={provider.enabled}
+              onCheckedChange={(val) => onChange('enabled', val)}
+              aria-label="Toggle provider"
+            />
+          </div>
+          <div className="w-px h-5 bg-border"></div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onRemove} 
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 px-2"
+          >
+            <Trash2 className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline-block text-xs">Xóa</span>
           </Button>
-          <Button variant="ghost" size="icon" onClick={onRemove} className="text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg" iconStart={<Trash2 className="w-4 h-4" />}></Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhà Cung cấp</label>
-          <select
-            className="w-full h-11 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium text-foreground"
-            value={provider.provider}
-            onChange={(e) => onChange('provider', e.target.value)}
+      {/* Form Fields - Grid Layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+        
+        {/* Provider Select - 4 cols on desktop */}
+        <div className="sm:col-span-4 space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">Nhà cung cấp</label>
+          <Select 
+            value={provider.provider} 
+            onValueChange={(val) => onChange('provider', val)}
           >
-            {aiProviderCategories.map((cat: any) => (
-              <option key={cat.code} value={cat.code}>{cat.nameVi || cat.name}</option>
-            ))}
-          </select>
+            <SelectTrigger className="h-10 bg-background border-input">
+              <SelectValue placeholder="Chọn..." />
+            </SelectTrigger>
+            <SelectContent>
+              {aiProviderCategories.map((cat: any) => (
+                <SelectItem key={cat.code} value={cat.code}>
+                  {cat.nameVi || cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="space-y-1.5 flex flex-col justify-end">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-            <span>Tên Model</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-5 px-2 text-[10px] text-primary hover:text-primary/80 bg-primary/10"
+
+        {/* Model Combobox - 5 cols on desktop */}
+        <div className="sm:col-span-5 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-muted-foreground">Tên Model</label>
+            <button
+              type="button"
               onClick={handleFetchModels}
               disabled={isFetching[provider.id]}
+              className="text-[10px] flex items-center text-primary hover:underline disabled:opacity-50"
             >
               <RefreshCw className={`w-3 h-3 mr-1 ${isFetching[provider.id] ? 'animate-spin' : ''}`} />
-              Tải danh sách
-            </Button>
-          </label>
+              Làm mới
+            </button>
+          </div>
           <Combobox
             value={provider.model}
             onValueChange={(val) => onChange('model', val || '')}
           >
             <ComboboxInput
-              placeholder="Chọn hoặc nhập model..."
-              className="h-11 border-input bg-background focus:ring-2 focus:ring-primary rounded-xl"
+              placeholder="Nhập hoặc chọn model..."
+              className="h-10 bg-background border-input"
               onChange={(e: any) => onChange('model', e.target.value)}
             />
             <ComboboxContent>
@@ -99,13 +132,9 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
                 {currentModels.map((m: any) => {
                   const mId = typeof m === 'string' ? m : m.id;
                   const mName = typeof m === 'string' ? m : m.name;
-                  const mCtx = typeof m === 'string' ? undefined : m.contextWindow;
                   return (
                     <ComboboxItem key={mId} value={mId}>
-                      <div className="flex justify-between w-full items-center gap-2">
-                        <span>{mName}</span>
-                        {mCtx && <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{(mCtx / 1000).toFixed(0)}k</span>}
-                      </div>
+                      <span className="truncate">{mName}</span>
                     </ComboboxItem>
                   );
                 })}
@@ -113,27 +142,35 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
             </ComboboxContent>
           </Combobox>
         </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Mức ưu tiên</label>
-          <input
+
+        {/* Priority - 3 cols on desktop */}
+        <div className="sm:col-span-3 space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">Độ ưu tiên</label>
+          <Input
             type="number"
-            className="w-full h-11 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium"
+            className="h-10 bg-background border-input font-mono"
             value={provider.priority}
             onChange={(e) => onChange('priority', parseInt(e.target.value) || 1)}
             min="1"
+            title="Số nhỏ hơn sẽ được ưu tiên gọi trước"
           />
         </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">API Key (Token)</label>
-          <input
+
+        {/* API Key - 12 cols (Full width) */}
+        <div className="sm:col-span-12 space-y-1.5">
+          <label className="text-xs font-semibold text-muted-foreground">API Key</label>
+          <Input
             type="password"
-            className="w-full h-11 px-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary outline-none text-sm font-medium"
+            className="h-10 bg-background border-input font-mono text-sm tracking-widest"
             value={provider.apiKey}
             onChange={(e) => onChange('apiKey', e.target.value)}
-            placeholder="Nhập API Key bảo mật..."
+            placeholder="Nhập token bảo mật (sk-...)"
+            autoComplete="off"
           />
         </div>
+        
       </div>
     </div>
   );
 }
+
