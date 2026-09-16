@@ -45,6 +45,7 @@ export class OrganizationsService implements OnModuleInit {
           name: body.name,
           shortName: body.shortName,
           typeId: body.typeId,
+          typeCode: body.categoryCode,
           parentId: body.parentId,
           domainIds: body.domainIds ?? [],
           scope: body.scope,
@@ -208,8 +209,7 @@ export class OrganizationsService implements OnModuleInit {
         name: body.name,
         shortName: body.shortName,
         typeId: body.typeId,
-        domainIds: body.domainIds,
-        scope: body.scope,
+        typeCode: body.categoryCode,
       };
       if (body.parentId !== undefined) payload.parentId = body.parentId;
       const result = await firstValueFrom(
@@ -247,9 +247,10 @@ export class OrganizationsService implements OnModuleInit {
     }
     try {
       const result = await firstValueFrom(
-        this.orgGrpcService.UpdateUnit({
+        this.orgGrpcService.UpdateUnitScope({
           id,
           domainIds: body.domainIds ?? [],
+          scope: body.scope,
         }),
       );
       return { success: true, data: result };

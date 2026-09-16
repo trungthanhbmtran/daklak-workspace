@@ -21,13 +21,25 @@ export class OrganizationsService {
         ? [data.domainId]
         : [];
 
+    let resolvedTypeId = data.typeId;
+    if (!resolvedTypeId && data.typeCode) {
+      const unitType = await this.prisma.unitType.findUnique({
+        where: { code: data.typeCode },
+      });
+      if (unitType) {
+        resolvedTypeId = unitType.id;
+      } else {
+        throw new RpcException({ message: 'Mã loại tổ chức không hợp lệ', code: GRPC.NOT_FOUND });
+      }
+    }
+
     // Bước 1: Tạo đơn vị (Path tạm để trống)
     const unit = await this.prisma.organizationUnit.create({
       data: {
         code: data.code,
         name: data.name,
         shortName: data.shortName ?? null,
-        typeId: data.typeId,
+        typeId: resolvedTypeId,
         parentId: data.parentId || null,
         hierarchyPath: '', // Placeholder
       },
@@ -99,8 +111,8 @@ export class OrganizationsService {
       name?: string;
       shortName?: string;
       typeId?: number;
+      typeCode?: string;
       parentId?: number | null;
-      domainIds?: number[] | null;
     },
   ) {
     const unit = await this.prisma.organizationUnit.findUnique({
@@ -149,9 +161,19 @@ export class OrganizationsService {
       }
     }
 
-    if (data.typeId !== undefined && data.typeId > 0) {
+    let finalTypeId = data.typeId;
+    if (!finalTypeId && data.typeCode) {
+      const unitType = await this.prisma.unitType.findUnique({
+        where: { code: data.typeCode },
+      });
+      if (unitType) {
+        finalTypeId = unitType.id;
+      }
+    }
+
+    if (finalTypeId !== undefined && finalTypeId > 0) {
       const typeExists = await this.prisma.unitType.findUnique({
-        where: { id: data.typeId },
+        where: { id: finalTypeId },
       });
       if (!typeExists)
         throw new RpcException({
@@ -166,8 +188,8 @@ export class OrganizationsService {
     if (data.name !== undefined) updateData.name = data.name;
     if (data.shortName !== undefined)
       updateData.shortName = data.shortName || null;
-    if (data.typeId !== undefined && data.typeId > 0)
-      updateData.typeId = data.typeId;
+    if (finalTypeId !== undefined && finalTypeId > 0)
+      updateData.typeId = finalTypeId;
     // Đổi đơn vị cha: luôn dùng code làm hierarchyPath
     if (data.code !== undefined && String(data.code).trim() !== '') {
       updateData.hierarchyPath = String(data.code).trim();
@@ -179,18 +201,6 @@ export class OrganizationsService {
       where: { id },
       data: updateData,
     });
-    if (data.domainIds !== undefined) {
-      await this.prisma.unitDomain.deleteMany({ where: { unitId: id } });
-      const ids = Array.isArray(data.domainIds)
-        ? data.domainIds.filter((d) => d > 0)
-        : [];
-      if (ids.length > 0) {
-        await this.prisma.unitDomain.createMany({
-          data: ids.map((domainId) => ({ unitId: id, domainId })),
-          skipDuplicates: true,
-        });
-      }
-    }
 
     // Invalidate cache
     this.treeCache.clear();
@@ -207,6 +217,46 @@ export class OrganizationsService {
                   where: { langCode: 'vi' },
                 },
               },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async updateUnitScope(id: number, data: { domainIds?: number[]; scope?: string }) {
+    const unit = await this.prisma.organizationUnit.findUnique({
+      where: { id },
+    });
+    if (!unit) return null;
+
+    if (data.scope !== undefined) {
+      // Not implemented in prisma schema yet, but prepared for future.
+    }
+
+    if (data.domainIds !== undefined) {
+      await this.prisma.unitDomain.deleteMany({ where: { unitId: id } });
+      const ids = Array.isArray(data.domainIds)
+        ? data.domainIds.filter((d) => d > 0)
+        : [];
+      if (ids.length > 0) {
+        await this.prisma.unitDomain.createMany({
+          data: ids.map((domainId) => ({ unitId: id, domainId })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    this.treeCache.clear();
+
+    return this.prisma.organizationUnit.findUniqueOrThrow({
+      where: { id: unit.id },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: { translations: { where: { langCode: 'vi' } } },
             },
           },
         },
@@ -248,17 +298,6 @@ export class OrganizationsService {
         orderBy: { hierarchyPath: 'asc' },
         include: {
           type: true,
-          unitDomains: {
-            include: {
-              domain: {
-                include: {
-                  translations: {
-                    where: { langCode: 'vi' },
-                  },
-                },
-              },
-            },
-          },
         },
       });
       fullTree = buildTree(units, null);
@@ -307,17 +346,6 @@ export class OrganizationsService {
       orderBy: { hierarchyPath: 'asc' },
       include: {
         type: true,
-        unitDomains: {
-          include: {
-            domain: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
       },
     });
     return { data: units };
@@ -357,17 +385,6 @@ export class OrganizationsService {
       orderBy: { hierarchyPath: 'asc' },
       include: {
         type: true,
-        unitDomains: {
-          include: {
-            domain: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
       },
     });
 

@@ -10,7 +10,7 @@
  * Client chỉ hiển thị và gửi lại PUT /:id/scope khi lưu.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOrganizationContext } from "../context/OrganizationContext";
 import { useParams } from "next/navigation";
 import { useDomainSearch, type CatalogServerItem } from "../hooks/useScopeCatalog";
@@ -22,26 +22,44 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
 
 /* ─── Main panel ──────────────────────────────────────── */
 export function UnitScopePanel() {
   const { state, actions, meta } = useOrganizationContext();
-  const { flatUnits } = state;
   const { isUpdatingScope } = meta;
   const params = useParams<{ id: string }>();
   const selectedId = params?.id ? Number(params.id) : null;
 
-  const unit = selectedId != null ? flatUnits.find(u => u.id === selectedId) : null;
+  const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationDetailQuery(selectedId ?? undefined);
+  const unit = detailResponse?.data;
 
   // Local IDs — server sẽ dùng để sort & đánh dấu selected
-  const [domainIds, setDomainIds] = useState<number[]>(() => unit?.domainIds ?? []);
+  const [domainIds, setDomainIds] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (unit?.domainIds) {
+      setDomainIds(unit.domainIds);
+      setDirty(false);
+    }
+  }, [unit]);
 
   // Truyền selectedIds lên server để server sort + đánh dấu
   const domains = useDomainSearch(domainIds);
 
-  if (!unit || selectedId == null) return null;
+  if (selectedId == null) return null;
+  if (isLoadingDetail) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    );
+  }
+  if (!unit) return null;
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];

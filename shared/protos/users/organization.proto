@@ -8,6 +8,7 @@ service OrganizationService {
   rpc CreateUnit (CreateUnitRequest) returns (UnitResponse);
   rpc GetOne (GetOneRequest) returns (UnitResponse);
   rpc UpdateUnit (UpdateUnitRequest) returns (UnitResponse);
+  rpc UpdateUnitScope (UpdateUnitScopeRequest) returns (UnitResponse);
   rpc DeleteUnit (DeleteUnitRequest) returns (DeleteUnitResponse);
   rpc GetFullTree (GetOrganizationsRequest) returns (OrganizationTreeResponse);
   rpc GetSubTree (GetSubTreeRequest) returns (OrganizationTreeResponse);
@@ -42,6 +43,7 @@ message CreateUnitRequest {
   int32 parent_id = 5;
   repeated int32 domain_ids = 6;  // Nhiều lĩnh vực phụ trách (từ danh mục DOMAIN)
   string scope = 7;
+  string type_code = 8;
 }
 
 message UnitResponse {
@@ -56,6 +58,7 @@ message UnitResponse {
   repeated int32 domain_ids = 9;
   repeated string domain_names = 10;
   string scope = 11;
+  string type_code = 12;
 }
 
 message GetOneRequest {
@@ -64,13 +67,18 @@ message GetOneRequest {
 
 message UpdateUnitRequest {
   int32 id = 1;
-  string code = 2;
-  string name = 3;
-  string short_name = 4;
-  int32 type_id = 5;
-  int32 parent_id = 6;
-  repeated int32 domain_ids = 7;
-  string scope = 8;
+  optional string code = 2;
+  optional string name = 3;
+  optional string short_name = 4;
+  optional int32 type_id = 5;
+  optional int32 parent_id = 6;
+  optional string type_code = 7;
+}
+
+message UpdateUnitScopeRequest {
+  int32 id = 1;
+  repeated int32 domain_ids = 2;
+  optional string scope = 3;
 }
 
 message DeleteUnitRequest {
@@ -97,6 +105,7 @@ message OrganizationUnitNode {
   string scope = 12;
   bool is_leaf = 13;   // true nếu không có đơn vị con (thành phần thấp nhất)
   int32 depth = 14;    // Độ sâu trong cây (root = 0)
+  string type_code = 15;
 }
 
 message OrganizationTreeResponse {

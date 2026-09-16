@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { Check, CheckCircle2, AlertTriangle, Info, Clock, Loader2, Filter, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -29,13 +29,13 @@ export function NotificationListClient() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useInfiniteQuery({
     queryKey: NOTIFICATIONS_KEY,
-    queryFn: ({ pageParam }) => getNotifications({ pageParam }),
+    queryFn: ({ pageParam }: { pageParam: number }) => getNotifications({ pageParam }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage: any) => lastPage.nextCursor,
     refetchInterval: 60_000,
   });
 
-  const list = data?.pages.flatMap((page) => page.data) || [];
+  const list = data?.pages.flatMap((page: any) => page.data) || [];
   const unreadCount = data?.pages[0]?.unreadCount ?? 0;
 
   const markRead = useMutation({
@@ -160,7 +160,7 @@ export function NotificationListClient() {
             </div>
           ) : (
             <div className="divide-y divide-border/50">
-              {list.map((item) => {
+              {list.map((item: any) => {
                 const href = resolveHref(item);
                 const isLink = href !== "#";
 

@@ -37,6 +37,7 @@ export class OrganizationsController {
       parentId: node.parentId ?? 0,
       hierarchyPath: node.hierarchyPath ?? '',
       typeName: node.type?.name ?? '',
+      typeCode: node.type?.code ?? '',
       domainIds,
       domainNames,
       scope: node.scope ?? '',
@@ -59,6 +60,7 @@ export class OrganizationsController {
       parentId: unit.parentId ?? 0,
       hierarchyPath: unit.hierarchyPath ?? '',
       typeName: unit.type?.name ?? '',
+      typeCode: unit.type?.code ?? '',
       domainIds,
       domainNames,
       scope: unit.scope ?? '',
@@ -71,6 +73,7 @@ export class OrganizationsController {
     name: string;
     shortName?: string;
     typeId: number;
+    typeCode?: string;
     parentId?: number;
     domainIds?: number[];
     scope?: string;
@@ -87,6 +90,7 @@ export class OrganizationsController {
       name: data.name,
       shortName: data.shortName,
       typeId: data.typeId,
+      typeCode: data.typeCode,
       parentId: data.parentId,
       domainIds: data.domainIds ?? [],
       scope: data.scope,
@@ -113,25 +117,17 @@ export class OrganizationsController {
     name?: string;
     shortName?: string;
     typeId?: number;
+    typeCode?: string;
     parentId?: number;
-    domainIds?: number[];
-    scope?: string;
   }) {
-    if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
-      throw new RpcException({
-        code: GrpcStatus.INVALID_ARGUMENT,
-        message: 'domainIds phải là một mảng',
-      });
-    }
-
     try {
       const unit = await this.orgService.updateUnit(data.id, {
         code: data.code,
         name: data.name,
         shortName: data.shortName,
         typeId: data.typeId,
+        typeCode: data.typeCode,
         parentId: data.parentId,
-        domainIds: data.domainIds,
       });
       if (!unit) {
         throw new RpcException({
@@ -145,6 +141,40 @@ export class OrganizationsController {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: e?.message ?? 'Lỗi cập nhật đơn vị',
+      });
+    }
+  }
+
+  @GrpcMethod('OrganizationService', 'UpdateUnitScope')
+  async updateUnitScope(data: {
+    id: number;
+    domainIds?: number[];
+    scope?: string;
+  }) {
+    if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'domainIds phải là một mảng',
+      });
+    }
+
+    try {
+      const unit = await this.orgService.updateUnitScope(data.id, {
+        domainIds: data.domainIds,
+        scope: data.scope,
+      });
+      if (!unit) {
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Đơn vị không tồn tại',
+        });
+      }
+      return this.toUnitResponse(unit);
+    } catch (e: any) {
+      if (e instanceof RpcException) throw e;
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: e?.message ?? 'Lỗi cập nhật scope',
       });
     }
   }

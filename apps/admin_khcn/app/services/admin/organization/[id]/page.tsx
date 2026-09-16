@@ -1,4 +1,4 @@
-import { OrganizationDetailClient } from "@/features/system-admin/organization";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Chi tiết Đơn vị | Quản trị Hệ thống",
@@ -20,5 +20,6 @@ export default async function OrganizationDetailPage({ params }: PageProps) {
     );
   }
 
-  return <OrganizationDetailClient />;
+  // Redirect to the default 'info' tab
+  redirect(`/services/admin/organization/${id}/info`);
 }

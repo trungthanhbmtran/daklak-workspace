@@ -11,6 +11,15 @@ Tài liệu này ghi chép lại toàn bộ lịch sử các bản cập nhật,
   - Cập nhật `AiService` và AI Worker để ưu tiên sử dụng khóa API cá nhân nếu người dùng đã cấu hình, nếu không sẽ tự động fallback sang cấu hình hệ thống chung.
   - Cập nhật giao diện thanh Header: bấm vào avatar sẽ có thêm nút "Cài đặt AI & Ứng dụng" để mở bảng điều khiển AI cá nhân bằng `Dialog`.
 
+### Changed (Cập nhật)
+- **Organization Details UI Refactor**: Chuyển đổi mô hình hiển thị chi tiết Đơn vị tổ chức trên giao diện Admin từ Client Tabs sang Next.js App Router Pages.
+  - Thay thế `OrganizationDetailClient` bằng cấu trúc trang độc lập: `/info`, `/scope`, `/staffing`.
+  - Hỗ trợ tốt hơn việc chia sẻ liên kết trực tiếp (Deep linking) và giảm nhẹ logic state phía client.
+
+- **Organization API Optimization (Over-fetching fix)**: Cải thiện mạnh mẽ hiệu suất load cây đơn vị tổ chức.
+  - **Backend**: Xóa bỏ việc load thừa (include) hàng loạt `unitDomains` (kèm translations) khi gọi `GetFullTree`, `GetOrganizations`, và `GetSubTree` trong `user-service`.
+  - **Frontend**: Trang Thông tin và trang Phạm vi phụ trách của đơn vị giờ đây sẽ tự động sử dụng hook `useOrganizationDetailQuery` (gọi riêng API `GET /admin/organizations/:id`) để lấy chi tiết khi người dùng nhấn vào đơn vị cụ thể, thay vì phụ thuộc vào một cục data khổng lồ. Màn hình chờ (Skeleton) cũng được bổ sung để nâng cao UX.
+
 - **Personal AI Assistants (Custom RAG & Bot)**: Khởi tạo hệ thống Trợ lý AI Cá nhân.
   - Bổ sung cấu hình `qdrant` vào `docker-compose.prod.yml` làm Vector Database.
   - Thiết kế và triển khai CSDL (Prisma schema) cho `AiAssistant`, `AiKnowledgeSource`, `AiAssistantTool` bên trong `user-service`.
@@ -23,6 +32,12 @@ Tài liệu này ghi chép lại toàn bộ lịch sử các bản cập nhật,
   - **Nguyên nhân**: Hàm `assignPosition` trong `user-service` tạo vị trí nhưng không gán user vào `StaffingSlot` cụ thể cũng như không tăng bộ đếm `currentCount` của định biên. Hơn nữa, sự kiện bắn ra không được `hrm-service` lắng nghe nên dữ liệu phòng ban của nhân viên không bao giờ được đồng bộ.
   - **Khắc phục**: Sửa `assignPosition` để tự động tìm Slot trống và gán `employeeCode`. Bổ sung `@EventPattern('user.position.assigned')` tại `hrm-service` (`employees.controller.ts`, `employees.service.ts`) để lắng nghe sự kiện và cập nhật `departmentId`, `jobTitleId` theo thời gian thực.
 
+- **Organization / Unit Scope & Type**: Khắc phục lỗi không hiển thị/cập nhật phân loại tổ chức và bị mất dữ liệu tên, mã tổ chức khi cập nhật phạm vi phụ trách.
+  - **Nguyên nhân**: Frontend gửi `categoryCode` nhưng backend lại dùng `typeId`, đồng thời gRPC API bị gom chung vào `UpdateUnit`. Vì proto3 mặc định chuỗi rỗng khi tham số bị thiếu, cập nhật `scope` làm wipe out (xóa trắng) tên/mã của đơn vị.
+  - **Khắc phục**: 
+    - Thêm trường `type_code` vào protobuf và ánh xạ nó với `typeId` trên CSDL.
+    - Tách riêng gRPC endpoint thành `UpdateUnitScope` chuyên biệt để cập nhật `domain_ids` và `scope`, không dùng chung `UpdateUnit` nhằm tránh lỗi wipe out.
+    - Cập nhật frontend `api.ts` để đọc chính xác `typeCode`.
 ## [1.0.1] - 2026-09-12
 
 ### Fixed (Đã sửa lỗi)

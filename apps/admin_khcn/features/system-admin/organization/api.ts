@@ -23,7 +23,7 @@ function normalizeUnitNode(n: any): OrganizationUnitNode {
     code: n.code ?? "",
     name: n.name ?? "",
     shortName: n.shortName ?? n.short_name,
-    categoryCode: n.categoryCode ?? n.category_code ?? undefined,
+    categoryCode: n.categoryCode ?? n.category_code ?? n.typeCode ?? n.type_code ?? undefined,
     parentId: rawParentId === 0 ? null : rawParentId,
     hierarchyPath: n.hierarchyPath ?? n.hierarchy_path,
     domainIds: n.domainIds ?? n.domain_ids ?? [],
@@ -94,8 +94,10 @@ export const organizationApi = {
       data: (r.data ?? []).map(normalizeUnitNode),
     })),
 
-  getOne: (id: number) =>
-    apiClient.get(`/organizations/${id}`).then(r => unwrapData<any>(r)),
+  getOne: (id: number): Promise<{ data: OrganizationUnitNode }> =>
+    apiClient.get(`/organizations/${id}`).then((r: any) => ({
+      data: normalizeUnitNode(unwrapData<any>(r)),
+    })),
 
   createUnit: (payload: CreateUnitPayload) =>
     apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),

@@ -21,7 +21,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useOrganizationContext } from "../context/OrganizationContext";
+import { useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 
 export function OrganizationUnitEdit() {
@@ -33,9 +35,10 @@ export function OrganizationUnitEdit() {
   const { isUpdating, isDeleting } = meta;
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const unit        = selectedId != null ? flatUnits.find((u) => u.id === selectedId) : null;
-  const hasChildren = unit != null && flatUnits.some((u) => u.parentId === unit.id);
-  const parentUnit  = unit?.parentId != null ? flatUnits.find((u) => u.id === unit.parentId) : null;
+  const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationDetailQuery(selectedId);
+  const unit = detailResponse?.data;
+  
+  const hasChildren = selectedId != null && flatUnits.some((u) => u.parentId === selectedId);
 
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
@@ -72,25 +75,19 @@ export function OrganizationUnitEdit() {
     });
   };
 
-  if (selectedId == null || !unit) return null;
+  if (selectedId == null) return null;
+  if (isLoadingDetail) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
+        <Skeleton className="h-[200px] w-full" />
+      </div>
+    );
+  }
+  if (!unit) return null;
 
   return (
     <>
-      <Card className="rounded-lg shadow-none border-border h-full flex flex-col min-h-0">
-        <CardHeader className="pb-4 shrink-0 bg-muted/10 border-b">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-0.5 min-w-0">
-              <p className="text-xs text-muted-foreground truncate">
-                {parentUnit ? `${parentUnit.name} /` : "Cơ cấu tổ chức /"} {unit.name}
-              </p>
-              <h2 className="text-base font-semibold leading-none tracking-tight">
-                Thông tin đơn vị
-              </h2>
-            </div>
-            <Badge variant="outline" className="font-mono text-xs shrink-0 bg-background">{unit.code}</Badge>
-          </div>
-        </CardHeader>
-
+      <Card className="rounded-lg shadow-none border-border h-full flex flex-col min-h-0 border-0 rounded-none">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="flex-1 flex flex-col min-h-0">
             <CardContent className="pt-6 space-y-6 flex-1 overflow-y-auto">
