@@ -62,6 +62,38 @@ export class UsersService implements OnModuleInit {
     await this.checkStaffingLimit(dto.unitId, dto.jobTitleId);
     
     const newPosition = await this.createJobPositionRecord(dto);
+
+    // Auto-assign to a StaffingSlot and update currentCount
+    if (newPosition.user?.employeeCode) {
+      const employeeCode = newPosition.user.employeeCode;
+      const staffing = await this.prisma.organizationStaffing.findUnique({
+        where: { unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId } },
+      });
+      if (staffing) {
+        const availableSlot = await this.prisma.staffingSlot.findFirst({
+          where: {
+            staffingId: staffing.id,
+            OR: [
+              { assignedEmployeeCode: null },
+              { assignedEmployeeCode: '' }
+            ]
+          },
+          orderBy: { slotOrder: 'asc' }
+        });
+
+        if (availableSlot) {
+          await this.prisma.staffingSlot.update({
+            where: { id: availableSlot.id },
+            data: { assignedEmployeeCode: employeeCode }
+          });
+          
+          await this.prisma.organizationStaffing.update({
+            where: { id: staffing.id },
+            data: { currentCount: { increment: 1 } }
+          });
+        }
+      }
+    }
     
     this.notifyPositionAssigned(newPosition);
     await this.clearUserProfileCache(dto.userId);
@@ -106,11 +138,21 @@ export class UsersService implements OnModuleInit {
   }
 
   private notifyPositionAssigned(newPosition: any) {
+    // Thông báo cho hệ thống notification (người dùng)
     this.notiClient.emit('notification.position_assigned', {
       email: newPosition.user.email,
       fullName: newPosition.user.fullName,
       position: newPosition.jobTitle.name,
       department: newPosition.unit.name,
+      timestamp: new Date(),
+    });
+
+    // Thông báo cho các microservice khác (như hrm-service) để đồng bộ data
+    this.notiClient.emit('user.position.assigned', {
+      userId: newPosition.userId,
+      employeeCode: newPosition.user?.employeeCode,
+      unitId: newPosition.unitId,
+      jobTitleId: newPosition.jobTitleId,
       timestamp: new Date(),
     });
     console.log(`📡 Đã bắn event bổ nhiệm cho User ${newPosition.userId}`);

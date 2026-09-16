@@ -18,6 +18,11 @@ Tài liệu này ghi chép lại toàn bộ lịch sử các bản cập nhật,
   - Hỗ trợ các API cho chức năng: Quản lý Trợ lý (CRUD), Thêm bớt công cụ (Tools), Quản lý Nguồn tài liệu (Knowledge Sources).
   - Hỗ trợ tải lên tài liệu định dạng PDF, DOCX (tích hợp `pdf-parse`, `mammoth` tại API Gateway) để tự động trích xuất văn bản, tạo vector và lưu vào Qdrant.
 
+### Fixed (Đã sửa lỗi)
+- **Staffing / HRM Assignment**: Khắc phục lỗi "không gán cá nhân theo đơn vị được mặc dù đã cấu hình" trên frontend (`admin_khcn`).
+  - **Nguyên nhân**: Hàm `assignPosition` trong `user-service` tạo vị trí nhưng không gán user vào `StaffingSlot` cụ thể cũng như không tăng bộ đếm `currentCount` của định biên. Hơn nữa, sự kiện bắn ra không được `hrm-service` lắng nghe nên dữ liệu phòng ban của nhân viên không bao giờ được đồng bộ.
+  - **Khắc phục**: Sửa `assignPosition` để tự động tìm Slot trống và gán `employeeCode`. Bổ sung `@EventPattern('user.position.assigned')` tại `hrm-service` (`employees.controller.ts`, `employees.service.ts`) để lắng nghe sự kiện và cập nhật `departmentId`, `jobTitleId` theo thời gian thực.
+
 ## [1.0.1] - 2026-09-12
 
 ### Fixed (Đã sửa lỗi)

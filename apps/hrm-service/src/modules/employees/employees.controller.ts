@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, Payload } from '@nestjs/microservices';
+import { GrpcMethod, Payload, EventPattern } from '@nestjs/microservices';
 import { CreateEmployeeGrpcDto, UpdateEmployeeGrpcDto, IdGrpcDto, CodeGrpcDto, ListEmployeesGrpcDto } from './dto/employee.grpc.dto';
 import { EmployeesService } from './employees.service';
 
@@ -54,5 +54,14 @@ export class EmployeesController {
   list(@Payload() data: ListEmployeesGrpcDto) {
     return this.employees.list(data);
   }
-}
 
+  @EventPattern('user.position.assigned')
+  handlePositionAssigned(@Payload() data: { employeeCode?: string; unitId: number; jobTitleId: number }) {
+    if (data.employeeCode) {
+      return this.employees.updateByEmployeeCode(data.employeeCode, {
+        departmentId: data.unitId,
+        jobTitleId: data.jobTitleId
+      });
+    }
+  }
+}

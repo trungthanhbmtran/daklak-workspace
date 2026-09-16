@@ -248,6 +248,17 @@ export class EmployeesService implements OnModuleInit {
     }
   }
 
+  async updateByEmployeeCode(employeeCode: string, data: Prisma.EmployeeUpdateInput) {
+    try {
+      const updated = await this.prisma.employee.update({ where: { employeeCode }, data });
+      return { success: true, message: 'Cập nhật hồ sơ thành công', data: this.toEmployee(updated) };
+    } catch (error) {
+      this.logger.error(`Failed to update employee code=${employeeCode}`, error instanceof Error ? error.stack : String(error));
+      // Tránh crash nếu employee không tồn tại
+      return { success: false, message: 'Không tìm thấy nhân viên hoặc cập nhật lỗi' };
+    }
+  }
+
   async delete(id: number) {
     const emp = await this.prisma.employee.findUnique({ where: { id } });
     if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: EmployeeErrorCode.NOT_FOUND });
