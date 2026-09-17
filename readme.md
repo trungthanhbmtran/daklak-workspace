@@ -53,6 +53,7 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm report-serv
 # (Tùy chọn) Xóa toàn bộ dữ liệu cũ và ép đồng bộ cấu trúc mới nhất
 # Lưu ý: Lệnh này sẽ xóa sạch dữ liệu. Dùng "db push" thay cho "migrate reset" để tránh lỗi lệch file migration
 # docker exec -it daklak-workspace-api-gateway-1 npx prisma db push --accept-data-loss
+
 # docker exec -it daklak-workspace-user-service-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-hrm-service-1 npx prisma db push --accept-data-loss
 # docker exec -it daklak-workspace-media-service-1 npx prisma db push --accept-data-loss

@@ -5,21 +5,20 @@ export const metadata = {
 };
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ code: string }>;
 }
 
 export default async function OrganizationDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  const unitId = Number(id);
+  const { code } = await params;
 
-  if (isNaN(unitId)) {
+  if (!code) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-muted-foreground">ID đơn vị không hợp lệ.</p>
+        <p className="text-muted-foreground">Mã đơn vị không hợp lệ.</p>
       </div>
     );
   }
 
   // Redirect to the default 'info' tab
-  redirect(`/services/admin/organization/${id}/info`);
+  redirect(`/services/admin/organization/${code}/info`);
 }
