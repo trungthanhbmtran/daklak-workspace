@@ -115,6 +115,8 @@ export class TransformInterceptor<T> implements NestInterceptor<T, any> {
   private detectListRequest(req: any): boolean {
     if (!req || req.method !== 'GET') return false;
     const path = req.path ?? '';
+    if (path.includes('/code/')) return false;
+    
     const endsWithId =
       /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
         path,
