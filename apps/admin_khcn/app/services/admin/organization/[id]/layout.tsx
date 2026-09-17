@@ -29,7 +29,7 @@ export default function OrganizationDetailLayout({
     return (
       <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border bg-card text-card-foreground shadow-sm h-full">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-muted-foreground">ID đơn vị không hợp lệ.</p>
+          <p className="text-muted-foreground">ID đơn vị không hợp lệ (URL nhận được: {resolvedParams.id}). Vui lòng chọn lại đơn vị từ cây tổ chức.</p>
           <Link href="/services/admin/organization">
             <Badge variant="outline" className="cursor-pointer hover:bg-muted">
               Quay lại danh sách
