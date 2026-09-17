@@ -23,20 +23,21 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrganizationContext } from "../context/OrganizationContext";
-import { useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
+import { useOrganizationByCodeQuery } from "../hooks/useOrganizationQueries";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 
 export function OrganizationUnitEdit() {
-  const params = useParams<{ id: string }>();
-  const selectedId = params?.id ? Number(params.id) : undefined;
+  const params = useParams<{ code: string }>();
+  const code = params?.code;
 
   const { state, actions, meta } = useOrganizationContext();
   const { flatUnits } = state;
   const { isUpdating, isDeleting } = meta;
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationDetailQuery(selectedId);
+  const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationByCodeQuery(code);
   const unit = detailResponse?.data;
+  const selectedId = unit?.id;
 
   const hasChildren = selectedId != null && flatUnits.some((u) => u.parentId === selectedId);
 

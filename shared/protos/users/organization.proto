@@ -7,6 +7,7 @@ import "common/common.proto";
 service OrganizationService {
   rpc CreateUnit (CreateUnitRequest) returns (UnitResponse);
   rpc GetOne (GetOneRequest) returns (UnitResponse);
+  rpc GetOrganizationByCode (GetOrganizationByCodeRequest) returns (UnitResponse);
   rpc GetUnitScope (GetUnitScopeRequest) returns (GetUnitScopeResponse);
   rpc UpdateUnit (UpdateUnitRequest) returns (UnitResponse);
   rpc UpdateUnitScope (UpdateUnitScopeRequest) returns (UnitResponse);
@@ -64,6 +65,10 @@ message UnitResponse {
 
 message GetOneRequest {
   int32 id = 1;
+}
+
+message GetOrganizationByCodeRequest {
+  string code = 1;
 }
 
 message GetUnitScopeRequest {

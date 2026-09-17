@@ -21,11 +21,16 @@ import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { JobTitleItem, StaffingReportItem } from "../../types";
+import { useOrganizationByCodeQuery } from "../../hooks/useOrganizationQueries";
 import { useDomainSearch } from "../../hooks/useScopeCatalog";
 
 export function OrganizationStaffing() {
-  const params = useParams<{ id: string }>();
-  const selectedId = params?.id ? Number(params.id) : undefined;
+  const params = useParams<{ code: string }>();
+  const code = params?.code;
+
+  const { data: detailResponse } = useOrganizationByCodeQuery(code);
+  const unit = detailResponse?.data;
+  const selectedId = unit?.id;
 
   const { state } = useOrganizationContext();
   const { flatUnits } = state;
@@ -39,9 +44,6 @@ export function OrganizationStaffing() {
   const [govPage, setGovPage] = useState(1);
   const [partyPage, setPartyPage] = useState(1);
   const STAFFING_PAGE_SIZE = 8;
-
-  const unit =
-    selectedId != null ? flatUnits.find((u) => u.id === selectedId) : null;
 
   const {
     report,

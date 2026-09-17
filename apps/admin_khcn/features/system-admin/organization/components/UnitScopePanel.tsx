@@ -24,14 +24,17 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useOrganizationScopeQuery } from "../hooks/useOrganizationQueries";
+import { useOrganizationScopeQuery, useOrganizationByCodeQuery } from "../hooks/useOrganizationQueries";
 
 /* ─── Main panel ──────────────────────────────────────── */
 export function UnitScopePanel() {
-  const { state, actions, meta } = useOrganizationContext();
+  const { actions, meta } = useOrganizationContext();
   const { isUpdatingScope } = meta;
-  const params = useParams<{ id: string }>();
-  const selectedId = params?.id ? Number(params.id) : null;
+  const params = useParams<{ code: string }>();
+  const code = params?.code;
+
+  const { data: detailResponse } = useOrganizationByCodeQuery(code);
+  const selectedId = detailResponse?.data?.id;
 
   const { data: scopeResponse, isLoading: isLoadingDetail } = useOrganizationScopeQuery(selectedId ?? undefined);
   const scopeData = scopeResponse?.data;

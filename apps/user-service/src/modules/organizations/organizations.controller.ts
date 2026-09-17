@@ -102,6 +102,18 @@ export class OrganizationsController {
     return this.toUnitResponse(unit);
   }
 
+  @GrpcMethod('OrganizationService', 'GetOrganizationByCode')
+  async getOrganizationByCode(data: { code: string }) {
+    const unit = await this.orgService.getOneByCode(data.code);
+    if (!unit) {
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Đơn vị không tồn tại',
+      });
+    }
+    return this.toUnitResponse(unit);
+  }
+
   @GrpcMethod('OrganizationService', 'GetUnitScope')
   async getUnitScope(data: { id: number }) {
     const unit = await this.orgService.getUnitScope(data.id);

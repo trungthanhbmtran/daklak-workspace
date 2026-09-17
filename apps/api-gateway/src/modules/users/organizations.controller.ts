@@ -86,6 +86,13 @@ export class OrganizationsController {
     return this.orgService.updateJobTitle(id, body);
   }
 
+  @Get('code/:code')
+  @ApiOperation({ summary: 'Chi tiết một đơn vị theo mã' })
+  @ApiResponse({ status: 200, description: 'Đơn vị (camelCase)' })
+  async getOneByCode(@Param('code') code: string) {
+    return this.orgService.getOneByCode(code);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết một đơn vị' })
   @ApiResponse({ status: 200, description: 'Đơn vị (camelCase)' })

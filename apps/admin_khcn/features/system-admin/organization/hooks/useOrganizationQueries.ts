@@ -33,6 +33,15 @@ export function useOrganizationDetailQuery(id?: number) {
   });
 }
 
+export function useOrganizationByCodeQuery(code?: string) {
+  return useQuery({
+    queryKey: code ? [...organizationQueryKeys.all, "unitByCode", code] : [...organizationQueryKeys.all, "unitByCode"],
+    queryFn: () => (code ? organizationApi.getOneByCode(code) : Promise.reject("No code")),
+    enabled: !!code,
+    staleTime: STALE_TIME,
+  });
+}
+
 export function useOrganizationScopeQuery(id?: number) {
   return useQuery({
     queryKey: id ? [...organizationQueryKeys.unit(id), "scope"] : [...organizationQueryKeys.all, "scope"],

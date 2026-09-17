@@ -99,6 +99,11 @@ export const organizationApi = {
       data: normalizeUnitNode(unwrapData<any>(r)),
     })),
 
+  getOneByCode: (code: string): Promise<{ data: OrganizationUnitNode }> =>
+    apiClient.get(`/organizations/code/${code}`).then((r: any) => ({
+      data: normalizeUnitNode(unwrapData<any>(r)),
+    })),
+
   getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
     apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
       data: {

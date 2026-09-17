@@ -7,6 +7,7 @@ import { FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useOrganizationByCodeQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { useOrganizationContext } from "@/features/system-admin/organization/context/OrganizationContext";
 
 export default function OrganizationDetailLayout({
@@ -14,22 +15,24 @@ export default function OrganizationDetailLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ id: string }>;
+  params: Promise<{ code: string }>;
 }) {
   const pathname = usePathname();
   const resolvedParams = use(params);
-  const id = resolvedParams.id ? Number(resolvedParams.id) : undefined;
+  const code = resolvedParams.code;
+
+  const { data: unitData, isLoading, isError } = useOrganizationByCodeQuery(code);
+  const unit = unitData?.data;
 
   const { state } = useOrganizationContext();
-  const { flatUnits, isLoadingTree: isLoading } = state;
-  const unit = id ? flatUnits.find((u) => u.id === id) : undefined;
+  const { flatUnits } = state;
   const parentUnit = unit?.parentId != null ? flatUnits.find((u) => u.id === unit.parentId) : null;
 
-  if (id === undefined || isNaN(id)) {
+  if (isError || (!isLoading && !unit)) {
     return (
       <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border bg-card text-card-foreground shadow-sm h-full">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-muted-foreground">ID đơn vị không hợp lệ (URL nhận được: {resolvedParams.id}). Vui lòng chọn lại đơn vị từ cây tổ chức.</p>
+          <p className="text-muted-foreground">Không tìm thấy đơn vị hoặc mã đơn vị không hợp lệ (Mã: {code}).</p>
           <Link href="/services/admin/organization">
             <Badge variant="outline" className="cursor-pointer hover:bg-muted">
               Quay lại danh sách
@@ -45,19 +48,19 @@ export default function OrganizationDetailLayout({
       id: "info",
       label: "Thông tin",
       icon: FileText,
-      href: `/services/admin/organization/${id}/info`,
+      href: `/services/admin/organization/${code}/info`,
     },
     {
       id: "scope",
       label: "Phạm vi phụ trách",
       icon: MapPin,
-      href: `/services/admin/organization/${id}/scope`,
+      href: `/services/admin/organization/${code}/scope`,
     },
     {
       id: "staffing",
       label: "Định biên & Chức danh",
       icon: Users,
-      href: `/services/admin/organization/${id}/staffing`,
+      href: `/services/admin/organization/${code}/staffing`,
     },
   ];
 

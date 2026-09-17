@@ -192,6 +192,17 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
+  async getOneByCode(code: string) {
+    try {
+      const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code }));
+      return { success: true, data: result };
+    } catch (err: any) {
+      const message = err?.message ?? err?.details ?? 'Đơn vị không tồn tại';
+      if (err?.code === 5) throw new NotFoundException(message);
+      throw new BadRequestException(message);
+    }
+  }
+
   async getUnitScope(id: number) {
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));

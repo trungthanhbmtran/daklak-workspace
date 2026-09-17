@@ -194,13 +194,14 @@ export function OrganizationSidebar() {
   const { flatUnits, tree } = state;
   const searchParams = useSearchParams();
   const router = useRouter();
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ code: string }>();
 
   // Determine activeId from route params or searchParams
-  const routeId = params?.id ? Number(params.id) : undefined;
+  const routeCode = params?.code;
+  const activeUnit = routeCode ? flatUnits.find(u => u.code === routeCode) : undefined;
   const parentIdStr = searchParams.get('parentId');
   const parentId = parentIdStr ? Number(parentIdStr) : undefined;
-  const activeId = routeId ?? parentId;
+  const activeId = activeUnit?.id ?? parentId;
 
   const searchTerm = searchParams.get('search') || "";
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
@@ -218,7 +219,12 @@ export function OrganizationSidebar() {
   const effectiveExpandedIds = searchTerm.trim() ? new Set(flatUnits.map(u => u.id)) : expandedIds;
 
   const handleSelect = (id: number) => {
-    router.push(`/services/admin/organization/${id}`);
+    const unit = flatUnits.find(u => u.id === id);
+    if (unit?.code) {
+      router.push(`/services/admin/organization/${unit.code}/info`);
+    } else {
+      router.push(`/services/admin/organization/${id}/info`);
+    }
   };
 
   const handleAddChild = (id: number) => {

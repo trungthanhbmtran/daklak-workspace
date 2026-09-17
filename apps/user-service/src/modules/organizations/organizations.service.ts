@@ -93,6 +93,17 @@ export class OrganizationsService {
     return unit;
   }
 
+  async getOneByCode(code: string) {
+    const unit = await this.prisma.organizationUnit.findUnique({
+      where: { code },
+      include: {
+        type: true,
+      },
+    });
+    if (!unit) return null;
+    return unit;
+  }
+
   async getUnitScope(id: number) {
     const unit = await this.prisma.organizationUnit.findUnique({
       where: { id },
