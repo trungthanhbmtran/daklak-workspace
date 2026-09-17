@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
+import { useOrganizationScopeQuery } from "../hooks/useOrganizationQueries";
 
 /* ─── Main panel ──────────────────────────────────────── */
 export function UnitScopePanel() {
@@ -33,19 +33,19 @@ export function UnitScopePanel() {
   const params = useParams<{ id: string }>();
   const selectedId = params?.id ? Number(params.id) : null;
 
-  const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationDetailQuery(selectedId ?? undefined);
-  const unit = detailResponse?.data;
+  const { data: scopeResponse, isLoading: isLoadingDetail } = useOrganizationScopeQuery(selectedId ?? undefined);
+  const scopeData = scopeResponse?.data;
 
   // Local IDs — server sẽ dùng để sort & đánh dấu selected
   const [domainIds, setDomainIds] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
-    if (unit?.domainIds) {
-      setDomainIds(unit.domainIds);
+    if (scopeData?.domainIds) {
+      setDomainIds(scopeData.domainIds);
       setDirty(false);
     }
-  }, [unit]);
+  }, [scopeData]);
 
   // Truyền selectedIds lên server để server sort + đánh dấu
   const domains = useDomainSearch(domainIds);
@@ -59,7 +59,7 @@ export function UnitScopePanel() {
       </div>
     );
   }
-  if (!unit) return null;
+  if (!scopeData) return null;
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
@@ -67,7 +67,7 @@ export function UnitScopePanel() {
   const handleDomainToggle = (id: number) => { setDomainIds(p => toggle(p, id)); setDirty(true); };
 
   const handleReset = () => {
-    setDomainIds(unit.domainIds ?? []);
+    setDomainIds(scopeData.domainIds ?? []);
     setDirty(false);
   };
 

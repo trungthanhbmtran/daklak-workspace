@@ -26,7 +26,6 @@ export class OrganizationsController {
   }
 
   private mapUnitNode(node: any, depth = 0): any {
-    const { domainIds, domainNames } = this.domainIdsAndNames(node);
     const hasChildren = node.children && node.children.length > 0;
     return {
       id: node.id,
@@ -38,9 +37,6 @@ export class OrganizationsController {
       hierarchyPath: node.hierarchyPath ?? '',
       typeName: node.type?.name ?? '',
       typeCode: node.type?.code ?? '',
-      domainIds,
-      domainNames,
-      scope: node.scope ?? '',
       isLeaf: !hasChildren,
       depth,
       children: hasChildren
@@ -50,7 +46,6 @@ export class OrganizationsController {
   }
 
   private toUnitResponse(unit: any): any {
-    const { domainIds, domainNames } = this.domainIdsAndNames(unit);
     return {
       id: unit.id,
       code: unit.code,
@@ -61,9 +56,6 @@ export class OrganizationsController {
       hierarchyPath: unit.hierarchyPath ?? '',
       typeName: unit.type?.name ?? '',
       typeCode: unit.type?.code ?? '',
-      domainIds,
-      domainNames,
-      scope: unit.scope ?? '',
     };
   }
 
@@ -108,6 +100,23 @@ export class OrganizationsController {
       });
     }
     return this.toUnitResponse(unit);
+  }
+
+  @GrpcMethod('OrganizationService', 'GetUnitScope')
+  async getUnitScope(data: { id: number }) {
+    const unit = await this.orgService.getUnitScope(data.id);
+    if (!unit) {
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Đơn vị không tồn tại',
+      });
+    }
+    const { domainIds, domainNames } = this.domainIdsAndNames(unit);
+    return {
+      domainIds,
+      domainNames,
+      scope: (unit as any).scope ?? '',
+    };
   }
 
   @GrpcMethod('OrganizationService', 'UpdateUnit')
@@ -169,7 +178,7 @@ export class OrganizationsController {
           message: 'Đơn vị không tồn tại',
         });
       }
-      return this.toUnitResponse(unit);
+      return this.toUnitResponse(unit); // Doesn't need to return scope, client will use GetUnitScope or rely on invalidation
     } catch (e: any) {
       if (e instanceof RpcException) throw e;
       throw new RpcException({

@@ -7,6 +7,7 @@ import { FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useOrganizationDetailQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { useOrganizationContext } from "@/features/system-admin/organization/context/OrganizationContext";
 
 export default function OrganizationDetailLayout({
@@ -21,8 +22,9 @@ export default function OrganizationDetailLayout({
   const id = resolvedParams.id ? Number(resolvedParams.id) : undefined;
 
   const { state } = useOrganizationContext();
-  const { flatUnits, isLoadingTree: isLoading } = state;
-  const unit = id ? flatUnits.find((u) => u.id === id) : undefined;
+  const { flatUnits } = state;
+  const { data: detailResponse, isLoading } = useOrganizationDetailQuery(id);
+  const unit = detailResponse?.data;
   const parentUnit = unit?.parentId != null ? flatUnits.find((u) => u.id === unit.parentId) : null;
 
   if (id === undefined || isNaN(id)) {
@@ -63,7 +65,7 @@ export default function OrganizationDetailLayout({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm h-full">
-      
+
       {/* Header */}
       <div className="pb-4 shrink-0 bg-muted/10 border-b p-4">
         {isLoading ? (
@@ -92,7 +94,7 @@ export default function OrganizationDetailLayout({
           {tabs.map((tab) => {
             const isActive = pathname.startsWith(tab.href);
             const Icon = tab.icon;
-            
+
             return (
               <Link
                 key={tab.id}

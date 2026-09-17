@@ -40,8 +40,8 @@ function UnitRow({
         role="button"
         tabIndex={0}
         className={`group flex items-start justify-between min-w-0 py-2 pr-2 rounded-md cursor-pointer transition-colors ${isSelected
-            ? "bg-primary/10 border border-primary/20"
-            : "hover:bg-muted text-foreground border border-transparent"
+          ? "bg-primary/10 border border-primary/20"
+          : "hover:bg-muted text-foreground border border-transparent"
           }`}
         style={{ paddingLeft: `${4 + level * 20}px` }}
         onClick={() => onSelect(unit.id)}

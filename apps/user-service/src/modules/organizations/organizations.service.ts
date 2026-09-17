@@ -87,6 +87,16 @@ export class OrganizationsService {
       where: { id },
       include: {
         type: true,
+      },
+    });
+    if (!unit) return null;
+    return unit;
+  }
+
+  async getUnitScope(id: number) {
+    const unit = await this.prisma.organizationUnit.findUnique({
+      where: { id },
+      include: {
         unitDomains: {
           include: {
             domain: {
@@ -100,7 +110,6 @@ export class OrganizationsService {
         },
       },
     });
-    if (!unit) return null;
     return unit;
   }
 

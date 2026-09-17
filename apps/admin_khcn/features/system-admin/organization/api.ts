@@ -99,6 +99,15 @@ export const organizationApi = {
       data: normalizeUnitNode(unwrapData<any>(r)),
     })),
 
+  getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
+    apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
+      data: {
+        domainIds: r.data?.domainIds ?? [],
+        domainNames: r.data?.domainNames ?? [],
+        scope: r.data?.scope ?? "",
+      }
+    })),
+
   createUnit: (payload: CreateUnitPayload) =>
     apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),
 

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useOrganizationTreeQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
+import { useOrganizationTreeQuery, useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import {
   useOrganizationCreateMutation,
   useOrganizationUpdateMutation,
@@ -14,23 +14,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "next/navigation";
 import type { OrganizationUnitNode } from "@/features/system-admin/organization/types";
 
-function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
-  const result: OrganizationUnitNode[] = [];
-  const traverse = (n: OrganizationUnitNode[]) => {
-    for (const node of n) {
-      result.push(node);
-      if (node.children?.length) traverse(node.children);
-    }
-  };
-  traverse(nodes);
-  return result;
-}
-
 export function OrganizationLayoutClient({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
 
   const { data: treeResponse, isLoading: isLoadingTree } = useOrganizationTreeQuery(searchTerm);
+  const { data: flatListResponse, isLoading: isLoadingFlatList } = useOrganizationFlatListQuery(searchTerm);
 
   const { mutateAsync: createUnit, isPending: isCreating } = useOrganizationCreateMutation();
   const { mutateAsync: updateUnitBase, isPending: isUpdating } = useOrganizationUpdateMutation();
@@ -41,7 +30,7 @@ export function OrganizationLayoutClient({ children }: { children: React.ReactNo
   const updateScope = (id: number, payload: any) => updateScopeBase({ id, payload });
 
   const tree = treeResponse?.data ?? [];
-  const flatUnits = flattenTree(tree);
+  const flatUnits = flatListResponse?.data ?? [];
 
   const contextValue = {
     state: {
@@ -63,7 +52,7 @@ export function OrganizationLayoutClient({ children }: { children: React.ReactNo
     },
   };
 
-  if (isLoadingTree) {
+  if (isLoadingTree || isLoadingFlatList) {
     return (
       <div className="flex flex-col lg:flex-row gap-6 flex-1 w-full min-h-0 overflow-hidden h-full">
         <Skeleton className="w-full lg:w-[380px] flex-1 lg:flex-none h-full rounded-xl shrink-0" />

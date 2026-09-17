@@ -33,3 +33,12 @@ export function useOrganizationDetailQuery(id?: number) {
   });
 }
 
+export function useOrganizationScopeQuery(id?: number) {
+  return useQuery({
+    queryKey: id ? [...organizationQueryKeys.unit(id), "scope"] : [...organizationQueryKeys.all, "scope"],
+    queryFn: () => (id ? organizationApi.getScope(id) : Promise.reject("No id")),
+    enabled: !!id,
+    staleTime: STALE_TIME,
+  });
+}
+

@@ -7,6 +7,7 @@ import "common/common.proto";
 service OrganizationService {
   rpc CreateUnit (CreateUnitRequest) returns (UnitResponse);
   rpc GetOne (GetOneRequest) returns (UnitResponse);
+  rpc GetUnitScope (GetUnitScopeRequest) returns (GetUnitScopeResponse);
   rpc UpdateUnit (UpdateUnitRequest) returns (UnitResponse);
   rpc UpdateUnitScope (UpdateUnitScopeRequest) returns (UnitResponse);
   rpc DeleteUnit (DeleteUnitRequest) returns (DeleteUnitResponse);
@@ -63,6 +64,16 @@ message UnitResponse {
 
 message GetOneRequest {
   int32 id = 1;
+}
+
+message GetUnitScopeRequest {
+  int32 id = 1;
+}
+
+message GetUnitScopeResponse {
+  repeated int32 domain_ids = 1;
+  repeated string domain_names = 2;
+  string scope = 3;
 }
 
 message UpdateUnitRequest {

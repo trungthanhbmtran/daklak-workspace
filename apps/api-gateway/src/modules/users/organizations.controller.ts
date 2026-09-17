@@ -107,6 +107,13 @@ export class OrganizationsController {
     return this.orgService.delete(id);
   }
 
+  @Get(':id/scope')
+  @ApiOperation({ summary: 'Lấy phạm vi phụ trách của đơn vị' })
+  @ApiResponse({ status: 200, description: 'Phạm vi phụ trách (domainIds, scope)' })
+  async getUnitScope(@Param('id', ParseIntPipe) id: number) {
+    return this.orgService.getUnitScope(id);
+  }
+
   @Put(':id/scope')
   @ApiOperation({
     summary: 'Cập nhật phạm vi phụ trách của đơn vị (lĩnh vực + địa bàn)',

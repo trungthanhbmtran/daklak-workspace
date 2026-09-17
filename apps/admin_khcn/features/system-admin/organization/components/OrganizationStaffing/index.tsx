@@ -26,7 +26,7 @@ import { useDomainSearch } from "../../hooks/useScopeCatalog";
 export function OrganizationStaffing() {
   const params = useParams<{ id: string }>();
   const selectedId = params?.id ? Number(params.id) : undefined;
-  
+
   const { state } = useOrganizationContext();
   const { flatUnits } = state;
 
@@ -128,7 +128,7 @@ export function OrganizationStaffing() {
       else g.push(j);
     });
     return { partyTitles: p, govTitles: g };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobTitles]);
 
   const { partyReport, govReport } = useMemo(() => {
@@ -142,7 +142,7 @@ export function OrganizationStaffing() {
       else g.push(rep);
     });
     return { partyReport: p, govReport: g };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report, jobTitles]);
 
   if (selectedId == null) return null;
@@ -317,18 +317,18 @@ export function OrganizationStaffing() {
       </Tabs>
 
       {configOpen && (
-          <JobTitleConfigDialog
-                  open={configOpen}
-                  onOpenChange={setConfigOpen}
-                  jobTitle={configJobTitle}
-                  domainId={configDomainId}
-                  onDomainIdChange={setConfigDomainId}
-                  onSave={handleSaveConfig}
-                  isSaving={updateJobTitle.isPending}
-                  domainsForUnit={domainsForUnit}
-                  unitName={unit?.name}
-                />
-          )}
+        <JobTitleConfigDialog
+          open={configOpen}
+          onOpenChange={setConfigOpen}
+          jobTitle={configJobTitle}
+          domainId={configDomainId}
+          onDomainIdChange={setConfigDomainId}
+          onSave={handleSaveConfig}
+          isSaving={updateJobTitle.isPending}
+          domainsForUnit={domainsForUnit}
+          unitName={unit?.name}
+        />
+      )}
     </div>
   );
 }

@@ -29,7 +29,7 @@ import { organizationUnitSchema, type OrganizationUnitFormValues } from "../sche
 export function OrganizationUnitEdit() {
   const params = useParams<{ id: string }>();
   const selectedId = params?.id ? Number(params.id) : undefined;
-  
+
   const { state, actions, meta } = useOrganizationContext();
   const { flatUnits } = state;
   const { isUpdating, isDeleting } = meta;
@@ -37,7 +37,7 @@ export function OrganizationUnitEdit() {
 
   const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationDetailQuery(selectedId);
   const unit = detailResponse?.data;
-  
+
   const hasChildren = selectedId != null && flatUnits.some((u) => u.parentId === selectedId);
 
   const form = useForm<OrganizationUnitFormValues>({
@@ -61,7 +61,7 @@ export function OrganizationUnitEdit() {
   // eslint-disable-next-line react-hooks/incompatible-library
   const categoryCode = form.watch("categoryCode");
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
-  const selectedCat  = categoryItems.find((c) => c.code === categoryCode);
+  const selectedCat = categoryItems.find((c) => c.code === categoryCode);
   const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
