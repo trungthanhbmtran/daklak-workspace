@@ -358,7 +358,7 @@ services:
       - redis
     ports:
       - "3011:3011"
-      - "50062:50062"
+      - "50562:50062"
     env_file:
       - .env.production
     environment:
