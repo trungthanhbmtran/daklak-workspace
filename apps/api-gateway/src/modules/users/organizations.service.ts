@@ -53,7 +53,7 @@ export class OrganizationsService implements OnModuleInit {
       );
       return { success: true, data: result };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi tạo đơn vị';
+      const message = err?.details ?? err?.message ?? 'Lỗi tạo đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
       if (err?.code === 6) throw new ConflictException(message);
       throw new BadRequestException(message);
@@ -186,7 +186,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(this.orgGrpcService.GetOne({ id }));
       return { success: true, data: result };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Đơn vị không tồn tại';
+      const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
       throw new BadRequestException(message);
     }
@@ -197,7 +197,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code }));
       return { success: true, data: result };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Đơn vị không tồn tại';
+      const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
       throw new BadRequestException(message);
     }
@@ -208,7 +208,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));
       return { success: true, data: result };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Đơn vị không tồn tại';
+      const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
       throw new BadRequestException(message);
     }
@@ -239,7 +239,7 @@ export class OrganizationsService implements OnModuleInit {
       );
       return { success: true, data: result };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật đơn vị';
+      const message = err?.details ?? err?.message ?? 'Lỗi cập nhật đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
       if (err?.code === 6) throw new ConflictException(message);
       throw new BadRequestException(message);
@@ -256,7 +256,7 @@ export class OrganizationsService implements OnModuleInit {
         message: res?.message ?? 'Đã xóa đơn vị',
       };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi xóa đơn vị';
+      const message = err?.details ?? err?.message ?? 'Lỗi xóa đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
       if (err?.code === 9) throw new ConflictException(message);
       throw new BadRequestException(message);
@@ -278,7 +278,7 @@ export class OrganizationsService implements OnModuleInit {
       return { success: true, data: result };
     } catch (err: any) {
       const message =
-        err?.message ?? err?.details ?? 'Lỗi cập nhật phạm vi phụ trách';
+        err?.details ?? err?.message ?? 'Lỗi cập nhật phạm vi phụ trách';
       if (err?.code === 5) throw new NotFoundException(message);
       throw new BadRequestException(message);
     }

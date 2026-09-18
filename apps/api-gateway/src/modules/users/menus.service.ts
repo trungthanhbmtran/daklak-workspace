@@ -273,7 +273,7 @@ export class MenusService implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi tạo menu';
+      const message = err?.details ?? err?.message ?? 'Lỗi tạo menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
@@ -308,7 +308,7 @@ export class MenusService implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật menu';
+      const message = err?.details ?? err?.message ?? 'Lỗi cập nhật menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
