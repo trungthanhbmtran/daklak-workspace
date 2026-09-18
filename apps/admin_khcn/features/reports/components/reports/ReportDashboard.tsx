@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, LayoutTemplate, MoreVertical, Trash2, BarChart2 } from "lucide-react";
+import { Plus, LayoutTemplate, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportBuilder } from "./ReportBuilder";
 import dynamic from "next/dynamic";
@@ -20,7 +20,6 @@ import { toast } from "sonner";
 
 import { useWidgets, useDeleteTemplate, usePreviewReport } from "../../api";
 import { useIntegrationList } from "@/features/integration/api";
-import { Skeleton } from "@/components/ui/skeleton";
 
 import { MOCK_DATA, generateMockDataForSource } from "./mockData";
 

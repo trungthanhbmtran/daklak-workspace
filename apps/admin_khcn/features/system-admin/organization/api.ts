@@ -94,10 +94,6 @@ export const organizationApi = {
       data: (r.data ?? []).map(normalizeUnitNode),
     })),
 
-  getOne: (id: number): Promise<{ data: OrganizationUnitNode }> =>
-    apiClient.get(`/organizations/${id}`).then((r: any) => ({
-      data: normalizeUnitNode(unwrapData<any>(r)),
-    })),
 
   getOneByCode: (code: string): Promise<{ data: OrganizationUnitNode }> =>
     apiClient.get(`/organizations/code/${code}`).then((r: any) => ({

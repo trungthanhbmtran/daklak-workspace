@@ -2,12 +2,11 @@
 "use client";
 
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
-import { Plug, Save, Play, X } from "lucide-react";
+import { Plug, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { IntegrationConfig, useUpdateIntegration } from "../../api";
-import { previewReport } from "../../../reports/api";
 import { toast } from "sonner";
 import { ParsedEndpoint } from "./EndpointTypes";
 import { EndpointSidebar } from "./EndpointSidebar";

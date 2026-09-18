@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Layers, Activity, ChevronLeft, Sparkles, Network, ArrowRight, Plug, PieChart, Loader2 } from "lucide-react";
+import { Layers, Activity, ChevronLeft, Sparkles, Network, ArrowRight, Plug, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 

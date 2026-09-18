@@ -139,7 +139,7 @@ export function PersonalAiAssistants() {
     if (knType === 'TEXT' && !knContent) return;
     if (knType === 'FILE' && !knFile) return;
 
-    let payload: any = {
+    const payload: any = {
       assistantId: activeKnowledgeAssistant.id,
       title: knTitle,
       type: knType,

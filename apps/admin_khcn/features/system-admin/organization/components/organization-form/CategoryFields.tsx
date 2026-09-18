@@ -9,7 +9,7 @@ import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../../hooks
 export function CategoryFields() {
   const { control, watch } = useFormContext();
   
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const categoryCode = watch("categoryCode");
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
   const selectedCat  = categoryItems.find((c) => c.code === categoryCode);

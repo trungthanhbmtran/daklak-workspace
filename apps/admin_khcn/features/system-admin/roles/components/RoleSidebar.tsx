@@ -24,7 +24,7 @@ export function RoleSidebar() {
   const searchTerm = searchParams.get('search') || "";
   
   const [page, setPage] = useState(1);
-  const selectedRoleId = params?.id ? Number(params.id) : null;
+  const selectedRoleId = params?.id ? Number(decodeURIComponent(params.id)) : null;
   // create mode could be indicated if pathname ends with /create
   // but we can just highlight it based on route if we want, or leave un-highlighted
 

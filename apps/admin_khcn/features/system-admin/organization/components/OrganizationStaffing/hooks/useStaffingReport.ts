@@ -33,8 +33,8 @@ export function useStaffingReport(unitId: number | null) {
   return {
     report,
     jobTitles,
-    isLoadingReport: reportQuery.isLoading,
-    isLoadingJobTitles: jobTitlesQuery.isLoading,
+    isLoadingReport: reportQuery.isPending || reportQuery.isFetching,
+    isLoadingJobTitles: jobTitlesQuery.isPending || jobTitlesQuery.isFetching,
     isError: reportQuery.isError || jobTitlesQuery.isError,
     refetchReport: reportQuery.refetch,
   };

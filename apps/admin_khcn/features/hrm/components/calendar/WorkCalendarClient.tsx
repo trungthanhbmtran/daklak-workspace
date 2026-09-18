@@ -2,7 +2,6 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import { Skeleton } from "@/components/ui/skeleton";

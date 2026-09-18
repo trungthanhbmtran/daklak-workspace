@@ -3,7 +3,6 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import axios from 'axios'
-import { API_BASE_URL } from '@/config/constants'
 
 // Vì login chưa có token, chúng ta gọi trực tiếp axios thay vì dùng serverApi instance
 // (để tránh interceptor tự động check token hoặc redirect vòng lặp)

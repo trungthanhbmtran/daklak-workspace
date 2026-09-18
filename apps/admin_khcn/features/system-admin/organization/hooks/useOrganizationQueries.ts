@@ -24,14 +24,7 @@ export function useOrganizationFlatListQuery(q?: string) {
   });
 }
 
-export function useOrganizationDetailQuery(id?: number) {
-  return useQuery({
-    queryKey: id ? organizationQueryKeys.unit(id) : [...organizationQueryKeys.all, "unit"],
-    queryFn: () => (id ? organizationApi.getOne(id) : Promise.reject("No id")),
-    enabled: !!id,
-    staleTime: STALE_TIME,
-  });
-}
+
 
 export function useOrganizationByCodeQuery(code?: string) {
   return useQuery({

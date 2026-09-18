@@ -19,7 +19,7 @@ export function MenuSidebar() {
 
   const { data: tree = [], isLoading: isLoadingMenus } = useMenuTreeQuery(searchTerm);
   const params = useParams<{ id: string }>();
-  const activeId = params?.id ? Number(params.id) : undefined;
+  const activeId = params?.id ? Number(decodeURIComponent(params.id)) : undefined;
 
   const { expandedRows, toggleExpand } = useSidebarLogic(tree);
 

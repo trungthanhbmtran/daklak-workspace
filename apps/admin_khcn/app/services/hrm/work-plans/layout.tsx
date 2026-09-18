@@ -4,11 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
   ListTodo, 
-  LayoutDashboard, 
-  FolderKanban, 
-  UserCheck, 
-  ClipboardCheck,
-  PieChart
+  LayoutDashboard
 } from "lucide-react";
 
 export default function WorkPlansLayout({ children }: { children: React.ReactNode }) {

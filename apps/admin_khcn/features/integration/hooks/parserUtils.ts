@@ -173,7 +173,7 @@ function extractSwaggerEndpoints(data: any): ParsedEndpoint[] {
 
 function extractSwaggerAuth(data: any): any {
   let authType = "NONE";
-  let authConfig: any = {};
+  const authConfig: any = {};
 
   const schemes = data.securityDefinitions || data.components?.securitySchemes;
   if (schemes) {
@@ -290,7 +290,7 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
         let headers: any[] = [];
         if (Array.isArray(req.header)) {
            headers = req.header.map((h: any) => {
-              let val = h.value !== undefined ? h.value : "";
+              const val = h.value !== undefined ? h.value : "";
               return { key: String(h.key || ""), value: String(val) };
            });
         } else if (typeof req.header === 'string') {
@@ -360,7 +360,7 @@ function extractPostmanEndpoints(data: any): ParsedEndpoint[] {
 
 function extractPostmanAuth(data: any): any {
   let authType = "NONE";
-  let authConfig: any = {};
+  const authConfig: any = {};
 
   if (data.auth && data.auth.type) {
     if (data.auth.type === "oauth2") authType = "OAUTH2";

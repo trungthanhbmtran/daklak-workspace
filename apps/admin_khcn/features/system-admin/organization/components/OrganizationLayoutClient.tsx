@@ -12,7 +12,6 @@ import { OrganizationProvider } from "@/features/system-admin/organization/conte
 import { OrganizationSidebar } from "@/features/system-admin/organization/components/OrganizationSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearchParams } from "next/navigation";
-import type { OrganizationUnitNode } from "@/features/system-admin/organization/types";
 
 export function OrganizationLayoutClient({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();

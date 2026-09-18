@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   AlertDialog, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
@@ -28,15 +28,17 @@ import { organizationUnitSchema, type OrganizationUnitFormValues } from "../sche
 
 export function OrganizationUnitEdit() {
   const params = useParams<{ code: string }>();
-  const code = params?.code;
+  const rawCode = params?.code;
+  const code = rawCode ? decodeURIComponent(rawCode) : "";
 
   const { state, actions, meta } = useOrganizationContext();
   const { flatUnits } = state;
   const { isUpdating, isDeleting } = meta;
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data: detailResponse, isLoading: isLoadingDetail } = useOrganizationByCodeQuery(code);
+  const { data: detailResponse, isPending, isFetching } = useOrganizationByCodeQuery(code);
   const unit = detailResponse?.data;
+  const isDetailLoading = isPending || isFetching;
   const selectedId = unit?.id;
 
   const hasChildren = selectedId != null && flatUnits.some((u) => u.parentId === selectedId);
@@ -77,7 +79,7 @@ export function OrganizationUnitEdit() {
   };
 
   if (selectedId == null) return null;
-  if (isLoadingDetail) {
+  if (isDetailLoading) {
     return (
       <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
         <Skeleton className="h-[200px] w-full" />

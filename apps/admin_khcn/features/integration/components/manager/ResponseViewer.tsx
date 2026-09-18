@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Clock, Database, Globe } from "lucide-react";
+import { Copy, Check, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ResponseViewerProps {
@@ -21,7 +21,7 @@ const formatBytes = (bytes: number, decimals = 2) => {
 
 const syntaxHighlight = (json: string) => {
   if (!json) return "";
-  let formatted = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const formatted = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return formatted.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
     let cls = 'text-amber-500'; // number
     if (/^"/.test(match)) {

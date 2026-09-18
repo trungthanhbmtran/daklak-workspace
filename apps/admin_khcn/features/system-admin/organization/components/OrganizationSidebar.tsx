@@ -197,8 +197,9 @@ export function OrganizationSidebar() {
   const params = useParams<{ code: string }>();
 
   // Determine activeId from route params or searchParams
-  const routeCode = params?.code;
-  const activeUnit = routeCode ? flatUnits.find(u => u.code === routeCode) : undefined;
+  const rawCode = params?.code;
+  const currentCode = rawCode ? decodeURIComponent(rawCode) : "";
+  const activeUnit = currentCode ? flatUnits.find(u => u.code === currentCode) : undefined;
   const parentIdStr = searchParams.get('parentId');
   const parentId = parentIdStr ? Number(parentIdStr) : undefined;
   const activeId = activeUnit?.id ?? parentId;

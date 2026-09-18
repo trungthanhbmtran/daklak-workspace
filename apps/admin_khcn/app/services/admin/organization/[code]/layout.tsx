@@ -18,17 +18,24 @@ export default function OrganizationDetailLayout({
   params: Promise<{ code: string }>;
 }) {
   const pathname = usePathname();
+  // Next.js 16.4: params là Promise, bắt buộc phải dùng React.use() để unwrap
   const resolvedParams = use(params);
-  const code = resolvedParams.code;
+  // Decode URL vì trong một số trường hợp client-side navigation, param có thể bị URL-encoded
+  const rawCode = resolvedParams?.code;
+  const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: unitData, isLoading, isError } = useOrganizationByCodeQuery(code);
+  const { data: unitData, isPending, isFetching, isError } = useOrganizationByCodeQuery(code);
   const unit = unitData?.data;
+
+  // TanStack Query v5: khi query disabled (code = ""), isLoading = false, isPending = true.
+  // Do đó phải dùng (isPending || isFetching) để hiển thị Skeleton.
+  const isQueryLoading = isPending || isFetching;
 
   const { state } = useOrganizationContext();
   const { flatUnits } = state;
   const parentUnit = unit?.parentId != null ? flatUnits.find((u) => u.id === unit.parentId) : null;
 
-  if (isError || (!isLoading && !unit)) {
+  if (isError || (!isQueryLoading && !unit && code)) {
     return (
       <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border bg-card text-card-foreground shadow-sm h-full">
         <div className="flex flex-col items-center gap-2">
@@ -69,7 +76,7 @@ export default function OrganizationDetailLayout({
       
       {/* Header */}
       <div className="pb-4 shrink-0 bg-muted/10 border-b p-4">
-        {isLoading ? (
+        {isQueryLoading && !unit ? (
           <div className="space-y-2">
             <Skeleton className="h-4 w-40" />
             <Skeleton className="h-6 w-1/3" />

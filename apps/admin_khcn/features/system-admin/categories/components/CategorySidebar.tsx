@@ -12,9 +12,10 @@ import { useCategoryUI } from "../hooks/useCategoryUI";
 export function CategorySidebar() {
   const { data: groups, isLoading } = useGetCategoryGroups();
   const params = useParams<{ code: string }>();
+  const currentCode = params?.code ? decodeURIComponent(params.code) : undefined;
   const router = useRouter();
   
-  const activeGroup = params?.code || "";
+  const activeGroup = currentCode || "";
 
   // Sử dụng UI hook để search nhóm
   const ui = useCategoryUI([], groups || []);

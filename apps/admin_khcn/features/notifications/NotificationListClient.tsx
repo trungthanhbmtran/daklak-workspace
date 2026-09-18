@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { Check, CheckCircle2, AlertTriangle, Info, Clock, Loader2, Filter, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -39,7 +39,7 @@ export function NotificationListClient() {
   const unreadCount = data?.pages[0]?.unreadCount ?? 0;
 
   const markRead = useMutation({
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+     
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
       const previousData = queryClient.getQueryData(NOTIFICATIONS_KEY);
@@ -73,7 +73,7 @@ export function NotificationListClient() {
   });
 
   const markAllRead = useMutation({
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+     
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
       const previousData = queryClient.getQueryData(NOTIFICATIONS_KEY);

@@ -26,7 +26,8 @@ import { useDomainSearch } from "../../hooks/useScopeCatalog";
 
 export function OrganizationStaffing() {
   const params = useParams<{ code: string }>();
-  const code = params?.code;
+  const rawCode = params?.code;
+  const code = rawCode ? decodeURIComponent(rawCode) : "";
 
   const { data: detailResponse } = useOrganizationByCodeQuery(code);
   const unit = detailResponse?.data;

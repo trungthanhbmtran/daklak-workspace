@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import React from 'react';
 import { Accordion } from "@/components/ui/accordion";
 import { PropertiesPanelComponentProps } from "./types";

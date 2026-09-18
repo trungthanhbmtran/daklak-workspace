@@ -1,9 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Loader2, Calendar, FileText, CheckCircle2, ArrowRight } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { Bell, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +10,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
 import { getNotifications, markNotificationRead, markAllNotificationsRead, type NotificationItem } from "./api";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -44,7 +41,7 @@ export function NotificationBell() {
   const unreadCount = data?.pages[0]?.unreadCount ?? 0;
 
   const markRead = useMutation({
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+     
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
       const previousData = queryClient.getQueryData(NOTIFICATIONS_KEY);
@@ -78,7 +75,7 @@ export function NotificationBell() {
   });
 
   const markAllRead = useMutation({
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+     
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_KEY });
       const previousData = queryClient.getQueryData(NOTIFICATIONS_KEY);

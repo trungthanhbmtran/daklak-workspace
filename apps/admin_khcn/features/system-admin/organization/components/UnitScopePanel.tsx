@@ -31,13 +31,15 @@ export function UnitScopePanel() {
   const { actions, meta } = useOrganizationContext();
   const { isUpdatingScope } = meta;
   const params = useParams<{ code: string }>();
-  const code = params?.code;
+  const rawCode = params?.code;
+  const code = rawCode ? decodeURIComponent(rawCode) : "";
 
   const { data: detailResponse } = useOrganizationByCodeQuery(code);
   const selectedId = detailResponse?.data?.id;
 
-  const { data: scopeResponse, isLoading: isLoadingDetail } = useOrganizationScopeQuery(selectedId ?? undefined);
+  const { data: scopeResponse, isPending, isFetching } = useOrganizationScopeQuery(selectedId ?? undefined);
   const scopeData = scopeResponse?.data;
+  const isScopeLoading = isPending || isFetching;
 
   // Local IDs — server sẽ dùng để sort & đánh dấu selected
   const [domainIds, setDomainIds] = useState<number[]>([]);
@@ -54,7 +56,7 @@ export function UnitScopePanel() {
   const domains = useDomainSearch(domainIds);
 
   if (selectedId == null) return null;
-  if (isLoadingDetail) {
+  if (isScopeLoading) {
     return (
       <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
         <Skeleton className="h-8 w-1/3" />
@@ -177,8 +179,6 @@ function ScopePicker({
   }));
 
   const selectedItems = displayItems.filter(i => i.selected);
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  const restItems = displayItems.filter(i => !i.selected);
   const isEmpty = displayItems.length === 0 && !isFetching;
 
   return (
