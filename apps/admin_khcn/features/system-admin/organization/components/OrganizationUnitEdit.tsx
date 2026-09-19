@@ -70,9 +70,9 @@ export function OrganizationUnitEdit() {
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     if (selectedId == null) return;
     await actions.updateUnit(selectedId, {
-      code: values.code.trim(),
+      code: values.code?.trim(),
       name: values.name.trim(),
-      shortName: values.shortName,
+      shortName: values.shortName?.trim() || undefined,
       categoryCode: values.categoryCode,
       scope: values.scope,
     });
@@ -125,7 +125,7 @@ export function OrganizationUnitEdit() {
                       <FormItem>
                         <FormLabel>Mã</FormLabel>
                         <FormControl>
-                          <Input {...field} className="font-mono uppercase bg-muted" readOnly disabled />
+                          <Input {...field} className="font-mono uppercase bg-muted" readOnly />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

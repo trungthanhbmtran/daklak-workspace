@@ -188,6 +188,8 @@ export class OrganizationsService implements OnModuleInit {
       this.orgGrpcService.UpdateJobTitle({
         id,
         domainId: body.domainId,
+        geographicAreaId: body.geographicAreaId,
+        monitoredUnitIds: body.monitoredUnitIds,
       }),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');

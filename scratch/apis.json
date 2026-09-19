@@ -1,0 +1,1766 @@
+[
+  {
+    "module": "ai",
+    "controller": "ai",
+    "method": "POST",
+    "path": "/admin/ai/generate"
+  },
+  {
+    "module": "ai",
+    "controller": "ai",
+    "method": "POST",
+    "path": "/admin/ai/execute"
+  },
+  {
+    "module": "ai",
+    "controller": "ai",
+    "method": "GET",
+    "path": "/admin/ai/jobs/:jobId"
+  },
+  {
+    "module": "ai",
+    "controller": "ai",
+    "method": "POST",
+    "path": "/admin/ai/models"
+  },
+  {
+    "module": "app",
+    "controller": "app",
+    "method": "GET",
+    "path": "/health"
+  },
+  {
+    "module": "app",
+    "controller": "app",
+    "method": "GET",
+    "path": "/"
+  },
+  {
+    "module": "auth",
+    "controller": "auth",
+    "method": "POST",
+    "path": "/admin/auth/login"
+  },
+  {
+    "module": "auth",
+    "controller": "auth",
+    "method": "POST",
+    "path": "/admin/auth/refresh"
+  },
+  {
+    "module": "auth",
+    "controller": "auth",
+    "method": "POST",
+    "path": "/admin/auth/logout"
+  },
+  {
+    "module": "auth",
+    "controller": "auth",
+    "method": "GET",
+    "path": "/admin/auth/me"
+  },
+  {
+    "module": "chat",
+    "controller": "chat",
+    "method": "POST",
+    "path": "/admin/chat/conversation"
+  },
+  {
+    "module": "chat",
+    "controller": "chat",
+    "method": "GET",
+    "path": "/admin/chat/conversation/:id"
+  },
+  {
+    "module": "chat",
+    "controller": "chat",
+    "method": "GET",
+    "path": "/admin/chat/conversation/:id/messages"
+  },
+  {
+    "module": "chat",
+    "controller": "chat",
+    "method": "POST",
+    "path": "/admin/chat/message"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "GET",
+    "path": "/admin/documents/consultations/public-comments"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "GET",
+    "path": "/admin/documents/consultations/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "POST",
+    "path": "/admin/documents/consultations/:id/responses"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "GET",
+    "path": "/admin/documents/consultations/:id/responses"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "GET",
+    "path": "/admin/documents/consultations/:id/public-comments"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "PUT",
+    "path": "/admin/documents/consultations/public-comments/:id/moderate"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "GET",
+    "path": "/admin/documents/consultations"
+  },
+  {
+    "module": "documents",
+    "controller": "consultations",
+    "method": "POST",
+    "path": "/admin/documents/consultations"
+  },
+  {
+    "module": "documents",
+    "controller": "document-category",
+    "method": "GET",
+    "path": "/admin/documents/categories/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "document-category",
+    "method": "PUT",
+    "path": "/admin/documents/categories/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "document-category",
+    "method": "DELETE",
+    "path": "/admin/documents/categories/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "document-category",
+    "method": "GET",
+    "path": "/admin/documents/categories"
+  },
+  {
+    "module": "documents",
+    "controller": "document-category",
+    "method": "POST",
+    "path": "/admin/documents/categories"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/procedures/list"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/procedures/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/procedures"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "PUT",
+    "path": "/admin/documents/procedures/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "DELETE",
+    "path": "/admin/documents/procedures/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/dossiers/list"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/dossiers/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/dossiers"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "PUT",
+    "path": "/admin/documents/dossiers/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "DELETE",
+    "path": "/admin/documents/dossiers/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/cabinet"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/cabinet"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "DELETE",
+    "path": "/admin/documents/cabinet/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/dossiers/:id/components"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "PUT",
+    "path": "/admin/documents/dossiers/components/:compId"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/dossiers/from-template"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/dossiers/create-blank"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/dossiers/:id/components"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "PUT",
+    "path": "/admin/documents/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/extract"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents/sync"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents/:id/logs"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "DELETE",
+    "path": "/admin/documents/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "GET",
+    "path": "/admin/documents"
+  },
+  {
+    "module": "documents",
+    "controller": "documents",
+    "method": "POST",
+    "path": "/admin/documents"
+  },
+  {
+    "module": "documents",
+    "controller": "minutes",
+    "method": "GET",
+    "path": "/admin/documents/minutes/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "minutes",
+    "method": "PUT",
+    "path": "/admin/documents/minutes/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "minutes",
+    "method": "DELETE",
+    "path": "/admin/documents/minutes/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "minutes",
+    "method": "GET",
+    "path": "/admin/documents/minutes"
+  },
+  {
+    "module": "documents",
+    "controller": "minutes",
+    "method": "POST",
+    "path": "/admin/documents/minutes"
+  },
+  {
+    "module": "documents",
+    "controller": "public-consultations",
+    "method": "POST",
+    "path": "/public/documents/consultations/:id/comments"
+  },
+  {
+    "module": "documents",
+    "controller": "public-documents",
+    "method": "GET",
+    "path": "/public/documents/procedures"
+  },
+  {
+    "module": "documents",
+    "controller": "public-documents",
+    "method": "GET",
+    "path": "/public/documents/procedures/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "public-documents",
+    "method": "GET",
+    "path": "/public/documents/dossiers/:code"
+  },
+  {
+    "module": "documents",
+    "controller": "public-documents",
+    "method": "GET",
+    "path": "/public/documents/:id"
+  },
+  {
+    "module": "documents",
+    "controller": "public-documents",
+    "method": "GET",
+    "path": "/public/documents"
+  },
+  {
+    "module": "hrm",
+    "controller": "employee",
+    "method": "GET",
+    "path": "/admin/hrm/employees/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "employee",
+    "method": "PUT",
+    "path": "/admin/hrm/employees/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "employee",
+    "method": "DELETE",
+    "path": "/admin/hrm/employees/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "employee",
+    "method": "GET",
+    "path": "/admin/hrm/employees"
+  },
+  {
+    "module": "hrm",
+    "controller": "employee",
+    "method": "POST",
+    "path": "/admin/hrm/employees"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "GET",
+    "path": "/admin/hrm/kpis/periods"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "POST",
+    "path": "/admin/hrm/kpis/periods"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "GET",
+    "path": "/admin/hrm/kpis/criteria"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "POST",
+    "path": "/admin/hrm/kpis/criteria"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "PUT",
+    "path": "/admin/hrm/kpis/criteria/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "DELETE",
+    "path": "/admin/hrm/kpis/criteria/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "POST",
+    "path": "/admin/hrm/kpis/evaluations"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "GET",
+    "path": "/admin/hrm/kpis/evaluations"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "POST",
+    "path": "/admin/hrm/kpis/evaluations/calculate-personal"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "GET",
+    "path": "/admin/hrm/kpis/evaluations/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "POST",
+    "path": "/admin/hrm/kpis/evaluations/:id/submit"
+  },
+  {
+    "module": "hrm",
+    "controller": "kpis",
+    "method": "POST",
+    "path": "/admin/hrm/kpis/evaluations/:id/approve"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "GET",
+    "path": "/admin/hrm/master-plans/advanced/historical-feasibility"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "GET",
+    "path": "/admin/hrm/master-plans/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "POST",
+    "path": "/admin/hrm/master-plans/ai-generate"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "PUT",
+    "path": "/admin/hrm/master-plans/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "DELETE",
+    "path": "/admin/hrm/master-plans/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "GET",
+    "path": "/admin/hrm/master-plans"
+  },
+  {
+    "module": "hrm",
+    "controller": "master-plans",
+    "method": "POST",
+    "path": "/admin/hrm/master-plans"
+  },
+  {
+    "module": "hrm",
+    "controller": "public-hrm",
+    "method": "GET",
+    "path": "/public/hrm/employees"
+  },
+  {
+    "module": "hrm",
+    "controller": "rank-quotas",
+    "method": "GET",
+    "path": "/admin/hrm/rank-quotas/:rankCode"
+  },
+  {
+    "module": "hrm",
+    "controller": "rank-quotas",
+    "method": "POST",
+    "path": "/admin/hrm/rank-quotas"
+  },
+  {
+    "module": "hrm",
+    "controller": "task-templates",
+    "method": "POST",
+    "path": "/admin/hrm/task-templates/bulk"
+  },
+  {
+    "module": "hrm",
+    "controller": "task-templates",
+    "method": "PUT",
+    "path": "/admin/hrm/task-templates/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "task-templates",
+    "method": "DELETE",
+    "path": "/admin/hrm/task-templates/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "task-templates",
+    "method": "GET",
+    "path": "/admin/hrm/task-templates"
+  },
+  {
+    "module": "hrm",
+    "controller": "task-templates",
+    "method": "POST",
+    "path": "/admin/hrm/task-templates"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "PUT",
+    "path": "/admin/hrm/tasks/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/extend"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "PUT",
+    "path": "/admin/hrm/tasks/:id/status"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/respond"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/recommend-assignees"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "PUT",
+    "path": "/admin/hrm/tasks/:id/assign"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/breakdown"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id/comments"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/comments"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/coordinate"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id/subtasks"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id/history"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "PUT",
+    "path": "/admin/hrm/tasks/:id/kpi-setting"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id/kpi-setting"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id/steps"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/steps"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "PUT",
+    "path": "/admin/hrm/tasks/:id/steps/:stepId"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "DELETE",
+    "path": "/admin/hrm/tasks/:id/steps/:stepId"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks/:id/attend"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks/:id/attendance-stats"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "POST",
+    "path": "/admin/hrm/tasks"
+  },
+  {
+    "module": "hrm",
+    "controller": "tasks",
+    "method": "GET",
+    "path": "/admin/hrm/tasks"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "GET",
+    "path": "/admin/integration/services"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "POST",
+    "path": "/admin/integration/services"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "PUT",
+    "path": "/admin/integration/services/:id"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "DELETE",
+    "path": "/admin/integration/services/:id"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "GET",
+    "path": "/admin/integration/routes"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "POST",
+    "path": "/admin/integration/routes"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "PUT",
+    "path": "/admin/integration/routes/:id"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "DELETE",
+    "path": "/admin/integration/routes/:id"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "GET",
+    "path": "/admin/integration/apikeys"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "POST",
+    "path": "/admin/integration/apikeys"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "PUT",
+    "path": "/admin/integration/apikeys/:id"
+  },
+  {
+    "module": "integration",
+    "controller": "integration",
+    "method": "DELETE",
+    "path": "/admin/integration/apikeys/:id"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "GET",
+    "path": "/admin/media/download/:id"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "POST",
+    "path": "/admin/media/request-upload"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "POST",
+    "path": "/admin/media/confirm-upload"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "POST",
+    "path": "/admin/media/init-multipart-upload"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "POST",
+    "path": "/admin/media/get-multipart-urls"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "POST",
+    "path": "/admin/media/complete-multipart-upload"
+  },
+  {
+    "module": "media",
+    "controller": "media",
+    "method": "GET",
+    "path": "/admin/media/:id"
+  },
+  {
+    "module": "notifications",
+    "controller": "notifications",
+    "method": "PATCH",
+    "path": "/admin/notifications/read-all"
+  },
+  {
+    "module": "notifications",
+    "controller": "notifications",
+    "method": "PATCH",
+    "path": "/admin/notifications/:id/read"
+  },
+  {
+    "module": "notifications",
+    "controller": "notifications",
+    "method": "GET",
+    "path": "/admin/notifications"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "GET",
+    "path": "/admin/interactions/comments"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "PUT",
+    "path": "/admin/interactions/comments/:id/status"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "DELETE",
+    "path": "/admin/interactions/comments/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "GET",
+    "path": "/admin/interactions/questions"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "POST",
+    "path": "/admin/interactions/questions/:id/answer"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "GET",
+    "path": "/admin/interactions/questions/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "GET",
+    "path": "/admin/interactions/feedbacks"
+  },
+  {
+    "module": "posts",
+    "controller": "interactions",
+    "method": "PUT",
+    "path": "/admin/interactions/feedbacks/:id/status"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-config",
+    "method": "PUT",
+    "path": "/admin/portal-configs/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-config",
+    "method": "POST",
+    "path": "/admin/portal-configs/upsert"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-config",
+    "method": "POST",
+    "path": "/admin/portal-configs/batch-upsert"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-config",
+    "method": "POST",
+    "path": "/admin/portal-configs"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-config",
+    "method": "GET",
+    "path": "/admin/portal-configs"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-menu",
+    "method": "GET",
+    "path": "/admin/portal-menus/quick-setup"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-menu",
+    "method": "GET",
+    "path": "/admin/portal-menus/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-menu",
+    "method": "PUT",
+    "path": "/admin/portal-menus/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-menu",
+    "method": "DELETE",
+    "path": "/admin/portal-menus/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-menu",
+    "method": "POST",
+    "path": "/admin/portal-menus"
+  },
+  {
+    "module": "posts",
+    "controller": "portal-menu",
+    "method": "GET",
+    "path": "/admin/portal-menus"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-banner",
+    "method": "GET",
+    "path": "/admin/banners/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-banner",
+    "method": "PUT",
+    "path": "/admin/banners/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-banner",
+    "method": "DELETE",
+    "path": "/admin/banners/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-banner",
+    "method": "POST",
+    "path": "/admin/banners"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-banner",
+    "method": "GET",
+    "path": "/admin/banners"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-category",
+    "method": "GET",
+    "path": "/admin/posts/categories/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-category",
+    "method": "PUT",
+    "path": "/admin/posts/categories/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-category",
+    "method": "DELETE",
+    "path": "/admin/posts/categories/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-category",
+    "method": "POST",
+    "path": "/admin/posts/categories"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-category",
+    "method": "GET",
+    "path": "/admin/posts/categories"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-tag",
+    "method": "POST",
+    "path": "/admin/posts/tags"
+  },
+  {
+    "module": "posts",
+    "controller": "posts-tag",
+    "method": "GET",
+    "path": "/admin/posts/tags"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "GET",
+    "path": "/admin/posts/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "PUT",
+    "path": "/admin/posts/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "DELETE",
+    "path": "/admin/posts/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts/:id/submit"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts/:id/review"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts/:id/approve"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts/:id/reject"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts/:id/publish"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts/:id/unpublish"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "GET",
+    "path": "/admin/posts/:id/history"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "POST",
+    "path": "/admin/posts"
+  },
+  {
+    "module": "posts",
+    "controller": "posts",
+    "method": "GET",
+    "path": "/admin/posts"
+  },
+  {
+    "module": "posts",
+    "controller": "public-banners",
+    "method": "GET",
+    "path": "/public/banners"
+  },
+  {
+    "module": "posts",
+    "controller": "public-interactions",
+    "method": "GET",
+    "path": "/public/interactions/questions"
+  },
+  {
+    "module": "posts",
+    "controller": "public-interactions",
+    "method": "POST",
+    "path": "/public/interactions/questions"
+  },
+  {
+    "module": "posts",
+    "controller": "public-portal-config",
+    "method": "GET",
+    "path": "/public/portal-configs"
+  },
+  {
+    "module": "posts",
+    "controller": "public-portal-menu",
+    "method": "GET",
+    "path": "/public/portal-menus/tree"
+  },
+  {
+    "module": "posts",
+    "controller": "public-portal-menu",
+    "method": "GET",
+    "path": "/public/portal-menus"
+  },
+  {
+    "module": "posts",
+    "controller": "public-posts",
+    "method": "GET",
+    "path": "/public/posts/slug/:slug"
+  },
+  {
+    "module": "posts",
+    "controller": "public-posts",
+    "method": "GET",
+    "path": "/public/posts/:id"
+  },
+  {
+    "module": "posts",
+    "controller": "public-posts",
+    "method": "POST",
+    "path": "/public/posts/:id/view"
+  },
+  {
+    "module": "posts",
+    "controller": "public-posts",
+    "method": "GET",
+    "path": "/public/posts"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "POST",
+    "path": "/admin/reports/templates"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/templates"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/templates/widgets"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/templates/:id"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "PUT",
+    "path": "/admin/reports/templates/:id"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "DELETE",
+    "path": "/admin/reports/templates/:id"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/tasks"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/posts"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/kpis"
+  },
+  {
+    "module": "reports",
+    "controller": "reports",
+    "method": "GET",
+    "path": "/admin/reports/documents"
+  },
+  {
+    "module": "translate",
+    "controller": "translate",
+    "method": "GET",
+    "path": "/admin/translate/jobs/:jobId"
+  },
+  {
+    "module": "translate",
+    "controller": "translate",
+    "method": "POST",
+    "path": "/admin/translate"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "GET",
+    "path": "/admin/ai-assistants/:id"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "PUT",
+    "path": "/admin/ai-assistants/:id"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "DELETE",
+    "path": "/admin/ai-assistants/:id"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "POST",
+    "path": "/admin/ai-assistants/:id/knowledge-sources"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "DELETE",
+    "path": "/admin/ai-assistants/knowledge-sources/:sourceId"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "POST",
+    "path": "/admin/ai-assistants/:id/chat"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "GET",
+    "path": "/admin/ai-assistants"
+  },
+  {
+    "module": "users",
+    "controller": "ai-assistant",
+    "method": "POST",
+    "path": "/admin/ai-assistants"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "GET",
+    "path": "/admin/categories/groups"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "PUT",
+    "path": "/admin/categories/groups/:code"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "PUT",
+    "path": "/admin/categories/:id"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "DELETE",
+    "path": "/admin/categories/:id"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "GET",
+    "path": "/admin/categories"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "POST",
+    "path": "/admin/categories"
+  },
+  {
+    "module": "users",
+    "controller": "categories",
+    "method": "GET",
+    "path": "/admin/categories"
+  },
+  {
+    "module": "users",
+    "controller": "configs",
+    "method": "GET",
+    "path": "/admin/system-configs"
+  },
+  {
+    "module": "users",
+    "controller": "configs",
+    "method": "PUT",
+    "path": "/admin/system-configs"
+  },
+  {
+    "module": "users",
+    "controller": "integrations",
+    "method": "PUT",
+    "path": "/admin/integrations/:id"
+  },
+  {
+    "module": "users",
+    "controller": "integrations",
+    "method": "PUT",
+    "path": "/admin/integrations/:id/active"
+  },
+  {
+    "module": "users",
+    "controller": "integrations",
+    "method": "DELETE",
+    "path": "/admin/integrations/:id"
+  },
+  {
+    "module": "users",
+    "controller": "integrations",
+    "method": "GET",
+    "path": "/admin/integrations"
+  },
+  {
+    "module": "users",
+    "controller": "integrations",
+    "method": "POST",
+    "path": "/admin/integrations"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "GET",
+    "path": "/admin/menus/tree"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "GET",
+    "path": "/admin/menus/me"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "GET",
+    "path": "/admin/menus/hub"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "GET",
+    "path": "/admin/menus/sidebar"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "PUT",
+    "path": "/admin/menus/:id"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "DELETE",
+    "path": "/admin/menus/:id"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "GET",
+    "path": "/admin/menus"
+  },
+  {
+    "module": "users",
+    "controller": "menus",
+    "method": "POST",
+    "path": "/admin/menus"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/unit-types"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/tree"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/job-titles"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "PUT",
+    "path": "/admin/organizations/job-titles/:id"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/code/:code"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/detail/:identifier"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/:id"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "PUT",
+    "path": "/admin/organizations/:id"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "DELETE",
+    "path": "/admin/organizations/:id"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/:id/scope"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "PUT",
+    "path": "/admin/organizations/:id/scope"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/:id/subtree"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "POST",
+    "path": "/admin/organizations/staffing"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations/:id/staffing-report"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "POST",
+    "path": "/admin/organizations/staffing-slots"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "POST",
+    "path": "/admin/organizations"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations"
+  },
+  {
+    "module": "users",
+    "controller": "organizations",
+    "method": "GET",
+    "path": "/admin/organizations"
+  },
+  {
+    "module": "users",
+    "controller": "pbac",
+    "method": "GET",
+    "path": "/admin/roles/:id"
+  },
+  {
+    "module": "users",
+    "controller": "pbac",
+    "method": "PUT",
+    "path": "/admin/roles/:id"
+  },
+  {
+    "module": "users",
+    "controller": "pbac",
+    "method": "DELETE",
+    "path": "/admin/roles/:id"
+  },
+  {
+    "module": "users",
+    "controller": "pbac",
+    "method": "GET",
+    "path": "/admin/roles"
+  },
+  {
+    "module": "users",
+    "controller": "pbac",
+    "method": "POST",
+    "path": "/admin/roles"
+  },
+  {
+    "module": "users",
+    "controller": "resources",
+    "method": "PUT",
+    "path": "/admin/resources/:id"
+  },
+  {
+    "module": "users",
+    "controller": "resources",
+    "method": "GET",
+    "path": "/admin/resources"
+  },
+  {
+    "module": "users",
+    "controller": "resources",
+    "method": "POST",
+    "path": "/admin/resources"
+  },
+  {
+    "module": "users",
+    "controller": "user-configs",
+    "method": "GET",
+    "path": "/admin/user-configs"
+  },
+  {
+    "module": "users",
+    "controller": "user-configs",
+    "method": "PUT",
+    "path": "/admin/user-configs"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "GET",
+    "path": "/admin/users/:id"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "GET",
+    "path": "/admin/users/:id/policies"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "POST",
+    "path": "/admin/users/:id/assign-position"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "PATCH",
+    "path": "/admin/users/:id/active"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "POST",
+    "path": "/admin/users/:id/assign-roles"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "PUT",
+    "path": "/admin/users/:id"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "DELETE",
+    "path": "/admin/users/:id"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "GET",
+    "path": "/admin/users"
+  },
+  {
+    "module": "users",
+    "controller": "user",
+    "method": "POST",
+    "path": "/admin/users"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/services"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/triggers"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/modules"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/org-roles"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "PUT",
+    "path": "/admin/workflow/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "POST",
+    "path": "/admin/workflow/instances/:instanceId/resume/:nodeId"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/instances"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/instances/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/instances/:instanceId/logs"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/integrations"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "POST",
+    "path": "/admin/workflow/integrations"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/integrations/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "PUT",
+    "path": "/admin/workflow/integrations/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "DELETE",
+    "path": "/admin/workflow/integrations/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "DELETE",
+    "path": "/admin/workflow/:id"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "POST",
+    "path": "/admin/workflow/:id/publish"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "POST",
+    "path": "/admin/workflow/:id/apply-module"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "POST",
+    "path": "/admin/workflow/:id/start"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "POST",
+    "path": "/admin/workflow"
+  },
+  {
+    "module": "workflow",
+    "controller": "workflow",
+    "method": "GET",
+    "path": "/admin/workflow"
+  }
+]

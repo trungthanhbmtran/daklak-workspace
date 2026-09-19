@@ -1,0 +1,294 @@
+[
+  {
+    "app": "admin_khcn",
+    "path": "/(dashboard)/system-admin/endpoints"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/admin/gateway"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/hub/notifications/config"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/hub/notifications"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/hub"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/login"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/categories"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/categories/[code]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/menus/create"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/menus"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/menus/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/organization/create"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/organization"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/organization/[code]/info"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/organization/[code]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/organization/[code]/scope"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/organization/[code]/staffing"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/resources"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/resources/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/roles/create"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/roles"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/roles/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/settings"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/admin/users"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/cabinet"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/consultations/manage"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/consultations"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/consultations/pending"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/consultations/public-feedbacks"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/consultations/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/dossiers"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/dossiers/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/incoming"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/minutes"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/outgoing"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/procedures"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/processing"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/processing/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/publish"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/transparency/finance"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/documents/transparency"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/calendar"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/calendar/[tab]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/dashboard"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/employees/create"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/employees"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/employees/[id]/edit"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/employees/[id]"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/work-plans/criteria"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/work-plans/manual-selector"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/work-plans/rank-templates"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/work-plans/tasks/dashboard"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/hrm/work-plans/tasks"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/integration/apis"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/integration/gateway"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/integration"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/integration/workflows"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/appearance"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/banners"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/interactions/comments"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/interactions/feedbacks"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/interactions/lgsp"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/interactions"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/interactions/questions"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/portal-config"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/portal-menu"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/posts/portal-page-builder"
+  },
+  {
+    "app": "admin_khcn",
+    "path": "/services/reports"
+  },
+  {
+    "app": "portal-goverment",
+    "path": "/[lang]/[[...content]]"
+  }
+]
