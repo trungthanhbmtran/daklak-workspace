@@ -241,8 +241,9 @@ export class OrganizationsService implements OnModuleInit {
 
   async getUnitScope(id: number) {
     try {
-      const result = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));
-      return { success: true, data: result };
+      const result: any = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));
+      const data = result?.data ?? result;
+      return { success: true, ...data };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -344,7 +345,7 @@ export class OrganizationsService implements OnModuleInit {
 
   async getStaffingReport(id: number) {
     const res = (await firstValueFrom(
-      this.reportGrpcService.GetStaffingReport({ unitId: id }),
+      this.orgGrpcService.GetStaffingReport({ unitId: id }),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;

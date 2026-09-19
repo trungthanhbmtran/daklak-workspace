@@ -101,13 +101,17 @@ export const organizationApi = {
     })),
 
   getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
-    apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
-      data: {
-        domainIds: r.data?.domainIds ?? [],
-        domainNames: r.data?.domainNames ?? [],
-        scope: r.data?.scope ?? "",
-      }
-    })),
+    apiClient.get(`/organizations/${id}/scope`).then((r: any) => {
+      // Defensive extraction because TransformInterceptor might treat /scope as a list request and wrap the object in an array
+      const payload = Array.isArray(r.data) ? r.data[0] : r.data;
+      return {
+        data: {
+          domainIds: payload?.domainIds ?? payload?.domain_ids ?? [],
+          domainNames: payload?.domainNames ?? payload?.domain_names ?? [],
+          scope: payload?.scope ?? "",
+        }
+      };
+    }),
 
   createUnit: (payload: CreateUnitPayload) =>
     apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),
