@@ -96,24 +96,18 @@ export const organizationApi = {
 
 
   getDetail: (identifier: string): Promise<{ data: OrganizationUnitNode }> =>
-    apiClient.get(`/organizations/detail/${identifier}`).then((r: any) => {
-      const rawData = unwrapData<any>(r);
-      const payload = Array.isArray(rawData) ? rawData[0] : rawData;
-      return { data: normalizeUnitNode(payload) };
-    }),
+    apiClient.get(`/organizations/detail/${identifier}`).then((r: any) => ({
+      data: normalizeUnitNode(unwrapData<any>(r)),
+    })),
 
   getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
-    apiClient.get(`/organizations/${id}/scope`).then((r: any) => {
-      // Defensive extraction because TransformInterceptor might treat /scope as a list request and wrap the object in an array
-      const payload = Array.isArray(r.data) ? r.data[0] : r.data;
-      return {
-        data: {
-          domainIds: payload?.domainIds ?? payload?.domain_ids ?? [],
-          domainNames: payload?.domainNames ?? payload?.domain_names ?? [],
-          scope: payload?.scope ?? "",
-        }
-      };
-    }),
+    apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
+      data: {
+        domainIds: r.data?.domainIds ?? r.data?.domain_ids ?? [],
+        domainNames: r.data?.domainNames ?? r.data?.domain_names ?? [],
+        scope: r.data?.scope ?? "",
+      }
+    })),
 
   createUnit: (payload: CreateUnitPayload) =>
     apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),

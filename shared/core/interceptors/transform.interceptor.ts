@@ -115,7 +115,17 @@ export class TransformInterceptor<T> implements NestInterceptor<T, any> {
   private detectListRequest(req: any): boolean {
     if (!req || req.method !== 'GET') return false;
     const path = req.path ?? '';
-    if (path.includes('/code/')) return false;
+    if (
+      path.includes('/code/') ||
+      path.includes('/detail/') ||
+      path.endsWith('/scope') ||
+      path.endsWith('/staffing') ||
+      path.includes('/staffing-report') ||
+      path.endsWith('/subtree') ||
+      path.endsWith('/info')
+    ) {
+      return false;
+    }
     
     const endsWithId =
       /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
