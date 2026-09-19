@@ -35,7 +35,6 @@ export class CategoriesService {
     };
   }
 
-  // Lấy danh mục theo nhóm (tự động hợp nhất bản dịch)
   async getByGroup(
     group: string,
     lang?: string,
@@ -44,16 +43,32 @@ export class CategoriesService {
       limit?: number;
       skip?: number;
       selectedIds?: number[];
+      parentUnitId?: number;
     },
   ) {
     const targetLang = lang || 'vi';
-    const { search, limit, skip, selectedIds = [] } = opts ?? {};
+    const { search, limit, skip, selectedIds = [], parentUnitId } = opts ?? {};
     const hasSelected = selectedIds.length > 0;
+
+    let restrictIds: number[] | null = null;
+    if (parentUnitId && group === 'DOMAIN') {
+      const parentUnit = await this.prisma.organizationUnit.findUnique({
+        where: { id: parentUnitId },
+        include: { unitDomains: true },
+      });
+      if (parentUnit) {
+        restrictIds = parentUnit.unitDomains.map((ud) => ud.domainId);
+      }
+    }
 
     // 1. Luôn fetch selected items (dù không khớp search) để đảm bảo chúng xuất hiện
     const selectedItems = hasSelected
       ? await this.prisma.category.findMany({
-          where: { groupCode: group, id: { in: selectedIds } },
+          where: { 
+            groupCode: group, 
+            id: { in: selectedIds },
+            ...(restrictIds ? { id: { in: restrictIds.filter(id => selectedIds.includes(id)) } } : {}),
+          },
           include: { translations: { where: { langCode: targetLang } } },
           orderBy: { order: 'asc' },
         })
@@ -64,6 +79,7 @@ export class CategoriesService {
     const where: any = {
       groupCode: group,
       isActive: true,
+      ...(restrictIds ? { id: { in: restrictIds } } : {}),
       ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
       ...(search?.trim()
         ? {

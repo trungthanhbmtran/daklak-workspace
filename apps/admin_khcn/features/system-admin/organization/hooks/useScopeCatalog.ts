@@ -35,13 +35,13 @@ function useDebounce(value: string, delay = DEBOUNCE_MS) {
 }
 
 /** Hook lĩnh vực — server-side search + selected-first sort */
-export function useDomainSearch(selectedIds: number[]) {
+export function useDomainSearch(selectedIds: number[], parentUnitId?: number) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
 
   const query = useInfiniteQuery<CatalogServerItem[]>({
-    queryKey: ["categories", "DOMAIN", debouncedQ, selectedIds.join(",")],
-    queryFn: ({ pageParam = 0 }) => organizationApi.getDomains(debouncedQ, selectedIds, pageParam as number),
+    queryKey: ["categories", "DOMAIN", debouncedQ, selectedIds.join(","), parentUnitId],
+    queryFn: ({ pageParam = 0 }) => organizationApi.getDomains(debouncedQ, selectedIds, pageParam as number, parentUnitId),
     getNextPageParam: (lastPage, allPages) => {
       // 15 items per page
       return lastPage.length === 15 ? allPages.length * 15 : undefined;

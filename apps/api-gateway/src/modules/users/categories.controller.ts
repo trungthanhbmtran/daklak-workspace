@@ -65,6 +65,11 @@ export class CategoriesController {
     required: false,
     description: 'IDs đã chọn (comma-separated), luôn xuất hiện đầu',
   })
+  @ApiQuery({
+    name: 'parentUnitId',
+    required: false,
+    description: 'ID của đơn vị cha để lọc lĩnh vực phù hợp',
+  })
   @ApiResponse({ status: 200 })
   async getByGroup(
     @Query('group') group?: string,
@@ -72,6 +77,7 @@ export class CategoriesController {
     @Query('limit') limit?: string,
     @Query('skip') skip?: string,
     @Query('selectedIds') selectedIds?: string,
+    @Query('parentUnitId') parentUnitId?: string,
   ) {
     return this.categoriesService.getByGroup(
       group,
@@ -79,6 +85,7 @@ export class CategoriesController {
       limit,
       skip,
       selectedIds,
+      parentUnitId,
     );
   }
 

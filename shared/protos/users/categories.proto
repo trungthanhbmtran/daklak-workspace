@@ -45,6 +45,8 @@ message GetByGroupRequest {
   int32 skip = 3;
   int32 take = 4;
   string search = 5;
+  repeated int32 selected_ids = 6;
+  int32 parent_unit_id = 7;
 }
 
 message CategoryItem {
@@ -56,6 +58,7 @@ message CategoryItem {
   int32 sort = 6;
   bool is_system = 7;
   int32 active = 8;
+  bool selected = 9;
 }
 
 message GetByGroupResponse {

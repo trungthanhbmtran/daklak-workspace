@@ -20,7 +20,7 @@ export class OrganizationsService implements OnModuleInit {
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
     @Inject(MICROSERVICES.REPORT.SYMBOL) private readonly reportClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgGrpcService = this.client.getService(
@@ -94,8 +94,8 @@ export class OrganizationsService implements OnModuleInit {
     const userId = user?.id;
     const userInfo: any = userId
       ? await firstValueFrom(
-          this.userGrpcService.FindOne({ id: userId }),
-        ).catch(() => null)
+        this.userGrpcService.FindOne({ id: userId }),
+      ).catch(() => null)
       : null;
 
     const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes(
@@ -149,8 +149,8 @@ export class OrganizationsService implements OnModuleInit {
     const userId = user?.id;
     const userInfo: any = userId
       ? await firstValueFrom(
-          this.userGrpcService.FindOne({ id: userId }),
-        ).catch(() => null)
+        this.userGrpcService.FindOne({ id: userId }),
+      ).catch(() => null)
       : null;
 
     const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes(
@@ -188,8 +188,6 @@ export class OrganizationsService implements OnModuleInit {
       this.orgGrpcService.UpdateJobTitle({
         id,
         domainId: body.domainId,
-        geographicAreaId: body.geographicAreaId,
-        monitoredUnitIds: body.monitoredUnitIds,
       }),
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');

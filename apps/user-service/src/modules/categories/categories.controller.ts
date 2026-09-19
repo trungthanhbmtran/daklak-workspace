@@ -33,12 +33,14 @@ export class CategoriesController {
     take?: number;
     skip?: number;
     selectedIds?: number[];
+    parentUnitId?: number;
   }) {
     const result = await this.catService.getByGroup(data.group || '', data.lang, {
       search: data.search,
       limit: data.take,
       skip: data.skip,
       selectedIds: data.selectedIds ?? [],
+      parentUnitId: data.parentUnitId,
     });
     return {
       data: result.data.map((item) => ({

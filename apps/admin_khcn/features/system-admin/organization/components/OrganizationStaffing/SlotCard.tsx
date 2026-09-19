@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { StaffingSlotItem } from "../../types";
 import { PopoverMultiSelect } from "../PopoverMultiSelect";
-import { useGeoAreaSearch, useDomainSearch } from "../../hooks/useScopeCatalog";
+import { useGeoAreaSearch } from "../../hooks/useScopeCatalog";
 
 type SlotCardProps = {
   staffingId: number;
@@ -44,11 +44,8 @@ export function SlotCard({
   // Use Geo Area Search locally to avoid fetching all areas upfront
   const { items: geoAreas, isFetching: isLoadingGeoAreas, q: searchGeoArea, setQ: setSearchGeoArea, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geographicAreaIds);
 
-  // Use Domain Search locally if unit doesn't have restricted domains
-  const isDomainRestricted = unitDomainIds.length > 0;
-  const { items: serverDomains, isFetching: isLoadingDomains, q: searchDomain, setQ: setSearchDomain, hasNextPage: hasNextDomainPage, fetchNextPage: fetchNextDomainPage, isFetchingNextPage: isFetchingNextDomainPage } = useDomainSearch(domainIds);
-
-  const displayDomains = isDomainRestricted ? domainsForUnit : serverDomains;
+  // Lĩnh vực chuyên môn luôn bám sát theo lĩnh vực của đơn vị
+  const displayDomains = domainsForUnit;
 
   useEffect(() => {
     setDomainIds(existingSlot?.domainIds ?? []);
@@ -86,12 +83,6 @@ export function SlotCard({
               onChange={setDomainIds}
               placeholderSearch="Tìm lĩnh vực..."
               triggerLabel="Chọn lĩnh vực"
-              search={isDomainRestricted ? undefined : searchDomain}
-              onSearchChange={isDomainRestricted ? undefined : setSearchDomain}
-              isLoading={isDomainRestricted ? false : isLoadingDomains}
-              hasNextPage={isDomainRestricted ? false : hasNextDomainPage}
-              fetchNextPage={isDomainRestricted ? undefined : fetchNextDomainPage}
-              isFetchingNextPage={isDomainRestricted ? false : isFetchingNextDomainPage}
             />
           </div>
 

@@ -69,6 +69,7 @@ export class CategoriesService implements OnModuleInit {
     limit?: string,
     skip?: string,
     selectedIds?: string,
+    parentUnitId?: string,
   ) {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     const skipNum = skip ? parseInt(skip, 10) : 0;
@@ -78,8 +79,9 @@ export class CategoriesService implements OnModuleInit {
           .map(Number)
           .filter((n) => !isNaN(n) && n > 0)
       : [];
+    const parentId = parentUnitId ? parseInt(parentUnitId, 10) : undefined;
 
-    const cacheKey = `category_group:${group || 'all'}:q${q || ''}:l${limitNum}:s${skipNum}:ids${selectedIdsArr.join('-')}`;
+    const cacheKey = `category_group:${group || 'all'}:q${q || ''}:l${limitNum}:s${skipNum}:ids${selectedIdsArr.join('-')}:pid${parentId || ''}`;
     const cachedStr = await this.redisService.get(cacheKey);
     if (cachedStr) {
       try {

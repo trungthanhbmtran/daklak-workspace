@@ -118,7 +118,7 @@ export const organizationApi = {
   deleteUnit: (id: number) =>
     apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
-  getDomains: (q?: string, selectedIds?: number[], skip: number = 0) =>
+  getDomains: (q?: string, selectedIds?: number[], skip: number = 0, parentUnitId?: number) =>
     apiClient
       .get("/categories", {
         params: {
@@ -127,6 +127,7 @@ export const organizationApi = {
           limit: 15,
           skip,
           ...(selectedIds?.length ? { selectedIds: selectedIds.join(',') } : {}),
+          ...(parentUnitId ? { parentUnitId } : {}),
         },
       })
       .then(r => unwrapData<any[]>(r)),
