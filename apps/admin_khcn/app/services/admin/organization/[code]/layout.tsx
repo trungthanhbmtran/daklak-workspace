@@ -7,7 +7,7 @@ import { FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useOrganizationByCodeQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
+import { useOrganizationDetailQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { useOrganizationContext } from "@/features/system-admin/organization/context/OrganizationContext";
 
 export default function OrganizationDetailLayout({
@@ -24,7 +24,7 @@ export default function OrganizationDetailLayout({
   const rawCode = resolvedParams?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: unitData, isPending, isFetching, isError } = useOrganizationByCodeQuery(code);
+  const { data: unitData, isPending, isFetching, isError } = useOrganizationDetailQuery(code);
   const unit = unitData?.data;
 
   // TanStack Query v5: khi query disabled (code = ""), isLoading = false, isPending = true.

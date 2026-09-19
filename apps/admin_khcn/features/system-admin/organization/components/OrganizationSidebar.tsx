@@ -158,14 +158,15 @@ function UnitTree({
   if (nodes.length === 0) return null;
 
   return (
-    <ul className="space-y-1 list-none relative">
+    <div className="relative">
       {level > 0 && (
         <div
           className="absolute top-0 bottom-0 left-0 border-l border-border/50 z-0"
           style={{ marginLeft: `${10 + (level - 1) * 20}px` }}
         />
       )}
-      {nodes.map((unit) => {
+      <ul className="space-y-1 list-none relative">
+        {nodes.map((unit) => {
         const isSelected = activeId === unit.id;
         const isExpanded = expandedIds.has(unit.id);
         const hasChildren = unit.children && unit.children.length > 0;
@@ -185,7 +186,8 @@ function UnitTree({
           />
         );
       })}
-    </ul>
+      </ul>
+    </div>
   );
 }
 
@@ -199,7 +201,9 @@ export function OrganizationSidebar() {
   // Determine activeId from route params or searchParams
   const rawCode = params?.code;
   const currentCode = rawCode ? decodeURIComponent(rawCode) : "";
-  const activeUnit = currentCode ? flatUnits.find(u => u.code === currentCode) : undefined;
+  const activeUnit = currentCode 
+    ? flatUnits.find(u => u.code === currentCode || String(u.id) === currentCode) 
+    : undefined;
   const parentIdStr = searchParams.get('parentId');
   const parentId = parentIdStr ? Number(parentIdStr) : undefined;
   const activeId = activeUnit?.id ?? parentId;

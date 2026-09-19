@@ -21,7 +21,7 @@ import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { JobTitleItem, StaffingReportItem } from "../../types";
-import { useOrganizationByCodeQuery } from "../../hooks/useOrganizationQueries";
+import { useOrganizationDetailQuery } from "../../hooks/useOrganizationQueries";
 import { useDomainSearch } from "../../hooks/useScopeCatalog";
 
 export function OrganizationStaffing() {
@@ -29,7 +29,7 @@ export function OrganizationStaffing() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse } = useOrganizationByCodeQuery(code);
+  const { data: detailResponse } = useOrganizationDetailQuery(code);
   const unit = detailResponse?.data;
   const selectedId = unit?.id;
 

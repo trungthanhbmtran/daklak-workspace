@@ -203,6 +203,28 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
+  async getDetail(identifier: string) {
+    const isNumeric = /^\d+$/.test(identifier);
+    try {
+      const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code: identifier }));
+      return { success: true, data: result };
+    } catch (err: any) {
+      if (isNumeric && err?.code === 5) {
+        try {
+          const resultById = await firstValueFrom(this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }));
+          return { success: true, data: resultById };
+        } catch (e2: any) {
+          const message = e2?.details ?? e2?.message ?? 'Đơn vị không tồn tại';
+          if (e2?.code === 5) throw new NotFoundException(message);
+          throw new BadRequestException(message);
+        }
+      }
+      const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
+      if (err?.code === 5) throw new NotFoundException(message);
+      throw new BadRequestException(message);
+    }
+  }
+
   async getUnitScope(id: number) {
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));

@@ -93,6 +93,13 @@ export class OrganizationsController {
     return this.orgService.getOneByCode(code);
   }
 
+  @Get('detail/:identifier')
+  @ApiOperation({ summary: 'Lấy chi tiết đơn vị theo mã hoặc id' })
+  @ApiResponse({ status: 200, description: 'Đơn vị (camelCase)' })
+  async getDetail(@Param('identifier') identifier: string) {
+    return this.orgService.getDetail(identifier);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết một đơn vị' })
   @ApiResponse({ status: 200, description: 'Đơn vị (camelCase)' })

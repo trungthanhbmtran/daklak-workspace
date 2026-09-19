@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useOrganizationScopeQuery, useOrganizationByCodeQuery } from "../hooks/useOrganizationQueries";
+import { useOrganizationScopeQuery, useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
 
 /* ─── Main panel ──────────────────────────────────────── */
 export function UnitScopePanel() {
@@ -34,7 +34,7 @@ export function UnitScopePanel() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse } = useOrganizationByCodeQuery(code);
+  const { data: detailResponse } = useOrganizationDetailQuery(code);
   const selectedId = detailResponse?.data?.id;
 
   const { data: scopeResponse, isPending, isFetching } = useOrganizationScopeQuery(selectedId ?? undefined);

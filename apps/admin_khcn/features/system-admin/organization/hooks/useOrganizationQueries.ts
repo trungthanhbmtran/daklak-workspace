@@ -26,11 +26,11 @@ export function useOrganizationFlatListQuery(q?: string) {
 
 
 
-export function useOrganizationByCodeQuery(code?: string) {
+export function useOrganizationDetailQuery(identifier?: string) {
   return useQuery({
-    queryKey: code ? [...organizationQueryKeys.all, "unitByCode", code] : [...organizationQueryKeys.all, "unitByCode"],
-    queryFn: () => (code ? organizationApi.getOneByCode(code) : Promise.reject("No code")),
-    enabled: !!code,
+    queryKey: identifier ? [...organizationQueryKeys.all, "detail", identifier] : [...organizationQueryKeys.all, "detail"],
+    queryFn: () => (identifier ? organizationApi.getDetail(identifier) : Promise.reject("No identifier")),
+    enabled: !!identifier,
     staleTime: STALE_TIME,
   });
 }

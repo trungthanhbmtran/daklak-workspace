@@ -85,23 +85,23 @@ function normalizeStaffingReportItem(r: any): StaffingReportItem {
 
 export const organizationApi = {
   getOrganizations: (q?: string): Promise<{ data: OrganizationUnitNode[] }> =>
-    apiClient.get("/users/organizations", { params: { q: q || undefined } }).then((r: any) => ({
+    apiClient.get("/organizations", { params: { q: q || undefined } }).then((r: any) => ({
       data: (r.data ?? []).map(normalizeUnitNode),
     })),
 
   getTree: (q?: string): Promise<{ data: OrganizationUnitNode[] }> =>
-    apiClient.get("/users/organizations/tree", { params: { q: q || undefined } }).then((r: any) => ({
+    apiClient.get("/organizations/tree", { params: { q: q || undefined } }).then((r: any) => ({
       data: (r.data ?? []).map(normalizeUnitNode),
     })),
 
 
-  getOneByCode: (code: string): Promise<{ data: OrganizationUnitNode }> =>
-    apiClient.get(`/users/organizations/code/${code}`).then((r: any) => ({
+  getDetail: (identifier: string): Promise<{ data: OrganizationUnitNode }> =>
+    apiClient.get(`/organizations/detail/${identifier}`).then((r: any) => ({
       data: normalizeUnitNode(unwrapData<any>(r)),
     })),
 
   getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
-    apiClient.get(`/users/organizations/${id}/scope`).then((r: any) => ({
+    apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
       data: {
         domainIds: r.data?.domainIds ?? [],
         domainNames: r.data?.domainNames ?? [],
@@ -110,13 +110,13 @@ export const organizationApi = {
     })),
 
   createUnit: (payload: CreateUnitPayload) =>
-    apiClient.post("/users/organizations", payload).then(r => unwrapData<any>(r)),
+    apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),
 
   updateUnit: (id: number, payload: UpdateUnitPayload) =>
-    apiClient.put(`/users/organizations/${id}`, payload).then(r => unwrapData<any>(r)),
+    apiClient.put(`/organizations/${id}`, payload).then(r => unwrapData<any>(r)),
 
   deleteUnit: (id: number) =>
-    apiClient.delete(`/users/organizations/${id}`).then(r => unwrapData<any>(r)),
+    apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
   getDomains: (q?: string, selectedIds?: number[], skip: number = 0) =>
     apiClient
@@ -145,30 +145,30 @@ export const organizationApi = {
       .then(r => unwrapData<any[]>(r)),
 
   updateScope: (id: number, payload: { domainIds?: number[] }) =>
-    apiClient.put(`/users/organizations/${id}/scope`, payload).then(r => unwrapData<any>(r)),
+    apiClient.put(`/organizations/${id}/scope`, payload).then(r => unwrapData<any>(r)),
 
   getJobTitles: (unitId?: number): Promise<{ data: JobTitleItem[] }> =>
     apiClient
-      .get("/users/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
+      .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
       .then((r: any) => {
         const data = unwrapData<any[]>(r);
         return { data: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem) };
       }),
 
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
-    apiClient.put(`/users/organizations/job-titles/${id}`, payload).then(r => unwrapData<any>(r)),
+    apiClient.put(`/organizations/job-titles/${id}`, payload).then(r => unwrapData<any>(r)),
 
   setStaffing: (payload: SetStaffingPayload) =>
-    apiClient.post("/users/organizations/staffing", payload).then(r => unwrapData<any>(r)),
+    apiClient.post("/organizations/staffing", payload).then(r => unwrapData<any>(r)),
 
   getStaffingReport: (unitId: number): Promise<StaffingReportItem[]> =>
     apiClient
-      .get(`/users/organizations/${unitId}/staffing-report`)
+      .get(`/organizations/${unitId}/staffing-report`)
       .then((r: any) => {
         const data = unwrapData<any[]>(r);
         return (Array.isArray(data) ? data : []).map(normalizeStaffingReportItem);
       }),
 
   setStaffingSlot: (payload: SetStaffingSlotPayload) =>
-    apiClient.post("/users/organizations/staffing-slots", payload).then(r => unwrapData<any>(r)),
+    apiClient.post("/organizations/staffing-slots", payload).then(r => unwrapData<any>(r)),
 };

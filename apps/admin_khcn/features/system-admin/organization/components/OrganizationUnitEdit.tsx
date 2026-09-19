@@ -23,7 +23,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrganizationContext } from "../context/OrganizationContext";
-import { useOrganizationByCodeQuery } from "../hooks/useOrganizationQueries";
+import { useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 
 export function OrganizationUnitEdit() {
@@ -36,7 +36,7 @@ export function OrganizationUnitEdit() {
   const { isUpdating, isDeleting } = meta;
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data: detailResponse, isPending, isFetching } = useOrganizationByCodeQuery(code);
+  const { data: detailResponse, isPending, isFetching } = useOrganizationDetailQuery(code);
   const unit = detailResponse?.data;
   const isDetailLoading = isPending || isFetching;
   const selectedId = unit?.id;
