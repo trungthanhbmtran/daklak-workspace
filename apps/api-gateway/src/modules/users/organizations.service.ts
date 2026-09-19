@@ -408,4 +408,22 @@ export class OrganizationsService implements OnModuleInit {
     });
     return result;
   }
+
+  async getUnitTypeJobTemplates(unitTypeId: number) {
+    const res = await firstValueFrom(
+      this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    }) as any;
+    return { success: true, data: res.jobTitleIds || [] };
+  }
+
+  async updateUnitTypeJobTemplates(unitTypeId: number, jobTitleIds: number[]) {
+    const res = await firstValueFrom(
+      this.orgGrpcService.UpdateUnitTypeJobTemplates({ unitTypeId, jobTitleIds }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    }) as any;
+    return { success: res.success };
+  }
 }

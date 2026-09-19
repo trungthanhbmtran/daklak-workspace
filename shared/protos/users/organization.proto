@@ -22,6 +22,25 @@ service OrganizationService {
   rpc ListJobTitles (ListJobTitlesRequest) returns (ListJobTitlesResponse);
   rpc UpdateJobTitle (UpdateJobTitleRequest) returns (JobTitleItem);
   rpc ListUnitTypes (common.Empty) returns (ListUnitTypesResponse);
+  rpc GetUnitTypeJobTemplates (GetUnitTypeJobTemplatesRequest) returns (GetUnitTypeJobTemplatesResponse);
+  rpc UpdateUnitTypeJobTemplates (UpdateUnitTypeJobTemplatesRequest) returns (UpdateUnitTypeJobTemplatesResponse);
+}
+
+message GetUnitTypeJobTemplatesRequest {
+  int32 unit_type_id = 1;
+}
+
+message GetUnitTypeJobTemplatesResponse {
+  repeated int32 job_title_ids = 1;
+}
+
+message UpdateUnitTypeJobTemplatesRequest {
+  int32 unit_type_id = 1;
+  repeated int32 job_title_ids = 2;
+}
+
+message UpdateUnitTypeJobTemplatesResponse {
+  bool success = 1;
 }
 
 // unit_id: nếu có thì chỉ trả về chức danh áp dụng cho loại đơn vị đó (VD Sở không có Chủ tịch)

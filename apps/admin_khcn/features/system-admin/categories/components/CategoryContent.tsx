@@ -16,6 +16,7 @@ import { useGetPaginatedCategoryByGroup, useDeleteCategory, useGetCategoryGroups
 import { useCategoryUI } from "../hooks/useCategoryUI";
 import { CategoryTable } from "./CategoryTable";
 import { CreateCategoryModal, EditCategoryModal } from "./CategoryModals";
+import { UnitTypeJobTemplateModal } from "./UnitTypeJobTemplateModal";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -51,6 +52,7 @@ export function CategoryContent({ activeGroup }: CategoryContentProps) {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [configJobTitlesItem, setConfigJobTitlesItem] = useState<any>(null);
 
   const handleDelete = (item: any) => {
     setItemToDelete(item);
@@ -91,8 +93,10 @@ export function CategoryContent({ activeGroup }: CategoryContentProps) {
         isLoading={isLoadingData}
         isError={isError}
         data={queryData}
+        activeGroup={activeGroup}
         onEdit={(item) => ui.setters.setEditingItem(item)}
         onDelete={handleDelete}
+        onConfigureJobTitles={setConfigJobTitlesItem}
       />
 
       {totalPages > 1 && (
@@ -160,6 +164,14 @@ export function CategoryContent({ activeGroup }: CategoryContentProps) {
                   isDeleting={deleteMutation.isPending}
                 />
           )}
+
+      {configJobTitlesItem && (
+        <UnitTypeJobTemplateModal
+          isOpen={true}
+          onClose={() => setConfigJobTitlesItem(null)}
+          category={configJobTitlesItem}
+        />
+      )}
     </div>
   );
 }

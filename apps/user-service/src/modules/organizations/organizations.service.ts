@@ -675,4 +675,32 @@ export class OrganizationsService {
     });
     return { data: items };
   }
+
+  async getUnitTypeJobTemplates(unitTypeId: number) {
+    const templates = await this.prisma.unitTypeJobTemplate.findMany({
+      where: { unitTypeId },
+      select: { jobTitleId: true },
+    });
+    return { jobTitleIds: templates.map(t => t.jobTitleId) };
+  }
+
+  async updateUnitTypeJobTemplates(unitTypeId: number, jobTitleIds: number[]) {
+    // Xóa các template cũ
+    await this.prisma.unitTypeJobTemplate.deleteMany({
+      where: { unitTypeId },
+    });
+    
+    // Thêm các template mới
+    if (jobTitleIds && jobTitleIds.length > 0) {
+      await this.prisma.unitTypeJobTemplate.createMany({
+        data: jobTitleIds.map(jobTitleId => ({
+          unitTypeId,
+          jobTitleId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return { success: true };
+  }
 }

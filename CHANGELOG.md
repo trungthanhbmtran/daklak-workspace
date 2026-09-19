@@ -49,3 +49,6 @@ Tài liệu này ghi chép lại toàn bộ lịch sử các bản cập nhật,
 - Cập nhật tài liệu triển khai (`readme.md`), thêm mục **Nhật ký gỡ lỗi (Troubleshooting)** nhằm cảnh báo về quy tắc map gRPC Object (camelCase vs snake_case).
 - Cập nhật tài liệu kỹ năng AI `grpc` (`.agents/skills/grpc/SKILL.md`) để bắt buộc các agent sau này tuân thủ trả về `camelCase` khi cấu hình gRPC `keepCase: false`.
 - Khởi tạo chính sách **CONTINUOUS DOCUMENTATION** (`.agents/rules/agent-execution-policy.md`) nhằm đảm bảo sau mỗi lần thực thi mọi nội dung bảo trì, sửa lỗi và tính năng mới đều được cập nhật vào `CHANGELOG.md`.
+
+### Added
+- [Feature] �nh x? Ch?c danh theo Lo?i don v? (UnitTypeJobTemplate): B? sung API v� Giao di?n t?i m�n h�nh Qu?n l� danh m?c d? ngu?i d�ng c?u h�nh ch?c danh ri�ng cho t?ng lo?i don v?.

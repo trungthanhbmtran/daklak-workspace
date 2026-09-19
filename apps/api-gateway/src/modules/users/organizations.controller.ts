@@ -71,6 +71,21 @@ export class OrganizationsController {
     return this.orgService.getJobTitles(unitId);
   }
 
+  @Get('unit-types/:id/job-templates')
+  @ApiOperation({ summary: 'Lấy danh sách ID chức danh đã được map với Loại đơn vị' })
+  async getUnitTypeJobTemplates(@Param('id', ParseIntPipe) id: number) {
+    return this.orgService.getUnitTypeJobTemplates(id);
+  }
+
+  @Put('unit-types/:id/job-templates')
+  @ApiOperation({ summary: 'Cập nhật danh sách chức danh được phép cho Loại đơn vị' })
+  async updateUnitTypeJobTemplates(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { jobTitleIds: number[] }
+  ) {
+    return this.orgService.updateUnitTypeJobTemplates(id, body.jobTitleIds);
+  }
+
   @Put('job-titles/:id')
   @ApiOperation({
     summary: 'Cập nhật chức danh (lĩnh vực phụ trách)',

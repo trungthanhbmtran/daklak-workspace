@@ -172,4 +172,17 @@ export const organizationApi = {
 
   setStaffingSlot: (payload: SetStaffingSlotPayload) =>
     apiClient.post("/organizations/staffing-slots", payload).then(r => unwrapData<any>(r)),
+
+  getUnitTypes: (): Promise<{ data: any[] }> =>
+    apiClient.get("/organizations/unit-types").then((r: any) => ({
+      data: unwrapData<any[]>(r) || [],
+    })),
+
+  getUnitTypeJobTemplates: (unitTypeId: number): Promise<{ data: number[] }> =>
+    apiClient.get(`/organizations/unit-types/${unitTypeId}/job-templates`).then((r: any) => ({
+      data: r.data?.data || [],
+    })),
+
+  updateUnitTypeJobTemplates: (unitTypeId: number, jobTitleIds: number[]) =>
+    apiClient.put(`/organizations/unit-types/${unitTypeId}/job-templates`, { jobTitleIds }).then((r: any) => unwrapData<any>(r)),
 };

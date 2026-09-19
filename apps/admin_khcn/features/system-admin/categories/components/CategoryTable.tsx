@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Edit, Trash2, MoreHorizontal, Loader2 } from "lucide-react";
+import { Edit, Trash2, MoreHorizontal, Loader2, ListChecks } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,13 +15,16 @@ import { CategoryItem } from "../types";
 
 interface CategoryRowProps {
   item: CategoryItem;
+  activeGroup?: string;
   onEdit: (item: CategoryItem) => void;
   onDelete: (item: CategoryItem) => void;
+  onConfigureJobTitles?: (item: CategoryItem) => void;
 }
 
-const CategoryRow = React.memo(function CategoryRow({ item, onEdit, onDelete }: CategoryRowProps) {
+const CategoryRow = React.memo(function CategoryRow({ item, activeGroup, onEdit, onDelete, onConfigureJobTitles }: CategoryRowProps) {
   const handleEdit = useCallback(() => onEdit(item), [item, onEdit]);
   const handleDelete = useCallback(() => onDelete(item), [item, onDelete]);
+  const handleConfigureJobTitles = useCallback(() => onConfigureJobTitles?.(item), [item, onConfigureJobTitles]);
 
   return (
     <TableRow>
@@ -42,6 +45,11 @@ const CategoryRow = React.memo(function CategoryRow({ item, onEdit, onDelete }: 
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+            {activeGroup === 'UNIT_TYPE_CATEGORY' && (
+              <DropdownMenuItem className="cursor-pointer" onClick={handleConfigureJobTitles}>
+                <ListChecks className="mr-2 h-4 w-4" /> Cấu hình chức danh
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem className="cursor-pointer" onClick={handleEdit}>
               <Edit className="mr-2 h-4 w-4" /> Chỉnh sửa
             </DropdownMenuItem>
@@ -64,12 +72,14 @@ interface TableProps {
   isLoading: boolean;
   isError: boolean;
   data: CategoryItem[];
+  activeGroup?: string;
   onEdit: (item: CategoryItem) => void;
   onDelete: (item: CategoryItem) => void;
+  onConfigureJobTitles?: (item: CategoryItem) => void;
 }
 
 export const CategoryTable = React.memo(function CategoryTable({
-  isLoading, isError, data, onEdit, onDelete,
+  isLoading, isError, data, activeGroup, onEdit, onDelete, onConfigureJobTitles
 }: TableProps) {
   const sortedData = React.useMemo(
     () => [...data].sort((a, b) => a.sort - b.sort),
@@ -106,7 +116,7 @@ export const CategoryTable = React.memo(function CategoryTable({
             </TableRow>
           ) : sortedData.length > 0 ? (
             sortedData.map((item) => (
-              <CategoryRow key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />
+              <CategoryRow key={item.id} item={item} activeGroup={activeGroup} onEdit={onEdit} onDelete={onDelete} onConfigureJobTitles={onConfigureJobTitles} />
             ))
           ) : (
             <TableRow>

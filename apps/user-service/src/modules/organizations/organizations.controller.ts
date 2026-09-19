@@ -414,6 +414,22 @@ export class OrganizationsController {
     };
   }
 
+  @GrpcMethod('OrganizationService', 'GetUnitTypeJobTemplates')
+  async getUnitTypeJobTemplates(data: { unitTypeId: number }) {
+    const res = await this.orgService.getUnitTypeJobTemplates(data.unitTypeId);
+    return {
+      jobTitleIds: res.jobTitleIds || []
+    };
+  }
+
+  @GrpcMethod('OrganizationService', 'UpdateUnitTypeJobTemplates')
+  async updateUnitTypeJobTemplates(data: { unitTypeId: number, jobTitleIds: number[] }) {
+    const res = await this.orgService.updateUnitTypeJobTemplates(data.unitTypeId, data.jobTitleIds || []);
+    return {
+      success: res.success
+    };
+  }
+
   private mapJobTitleItem(j: any) {
     return {
       id: j.id,
