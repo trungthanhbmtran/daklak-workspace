@@ -29,7 +29,7 @@ export function OrganizationStaffing() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse } = useOrganizationDetailQuery(code);
+  const { data: detailResponse, isPending: isDetailLoading } = useOrganizationDetailQuery(code);
   const unit = detailResponse?.data;
   const selectedId = unit?.id;
 
@@ -148,7 +148,25 @@ export function OrganizationStaffing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report, jobTitles]);
 
-  if (selectedId == null) return null;
+  const isScreenLoading = isDetailLoading || isLoadingReport || isLoadingJobTitles;
+
+  if (isScreenLoading) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    );
+  }
+
+  if (selectedId == null) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg items-center justify-center text-muted-foreground text-sm">
+        Không tìm thấy thông tin đơn vị hoặc mã đơn vị không hợp lệ.
+      </div>
+    );
+  }
 
   if (isError) {
     return (

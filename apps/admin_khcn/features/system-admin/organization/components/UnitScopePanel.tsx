@@ -34,12 +34,12 @@ export function UnitScopePanel() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse } = useOrganizationDetailQuery(code);
+  const { data: detailResponse, isPending: isDetailLoading } = useOrganizationDetailQuery(code);
   const selectedId = detailResponse?.data?.id;
 
   const { data: scopeResponse, isPending, isFetching } = useOrganizationScopeQuery(selectedId ?? undefined);
   const scopeData = scopeResponse?.data;
-  const isScopeLoading = isPending || isFetching;
+  const isScopeLoading = isDetailLoading || isPending || isFetching;
 
   // Local IDs — server sẽ dùng để sort & đánh dấu selected
   const [domainIds, setDomainIds] = useState<number[]>([]);
@@ -55,7 +55,6 @@ export function UnitScopePanel() {
   // Truyền selectedIds lên server để server sort + đánh dấu
   const domains = useDomainSearch(domainIds);
 
-  if (selectedId == null) return null;
   if (isScopeLoading) {
     return (
       <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
@@ -64,6 +63,15 @@ export function UnitScopePanel() {
       </div>
     );
   }
+
+  if (selectedId == null) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg items-center justify-center text-muted-foreground text-sm">
+        Không tìm thấy thông tin đơn vị hoặc mã đơn vị không hợp lệ.
+      </div>
+    );
+  }
+
   if (!scopeData) return null;
 
   const toggle = (ids: number[], id: number) =>
