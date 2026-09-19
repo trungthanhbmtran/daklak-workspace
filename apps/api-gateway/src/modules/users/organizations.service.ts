@@ -34,6 +34,20 @@ export class OrganizationsService implements OnModuleInit {
     );
   }
 
+  private mapToOrganizationNode(node: any): any {
+    if (!node) return null;
+    const { children, typeCode, type_code, category_code, categoryCode, parent_id, parentId, domain_ids, domainIds, domain_names, domainNames, ...rest } = node;
+    const rawParentId = parentId ?? parent_id;
+    return {
+      ...rest,
+      categoryCode: categoryCode ?? category_code ?? typeCode ?? type_code ?? undefined,
+      parentId: rawParentId === 0 ? null : (rawParentId ?? null),
+      domainIds: domainIds ?? domain_ids ?? [],
+      domainNames: domainNames ?? domain_names ?? [],
+      children: Array.isArray(children) ? children.map(c => this.mapToOrganizationNode(c)) : undefined,
+    };
+  }
+
   async create(body: any) {
     try {
       if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
@@ -118,7 +132,7 @@ export class OrganizationsService implements OnModuleInit {
 
     return {
       success: true,
-      data: nodes,
+      data: nodes.map(n => this.mapToOrganizationNode(n)),
       meta: { allowedActions },
     };
   }
@@ -153,7 +167,7 @@ export class OrganizationsService implements OnModuleInit {
       }
     }
 
-    return { success: true, data: flatList };
+    return { success: true, data: flatList.map(n => this.mapToOrganizationNode(n)) };
   }
 
   async getJobTitles(unitId?: string) {
@@ -184,7 +198,7 @@ export class OrganizationsService implements OnModuleInit {
   async getOne(id: number) {
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetOne({ id }));
-      return { success: true, data: result };
+      return { success: true, data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -195,7 +209,7 @@ export class OrganizationsService implements OnModuleInit {
   async getOneByCode(code: string) {
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code }));
-      return { success: true, data: result };
+      return { success: true, data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -207,12 +221,12 @@ export class OrganizationsService implements OnModuleInit {
     const isNumeric = /^\d+$/.test(identifier);
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code: identifier }));
-      return { success: true, data: result };
+      return { success: true, data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
       if (isNumeric && err?.code === 5) {
         try {
           const resultById = await firstValueFrom(this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }));
-          return { success: true, data: resultById };
+          return { success: true, data: this.mapToOrganizationNode(resultById) };
         } catch (e2: any) {
           const message = e2?.details ?? e2?.message ?? 'Đơn vị không tồn tại';
           if (e2?.code === 5) throw new NotFoundException(message);
@@ -312,7 +326,7 @@ export class OrganizationsService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: true, data: res.nodes };
+    return { success: true, data: (res.nodes || []).map(n => this.mapToOrganizationNode(n)) };
   }
 
   async setStaffing(body: any) {
@@ -384,15 +398,11 @@ export class OrganizationsService implements OnModuleInit {
     if (!Array.isArray(nodes)) return [];
     let result: any[] = [];
     nodes.forEach((node) => {
-      const { children, ...rest } = node;
-      const rawParentId = rest.parentId ?? rest.parent_id;
-      const normalizedNode = {
-        ...rest,
-        parentId: rawParentId === 0 ? null : (rawParentId ?? null),
-      };
-      result.push(normalizedNode);
-      if (Array.isArray(children) && children.length > 0) {
-        result = result.concat(this.flattenTree(children));
+      const normalizedNode = this.mapToOrganizationNode(node);
+      const { children: mappedChildren, ...restNormalized } = normalizedNode;
+      result.push(restNormalized);
+      if (Array.isArray(node.children) && node.children.length > 0) {
+        result = result.concat(this.flattenTree(node.children));
       }
     });
     return result;
