@@ -96,9 +96,11 @@ export const organizationApi = {
 
 
   getDetail: (identifier: string): Promise<{ data: OrganizationUnitNode }> =>
-    apiClient.get(`/organizations/detail/${identifier}`).then((r: any) => ({
-      data: normalizeUnitNode(unwrapData<any>(r)),
-    })),
+    apiClient.get(`/organizations/detail/${identifier}`).then((r: any) => {
+      const rawData = unwrapData<any>(r);
+      const payload = Array.isArray(rawData) ? rawData[0] : rawData;
+      return { data: normalizeUnitNode(payload) };
+    }),
 
   getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
     apiClient.get(`/organizations/${id}/scope`).then((r: any) => {
