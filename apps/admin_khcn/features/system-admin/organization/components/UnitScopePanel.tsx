@@ -47,8 +47,8 @@ export function UnitScopePanel() {
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
-    if (scopeData?.domainIds) {
-      setDomainIds(scopeData.domainIds);
+    if (scopeData !== undefined) {
+      setDomainIds(scopeData?.domainIds ?? []);
       setDirty(false);
     }
   }, [scopeData]);
@@ -66,7 +66,6 @@ export function UnitScopePanel() {
     );
   }
   if (selectedId == null) return null;
-  if (!scopeData) return null;
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
@@ -74,7 +73,7 @@ export function UnitScopePanel() {
   const handleDomainToggle = (id: number) => { setDomainIds(p => toggle(p, id)); setDirty(true); };
 
   const handleReset = () => {
-    setDomainIds(scopeData.domainIds ?? []);
+    setDomainIds(scopeData?.domainIds ?? []);
     setDirty(false);
   };
 

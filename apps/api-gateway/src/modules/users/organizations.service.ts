@@ -243,7 +243,13 @@ export class OrganizationsService implements OnModuleInit {
     try {
       const result: any = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));
       const data = result?.data ?? result;
-      return { success: true, ...data };
+      return { 
+        success: true, 
+        ...data,
+        domainIds: data.domainIds ?? [],
+        domainNames: data.domainNames ?? [],
+        scope: data.scope ?? ''
+      };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);

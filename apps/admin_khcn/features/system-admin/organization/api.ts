@@ -103,9 +103,9 @@ export const organizationApi = {
   getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
     apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
       data: {
-        domainIds: r.data?.domainIds ?? r.data?.domain_ids ?? [],
-        domainNames: r.data?.domainNames ?? r.data?.domain_names ?? [],
-        scope: r.data?.scope ?? "",
+        domainIds: r.data?.domainIds ?? r.data?.domain_ids,
+        domainNames: r.data?.domainNames ?? r.data?.domain_names,
+        scope: r.data?.scope,
       }
     })),
 
