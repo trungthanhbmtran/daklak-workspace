@@ -147,6 +147,17 @@ export function OrganizationStaffing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report, jobTitles]);
 
+  const isDetailLoading = !unit && detailResponse === undefined;
+
+  if (isDetailLoading) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-[200px] w-full" />
+      </div>
+    );
+  }
+
   if (selectedId == null) return null;
 
   if (isError) {

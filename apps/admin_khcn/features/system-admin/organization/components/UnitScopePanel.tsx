@@ -57,8 +57,7 @@ export function UnitScopePanel() {
   // Backend sẽ tự động lọc danh sách lĩnh vực theo parentId nếu có
   const domains = useDomainSearch(domainIds, parentId ?? undefined);
 
-  if (selectedId == null) return null;
-  if (isScopeLoading) {
+  if (isScopeLoading && !scopeData) {
     return (
       <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
         <Skeleton className="h-8 w-1/3" />
@@ -66,6 +65,7 @@ export function UnitScopePanel() {
       </div>
     );
   }
+  if (selectedId == null) return null;
   if (!scopeData) return null;
 
   const toggle = (ids: number[], id: number) =>

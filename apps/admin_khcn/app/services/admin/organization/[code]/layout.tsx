@@ -1,8 +1,8 @@
 "use client";
 
-import { use } from "react";
+
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,16 +12,14 @@ import { useOrganizationContext } from "@/features/system-admin/organization/con
 
 export default function OrganizationDetailLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ code: string }>;
 }) {
   const pathname = usePathname();
-  // Next.js 16.4: params là Promise, bắt buộc phải dùng React.use() để unwrap
-  const resolvedParams = use(params);
-  // Decode URL vì trong một số trường hợp client-side navigation, param có thể bị URL-encoded
-  const rawCode = resolvedParams?.code;
+  const params = useParams<{ code: string }>();
+  
+  // Lấy param đồng bộ từ useParams để tránh suspend (Suspense fallback) khi chuyển đổi giữa các tab
+  const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
   const { data: unitData, isPending, isFetching, isError } = useOrganizationDetailQuery(code);

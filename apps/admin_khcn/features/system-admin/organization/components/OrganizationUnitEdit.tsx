@@ -78,14 +78,14 @@ export function OrganizationUnitEdit() {
     });
   };
 
-  if (selectedId == null) return null;
-  if (isDetailLoading) {
+  if (isDetailLoading && !unit) {
     return (
       <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
         <Skeleton className="h-[200px] w-full" />
       </div>
     );
   }
+  if (selectedId == null) return null;
   if (!unit) return null;
 
   return (
