@@ -34,7 +34,7 @@ export function UnitScopePanel() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse } = useOrganizationDetailQuery(code);
+  const { data: detailResponse, isPending: isDetailPending, isFetching: isDetailFetching, isError: isDetailError } = useOrganizationDetailQuery(code);
   const selectedId = detailResponse?.data?.id;
   const parentId = detailResponse?.data?.parentId;
 
@@ -57,6 +57,9 @@ export function UnitScopePanel() {
   // Backend sẽ tự động lọc danh sách lĩnh vực theo parentId nếu có
   const domains = useDomainSearch(domainIds, parentId ?? undefined);
 
+  // TanStack Query v5: isPending=true khi enabled=false (code rỗng) hoặc chưa fetch xong
+  const isDetailLoading = (isDetailPending || isDetailFetching) && !detailResponse;
+
   if (isScopeLoading && !scopeData) {
     return (
       <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
@@ -65,7 +68,23 @@ export function UnitScopePanel() {
       </div>
     );
   }
-  if (selectedId == null) return null;
+  if (isDetailLoading) {
+    return (
+      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    );
+  }
+  if (isDetailError || selectedId == null) {
+    return (
+      <div className="rounded-lg border border-dashed bg-muted/20 py-16 flex flex-col items-center gap-2 text-center">
+        <p className="text-sm text-muted-foreground">
+          {isDetailError ? "Không tải được thông tin đơn vị. Vui lòng thử lại." : "Không tìm thấy đơn vị."}
+        </p>
+      </div>
+    );
+  }
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];

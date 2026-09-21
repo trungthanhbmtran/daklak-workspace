@@ -29,7 +29,7 @@ export function OrganizationStaffing() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse } = useOrganizationDetailQuery(code);
+  const { data: detailResponse, isPending: isDetailPending, isFetching: isDetailFetching, isError: isDetailError } = useOrganizationDetailQuery(code);
   const unit = detailResponse?.data;
   const selectedId = unit?.id;
 
@@ -147,7 +147,8 @@ export function OrganizationStaffing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report, jobTitles]);
 
-  const isDetailLoading = !unit && detailResponse === undefined;
+  // TanStack Query v5: khi enabled=true và đang fetch, dùng isPending || isFetching
+  const isDetailLoading = (isDetailPending || isDetailFetching) && !unit;
 
   if (isDetailLoading) {
     return (
@@ -158,7 +159,15 @@ export function OrganizationStaffing() {
     );
   }
 
-  if (selectedId == null) return null;
+  if (isDetailError || selectedId == null) {
+    return (
+      <div className="rounded-lg border border-dashed bg-muted/20 py-16 flex flex-col items-center gap-2 text-center">
+        <p className="text-sm text-muted-foreground">
+          {isDetailError ? "Không tải được thông tin đơn vị. Vui lòng thử lại." : "Không tìm thấy đơn vị."}
+        </p>
+      </div>
+    );
+  }
 
   if (isError) {
     return (
