@@ -41,11 +41,18 @@ export default function OrganizationDetailLayout({
       <div className="flex-1 min-h-0 flex items-center justify-center rounded-xl border bg-card text-card-foreground shadow-sm h-full">
         <div className="flex flex-col items-center gap-2">
           <p className="text-muted-foreground">Không tìm thấy đơn vị hoặc mã đơn vị không hợp lệ (Mã: {code}).</p>
-          <Link href="/services/admin/organization">
-            <Badge variant="outline" className="cursor-pointer hover:bg-muted">
-              Quay lại danh sách
-            </Badge>
-          </Link>
+          <div className="flex gap-2 mt-2">
+            <Link href="/services/admin/organization">
+              <Badge variant="outline" className="cursor-pointer hover:bg-muted py-1.5 px-3">
+                Quay lại danh sách
+              </Badge>
+            </Link>
+            <Link href="/services/admin/organization/create">
+              <Badge variant="default" className="cursor-pointer py-1.5 px-3">
+                Tạo đơn vị mới
+              </Badge>
+            </Link>
+          </div>
         </div>
       </div>
     );
