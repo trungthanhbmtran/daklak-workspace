@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
@@ -113,7 +113,7 @@ function UnitRow({
                 e.stopPropagation();
                 onAddChild(unit.id);
               }}
-              title="Thêm đơn vị con"
+              title="ThÃªm Ä‘Æ¡n vá»‹ con"
             >
               <Plus className="h-3.5 w-3.5 text-muted-foreground" />
             </Button>
@@ -220,16 +220,12 @@ export function OrganizationSidebar() {
     });
   };
 
-  // Tự động expand tất cả khi có searchTerm
+  // Tá»± Ä‘á»™ng expand táº¥t cáº£ khi cÃ³ searchTerm
   const effectiveExpandedIds = searchTerm.trim() ? new Set(flatUnits.map(u => u.id)) : expandedIds;
 
   const handleSelect = (id: number) => {
     const unit = flatUnits.find(u => u.id === id);
-    if (unit?.code) {
-      router.push(`/services/admin/organization/${unit.code}/info`);
-    } else {
-      router.push(`/services/admin/organization/${id}/info`);
-    }
+    router.push(`/services/admin/organization/${id}/info`);
   };
 
   const handleAddChild = (id: number) => {
@@ -249,7 +245,7 @@ export function OrganizationSidebar() {
               <Building2 className="h-4 w-4 text-primary shrink-0" />
             </div>
             <h2 className="text-sm font-bold text-foreground tracking-tight">
-              Cơ cấu tổ chức
+              CÆ¡ cáº¥u tá»• chá»©c
             </h2>
           </div>
           <Button
@@ -258,11 +254,11 @@ export function OrganizationSidebar() {
             onClick={handleAddRoot}
           >
             <Plus className="h-3.5 w-3.5 mr-1.5" />
-            <span className="font-medium">Thêm gốc</span>
+            <span className="font-medium">ThÃªm gá»‘c</span>
           </Button>
         </div>
 
-        <Search placeholder="Tìm tên hoặc mã đơn vị..." className="w-full" />
+        <Search placeholder="TÃ¬m tÃªn hoáº·c mÃ£ Ä‘Æ¡n vá»‹..." className="w-full" />
       </div>
 
       <ScrollArea className="flex-1 min-h-0 bg-background">
@@ -273,14 +269,14 @@ export function OrganizationSidebar() {
                 <Building2 className="h-8 w-8 text-muted-foreground/30" />
               </div>
               <div>
-                <p className="font-medium text-foreground">Chưa có dữ liệu</p>
-                <p className="text-xs mt-1">Nhấn &quot;Thêm gốc&quot; để tạo đơn vị đầu tiên.</p>
+                <p className="font-medium text-foreground">ChÆ°a cÃ³ dá»¯ liá»‡u</p>
+                <p className="text-xs mt-1">Nháº¥n &quot;ThÃªm gá»‘c&quot; Ä‘á»ƒ táº¡o Ä‘Æ¡n vá»‹ Ä‘áº§u tiÃªn.</p>
               </div>
             </div>
           ) : searchTerm.trim() && tree.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
               <SearchIcon className="h-6 w-6 text-muted-foreground/30" />
-              <p>Không tìm thấy kết quả phù hợp.</p>
+              <p>KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£ phÃ¹ há»£p.</p>
             </div>
           ) : (
             <UnitTree
@@ -298,3 +294,5 @@ export function OrganizationSidebar() {
     </Card>
   );
 }
+
+

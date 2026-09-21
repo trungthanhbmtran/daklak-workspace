@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
 import type {
   OrganizationUnitNode,
@@ -95,8 +95,7 @@ export const organizationApi = {
     })),
 
 
-  getDetail: (identifier: string): Promise<{ data: OrganizationUnitNode }> =>
-    apiClient.get(`/organizations/detail/${identifier}`).then((r: any) => ({
+  getDetail: (identifier: string): Promise<{ data: OrganizationUnitNode }> => apiClient.get(`/organizations/detail/${encodeURIComponent(identifier)}`).then((r: any) => ({
       data: normalizeUnitNode(unwrapData<any>(r)),
     })),
 
@@ -186,3 +185,4 @@ export const organizationApi = {
   updateUnitTypeJobTemplates: (unitTypeId: number, jobTitleIds: number[]) =>
     apiClient.put(`/organizations/unit-types/${unitTypeId}/job-templates`, { jobTitleIds }).then((r: any) => unwrapData<any>(r)),
 };
+
