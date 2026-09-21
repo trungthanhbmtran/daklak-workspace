@@ -22,6 +22,9 @@ export default function OrganizationDetailLayout({
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
+  // Guard: nếu code chưa có (hydration chưa xong), hiển thị skeleton thay vì render tabs với href sai
+  const encodedCode = code ? encodeURIComponent(code) : "";
+
   const { data: unitData, isPending, isFetching, isError } = useOrganizationDetailQuery(code);
   const unit = unitData?.data;
 
@@ -48,26 +51,29 @@ export default function OrganizationDetailLayout({
     );
   }
 
-  const tabs = [
-    {
-      id: "info",
-      label: "Thông tin",
-      icon: FileText,
-      href: `/services/admin/organization/${code}/info`,
-    },
-    {
-      id: "scope",
-      label: "Phạm vi phụ trách",
-      icon: MapPin,
-      href: `/services/admin/organization/${code}/scope`,
-    },
-    {
-      id: "staffing",
-      label: "Định biên & Chức danh",
-      icon: Users,
-      href: `/services/admin/organization/${code}/staffing`,
-    },
-  ];
+  // Tabs chỉ được tạo khi đã có encodedCode — tránh href sai khi code chưa hydrate
+  const tabs = encodedCode
+    ? [
+        {
+          id: "info",
+          label: "Thông tin",
+          icon: FileText,
+          href: `/services/admin/organization/${encodedCode}/info`,
+        },
+        {
+          id: "scope",
+          label: "Phạm vi phụ trách",
+          icon: MapPin,
+          href: `/services/admin/organization/${encodedCode}/scope`,
+        },
+        {
+          id: "staffing",
+          label: "Định biên & Chức danh",
+          icon: Users,
+          href: `/services/admin/organization/${encodedCode}/staffing`,
+        },
+      ]
+    : [];
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm h-full">
@@ -96,29 +102,38 @@ export default function OrganizationDetailLayout({
 
       {/* Tab bar equivalent using links */}
       <div className="shrink-0 border-b bg-muted/30 px-4 pt-3 pb-2">
-        <nav className="flex h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1" aria-label="Tabs">
-          {tabs.map((tab) => {
-            const isActive = pathname.startsWith(tab.href);
-            const Icon = tab.icon;
-            
-            return (
-              <Link
-                key={tab.id}
-                href={tab.href}
-                className={cn(
-                  "inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2",
-                  isActive
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                )}
-                aria-current={isActive ? "page" : undefined}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {tab.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {!encodedCode ? (
+          // Skeleton tab bar khi code chưa hydrate — tránh render <Link> với href sai
+          <div className="flex h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1">
+            <Skeleton className="flex-1 h-full rounded-md" />
+            <Skeleton className="flex-1 h-full rounded-md" />
+            <Skeleton className="flex-1 h-full rounded-md" />
+          </div>
+        ) : (
+          <nav className="flex h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1" aria-label="Tabs">
+            {tabs.map((tab) => {
+              const isActive = pathname.startsWith(tab.href);
+              const Icon = tab.icon;
+              
+              return (
+                <Link
+                  key={tab.id}
+                  href={tab.href}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2",
+                    isActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  )}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </div>
 
       {/* Content area */}

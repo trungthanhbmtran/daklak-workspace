@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Network, Save, Loader2, MapPin, Users } from "lucide-react";
@@ -9,48 +8,28 @@ import type { StaffingSlotItem } from "../../types";
 import { PopoverMultiSelect } from "../PopoverMultiSelect";
 import { useGeoAreaSearch } from "../../hooks/useScopeCatalog";
 
-type SlotCardProps = {
+type Props = {
   staffingId: number;
   slotOrder: number;
-  existingSlot: StaffingSlotItem | null | undefined;
+  existingSlot?: StaffingSlotItem | null;
   domainsForUnit: { id: number; name: string }[];
   unitDomainIds: number[];
-  onSave: (payload: {
-    staffingId: number;
-    slotOrder: number;
-    description?: string;
-    domainIds?: number[];
-    geographicAreaIds?: number[];
-    monitoredUnitIds?: number[];
-  }) => void;
   subordinateUnits: { id: number; name: string }[];
+  onSave: (p: { staffingId: number; slotOrder: number; domainIds?: number[]; geographicAreaIds?: number[]; monitoredUnitIds?: number[] }) => void;
   isSaving: boolean;
 };
 
-export function SlotCard({
-  staffingId,
-  slotOrder,
-  existingSlot,
-  domainsForUnit,
-  unitDomainIds,
-  subordinateUnits,
-  onSave,
-  isSaving,
-}: SlotCardProps) {
+export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, unitDomainIds, subordinateUnits, onSave, isSaving }: Props) {
   const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
-  const [geographicAreaIds, setGeographicAreaIds] = useState<number[]>(existingSlot?.geographicAreaIds ?? []);
-  const [monitoredUnitIds, setMonitoredUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
+  const [geoAreaIds, setGeoAreaIds] = useState<number[]>(existingSlot?.geographicAreaIds ?? []);
+  const [unitIds, setUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
 
-  // Use Geo Area Search locally to avoid fetching all areas upfront
-  const { items: geoAreas, isFetching: isLoadingGeoAreas, q: searchGeoArea, setQ: setSearchGeoArea, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geographicAreaIds);
-
-  // Lĩnh vực chuyên môn luôn bám sát theo lĩnh vực của đơn vị
-  const displayDomains = domainsForUnit;
+  const { items: geoAreas, isFetching: loadingGeo, q: geoQ, setQ: setGeoQ, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geoAreaIds);
 
   useEffect(() => {
     setDomainIds(existingSlot?.domainIds ?? []);
-    setGeographicAreaIds(existingSlot?.geographicAreaIds ?? []);
-    setMonitoredUnitIds(existingSlot?.monitoredUnitIds ?? []);
+    setGeoAreaIds(existingSlot?.geographicAreaIds ?? []);
+    setUnitIds(existingSlot?.monitoredUnitIds ?? []);
   }, [existingSlot]);
 
   return (
@@ -58,71 +37,30 @@ export function SlotCard({
       <CardHeader className="py-3 px-4 bg-muted/40 border-b flex flex-row items-center justify-between space-y-0 gap-2 shrink-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">{slotOrder}</div>
-          <span>Vị trí nhân sự</span>
+          <span>Vi tri nhan su</span>
         </CardTitle>
-        <Button type="button" size="sm" className="h-8 text-xs font-medium" onClick={() => onSave({ staffingId, slotOrder, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geographicAreaIds.length ? geographicAreaIds : undefined, monitoredUnitIds: monitoredUnitIds.length ? monitoredUnitIds : undefined })} disabled={isSaving}>
+        <Button type="button" size="sm" className="h-8 text-xs font-medium"
+          onClick={() => onSave({ staffingId, slotOrder, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geoAreaIds.length ? geoAreaIds : undefined, monitoredUnitIds: unitIds.length ? unitIds : undefined })}
+          disabled={isSaving}>
           {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
-          Lưu vị trí
+          Luu vi tri
         </Button>
       </CardHeader>
-
       <CardContent className="p-4 flex-1 flex flex-col gap-4 text-sm">
-        {/* Lưới danh sách */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-
-          {/* LĨNH VỰC */}
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between mb-1">
-              <span className="flex items-center gap-1.5"><Network className="h-3.5 w-3.5" /> Lĩnh vực</span>
-            </label>
-            <PopoverMultiSelect
-              title="Chọn lĩnh vực chuyên môn"
-              icon={<Network className="h-5 w-5" />}
-              items={displayDomains}
-              selectedIds={domainIds}
-              onChange={setDomainIds}
-              placeholderSearch="Tìm lĩnh vực..."
-              triggerLabel="Chọn lĩnh vực"
-            />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Network className="h-3.5 w-3.5" /> Linh vuc</label>
+            <PopoverMultiSelect title="Chon linh vuc" icon={<Network className="h-5 w-5" />} items={domainsForUnit} selectedIds={domainIds} onChange={setDomainIds} placeholderSearch="Tim linh vuc..." triggerLabel="Chon linh vuc" />
           </div>
-
-          {/* ĐỊA LÝ */}
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between mb-1">
-              <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Địa lý</span>
-            </label>
-            <PopoverMultiSelect
-              title="Chọn khu vực địa lý"
-              icon={<MapPin className="h-5 w-5" />}
-              items={geoAreas}
-              selectedIds={geographicAreaIds}
-              onChange={setGeographicAreaIds}
-              placeholderSearch="Tìm địa bàn..."
-              triggerLabel="Chọn địa bàn"
-              search={searchGeoArea}
-              onSearchChange={setSearchGeoArea}
-              isLoading={isLoadingGeoAreas}
-              hasNextPage={hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-            />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Dia ly</label>
+            <PopoverMultiSelect title="Chon khu vuc dia ly" icon={<MapPin className="h-5 w-5" />} items={geoAreas} selectedIds={geoAreaIds} onChange={setGeoAreaIds} placeholderSearch="Tim dia ban..." triggerLabel="Chon dia ban" search={geoQ} onSearchChange={setGeoQ} isLoading={loadingGeo} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} isFetchingNextPage={isFetchingNextPage} />
           </div>
-
-          {/* ĐƠN VỊ TRỰC THUỘC */}
           <div className="flex flex-col space-y-1.5 sm:col-span-2 lg:col-span-1 xl:col-span-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between mb-1">
-              <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Đơn vị trực thuộc</span>
-            </label>
-            <PopoverMultiSelect
-              title="Chọn phòng ban / đơn vị trực thuộc để theo dõi"
-              icon={<Users className="h-5 w-5" />}
-              items={subordinateUnits}
-              selectedIds={monitoredUnitIds}
-              onChange={setMonitoredUnitIds}
-              placeholderSearch="Tìm đơn vị..."
-              triggerLabel="Chọn đơn vị"
-            />
-          </div>        </div>
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Don vi truc thuoc</label>
+            <PopoverMultiSelect title="Chon don vi truc thuoc" icon={<Users className="h-5 w-5" />} items={subordinateUnits} selectedIds={unitIds} onChange={setUnitIds} placeholderSearch="Tim don vi..." triggerLabel="Chon don vi" />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
