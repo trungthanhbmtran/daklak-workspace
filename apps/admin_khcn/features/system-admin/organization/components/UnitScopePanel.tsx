@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * UnitScopePanel — Phạm vi phụ trách (lĩnh vực + địa bàn).
@@ -192,7 +192,8 @@ function ScopePicker({
   const Icon = Briefcase;
   const placeholder = "Tìm lĩnh vực chuyên môn...";
 
-  // Override selected state with local state for instant feedback
+  // Xử lý selected ở client để UI phản hồi tức thì (instant feedback)
+  // không cần đợi API trả về kết quả mới
   const displayItems = items.map(item => ({
     ...item,
     selected: selectedIds.includes(item.id)
