@@ -48,26 +48,28 @@ export default function OrganizationDetailLayout({
     );
   }
 
-  const tabs = [
-    {
-      id: "info",
-      label: "Thông tin",
-      icon: FileText,
-      href: `/services/admin/organization/${code}/info`,
-    },
-    {
-      id: "scope",
-      label: "Phạm vi phụ trách",
-      icon: MapPin,
-      href: `/services/admin/organization/${code}/scope`,
-    },
-    {
-      id: "staffing",
-      label: "Định biên & Chức danh",
-      icon: Users,
-      href: `/services/admin/organization/${code}/staffing`,
-    },
-  ];
+  const tabs = code
+    ? [
+        {
+          id: "info",
+          label: "Thông tin",
+          icon: FileText,
+          href: `/services/admin/organization/${code}/info`,
+        },
+        {
+          id: "scope",
+          label: "Phạm vi phụ trách",
+          icon: MapPin,
+          href: `/services/admin/organization/${code}/scope`,
+        },
+        {
+          id: "staffing",
+          label: "Định biên & Chức danh",
+          icon: Users,
+          href: `/services/admin/organization/${code}/staffing`,
+        },
+      ]
+    : [];
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm h-full">
@@ -98,7 +100,9 @@ export default function OrganizationDetailLayout({
       <div className="shrink-0 border-b bg-muted/30 px-4 pt-3 pb-2">
         <nav className="flex h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1" aria-label="Tabs">
           {tabs.map((tab) => {
-            const isActive = pathname.startsWith(tab.href);
+            // Dùng endsWith(tab.id) thay vì startsWith(tab.href) để không bị
+            // ảnh hưởng bởi basePath prefix trong usePathname() của Next.js App Router
+            const isActive = pathname.endsWith(`/${tab.id}`);
             const Icon = tab.icon;
 
             return (
