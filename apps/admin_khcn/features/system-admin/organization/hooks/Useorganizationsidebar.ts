@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useOrganizationContext } from "../context/OrganizationContext";
 
 /**
@@ -18,6 +18,7 @@ export function useOrganizationSidebar() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const params = useParams<{ code: string }>();
+    const pathname = usePathname();
 
     const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
@@ -54,9 +55,12 @@ export function useOrganizationSidebar() {
 
     const handleSelect = useCallback(
         (id: number) => {
-            router.push(`/services/admin/organization/${id}/info`);
+            // Giữ lại tab đang active (info/scope/staffing) khi chuyển đơn vị
+            const TABS = ["info", "scope", "staffing"] as const;
+            const activeTab = TABS.find((tab) => pathname.includes(`/${tab}`)) ?? "info";
+            router.push(`/services/admin/organization/${id}/${activeTab}`);
         },
-        [router]
+        [router, pathname]
     );
 
     const handleAddChild = useCallback(
