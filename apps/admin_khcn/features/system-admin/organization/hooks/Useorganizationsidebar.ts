@@ -55,9 +55,13 @@ export function useOrganizationSidebar() {
 
     const handleSelect = useCallback(
         (id: number) => {
-            // Giữ lại tab đang active (info/scope/staffing) khi chuyển đơn vị
+            // Lấy tab segment cuối cùng trong URL để giữ lại khi chuyển đơn vị
+            // Dùng pop() thay vì includes() để tránh false match với các segment khác
             const TABS = ["info", "scope", "staffing"] as const;
-            const activeTab = TABS.find((tab) => pathname.includes(`/${tab}`)) ?? "info";
+            const lastSegment = pathname.split("/").pop() ?? "";
+            const activeTab = (TABS as readonly string[]).includes(lastSegment)
+                ? (lastSegment as typeof TABS[number])
+                : "info";
             router.push(`/services/admin/organization/${id}/${activeTab}`);
         },
         [router, pathname]
