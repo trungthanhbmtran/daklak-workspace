@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 /**
@@ -115,33 +115,10 @@ export function OrganizationStaffing() {
   };
 
   /* 7. Render states */
+  // Không dùng early-return để form luôn render ngay, tránh bị ẩn khi chuyển tab
   const isDetailLoading = (detailQuery.isPending || detailQuery.isFetching) && !unit;
+  const isDetailError = detailQuery.isError || (!!code && !isDetailLoading && !unit);
 
-  if (isDetailLoading) {
-    return (
-      <div className="flex flex-col gap-4 p-6 h-full border rounded-xl">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-[200px] w-full" />
-      </div>
-    );
-  }
-
-  if (detailQuery.isError || (code && !isDetailLoading && !unit)) {
-    return (
-      <div className="rounded-xl border border-dashed bg-muted/20 py-16 flex flex-col items-center gap-3 text-center">
-        <AlertCircle className="h-8 w-8 text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">Khong tai duoc thong tin don vi. Vui long thu lai.</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="rounded-lg border border-destructive/30 bg-destructive/5 py-10 text-center">
-        <p className="text-sm text-destructive">Khong tai duoc bao cao dinh bien. Vui long thu lai.</p>
-      </div>
-    );
-  }
 
   /* 8. Tab content renderer */
   const renderTab = (titleList: JobTitleItem[], reportList: StaffingReportItem[], label: string, page: number, setPage: (p: number) => void) => {
@@ -230,23 +207,43 @@ export function OrganizationStaffing() {
       <div className="shrink-0">
         <h2 className="text-base font-semibold text-foreground">
           Dinh bien &amp; Chuc danh
-          {unit?.name && <span className="font-normal text-muted-foreground"> — {unit.name}</span>}
+          {isDetailLoading
+            ? <Skeleton className="inline-block h-4 w-40 ml-2 align-middle" />
+            : unit?.name && <span className="font-normal text-muted-foreground"> — {unit.name}</span>
+          }
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">Chuc danh theo ND 334/2025/ND-CP (Dang, Chinh quyen).</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v: any) => { setActiveTab(v); setSelectedJobTitleId(""); setQuantity("1"); }} className="flex-1 min-h-0 flex flex-col w-full">
-        <TabsList className="shrink-0 w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
-          <TabsTrigger value="CHINH_QUYEN" className="rounded-lg text-xs font-semibold">Chinh quyen</TabsTrigger>
-          <TabsTrigger value="DANG" className="rounded-lg text-xs font-semibold">Dang doan the</TabsTrigger>
-        </TabsList>
-        <TabsContent value="CHINH_QUYEN" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
-          {renderTab(govTitles, govReport, "Chinh quyen", govPage, setGovPage)}
-        </TabsContent>
-        <TabsContent value="DANG" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
-          {renderTab(partyTitles, partyReport, "Dang", partyPage, setPartyPage)}
-        </TabsContent>
-      </Tabs>
+      {isDetailLoading ? (
+        <div className="flex flex-col gap-4 flex-1">
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <Skeleton className="h-20 w-full rounded-lg" />
+        </div>
+      ) : isDetailError ? (
+        <div className="rounded-xl border border-dashed bg-muted/20 py-16 flex flex-col items-center gap-3 text-center">
+          <AlertCircle className="h-8 w-8 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">Khong tai duoc thong tin don vi. Vui long thu lai.</p>
+        </div>
+      ) : isError ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 py-10 text-center">
+          <p className="text-sm text-destructive">Khong tai duoc bao cao dinh bien. Vui long thu lai.</p>
+        </div>
+      ) : (
+        <Tabs value={activeTab} onValueChange={(v: any) => { setActiveTab(v); setSelectedJobTitleId(""); setQuantity("1"); }} className="flex-1 min-h-0 flex flex-col w-full">
+          <TabsList className="shrink-0 w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
+            <TabsTrigger value="CHINH_QUYEN" className="rounded-lg text-xs font-semibold">Chinh quyen</TabsTrigger>
+            <TabsTrigger value="DANG" className="rounded-lg text-xs font-semibold">Dang doan the</TabsTrigger>
+          </TabsList>
+          <TabsContent value="CHINH_QUYEN" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
+            {renderTab(govTitles, govReport, "Chinh quyen", govPage, setGovPage)}
+          </TabsContent>
+          <TabsContent value="DANG" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
+            {renderTab(partyTitles, partyReport, "Dang", partyPage, setPartyPage)}
+          </TabsContent>
+        </Tabs>
+      )}
 
       {configOpen && (
         <JobTitleConfigDialog open={configOpen} onOpenChange={setConfigOpen} jobTitle={configJobTitle} domainId={configDomainId} onDomainIdChange={setConfigDomainId} onSave={handleSaveConfig} isSaving={updateJobTitle.isPending} domainsForUnit={domainsForUnit} unitName={unit?.name} />

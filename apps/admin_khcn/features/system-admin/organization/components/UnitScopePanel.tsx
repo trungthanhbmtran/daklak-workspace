@@ -58,33 +58,9 @@ export function UnitScopePanel() {
   const domains = useDomainSearch(domainIds, parentId ?? undefined);
 
   // TanStack Query v5: isPending=true khi enabled=false (code rỗng) hoặc chưa fetch xong
+  // Không dùng early-return để form luôn render ngay, tránh bị ẩn khi chuyển tab
   const isDetailLoading = (isDetailPending || isDetailFetching) && !detailResponse;
-
-  if (isScopeLoading && !scopeData) {
-    return (
-      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-[300px] w-full" />
-      </div>
-    );
-  }
-  if (isDetailLoading) {
-    return (
-      <div className="flex flex-col gap-4 p-6 h-full border rounded-lg">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-[300px] w-full" />
-      </div>
-    );
-  }
-  if (isDetailError || selectedId == null) {
-    return (
-      <div className="rounded-lg border border-dashed bg-muted/20 py-16 flex flex-col items-center gap-2 text-center">
-        <p className="text-sm text-muted-foreground">
-          {isDetailError ? "Không tải được thông tin đơn vị. Vui lòng thử lại." : "Không tìm thấy đơn vị."}
-        </p>
-      </div>
-    );
-  }
+  const isLoading = isDetailLoading || (isScopeLoading && !scopeData);
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
@@ -97,7 +73,7 @@ export function UnitScopePanel() {
   };
 
   const handleSave = async () => {
-    // Chỉ lưu domainIds theo yêu cầu mới
+    if (selectedId == null) return;
     await actions.updateScope(selectedId, { domainIds });
     setDirty(false);
   };
@@ -126,7 +102,7 @@ export function UnitScopePanel() {
           <Button
             size="sm"
             className="h-8 text-xs"
-            disabled={!dirty || isUpdatingScope}
+            disabled={!dirty || isUpdatingScope || selectedId == null || isLoading}
             onClick={handleSave}
           >
             {isUpdatingScope
@@ -147,25 +123,39 @@ export function UnitScopePanel() {
               <Briefcase className="h-4 w-4" />
             </div>
             <h4 className="text-sm font-semibold">Lĩnh vực chuyên môn</h4>
-            {domainIds.length > 0 && (
-              <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                {domainIds.length}
-              </span>
-            )}
+            {isLoading
+              ? <Skeleton className="ml-auto h-5 w-8 rounded-full" />
+              : domainIds.length > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
+                  {domainIds.length}
+                </span>
+              )
+            }
           </div>
           <div className="flex-1 min-h-0">
-            <ScopePicker
-              items={domains.items}
-              selectedIds={domainIds}
-              isFetching={domains.isFetching}
-              q={domains.q}
-              onSearch={domains.setQ}
-              onToggle={handleDomainToggle}
-              onRemoveAll={() => { setDomainIds([]); setDirty(true); }}
-              hasNextPage={domains.hasNextPage}
-              fetchNextPage={domains.fetchNextPage}
-              isFetchingNextPage={domains.isFetchingNextPage}
-            />
+            {isLoading ? (
+              <div className="flex flex-col gap-3">
+                <Skeleton className="h-9 w-full" />
+                <Skeleton className="h-[200px] w-full rounded-lg" />
+              </div>
+            ) : isDetailError ? (
+              <div className="rounded-lg border border-dashed bg-muted/20 py-10 flex flex-col items-center gap-2 text-center">
+                <p className="text-sm text-muted-foreground">Không tải được thông tin đơn vị. Vui lòng thử lại.</p>
+              </div>
+            ) : (
+              <ScopePicker
+                items={domains.items}
+                selectedIds={domainIds}
+                isFetching={domains.isFetching}
+                q={domains.q}
+                onSearch={domains.setQ}
+                onToggle={handleDomainToggle}
+                onRemoveAll={() => { setDomainIds([]); setDirty(true); }}
+                hasNextPage={domains.hasNextPage}
+                fetchNextPage={domains.fetchNextPage}
+                isFetchingNextPage={domains.isFetchingNextPage}
+              />
+            )}
           </div>
         </div>
       </div>
