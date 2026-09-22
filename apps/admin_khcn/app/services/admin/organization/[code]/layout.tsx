@@ -22,12 +22,13 @@ export default function OrganizationDetailLayout({
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: unitData, isPending, isFetching, isError } = useOrganizationDetailQuery(code);
+  const { data: unitData, isPending, isFetching, isError, isPlaceholderData } = useOrganizationDetailQuery(code);
   const unit = unitData?.data;
 
   // TanStack Query v5: khi query disabled (code = ""), isLoading = false, isPending = true.
-  // Do đó phải dùng (isPending || isFetching) để hiển thị Skeleton.
-  const isQueryLoading = isPending || isFetching;
+  // isPlaceholderData = true khi keepPreviousData đang giữ data cũ trong lúc fetch data mới.
+  // Cả hai trường hợp đều cần coi là "đang tải" để tránh flash "không tìm thấy đơn vị".
+  const isQueryLoading = isPending || isFetching || isPlaceholderData;
 
   const { state } = useOrganizationContext();
   const { flatUnits } = state;

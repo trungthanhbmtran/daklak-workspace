@@ -36,9 +36,10 @@ export function OrganizationUnitEdit() {
   const { isUpdating, isDeleting } = meta;
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data: detailResponse, isPending, isFetching } = useOrganizationDetailQuery(code);
+  const { data: detailResponse, isPending, isFetching, isPlaceholderData } = useOrganizationDetailQuery(code);
   const unit = detailResponse?.data;
-  const isDetailLoading = isPending || isFetching;
+  // isPlaceholderData = true khi keepPreviousData đang giữ data cũ trong lúc fetch data mới
+  const isDetailLoading = isPending || isFetching || isPlaceholderData;
   const selectedId = unit?.id;
 
   const hasChildren = selectedId != null && flatUnits.some((u) => u.parentId === selectedId);

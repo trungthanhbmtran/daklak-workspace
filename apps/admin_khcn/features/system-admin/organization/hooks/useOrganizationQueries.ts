@@ -32,6 +32,7 @@ export function useOrganizationDetailQuery(identifier?: string) {
     queryFn: () => (identifier ? organizationApi.getDetail(identifier) : Promise.reject("No identifier")),
     enabled: !!identifier,
     staleTime: STALE_TIME,
+    placeholderData: keepPreviousData, // Giữ data cũ khi chuyển đơn vị, tránh flash "không tìm thấy"
   });
 }
 
@@ -41,6 +42,7 @@ export function useOrganizationScopeQuery(id?: number) {
     queryFn: () => (id ? organizationApi.getScope(id) : Promise.reject("No id")),
     enabled: !!id,
     staleTime: STALE_TIME,
+    placeholderData: keepPreviousData, // Giữ scope data cũ khi chuyển đơn vị, tránh flash loading
   });
 }
 

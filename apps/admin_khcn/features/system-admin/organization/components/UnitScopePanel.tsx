@@ -34,7 +34,7 @@ export function UnitScopePanel() {
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: detailResponse, isPending: isDetailPending, isFetching: isDetailFetching, isError: isDetailError } = useOrganizationDetailQuery(code);
+  const { data: detailResponse, isPending: isDetailPending, isFetching: isDetailFetching, isError: isDetailError, isPlaceholderData: isDetailPlaceholder } = useOrganizationDetailQuery(code);
   const selectedId = detailResponse?.data?.id;
   const parentId = detailResponse?.data?.parentId;
 
@@ -58,8 +58,9 @@ export function UnitScopePanel() {
   const domains = useDomainSearch(domainIds, parentId ?? undefined);
 
   // TanStack Query v5: isPending=true khi enabled=false (code rỗng) hoặc chưa fetch xong
+  // isDetailPlaceholder=true khi keepPreviousData đang giữ data cũ trong lúc chuyển đơn vị
   // Không dùng early-return để form luôn render ngay, tránh bị ẩn khi chuyển tab
-  const isDetailLoading = (isDetailPending || isDetailFetching) && !detailResponse;
+  const isDetailLoading = (isDetailPending || isDetailFetching || isDetailPlaceholder) && !detailResponse;
   const isLoading = isDetailLoading || (isScopeLoading && !scopeData);
 
   const toggle = (ids: number[], id: number) =>
