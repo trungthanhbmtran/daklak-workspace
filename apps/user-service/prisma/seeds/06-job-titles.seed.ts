@@ -2,13 +2,10 @@ import { PrismaClient } from '../../src/generated/prisma/client';
 import * as bcrypt from 'bcrypt';
 
 export async function seedJobTitles(prisma: PrismaClient) {
-
   const _unitTypes = await prisma.unitType.findMany();
   const unitTypeMap: Record<string, any> = {};
   for (const r of _unitTypes) unitTypeMap[r.code] = r;
 
-
-  
   console.log('📦 Seeding Job Titles...');
   const jobTitlesData = [
     {
@@ -215,6 +212,20 @@ export async function seedJobTitles(prisma: PrismaClient) {
       type: 'GOVERNMENT',
     },
     {
+      code: 'CONG_CHUC',
+      name: 'Công chức',
+      category: 'STAFF',
+      rank: 3,
+      type: 'RANK',
+    },
+    {
+      code: 'HOP_DONG',
+      name: 'Hợp đồng lao động',
+      category: 'SUPPORT',
+      rank: 5,
+      type: 'RANK',
+    },
+    {
       code: 'BI_THU_DANG_BO',
       name: 'Bí thư Đảng bộ',
       category: 'EXECUTIVE',
@@ -306,38 +317,22 @@ export async function seedJobTitles(prisma: PrismaClient) {
   const links = [
     {
       jt: 'CHU_TICH',
-      types: [
-        'UBND_TINH',
-        'HDND_TINH',
-      ],
+      types: ['UBND_TINH', 'HDND_TINH'],
     },
     {
       jt: 'PHO_CHU_TICH',
-      types: [
-        'UBND_TINH',
-        'HDND_TINH',
-      ],
+      types: ['UBND_TINH', 'HDND_TINH'],
     },
     { jt: 'UY_VIEN_UBND', types: ['UBND_TINH'] },
     { jt: 'GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     {
       jt: 'TRUONG_PHONG',
-      types: [
-        'PHONG_BAN_SO',
-        'DVSN',
-        'TRUNG_TAM',
-        'CHI_CUC',
-      ],
+      types: ['PHONG_BAN_SO', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'],
     },
     {
       jt: 'PHO_PHONG',
-      types: [
-        'PHONG_BAN_SO',
-        'DVSN',
-        'TRUNG_TAM',
-        'CHI_CUC',
-      ],
+      types: ['PHONG_BAN_SO', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'],
     },
     { jt: 'CHANH_VAN_PHONG', types: ['VAN_PHONG'] },
     { jt: 'PHO_CHANH_VAN_PHONG', types: ['VAN_PHONG'] },
@@ -348,13 +343,7 @@ export async function seedJobTitles(prisma: PrismaClient) {
     { jt: 'THANH_TRA_VIEN_CAO_CAP', types: ['THANH_TRA'] },
     {
       jt: 'SPECIALIST',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'DVSN',
-        'TRUNG_TAM',
-        'CHI_CUC',
-      ],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'],
     },
     {
       jt: 'SENIOR_SPECIALIST',
@@ -366,70 +355,25 @@ export async function seedJobTitles(prisma: PrismaClient) {
     },
     {
       jt: 'OFFICER',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'],
     },
     {
       jt: 'STAFF',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'THANH_TRA',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'],
     },
-    {
-      jt: 'CONG_CHUC_PHU_TRACH',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
-    },
-    {
-      jt: 'CAN_BO_PHU_TRACH',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
-    },
+    { jt: 'CONG_CHUC_PHU_TRACH', types: ['PHONG_BAN_SO', 'VAN_PHONG'] },
+    { jt: 'CAN_BO_PHU_TRACH', types: ['PHONG_BAN_SO', 'VAN_PHONG'] },
     {
       jt: 'BI_THU_DANG_BO',
-      types: [
-        'CQ_DANG',
-        'SO_NGANH',
-        'UBND_TINH',
-        'DVSN',
-        'CHI_CUC',
-      ],
+      types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'DVSN', 'CHI_CUC'],
     },
     {
       jt: 'PHO_BI_THU_DANG_BO',
-      types: [
-        'CQ_DANG',
-        'SO_NGANH',
-        'UBND_TINH',
-        'DVSN',
-        'CHI_CUC',
-      ],
+      types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'DVSN', 'CHI_CUC'],
     },
     {
       jt: 'DANG_UY_VIEN',
-      types: [
-        'CQ_DANG',
-        'SO_NGANH',
-        'UBND_TINH',
-        'DVSN',
-        'CHI_CUC',
-      ],
+      types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'DVSN', 'CHI_CUC'],
     },
     {
       jt: 'BI_THU_CHI_BO',
@@ -479,56 +423,57 @@ export async function seedJobTitles(prisma: PrismaClient) {
     { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
     {
       jt: 'KE_TOAN',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'THANH_TRA',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'],
     },
     {
       jt: 'VAN_THU',
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'],
+    },
+    { jt: 'VIEN_CHUC', types: ['DVSN', 'TRUNG_TAM'] },
+    { jt: 'GRADE_1', types: ['DVSN', 'TRUNG_TAM'] },
+    { jt: 'GRADE_2', types: ['DVSN', 'TRUNG_TAM'] },
+    { jt: 'GRADE_3', types: ['DVSN', 'TRUNG_TAM'] },
+    { jt: 'GRADE_4', types: ['DVSN', 'TRUNG_TAM'] },
+    {
+      jt: 'CONG_CHUC',
       types: [
+        'SO_NGANH',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'THANH_TRA',
-        'DVSN',
-        'TRUNG_TAM',
+        'CHI_CUC',
+        'UBND_TINH',
       ],
     },
     {
-      jt: 'VIEN_CHUC',
+      jt: 'HOP_DONG',
       types: [
+        'SO_NGANH',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'CHI_CUC',
+        'UBND_TINH',
         'DVSN',
         'TRUNG_TAM',
       ],
     },
     {
       jt: 'NHAN_VIEN',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'THANH_TRA',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'],
     },
     {
       jt: 'BAO_VE',
-      types: [
-        'PHONG_BAN_SO',
-        'VAN_PHONG',
-        'THANH_TRA',
-        'DVSN',
-        'TRUNG_TAM',
-      ],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'],
     },
   ];
 
   // Dynamically add PHONG_BAN_TRUNG_TAM to any link that supports PHONG_BAN_SO
   for (const link of links) {
-    if (link.types.includes('PHONG_BAN_SO') && !link.types.includes('PHONG_BAN_TRUNG_TAM')) {
+    if (
+      link.types.includes('PHONG_BAN_SO') &&
+      !link.types.includes('PHONG_BAN_TRUNG_TAM')
+    ) {
       link.types.push('PHONG_BAN_TRUNG_TAM');
     }
   }
@@ -542,7 +487,10 @@ export async function seedJobTitles(prisma: PrismaClient) {
       for (const typeCode of link.types) {
         const typeId = unitTypeMap[typeCode]?.id;
         if (typeId) {
-          templatesToCreate.push({ unitTypeId: typeId, jobTitleId: jobTitle.id });
+          templatesToCreate.push({
+            unitTypeId: typeId,
+            jobTitleId: jobTitle.id,
+          });
         }
       }
     }
@@ -554,6 +502,4 @@ export async function seedJobTitles(prisma: PrismaClient) {
       skipDuplicates: true,
     });
   }
-
-  
 }
