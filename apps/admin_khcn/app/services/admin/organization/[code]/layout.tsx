@@ -2,7 +2,7 @@
 
 
 import Link from "next/link";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useSearchParams } from "next/navigation";
 import { FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +21,10 @@ export default function OrganizationDetailLayout({
   // Lấy param đồng bộ từ useParams để tránh suspend (Suspense fallback) khi chuyển đổi giữa các tab
   const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
+
+  const searchParams = useSearchParams();
+  const searchStr = searchParams.toString();
+  const suffix = searchStr ? `?${searchStr}` : "";
 
   const { data: unitData, isPending, isFetching, isError, isPlaceholderData } = useOrganizationDetailQuery(code);
   const unit = unitData?.data;
@@ -55,19 +59,19 @@ export default function OrganizationDetailLayout({
           id: "info",
           label: "Thông tin",
           icon: FileText,
-          href: `/services/admin/organization/${code}/info`,
+          href: `/services/admin/organization/${code}/info${suffix}`,
         },
         {
           id: "scope",
           label: "Phạm vi phụ trách",
           icon: MapPin,
-          href: `/services/admin/organization/${code}/scope`,
+          href: `/services/admin/organization/${code}/scope${suffix}`,
         },
         {
           id: "staffing",
           label: "Định biên & Chức danh",
           icon: Users,
-          href: `/services/admin/organization/${code}/staffing`,
+          href: `/services/admin/organization/${code}/staffing${suffix}`,
         },
       ]
     : [];

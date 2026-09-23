@@ -61,7 +61,7 @@ export function UnitScopePanel() {
   // isDetailPlaceholder=true khi keepPreviousData đang giữ data cũ trong lúc chuyển đơn vị
   // Không dùng early-return để form luôn render ngay, tránh bị ẩn khi chuyển tab
   const isDetailLoading = (isDetailPending || isDetailFetching || isDetailPlaceholder) && !detailResponse;
-  const isLoading = isDetailLoading || (isScopeLoading && !scopeData);
+  const isLoading = isDetailLoading || (!isDetailError && isScopeLoading && !scopeData && !!selectedId);
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];

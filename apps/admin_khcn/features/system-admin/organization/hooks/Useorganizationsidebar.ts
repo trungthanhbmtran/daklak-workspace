@@ -62,9 +62,11 @@ export function useOrganizationSidebar() {
             const activeTab = (TABS as readonly string[]).includes(lastSegment)
                 ? (lastSegment as typeof TABS[number])
                 : "info";
-            router.push(`/services/admin/organization/${id}/${activeTab}`);
+            const searchStr = searchParams.toString();
+            const suffix = searchStr ? `?${searchStr}` : "";
+            router.push(`/services/admin/organization/${id}/${activeTab}${suffix}`);
         },
-        [router, pathname]
+        [router, pathname, searchParams]
     );
 
     const handleAddChild = useCallback(
