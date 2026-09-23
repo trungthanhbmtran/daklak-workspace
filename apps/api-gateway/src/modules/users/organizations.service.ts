@@ -242,13 +242,13 @@ export class OrganizationsService implements OnModuleInit {
     };
 
     try {
-      const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code: identifier }));
+      const result = (await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code: identifier }))) as any;
       const mapped = await enrichWithSubordinates(this.mapToOrganizationNode(result), result.id);
       return { success: true, data: mapped };
     } catch (err: any) {
       if (isNumeric && err?.code === 5) {
         try {
-          const resultById = await firstValueFrom(this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }));
+          const resultById = (await firstValueFrom(this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }))) as any;
           const mapped = await enrichWithSubordinates(this.mapToOrganizationNode(resultById), resultById.id);
           return { success: true, data: mapped };
         } catch (e2: any) {
