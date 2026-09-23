@@ -1,6 +1,7 @@
 {
   "name": "admin_khcn",
   "version": "0.1.0",
+  "description": "Quản trị Hệ thống Daklak Workspace - Next.js 16.1.6",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -2,7 +2,7 @@
 npx prisma migrate dev --name init
 npx prisma migrate dev --name mo_ta_su_thay_doi
 npx prisma generate
-Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
+Hướng dẫn build và deploy ứng dụng Daklak (Next.js 16.1.6, NestJS, Prisma) bằng Docker Compose thông qua GitHub Actions.
 
 ## 1. Hướng Dẫn Sử Dụng AI Agent Skills (Dành cho Lập Trình Viên)
 Dự án được cấu hình sẵn các thư mục kỹ năng (skills) đặc biệt dành cho AI (như Github Copilot, Gemini, Cursor) trong thư mục `.agents/skills`. Để AI viết code chính xác theo chuẩn kiến trúc dự án, bạn nên sử dụng các Slash Command hoặc Prompt gợi ý:
