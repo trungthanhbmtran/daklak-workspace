@@ -8,7 +8,7 @@ Tài liệu này cung cấp bức tranh toàn cảnh về hệ thống **Daklak 
 
 Daklak Workspace là một hệ thống **Microservices** phân tán, kết nối với nhau qua **gRPC** (cho giao tiếp nội bộ tốc độ cao) và **REST API** (cho external/client).
 
-- **Frontend**: 2 ứng dụng độc lập sử dụng **Next.js 15 (React 19)**. Áp dụng triệt để kiến trúc *"Dumb Client"* - mọi logic tính toán, lọc dữ liệu đều được đẩy xuống Backend.
+- **Frontend**: 2 ứng dụng độc lập sử dụng **Next.js 16.1.6 (React 19.2.3)**. Áp dụng triệt để kiến trúc *"Dumb Client"* - mọi logic tính toán, lọc dữ liệu đều được đẩy xuống Backend.
 - **Backend**: API Gateway (NestJS) đóng vai trò trung tâm điều hướng request. Các services con (NestJS) đảm nhận nghiệp vụ riêng biệt.
 - **Database**: Sử dụng **Prisma ORM** kết nối SQL (MySQL/PostgreSQL), có chuẩn hóa CUID cho khóa chính.
 - **Message Broker & Cache**: RabbitMQ (cho Event-driven/Notifications) và Redis (cho Caching tốc độ cao).
