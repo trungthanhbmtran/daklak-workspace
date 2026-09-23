@@ -37,28 +37,28 @@ export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, 
       <CardHeader className="py-3 px-4 bg-muted/40 border-b flex flex-row items-center justify-between space-y-0 gap-2 shrink-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">{slotOrder}</div>
-          <span>Vi tri nhan su</span>
+          <span>Vị trí nhân sự</span>
         </CardTitle>
         <Button type="button" size="sm" className="h-8 text-xs font-medium"
           onClick={() => onSave({ staffingId, slotOrder, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geoAreaIds.length ? geoAreaIds : undefined, monitoredUnitIds: unitIds.length ? unitIds : undefined })}
           disabled={isSaving}>
           {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
-          Luu vi tri
+          Lưu vị trí
         </Button>
       </CardHeader>
       <CardContent className="p-4 flex-1 flex flex-col gap-4 text-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Network className="h-3.5 w-3.5" /> Linh vuc</label>
-            <PopoverMultiSelect title="Chon linh vuc" icon={<Network className="h-5 w-5" />} items={domainsForUnit} selectedIds={domainIds} onChange={setDomainIds} placeholderSearch="Tim linh vuc..." triggerLabel="Chon linh vuc" />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Network className="h-3.5 w-3.5" /> Lĩnh vực</label>
+            <PopoverMultiSelect title="Chọn lĩnh vực" icon={<Network className="h-5 w-5" />} items={domainsForUnit} selectedIds={domainIds} onChange={setDomainIds} placeholderSearch="Tìm lĩnh vực..." triggerLabel="Chọn lĩnh vực" />
           </div>
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Dia ly</label>
-            <PopoverMultiSelect title="Chon khu vuc dia ly" icon={<MapPin className="h-5 w-5" />} items={geoAreas} selectedIds={geoAreaIds} onChange={setGeoAreaIds} placeholderSearch="Tim dia ban..." triggerLabel="Chon dia ban" search={geoQ} onSearchChange={setGeoQ} isLoading={loadingGeo} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} isFetchingNextPage={isFetchingNextPage} />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Địa lý</label>
+            <PopoverMultiSelect title="Chọn khu vực địa lý" icon={<MapPin className="h-5 w-5" />} items={geoAreas} selectedIds={geoAreaIds} onChange={setGeoAreaIds} placeholderSearch="Tìm địa bàn..." triggerLabel="Chọn địa bàn" search={geoQ} onSearchChange={setGeoQ} isLoading={loadingGeo} hasNextPage={hasNextPage} fetchNextPage={fetchNextPage} isFetchingNextPage={isFetchingNextPage} />
           </div>
           <div className="flex flex-col space-y-1.5 sm:col-span-2 lg:col-span-1 xl:col-span-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Don vi truc thuoc</label>
-            <PopoverMultiSelect title="Chon don vi truc thuoc" icon={<Users className="h-5 w-5" />} items={subordinateUnits} selectedIds={unitIds} onChange={setUnitIds} placeholderSearch="Tim don vi..." triggerLabel="Chon don vi" />
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Đơn vị trực thuộc</label>
+            <PopoverMultiSelect title="Chọn đơn vị trực thuộc" icon={<Users className="h-5 w-5" />} items={subordinateUnits} selectedIds={unitIds} onChange={setUnitIds} placeholderSearch="Tìm đơn vị..." triggerLabel="Chọn đơn vị" />
           </div>
         </div>
       </CardContent>

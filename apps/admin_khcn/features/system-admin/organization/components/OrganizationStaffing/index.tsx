@@ -95,9 +95,9 @@ export function OrganizationStaffing() {
   /* 6. Handlers */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!unitId || !selectedJobTitleId) { toast.error("Vui long chon chuc danh."); return; }
+    if (!unitId || !selectedJobTitleId) { toast.error("Vui lòng chọn chức danh."); return; }
     const q = parseInt(quantity, 10);
-    if (Number.isNaN(q) || q < 1) { toast.error("So luong phai la so nguyen duong."); return; }
+    if (Number.isNaN(q) || q < 1) { toast.error("Số lượng phải là số nguyên dương."); return; }
     setStaffing.mutate({ unitId, jobTitleId: parseInt(selectedJobTitleId, 10), quantity: q });
     setQuantity("1");
     setSelectedJobTitleId("");
@@ -128,14 +128,14 @@ export function OrganizationStaffing() {
     return (
       <div className="flex flex-col flex-1 min-h-0 gap-4 mt-2">
         <section className="shrink-0 rounded-lg border bg-muted/30 p-4">
-          <h3 className="text-sm font-medium mb-3">Them dinh bien {label.toLowerCase()}</h3>
+          <h3 className="text-sm font-medium mb-3">Thêm định biên {label.toLowerCase()}</h3>
           <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5 min-w-[220px]">
               <label className="text-sm font-medium text-foreground">Chuc danh</label>
               <Select value={selectedJobTitleId || "__none__"} onValueChange={v => setSelectedJobTitleId(v === "__none__" ? "" : v)} disabled={isLoadingJobTitles}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="Chon chuc danh" /></SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue placeholder="Chọn chức danh" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">Chon chuc danh</SelectItem>
+                  <SelectItem value="__none__">Chọn chức danh</SelectItem>
                   {titleList.map(j => (
                     <SelectItem key={j.id} value={String(j.id)}>
                       <span>{j.name} ({j.code}){(j.domainName || j.geographicAreaName) && <span className="text-muted-foreground text-xs ml-1">— {[j.domainName, j.geographicAreaName].filter(Boolean).join(", ")}</span>}</span>
@@ -145,25 +145,25 @@ export function OrganizationStaffing() {
               </Select>
             </div>
             <div className="space-y-1.5 w-24">
-              <label className="text-sm font-medium text-foreground">So luong</label>
+              <label className="text-sm font-medium text-foreground">Số lượng</label>
               <Input type="number" min={1} className="h-9" value={quantity} onChange={e => setQuantity(e.target.value)} disabled={setStaffing.isPending} />
             </div>
             <Button type="submit" size="default" className="h-9" disabled={setStaffing.isPending || !selectedJobTitleId}>
-              {setStaffing.isPending ? "Dang luu..." : "Luu dinh bien"}
+              {setStaffing.isPending ? "Đang lưu..." : "Lưu định biên"}
             </Button>
           </form>
         </section>
 
         <section className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Danh sach {label.toLowerCase()}</h3>
-            {reportList.length > 0 && <span className="text-xs text-muted-foreground">{reportList.length} chuc danh</span>}
+            <h3 className="text-sm font-medium">Danh sách {label.toLowerCase()}</h3>
+            {reportList.length > 0 && <span className="text-xs text-muted-foreground">{reportList.length} chức danh</span>}
           </div>
           {isLoadingReport ? (
             <Skeleton className="h-40 w-full rounded-lg" />
           ) : reportList.length === 0 ? (
             <div className="rounded-lg border border-dashed bg-muted/20 py-10 text-center text-sm text-muted-foreground">
-              Chua co dinh bien. Them chuc danh va so luong o form tren.
+              Chua co dinh bien. Them chức danh va so luong o form tren.
             </div>
           ) : (
             <>
@@ -174,7 +174,7 @@ export function OrganizationStaffing() {
                 <div className="shrink-0 flex items-center justify-between mt-2 px-1">
                   <span className="text-xs text-muted-foreground">{(safeP - 1) * PAGE_SIZE + 1}–{Math.min(safeP * PAGE_SIZE, reportList.length)} / {reportList.length}</span>
                   <div className="flex gap-1">
-                    <Button variant="outline" size="sm" className="h-7 px-2 text-xs" disabled={safeP <= 1} onClick={() => setPage(safeP - 1)}>Truoc</Button>
+                    <Button variant="outline" size="sm" className="h-7 px-2 text-xs" disabled={safeP <= 1} onClick={() => setPage(safeP - 1)}>Trước</Button>
                     <span className="text-xs font-medium px-2 self-center">{safeP}/{totalPages}</span>
                     <Button variant="outline" size="sm" className="h-7 px-2 text-xs" disabled={safeP >= totalPages} onClick={() => setPage(safeP + 1)}>Sau</Button>
                   </div>
@@ -186,8 +186,8 @@ export function OrganizationStaffing() {
 
         {titleList.length > 0 && (
           <section className="shrink-0 rounded-lg border bg-muted/20 p-4">
-            <h3 className="text-sm font-medium mb-1">Cau hinh chuc danh</h3>
-            <p className="text-xs text-muted-foreground mb-3">Linh vuc phu trach (theo cap tren giao). Theo doi phong ban: don vi truc thuoc.</p>
+            <h3 className="text-sm font-medium mb-1">Cau hinh chức danh</h3>
+            <p className="text-xs text-muted-foreground mb-3">Lĩnh vực phụ trách (theo cấp trên giao). Theo dõi phòng ban: đơn vị trực thuộc.</p>
             <div className="flex flex-wrap gap-2">
               {titleList.map(j => (
                 <Button key={j.id} type="button" variant="outline" size="sm" className="h-8" onClick={() => openConfig(j)}>
@@ -206,13 +206,13 @@ export function OrganizationStaffing() {
     <div className="flex flex-col h-full min-h-0 gap-4">
       <div className="shrink-0">
         <h2 className="text-base font-semibold text-foreground">
-          Dinh bien &amp; Chuc danh
+          Định biên & Chức danh
           {isDetailLoading
             ? <Skeleton className="inline-block h-4 w-40 ml-2 align-middle" />
             : unit?.name && <span className="font-normal text-muted-foreground"> — {unit.name}</span>
           }
         </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Chuc danh theo ND 334/2025/ND-CP (Dang, Chinh quyen).</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Chức danh theo NĐ 334/2025/NĐ-CP (Đảng, Chính quyền).</p>
       </div>
 
       {isDetailLoading ? (
@@ -224,23 +224,23 @@ export function OrganizationStaffing() {
       ) : isDetailError ? (
         <div className="rounded-xl border border-dashed bg-muted/20 py-16 flex flex-col items-center gap-3 text-center">
           <AlertCircle className="h-8 w-8 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">Khong tai duoc thong tin don vi. Vui long thu lai.</p>
+          <p className="text-sm text-muted-foreground">Không tải được thông tin đơn vị. Vui lòng thử lại.</p>
         </div>
       ) : isError ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 py-10 text-center">
-          <p className="text-sm text-destructive">Khong tai duoc bao cao dinh bien. Vui long thu lai.</p>
+          <p className="text-sm text-destructive">Không tải được báo cáo định biên. Vui lòng thử lại.</p>
         </div>
       ) : (
         <Tabs value={activeTab} onValueChange={(v: any) => { setActiveTab(v); setSelectedJobTitleId(""); setQuantity("1"); }} className="flex-1 min-h-0 flex flex-col w-full">
           <TabsList className="shrink-0 w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
-            <TabsTrigger value="CHINH_QUYEN" className="rounded-lg text-xs font-semibold">Chinh quyen</TabsTrigger>
-            <TabsTrigger value="DANG" className="rounded-lg text-xs font-semibold">Dang doan the</TabsTrigger>
+            <TabsTrigger value="CHINH_QUYEN" className="rounded-lg text-xs font-semibold">Chính quyền</TabsTrigger>
+            <TabsTrigger value="DANG" className="rounded-lg text-xs font-semibold">Đảng đoàn thể</TabsTrigger>
           </TabsList>
           <TabsContent value="CHINH_QUYEN" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
-            {renderTab(govTitles, govReport, "Chinh quyen", govPage, setGovPage)}
+            {renderTab(govTitles, govReport, "Chính quyền", govPage, setGovPage)}
           </TabsContent>
           <TabsContent value="DANG" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
-            {renderTab(partyTitles, partyReport, "Dang", partyPage, setPartyPage)}
+            {renderTab(partyTitles, partyReport, "Đảng", partyPage, setPartyPage)}
           </TabsContent>
         </Tabs>
       )}
