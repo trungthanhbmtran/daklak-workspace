@@ -1,6 +1,10 @@
 import { useState, useMemo } from "react";
 import { Check, Loader2, Search, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -42,9 +46,9 @@ export function PopoverMultiSelect({
   const [localSearch, setLocalSearch] = useState("");
 
   const isAsync = onSearchChange !== undefined;
-  
+
   // Dùng search server (search) nếu có, không thì dùng localSearch
-  const currentSearch = isAsync ? (search || "") : localSearch;
+  const currentSearch = isAsync ? search || "" : localSearch;
 
   const handleSearchChange = (val: string) => {
     if (isAsync && onSearchChange) {
@@ -70,17 +74,19 @@ export function PopoverMultiSelect({
     if (!localSearch.trim()) return items;
     const lowerQ = localSearch.toLowerCase();
     return items.filter(
-      (i) => i.name.toLowerCase().includes(lowerQ) || i.code?.toLowerCase().includes(lowerQ)
+      (i) =>
+        i.name.toLowerCase().includes(lowerQ) ||
+        i.code?.toLowerCase().includes(lowerQ),
     );
   }, [items, isAsync, localSearch]);
 
   const selectedItems = useMemo(() => {
-    return items.filter(i => selectedIds.includes(i.id));
+    return items.filter((i) => selectedIds.includes(i.id));
   }, [items, selectedIds]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
           variant="outline"
           className="w-full justify-between font-normal bg-background hover:bg-muted/50 border-input h-auto min-h-11 py-2 shadow-sm text-left"
@@ -90,27 +96,36 @@ export function PopoverMultiSelect({
             <span className="truncate">{triggerLabel}</span>
           </span>
           {selectedIds.length > 0 && (
-            <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary shrink-0">
+            <Badge
+              variant="secondary"
+              className="ml-2 bg-primary/10 text-primary shrink-0"
+            >
               {selectedIds.length} đã chọn
             </Badge>
           )}
         </Button>
-      </DialogTrigger>
+      </PopoverTrigger>
 
-      <DialogContent className="max-w-[600px] h-[85vh] flex flex-col p-0 overflow-hidden shadow-xl border-primary/20 gap-0">
-        <DialogHeader className="px-5 pt-5 pb-3 border-b shrink-0 bg-muted/10">
-          <DialogTitle className="flex items-center gap-2 text-primary text-base">
+      <PopoverContent
+        className="w-[350px] sm:w-[400px] h-[400px] flex flex-col p-0 overflow-hidden shadow-xl border-primary/20 gap-0"
+        align="start"
+        sideOffset={5}
+      >
+        <div className="px-4 py-3 border-b shrink-0 bg-muted/10">
+          <div className="flex items-center gap-2 text-primary text-base font-semibold">
             {icon && <span>{icon}</span>}
             {title}
-          </DialogTitle>
-        </DialogHeader>
+          </div>
+        </div>
 
         {/* Selected Chips Area */}
         {selectedItems.length > 0 && (
           <div className="shrink-0 px-5 py-3 border-b bg-primary/5 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-primary">Đã chọn ({selectedIds.length})</span>
-              <Button 
+              <span className="text-xs font-medium text-primary">
+                Đã chọn ({selectedIds.length})
+              </span>
+              <Button
                 onClick={removeAll}
                 className="text-xs text-muted-foreground hover:text-destructive transition-colors"
               >
@@ -139,7 +154,7 @@ export function PopoverMultiSelect({
         {/* Search Input */}
         <div className="shrink-0 p-4 border-b relative">
           <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
+          <Input
             placeholder={placeholderSearch}
             value={currentSearch}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -176,7 +191,7 @@ export function PopoverMultiSelect({
                     onClick={() => toggleItem(item.id)}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                      isSelected ? "bg-primary/10" : "hover:bg-muted"
+                      isSelected ? "bg-primary/10" : "hover:bg-muted",
                     )}
                   >
                     <div
@@ -184,17 +199,26 @@ export function PopoverMultiSelect({
                         "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border",
                         isSelected
                           ? "bg-primary border-primary text-primary-foreground"
-                          : "border-input opacity-50"
+                          : "border-input opacity-50",
                       )}
                     >
-                      <Check className={cn("h-3 w-3", !isSelected && "opacity-0")} />
+                      <Check
+                        className={cn("h-3 w-3", !isSelected && "opacity-0")}
+                      />
                     </div>
                     <div className="flex flex-col flex-1 min-w-0">
-                      <span className={cn("text-sm font-medium truncate", isSelected ? "text-primary" : "text-foreground")}>
+                      <span
+                        className={cn(
+                          "text-sm font-medium truncate",
+                          isSelected ? "text-primary" : "text-foreground",
+                        )}
+                      >
                         {item.name}
                       </span>
                       {item.code && (
-                        <span className="text-xs text-muted-foreground truncate">{item.code}</span>
+                        <span className="text-xs text-muted-foreground truncate">
+                          {item.code}
+                        </span>
                       )}
                     </div>
                   </Button>
@@ -213,7 +237,10 @@ export function PopoverMultiSelect({
                   disabled={isFetchingNextPage}
                 >
                   {isFetchingNextPage ? (
-                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Đang tải...</>
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      Đang tải...
+                    </>
                   ) : (
                     "Tải thêm kết quả..."
                   )}
@@ -222,14 +249,7 @@ export function PopoverMultiSelect({
             )}
           </div>
         </ScrollArea>
-        
-        {/* Footer Actions */}
-        <div className="shrink-0 p-4 border-t bg-muted/10 flex justify-end">
-          <Button onClick={() => setOpen(false)} className="px-6">
-            Xong
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }
