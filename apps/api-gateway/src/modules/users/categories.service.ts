@@ -117,7 +117,7 @@ export class CategoriesService implements OnModuleInit {
 
     const response = {
       success: true,
-      data: result?.categories?.map(toFrontendItem) || [],
+      data: result?.data?.map(toFrontendItem) || [],
       meta: { total: result?.total || 0 },
     };
     await this.redisService.set(cacheKey, JSON.stringify(response), 5 * 60); // 5 mins cache
