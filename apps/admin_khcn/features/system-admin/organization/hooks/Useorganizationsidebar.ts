@@ -55,6 +55,8 @@ export function useOrganizationSidebar() {
 
     const handleSelect = useCallback(
         (id: number) => {
+            const unit = flatUnits.find(u => u.id === id);
+            const routeCode = unit?.code || id;
             // Lấy tab segment cuối cùng trong URL để giữ lại khi chuyển đơn vị
             // Dùng pop() thay vì includes() để tránh false match với các segment khác
             const TABS = ["info", "scope", "staffing"] as const;
@@ -62,11 +64,9 @@ export function useOrganizationSidebar() {
             const activeTab = (TABS as readonly string[]).includes(lastSegment)
                 ? (lastSegment as typeof TABS[number])
                 : "info";
-            const searchStr = searchParams.toString();
-            const suffix = searchStr ? `?${searchStr}` : "";
-            router.push(`/services/admin/organization/${id}/${activeTab}${suffix}`);
+            router.push(`/services/admin/organization/${routeCode}/${activeTab}`);
         },
-        [router, pathname, searchParams]
+        [router, pathname, flatUnits]
     );
 
     const handleAddChild = useCallback(
