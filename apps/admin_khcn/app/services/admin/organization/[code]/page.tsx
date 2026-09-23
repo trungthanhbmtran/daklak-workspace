@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,13 +13,9 @@ import { OrganizationUnitEdit } from "@/features/system-admin/organization/compo
 import { UnitScopePanel } from "@/features/system-admin/organization/components/UnitScopePanel";
 import { OrganizationStaffing } from "@/features/system-admin/organization/components/OrganizationStaffing";
 
-interface PageProps {
-  params: Promise<{ code: string }>;
-}
-
-export default function OrganizationDetailPage({ params }: PageProps) {
-  const resolvedParams = use(params);
-  const rawCode = resolvedParams?.code;
+export default function OrganizationDetailPage() {
+  const params = useParams<{ code: string }>();
+  const rawCode = params?.code;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
   const { data: unitData, isPending, isFetching, isError, isPlaceholderData } = useOrganizationDetailQuery(code);
