@@ -55,23 +55,15 @@ export function OrganizationStaffing() {
   const { flatUnits } = state;
 
   /* 2. Staffing data */
-  const { report, jobTitles, isLoadingReport, isLoadingJobTitles, isError } =
+  const { report, partyReport, govReport, jobTitles, partyTitles, govTitles, isLoadingReport, isLoadingJobTitles, isError } =
     useStaffingData(unitId ?? null);
   const { setStaffing, setStaffingSlot, updateJobTitle } = useStaffingActions(
     unitId ?? null,
   );
 
-  /* 3. Domain list for unit (for SlotCard) */
-  const { items: allDomains } = useDomainSearch(unit?.domainIds ?? []);
-  const domainsForUnit = useMemo(() => {
-    if (!unit?.domainIds?.length) return [];
-    return unit.domainIds.map((id, index) => {
-      const found = allDomains.find((d: any) => d.id === id);
-      if (found) return found;
-      return { id, name: unit.domainNames?.[index] || `Lĩnh vực ${id}` };
-    });
-  }, [unit?.domainIds, unit?.domainNames, allDomains]);
-  const subordinateUnits = flatUnits.filter((u) => u.parentId === unitId);
+  /* 3. Domain list & subordinate units for unit */
+  const domainsForUnit = unit?.domains || [];
+  const subordinateUnits = unit?.subordinateUnits || [];
 
   /* 4. UI state */
   const [activeTab, setActiveTab] = useState<"CHINH_QUYEN" | "DANG">(
@@ -89,30 +81,7 @@ export function OrganizationStaffing() {
   );
   const [configDomainId, setConfigDomainId] = useState("__none__");
 
-  /* 5. Classify job titles */
-  const isParty = (j: JobTitleItem) =>
-    ["DANG", "PARTY"].includes(j.category?.toUpperCase() ?? "") ||
-    ["DANG", "PARTY"].includes(j.type?.toUpperCase() ?? "");
-
-  const { partyTitles, govTitles } = useMemo(() => {
-    const p: JobTitleItem[] = [];
-    const g: JobTitleItem[] = [];
-    jobTitles.forEach((j) => (isParty(j) ? p : g).push(j));
-    return { partyTitles: p, govTitles: g };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobTitles]);
-
-  const { partyReport, govReport } = useMemo(() => {
-    const p: StaffingReportItem[] = [];
-    const g: StaffingReportItem[] = [];
-    report.forEach((rep) => {
-      const jt = jobTitles.find((j) => j.id === rep.jobTitleId);
-      const party = jt ? isParty(jt) : false;
-      (party ? p : g).push(rep);
-    });
-    return { partyReport: p, govReport: g };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [report, jobTitles]);
+  // (Party/Gov classification is now handled by the backend)
 
   /* 6. Handlers */
   const handleSubmit = (e: React.FormEvent) => {

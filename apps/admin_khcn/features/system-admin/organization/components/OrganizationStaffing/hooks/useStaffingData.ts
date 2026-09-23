@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -26,12 +26,21 @@ export function useStaffingData(unitId: number | null) {
     gcTime: GC,
   });
 
-  const report: StaffingReportItem[] = Array.isArray(reportQuery.data) ? reportQuery.data : [];
-  const jobTitles = jobTitlesQuery.data?.data ?? [];
+  const report = reportQuery.data?.allReport ?? [];
+  const partyReport = reportQuery.data?.partyReport ?? [];
+  const govReport = reportQuery.data?.govReport ?? [];
+  
+  const jobTitles = jobTitlesQuery.data?.data?.allTitles ?? [];
+  const partyTitles = jobTitlesQuery.data?.data?.partyTitles ?? [];
+  const govTitles = jobTitlesQuery.data?.data?.govTitles ?? [];
 
   return {
     report,
+    partyReport,
+    govReport,
     jobTitles,
+    partyTitles,
+    govTitles,
     isLoadingReport: reportQuery.isPending || reportQuery.isFetching,
     isLoadingJobTitles: jobTitlesQuery.isPending || jobTitlesQuery.isFetching,
     isError: reportQuery.isError || jobTitlesQuery.isError,

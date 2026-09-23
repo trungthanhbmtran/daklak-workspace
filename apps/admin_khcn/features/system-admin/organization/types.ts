@@ -10,6 +10,8 @@ export interface OrganizationUnitNode {
   hierarchyPath?: string;
   domainIds?: number[];
   domainNames?: string[];
+  domains?: { id: number; name: string }[];
+  subordinateUnits?: OrganizationUnitNode[];
   scope?: string;
   children?: OrganizationUnitNode[];
 }

@@ -38,12 +38,18 @@ export class OrganizationsService implements OnModuleInit {
     if (!node) return null;
     const { children, typeCode, type_code, category_code, categoryCode, parent_id, parentId, domain_ids, domainIds, domain_names, domainNames, ...rest } = node;
     const rawParentId = parentId ?? parent_id;
+    const dIds = domainIds ?? domain_ids ?? [];
+    const dNames = domainNames ?? domain_names ?? [];
     return {
       ...rest,
       categoryCode: categoryCode ?? category_code ?? typeCode ?? type_code ?? undefined,
       parentId: rawParentId === 0 ? null : (rawParentId ?? null),
-      domainIds: domainIds ?? domain_ids ?? [],
-      domainNames: domainNames ?? domain_names ?? [],
+      domainIds: dIds,
+      domainNames: dNames,
+      domains: dIds.map((id: number, i: number) => ({
+        id,
+        name: dNames[i] || `Lĩnh vực ${id}`,
+      })),
       children: Array.isArray(children) ? children.map(c => this.mapToOrganizationNode(c)) : undefined,
     };
   }
@@ -180,7 +186,12 @@ export class OrganizationsService implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     })) as any;
-    return { success: true, data: res.data };
+    const data = res.data || [];
+    const isParty = (j: any) => ["DANG", "PARTY"].includes(j.category?.toUpperCase() ?? "") || ["DANG", "PARTY"].includes(j.type?.toUpperCase() ?? "");
+    const partyTitles = data.filter(isParty);
+    const govTitles = data.filter((j: any) => !isParty(j));
+
+    return { success: true, data: { partyTitles, govTitles, allTitles: data } };
   }
 
   async updateJobTitle(id: number, body: any) {
@@ -219,14 +230,27 @@ export class OrganizationsService implements OnModuleInit {
 
   async getDetail(identifier: string) {
     const isNumeric = /^\d+$/.test(identifier);
+    
+    const enrichWithSubordinates = async (mapped: any, id: number) => {
+      try {
+        const allOrgsRes: any = await firstValueFrom(this.orgGrpcService.GetOrganizations({ q: '' }));
+        mapped.subordinateUnits = (allOrgsRes.nodes || []).filter((n: any) => n.parentId === id || n.parent_id === id).map((n: any) => this.mapToOrganizationNode(n));
+      } catch (e) {
+        mapped.subordinateUnits = [];
+      }
+      return mapped;
+    };
+
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetOrganizationByCode({ code: identifier }));
-      return { success: true, data: this.mapToOrganizationNode(result) };
+      const mapped = await enrichWithSubordinates(this.mapToOrganizationNode(result), result.id);
+      return { success: true, data: mapped };
     } catch (err: any) {
       if (isNumeric && err?.code === 5) {
         try {
           const resultById = await firstValueFrom(this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }));
-          return { success: true, data: this.mapToOrganizationNode(resultById) };
+          const mapped = await enrichWithSubordinates(this.mapToOrganizationNode(resultById), resultById.id);
+          return { success: true, data: mapped };
         } catch (e2: any) {
           const message = e2?.details ?? e2?.message ?? 'Đơn vị không tồn tại';
           if (e2?.code === 5) throw new NotFoundException(message);
@@ -350,12 +374,30 @@ export class OrganizationsService implements OnModuleInit {
   }
 
   async getStaffingReport(id: number) {
-    const res = (await firstValueFrom(
-      this.orgGrpcService.GetStaffingReport({ unitId: id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
-    return { success: true, data: res.data };
+    try {
+      const res = (await firstValueFrom(
+        this.orgGrpcService.GetStaffingReport({ unitId: id }),
+      )) as any;
+      
+      const jtRes = await this.getJobTitles(id.toString()).catch(() => ({ data: { allTitles: [] } }));
+      const allTitles = jtRes.data?.allTitles || [];
+      const isParty = (j: any) => ["DANG", "PARTY"].includes(j.category?.toUpperCase() ?? "") || ["DANG", "PARTY"].includes(j.type?.toUpperCase() ?? "");
+      
+      const partyReport: any[] = [];
+      const govReport: any[] = [];
+      const reportData = res.data || [];
+      
+      reportData.forEach((rep: any) => {
+        const jt = allTitles.find((j: any) => j.id === (rep.jobTitleId || rep.job_title_id));
+        const party = jt ? isParty(jt) : false;
+        if (party) partyReport.push(rep);
+        else govReport.push(rep);
+      });
+      
+      return { success: true, data: { partyReport, govReport, allReport: reportData } };
+    } catch (err: any) {
+      throw new InternalServerErrorException(err.message || 'RPC Call Failed');
+    }
   }
 
   async setStaffingSlot(body: any) {

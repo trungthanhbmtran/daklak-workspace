@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
 import type {
   OrganizationUnitNode,
@@ -147,12 +147,18 @@ export const organizationApi = {
   updateScope: (id: number, payload: { domainIds?: number[] }) =>
     apiClient.put(`/organizations/${id}/scope`, payload).then(r => unwrapData<any>(r)),
 
-  getJobTitles: (unitId?: number): Promise<{ data: JobTitleItem[] }> =>
+  getJobTitles: (unitId?: number): Promise<{ data: { partyTitles: JobTitleItem[], govTitles: JobTitleItem[], allTitles: JobTitleItem[] } }> =>
     apiClient
       .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
       .then((r: any) => {
-        const data = unwrapData<any[]>(r);
-        return { data: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem) };
+        const data = unwrapData<any>(r);
+        return {
+          data: {
+            partyTitles: (Array.isArray(data.partyTitles) ? data.partyTitles : []).map(normalizeJobTitleItem),
+            govTitles: (Array.isArray(data.govTitles) ? data.govTitles : []).map(normalizeJobTitleItem),
+            allTitles: (Array.isArray(data.allTitles) ? data.allTitles : []).map(normalizeJobTitleItem),
+          }
+        };
       }),
 
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
@@ -161,12 +167,16 @@ export const organizationApi = {
   setStaffing: (payload: SetStaffingPayload) =>
     apiClient.post("/organizations/staffing", payload).then(r => unwrapData<any>(r)),
 
-  getStaffingReport: (unitId: number): Promise<StaffingReportItem[]> =>
+  getStaffingReport: (unitId: number): Promise<{ partyReport: StaffingReportItem[], govReport: StaffingReportItem[], allReport: StaffingReportItem[] }> =>
     apiClient
       .get(`/organizations/${unitId}/staffing-report`)
       .then((r: any) => {
-        const data = unwrapData<any[]>(r);
-        return (Array.isArray(data) ? data : []).map(normalizeStaffingReportItem);
+        const data = unwrapData<any>(r);
+        return {
+          partyReport: (Array.isArray(data.partyReport) ? data.partyReport : []).map(normalizeStaffingReportItem),
+          govReport: (Array.isArray(data.govReport) ? data.govReport : []).map(normalizeStaffingReportItem),
+          allReport: (Array.isArray(data.allReport) ? data.allReport : []).map(normalizeStaffingReportItem),
+        };
       }),
 
   setStaffingSlot: (payload: SetStaffingSlotPayload) =>

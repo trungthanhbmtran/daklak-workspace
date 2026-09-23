@@ -54,7 +54,7 @@ export function HrmLookupSection({ isOpen }: Props) {
 
   const jobTitleNameMap = useMemo(() => {
     const m = new Map<number, string>();
-    (jobTitlesRes?.data ?? []).forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
+    (jobTitlesRes?.data?.allTitles ?? []).forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
     return m;
   }, [jobTitlesRes]);
 

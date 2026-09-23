@@ -75,7 +75,7 @@ export function UnitTypeJobTemplateModal({ isOpen, onClose, category }: UnitType
   };
 
   const isLoading = isUnitTypesLoading || isJobTitlesLoading || isTemplatesLoading;
-  const allJobTitles = jobTitlesData?.data || [];
+  const allJobTitles = jobTitlesData?.data?.allTitles || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
