@@ -186,13 +186,13 @@ export function PopoverMultiSelect({
               displayItems.map((item) => {
                 const isSelected = selectedIds.includes(item.id);
                 return (
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
                     key={item.id}
                     onClick={() => toggleItem(item.id)}
                     className={cn(
-                      "w-full flex items-start gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                      isSelected ? "bg-primary/10" : "bg-transparent hover:bg-muted",
+                      "w-full flex items-start gap-3 px-3 py-2.5 rounded-md text-left transition-colors h-auto font-normal",
+                      isSelected ? "bg-primary/10 hover:bg-primary/20" : "hover:bg-muted",
                     )}
                   >
                     <div
@@ -217,12 +217,12 @@ export function PopoverMultiSelect({
                         {item.name}
                       </span>
                       {item.code && (
-                        <span className="text-xs text-muted-foreground truncate">
+                        <span className="text-xs text-muted-foreground truncate mt-0.5">
                           {item.code}
                         </span>
                       )}
                     </div>
-                  </button>
+                  </Button>
                 );
               })
             )}

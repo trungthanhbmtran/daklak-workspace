@@ -318,26 +318,26 @@ function ResultRow({
 }) {
   return (
     <Button
-      type="button"
+      variant="ghost"
       onClick={() => onToggle(item.id)}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors group border",
+        "w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-colors group border h-auto font-normal",
         checked ? "bg-primary/5 hover:bg-primary/10 border-primary/20" : "bg-background hover:bg-muted/60 border-transparent",
       )}
     >
       {checked
-        ? <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
-        : <Circle className="h-4 w-4 shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
+        ? <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+        : <Circle className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
       }
       <div className="flex-1 min-w-0">
         <span className={cn(
-          "text-sm leading-snug truncate block",
+          "text-sm leading-snug whitespace-normal break-words block",
           checked ? "font-medium text-primary" : "text-foreground",
         )}>
           {item.name}
         </span>
         {item.code && (
-          <span className="text-[11px] font-mono text-muted-foreground">{item.code}</span>
+          <span className="text-[11px] font-mono text-muted-foreground mt-0.5 block">{item.code}</span>
         )}
       </div>
     </Button>
