@@ -352,7 +352,7 @@ export function PopoverMultiSelect({
           role="listbox"
           aria-multiselectable="true"
           aria-label={title}
-          className="min-h-0 flex-1 max-h-[300px] overflow-y-auto overscroll-contain bg-background p-2 space-y-0.5 custom-scrollbar"
+          className="max-h-[300px] overflow-y-auto overscroll-contain bg-background p-2 space-y-0.5 custom-scrollbar"
         >
           {showInitialLoading ? (
             <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-3">
