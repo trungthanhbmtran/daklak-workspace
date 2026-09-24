@@ -171,7 +171,7 @@ export function PopoverMultiSelect({
         </div>
 
         {/* List Content */}
-        <ScrollArea className="flex-1 min-h-0 bg-background px-2">
+        <ScrollArea className="w-full h-[300px] bg-background px-2">
           <div className="p-2 space-y-0.5">
             {isLoading && displayItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-3">
