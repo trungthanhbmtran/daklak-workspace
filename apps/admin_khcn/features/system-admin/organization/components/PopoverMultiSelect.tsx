@@ -8,7 +8,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type PopoverMultiSelectProps = {
@@ -107,7 +106,7 @@ export function PopoverMultiSelect({
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[350px] sm:w-[400px] max-h-[400px] flex flex-col p-0 overflow-hidden border-primary/20 gap-0 bg-background shadow-lg"
+        className="w-[350px] sm:w-[500px] max-h-[500px] flex flex-col p-0 overflow-hidden border-primary/20 gap-0 bg-background shadow-lg"
         align="start"
         sideOffset={5}
       >
@@ -171,7 +170,7 @@ export function PopoverMultiSelect({
         </div>
 
         {/* List Content */}
-        <ScrollArea className="flex-1 min-h-0 bg-background px-2">
+        <div className="flex-1 min-h-0 overflow-y-auto bg-background px-2 custom-scrollbar">
           <div className="p-2 space-y-0.5">
             {isLoading && displayItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-3">
@@ -186,20 +185,21 @@ export function PopoverMultiSelect({
               displayItems.map((item) => {
                 const isSelected = selectedIds.includes(item.id);
                 return (
-                  <Button
+                  <button
+                    type="button"
                     key={item.id}
                     onClick={() => toggleItem(item.id)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                      isSelected ? "bg-primary/10" : "hover:bg-muted",
+                      "w-full flex items-start gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+                      isSelected ? "bg-primary/10" : "bg-transparent hover:bg-muted",
                     )}
                   >
                     <div
                       className={cn(
-                        "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border",
+                        "flex h-4 w-4 mt-0.5 shrink-0 items-center justify-center rounded-sm border",
                         isSelected
                           ? "bg-primary border-primary text-primary-foreground"
-                          : "border-input opacity-50",
+                          : "border-input opacity-50 bg-background",
                       )}
                     >
                       <Check
@@ -209,7 +209,7 @@ export function PopoverMultiSelect({
                     <div className="flex flex-col flex-1 min-w-0">
                       <span
                         className={cn(
-                          "text-sm font-medium truncate",
+                          "text-sm font-medium whitespace-normal break-words",
                           isSelected ? "text-primary" : "text-foreground",
                         )}
                       >
@@ -221,7 +221,7 @@ export function PopoverMultiSelect({
                         </span>
                       )}
                     </div>
-                  </Button>
+                  </button>
                 );
               })
             )}
@@ -248,7 +248,7 @@ export function PopoverMultiSelect({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </PopoverContent>
     </Popover>
   );
