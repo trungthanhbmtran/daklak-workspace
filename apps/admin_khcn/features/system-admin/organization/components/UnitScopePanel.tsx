@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useOrganizationScopeQuery, useOrganizationDetailQuery } from "../hooks/useOrganizationQueries";
@@ -266,7 +267,7 @@ function ScopePicker({
       </p>
 
       {/* Result list — server đã sort sẵn */}
-      <div className="flex-1 min-h-[240px] -mx-1 overflow-y-auto custom-scrollbar">
+      <ScrollArea className="flex-1 min-h-[240px] -mx-1">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
             <Icon className="h-8 w-8 opacity-25" />
@@ -302,7 +303,7 @@ function ScopePicker({
             </Button>
           </div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

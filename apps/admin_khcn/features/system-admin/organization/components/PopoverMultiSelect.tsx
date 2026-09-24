@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type PopoverMultiSelectProps = {
@@ -170,7 +171,7 @@ export function PopoverMultiSelect({
         </div>
 
         {/* List Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto bg-background px-2 custom-scrollbar">
+        <ScrollArea className="flex-1 min-h-0 bg-background px-2">
           <div className="p-2 space-y-0.5">
             {isLoading && displayItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-3">
@@ -248,7 +249,7 @@ export function PopoverMultiSelect({
               </div>
             )}
           </div>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   );
