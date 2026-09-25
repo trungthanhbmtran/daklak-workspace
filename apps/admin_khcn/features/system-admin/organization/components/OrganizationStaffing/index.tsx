@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 /**
@@ -106,7 +106,7 @@ export function OrganizationStaffing() {
 
   const openConfig = (j: JobTitleItem) => {
     setConfigJobTitle(j);
-    setConfigDomainId(j.domainId ? String(j.domainId) : "__none__");
+    setConfigDomainId(j.domain?.id ? String(j.domain?.id) : "__none__");
     setConfigOpen(true);
   };
 
@@ -175,10 +175,10 @@ export function OrganizationStaffing() {
                     <SelectItem key={j.id} value={String(j.id)}>
                       <span>
                         {j.name} ({j.code})
-                        {(j.domainName || j.geographicAreaName) && (
+                        {(j.domain?.name || j.geographicArea?.name) && (
                           <span className="text-muted-foreground text-xs ml-1">
                             —{" "}
-                            {[j.domainName, j.geographicAreaName]
+                            {[j.domain?.name, j.geographicArea?.name]
                               .filter(Boolean)
                               .join(", ")}
                           </span>
@@ -236,7 +236,7 @@ export function OrganizationStaffing() {
                 <StaffingTable
                   report={paged}
                   domainsForUnit={domainsForUnit}
-                  unitDomainIds={unit?.domainIds ?? []}
+                  unitDomainIds={unit?.domains?.map(d => d.id) ?? []}
                   subordinateUnits={subordinateUnits}
                   onSaveSlot={(p) => setStaffingSlot.mutate(p)}
                   isSavingSlot={setStaffingSlot.isPending}
@@ -296,9 +296,9 @@ export function OrganizationStaffing() {
                   onClick={() => openConfig(j)}
                 >
                   {j.name}
-                  {(j.domainName ||
-                    j.geographicAreaName ||
-                    (j.monitoredUnitNames?.length ?? 0) > 0) && (
+                  {(j.domain?.name ||
+                    j.geographicArea?.name ||
+                    (j.monitoredUnits?.length ?? 0) > 0) && (
                     <span className="ml-1.5 text-muted-foreground">•</span>
                   )}
                 </Button>

@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+﻿import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { OrganizationsService } from './organizations.service';
@@ -9,7 +9,7 @@ export class OrganizationsController {
 
   private getCatName(cat: any): string {
     if (!cat) return '';
-    return cat.translations?.[0]?.name ?? '';
+    return cat.name ?? cat.translations?.[0]?.name ?? '';
   }
 
   private getDomains(unit: any): { id: number; name: string }[] {
@@ -124,10 +124,8 @@ export class OrganizationsController {
         message: 'Đơn vị không tồn tại',
       });
     }
-    const { domainIds, domainNames } = this.domainIdsAndNames(unit);
-    return {
-      domainIds,
-      domainNames,
+      return {
+        domains: this.getDomains(unit),
       scope: (unit as any).scope ?? '',
     };
   }

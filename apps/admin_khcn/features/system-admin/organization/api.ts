@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
 import type {
   OrganizationUnitNode,
@@ -166,9 +166,9 @@ export const organizationApi = {
       .then((r: any) => {
         const data = unwrapData<any>(r);
         return {
-          partyReport: (Array.isArray(data.partyReport) ? data.partyReport : []).map(normalizeStaffingReportItem),
-          govReport: (Array.isArray(data.govReport) ? data.govReport : []).map(normalizeStaffingReportItem),
-          allReport: (Array.isArray(data.allReport) ? data.allReport : []).map(normalizeStaffingReportItem),
+          partyReport: Array.isArray(data.partyReport) ? data.partyReport : [],
+          govReport: Array.isArray(data.govReport) ? data.govReport : [],
+          allReport: Array.isArray(data.allReport) ? data.allReport : [],
         };
       }),
 

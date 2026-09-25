@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   Inject,
   OnModuleInit,
@@ -365,6 +365,32 @@ export class OrganizationsService implements OnModuleInit {
     return { success: true, data: result };
   }
 
+  private mapStaffingReportItem(rep: any): any {
+    return {
+      id: rep.id,
+      unitId: rep.unitId ?? rep.unit_id,
+      jobTitleId: rep.jobTitleId ?? rep.job_title_id,
+      jobTitleName: rep.jobTitleName ?? rep.job_title_name ?? '',
+      quantity: rep.quantity ?? 0,
+      currentCount: rep.currentCount ?? rep.current_count ?? 0,
+      currentEmployeeNames: rep.currentEmployeeNames ?? rep.current_employee_names ?? [],
+      jobTitleDomainName: rep.jobTitleDomainName ?? rep.job_title_domain_name ?? '',
+      jobTitleMonitoredUnitNames: rep.jobTitleMonitoredUnitNames ?? rep.job_title_monitored_unit_names ?? [],
+      jobTitleGeographicAreaName: rep.jobTitleGeographicAreaName ?? rep.job_title_geographic_area_name ?? '',
+      slots: (rep.slots ?? []).map((s: any) => ({
+        id: s.id,
+        staffingId: s.staffingId ?? s.staffing_id,
+        slotOrder: s.slotOrder ?? s.slot_order,
+        description: s.description ?? '',
+        domains: s.domains ?? [],
+        geographicAreas: s.geographicAreas ?? s.geographic_areas ?? [],
+        monitoredUnits: s.monitoredUnits ?? s.monitored_units ?? [],
+        assignedEmployeeName: s.assignedEmployeeName ?? s.assigned_employee_name ?? '',
+        assignedEmployeeCode: s.assignedEmployeeCode ?? s.assigned_employee_code ?? ''
+      }))
+    };
+  }
+
   async getStaffingReport(id: number) {
     try {
       const res = (await firstValueFrom(
@@ -377,7 +403,7 @@ export class OrganizationsService implements OnModuleInit {
       
       const partyReport: any[] = [];
       const govReport: any[] = [];
-      const reportData = res.data || [];
+      const reportData = (res.data || []).map((r: any) => this.mapStaffingReportItem(r));
       
       reportData.forEach((rep: any) => {
         const jt = allTitles.find((j: any) => j.id === (rep.jobTitleId || rep.job_title_id));

@@ -146,7 +146,6 @@ export function UnitScopePanel() {
             ) : (
               <ScopePicker
                 items={domains.items}
-                selectedIds={domainIds}
                 isFetching={domains.isFetching}
                 q={domains.q}
                 onSearch={domains.setQ}
@@ -166,11 +165,10 @@ export function UnitScopePanel() {
 
 /* ─── ScopePicker ─────────────────────────────────────── */
 function ScopePicker({
-  items, selectedIds, isFetching, q, onSearch, onToggle, onRemoveAll,
+  items, isFetching, q, onSearch, onToggle, onRemoveAll,
   hasNextPage, fetchNextPage, isFetchingNextPage
 }: {
   items: CatalogServerItem[];   // đã được server sort: selected first
-  selectedIds: number[];
   isFetching: boolean;
   q: string;
   onSearch: (v: string) => void;
@@ -183,15 +181,8 @@ function ScopePicker({
   const Icon = Briefcase;
   const placeholder = "Tìm lĩnh vực chuyên môn...";
 
-  // Xử lý selected ở client để UI phản hồi tức thì (instant feedback)
-  // không cần đợi API trả về kết quả mới
-  const displayItems = items.map(item => ({
-    ...item,
-    selected: selectedIds.includes(item.id)
-  }));
-
-  const selectedItems = displayItems.filter(i => i.selected);
-  const isEmpty = displayItems.length === 0 && !isFetching;
+  const selectedItems = items.filter(i => i.selected);
+  const isEmpty = items.length === 0 && !isFetching;
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -262,7 +253,7 @@ function ScopePicker({
           ? "Đang tìm kiếm..."
           : isEmpty
             ? q ? `Không có kết quả cho "${q}"` : `Nhập từ khóa để tìm lĩnh vực`
-            : `${displayItems.length} kết quả${displayItems.length >= 50 ? " — nhập thêm từ khóa để thu hẹp" : ""}`
+            : `${items.length} kết quả${items.length >= 50 ? " — nhập thêm từ khóa để thu hẹp" : ""}`
         }
       </p>
 
@@ -275,7 +266,7 @@ function ScopePicker({
           </div>
         ) : (
           <div className="px-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 pb-4">
-            {displayItems.map((item) => (
+            {items.map((item) => (
               <ResultRow
                 key={item.id}
                 item={item}
