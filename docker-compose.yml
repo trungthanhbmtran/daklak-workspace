@@ -31,7 +31,7 @@ services:
       - "15672:15672"
 
   minio:
-    image: minio/minio
+    image: elestio/minio:latest
     container_name: minio
     command: server /data
     environment:
