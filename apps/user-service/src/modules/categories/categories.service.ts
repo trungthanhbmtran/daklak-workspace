@@ -4,7 +4,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
   async getAll(lang?: string) {
@@ -27,7 +27,7 @@ export class CategoriesService {
           code: item.code,
           order: item.order,
           isActive: item.isActive,
-          name: trans?.name || '',
+          name: trans?.name ?? '',
           description: trans?.description || '',
         };
       }),
@@ -64,14 +64,14 @@ export class CategoriesService {
     // 1. Luôn fetch selected items (dù không khớp search) để đảm bảo chúng xuất hiện
     const selectedItems = hasSelected
       ? await this.prisma.category.findMany({
-          where: { 
-            groupCode: group, 
-            id: { in: selectedIds },
-            ...(restrictIds ? { id: { in: restrictIds.filter(id => selectedIds.includes(id)) } } : {}),
-          },
-          include: { translations: { where: { langCode: targetLang } } },
-          orderBy: { order: 'asc' },
-        })
+        where: {
+          groupCode: group,
+          id: { in: selectedIds },
+          ...(restrictIds ? { id: { in: restrictIds.filter(id => selectedIds.includes(id)) } } : {}),
+        },
+        include: { translations: { where: { langCode: targetLang } } },
+        orderBy: { order: 'asc' },
+      })
       : [];
 
     // 2. Fetch search results (loại trừ các ID đã có trong selected)
@@ -83,13 +83,13 @@ export class CategoriesService {
       ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
       ...(search?.trim()
         ? {
-            translations: {
-              some: {
-                langCode: targetLang,
-                name: { contains: search.trim() },
-              },
+          translations: {
+            some: {
+              langCode: targetLang,
+              name: { contains: search.trim() },
             },
-          }
+          },
+        }
         : {}),
     };
 
@@ -117,7 +117,7 @@ export class CategoriesService {
         isSystem: item.isSystem,
         isActive: item.isActive,
         createdAt: item.createdAt,
-        name: trans?.name || '',
+        name: trans?.name ?? '',
         description: trans?.description || '',
         selected,
       };
@@ -232,7 +232,7 @@ export class CategoriesService {
       code: created.code,
       order: created.order,
       isActive: created.isActive,
-      name: trans?.name || '',
+      name: trans?.name ?? '',
       description: trans?.description || '',
     };
   }
@@ -305,7 +305,7 @@ export class CategoriesService {
       code: updatedCategory.code,
       order: updatedCategory.order,
       isActive: updatedCategory.isActive,
-      name: trans?.name || '',
+      name: trans?.name ?? '',
       description: trans?.description || '',
     };
   }
