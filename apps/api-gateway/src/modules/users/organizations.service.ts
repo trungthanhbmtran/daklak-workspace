@@ -36,20 +36,13 @@ export class OrganizationsService implements OnModuleInit {
 
   private mapToOrganizationNode(node: any): any {
     if (!node) return null;
-    const { children, typeCode, type_code, category_code, categoryCode, parent_id, parentId, domain_ids, domainIds, domain_names, domainNames, ...rest } = node;
+    const { children, typeCode, type_code, category_code, categoryCode, parent_id, parentId, domains, ...rest } = node;
     const rawParentId = parentId ?? parent_id;
-    const dIds = domainIds ?? domain_ids ?? [];
-    const dNames = domainNames ?? domain_names ?? [];
     return {
       ...rest,
       categoryCode: categoryCode ?? category_code ?? typeCode ?? type_code ?? undefined,
       parentId: rawParentId === 0 ? null : (rawParentId ?? null),
-      domainIds: dIds,
-      domainNames: dNames,
-      domains: dIds.map((id: number, i: number) => ({
-        id,
-        name: dNames[i] || `Lĩnh vực ${id}`,
-      })),
+      domains: domains ?? [],
       children: Array.isArray(children) ? children.map(c => this.mapToOrganizationNode(c)) : undefined,
     };
   }
@@ -270,8 +263,7 @@ export class OrganizationsService implements OnModuleInit {
       return { 
         success: true, 
         ...data,
-        domainIds: data.domainIds ?? [],
-        domainNames: data.domainNames ?? [],
+        domains: data.domains ?? [],
         scope: data.scope ?? ''
       };
     } catch (err: any) {

@@ -8,8 +8,6 @@ export interface OrganizationUnitNode {
   categoryCode?: string;
   parentId: number | null;
   hierarchyPath?: string;
-  domainIds?: number[];
-  domainNames?: string[];
   domains?: { id: number; name: string }[];
   subordinateUnits?: OrganizationUnitNode[];
   scope?: string;
@@ -43,12 +41,9 @@ export interface JobTitleItem {
   id: number;
   code: string;
   name: string;
-  domainId?: number;
-  domainName?: string;
-  monitoredUnitIds?: number[];
-  monitoredUnitNames?: string[];
-  geographicAreaId?: number;
-  geographicAreaName?: string;
+  domain?: { id: number; name: string };
+  monitoredUnits?: { id: number; name: string }[];
+  geographicArea?: { id: number; name: string };
   category?: string;
   rank?: number;
   type?: string;
@@ -60,12 +55,9 @@ export interface StaffingSlotItem {
   staffingId: number;
   slotOrder: number;
   description?: string;
-  geographicAreaIds?: number[];
-  geographicAreaNames?: string[];
-  domainIds?: number[];
-  domainNames?: string[];
-  monitoredUnitIds?: number[];
-  monitoredUnitNames?: string[];
+  geographicAreas?: { id: number; name: string }[];
+  domains?: { id: number; name: string }[];
+  monitoredUnits?: { id: number; name: string }[];
   assignedEmployeeName?: string;
   assignedEmployeeCode?: string;
 }

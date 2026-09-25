@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Network, Save, Loader2, MapPin, Users } from "lucide-react";
@@ -20,16 +20,16 @@ type Props = {
 };
 
 export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, unitDomainIds, subordinateUnits, onSave, isSaving }: Props) {
-  const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
-  const [geoAreaIds, setGeoAreaIds] = useState<number[]>(existingSlot?.geographicAreaIds ?? []);
-  const [unitIds, setUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
+  const [domainIds, setDomainIds] = useState<number[]>((existingSlot?.domains ?? []).map(x => x.id));
+  const [geoAreaIds, setGeoAreaIds] = useState<number[]>((existingSlot?.geographicAreas ?? []).map(x => x.id));
+  const [unitIds, setUnitIds] = useState<number[]>((existingSlot?.monitoredUnits ?? []).map(x => x.id));
 
   const { items: geoAreas, isFetching: loadingGeo, q: geoQ, setQ: setGeoQ, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geoAreaIds);
 
   useEffect(() => {
-    setDomainIds(existingSlot?.domainIds ?? []);
-    setGeoAreaIds(existingSlot?.geographicAreaIds ?? []);
-    setUnitIds(existingSlot?.monitoredUnitIds ?? []);
+    setDomainIds((existingSlot?.domains ?? []).map(x => x.id));
+    setGeoAreaIds((existingSlot?.geographicAreas ?? []).map(x => x.id));
+    setUnitIds((existingSlot?.monitoredUnits ?? []).map(x => x.id));
   }, [existingSlot]);
 
   return (

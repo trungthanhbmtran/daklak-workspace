@@ -56,7 +56,7 @@ export function OrganizationUnitEdit() {
         name: unit.name ?? "",
         shortName: unit.shortName ?? "",
         categoryCode: unit.categoryCode ?? "",
-        domainIds: unit.domainIds ?? [],
+        domainIds: (unit.domains ?? []).map((d: any) => d.id),
         scope: unit.scope ?? "",
       });
     }

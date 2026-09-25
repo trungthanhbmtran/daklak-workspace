@@ -55,6 +55,10 @@ message UpdateJobTitleRequest {
   repeated int32 monitored_unit_ids = 4;  // Theo dõi phòng ban
 }
 
+message IdName {
+  int32 id = 1;
+  string name = 2;
+}
 
 message CreateUnitRequest {
   string code = 1;
@@ -76,10 +80,9 @@ message UnitResponse {
   int32 parent_id = 6;
   string hierarchy_path = 7;
   string type_name = 8;
-  repeated int32 domain_ids = 9;
-  repeated string domain_names = 10;
-  string scope = 11;
-  string type_code = 12;
+  repeated IdName domains = 9;
+  string scope = 10;
+  string type_code = 11;
 }
 
 message GetOneRequest {
@@ -95,9 +98,8 @@ message GetUnitScopeRequest {
 }
 
 message GetUnitScopeResponse {
-  repeated int32 domain_ids = 1;
-  repeated string domain_names = 2;
-  string scope = 3;
+  repeated IdName domains = 1;
+  string scope = 2;
 }
 
 message UpdateUnitRequest {
@@ -135,12 +137,11 @@ message OrganizationUnitNode {
   string hierarchy_path = 7;
   string type_name = 8;
   repeated OrganizationUnitNode children = 9;
-  repeated int32 domain_ids = 10;
-  repeated string domain_names = 11;
-  string scope = 12;
-  bool is_leaf = 13;   // true nếu không có đơn vị con (thành phần thấp nhất)
-  int32 depth = 14;    // Độ sâu trong cây (root = 0)
-  string type_code = 15;
+  repeated IdName domains = 10;
+  string scope = 11;
+  bool is_leaf = 12;   // true nếu không có đơn vị con (thành phần thấp nhất)
+  int32 depth = 13;    // Độ sâu trong cây (root = 0)
+  string type_code = 14;
 }
 
 message OrganizationTreeResponse {
@@ -179,7 +180,7 @@ message StaffingReportItem {
   string job_title_name = 4;
   int32 quantity = 5;
   int32 current_count = 6;
-  // Thông tin chức danh (mặc định chung)
+  // Thông vị chức danh (mặc định chung)
   string job_title_domain_name = 7;
   repeated string job_title_monitored_unit_names = 8;
   string job_title_geographic_area_name = 9;
@@ -193,23 +194,21 @@ message StaffingSlotItem {
   int32 staffing_id = 2;
   int32 slot_order = 3;
   string description = 4;                    // Nhiệm vụ được giao
-  int32 geographic_area_id = 5;              // deprecated: dùng geographic_area_ids
-  string geographic_area_name = 6;           // deprecated
-  repeated int32 domain_ids = 7;
-  repeated string domain_names = 8;
-  repeated int32 monitored_unit_ids = 9;
-  repeated string monitored_unit_names = 10;
-  repeated int32 geographic_area_ids = 11;   // Nhiều khu vực địa lý
-  repeated string geographic_area_names = 12;
-  string assigned_employee_name = 13;
-  string assigned_employee_code = 14;
+  // deprecated fields removed
+  // int32 geographic_area_id = 5;
+  // string geographic_area_name = 6;
+  repeated IdName domains = 7;
+  repeated IdName monitored_units = 8;
+  repeated IdName geographic_areas = 9;
+  string assigned_employee_name = 10;
+  string assigned_employee_code = 11;
 }
 
 message SetStaffingSlotRequest {
   int32 staffing_id = 1;
   int32 slot_order = 2;                      // 1, 2, 3... (Phó thứ nhất, hai, ba)
   string description = 3;
-  int32 geographic_area_id = 4;              // deprecated: dùng geographic_area_ids
+  int32 geographic_area_id = 4;              // deprecated
   repeated int32 domain_ids = 5;
   repeated int32 monitored_unit_ids = 6;
   repeated int32 geographic_area_ids = 7;    // Nhiều khu vực địa lý
@@ -224,17 +223,14 @@ message JobTitleItem {
   string code = 2;
   string name = 3;
   // Lĩnh vực phụ trách (domain)
-  int32 domain_id = 4;
-  string domain_name = 5;
+  IdName domain = 4;
   // Theo dõi phòng ban: danh sách đơn vị
-  repeated int32 monitored_unit_ids = 6;
-  repeated string monitored_unit_names = 7;
+  repeated IdName monitored_units = 6;
   // Khu vực địa lý phụ trách
-  int32 geographic_area_id = 8;
-  string geographic_area_name = 9;
-  string category = 10;
-  int32 rank = 11;
-  string type = 12;
+  IdName geographic_area = 7;
+  string category = 9;
+  int32 rank = 10;
+  string type = 11;
 }
 
 message UnitTypeItem {

@@ -26,8 +26,8 @@ function normalizeUnitNode(n: any): OrganizationUnitNode {
     categoryCode: n.categoryCode ?? n.category_code ?? n.typeCode ?? n.type_code ?? undefined,
     parentId: rawParentId === 0 ? null : rawParentId,
     hierarchyPath: n.hierarchyPath ?? n.hierarchy_path,
-    domainIds: n.domainIds ?? n.domain_ids ?? [],
-    domainNames: n.domainNames ?? n.domain_names ?? [],
+    domains: n.domains ?? [],
+    subordinateUnits: Array.isArray(n.subordinateUnits || n.subordinate_units) ? (n.subordinateUnits || n.subordinate_units).map(normalizeUnitNode) : undefined,
     scope: n.scope,
     children: Array.isArray(n.children) ? n.children.map(normalizeUnitNode) : undefined,
   };
@@ -38,12 +38,9 @@ function normalizeJobTitleItem(j: any): JobTitleItem {
     id: j.id,
     code: j.code ?? "",
     name: j.name ?? "",
-    domainId: j.domainId ?? j.domain_id,
-    domainName: j.domainName ?? j.domain_name,
-    monitoredUnitIds: j.monitoredUnitIds ?? j.monitored_unit_ids ?? [],
-    monitoredUnitNames: j.monitoredUnitNames ?? j.monitored_unit_names ?? [],
-    geographicAreaId: j.geographicAreaId ?? j.geographic_area_id,
-    geographicAreaName: j.geographicAreaName ?? j.geographic_area_name,
+    domain: j.domain,
+    monitoredUnits: j.monitoredUnits ?? j.monitored_units ?? [],
+    geographicArea: j.geographicArea ?? j.geographic_area,
     category: j.category,
     rank: j.rank,
     type: j.type,
@@ -56,12 +53,9 @@ function normalizeStaffingSlotItem(s: any): StaffingSlotItem {
     staffingId: s.staffingId ?? s.staffing_id,
     slotOrder: s.slotOrder ?? s.slot_order,
     description: s.description,
-    geographicAreaIds: s.geographicAreaIds ?? s.geographic_area_ids ?? [],
-    geographicAreaNames: s.geographicAreaNames ?? s.geographic_area_names ?? [],
-    domainIds: s.domainIds ?? s.domain_ids ?? [],
-    domainNames: s.domainNames ?? s.domain_names ?? [],
-    monitoredUnitIds: s.monitoredUnitIds ?? s.monitored_unit_ids ?? [],
-    monitoredUnitNames: s.monitoredUnitNames ?? s.monitored_unit_names ?? [],
+    geographicAreas: s.geographicAreas ?? s.geographic_areas ?? [],
+    domains: s.domains ?? [],
+    monitoredUnits: s.monitoredUnits ?? s.monitored_units ?? [],
     assignedEmployeeName: s.assignedEmployeeName ?? s.assigned_employee_name,
     assignedEmployeeCode: s.assignedEmployeeCode ?? s.assigned_employee_code,
   };
@@ -99,11 +93,10 @@ export const organizationApi = {
       data: normalizeUnitNode(unwrapData<any>(r)),
     })),
 
-  getScope: (id: number): Promise<{ data: { domainIds: number[], domainNames: string[], scope: string } }> =>
+  getScope: (id: number): Promise<{ data: { domains: { id: number; name: string }[], scope: string } }> =>
     apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
       data: {
-        domainIds: r.data?.domainIds ?? r.data?.domain_ids,
-        domainNames: r.data?.domainNames ?? r.data?.domain_names,
+        domains: r.data?.domains ?? [],
         scope: r.data?.scope,
       }
     })),

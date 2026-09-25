@@ -12,17 +12,14 @@ export class OrganizationsController {
     return cat.translations?.[0]?.name ?? '';
   }
 
-  private domainIdsAndNames(unit: any): {
-    domainIds: number[];
-    domainNames: string[];
-  } {
+  private getDomains(unit: any): { id: number; name: string }[] {
     const ud = unit.unitDomains ?? [];
-    return {
-      domainIds: ud.map((d: any) => d.domainId ?? d.domain?.id).filter(Boolean),
-      domainNames: ud
-        .map((d: any) => this.getCatName(d.domain))
-        .filter(Boolean),
-    };
+    return ud
+      .map((d: any) => ({
+        id: d.domainId ?? d.domain?.id,
+        name: this.getCatName(d.domain),
+      }))
+      .filter((d: any) => d.id);
   }
 
   private mapUnitNode(node: any, depth = 0): any {
@@ -37,6 +34,8 @@ export class OrganizationsController {
       hierarchyPath: node.hierarchyPath ?? '',
       typeName: node.type?.name ?? '',
       typeCode: node.type?.code ?? '',
+      domains: this.getDomains(node),
+      scope: node.scope ?? '',
       isLeaf: !hasChildren,
       depth,
       children: hasChildren
@@ -56,6 +55,8 @@ export class OrganizationsController {
       hierarchyPath: unit.hierarchyPath ?? '',
       typeName: unit.type?.name ?? '',
       typeCode: unit.type?.code ?? '',
+      domains: this.getDomains(unit),
+      scope: unit.scope ?? '',
     };
   }
 
@@ -304,22 +305,15 @@ export class OrganizationsController {
             staffingId: slot.staffingId,
             slotOrder: slot.slotOrder,
             description: slot.description ?? '',
-            domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-            domainNames: (slot.domains ?? []).map((d: any) =>
-              this.getCatName(d.domain),
-            ),
-            geographicAreaIds: (slot.geographicAreas ?? []).map(
-              (ga: any) => ga.geographicAreaId,
-            ),
-            geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) =>
-              this.getCatName(ga.geographicArea),
-            ),
-            monitoredUnitIds: (slot.monitoredUnits ?? []).map(
-              (mu: any) => mu.unitId,
-            ),
-            monitoredUnitNames: (slot.monitoredUnits ?? []).map(
-              (mu: any) => mu.unit?.name ?? mu.unit?.code ?? '',
-            ),
+            domains: (slot.domains ?? [])
+              .map((d: any) => ({ id: d.domainId, name: this.getCatName(d.domain) }))
+              .filter((x: any) => x.id),
+            geographicAreas: (slot.geographicAreas ?? [])
+              .map((ga: any) => ({ id: ga.geographicAreaId, name: this.getCatName(ga.geographicArea) }))
+              .filter((x: any) => x.id),
+            monitoredUnits: (slot.monitoredUnits ?? [])
+              .map((mu: any) => ({ id: mu.unitId, name: mu.unit?.name ?? mu.unit?.code ?? '' }))
+              .filter((x: any) => x.id),
             assignedEmployeeName: slot.assignedEmployeeName ?? '',
             assignedEmployeeCode: slot.assignedEmployeeCode ?? '',
           })),
@@ -375,11 +369,15 @@ export class OrganizationsController {
       staffingId: slot.staffingId,
       slotOrder: slot.slotOrder,
       description: slot.description ?? '',
-      domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-      geographicAreaIds: (slot.geographicAreas ?? []).map(
-        (ga: any) => ga.geographicAreaId,
-      ),
-      monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
+      domains: (slot.domains ?? [])
+        .map((d: any) => ({ id: d.domainId, name: this.getCatName(d.domain) }))
+        .filter((x: any) => x.id),
+      geographicAreas: (slot.geographicAreas ?? [])
+        .map((ga: any) => ({ id: ga.geographicAreaId, name: this.getCatName(ga.geographicArea) }))
+        .filter((x: any) => x.id),
+      monitoredUnits: (slot.monitoredUnits ?? [])
+        .map((mu: any) => ({ id: mu.unitId, name: mu.unit?.name ?? mu.unit?.code ?? '' }))
+        .filter((x: any) => x.id),
     };
   }
 
@@ -435,6 +433,8 @@ export class OrganizationsController {
       id: j.id,
       code: j.code,
       name: j.name,
+      domain: j.domain ? { id: j.domainId ?? j.domain.id, name: this.getCatName(j.domain) } : undefined,
+      geographicArea: j.geographicArea ? { id: j.geographicAreaId ?? j.geographicArea.id, name: this.getCatName(j.geographicArea) } : undefined,
       category: j.category ?? '',
       rank: j.rank ?? 0,
       type: j.type ?? '',

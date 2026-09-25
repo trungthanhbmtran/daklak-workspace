@@ -48,7 +48,7 @@ export function UnitScopePanel() {
 
   useEffect(() => {
     if (scopeData !== undefined) {
-      setDomainIds(scopeData?.domainIds ?? []);
+      setDomainIds((scopeData?.domains ?? []).map((d: any) => d.id));
       setDirty(false);
     }
   }, [scopeData]);
@@ -69,7 +69,7 @@ export function UnitScopePanel() {
   const handleDomainToggle = (id: number) => { setDomainIds(p => toggle(p, id)); setDirty(true); };
 
   const handleReset = () => {
-    setDomainIds(scopeData?.domainIds ?? []);
+    setDomainIds((scopeData?.domains ?? []).map((d: any) => d.id));
     setDirty(false);
   };
 
