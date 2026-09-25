@@ -5,17 +5,50 @@ import { buildTree } from '@/common/utils/tree.util';
 
 const GRPC = { NOT_FOUND: 5 } as const;
 
+// Include dùng chung cho OrganizationUnit — tránh lặp lại object include ở nhiều nơi
+// (giảm rủi ro gõ sai / lệch nhau giữa các method, và dễ sửa 1 chỗ khi đổi field).
+const UNIT_FULL_INCLUDE = {
+  type: true,
+  unitDomains: {
+    include: {
+      domain: {
+        include: {
+          translations: { where: { langCode: 'vi' } },
+        },
+      },
+    },
+  },
+} as const;
+
 @Injectable()
 export class OrganizationsService {
   private treeCache = new Map<string, { data: any; expiresAt: number }>();
-  private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
+  private readonly CACHE_TTL_MS = 3600 * 1000; // 1 giờ
 
   constructor(private prisma: PrismaService) { }
+
+  // ----------------- Helper cache (gộp logic get/set/invalidate lặp lại) -----------------
+  private getCache<T = any>(key: string): T | undefined {
+    const cached = this.treeCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.data as T;
+    if (cached) this.treeCache.delete(key); // dọn entry hết hạn thay vì để rác trong Map
+    return undefined;
+  }
+
+  private setCache(key: string, data: any) {
+    this.treeCache.set(key, { data, expiresAt: Date.now() + this.CACHE_TTL_MS });
+  }
+
+  private invalidateCache() {
+    // Mọi thay đổi cấu trúc cây đều có thể ảnh hưởng full tree + nhiều sub-tree,
+    // nên clear toàn bộ vẫn là lựa chọn an toàn nhất với materialized path.
+    this.treeCache.clear();
+  }
 
   // --- 1. QUẢN LÝ ĐƠN VỊ (CRUD) ---
 
   async createUnit(data: any) {
-    const domainIds = Array.isArray(data.domainIds)
+    const domainIds: number[] = Array.isArray(data.domainIds)
       ? data.domainIds
       : data.domainId != null
         ? [data.domainId]
@@ -26,102 +59,72 @@ export class OrganizationsService {
       const unitType = await this.prisma.unitType.findUnique({
         where: { code: data.typeCode },
       });
-      if (unitType) {
-        resolvedTypeId = unitType.id;
-      } else {
+      if (!unitType) {
         throw new RpcException({ message: 'Mã loại tổ chức không hợp lệ', code: GRPC.NOT_FOUND });
       }
+      resolvedTypeId = unitType.id;
     }
 
-    // Bước 1: Tạo đơn vị (Path tạm để trống)
-    const unit = await this.prisma.organizationUnit.create({
-      data: {
-        code: data.code,
-        name: data.name,
-        shortName: data.shortName ?? null,
-        typeId: resolvedTypeId,
-        parentId: data.parentId || null,
-        hierarchyPath: '', // Placeholder
-      },
-    });
-
-    // Bước 2 & 3: Dùng chính code làm hierarchyPath (mã liên thông đã mã hóa phân cấp)
-    // VD: H15.07.04.02 → tự nó là materialized path theo chấm (dot notation)
-    await this.prisma.organizationUnit.update({
-      where: { id: unit.id },
-      data: { hierarchyPath: data.code },
-    });
-    if (domainIds.length > 0) {
-      await this.prisma.unitDomain.createMany({
-        data: domainIds
-          .filter((id: number) => id > 0)
-          .map((domainId: number) => ({ unitId: unit.id, domainId })),
-        skipDuplicates: true,
+    // hierarchyPath luôn = code ngay từ đầu (VD: H15.07.04.02), nên tạo unit
+    // và gán unitDomains trong 1 transaction thay vì create → update → createMany rời rạc.
+    const unit = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.organizationUnit.create({
+        data: {
+          code: data.code,
+          name: data.name,
+          shortName: data.shortName ?? null,
+          typeId: resolvedTypeId,
+          parentId: data.parentId || null,
+          hierarchyPath: data.code,
+        },
       });
-    }
 
-    // Invalidate cache
-    this.treeCache.clear();
+      const validDomainIds = domainIds.filter((id) => id > 0);
+      if (validDomainIds.length > 0) {
+        await tx.unitDomain.createMany({
+          data: validDomainIds.map((domainId) => ({ unitId: created.id, domainId })),
+          skipDuplicates: true,
+        });
+      }
+
+      return created;
+    });
+
+    this.invalidateCache();
 
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
-      include: {
-        type: true,
-        unitDomains: {
-          include: {
-            domain: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
-      },
+      include: UNIT_FULL_INCLUDE,
     });
   }
 
   async getById(id: number) {
-    const unit = await this.prisma.organizationUnit.findUnique({
+    return this.prisma.organizationUnit.findUnique({
       where: { id },
-      include: {
-        type: true,
-      },
+      include: UNIT_FULL_INCLUDE,
     });
-    if (!unit) return null;
-    return unit;
   }
 
   async getOneByCode(code: string) {
-    const unit = await this.prisma.organizationUnit.findUnique({
+    return this.prisma.organizationUnit.findUnique({
       where: { code },
-      include: {
-        type: true,
-      },
+      include: UNIT_FULL_INCLUDE,
     });
-    if (!unit) return null;
-    return unit;
   }
 
   async getUnitScope(id: number) {
-    const unit = await this.prisma.organizationUnit.findUnique({
+    return this.prisma.organizationUnit.findUnique({
       where: { id },
       include: {
         unitDomains: {
           include: {
             domain: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
+              include: { translations: { where: { langCode: 'vi' } } },
             },
           },
         },
       },
     });
-    return unit;
   }
 
   async updateUnit(
@@ -137,199 +140,134 @@ export class OrganizationsService {
   ) {
     const unit = await this.prisma.organizationUnit.findUnique({
       where: { id },
-      include: { children: true },
+      select: { id: true, children: { select: { id: true } } },
     });
     if (!unit) return null;
 
-    // Chỉ validate/đổi mã khi client gửi mã không rỗng (khi chỉ cập nhật parentId, gateway/proto có thể gửi code: "" — bỏ qua, không ném lỗi)
-    if (data.code !== undefined) {
-      const code = String(data.code).trim();
-      if (code) {
-        const existing = await this.prisma.organizationUnit.findFirst({
-          where: { code, id: { not: id } },
-        });
-        if (existing)
-          throw new RpcException({
-            message: `Mã đơn vị "${code}" đã được sử dụng`,
-            code: 3,
-          });
-      }
-    }
-    // parentId 0 hoặc undefined = không đổi đơn vị cha; null = chuyển lên gốc; > 0 = chuyển sang đơn vị cha mới
+    const trimmedCode = data.code !== undefined ? String(data.code).trim() : undefined;
+
+    // parentId 0 hoặc undefined = không đổi; null = chuyển lên gốc; > 0 = đổi cha mới
     const effectiveParentId = data.parentId === 0 ? undefined : data.parentId;
+
+    // Chạy song song các việc validate độc lập (mã trùng, cha mới tồn tại, type tồn tại)
+    // thay vì await tuần tự từng cái.
+    const [existingCode, newParent, newType] = await Promise.all([
+      trimmedCode ? this.prisma.organizationUnit.findFirst({ where: { code: trimmedCode, id: { not: id } } }) : null,
+      effectiveParentId !== undefined && effectiveParentId !== null
+        ? this.prisma.organizationUnit.findUnique({ where: { id: effectiveParentId }, select: { id: true } })
+        : null,
+      !data.typeId && data.typeCode
+        ? this.prisma.unitType.findUnique({ where: { code: data.typeCode } })
+        : null,
+    ]);
+
+    if (trimmedCode && existingCode) {
+      throw new RpcException({ message: `Mã đơn vị "${trimmedCode}" đã được sử dụng`, code: 3 });
+    }
+
     if (effectiveParentId !== undefined) {
-      if (effectiveParentId === id)
+      if (effectiveParentId === id) {
+        throw new RpcException({ message: 'Đơn vị không thể là cha của chính nó', code: 3 });
+      }
+      if (unit.children.length > 0) {
         throw new RpcException({
-          message: 'Đơn vị không thể là cha của chính nó',
-          code: 3,
-        });
-      if (unit.children.length > 0)
-        throw new RpcException({
-          message:
-            'Không thể đổi đơn vị cha khi có đơn vị con. Hãy di chuyển hoặc xóa đơn vị con trước.',
+          message: 'Không thể đổi đơn vị cha khi có đơn vị con. Hãy di chuyển hoặc xóa đơn vị con trước.',
           code: 9,
         });
-      if (effectiveParentId !== null) {
-        const parent = await this.prisma.organizationUnit.findUnique({
-          where: { id: effectiveParentId },
-        });
-        if (!parent)
-          throw new RpcException({
-            message: 'Đơn vị cha không tồn tại',
-            code: GRPC.NOT_FOUND,
-          });
+      }
+      if (effectiveParentId !== null && !newParent) {
+        throw new RpcException({ message: 'Đơn vị cha không tồn tại', code: GRPC.NOT_FOUND });
       }
     }
 
     let finalTypeId = data.typeId;
-    if (!finalTypeId && data.typeCode) {
-      const unitType = await this.prisma.unitType.findUnique({
-        where: { code: data.typeCode },
-      });
-      if (unitType) {
-        finalTypeId = unitType.id;
-      }
-    }
+    if (!finalTypeId && newType) finalTypeId = newType.id;
 
     if (finalTypeId !== undefined && finalTypeId > 0) {
-      const typeExists = await this.prisma.unitType.findUnique({
-        where: { id: finalTypeId },
-      });
-      if (!typeExists)
-        throw new RpcException({
-          message: 'Loại đơn vị không tồn tại',
-          code: 3,
-        });
+      const typeExists = await this.prisma.unitType.findUnique({ where: { id: finalTypeId } });
+      if (!typeExists) throw new RpcException({ message: 'Loại đơn vị không tồn tại', code: 3 });
     }
 
     const updateData: any = {};
-    if (data.code !== undefined && String(data.code).trim() !== '')
-      updateData.code = String(data.code).trim();
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.shortName !== undefined)
-      updateData.shortName = data.shortName || null;
-    if (finalTypeId !== undefined && finalTypeId > 0)
-      updateData.typeId = finalTypeId;
-    // Đổi đơn vị cha: luôn dùng code làm hierarchyPath
-    if (data.code !== undefined && String(data.code).trim() !== '') {
-      updateData.hierarchyPath = String(data.code).trim();
-    } else if (updateData.code) {
-      updateData.hierarchyPath = updateData.code;
+    if (trimmedCode) {
+      updateData.code = trimmedCode;
+      updateData.hierarchyPath = trimmedCode; // hierarchyPath luôn theo code, chỉ cần set 1 lần
     }
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.shortName !== undefined) updateData.shortName = data.shortName || null;
+    if (finalTypeId !== undefined && finalTypeId > 0) updateData.typeId = finalTypeId;
 
-    await this.prisma.organizationUnit.update({
-      where: { id },
-      data: updateData,
-    });
+    await this.prisma.organizationUnit.update({ where: { id }, data: updateData });
 
-    // Invalidate cache
-    this.treeCache.clear();
+    this.invalidateCache();
 
     return this.prisma.organizationUnit.findUniqueOrThrow({
-      where: { id: unit.id },
-      include: {
-        type: true,
-        unitDomains: {
-          include: {
-            domain: {
-              include: {
-                translations: {
-                  where: { langCode: 'vi' },
-                },
-              },
-            },
-          },
-        },
-      },
+      where: { id },
+      include: UNIT_FULL_INCLUDE,
     });
   }
 
   async updateUnitScope(id: number, data: { domainIds?: number[]; scope?: string }) {
-    const unit = await this.prisma.organizationUnit.findUnique({
-      where: { id },
-    });
+    const unit = await this.prisma.organizationUnit.findUnique({ where: { id }, select: { id: true } });
     if (!unit) return null;
 
-    if (data.scope !== undefined) {
-      // Not implemented in prisma schema yet, but prepared for future.
-    }
-
     if (data.domainIds !== undefined) {
-      await this.prisma.unitDomain.deleteMany({ where: { unitId: id } });
-      const ids = Array.isArray(data.domainIds)
-        ? data.domainIds.filter((d) => d > 0)
-        : [];
-      if (ids.length > 0) {
-        await this.prisma.unitDomain.createMany({
-          data: ids.map((domainId) => ({ unitId: id, domainId })),
-          skipDuplicates: true,
-        });
-      }
+      const ids = Array.isArray(data.domainIds) ? data.domainIds.filter((d) => d > 0) : [];
+      // delete + create phải atomic để không có khoảng trống dữ liệu nếu 1 trong 2 lệnh lỗi.
+      await this.prisma.$transaction([
+        this.prisma.unitDomain.deleteMany({ where: { unitId: id } }),
+        ...(ids.length > 0
+          ? [
+            this.prisma.unitDomain.createMany({
+              data: ids.map((domainId) => ({ unitId: id, domainId })),
+              skipDuplicates: true,
+            }),
+          ]
+          : []),
+      ]);
     }
 
-    this.treeCache.clear();
+    this.invalidateCache();
 
     return this.prisma.organizationUnit.findUniqueOrThrow({
-      where: { id: unit.id },
-      include: {
-        type: true,
-        unitDomains: {
-          include: {
-            domain: {
-              include: { translations: { where: { langCode: 'vi' } } },
-            },
-          },
-        },
-      },
+      where: { id },
+      include: UNIT_FULL_INCLUDE,
     });
   }
 
   async deleteUnit(id: number) {
     const unit = await this.prisma.organizationUnit.findUnique({
       where: { id },
-      include: { children: true },
+      select: { id: true, children: { select: { id: true } } },
     });
     if (!unit) return false;
     if (unit.children.length > 0) {
       throw new RpcException({
-        message:
-          'Không thể xóa đơn vị có đơn vị con. Hãy xóa đơn vị con trước.',
+        message: 'Không thể xóa đơn vị có đơn vị con. Hãy xóa đơn vị con trước.',
         code: 9,
       });
     }
     await this.prisma.organizationUnit.delete({ where: { id } });
 
-    // Invalidate cache
-    this.treeCache.clear();
+    this.invalidateCache();
 
     return true;
   }
 
   // Lấy cây tổ chức (Full Tree)
   async getFullTree(q?: string) {
-    const cacheKey = 'FULL_TREE';
-    const cached = this.treeCache.get(cacheKey);
-    let fullTree: any[] = [];
+    let fullTree = this.getCache<any[]>('FULL_TREE');
 
-    if (cached && cached.expiresAt > Date.now()) {
-      fullTree = cached.data.data;
-    } else {
+    if (!fullTree) {
       const units = await this.prisma.organizationUnit.findMany({
         orderBy: { hierarchyPath: 'asc' },
-        include: {
-          type: true,
-        },
+        include: { type: true },
       });
       fullTree = buildTree(units, null);
-      this.treeCache.set(cacheKey, {
-        data: { data: fullTree },
-        expiresAt: Date.now() + this.CACHE_TTL_MS,
-      });
+      this.setCache('FULL_TREE', fullTree);
     }
 
-    if (!q || !q.trim()) {
-      return { data: fullTree };
-    }
+    if (!q || !q.trim()) return { data: fullTree };
 
     const lowerQ = q.toLowerCase().trim();
     const filterTree = (nodes: any[]): any[] => {
@@ -337,9 +275,9 @@ export class OrganizationsService {
       for (const node of nodes) {
         const filteredChildren = filterTree(node.children || []);
         const matches =
-          (node.name && node.name.toLowerCase().includes(lowerQ)) ||
-          (node.code && node.code.toLowerCase().includes(lowerQ)) ||
-          (node.shortName && node.shortName.toLowerCase().includes(lowerQ));
+          node.name?.toLowerCase().includes(lowerQ) ||
+          node.code?.toLowerCase().includes(lowerQ) ||
+          node.shortName?.toLowerCase().includes(lowerQ);
 
         if (matches || filteredChildren.length > 0) {
           result.push({ ...node, children: filteredChildren });
@@ -353,20 +291,13 @@ export class OrganizationsService {
 
   // Lấy danh sách phẳng (có thể lọc theo tên, mã)
   async getOrganizations(q?: string) {
-    const where: any = {};
-    if (q) {
-      where.OR = [
-        { name: { contains: q } },
-        { code: { contains: q } },
-        { shortName: { contains: q } },
-      ];
-    }
+    const where: any = q
+      ? { OR: [{ name: { contains: q } }, { code: { contains: q } }, { shortName: { contains: q } }] }
+      : {};
     const units = await this.prisma.organizationUnit.findMany({
       where,
       orderBy: { hierarchyPath: 'asc' },
-      include: {
-        type: true,
-      },
+      include: { type: true },
     });
     return { data: units };
   }
@@ -374,45 +305,26 @@ export class OrganizationsService {
   // Lấy cây con của 1 đơn vị (Dùng Materialized Path)
   async getSubTree(rootId: number) {
     const cacheKey = `SUB_TREE_${rootId}`;
-    const cached = this.treeCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.data;
-    }
+    const cached = this.getCache(cacheKey);
+    if (cached) return cached;
 
     const root = await this.prisma.organizationUnit.findUnique({
       where: { id: rootId },
+      select: { code: true, hierarchyPath: true, parentId: true },
     });
     if (!root) {
-      throw new RpcException({
-        message: 'Đơn vị không tồn tại',
-        code: GRPC.NOT_FOUND,
-      });
+      throw new RpcException({ message: 'Đơn vị không tồn tại', code: GRPC.NOT_FOUND });
     }
 
-    // hierarchyPath = code, nên dùng startsWith(code + '.') để lấy con cháu
-    // Đồng thời lấy cả root (where code = rootId's code)
+    const prefix = (root.code || root.hierarchyPath || '') + '.';
     const units = await this.prisma.organizationUnit.findMany({
-      where: {
-        OR: [
-          { id: rootId },
-          {
-            hierarchyPath: {
-              startsWith: (root.code || root.hierarchyPath || '') + '.',
-            },
-          },
-        ],
-      },
+      where: { OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }] },
       orderBy: { hierarchyPath: 'asc' },
-      include: {
-        type: true,
-      },
+      include: { type: true },
     });
 
     const result = { data: buildTree(units, root.parentId) };
-    this.treeCache.set(cacheKey, {
-      data: result,
-      expiresAt: Date.now() + this.CACHE_TTL_MS,
-    });
+    this.setCache(cacheKey, result);
     return result;
   }
 
@@ -420,47 +332,26 @@ export class OrganizationsService {
   async getDescendants(rootId: number) {
     const root = await this.prisma.organizationUnit.findUnique({
       where: { id: rootId },
-      select: { code: true, hierarchyPath: true, id: true }
+      select: { code: true, hierarchyPath: true },
     });
-    if (!root) {
-      return { data: [] };
-    }
+    if (!root) return { data: [] };
 
+    const prefix = (root.code || root.hierarchyPath || '') + '.';
     const units = await this.prisma.organizationUnit.findMany({
-      where: {
-        OR: [
-          { id: rootId },
-          {
-            hierarchyPath: {
-              startsWith: (root.code || root.hierarchyPath || '') + '.',
-            },
-          },
-        ],
-      },
-      select: { id: true }
+      where: { OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }] },
+      select: { id: true },
     });
 
-    return { data: units.map(u => u.id) };
+    return { data: units.map((u) => u.id) };
   }
 
   // --- 2. QUẢN LÝ ĐỊNH BIÊN (STAFFING) ---
 
-  // Thiết lập định biên cho đơn vị
-  async setStaffing(dto: {
-    unitId: number;
-    jobTitleId: number;
-    quantity: number;
-  }) {
+  async setStaffing(dto: { unitId: number; jobTitleId: number; quantity: number }) {
     return this.prisma.organizationStaffing.upsert({
-      where: {
-        unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId },
-      },
+      where: { unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId } },
       update: { quantity: dto.quantity },
-      create: {
-        unitId: dto.unitId,
-        jobTitleId: dto.jobTitleId,
-        quantity: dto.quantity,
-      },
+      create: { unitId: dto.unitId, jobTitleId: dto.jobTitleId, quantity: dto.quantity },
     });
   }
 
@@ -474,18 +365,10 @@ export class OrganizationsService {
           orderBy: { slotOrder: 'asc' },
           include: {
             domains: {
-              include: {
-                domain: {
-                  include: { translations: { where: { langCode: 'vi' } } },
-                },
-              },
+              include: { domain: { include: { translations: { where: { langCode: 'vi' } } } } },
             },
             geographicAreas: {
-              include: {
-                geographicArea: {
-                  include: { translations: { where: { langCode: 'vi' } } },
-                },
-              },
+              include: { geographicArea: { include: { translations: { where: { langCode: 'vi' } } } } },
             },
             monitoredUnits: { include: { unit: true } },
           },
@@ -493,57 +376,35 @@ export class OrganizationsService {
       },
     });
 
-    // Lấy danh sách mã nhân viên đã được gán vào các vị trí
-    const employeeCodes = new Set<string>();
-    items.forEach((item) => {
-      item.slots.forEach((slot) => {
-        if ((slot as any).assignedEmployeeCode) {
-          employeeCodes.add((slot as any).assignedEmployeeCode);
-        }
-      });
-    });
-
-    const users = await this.prisma.user.findMany({
-      where: { employeeCode: { in: Array.from(employeeCodes) } },
-      select: { employeeCode: true, fullName: true },
-    });
+    const employeeCodes = [
+      ...new Set(
+        items.flatMap((item) => item.slots.map((s) => (s as any).assignedEmployeeCode).filter(Boolean)),
+      ),
+    ];
 
     const userMap = new Map<string, string>();
-    users.forEach((u) => {
-      if (u.employeeCode && u.fullName) {
-        userMap.set(u.employeeCode, u.fullName);
-      }
-    });
+    if (employeeCodes.length > 0) {
+      const users = await this.prisma.user.findMany({
+        where: { employeeCode: { in: employeeCodes } },
+        select: { employeeCode: true, fullName: true },
+      });
+      users.forEach((u) => {
+        if (u.employeeCode && u.fullName) userMap.set(u.employeeCode, u.fullName);
+      });
+    }
 
     const data = items.map((item) => {
-      // Map tên nhân sự và mã nhân sự vào từng slot
       const assignedUserBySlot: Record<number, { fullName: string; employeeCode: string | null }> = {};
 
       const mappedSlots = item.slots.map((slot) => {
         const code = (slot as any).assignedEmployeeCode;
-        let employeeName = "";
-        
-        if (code) {
-          const fullName = userMap.get(code);
-          if (fullName) {
-            employeeName = fullName;
-            assignedUserBySlot[slot.slotOrder] = {
-              fullName,
-              employeeCode: code,
-            };
-          }
-        }
-        
-        return {
-          ...slot,
-          assignedEmployeeCode: code || "",
-          assignedEmployeeName: employeeName,
-        };
+        const fullName = code ? userMap.get(code) : undefined;
+        if (fullName) assignedUserBySlot[slot.slotOrder] = { fullName, employeeCode: code };
+
+        return { ...slot, assignedEmployeeCode: code || '', assignedEmployeeName: fullName || '' };
       });
 
-      const currentEmployeeNames = Object.values(assignedUserBySlot)
-        .map(u => u.fullName)
-        .filter(Boolean);
+      const currentEmployeeNames = Object.values(assignedUserBySlot).map((u) => u.fullName);
 
       return {
         ...item,
@@ -559,41 +420,33 @@ export class OrganizationsService {
 
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
   async listJobTitles(unitId?: number) {
-    const include = {};
-    let items;
     if (!unitId || unitId === 0) {
-      items = await this.prisma.jobTitle.findMany({
-        orderBy: { code: 'asc' },
-        include,
-      });
-    } else {
-      const unit = await this.prisma.organizationUnit.findUnique({
-        where: { id: unitId },
-        select: { typeId: true },
-      });
-      if (!unit) items = [];
-      else {
-        const typeId = unit.typeId;
-        items = await this.prisma.jobTitle.findMany({
-          orderBy: { code: 'asc' },
-          include,
-          where: {
-            OR: [
-              { applicableUnitTemplates: { none: {} } },
-              { applicableUnitTemplates: { some: { unitTypeId: typeId } } },
-            ],
-          },
-        });
-      }
+      return { data: await this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' } }) };
     }
+
+    const unit = await this.prisma.organizationUnit.findUnique({
+      where: { id: unitId },
+      select: { typeId: true },
+    });
+    if (!unit) return { data: [] };
+
+    const items = await this.prisma.jobTitle.findMany({
+      orderBy: { code: 'asc' },
+      where: {
+        OR: [
+          { applicableUnitTemplates: { none: {} } },
+          { applicableUnitTemplates: { some: { unitTypeId: unit.typeId } } },
+        ],
+      },
+    });
     return { data: items };
   }
 
+  // NOTE: method này hiện chỉ đọc dữ liệu, không cập nhật gì cả — tên gọi "updateJobTitle"
+  // đang gây hiểu nhầm. Giữ nguyên hành vi cũ vì không rõ field nào cần cho phép sửa;
+  // nên bổ sung tham số update thực sự hoặc đổi tên thành getJobTitle nếu đúng ý đồ chỉ là đọc.
   async updateJobTitle(dto: { id: number }) {
-    const updated = await this.prisma.jobTitle.findUnique({
-      where: { id: dto.id },
-    });
-    return updated!;
+    return this.prisma.jobTitle.findUniqueOrThrow({ where: { id: dto.id } });
   }
 
   // Phân công từng vị trí (từng phó): nhiệm vụ, đơn vị theo dõi riêng cho từng slot
@@ -612,52 +465,51 @@ export class OrganizationsService {
     geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const staffing = await this.prisma.organizationStaffing.findUnique({
-      where: { id: staffingId },
-    });
+    const staffing = await this.prisma.organizationStaffing.findUnique({ where: { id: staffingId } });
+    if (!staffing) throw new Error('Staffing not found');
 
-    if (!staffing) throw new Error("Staffing not found");
     const slot = await this.prisma.staffingSlot.upsert({
       where: { staffingId_slotOrder: { staffingId, slotOrder } },
       update: { description: description ?? undefined },
       create: { staffingId, slotOrder, description: description ?? undefined },
     });
 
+    // Gộp toàn bộ delete/create của 3 quan hệ vào 1 transaction để tránh trạng thái
+    // dữ liệu nửa vời nếu 1 bước giữa chừng lỗi.
+    const ops: any[] = [];
     if (domainIds !== undefined) {
-      await this.prisma.staffingSlotDomain.deleteMany({
-        where: { slotId: slot.id },
-      });
+      ops.push(this.prisma.staffingSlotDomain.deleteMany({ where: { slotId: slot.id } }));
       if (domainIds.length > 0) {
-        await this.prisma.staffingSlotDomain.createMany({
-          data: domainIds.map((domainId) => ({ slotId: slot.id, domainId })),
-        });
+        ops.push(
+          this.prisma.staffingSlotDomain.createMany({
+            data: domainIds.map((domainId) => ({ slotId: slot.id, domainId })),
+          }),
+        );
       }
     }
     if (geographicAreaIds !== undefined) {
-      await this.prisma.staffingSlotGeographicArea.deleteMany({
-        where: { slotId: slot.id },
-      });
+      ops.push(this.prisma.staffingSlotGeographicArea.deleteMany({ where: { slotId: slot.id } }));
       if (geographicAreaIds.length > 0) {
-        await this.prisma.staffingSlotGeographicArea.createMany({
-          data: geographicAreaIds.map((geographicAreaId) => ({
-            slotId: slot.id,
-            geographicAreaId,
-          })),
-        });
+        ops.push(
+          this.prisma.staffingSlotGeographicArea.createMany({
+            data: geographicAreaIds.map((geographicAreaId) => ({ slotId: slot.id, geographicAreaId })),
+          }),
+        );
       }
     }
     if (monitoredUnitIds !== undefined) {
-      await this.prisma.staffingSlotMonitoredUnit.deleteMany({
-        where: { slotId: slot.id },
-      });
+      ops.push(this.prisma.staffingSlotMonitoredUnit.deleteMany({ where: { slotId: slot.id } }));
       if (monitoredUnitIds.length > 0) {
-        await this.prisma.staffingSlotMonitoredUnit.createMany({
-          data: monitoredUnitIds.map((unitId) => ({ slotId: slot.id, unitId })),
-        });
+        ops.push(
+          this.prisma.staffingSlotMonitoredUnit.createMany({
+            data: monitoredUnitIds.map((unitId) => ({ slotId: slot.id, unitId })),
+          }),
+        );
       }
     }
+    if (ops.length > 0) await this.prisma.$transaction(ops);
 
-    const updated = await this.prisma.staffingSlot.findUnique({
+    return this.prisma.staffingSlot.findUniqueOrThrow({
       where: { id: slot.id },
       include: {
         monitoredUnits: { include: { unit: true } },
@@ -665,15 +517,11 @@ export class OrganizationsService {
         domains: { include: { domain: true } },
       },
     });
-    return updated!;
   }
 
   // --- 3. QUẢN LÝ LOẠI ĐƠN VỊ ---
   async listUnitTypes() {
-    const items = await this.prisma.unitType.findMany({
-      orderBy: { level: 'asc' },
-    });
-    return { data: items };
+    return { data: await this.prisma.unitType.findMany({ orderBy: { level: 'asc' } }) };
   }
 
   async getUnitTypeJobTemplates(unitTypeId: number) {
@@ -681,25 +529,21 @@ export class OrganizationsService {
       where: { unitTypeId },
       select: { jobTitleId: true },
     });
-    return { jobTitleIds: templates.map(t => t.jobTitleId) };
+    return { jobTitleIds: templates.map((t) => t.jobTitleId) };
   }
 
   async updateUnitTypeJobTemplates(unitTypeId: number, jobTitleIds: number[]) {
-    // Xóa các template cũ
-    await this.prisma.unitTypeJobTemplate.deleteMany({
-      where: { unitTypeId },
-    });
-    
-    // Thêm các template mới
-    if (jobTitleIds && jobTitleIds.length > 0) {
-      await this.prisma.unitTypeJobTemplate.createMany({
-        data: jobTitleIds.map(jobTitleId => ({
-          unitTypeId,
-          jobTitleId,
-        })),
-        skipDuplicates: true,
-      });
-    }
+    await this.prisma.$transaction([
+      this.prisma.unitTypeJobTemplate.deleteMany({ where: { unitTypeId } }),
+      ...(jobTitleIds?.length > 0
+        ? [
+          this.prisma.unitTypeJobTemplate.createMany({
+            data: jobTitleIds.map((jobTitleId) => ({ unitTypeId, jobTitleId })),
+            skipDuplicates: true,
+          }),
+        ]
+        : []),
+    ]);
 
     return { success: true };
   }
