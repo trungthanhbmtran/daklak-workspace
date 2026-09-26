@@ -65,7 +65,7 @@ export function PolicySidebar() {
             )}
           </div>
           <Button variant="outline" size="sm" className="h-8 px-2 md:px-3 font-semibold text-xs md:text-sm" asChild>
-            <Link href="/services/admin/policys/create">
+            <Link href="/services/admin/policies/create">
               <Plus className="h-3 w-3" /> Thêm mới
             </Link>
           </Button>
@@ -87,7 +87,7 @@ export function PolicySidebar() {
           return (
             <Link
               key={policy.id}
-              href={`/services/admin/policys/${policy.id}`}
+              href={`/services/admin/policies/${policy.id}`}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md transition-colors ${
                 isSelected
                   ? "bg-primary/10 text-primary border border-primary/20"

@@ -95,7 +95,7 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
       
       if (createMode) {
         // Sau khi tạo xong, có thể redirect về danh sách hoặc sang trang edit (cần ID trả về)
-        router.push("/services/admin/policys");
+        router.push("/services/admin/policies");
       }
     },
   });
@@ -107,7 +107,7 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: policyKeys.all });
       toast.success("Đã xóa vai trò!");
-      router.push("/services/admin/policys");
+      router.push("/services/admin/policies");
     },
   });
 
@@ -127,7 +127,7 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
   };
 
   const onCancel = () => {
-    router.push("/services/admin/policys");
+    router.push("/services/admin/policies");
   };
 
   if (isLoadingPolicy) {
