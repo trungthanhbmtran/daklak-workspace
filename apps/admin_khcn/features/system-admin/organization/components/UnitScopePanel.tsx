@@ -98,7 +98,10 @@ export function UnitScopePanel() {
             </span>
           )}
           {dirty && (
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleReset} iconStart={<RotateCcw className="h-3.5 w-3.5" />}>Hoàn tác</Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleReset}>
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Hoàn tác</span>
+            </Button>
           )}
           <Button
             size="sm"
@@ -106,9 +109,17 @@ export function UnitScopePanel() {
             disabled={!dirty || isUpdatingScope || selectedId == null || isLoading}
             onClick={handleSave}
           >
-            {isUpdatingScope
-              ? <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />Đang lưu...</>
-              : <><Save className="h-3.5 w-3.5 mr-1" />Lưu thay đổi</>}
+            {isUpdatingScope ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>Đang lưu...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-3.5 w-3.5" />
+                <span>Lưu thay đổi</span>
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -287,7 +298,7 @@ function ScopePicker({
               disabled={isFetchingNextPage}
             >
               {isFetchingNextPage ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Đang tải...</>
+                <><Loader2 className="h-4 w-4 animate-spin" />Đang tải...</>
               ) : (
                 "Tải thêm lĩnh vực"
               )}

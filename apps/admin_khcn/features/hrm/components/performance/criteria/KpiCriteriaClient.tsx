@@ -171,7 +171,7 @@ export function KpiCriteriaClient() {
           </Text>
         </div>
         <Button onClick={() => openModal()} className="h-10 px-4">
-          <Plus className="w-4 h-4 mr-2" /> Tạo Tiêu chí
+          <Plus className="w-4 h-4" /> Tạo Tiêu chí
         </Button>
       </div>
 

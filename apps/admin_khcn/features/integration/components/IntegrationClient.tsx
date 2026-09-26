@@ -61,7 +61,7 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
             onClick={() => setActiveView('dashboard')}
             className="rounded-xl border-border hover:bg-muted bg-background text-foreground"
           >
-            <ChevronLeft className="h-4 w-4 md:mr-1" /> <span className="hidden md:inline">Trở về</span>
+            <ChevronLeft className="h-4 w-4 md:" /> <span className="hidden md:inline">Trở về</span>
           </Button>
           <h2 className="text-lg md:text-xl font-bold text-foreground line-clamp-1">
             {activeView === 'definitions' && "Định nghĩa Quy trình (BPMN)"}
@@ -170,7 +170,7 @@ export function IntegrationClient({ initialView = 'dashboard' }: { initialView?:
                 
                 <div className="flex items-center text-xs md:text-sm font-bold text-muted-foreground group-hover:text-primary transition-colors mt-auto uppercase tracking-wide w-full">
                   Truy cập phân hệ
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </div>
             </Button>
           );

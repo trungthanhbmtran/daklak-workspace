@@ -83,19 +83,22 @@ export default function OrganizationDetailPage() {
               value="info" 
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             >
-              <FileText className="h-4 w-4 shrink-0" /> Thông tin
+              <FileText className="h-4 w-4 shrink-0" />
+              <span>Thông tin</span>
             </TabsTrigger>
             <TabsTrigger 
               value="scope" 
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             >
-              <MapPin className="h-4 w-4 shrink-0" /> Phạm vi phụ trách
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span>Phạm vi phụ trách</span>
             </TabsTrigger>
             <TabsTrigger 
               value="staffing" 
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             >
-              <Users className="h-4 w-4 shrink-0" /> Định biên & Chức danh
+              <Users className="h-4 w-4 shrink-0" />
+              <span>Định biên & Chức danh</span>
             </TabsTrigger>
           </TabsList>
         </div>

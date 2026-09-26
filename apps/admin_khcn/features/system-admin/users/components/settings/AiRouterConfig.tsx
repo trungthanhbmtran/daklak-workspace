@@ -81,7 +81,7 @@ export function AiRouterConfig() {
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">Cấu hình nhiều LLM. Hệ thống sẽ tự động chuyển sang mô hình có mức ưu tiên thấp hơn nếu mô hình chính bị lỗi.</p>
         </div>
         <Button onClick={handleSaveAiConfigs} disabled={updateConfig.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg px-6 h-11 w-full sm:w-auto">
-          {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4 mr-2" /> Lưu cấu hình AI</>}
+          {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4" /> Lưu cấu hình AI</>}
         </Button>
       </CardHeader>
 

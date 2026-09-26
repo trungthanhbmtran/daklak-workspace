@@ -108,7 +108,7 @@ export const EndpointEditorKeyValueTab = ({
       </div>
       <div className="p-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shrink-0">
         <Button variant="outline" size="sm" onClick={() => onAddItem(type)} className="w-full text-xs h-8 border-dashed">
-          <Plus className="w-4 h-4 mr-1" /> {addButtonText}
+          <Plus className="w-4 h-4" /> {addButtonText}
         </Button>
       </div>
     </div>

@@ -230,7 +230,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                   onClick={() => handleAction('PROCESSING', 'Chuyển xử lý')}
                   disabled={isSaving}
                 >
-                  <CornerUpRight className="h-3.5 w-3.5 mr-2" /> Chuyển xử lý
+                  <CornerUpRight className="h-3.5 w-3.5" /> Chuyển xử lý
                 </Button>
                 <Button 
                   variant="outline" 
@@ -238,7 +238,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                   onClick={() => handleAction('PUBLISHED', 'Kết thúc')}
                   disabled={isSaving}
                 >
-                  <CheckCheck className="h-3.5 w-3.5 mr-2" /> Kết thúc hồ sơ
+                  <CheckCheck className="h-3.5 w-3.5" /> Kết thúc hồ sơ
                 </Button>
                 <Button variant="outline" className="w-full text-foreground border-border hover:bg-muted col-span-2 h-9 text-xs" iconStart={<FileSignature className="h-3.5 w-3.5" />}>Ký số & Trình duyệt (VGCA)</Button>
               </div>

@@ -26,7 +26,7 @@ function SidebarHeaderComponent({ onAddRoot }: SidebarHeaderProps) {
                     className="h-8 shrink-0 px-3 shadow-sm bg-primary hover:bg-primary/90"
                     onClick={onAddRoot}
                 >
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    <Plus className="h-3.5 w-3.5" />
                     <span className="font-medium">Thêm gốc</span>
                 </Button>
             </div>

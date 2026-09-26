@@ -10,19 +10,19 @@ export const CalendarTabs = React.memo(function CalendarTabs() {
     <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 w-full bg-card p-2 sm:p-3 rounded-xl border border-border shadow-sm">
       <TabsList className="bg-muted/50 p-1.5 rounded-lg flex-wrap gap-1 h-auto shrink-0 self-start xl:self-auto">
         <TabsTrigger value="all" className={triggerClass}>
-          <Briefcase className="w-4 h-4 mr-2" />
+          <Briefcase className="w-4 h-4" />
           Lịch xử lý công việc
         </TabsTrigger>
         <TabsTrigger value="personal" className={triggerClass}>
-          <User className="w-4 h-4 mr-2" />
+          <User className="w-4 h-4" />
           Lịch cá nhân
         </TabsTrigger>
         <TabsTrigger value="unit" className={triggerClass}>
-          <Users className="w-4 h-4 mr-2" />
+          <Users className="w-4 h-4" />
           Lịch đơn vị
         </TabsTrigger>
         <TabsTrigger value="meeting" className={triggerClass}>
-          <Video className="w-4 h-4 mr-2" />
+          <Video className="w-4 h-4" />
           Lịch họp
         </TabsTrigger>
       </TabsList>

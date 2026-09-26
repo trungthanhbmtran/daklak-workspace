@@ -42,8 +42,17 @@ export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, 
         <Button type="button" size="sm" className="h-8 text-xs font-medium"
           onClick={() => onSave({ staffingId, slotOrder, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geoAreaIds.length ? geoAreaIds : undefined, monitoredUnitIds: unitIds.length ? unitIds : undefined })}
           disabled={isSaving}>
-          {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
-          Lưu vị trí
+          {isSaving ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span>Đang lưu...</span>
+            </>
+          ) : (
+            <>
+              <Save className="h-3.5 w-3.5" />
+              <span>Lưu vị trí</span>
+            </>
+          )}
         </Button>
       </CardHeader>
       <CardContent className="p-4 flex-1 flex flex-col gap-4 text-sm">

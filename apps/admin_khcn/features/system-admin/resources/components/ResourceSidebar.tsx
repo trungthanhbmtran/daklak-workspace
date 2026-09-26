@@ -166,7 +166,7 @@ function ResourceSidebarInner() {
           <Input placeholder="Tên hiển thị" className="h-9 text-sm flex-1" value={newName} onChange={(e) => setNewName(e.target.value)} />
         </div>
         <Button size="sm" className="w-full h-9" onClick={handleCreateResource} disabled={createResourceMutation.isPending || !newCode.trim() || !newName.trim()}>
-          {createResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-2" /> Thêm tài nguyên</>}
+          {createResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4" /> Thêm tài nguyên</>}
         </Button>
         {createResourceMutation.isError && (
           <p className="text-xs text-destructive text-center">

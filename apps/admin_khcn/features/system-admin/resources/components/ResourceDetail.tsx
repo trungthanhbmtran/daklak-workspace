@@ -167,7 +167,7 @@ function ResourceDetailInner({ resourceId }: ResourceDetailProps) {
                 disabled={updateResourceMutation.isPending}
                 className="w-auto"
               >
-                {updateResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                {updateResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Lưu thay đổi
               </Button>
             </div>

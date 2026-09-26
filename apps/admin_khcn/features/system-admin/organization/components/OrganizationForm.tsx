@@ -79,8 +79,8 @@ export function OrganizationForm() {
             <Button type="submit" size="sm" disabled={meta.isCreating}>
               {meta.isCreating ? "Đang thêm..." : (
                 <>
-                  <Plus className="h-4 w-4 mr-1.5" />
-                  Thêm đơn vị
+                  <Plus className="h-4 w-4" />
+                  <span>Thêm đơn vị</span>
                 </>
               )}
             </Button>

@@ -180,7 +180,7 @@ export function NotificationConfigPanel() {
           </div>
           <div className="flex justify-end pt-2">
             <Button onClick={() => handleSave("NOTIFY_TELEGRAM", "Telegram Bot", telegram, activeStates["NOTIFY_TELEGRAM"])} disabled={saving} className="bg-sky-500 hover:bg-sky-600">
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Lưu cấu hình Telegram
             </Button>
           </div>
@@ -223,7 +223,7 @@ export function NotificationConfigPanel() {
           </div>
           <div className="flex justify-end pt-2 md:col-span-2">
             <Button onClick={() => handleSave("NOTIFY_SMTP", "Email SMTP", smtp, activeStates["NOTIFY_SMTP"])} disabled={saving} className="bg-rose-500 hover:bg-rose-600 text-white">
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Lưu cấu hình Email
             </Button>
           </div>
@@ -250,7 +250,7 @@ export function NotificationConfigPanel() {
           </div>
           <div className="flex justify-end pt-2">
             <Button onClick={() => handleSave("NOTIFY_ZALO", "Zalo ZNS / OA", zalo, activeStates["NOTIFY_ZALO"])} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Lưu cấu hình Zalo
             </Button>
           </div>

@@ -52,7 +52,7 @@ export function CreateCategoryModal({ isOpen, onClose, activeGroup, defaultSort 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Hủy</Button>
           <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-            {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Lưu giá trị
+            {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Lưu giá trị
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -114,7 +114,7 @@ export function EditCategoryModal({ editingItem, onClose }: { editingItem: Categ
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Hủy</Button>
           <Button onClick={handleSubmit} disabled={updateMutation.isPending}>
-            {updateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Cập nhật
+            {updateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Cập nhật
           </Button>
         </DialogFooter>
       </DialogContent>

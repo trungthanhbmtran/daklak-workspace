@@ -179,7 +179,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         <>
           <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Hủy bỏ</Button>
           <Button type="submit" form="integration-form" className="bg-violet-600 hover:bg-violet-700 text-white min-w-[120px]" disabled={isPending}>
-            {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             {isPending ? "Đang xử lý..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
           </Button>
         </>

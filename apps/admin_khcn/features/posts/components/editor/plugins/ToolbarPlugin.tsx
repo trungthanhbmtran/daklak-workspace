@@ -387,7 +387,7 @@ const InsertMediaPlugin = () => {
               <div className="grow border-t"></div><Text as="span" className="mx-2 text-[10px] text-slate-400 uppercase">Hoặc</Text><div className="grow border-t"></div>
             </div>
             <Button type="button" variant="outline" size="sm" className="h-8 text-xs text-slate-600" onClick={() => imageInputRef.current?.click()}>
-              <Upload className="h-3.5 w-3.5 mr-2 text-emerald-600" /> Tải lên từ máy
+              <Upload className="h-3.5 w-3.5 text-emerald-600" /> Tải lên từ máy
             </Button>
           </div>
         </PopoverContent>

@@ -34,7 +34,7 @@ export const EndpointHeader = memo(({
         <div className="flex gap-1 shrink-0">
           {onTest && (
             <Button variant="outline" size="sm" onClick={onTest} disabled={isTesting} className="text-violet-600 border-violet-200 hover:bg-violet-50 dark:border-violet-800 dark:hover:bg-violet-900/30 shrink-0 h-8" title="Test API">
-              {isTesting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />} Test
+              {isTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />} Test
             </Button>
           )}
           <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 shrink-0 h-8 w-8" title="Xóa Endpoint này">

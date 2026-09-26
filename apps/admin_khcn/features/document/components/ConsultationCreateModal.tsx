@@ -312,7 +312,7 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
             <DialogFooter className="pt-6 gap-2 border-t mt-4 shrink-0">
               <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl h-12 px-8 font-bold">Hủy bỏ</Button>
               <Button type="submit" className="rounded-xl h-12 px-12 shadow-xl shadow-primary/20 bg-primary font-black text-lg transition-all active:scale-95 group" disabled={isLoading || isUploading}>
-                {isLoading || isUploading ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Save className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />}
+                {isLoading || isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5 group-hover:scale-110 transition-transform" />}
                 PHÁT HÀNH
               </Button>
             </DialogFooter>

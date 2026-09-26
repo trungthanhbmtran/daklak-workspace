@@ -115,7 +115,7 @@ const ReportRow = React.memo(function ReportRow({ report, fiscalYear }: ReportRo
               asChild
             >
               <a href={`/api/v1/media/download/${report.fileId}`} target="_blank">
-                <Download className="h-3.5 w-3.5 mr-1.5" /> Tải PDF
+                <Download className="h-3.5 w-3.5" /> Tải PDF
               </a>
             </Button>
           )}

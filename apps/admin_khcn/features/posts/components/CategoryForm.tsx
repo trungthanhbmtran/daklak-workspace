@@ -208,7 +208,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
           </div>
         </div>
         <Button onClick={form.handleSubmit(((v: any) => onSubmit(v)) as any)} className="bg-blue-600 hover:bg-blue-700 shadow-md min-w-[140px]" disabled={mutation.isPending}>
-          {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isEdit ? "Cập nhật ngay" : "Tạo chuyên mục"}
         </Button>
       </div>
@@ -349,7 +349,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                       onClick={() => docInputRef.current?.click()}
                       disabled={isUploadingDoc}
                     >
-                      {isUploadingDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                      {isUploadingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
                       {form.watch("attachmentId") ? "Thay đổi văn bản" : "Tải lên văn bản"}
                     </Button>
                     <input id="doc-upload" type="file" className="hidden" ref={docInputRef} onChange={handleDocUpload} />

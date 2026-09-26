@@ -76,7 +76,7 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
             onClick={onRemove} 
             className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 px-2"
           >
-            <Trash2 className="w-4 h-4 sm:mr-1" />
+            <Trash2 className="w-4 h-4 sm:" />
             <span className="hidden sm:inline-block text-xs">Xóa</span>
           </Button>
         </div>

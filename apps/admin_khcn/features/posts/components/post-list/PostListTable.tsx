@@ -329,7 +329,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
               className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40 hover:bg-blue-50 dark:hover:bg-blue-950/30"
               onClick={() => workflowMutation.mutate({ id: post.id, action: 'submit' })}
             >
-              <Send className="h-3 w-3 mr-1 shrink-0" /> Gửi duyệt
+              <Send className="h-3 w-3 shrink-0" /> Gửi duyệt
             </Button>
           )}
 
@@ -341,7 +341,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                 className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                 onClick={() => workflowMutation.mutate({ id: post.id, action: 'approve' })}
               >
-                <CheckCircle2 className="h-3 w-3 mr-1 shrink-0" /> Duyệt
+                <CheckCircle2 className="h-3 w-3 shrink-0" /> Duyệt
               </Button>
               <Button
                 variant="outline"
@@ -352,7 +352,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
                   setRejectionNote("");
                 }}
               >
-                <X className="h-3 w-3 mr-1 shrink-0" /> Từ chối
+                <X className="h-3 w-3 shrink-0" /> Từ chối
               </Button>
             </div>
           )}
@@ -364,7 +364,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
               className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
               onClick={() => workflowMutation.mutate({ id: post.id, action: 'publish' })}
             >
-              <Globe className="h-3 w-3 mr-1 shrink-0" /> Xuất bản
+              <Globe className="h-3 w-3 shrink-0" /> Xuất bản
             </Button>
           )}
 
@@ -375,7 +375,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
               className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-950/30"
               onClick={() => workflowMutation.mutate({ id: post.id, action: 'unpublish' })}
             >
-              <EyeOff className="h-3 w-3 mr-1 shrink-0" /> Gỡ bài
+              <EyeOff className="h-3 w-3 shrink-0" /> Gỡ bài
             </Button>
           )}
 

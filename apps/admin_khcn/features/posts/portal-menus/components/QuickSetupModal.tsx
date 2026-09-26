@@ -82,7 +82,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                     onClick={importSelectedCategories}
                     disabled={isImporting}
                   >
-                    {isImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                    {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                     Nhập {selectedCategories.length} mục
                   </Button>
                 )}
@@ -123,7 +123,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                       }}
                       disabled={isImporting}
                     >
-                      {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4 mr-2" /> Nhập lẻ</>}
+                      {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4" /> Nhập lẻ</>}
                     </Button>
                   </div>
                 ))}
@@ -196,7 +196,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
                 className="bg-blue-600 px-8 hover:bg-blue-700"
                 disabled={isImporting}
               >
-                {isImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                 Bắt đầu khởi tạo
               </Button>
             </TabsContent>

@@ -69,7 +69,7 @@ export function TaskExtendDialog({ open, onOpenChange, taskId, currentDueDate }:
             Hủy
           </Button>
           <Button onClick={handleSubmit} disabled={extendMutation.isPending}>
-            {extendMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {extendMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Xác nhận
           </Button>
         </DialogFooter>

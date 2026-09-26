@@ -131,7 +131,7 @@ export function NotificationListClient() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="bg-background" onClick={() => markAllRead.mutate()} disabled={unreadCount === 0 || markAllRead.isPending}>
-            <Check className="mr-2 h-4 w-4" /> Đánh dấu tất cả đã đọc
+            <Check className="h-4 w-4" /> Đánh dấu tất cả đã đọc
           </Button>
         </div>
       </div>

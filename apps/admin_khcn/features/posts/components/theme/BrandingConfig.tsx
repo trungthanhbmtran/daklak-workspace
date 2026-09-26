@@ -74,7 +74,7 @@ export function BrandingConfig() {
                                 }}
                                 className="text-xs font-bold h-8"
                             >
-                                <X className="w-3.5 h-3.5 mr-1" /> Gỡ bỏ logo
+                                <X className="w-3.5 h-3.5" /> Gỡ bỏ logo
                             </Button>
                         </div>
                     ) : (
@@ -123,7 +123,7 @@ export function BrandingConfig() {
                                 }}
                                 className="text-xs font-bold h-8"
                             >
-                                <X className="w-3.5 h-3.5 mr-1" /> Gỡ bỏ favicon
+                                <X className="w-3.5 h-3.5" /> Gỡ bỏ favicon
                             </Button>
                         </div>
                     ) : (

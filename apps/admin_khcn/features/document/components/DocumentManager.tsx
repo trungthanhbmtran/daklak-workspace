@@ -72,14 +72,14 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
         {/* Thanh Navigation Tab */}
         <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/40 p-1">
           <TabsTrigger value="documents" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <FileText className="h-4 w-4 mr-2" /> Văn bản Bộ / Ngành
+            <FileText className="h-4 w-4" /> Văn bản Bộ / Ngành
           </TabsTrigger>
           <TabsTrigger value="consultation" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm relative">
-            <MessageSquareShare className="h-4 w-4 mr-2" /> Quản lý Lấy ý kiến
+            <MessageSquareShare className="h-4 w-4" /> Quản lý Lấy ý kiến
             <span className="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-destructive animate-pulse"></span>
           </TabsTrigger>
           <TabsTrigger value="finance" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <PieChart className="h-4 w-4 mr-2" /> Công khai Tài chính
+            <PieChart className="h-4 w-4" /> Công khai Tài chính
           </TabsTrigger>
         </TabsList>
 

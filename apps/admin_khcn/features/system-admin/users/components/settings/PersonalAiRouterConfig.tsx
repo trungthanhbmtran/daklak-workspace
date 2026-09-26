@@ -90,7 +90,7 @@ export function PersonalAiRouterConfig() {
           disabled={updateConfig.isPending} 
           className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-md hover:shadow-lg transition-all px-6 h-11 w-full sm:w-auto font-semibold"
         >
-          {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4 mr-2" /> Lưu cấu hình AI</>}
+          {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4" /> Lưu cấu hình AI</>}
         </Button>
       </CardHeader>
 
@@ -104,7 +104,7 @@ export function PersonalAiRouterConfig() {
             <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-sm">
               Hệ thống định tuyến AI cá nhân đang tắt. Hãy thêm nhà cung cấp để kích hoạt Smart Router của riêng bạn.
             </p>
-            <Button onClick={handleAddAiProvider} variant="default" className="rounded-xl shadow-sm h-11 px-6 font-semibold" iconStart={<Plus className="w-4 h-4 mr-1" />}>
+            <Button onClick={handleAddAiProvider} variant="default" className="rounded-xl shadow-sm h-11 px-6 font-semibold" iconStart={<Plus className="w-4 h-4" />}>
               Thêm cấu hình AI đầu tiên
             </Button>
           </div>
@@ -124,7 +124,7 @@ export function PersonalAiRouterConfig() {
               onClick={handleAddAiProvider} 
               variant="outline" 
               className="w-full h-14 border-dashed border-2 border-border/80 text-muted-foreground font-bold hover:bg-primary/5 hover:border-primary/40 hover:text-primary rounded-2xl transition-all shadow-sm" 
-              iconStart={<Plus className="w-5 h-5 mr-1" />}
+              iconStart={<Plus className="w-5 h-5" />}
             >
               Thêm Cấu hình AI Dự phòng
             </Button>

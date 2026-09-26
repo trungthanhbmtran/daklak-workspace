@@ -138,7 +138,7 @@ export const Topbar = ({
           onClick={onSave}
           disabled={isSaving}
         >
-          {isSaving ? <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" /> : <Save className="h-4 w-4 sm:mr-2 text-primary" />}
+          {isSaving ? <Loader2 className="h-4 w-4 sm: animate-spin" /> : <Save className="h-4 w-4 sm: text-primary" />}
           <span className="hidden sm:inline">Lưu bản nháp</span>
         </Button>
         <Button
@@ -161,12 +161,12 @@ export const Topbar = ({
                 disabled={isApplying}
               >
                 {isApplying ? (
-                  <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 sm: animate-spin" />
                 ) : (
-                  <Link2 className="h-4 w-4 sm:mr-2" />
+                  <Link2 className="h-4 w-4 sm:" />
                 )}
                 <span className="hidden sm:inline">Áp dụng nghiệp vụ</span>
-                <ChevronDown className="h-3.5 w-3.5 ml-1 sm:ml-1.5 opacity-70" />
+                <ChevronDown className="h-3.5 w-3.5 sm:ml-1.5 opacity-70" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-xl border-border/60 w-60">

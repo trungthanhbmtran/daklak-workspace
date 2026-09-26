@@ -46,7 +46,7 @@ export function PostFormHeader({ onBack, isEdit, isPending, onSubmitForm }: Prop
               onSubmitForm();
             }}
           >
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             {isEdit ? "Gửi lại phê duyệt" : "Gửi phê duyệt"}
           </Button>
         )}
@@ -58,7 +58,7 @@ export function PostFormHeader({ onBack, isEdit, isPending, onSubmitForm }: Prop
             className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[140px] shadow-lg shadow-emerald-500/20"
             disabled={isPending}
           >
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Lưu bài viết
           </Button>
         )}

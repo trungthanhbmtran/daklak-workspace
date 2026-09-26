@@ -50,7 +50,7 @@ export const DevConfig = ({ data, handleChange, onUpdate, selectedNode }: Proper
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-semibold text-muted-foreground uppercase">Hành động phụ (Side Effects)</label>
             <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary hover:bg-primary/10" onClick={() => updateSideEffects([...sideEffects, { id: Math.random().toString(36).substring(7), type: "WEBHOOK", url: "" }])}>
-              <Plus className="h-3 w-3 mr-1" /> Thêm API
+              <Plus className="h-3 w-3" /> Thêm API
             </Button>
           </div>
           <div className="space-y-3">

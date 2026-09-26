@@ -95,7 +95,7 @@ export function ApiKeysTab() {
               <Input className="h-10 rounded-md bg-background border-input focus-visible:ring-primary" placeholder="Tích hợp lấy số liệu báo cáo..." value={newApiKey.description} onChange={e => setNewApiKey({...newApiKey, description: e.target.value})} />
             </div>
             <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-primary hover:bg-primary/90 shadow-sm text-primary-foreground w-full">
-              {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Key className="w-5 h-5 mr-1.5" />}
+              {createMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Key className="w-5 h-5" />}
               Tạo Key Mới
             </Button>
           </div>

@@ -82,14 +82,14 @@ export const CalendarHeader = React.memo(function CalendarHeader({
           {onOpenAiModal && (
             <Button 
               onClick={onOpenAiModal} 
-              className="mr-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md border-0 transition-all hover:scale-105 active:scale-95 px-3 py-1.5 h-8 font-medium rounded-md"
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md border-0 transition-all hover:scale-105 active:scale-95 px-3 py-1.5 h-8 font-medium rounded-md"
               size="sm"
             >
-              <Sparkles className="w-4 h-4 mr-1.5" />
+              <Sparkles className="w-4 h-4" />
               AI Trợ lý
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={onGoToToday} className="mr-1 h-8 rounded-md px-3 font-medium">
+          <Button variant="ghost" size="sm" onClick={onGoToToday} className="h-8 rounded-md px-3 font-medium">
             Hôm nay
           </Button>
           <Button variant="ghost" size="icon" onClick={onPrevDate} className="w-8 h-8 rounded-full bg-muted/50 hover:bg-muted"><ChevronLeft className="w-4 h-4" /></Button>

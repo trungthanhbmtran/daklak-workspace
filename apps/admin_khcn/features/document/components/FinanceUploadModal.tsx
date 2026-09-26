@@ -227,7 +227,7 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
                 <input id="decision-pdf-upload" type="file" className="hidden" accept=".pdf" onChange={handleDecisionPdfChange} />
                 {!decisionPdf && (
                   <Button type="button" variant="outline" size="sm" className="bg-white border-rose-200 text-rose-700 hover:bg-rose-50" onClick={() => document.getElementById("decision-pdf-upload")?.click()}>
-                    <UploadCloud className="h-4 w-4 mr-2" /> Chọn File PDF
+                    <UploadCloud className="h-4 w-4" /> Chọn File PDF
                   </Button>
                 )}
               </div>
@@ -260,7 +260,7 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
 
                 <input id="excel-upload" type="file" className="hidden" multiple accept=".xlsx,.xls" onChange={handleExcelChange} />
                 <Button type="button" variant="outline" size="sm" className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50" onClick={() => document.getElementById("excel-upload")?.click()}>
-                  <FilePlus className="h-4 w-4 mr-2" /> Thêm Biểu mẫu
+                  <FilePlus className="h-4 w-4" /> Thêm Biểu mẫu
                 </Button>
               </div>
 
@@ -295,7 +295,7 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
         <DialogFooter className="p-4 border-t bg-muted/10 shrink-0">
           <Button variant="outline" onClick={onClose} className="w-24 bg-background">Hủy bỏ</Button>
           <Button onClick={form.handleSubmit(onSubmit)} className="w-48 shadow-md" disabled={isUploading}>
-            {isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
             Trình duyệt & Công khai
           </Button>
         </DialogFooter>

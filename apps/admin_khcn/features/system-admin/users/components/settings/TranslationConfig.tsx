@@ -43,7 +43,7 @@ export function TranslationConfig() {
           🌐 Cấu hình Dịch thuật Tiêu chuẩn
         </CardTitle>
         <Button onClick={handleSaveTranslation} disabled={updateConfig.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg px-6 h-11 w-full sm:w-auto">
-          {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4 mr-2" /> Lưu thay đổi</>}
+          {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4" /> Lưu thay đổi</>}
         </Button>
       </CardHeader>
       <CardContent className="p-6">

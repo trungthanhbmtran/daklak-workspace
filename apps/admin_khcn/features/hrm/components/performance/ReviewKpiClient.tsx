@@ -125,7 +125,7 @@ export function ReviewKpiClient() {
                 header: "Thao tác",
                 cell: (ev: any) => (
                   <Button size="sm" onClick={() => setSelectedEvalId(ev.id)}>
-                    <UserCheck className="w-4 h-4 mr-2" /> Duyệt phiếu
+                    <UserCheck className="w-4 h-4" /> Duyệt phiếu
                   </Button>
                 )
               }
@@ -243,7 +243,7 @@ export function ReviewKpiClient() {
               <div className="flex justify-end gap-3 pt-4 border-t">
                 <Button variant="outline" onClick={() => setSelectedEvalId(null)}>Hủy bỏ</Button>
                 <Button className="h-10 px-8" onClick={handleApprove} disabled={approveMutation.isPending}>
-                  {approveMutation.isPending ? "Đang xử lý..." : <><CheckCircle2 className="w-4 h-4 mr-2"/> Chốt điểm (Approve)</>}
+                  {approveMutation.isPending ? "Đang xử lý..." : <><CheckCircle2 className="w-4 h-4"/> Chốt điểm (Approve)</>}
                 </Button>
               </div>
             </div>

@@ -225,7 +225,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
             disabled={mutation.isPending}
             onClick={form.handleSubmit(onSubmit, onError)}
           >
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isEdit ? "Cập nhật Banner" : "Lưu Banner"}
           </Button>
         </div>

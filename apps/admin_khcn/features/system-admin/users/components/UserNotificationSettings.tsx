@@ -141,7 +141,7 @@ export function UserNotificationSettings({ user }: UserNotificationSettingsProps
       </CardContent>
       <CardFooter className="px-0 justify-end">
         <Button onClick={handleSave} disabled={saving}>
-          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
           Lưu Tùy Chọn
         </Button>
       </CardFooter>

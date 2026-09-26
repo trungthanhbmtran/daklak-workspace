@@ -183,12 +183,13 @@ export function OrganizationUnitEdit() {
                 className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => setDeleteOpen(true)}
               >
-                <Trash2 className="h-4 w-4 mr-1.5" /> Xóa
+                <Trash2 className="h-4 w-4" />
+                <span>Xóa</span>
               </Button>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => form.reset()}>
-                  <ArrowLeftCircleIcon className="h-4 w-4 mr-1.5" />
-                  Hoàn tác
+                  <ArrowLeftCircleIcon className="h-4 w-4" />
+                  <span>Hoàn tác</span>
                 </Button>
                 <Button type="submit" size="sm" disabled={isUpdating || !form.formState.isDirty}>
                   {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}

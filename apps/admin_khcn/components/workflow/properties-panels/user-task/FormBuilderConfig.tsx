@@ -42,7 +42,7 @@ export const FormBuilderConfig = ({ data, onUpdate, selectedNode }: PropertiesPa
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-muted-foreground">Thêm các trường dữ liệu cần nhập.</span>
           <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px] text-primary hover:bg-primary/10" onClick={() => updateFormFields([...formFields, { id: Math.random().toString(36).substring(7), name: "", label: "", type: "text" }])}>
-            <Plus className="h-3 w-3 mr-1" /> Thêm Field
+            <Plus className="h-3 w-3" /> Thêm Field
           </Button>
         </div>
         

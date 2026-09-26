@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,14 @@ export function JobTitleConfigDialog({ open, onOpenChange, jobTitle, domainId, o
         <DialogFooter className="px-6 py-4 border-t bg-muted/20 shrink-0 flex items-center justify-end gap-2">
           <Button variant="outline" className="min-w-[100px]" onClick={() => onOpenChange(false)}>Dong</Button>
           <Button className="min-w-[120px]" onClick={onSave} disabled={isSaving || !jobTitle}>
-            {isSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Dang luu...</> : "Luu thiet lap"}
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Đang lưu...</span>
+              </>
+            ) : (
+              <span>Lưu thiết lập</span>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

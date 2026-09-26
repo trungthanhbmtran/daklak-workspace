@@ -181,7 +181,7 @@ const FeedbackDetailDialog = React.memo(function FeedbackDetailDialog({
                 feedback && updateMutation.mutate({ id: feedback.id, status: "PROCESSED" })
               }
             >
-              <Check className="w-4 h-4 mr-2" /> Đánh dấu đã xử lý
+              <Check className="w-4 h-4" /> Đánh dấu đã xử lý
             </Button>
           )}
         </DialogFooter>

@@ -125,7 +125,7 @@ const ConsultationRow = React.memo(function ConsultationRow({ item, stats }: Con
           </TooltipProvider>
           <Link href={`/services/documents/consultations/${item.id}`}>
             <Button size="sm" className="h-11 px-5 rounded-2xl font-black text-[11px] bg-background text-foreground border-2 border-muted-foreground/10 hover:bg-muted/10 shadow-sm">
-              QUẢN LÝ <ChevronRight className="h-4 w-4 ml-1.5" />
+              QUẢN LÝ <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>

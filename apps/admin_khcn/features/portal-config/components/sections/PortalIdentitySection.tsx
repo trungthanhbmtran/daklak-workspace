@@ -58,9 +58,9 @@ export const PortalIdentitySection = ({ activeLangTab, isCompareMode, languages 
           className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2.5 px-6 rounded-lg shadow-md transition-all"
         >
           {isSaving ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang lưu...</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> Đang lưu...</>
           ) : (
-            <><CheckCircle2 className="w-4 h-4 mr-2" /> Lưu thông tin nhận diện</>
+            <><CheckCircle2 className="w-4 h-4" /> Lưu thông tin nhận diện</>
           )}
         </Button>
       </div>

@@ -46,7 +46,7 @@ function AppCard({ app }: { app: AppItem }) {
         ) : (
           <Link href={app.href} className="w-full">
             <Button className="w-full rounded-xl shadow-sm group-hover:shadow-md transition-all">
-              Truy cập <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              Truy cập <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </Link>
         )}

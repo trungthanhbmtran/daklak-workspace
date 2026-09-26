@@ -322,7 +322,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                   className="rounded-xl hover:bg-primary/5 hover:text-primary group/btn shrink-0"
                   onClick={() => setSelectedWorkflow(workflow)}
                 >
-                  Chi tiết <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-0.5" />
+                  Chi tiết <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-0.5" />
                 </Button>
               </div>
             </div>
@@ -458,10 +458,10 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                     setSelectedWorkflow(null);
                   }}
                 >
-                  <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa luồng (BPMN Editor)
+                  <Edit2 className="h-4 w-4" /> Chỉnh sửa luồng (BPMN Editor)
                 </Button>
                 <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { setTestContext("{\n  \n}"); setTestRunWorkflow(selectedWorkflow); }}>
-                  <Play className="mr-2 h-4 w-4" /> Chạy thử quy trình
+                  <Play className="h-4 w-4" /> Chạy thử quy trình
                 </Button>
               </div>
             </>
@@ -494,7 +494,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
               Hủy
             </Button>
             <Button onClick={handleStartTestRun} disabled={isTestRunning}>
-              {isTestRunning ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />} Bắt đầu chạy
+              {isTestRunning ? <Activity className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Bắt đầu chạy
             </Button>
           </DialogFooter>
         </DialogContent>

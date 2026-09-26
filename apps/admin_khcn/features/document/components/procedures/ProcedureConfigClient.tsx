@@ -270,7 +270,7 @@ export function ProcedureConfigClient() {
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
             <Button onClick={handleSubmit} disabled={createProcedure.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              {createProcedure.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Lưu Mẫu hồ sơ
+              {createProcedure.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Lưu Mẫu hồ sơ
             </Button>
           </DialogFooter>
         </DialogContent>

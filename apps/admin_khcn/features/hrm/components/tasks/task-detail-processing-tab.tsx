@@ -290,7 +290,7 @@ export function TaskProcessingTab({
                 onClick={handleStartTask}
                 disabled={updateStatus.isPending}
               >
-                {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+                {updateStatus.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
                 Bắt đầu làm
               </Button>
             </div>
@@ -365,7 +365,7 @@ export function TaskProcessingTab({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
               >
-                {isUploading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                 Đính kèm file
               </Button>
             </div>
@@ -373,7 +373,7 @@ export function TaskProcessingTab({
           <DialogFooter>
             <Button variant="outline" onClick={() => setCompletingItem(null)}>Hủy</Button>
             <Button onClick={handleSubmitEvidence} disabled={isSubmittingEvidence || isUploading}>
-              {isSubmittingEvidence && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isSubmittingEvidence && <Loader2 className="w-4 h-4 animate-spin" />}
               Lưu minh chứng
             </Button>
           </DialogFooter>

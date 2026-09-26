@@ -60,10 +60,10 @@ export function PortalMenuClient() {
             onClick={() => setIsQuickSetupOpen(true)}
             className="border-primary/20 text-primary hover:bg-primary/10 font-bold"
           >
-            <Zap className="w-4 h-4 mr-2 text-amber-500 fill-amber-500" /> Thiết lập nhanh
+            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" /> Thiết lập nhanh
           </Button>
           <Button onClick={() => handleOpenDialog()} className="shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
-            <Plus className="w-4 h-4 mr-2" /> Thêm Menu mới
+            <Plus className="w-4 h-4" /> Thêm Menu mới
           </Button>
         </div>
       </div>

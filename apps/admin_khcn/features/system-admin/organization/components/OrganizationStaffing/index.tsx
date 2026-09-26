@@ -299,7 +299,7 @@ export function OrganizationStaffing() {
                   {(j.domain?.name ||
                     j.geographicArea?.name ||
                     (j.monitoredUnits?.length ?? 0) > 0) && (
-                    <span className="ml-1.5 text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">•</span>
                   )}
                 </Button>
               ))}

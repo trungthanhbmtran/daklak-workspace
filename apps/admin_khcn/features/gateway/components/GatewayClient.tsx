@@ -60,15 +60,15 @@ export function GatewayClient() {
         <div className="shrink-0 flex justify-start mb-4 overflow-x-auto pb-1">
           <TabsList className="h-10 bg-muted/50 border border-border/50 backdrop-blur">
               <TabsTrigger value="services" className="rounded-sm px-4">
-                <Network className="w-4 h-4 mr-2" />
+                <Network className="w-4 h-4" />
                 Services
               </TabsTrigger>
               <TabsTrigger value="routes" className="rounded-sm px-4">
-                <RouteIcon className="w-4 h-4 mr-2" />
+                <RouteIcon className="w-4 h-4" />
                 Routes
               </TabsTrigger>
               <TabsTrigger value="apikeys" className="rounded-sm px-4">
-                <Key className="w-4 h-4 mr-2" />
+                <Key className="w-4 h-4" />
                 API Keys
               </TabsTrigger>
             </TabsList>

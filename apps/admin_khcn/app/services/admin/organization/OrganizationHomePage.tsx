@@ -37,7 +37,7 @@ export default function OrganizationHomePage() {
               Hệ thống chưa có đơn vị nào. Bạn đang có quyền quản trị, vui lòng khởi tạo cơ cấu tổ chức đầu tiên.
             </p>
             <Button onClick={() => router.push("/services/admin/organization/create")} className="mt-2">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4" />
               Tạo đơn vị đầu tiên
             </Button>
           </div>

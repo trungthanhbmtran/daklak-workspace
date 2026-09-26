@@ -117,7 +117,7 @@ export default function DocumentPublishingPage() {
             onClick={handlePublish}
             disabled={!selectedDoc || isUpdating}
           >
-            {isUpdating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
             Đăng tải Công khai
           </Button>
         </div>
@@ -199,7 +199,7 @@ export default function DocumentPublishingPage() {
                 </div>
                 <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10 font-bold" asChild>
                   <a href={`/services/documents/processing/${selectedDoc.id}`} target="_blank">
-                    Xem chi tiết <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                    Xem chi tiết <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </Button>
               </CardContent>

@@ -158,7 +158,7 @@ export function TaskRespondDialog({ open, onOpenChange, taskId, action }: TaskRe
               Hủy
             </Button>
             <Button type="submit" disabled={isPending || !reason.trim()} className={isReject ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}>
-              {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               {isReject ? "Từ chối" : "Gửi yêu cầu"}
             </Button>
           </DialogFooter>

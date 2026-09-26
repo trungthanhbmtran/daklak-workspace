@@ -163,7 +163,7 @@ export const PropertiesPanel = ({
                 onOpenChange(false);
               }}
             >
-              <Trash2 className="w-4 h-4 mr-2" />
+              <Trash2 className="w-4 h-4" />
               Xóa {selectedNode ? "Node" : "Edge"}
             </Button>
           </div>

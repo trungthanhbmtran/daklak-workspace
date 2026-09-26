@@ -146,7 +146,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
             className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2"
             onClick={() => window.open(`/api/v1/admin/media/download/${cat.attachmentId}`, '_blank')}
           >
-            <FileText className="h-4 w-4 mr-1" /> Xem
+            <FileText className="h-4 w-4" /> Xem
           </Button>
         ) : (
           <Text as="span" className="text-muted-foreground italic font-normal text-xs">N/A</Text>

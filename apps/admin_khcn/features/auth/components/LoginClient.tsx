@@ -162,12 +162,12 @@ export function LoginClient() {
               >
                 {isRedirecting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Đang chuyển hướng...
                   </>
                 ) : loginMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Đang xác thực...
                   </>
                 ) : (

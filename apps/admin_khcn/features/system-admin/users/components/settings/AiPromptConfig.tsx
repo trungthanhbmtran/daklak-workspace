@@ -318,7 +318,7 @@ Nhiệm vụ cốt lõi của bạn là hỗ trợ ban lãnh đạo và cán b�
           disabled={updateMultiple.isPending}
           className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-md hover:shadow-lg transition-all px-6 h-11 w-full sm:w-auto font-semibold"
         >
-          {updateMultiple.isPending ? 'Đang cập nhật não bộ...' : <><Save className="w-4 h-4 mr-2" /> Lưu Cấu hình</>}
+          {updateMultiple.isPending ? 'Đang cập nhật não bộ...' : <><Save className="w-4 h-4" /> Lưu Cấu hình</>}
         </Button>
       </CardHeader>
 

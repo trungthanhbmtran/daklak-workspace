@@ -44,7 +44,7 @@ export function AttendeesField({ attendees, setAttendees }: Props) {
         {attendees.map((name, i) => (
           <Badge key={i} className="pl-3 pr-1 py-1.5 bg-background text-foreground border shadow-sm group">
             {name}
-            <Button type="button" onClick={() => removeAttendee(i)} className="ml-2 p-0.5 rounded-full hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button type="button" onClick={() => removeAttendee(i)} className="p-0.5 rounded-full hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
               <X className="h-3 w-3" />
             </Button>
           </Badge>

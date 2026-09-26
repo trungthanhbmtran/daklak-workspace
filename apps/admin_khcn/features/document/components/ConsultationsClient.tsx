@@ -78,7 +78,7 @@ export function ConsultationsClient() {
                   onClick={() => setIsModalOpen(true)}
                   className="flex-1 md:flex-none rounded-xl shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 font-bold px-6"
                >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4" />
                   Tạo đợt lấy ý kiến
                </Button>
             </div>
@@ -217,7 +217,7 @@ export function ConsultationsClient() {
                                  className="block"
                               >
                                  <Button variant="outline" className="w-full justify-start h-12 rounded-xl bg-background border-muted hover:border-primary/40 hover:bg-primary/5 group/btn transition-all">
-                                    <Download className="h-5 w-5 mr-3 text-primary group-hover/btn:scale-110 transition-transform" />
+                                    <Download className="h-5 w-5 text-primary group-hover/btn:scale-110 transition-transform" />
                                     <div className="text-left overflow-hidden">
                                        <p className="text-[11px] font-bold text-muted-foreground uppercase leading-none mb-1">Download</p>
                                        <p className="text-sm font-black text-foreground truncate">Dự thảo văn bản.pdf</p>
@@ -234,7 +234,7 @@ export function ConsultationsClient() {
                         <div className="space-y-3">
                            <Link href={`/services/documents/consultations/${con.id}`} className="block">
                               <Button className="w-full h-14 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-black shadow-xl shadow-foreground/10 text-lg group/more">
-                                 Chi tiết <ArrowRight className="h-5 w-5 ml-3 group-hover/more:translate-x-1 transition-transform" />
+                                 Chi tiết <ArrowRight className="h-5 w-5 group-hover/more:translate-x-1 transition-transform" />
                               </Button>
                            </Link>
                            <Button variant="ghost" className="w-full h-12 rounded-xl font-bold text-muted-foreground hover:text-primary">

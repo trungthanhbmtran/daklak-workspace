@@ -66,7 +66,7 @@ export function DocumentsDashboardClient() {
           <Button variant="outline" className="bg-background shadow-sm" iconStart={<BarChart3 className="h-4 w-4" />}>Báo cáo thống kê</Button>
           <Link href="/services/documents/incoming">
             <Button className="shadow-sm">
-              Vào sổ văn bản ngay <ArrowRight className="h-4 w-4 ml-2" />
+              Vào sổ văn bản ngay <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
         </div>
@@ -189,7 +189,7 @@ export function DocumentsDashboardClient() {
                         </div>
                         <Link href={`/services/documents/processing/${task.id}`} className="w-full sm:w-auto">
                           <Button size="sm" className="h-8 text-xs w-full shadow-sm">
-                            Xử lý ngay <CornerUpRight className="h-3.5 w-3.5 ml-1.5" />
+                            Xử lý ngay <CornerUpRight className="h-3.5 w-3.5" />
                           </Button>
                         </Link>
                       </div>
@@ -200,7 +200,7 @@ export function DocumentsDashboardClient() {
               <div className="p-3 border-t bg-muted/10 text-center">
                 <Link href="/services/documents/processing">
                   <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary">
-                    Xem tất cả văn bản chờ xử lý <ArrowRight className="h-3 w-3 ml-1" />
+                    Xem tất cả văn bản chờ xử lý <ArrowRight className="h-3 w-3" />
                   </Button>
                 </Link>
               </div>

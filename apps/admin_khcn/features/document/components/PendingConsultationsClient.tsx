@@ -44,7 +44,7 @@ export function PendingConsultationsClient() {
             </Link>
             <h2 className="text-2xl font-bold tracking-tight text-foreground">Văn bản chờ Ý kiến</h2>
           </div>
-          <p className="text-sm text-muted-foreground ml-10">Danh sách các dự thảo văn bản đang chờ bạn hoặc đơn vị bạn tham gia đóng góp ý kiến.</p>
+          <p className="text-sm text-muted-foreground">Danh sách các dự thảo văn bản đang chờ bạn hoặc đơn vị bạn tham gia đóng góp ý kiến.</p>
         </div>
       </div>
 

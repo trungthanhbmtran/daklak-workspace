@@ -173,7 +173,7 @@ export function PersonalAiAssistants() {
           <Bot className="w-6 h-6 text-primary" />
           Quản lý Trợ lý AI (Custom Assistants)
         </h3>
-        <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4 mr-1" />} className="w-full sm:w-auto h-10 px-4">
+        <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4" />} className="w-full sm:w-auto h-10 px-4">
           Tạo Trợ lý
         </Button>
       </div>
@@ -198,9 +198,9 @@ export function PersonalAiAssistants() {
               </div>
 
               <div className="flex flex-wrap gap-2 pt-1 mt-auto">
-                <Button size="sm" variant="outline" className="flex-1 min-w-[80px]" onClick={() => handleOpenEdit(assistant)}><Edit className="w-3.5 h-3.5 mr-1.5"/> Sửa</Button>
-                <Button size="sm" variant="outline" className="flex-1 min-w-[90px]" onClick={() => handleOpenKnowledge(assistant)}><FileText className="w-3.5 h-3.5 mr-1.5"/> Tri thức</Button>
-                <Button size="sm" className="flex-1 min-w-[80px]" onClick={() => handleOpenChat(assistant)}><Bot className="w-3.5 h-3.5 mr-1.5"/> Chat</Button>
+                <Button size="sm" variant="outline" className="flex-1 min-w-[80px]" onClick={() => handleOpenEdit(assistant)}><Edit className="w-3.5 h-3.5"/> Sửa</Button>
+                <Button size="sm" variant="outline" className="flex-1 min-w-[90px]" onClick={() => handleOpenKnowledge(assistant)}><FileText className="w-3.5 h-3.5"/> Tri thức</Button>
+                <Button size="sm" className="flex-1 min-w-[80px]" onClick={() => handleOpenChat(assistant)}><Bot className="w-3.5 h-3.5"/> Chat</Button>
                 <Button size="icon" variant="outline" className="text-red-500 hover:bg-red-50 border-red-100 hover:border-red-200" onClick={() => handleDelete(assistant.id)}><Trash2 className="w-4 h-4" /></Button>
               </div>
             </CardContent>
@@ -211,7 +211,7 @@ export function PersonalAiAssistants() {
             <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
             <h4 className="text-lg font-semibold text-foreground mb-1">Chưa có trợ lý AI</h4>
             <p className="text-sm text-muted-foreground mb-4">Bạn chưa tạo bất kỳ trợ lý AI nào. Hãy tạo một trợ lý để bắt đầu.</p>
-            <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4 mr-1" />}>Tạo Trợ lý AI đầu tiên</Button>
+            <Button onClick={handleOpenCreate} iconStart={<Plus className="w-4 h-4" />}>Tạo Trợ lý AI đầu tiên</Button>
           </div>
         )}
       </div>
@@ -250,7 +250,7 @@ export function PersonalAiAssistants() {
           </div>
           <DialogFooter>
             <Button className="w-full sm:w-auto h-11 px-8" onClick={handleSave}>
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-4 h-4" />
               Lưu thông tin
             </Button>
           </DialogFooter>
@@ -315,9 +315,9 @@ export function PersonalAiAssistants() {
           <DialogFooter>
             <Button className="w-full h-11" onClick={handleSaveKnowledge} disabled={addKnowledgeSource.isPending || isUploading}>
               {(addKnowledgeSource.isPending || isUploading) ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang xử lý tải lên...</>
+                <><Loader2 className="w-4 h-4 animate-spin" /> Đang xử lý tải lên...</>
               ) : (
-                <><Save className="w-4 h-4 mr-2" /> Lưu & Học tài liệu này</>
+                <><Save className="w-4 h-4" /> Lưu & Học tài liệu này</>
               )}
             </Button>
           </DialogFooter>

@@ -83,7 +83,7 @@ export function MinutesForm({ onComplete, onCancel }: { onComplete: () => void, 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="ghost" onClick={onCancel} className="rounded-xl px-8">Hủy bỏ</Button>
             <Button type="submit" className="rounded-xl px-10 shadow-lg shadow-primary/20 bg-primary" disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Lưu & Phát hành biên bản
             </Button>
           </div>

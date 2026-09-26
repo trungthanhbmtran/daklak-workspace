@@ -93,8 +93,8 @@ export function CreateDossierModal({
             className="bg-indigo-600 hover:bg-indigo-700"
           >
             {createDossier.isPending
-              ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              : <Save className="h-4 w-4 mr-2" />
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <Save className="h-4 w-4" />
             }
             Tiếp nhận Hồ sơ
           </Button>

@@ -201,7 +201,7 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
                   disabled={!prompt.trim() || isGenerating}
                   className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 h-11 w-11 p-0 rounded-xl transition-transform active:scale-95"
                 >
-                  <Send className="w-5 h-5 ml-1" />
+                  <Send className="w-5 h-5" />
                 </Button>
               </div>
             </>
@@ -212,7 +212,7 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
                 Hủy bỏ
               </Button>
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 rounded-xl h-10 px-6 font-medium transition-transform active:scale-95" onClick={handleAddEvents} disabled={isAdding}>
-                {isAdding ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 Thêm vào Lịch
               </Button>
             </div>

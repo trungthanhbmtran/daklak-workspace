@@ -84,8 +84,8 @@ export function DocumentCabinetClient() {
           className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[150px]"
         >
           {(isUploading || addFile.isPending)
-            ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            : <Upload className="mr-2 h-4 w-4" />}
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <Upload className="h-4 w-4" />}
           {(isUploading || addFile.isPending) ? "Đang tải..." : "Tải tài liệu lên"}
         </Button>
       </div>

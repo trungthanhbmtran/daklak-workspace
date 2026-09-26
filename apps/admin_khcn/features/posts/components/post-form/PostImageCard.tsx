@@ -42,7 +42,7 @@ export function PostImageCard() {
                   <Maximize2 className="h-4 w-4" />
                 </Button>
                 <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-                  <UploadCloud className="h-4 w-4 mr-2" /> Đổi ảnh
+                  <UploadCloud className="h-4 w-4" /> Đổi ảnh
                 </Button>
                 <Button type="button" variant="destructive" size="icon" onClick={removeImage}>
                   <X className="h-4 w-4" />

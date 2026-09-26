@@ -663,7 +663,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
             className="rounded-xl px-10 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all bg-primary hover:bg-primary/90"
             disabled={isProcessing || isCreating || isUploading}
           >
-            {isProcessing || isCreating || isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            {isProcessing || isCreating || isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
             Xác nhận vào sổ
           </Button>
         </DialogFooter>

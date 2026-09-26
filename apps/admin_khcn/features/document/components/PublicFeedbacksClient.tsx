@@ -110,7 +110,7 @@ const FeedbackCard = React.memo(function FeedbackCard({ fb }: FeedbackCardProps)
                   onClick={() => handleModerate("APPROVED")}
                   disabled={isActionLoading}
                 >
-                  <CheckSquare className="h-4 w-4 mr-1.5" /> Phê duyệt cho hiển thị
+                  <CheckSquare className="h-4 w-4" /> Phê duyệt cho hiển thị
                 </Button>
                 <Button
                   variant="outline"
@@ -119,7 +119,7 @@ const FeedbackCard = React.memo(function FeedbackCard({ fb }: FeedbackCardProps)
                   onClick={() => handleModerate("REJECTED")}
                   disabled={isActionLoading}
                 >
-                  <XCircle className="h-4 w-4 mr-1.5" /> Từ chối / Spam
+                  <XCircle className="h-4 w-4" /> Từ chối / Spam
                 </Button>
               </>
             )}

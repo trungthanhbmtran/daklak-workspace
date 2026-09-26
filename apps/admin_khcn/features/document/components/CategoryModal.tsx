@@ -114,7 +114,7 @@ export function CategoryModal({ isOpen, onClose, category, groupCode }: Category
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl">Hủy</Button>
               <Button type="submit" className="rounded-xl px-6 shadow-lg shadow-primary/20" disabled={isLoading}>
-                {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {category ? "Lưu thay đổi" : "Tạo danh mục"}
               </Button>
             </DialogFooter>

@@ -149,7 +149,7 @@ export function ReportDashboard() {
           <p className="text-slate-500 text-sm mt-1">Tổng hợp các biểu đồ phân tích và thống kê hệ thống</p>
         </div>
         <Button onClick={() => setIsBuilding(true)} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl h-10 px-6 shadow-md shadow-violet-500/20">
-          <Plus className="w-4 h-4 mr-2" /> Thêm Báo Cáo Mới
+          <Plus className="w-4 h-4" /> Thêm Báo Cáo Mới
         </Button>
       </div>
 
@@ -163,7 +163,7 @@ export function ReportDashboard() {
           <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Chưa có báo cáo nào</h3>
           <p className="text-slate-500 max-w-sm mb-6">Tạo biểu đồ báo cáo tuỳ chỉnh đầu tiên của bạn để theo dõi các chỉ số quan trọng.</p>
           <Button onClick={() => setIsBuilding(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4" />
             Tạo Báo Cáo
           </Button>
         </div>

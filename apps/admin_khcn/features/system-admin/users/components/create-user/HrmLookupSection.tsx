@@ -139,7 +139,7 @@ export function HrmLookupSection({ isOpen }: Props) {
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 h-8 px-2"
             title="Hủy chọn nhân sự này"
           >
-            <X className="h-4 w-4 mr-1" /> Bỏ chọn
+            <X className="h-4 w-4" /> Bỏ chọn
           </Button>
         </div>
       ) : (
@@ -155,7 +155,7 @@ export function HrmLookupSection({ isOpen }: Props) {
               className="flex-1 bg-muted/20"
             />
             <Button type="button" variant="secondary" disabled={hrmKeyword.trim().length < 2 || hrmFetching}>
-              {(hrmSearching || hrmFetching) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 sm:mr-2" />}
+              {(hrmSearching || hrmFetching) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 sm:" />}
               <span className="hidden sm:inline">Tìm kiếm</span>
             </Button>
           </div>

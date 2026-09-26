@@ -66,7 +66,7 @@ export function RoleSidebar() {
           </div>
           <Button variant="outline" size="sm" className="h-8 px-2 md:px-3 font-semibold text-xs md:text-sm" asChild>
             <Link href="/services/admin/roles/create">
-              <Plus className="mr-1 h-3 w-3" /> Thêm mới
+              <Plus className="h-3 w-3" /> Thêm mới
             </Link>
           </Button>
         </div>

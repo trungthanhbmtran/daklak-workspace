@@ -126,7 +126,7 @@ export function EditRolesModal({ user, isOpen, onClose, onSave, isSaving }: Edit
             Hủy
           </Button>
           <Button onClick={handleSubmit} disabled={rolesLoading || roles.length === 0 || isSaving}>
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Lưu vai trò
           </Button>
         </DialogFooter>

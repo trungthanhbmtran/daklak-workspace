@@ -191,7 +191,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
             <div className="flex items-center gap-3">
               <Button type="button" variant="ghost" onClick={() => router.back()} className="font-bold text-slate-600">Hủy</Button>
               <Button type="submit" disabled={submitting || isUploading || isLoadingEmployee} className="rounded-xl bg-blue-700 hover:bg-blue-800 px-8 h-11 font-bold shadow-lg shadow-blue-200">
-                {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 LƯU HỒ SƠ
               </Button>
             </div>

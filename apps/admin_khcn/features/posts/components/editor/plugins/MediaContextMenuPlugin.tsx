@@ -34,7 +34,7 @@ const MenuItem = ({ icon: Icon, label, onClick, isDestructive }: any) => (
       isDestructive && "text-destructive hover:bg-destructive/10 font-medium"
     )}
   >
-    <Icon className="mr-2 h-4 w-4" />
+    <Icon className="h-4 w-4" />
     {label}
   </Button>
 );

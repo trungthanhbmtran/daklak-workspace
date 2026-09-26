@@ -114,13 +114,13 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 <div className="flex gap-2">
                   {canReassign && !isCompleted && (
                     <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
-                      <Briefcase className="w-3 h-3 mr-1" />
+                      <Briefcase className="w-3 h-3" />
                       Giao lại / Phối hợp
                     </Button>
                   )}
                   {isAssigner && !isCompleted && (
                     <Button variant="outline" size="sm" onClick={() => setIsExtendOpen(true)} className="text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-100 hover:text-purple-700">
-                      <Calendar className="w-3 h-3 mr-1" />
+                      <Calendar className="w-3 h-3" />
                       Gia hạn
                     </Button>
                   )}
@@ -242,7 +242,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="processing">Xử lý & Cập nhật</TabsTrigger>
               <TabsTrigger value="discussion">
-                <MessageSquare className="w-3 h-3 mr-1" />
+                <MessageSquare className="w-3 h-3" />
                 Trao đổi {comments.length > 0 && `(${comments.length})`}
               </TabsTrigger>
               <TabsTrigger value="history">Lịch sử</TabsTrigger>

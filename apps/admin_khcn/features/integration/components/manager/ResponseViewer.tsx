@@ -180,7 +180,7 @@ export function ResponseViewer({ result, isLoading }: ResponseViewerProps) {
             className="h-6 px-2 text-xs text-slate-400 hover:text-slate-300 hover:bg-slate-800"
             onClick={handleCopy}
           >
-            {copied ? <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             Copy
           </Button>
         </div>

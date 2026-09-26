@@ -168,10 +168,10 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                   {!comp.fileUrl ? (
                     <>
                       <Button onClick={() => handleUploadClick(comp.id)} disabled={isUploading && selectedCompId === comp.id} variant="outline" size="sm" className="flex-1 md:flex-none border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                        <Upload className="mr-2 h-3 w-3" /> {isUploading && selectedCompId === comp.id ? "Đang tải..." : "Tải lên"}
+                        <Upload className="h-3 w-3" /> {isUploading && selectedCompId === comp.id ? "Đang tải..." : "Tải lên"}
                       </Button>
                       <Button onClick={() => handleCabinetClick(comp.id)} disabled={isUploading && selectedCompId === comp.id} variant="secondary" size="sm" className="flex-1 md:flex-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
-                        <LinkIcon className="mr-2 h-3 w-3" /> Từ Tủ VB
+                        <LinkIcon className="h-3 w-3" /> Từ Tủ VB
                       </Button>
                     </>
                   ) : (

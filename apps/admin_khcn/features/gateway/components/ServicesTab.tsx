@@ -129,7 +129,7 @@ export function ServicesTab() {
             </div>
 
             <Button onClick={handleCreate} disabled={createMutation.isPending} className="h-10 md:col-span-3 rounded-md bg-primary hover:bg-primary/90 shadow-sm text-primary-foreground w-full">
-              {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-1.5 animate-spin" /> : <Plus className="w-5 h-5 mr-1.5" />}
+              {createMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
               Khởi tạo Service
             </Button>
           </div>

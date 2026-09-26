@@ -182,7 +182,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       {/* Sidebar Configuration */}
       <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex flex-col">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={onBack} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 -ml-2" iconStart={<ChevronLeft className="w-4 h-4" />}>Trở lại</Button>
+          <Button variant="ghost" size="sm" onClick={onBack} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 -" iconStart={<ChevronLeft className="w-4 h-4" />}>Trở lại</Button>
           <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400 font-semibold text-sm">
             <Settings className="w-4 h-4" /> Cấu hình
           </div>
@@ -269,42 +269,42 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
                 className={`w-full justify-start ${chartType === 'bar' ? 'bg-violet-600 hover:bg-violet-700 text-white' : ''}`}
                 onClick={() => setChartType('bar')}
               >
-                <BarChart2 className="w-4 h-4 mr-2" /> Cột
+                <BarChart2 className="w-4 h-4" /> Cột
               </Button>
               <Button
                 variant={chartType === 'line' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'line' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
                 onClick={() => setChartType('line')}
               >
-                <LineChartIcon className="w-4 h-4 mr-2" /> Đường
+                <LineChartIcon className="w-4 h-4" /> Đường
               </Button>
               <Button
                 variant={chartType === 'pie' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'pie' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
                 onClick={() => setChartType('pie')}
               >
-                <PieChart className="w-4 h-4 mr-2" /> Tròn
+                <PieChart className="w-4 h-4" /> Tròn
               </Button>
               <Button
                 variant={chartType === 'area' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'area' ? 'bg-teal-600 hover:bg-teal-700 text-white' : ''}`}
                 onClick={() => setChartType('area')}
               >
-                <LineChartIcon className="w-4 h-4 mr-2" /> Vùng (Area)
+                <LineChartIcon className="w-4 h-4" /> Vùng (Area)
               </Button>
               <Button
                 variant={chartType === 'doughnut' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'doughnut' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''}`}
                 onClick={() => setChartType('doughnut')}
               >
-                <PieChart className="w-4 h-4 mr-2" /> Vành Khuyên
+                <PieChart className="w-4 h-4" /> Vành Khuyên
               </Button>
               <Button
                 variant={chartType === 'table' ? 'default' : 'outline'}
                 className={`w-full justify-start ${chartType === 'table' ? 'bg-slate-800 hover:bg-slate-900 text-white' : ''}`}
                 onClick={() => setChartType('table')}
               >
-                <Table2 className="w-4 h-4 mr-2" /> Bảng
+                <Table2 className="w-4 h-4" /> Bảng
               </Button>
             </div>
           </div>

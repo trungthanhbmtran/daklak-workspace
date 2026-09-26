@@ -58,7 +58,7 @@ export function UserClient() {
           className="shrink-0 w-full sm:w-auto"
           onClick={() => ui.setters.setIsCreateOpen(true)}
         >
-          <Plus className="mr-2 h-4 w-4" /> Thêm người dùng
+          <Plus className="h-4 w-4" /> Thêm người dùng
         </Button>
       </div>
 

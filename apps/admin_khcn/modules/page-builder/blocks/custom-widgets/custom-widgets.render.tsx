@@ -344,7 +344,7 @@ export const ExternalLinksRender: React.FC<{ widget: Widget; activeLang: string 
               <Link2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <span className="text-[10px] font-black uppercase truncate tracking-wide">{link.title || (currentLang === "en" ? "Link" : "Liên kết")}</span>
             </div>
-            <ChevronRight className="w-3 h-3 text-slate-400 shrink-0 ml-2" />
+            <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           </a>
         </Button>
       ))}

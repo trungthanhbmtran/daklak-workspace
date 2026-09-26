@@ -261,7 +261,7 @@ export function PopoverMultiSelect({
           {selectedIds.length > 0 && (
             <Badge
               variant="secondary"
-              className="ml-2 bg-primary/10 text-primary shrink-0"
+              className="bg-primary/10 text-primary shrink-0"
             >
               {selectedIds.length} đã chọn
             </Badge>
@@ -387,8 +387,8 @@ export function PopoverMultiSelect({
               >
                 {isFetchingNextPage ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                    Đang tải...
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Đang tải...</span>
                   </>
                 ) : (
                   "Tải thêm kết quả..."

@@ -113,7 +113,7 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                 });
               }}
             >
-              <Plus className="h-3 w-3 mr-1" /> Thêm quyền
+              <Plus className="h-3 w-3" /> Thêm quyền
             </Button>
           </div>
 
@@ -147,7 +147,7 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                           {role}
                           <Button
                             type="button"
-                            className="ml-1 text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
+                            className="text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
                             onClick={() => {
                               const newRoles = (roles as string[]).filter(r => r !== role);
                               onUpdate(selectedNode.id, {

@@ -341,7 +341,7 @@ export function TaskList() {
               className: "text-right",
               cell: (task: any) => (
                 <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
-                  <Eye className="w-3 h-3 mr-1" />
+                  <Eye className="w-3 h-3" />
                   Chi tiết
                 </Button>
               )

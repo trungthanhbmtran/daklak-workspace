@@ -316,7 +316,7 @@ export function PersonalKpiClient() {
                   Khôi phục (Reset)
                 </Button>
                 <Button onClick={handleSubmit} disabled={submitMutation.isPending}>
-                  {submitMutation.isPending ? "Đang gửi..." : <><Send className="w-4 h-4 mr-2"/> Gửi Phiếu Đánh Giá</>}
+                  {submitMutation.isPending ? "Đang gửi..." : <><Send className="w-4 h-4"/> Gửi Phiếu Đánh Giá</>}
                 </Button>
               </CardFooter>
             )}

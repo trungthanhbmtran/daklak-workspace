@@ -109,7 +109,7 @@ export function MenuSidebar() {
           </Heading>
           <Button size="sm" variant="ghost" className="h-8 px-2 md:px-3 text-xs md:text-sm font-medium text-primary hover:bg-primary/10" asChild>
             <Link href="/services/admin/menus/create">
-              <Plus className="h-4 w-4 mr-1" /> Thêm gốc
+              <Plus className="h-4 w-4" /> Thêm gốc
             </Link>
           </Button>
         </div>
