@@ -491,6 +491,15 @@ export class UsersService implements OnModuleInit {
       where: { id },
       include: {
         policies: { include: { resource: true } },
+        UserToUserGroup: {
+          include: {
+            user_groups: {
+              include: {
+                policies: { include: { resource: true } }
+              }
+            }
+          }
+        },
         jobPositions: {
           where: { endDate: null },
           include: { unit: true, jobTitle: true },
@@ -514,7 +523,17 @@ export class UsersService implements OnModuleInit {
     const permissionsFlattenSet = new Set<string>();
     const policiesList: any[] = [];
 
-    for (const policy of user.policies ?? []) {
+    const allPolicies = [...(user.policies ?? [])];
+    if (user.UserToUserGroup) {
+      for (const utg of user.UserToUserGroup) {
+        if (utg.user_groups && utg.user_groups.policies) {
+          allPolicies.push(...utg.user_groups.policies);
+          roleNames.push(utg.user_groups.name);
+        }
+      }
+    }
+
+    for (const policy of allPolicies) {
         const resourceCode = policy.resource?.code ?? '';
         if (resourceCode && policy.action) {
           permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);

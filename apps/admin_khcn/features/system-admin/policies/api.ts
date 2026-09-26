@@ -17,8 +17,13 @@ import { PolicyFilter, Permission } from "./types";
 
 /** Response từ GET /policys — gateway trả về { data: { policys } } hoặc { data: [...] } */
 const policysListRes = (res: unknown): Policy[] => {
-  const data = (res as { data?: { policys?: unknown[] } | unknown[] })?.data;
-  const list = Array.isArray(data) ? data : (data && Array.isArray((data as { policys?: unknown[] }).policys) ? (data as { policys: unknown[] }).policys : []);
+  const rawData = (res as { data?: any })?.data ?? res;
+  let list: any[] = [];
+  if (Array.isArray(rawData)) {
+    list = rawData;
+  } else if (rawData && typeof rawData === 'object') {
+    list = rawData.userGroups || rawData.user_groups || rawData.policys || [];
+  }
   return list.map((r: unknown) => {
     const row = r as Record<string, unknown>;
     const rawPolicies = (row.policies as any[]) || [];
