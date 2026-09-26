@@ -56,9 +56,12 @@ export const userApi = {
   list: async (params?: { page?: number; limit?: number; search?: string }): Promise<{ data: UserItem[], meta: { total: number } }> => {
     try {
       const res = await apiClient.get("/users", { params });
-      const rawData = (res as any)?.data ?? res;
-      const meta = rawData?.meta ?? { total: 0 };
-      const arr = Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData) ? rawData : []);
+      const rawRes = res as any;
+      
+      // Axios interceptor returns the raw JSON body: { success: true, data: [...], meta: { total, skip, take } }
+      const meta = rawRes?.meta ?? { total: 0 };
+      const arr = Array.isArray(rawRes?.data) ? rawRes.data : [];
+      
       return {
         data: arr.map((r: any) => normalizeUser(r as Record<string, unknown>)),
         meta

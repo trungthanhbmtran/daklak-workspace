@@ -23,8 +23,7 @@ import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { policyApi } from "../api";
 import { policyKeys } from "../keys";
 
-// Lazy load: chỉ tải khi có policy được chọn / tạo mới
-const PolicyCardDialog = lazy(() => import("./PolicyCardDialog"));
+const PermissionMatrixTable = lazy(() => import("./PermissionMatrixTable").then(mod => ({ default: mod.PermissionMatrixTable })));
 
 interface PolicyFormProps {
   policyId?: number; // Nếu có policyId => Edit Mode. Nếu không => Create Mode
@@ -223,22 +222,13 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {isLoadingPerms ? (
-                  Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="border rounded-xl bg-muted/30 animate-pulse h-[100px]" />
-                  ))
-                ) : (
-                  Object.entries(groupedPermissions).map(([resourceName, perms]) => (
-                    <Suspense
-                      key={resourceName}
-                      fallback={<div className="border rounded-xl bg-muted/30 animate-pulse h-[100px]" />}
-                    >
-                      <PolicyCardDialog resourceName={resourceName} perms={perms} form={form} />
-                    </Suspense>
-                  ))
-                )}
-              </div>
+              {isLoadingPerms ? (
+                <div className="border rounded-xl bg-muted/30 animate-pulse h-[300px]" />
+              ) : (
+                <Suspense fallback={<div className="border rounded-xl bg-muted/30 animate-pulse h-[300px]" />}>
+                  <PermissionMatrixTable groupedPermissions={groupedPermissions} form={form} />
+                </Suspense>
+              )}
             </div>
           </form>
         </Form>
