@@ -12,40 +12,40 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heading, Text } from "@/components/ui/typography";
 
-import { roleApi } from "../api";
-import { roleKeys } from "../keys";
-import type { Role } from "../types";
+import { policyApi } from "../api";
+import { policyKeys } from "../keys";
+import type { Policy } from "../types";
 
 const PAGE_SIZE = 10;
 
-export function RoleSidebar() {
+export function PolicySidebar() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   
   const [page, setPage] = useState(1);
-  const selectedRoleId = params?.id ? Number(decodeURIComponent(params.id)) : null;
+  const selectedPolicyId = params?.id ? Number(decodeURIComponent(params.id)) : null;
   // create mode could be indicated if pathname ends with /create
   // but we can just highlight it based on route if we want, or leave un-highlighted
 
-  const { data: roles = [], isLoading } = useQuery({
-    queryKey: roleKeys.lists(),
-    queryFn: () => roleApi.getRoles(),
+  const { data: policys = [], isLoading } = useQuery({
+    queryKey: policyKeys.lists(),
+    queryFn: () => policyApi.getPolicys(),
     staleTime: 2 * 60 * 1000,
   });
 
-  const filteredRoles = useMemo(() => roles.filter((r: Role) =>
+  const filteredPolicys = useMemo(() => policys.filter((r: Policy) =>
     r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.code.toLowerCase().includes(searchTerm.toLowerCase())
-  ), [roles, searchTerm]);
+  ), [policys, searchTerm]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / PAGE_SIZE));
-  const pagedRoles = useMemo(() => {
+  const totalPages = Math.max(1, Math.ceil(filteredPolicys.length / PAGE_SIZE));
+  const pagedPolicys = useMemo(() => {
     const safePage = page > totalPages ? 1 : page;
-    return filteredRoles.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-  }, [filteredRoles, page, totalPages]);
+    return filteredPolicys.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  }, [filteredPolicys, page, totalPages]);
 
-  const total = filteredRoles.length;
+  const total = filteredPolicys.length;
   const start = (page - 1) * PAGE_SIZE + 1;
   const end = Math.min(page * PAGE_SIZE, total);
 
@@ -65,7 +65,7 @@ export function RoleSidebar() {
             )}
           </div>
           <Button variant="outline" size="sm" className="h-8 px-2 md:px-3 font-semibold text-xs md:text-sm" asChild>
-            <Link href="/services/admin/roles/create">
+            <Link href="/services/admin/policys/create">
               <Plus className="h-3 w-3" /> Thêm mới
             </Link>
           </Button>
@@ -80,14 +80,14 @@ export function RoleSidebar() {
             <Loader2 className="h-5 w-5 animate-spin mr-2" />
             <Text variant="small">Đang tải...</Text>
           </div>
-        ) : pagedRoles.length === 0 ? (
+        ) : pagedPolicys.length === 0 ? (
           <Text variant="muted" className="text-center italic py-6">Không có vai trò nào.</Text>
-        ) : pagedRoles.map((role) => {
-          const isSelected = selectedRoleId === role.id;
+        ) : pagedPolicys.map((policy) => {
+          const isSelected = selectedPolicyId === policy.id;
           return (
             <Link
-              key={role.id}
-              href={`/services/admin/roles/${role.id}`}
+              key={policy.id}
+              href={`/services/admin/policys/${policy.id}`}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md transition-colors ${
                 isSelected
                   ? "bg-primary/10 text-primary border border-primary/20"
@@ -97,11 +97,11 @@ export function RoleSidebar() {
               <ShieldCheck className={`h-4 w-4 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
               <div className="flex-1 min-w-0">
                 <Text weight="semibold" className={`truncate leading-tight ${isSelected ? "text-primary" : ""}`}>
-                  {role.name}
+                  {policy.name}
                 </Text>
-                <Text variant="muted" className="font-mono truncate">{role.code}</Text>
+                <Text variant="muted" className="font-mono truncate">{policy.code}</Text>
               </div>
-              {role.active === 0 && (
+              {policy.active === 0 && (
                 <span className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" title="Đang khóa" />
               )}
             </Link>

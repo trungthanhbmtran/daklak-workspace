@@ -7,7 +7,6 @@ import {
 import { firstValueFrom } from 'rxjs';
 
 import { MICROSERVICES } from '../../core/constants/services';
-import { Role } from '../../common/decorators/roles.decorator';
 
 @Injectable()
 export class KpisService implements OnModuleInit {

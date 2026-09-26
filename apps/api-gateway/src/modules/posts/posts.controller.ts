@@ -11,17 +11,17 @@ import {
   Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { Roles, Role } from '../../common/decorators/roles.decorator';
+import { PbacGuard } from '../../common/guards/pbac.guard';
+import { RequirePolicy } from '../../common/decorators/require-policy.decorator';
 import { PostsService } from './posts.service';
 
 @Controller('admin/posts')
-@UseGuards(JwtAuthGuard, RbacGuard)
+@UseGuards(JwtAuthGuard, PbacGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  @Roles(Role.AUTHOR, Role.EDITOR, Role.ADMIN)
+  @RequirePolicy('create', 'posts')
   async create(@Body() createPostDto: any, @Req() req: any) {
     return this.postsService.create(createPostDto, req);
   }
@@ -37,7 +37,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  @Roles(Role.AUTHOR, Role.EDITOR, Role.ADMIN)
+  @RequirePolicy('update', 'posts')
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: any,
@@ -47,13 +47,13 @@ export class PostsController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('delete', 'posts')
   async remove(@Param('id') id: string, @Req() req: any) {
     return this.postsService.remove(id, req);
   }
 
   @Post(':id/submit')
-  @Roles(Role.AUTHOR, Role.EDITOR, Role.ADMIN)
+  @RequirePolicy('submit', 'posts')
   async submit(
     @Param('id') id: string,
     @Body('note') note: string,
@@ -63,7 +63,7 @@ export class PostsController {
   }
 
   @Post(':id/review')
-  @Roles(Role.EDITOR, Role.REVIEWER, Role.ADMIN)
+  @RequirePolicy('review', 'posts')
   async review(
     @Param('id') id: string,
     @Body('note') note: string,
@@ -73,7 +73,7 @@ export class PostsController {
   }
 
   @Post(':id/approve')
-  @Roles(Role.REVIEWER, Role.ADMIN)
+  @RequirePolicy('approve', 'posts')
   async approve(
     @Param('id') id: string,
     @Body('note') note: string,
@@ -83,7 +83,7 @@ export class PostsController {
   }
 
   @Post(':id/reject')
-  @Roles(Role.REVIEWER, Role.ADMIN)
+  @RequirePolicy('reject', 'posts')
   async reject(
     @Param('id') id: string,
     @Body('note') note: string,
@@ -93,7 +93,7 @@ export class PostsController {
   }
 
   @Post(':id/publish')
-  @Roles(Role.PUBLISHER, Role.ADMIN)
+  @RequirePolicy('publish', 'posts')
   async publish(
     @Param('id') id: string,
     @Body('note') note: string,
@@ -103,7 +103,7 @@ export class PostsController {
   }
 
   @Post(':id/unpublish')
-  @Roles(Role.PUBLISHER, Role.ADMIN)
+  @RequirePolicy('unpublish', 'posts')
   async unpublish(
     @Param('id') id: string,
     @Body('note') note: string,

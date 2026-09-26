@@ -18,42 +18,42 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/typography";
 
 import { Permission } from "../types";
-import { roleFormSchema, type RoleFormValues } from "../schemas";
+import { policyFormSchema, type PolicyFormValues } from "../schemas";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
-import { roleApi } from "../api";
-import { roleKeys } from "../keys";
+import { policyApi } from "../api";
+import { policyKeys } from "../keys";
 
-// Lazy load: chỉ tải khi có role được chọn / tạo mới
+// Lazy load: chỉ tải khi có policy được chọn / tạo mới
 const PolicyCardDialog = lazy(() => import("./PolicyCardDialog"));
 
-interface RoleFormProps {
-  roleId?: number; // Nếu có roleId => Edit Mode. Nếu không => Create Mode
+interface PolicyFormProps {
+  policyId?: number; // Nếu có policyId => Edit Mode. Nếu không => Create Mode
 }
 
-export function RoleForm({ roleId }: RoleFormProps) {
+export function PolicyForm({ policyId }: PolicyFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const createMode = !roleId;
+  const createMode = !policyId;
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // 1. Fetch permissions (luôn cần)
   const { data: permissions = [], isLoading: isLoadingPerms } = useQuery({
-    queryKey: roleKeys.permissions(),
-    queryFn: () => roleApi.getPermissionMatrix(),
+    queryKey: policyKeys.permissions(),
+    queryFn: () => policyApi.getPermissionMatrix(),
     staleTime: 5 * 60 * 1000,
   });
 
-  // 2. Fetch role detail nếu ở chế độ Edit
-  const { data: roleDetail, isLoading: isLoadingRole } = useQuery({
-    queryKey: [...roleKeys.lists(), "detail", roleId],
-    queryFn: () => roleApi.getRoleById(roleId!),
-    enabled: !!roleId,
+  // 2. Fetch policy detail nếu ở chế độ Edit
+  const { data: policyDetail, isLoading: isLoadingPolicy } = useQuery({
+    queryKey: [...policyKeys.lists(), "detail", policyId],
+    queryFn: () => policyApi.getPolicyById(policyId!),
+    enabled: !!policyId,
     staleTime: 60 * 1000,
   });
 
-  const form = useForm<RoleFormValues>({
-    resolver: zodResolver(roleFormSchema) as unknown as Resolver<RoleFormValues>,
+  const form = useForm<PolicyFormValues>({
+    resolver: zodResolver(policyFormSchema) as unknown as Resolver<PolicyFormValues>,
     defaultValues: {
       name: "", code: "", description: "", active: 1, policies: []
     }
@@ -62,16 +62,16 @@ export function RoleForm({ roleId }: RoleFormProps) {
   useEffect(() => {
     if (createMode) {
       form.reset({ name: "", code: "", description: "", active: 1, policies: [] });
-    } else if (roleDetail) {
+    } else if (policyDetail) {
       form.reset({
-        name: roleDetail.name || "",
-        code: roleDetail.code || "",
-        description: roleDetail.description || "",
-        active: roleDetail.active ?? 1,
-        policies: roleDetail.policies || [],
+        name: policyDetail.name || "",
+        code: policyDetail.code || "",
+        description: policyDetail.description || "",
+        active: policyDetail.active ?? 1,
+        policies: policyDetail.policies || [],
       });
     }
-  }, [roleDetail, createMode, form]);
+  }, [policyDetail, createMode, form]);
 
   // Gom nhóm available actions (permissions) theo Resource Name (module)
   const groupedPermissions = useMemo(() => {
@@ -87,15 +87,15 @@ export function RoleForm({ roleId }: RoleFormProps) {
   const saveMutation = useMutation({
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: roleApi.saveRole,
+    mutationFn: policyApi.savePolicy,
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: roleKeys.all });
-      if (variables.id) queryClient.invalidateQueries({ queryKey: [...roleKeys.lists(), "detail", variables.id] });
+      queryClient.invalidateQueries({ queryKey: policyKeys.all });
+      if (variables.id) queryClient.invalidateQueries({ queryKey: [...policyKeys.lists(), "detail", variables.id] });
       toast.success("Đã lưu cấu hình vai trò!");
       
       if (createMode) {
         // Sau khi tạo xong, có thể redirect về danh sách hoặc sang trang edit (cần ID trả về)
-        router.push("/services/admin/roles");
+        router.push("/services/admin/policys");
       }
     },
   });
@@ -103,34 +103,34 @@ export function RoleForm({ roleId }: RoleFormProps) {
   const deleteMutation = useMutation({
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: roleApi.deleteRole,
+    mutationFn: policyApi.deletePolicy,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: roleKeys.all });
+      queryClient.invalidateQueries({ queryKey: policyKeys.all });
       toast.success("Đã xóa vai trò!");
-      router.push("/services/admin/roles");
+      router.push("/services/admin/policys");
     },
   });
 
-  const onSave = (data: RoleFormValues) => {
-    const payload = !createMode && roleId
-      ? { ...data, id: roleId }
+  const onSave = (data: PolicyFormValues) => {
+    const payload = !createMode && policyId
+      ? { ...data, id: policyId }
       : data;
     saveMutation.mutate(payload);
   };
 
   const onDelete = (reason?: string) => {
-    if (roleId) {
+    if (policyId) {
       // In a real scenario, reason could be sent to the API
-      console.log("Deleting role with reason:", reason);
-      deleteMutation.mutate(roleId);
+      console.log("Deleting policy with reason:", reason);
+      deleteMutation.mutate(policyId);
     }
   };
 
   const onCancel = () => {
-    router.push("/services/admin/roles");
+    router.push("/services/admin/policys");
   };
 
-  if (isLoadingRole) {
+  if (isLoadingPolicy) {
     return (
       <Card className="flex-1 w-full min-h-0 shadow-sm border-border flex flex-col items-center justify-center p-12 text-center rounded-xl bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
@@ -149,7 +149,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
           </div>
           <div>
             <CardTitle className="text-base font-bold leading-none">
-              {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${roleDetail?.name}`}
+              {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${policyDetail?.name}`}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1.5">
               <Text variant="small" className="text-muted-foreground uppercase tracking-tight">Mô hình phân quyền:</Text>
@@ -166,7 +166,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
 
       <CardContent className="flex-1 overflow-y-auto p-0 scrollbar-thin">
         <Form {...form}>
-          <form id="role-form" onSubmit={form.handleSubmit(onSave)}>
+          <form id="policy-form" onSubmit={form.handleSubmit(onSave)}>
 
             {/* 1. THÔNG TIN ĐỊNH DANH */}
             <div className="p-6 space-y-5">
@@ -247,7 +247,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
       {/* FOOTER */}
       <div className="p-4 border-t bg-muted/20 shrink-0 flex justify-end gap-3 items-center">
         <Button variant="ghost" onClick={onCancel} className="text-xs font-semibold h-9 px-6">Hủy</Button>
-        <Button type="submit" form="role-form" className="px-10 text-xs font-bold h-9 shadow-sm" disabled={saveMutation.isPending}>
+        <Button type="submit" form="policy-form" className="px-10 text-xs font-bold h-9 shadow-sm" disabled={saveMutation.isPending}>
           {saveMutation.isPending ? "Đang xử lý..." : "Lưu Vai trò"}
         </Button>
       </div>
@@ -261,7 +261,7 @@ export function RoleForm({ roleId }: RoleFormProps) {
                     setIsDeleteDialogOpen(false);
                   }}
                   title="Xóa vai trò"
-                  description={`Bạn có chắc chắn muốn xóa vai trò "${roleDetail?.name}"? Hành động này không thể hoàn tác.`}
+                  description={`Bạn có chắc chắn muốn xóa vai trò "${policyDetail?.name}"? Hành động này không thể hoàn tác.`}
                   isDeleting={deleteMutation.isPending}
                   requireReason={true}
                 />

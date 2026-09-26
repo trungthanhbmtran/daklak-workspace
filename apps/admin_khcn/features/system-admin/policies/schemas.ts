@@ -10,7 +10,7 @@ const policySchema = z.object({
   }).optional(),
 });
 
-export const roleFormSchema = z.object({
+export const policyFormSchema = z.object({
   name: z.string().min(1, "Vui lòng nhập tên vai trò"),
   code: z.string().min(1, "Vui lòng nhập mã vai trò"),
   description: z.string().optional(),
@@ -18,4 +18,4 @@ export const roleFormSchema = z.object({
   policies: z.array(policySchema).default([]),
 });
 
-export type RoleFormValues = z.infer<typeof roleFormSchema>;
+export type PolicyFormValues = z.infer<typeof policyFormSchema>;

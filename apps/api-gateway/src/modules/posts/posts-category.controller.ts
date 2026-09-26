@@ -14,11 +14,11 @@ import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
+import { PbacGuard } from '../../common/guards/pbac.guard';
 import { UseGuards } from '@nestjs/common';
 
 @Controller('admin/posts/categories')
-@UseGuards(JwtAuthGuard, RbacGuard)
+@UseGuards(JwtAuthGuard, PbacGuard)
 export class PostsCategoryController {
   private categoryService: any;
 

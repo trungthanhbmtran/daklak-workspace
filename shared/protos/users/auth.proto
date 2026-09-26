@@ -29,7 +29,7 @@ message RegisterRequest {
   string username = 1;
   string password = 2;
   string identitycard = 3;
-  repeated int32 roles = 4;
+  repeated int32 policies = 4;
 }
 
 message RegisterResponse {
@@ -54,7 +54,7 @@ message ValidateTokenRequest {
 message ValidateTokenResponse {
   bool is_valid = 1;
   int32 userId = 2;
-  string roles = 3; // JSON String
+  string policies = 3; // JSON String
 }
 
 message LogoutRequest {

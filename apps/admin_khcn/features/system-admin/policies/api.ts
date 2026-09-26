@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
-import { Role, Permission, Policy } from "./types";
+import { Policy, Permission, Policy } from "./types";
 
-/** Response từ GET /roles — gateway trả về { data: { roles } } hoặc { data: [...] } */
-const rolesListRes = (res: unknown): Role[] => {
-  const data = (res as { data?: { roles?: unknown[] } | unknown[] })?.data;
-  const list = Array.isArray(data) ? data : (data && Array.isArray((data as { roles?: unknown[] }).roles) ? (data as { roles: unknown[] }).roles : []);
+/** Response từ GET /policys — gateway trả về { data: { policys } } hoặc { data: [...] } */
+const policysListRes = (res: unknown): Policy[] => {
+  const data = (res as { data?: { policys?: unknown[] } | unknown[] })?.data;
+  const list = Array.isArray(data) ? data : (data && Array.isArray((data as { policys?: unknown[] }).policys) ? (data as { policys: unknown[] }).policys : []);
   return list.map((r: unknown) => {
     const row = r as Record<string, unknown>;
     const rawPolicies = (row.policies as any[]) || [];
@@ -48,8 +48,8 @@ const permissionMatrixToFlat = (res: unknown): Permission[] => {
   return out;
 };
 
-/** Response từ GET /roles/:id — gateway trả về { data } hoặc role trực tiếp */
-const roleDetailRes = (res: unknown): Role | null => {
+/** Response từ GET /policys/:id — gateway trả về { data } hoặc policy trực tiếp */
+const policyDetailRes = (res: unknown): Policy | null => {
   const raw = (res as { data?: Record<string, unknown> })?.data ?? res;
   const r = raw as Record<string, unknown>;
   if (!r || r.id === 0) return null;
@@ -72,10 +72,10 @@ const roleDetailRes = (res: unknown): Role | null => {
   };
 };
 
-export const roleApi = {
-  getRoles: async (): Promise<Role[]> => {
-    const res = await apiClient.get("/roles");
-    return rolesListRes(res);
+export const policyApi = {
+  getPolicys: async (): Promise<Policy[]> => {
+    const res = await apiClient.get("/policys");
+    return policysListRes(res);
   },
 
   getPermissionMatrix: async (): Promise<Permission[]> => {
@@ -83,12 +83,12 @@ export const roleApi = {
     return permissionMatrixToFlat(res);
   },
 
-  getRoleById: async (id: number): Promise<Role | null> => {
-    const res = await apiClient.get(`/roles/${id}`);
-    return roleDetailRes(res);
+  getPolicyById: async (id: number): Promise<Policy | null> => {
+    const res = await apiClient.get(`/policys/${id}`);
+    return policyDetailRes(res);
   },
 
-  saveRole: (data: Partial<Role>) => {
+  savePolicy: (data: Partial<Policy>) => {
     const payload = {
       code: data.code,
       name: data.name,
@@ -96,10 +96,10 @@ export const roleApi = {
       policies: data.policies ?? [],
     };
     if (data.id) {
-      return apiClient.put(`/roles/${data.id}`, { name: payload.name, description: payload.description, policies: payload.policies });
+      return apiClient.put(`/policys/${data.id}`, { name: payload.name, description: payload.description, policies: payload.policies });
     }
-    return apiClient.post("/roles", payload);
+    return apiClient.post("/policys", payload);
   },
 
-  deleteRole: (id: number) => apiClient.delete(`/roles/${id}`),
+  deletePolicy: (id: number) => apiClient.delete(`/policys/${id}`),
 };

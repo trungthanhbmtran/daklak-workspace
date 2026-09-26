@@ -1,16 +1,8 @@
 export function sanitizeUserForClient(user: any) {
   if (!user) return null;
   const {
-    // Chỉ loại bỏ các Role thuần túy (RBAC) nếu không dùng tới ở client
-    roles,
-    role,
-    roleIds,
-    role_ids,
-    roleNames,
-    role_names,
-
-    // (Giữ lại permissionsFlatten và policies cho PBAC)
-    // (Giữ lại đơn vị, chức danh để render)
+    // Note: PBAC enabled. Role-related fields have been deprecated.
+    // Ensure you only pass necessary flags (like permissions or policies) to the frontend.
     ...safeUser
   } = user;
 

@@ -12,13 +12,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { Role, Roles } from '../../common/decorators/roles.decorator';
+import { PbacGuard } from '../../common/guards/pbac.guard';
+import { RequirePolicy } from '../../common/decorators/require-policy.decorator';
 import { KpisService } from './kpis.service';
 
 @ApiTags('HRM - KPIs')
 @Controller('admin/hrm/kpis')
-@UseGuards(JwtAuthGuard, RbacGuard)
+@UseGuards(JwtAuthGuard, PbacGuard)
 @ApiBearerAuth('JWT-auth')
 export class KpisController {
   constructor(private readonly kpisService: KpisService) {}
@@ -43,19 +43,19 @@ export class KpisController {
   }
 
   @Post('criteria')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('create', 'kpi_criteria')
   async createCriterion(@Body() body: any) {
     return this.kpisService.createCriterion(body);
   }
 
   @Put('criteria/:id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('update', 'kpi_criteria')
   async updateCriterion(@Param('id') id: string, @Body() body: any) {
     return this.kpisService.updateCriterion(id, body);
   }
 
   @Delete('criteria/:id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('delete', 'kpi_criteria')
   async deleteCriterion(@Param('id') id: string) {
     return this.kpisService.deleteCriterion(id);
   }

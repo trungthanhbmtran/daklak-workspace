@@ -14,11 +14,11 @@ import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { Roles, Role } from '../../common/decorators/roles.decorator';
+import { PbacGuard } from '../../common/guards/pbac.guard';
+import { RequirePolicy } from '../../common/decorators/require-policy.decorator';
 
 @Controller('admin/portal-configs')
-@UseGuards(JwtAuthGuard, RbacGuard)
+@UseGuards(JwtAuthGuard, PbacGuard)
 export class PortalConfigController {
   private configService: any;
 
@@ -33,7 +33,7 @@ export class PortalConfigController {
   }
 
   @Post()
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_config')
   async create(
     @Body() dto: { code: string; name: string; description?: string },
   ) {
@@ -56,7 +56,7 @@ export class PortalConfigController {
   }
 
   @Put(':id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_config')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: { code?: string; name?: string; description?: string },
@@ -70,7 +70,7 @@ export class PortalConfigController {
   }
 
   @Post('upsert')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_config')
   async upsert(
     @Body() dto: { code: string; name: string; description?: string },
   ) {
@@ -91,7 +91,7 @@ export class PortalConfigController {
    * Client gọi 1 lần thay vì N lần riêng lẻ.
    */
   @Post('batch-upsert')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_config')
   async batchUpsert(
     @Body()
     dto: {

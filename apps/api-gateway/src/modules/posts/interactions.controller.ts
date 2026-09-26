@@ -11,24 +11,24 @@ import {
   Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { Roles, Role } from '../../common/decorators/roles.decorator';
+import { PbacGuard } from '../../common/guards/pbac.guard';
+import { RequirePolicy } from '../../common/decorators/require-policy.decorator';
 import { InteractionsService } from './interactions.service';
 
 @Controller('admin/interactions')
-@UseGuards(JwtAuthGuard, RbacGuard)
+@UseGuards(JwtAuthGuard, PbacGuard)
 export class InteractionsController {
   constructor(private readonly interactionsService: InteractionsService) {}
 
   // --- Comments Moderation ---
   @Get('comments')
-  @Roles(Role.ADMIN, Role.REVIEWER)
+  @RequirePolicy('manage', 'portal_interactions')
   async listComments(@Query() query: any) {
     return this.interactionsService.listComments(query);
   }
 
   @Put('comments/:id/status')
-  @Roles(Role.ADMIN, Role.REVIEWER)
+  @RequirePolicy('manage', 'portal_interactions')
   async updateCommentStatus(
     @Param('id') id: string,
     @Body('status') status: string,
@@ -37,20 +37,20 @@ export class InteractionsController {
   }
 
   @Delete('comments/:id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_interactions')
   async deleteComment(@Param('id') id: string) {
     return this.interactionsService.deleteComment(id);
   }
 
   // --- Citizen Questions (Hỏi đáp) ---
   @Get('questions')
-  @Roles(Role.ADMIN, Role.REVIEWER)
+  @RequirePolicy('manage', 'portal_interactions')
   async listQuestions(@Query() query: any) {
     return this.interactionsService.listQuestions(query);
   }
 
   @Post('questions/:id/answer')
-  @Roles(Role.ADMIN, Role.REVIEWER)
+  @RequirePolicy('manage', 'portal_interactions')
   async answerQuestion(
     @Param('id') id: string,
     @Body() dto: any,
@@ -66,13 +66,13 @@ export class InteractionsController {
 
   // --- Citizen Feedback (Góp ý) ---
   @Get('feedbacks')
-  @Roles(Role.ADMIN, Role.REVIEWER)
+  @RequirePolicy('manage', 'portal_interactions')
   async listFeedbacks(@Query() query: any) {
     return this.interactionsService.listFeedbacks(query);
   }
 
   @Put('feedbacks/:id/status')
-  @Roles(Role.ADMIN, Role.REVIEWER)
+  @RequirePolicy('manage', 'portal_interactions')
   async updateFeedbackStatus(
     @Param('id') id: string,
     @Body('status') status: string,

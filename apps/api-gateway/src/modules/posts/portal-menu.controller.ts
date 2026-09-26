@@ -15,11 +15,11 @@ import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { Roles, Role } from '../../common/decorators/roles.decorator';
+import { PbacGuard } from '../../common/guards/pbac.guard';
+import { RequirePolicy } from '../../common/decorators/require-policy.decorator';
 
 @Controller('admin/portal-menus')
-@UseGuards(JwtAuthGuard, RbacGuard)
+@UseGuards(JwtAuthGuard, PbacGuard)
 export class PortalMenuController {
   private portalMenuService: any;
 
@@ -34,7 +34,7 @@ export class PortalMenuController {
   }
 
   @Post()
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_menu')
   async create(@Body() dto: any) {
     return firstValueFrom(this.portalMenuService.createPortalMenu(dto)).catch(
       (e) => {
@@ -77,7 +77,7 @@ export class PortalMenuController {
   }
 
   @Put(':id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_menu')
   async update(@Param('id') id: string, @Body() dto: any) {
     return firstValueFrom(
       this.portalMenuService.updatePortalMenu({ id, ...dto }),
@@ -87,7 +87,7 @@ export class PortalMenuController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
+  @RequirePolicy('manage', 'portal_menu')
   async remove(@Param('id') id: string) {
     return firstValueFrom(
       this.portalMenuService.deletePortalMenu({ id }),

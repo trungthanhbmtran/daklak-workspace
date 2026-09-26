@@ -15,7 +15,7 @@ model User {
   credential      Credential?
   refreshTokens   RefreshToken[]
   jobPositions    JobPosition[]
-  roles           Role[]            @relation("RoleToUser")
+  policies        Policy[]          @relation("PolicyToUser")
   userConfigs     UserConfig[]
   aiAssistants    AiAssistant[]
 
@@ -46,7 +46,7 @@ model UserGroup {
   id              Int               @id @default(autoincrement())
   name            String            @unique
   UserToUserGroup UserToUserGroup[]
-  roles           Role[]            @relation("RoleToUserGroup")
+  policies        Policy[]          @relation("PolicyToUserGroup")
 
   @@map("user_groups")
 }

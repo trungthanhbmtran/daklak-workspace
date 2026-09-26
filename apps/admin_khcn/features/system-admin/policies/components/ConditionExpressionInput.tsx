@@ -27,7 +27,7 @@ const EXPRESSION_TEMPLATES: {
     items: [
       { label: "Là quản lý", description: "Người dùng có chức vụ quản lý", value: "currentUser.isManager == true" },
       { label: "Là trưởng đơn vị", description: "Người dùng là trưởng đơn vị", value: "currentUser.isUnitHead == true" },
-      { label: "Có vai trò ADMIN", description: "Người dùng mang vai trò ADMIN", value: "currentUser.roles.includes('ADMIN')" },
+      { label: "Có vai trò ADMIN", description: "Người dùng mang vai trò ADMIN", value: "currentUser.policys.includes('ADMIN')" },
     ],
   },
   {
@@ -43,7 +43,7 @@ const EXPRESSION_TEMPLATES: {
     items: [
       { label: "Chủ sở hữu HOẶC Quản lý", description: "Chủ sở hữu hoặc quản lý cùng phòng", value: "resource.createdById == currentUser.id || currentUser.isManager == true" },
       { label: "Cùng đơn vị VÀ là quản lý", description: "Quản lý trong cùng đơn vị", value: "resource.unitId == currentUser.unitId && currentUser.isManager == true" },
-      { label: "Chính mình HOẶC ADMIN", description: "Bản thân hoặc quản trị viên", value: "resource.userId == currentUser.id || currentUser.roles.includes('ADMIN')" },
+      { label: "Chính mình HOẶC ADMIN", description: "Bản thân hoặc quản trị viên", value: "resource.userId == currentUser.id || currentUser.policys.includes('ADMIN')" },
     ],
   },
 ];
@@ -54,7 +54,7 @@ const AVAILABLE_VARS = [
   { name: "currentUser.unitId", desc: "ID đơn vị" },
   { name: "currentUser.isManager", desc: "Có phải quản lý" },
   { name: "currentUser.isUnitHead", desc: "Có phải trưởng đơn vị" },
-  { name: "currentUser.roles", desc: "Danh sách vai trò" },
+  { name: "currentUser.policys", desc: "Danh sách vai trò" },
   { name: "resource.id", desc: "ID tài nguyên" },
   { name: "resource.createdById", desc: "ID người tạo" },
   { name: "resource.departmentId", desc: "ID phòng ban tài nguyên" },

@@ -9,7 +9,7 @@ export interface Policy {
   };
 }
 
-export interface Role {
+export interface Policy {
   id: number;
   code: string;
   name: string;
