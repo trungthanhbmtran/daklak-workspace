@@ -114,6 +114,26 @@ export const userApi = {
     return { success: data?.success ?? true, message: data?.message };
   },
 
+  update: async (id: number, payload: Partial<UserCreatePayload>): Promise<UserItem> => {
+    const body = {
+      email: payload.email,
+      username: payload.username,
+      fullName: payload.fullName,
+      phoneNumber: payload.phoneNumber,
+      cccd: payload.cccd,
+      employeeCode: payload.employeeCode,
+    };
+    const res = await apiClient.put(`/users/${id}`, body);
+    const raw = unwrapData<Record<string, unknown> | null>(res);
+    return normalizeUser(raw ?? {});
+  },
+
+  remove: async (id: number): Promise<{ success: boolean }> => {
+    const res = await apiClient.delete(`/users/${id}`);
+    const data = unwrapData<{ success?: boolean } | null>(res);
+    return { success: data?.success ?? true };
+  },
+
 
   /** Cập nhật tùy chọn nhận thông báo cá nhân (PUT /users/:id/notification-prefs) */
   updateNotificationPrefs: async (id: number, prefs: Record<string, boolean>) => {

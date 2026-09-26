@@ -73,3 +73,38 @@ export function useSetUserActive() {
   });
 }
 
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Partial<UserCreatePayload> }) =>
+      userApi.update(id, payload),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: USER_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: USER_KEYS.list() });
+      toast.success("Đã cập nhật người dùng.");
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string }; message?: string } })?.response?.data?.message
+        ?? (err as Error)?.message
+        ?? "Không thể cập nhật người dùng.";
+      toast.error(msg);
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => userApi.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USER_KEYS.list() });
+      toast.success("Đã xóa người dùng.");
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string }; message?: string } })?.response?.data?.message
+        ?? (err as Error)?.message
+        ?? "Không thể xóa người dùng.";
+      toast.error(msg);
+    },
+  });
+}

@@ -24,6 +24,10 @@ service UserService {
   rpc GetSubordinates (GetSubordinatesRequest) returns (GetSubordinatesResponse);
   // Lấy danh sách nhân viên phụ trách theo domain và monitored_unit
   rpc GetEmployeesByScope (GetEmployeesByScopeRequest) returns (GetEmployeesByScopeResponse);
+  // Cập nhật thông tin user
+  rpc UpdateUser (UpdateUserRequest) returns (UserResponse);
+  // Xóa user
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
 }
 
 message CreateUserRequest {
@@ -199,3 +203,22 @@ message GetEmployeesByScopeRequest {
 message GetEmployeesByScopeResponse {
   repeated string employee_codes = 1;
 }
+
+message UpdateUserRequest {
+  int32 id = 1;
+  optional string email = 2;
+  optional string username = 3;
+  optional string full_name = 4;
+  optional string phone_number = 5;
+  optional string cccd = 6;
+  optional string employee_code = 7;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+

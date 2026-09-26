@@ -116,15 +116,15 @@ export class UserController {
 
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật user (chưa hỗ trợ)' })
-  @ApiResponse({ status: 406 })
-  async update(@Param('id') id: string) {
-    return this.userService.update(id);
+  @ApiOperation({ summary: 'Cập nhật user' })
+  @ApiResponse({ status: 200 })
+  async update(@Param('id') id: string, @Body() body: any) {
+    return this.userService.update(id, body);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa user (chưa hỗ trợ)' })
-  @ApiResponse({ status: 406 })
+  @ApiOperation({ summary: 'Xóa user' })
+  @ApiResponse({ status: 200 })
   async delete(@Param('id') id: string) {
     return this.userService.delete(id);
   }

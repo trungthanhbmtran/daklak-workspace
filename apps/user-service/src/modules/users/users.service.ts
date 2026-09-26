@@ -187,6 +187,64 @@ export class UsersService implements OnModuleInit {
     return this.toUserResponse(user);
   }
 
+  async updateUser(data: {
+    id: number;
+    email?: string;
+    username?: string;
+    fullName?: string | null;
+    phoneNumber?: string | null;
+    cccd?: string | null;
+    employeeCode?: string | null;
+  }) {
+    if (data.username) {
+      const existing = await this.prisma.user.findFirst({
+        where: { username: data.username, id: { not: data.id } },
+      });
+      if (existing) {
+        throw new RpcException({
+          message: 'Username đã tồn tại',
+          code: GRPC.INVALID_ARGUMENT,
+        });
+      }
+    }
+
+    try {
+      const user = await this.prisma.user.update({
+        where: { id: data.id },
+        data: {
+          ...(data.email && { email: data.email }),
+          ...(data.username && { username: data.username }),
+          ...(data.fullName !== undefined && { fullName: data.fullName }),
+          ...(data.phoneNumber !== undefined && { phoneNumber: data.phoneNumber }),
+          ...(data.cccd !== undefined && { cccd: data.cccd }),
+          ...(data.employeeCode !== undefined && { employeeCode: data.employeeCode }),
+        },
+      });
+      return this.toUserResponse(user);
+    } catch (e: any) {
+      if (e?.code === 'P2002') {
+        throw new RpcException({
+          message: 'Email hoặc Username đã tồn tại',
+          code: GRPC.INVALID_ARGUMENT,
+        });
+      }
+      throw e;
+    }
+  }
+
+  async deleteUser(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new RpcException({
+        message: 'Tài khoản không tồn tại',
+        code: GRPC.NOT_FOUND,
+      });
+    }
+
+    await this.prisma.user.delete({ where: { id } });
+    return true;
+  }
+
   private async validateUsername(username?: string) {
     if (!username) return;
     const existing = await this.prisma.user.findUnique({

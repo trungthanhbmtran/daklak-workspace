@@ -2,7 +2,7 @@
 
 import React, { useCallback } from "react";
 import {
-  Loader2, User as UserIcon, ChevronLeft, ChevronRight,
+  Loader2, User as UserIcon, ChevronLeft, ChevronRight, Eye, Pencil, Trash2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,14 @@ import type { UserItem } from "../types";
 interface UserRowProps {
   item: UserItem;
   onViewDetail: (item: UserItem) => void;
+  onEdit?: (item: UserItem) => void;
+  onDelete?: (item: UserItem) => void;
 }
 
-const UserRow = React.memo(function UserRow({ item, onViewDetail }: UserRowProps) {
-  const handleClick = useCallback(() => onViewDetail(item), [item, onViewDetail]);
+const UserRow = React.memo(function UserRow({ item, onViewDetail, onEdit, onDelete }: UserRowProps) {
+  const handleView = useCallback(() => onViewDetail(item), [item, onViewDetail]);
+  const handleEdit = useCallback(() => onEdit?.(item), [item, onEdit]);
+  const handleDelete = useCallback(() => onDelete?.(item), [item, onDelete]);
 
   return (
     <TableRow className="hover:bg-muted/30 transition-colors">
@@ -38,9 +42,17 @@ const UserRow = React.memo(function UserRow({ item, onViewDetail }: UserRowProps
         )}
       </TableCell>
       <TableCell className="text-right">
-        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={handleClick}>
-          Chi tiết
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={handleView} title="Chi tiết">
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-500" onClick={handleEdit} title="Sửa">
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={handleDelete} title="Xóa">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );
@@ -58,11 +70,13 @@ interface UserTableProps {
   pageSize: number;
   onPageChange: (p: number) => void;
   onViewDetail: (item: UserItem) => void;
+  onEdit?: (item: UserItem) => void;
+  onDelete?: (item: UserItem) => void;
 }
 
 export const UserTable = React.memo(function UserTable({
   isLoading, isError, data, total, page, totalPages, pageSize,
-  onPageChange, onViewDetail,
+  onPageChange, onViewDetail, onEdit, onDelete
 }: UserTableProps) {
   const start = (page - 1) * pageSize + 1;
   const end = Math.min(page * pageSize, total);
@@ -103,7 +117,7 @@ export const UserTable = React.memo(function UserTable({
               </TableRow>
             ) : data.length > 0 ? (
               data.map((item) => (
-                <UserRow key={item.id} item={item} onViewDetail={onViewDetail} />
+                <UserRow key={item.id} item={item} onViewDetail={onViewDetail} onEdit={onEdit} onDelete={onDelete} />
               ))
             ) : (
               <TableRow>

@@ -123,4 +123,39 @@ export class UsersController {
     const userId = data.userId ?? data.user_id ?? 0;
     return this.usersService.getSubordinates({ userId });
   }
+
+  @GrpcMethod('UserService', 'UpdateUser')
+  async updateUser(@Payload() data: any) {
+    try {
+      return await this.usersService.updateUser({
+        id: data.id,
+        email: data.email,
+        username: data.username,
+        fullName: data.fullName ?? data.full_name,
+        phoneNumber: data.phoneNumber ?? data.phone_number,
+        cccd: data.cccd,
+        employeeCode: data.employeeCode ?? data.employee_code,
+      });
+    } catch (e: any) {
+      if (e instanceof RpcException) throw e;
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: String(e?.message ?? 'Lỗi cập nhật tài khoản'),
+      });
+    }
+  }
+
+  @GrpcMethod('UserService', 'DeleteUser')
+  async deleteUser(@Payload() data: any) {
+    try {
+      await this.usersService.deleteUser(data.id);
+      return { success: true };
+    } catch (e: any) {
+      if (e instanceof RpcException) throw e;
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: String(e?.message ?? 'Lỗi xóa tài khoản'),
+      });
+    }
+  }
 }

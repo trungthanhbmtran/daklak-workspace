@@ -201,12 +201,43 @@ export class UserService implements OnModuleInit {
   }
 
 
+  async update(id: string, body: any) {
+    const result = await firstValueFrom(
+      this.userGrpcService.UpdateUser({
+        id: parseInt(id, 10),
+        email: body.email,
+        username: body.username,
+        fullName: body.fullName,
+        phoneNumber: body.phoneNumber,
+        cccd: body.cccd,
+        employeeCode: body.employeeCode,
+      }),
+    ).catch((e) => {
+      throw new BadRequestException(e.message || 'Lỗi cập nhật người dùng');
+    });
 
-  async update(id: string) {
-    throw new NotAcceptableException('UserService mới chưa hỗ trợ UpdateUser.');
+    try {
+      await this.redisService.getClient().del(`user:profile:${id}`);
+    } catch (err) {
+      console.error('Failed to clear user cache on update:', err);
+    }
+    return { success: true, data: result };
   }
 
   async delete(id: string) {
-    throw new NotAcceptableException('UserService mới chưa hỗ trợ DeleteUser.');
+    await firstValueFrom(
+      this.userGrpcService.DeleteUser({
+        id: parseInt(id, 10),
+      }),
+    ).catch((e) => {
+      throw new BadRequestException(e.message || 'Lỗi xóa người dùng');
+    });
+
+    try {
+      await this.redisService.getClient().del(`user:profile:${id}`);
+    } catch (err) {
+      console.error('Failed to clear user cache on delete:', err);
+    }
+    return { success: true };
   }
 }
