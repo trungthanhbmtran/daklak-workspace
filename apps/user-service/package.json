@@ -26,6 +26,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:grpc": "node test-grpc-client.js"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",
     "@grpc/proto-loader": "^0.8.0",

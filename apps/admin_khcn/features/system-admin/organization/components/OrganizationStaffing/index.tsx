@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 /**
@@ -156,8 +156,8 @@ export function OrganizationStaffing() {
             className="flex flex-wrap items-end gap-4"
           >
             <div className="space-y-1.5 min-w-[220px]">
-              <label className="text-sm font-medium text-foreground">
-                Chuc danh
+              <label className="text-sm font-medium leading-none text-foreground">
+                Chức danh
               </label>
               <Select
                 value={selectedJobTitleId || "__none__"}
@@ -166,7 +166,7 @@ export function OrganizationStaffing() {
                 }
                 disabled={isLoadingJobTitles}
               >
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="Chọn chức danh" />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,13 +190,13 @@ export function OrganizationStaffing() {
               </Select>
             </div>
             <div className="space-y-1.5 w-24">
-              <label className="text-sm font-medium text-foreground">
+              <label className="text-sm font-medium leading-none text-foreground">
                 Số lượng
               </label>
               <Input
                 type="number"
                 min={1}
-                className="h-9"
+                className="h-10"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 disabled={setStaffing.isPending}
@@ -205,7 +205,7 @@ export function OrganizationStaffing() {
             <Button
               type="submit"
               size="default"
-              className="h-9"
+              className="h-10"
               disabled={setStaffing.isPending || !selectedJobTitleId}
             >
               {setStaffing.isPending ? "Đang lưu..." : "Lưu định biên"}
