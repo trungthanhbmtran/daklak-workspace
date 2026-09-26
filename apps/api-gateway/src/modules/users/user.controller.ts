@@ -85,7 +85,7 @@ export class UserController {
       password?: string;
       fullName?: string;
       phoneNumber?: string;
-      roleIds?: number[];
+
       cccd?: string;
       employeeCode?: string;
     },
@@ -113,15 +113,7 @@ export class UserController {
     return this.userService.setActive(id, body.isActive);
   }
 
-  @Post(':id/assign-roles')
-  @ApiOperation({ summary: 'Gán lại vai trò cho user (roleIds: number[])' })
-  @ApiResponse({ status: 200, description: 'success, message' })
-  async assignRoles(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { roleIds?: number[] },
-  ) {
-    return this.userService.assignRoles(id, body.roleIds);
-  }
+
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật user (chưa hỗ trợ)' })

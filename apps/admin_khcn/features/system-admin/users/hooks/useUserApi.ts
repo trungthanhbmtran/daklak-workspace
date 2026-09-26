@@ -73,22 +73,3 @@ export function useSetUserActive() {
   });
 }
 
-export function useAssignRoles() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, roleIds }: { id: number; roleIds: number[] }) => userApi.assignRoles(id, roleIds),
-    onSuccess: async (res, { id }) => {
-      queryClient.invalidateQueries({ queryKey: USER_KEYS.list() });
-      queryClient.invalidateQueries({ queryKey: USER_KEYS.detail(id) });
-      queryClient.invalidateQueries({ queryKey: USER_KEYS.policies(id) });
-      await queryClient.refetchQueries({ queryKey: USER_KEYS.detail(id) });
-      toast.success(res?.message ?? "Đã cập nhật vai trò.");
-    },
-    onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string }; message?: string } })?.response?.data?.message
-        ?? (err as Error)?.message
-        ?? "Không thể cập nhật vai trò.";
-      toast.error(msg);
-    },
-  });
-}

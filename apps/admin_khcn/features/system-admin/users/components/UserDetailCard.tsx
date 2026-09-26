@@ -21,7 +21,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Text } from "@/components/ui/typography";
-import { EditRolesModal } from "./EditRolesModal";
 import { useUserPolicies } from "../hooks/useUserApi";
 import type { UserDetail } from "../types";
 
@@ -31,10 +30,7 @@ interface UserDetailSheetProps {
   isLoading: boolean;
   onClose: () => void;
   onSetActive?: (userId: number, isActive: boolean) => void;
-  isSettingActive?: boolean;
-  onAssignRoles?: (payload: { id: number; roleIds: number[] }) => void;
-  isAssigningRoles?: boolean;
-}
+  isSettingActive?: boolean;}
 
 export function UserDetailSheet({
   user,
@@ -42,12 +38,7 @@ export function UserDetailSheet({
   isLoading,
   onClose,
   onSetActive,
-  isSettingActive,
-  onAssignRoles,
-  isAssigningRoles,
-}: UserDetailSheetProps) {
-  const [editRolesOpen, setEditRolesOpen] = useState(false);
-  const [policiesOpen, setPoliciesOpen] = useState(false);
+  isSettingActive,}: UserDetailSheetProps) {  const [policiesOpen, setPoliciesOpen] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(20);
   const observerTarget = useRef<HTMLLIElement>(null);
@@ -86,9 +77,7 @@ export function UserDetailSheet({
     };
   }, [policiesData, visibleCount]);
 
-  const isActive = user ? (user.status === "ACTIVE" || user.isActive !== false) : false;
-  const roles = user?.roles ?? [];
-  const lastLogin = user?.lastLogin;
+  const isActive = user ? (user.status === "ACTIVE" || user.isActive !== false) : false;  const lastLogin = user?.lastLogin;
 
   const handleLockUnlock = () => {
     if (!user?.id || !onSetActive) return;
@@ -144,35 +133,6 @@ export function UserDetailSheet({
                       </Badge>
                     </div>
                   </div>
-
-                  <Separator />
-
-                  {/* Roles */}
-                  <section>
-                    <Text weight="semibold" className="mb-2.5 flex items-center gap-2">
-                      <Key className="w-4 h-4 text-muted-foreground" />
-                      Vai trò ({roles.length})
-                    </Text>
-                    <div className="flex flex-wrap gap-1.5">
-                      {roles.length > 0 ? roles.map((role, i) => {
-                        const name = typeof role === "string" ? role
-                          : (role as { name?: string; code?: string }).name
-                          ?? (role as { code?: string }).code
-                          ?? String(role);
-                        const code = typeof role === "string" ? undefined : (role as { code?: string }).code;
-                        return (
-                          <Badge key={i} variant="secondary" className="px-2.5 py-0.5 font-medium border text-xs flex items-center gap-1">
-                            {name}
-                            {code && code !== name && (
-                              <Text as="span" variant="code" className="text-muted-foreground opacity-70">({code})</Text>
-                            )}
-                          </Badge>
-                        );
-                      }) : (
-                        <Text as="span" variant="muted" className="italic">Chưa gán vai trò nào.</Text>
-                      )}
-                    </div>
-                  </section>
 
                   <Separator />
 
@@ -266,24 +226,12 @@ export function UserDetailSheet({
             >
               {isSettingActive ? "Đang xử lý..." : isActive ? "Khóa tài khoản" : "Mở khóa"}
             </Button>
-            <Button
-              className="flex-1 text-sm"
-              variant="secondary"
-              onClick={() => setEditRolesOpen(true)}
-              disabled={!user?.id || isAssigningRoles}
-            >
-              {isAssigningRoles ? "Đang lưu..." : "Chỉnh sửa quyền"}
-            </Button>
+            
           </SheetFooter>
         </SheetContent>
       </Sheet>
 
-      {editRolesOpen && (
-          <EditRolesModal
-                  user={user}
-                  isOpen={editRolesOpen}
-                  onClose={() => setEditRolesOpen(false)}
-                  onSave={(userId, roleIds) => onAssignRoles?.({ id: userId, roleIds })}
+                        onSave={(userId, roleIds) => onAssignRoles?.({ id: userId, roleIds })}
                   isSaving={!!isAssigningRoles}
                 />
           )}

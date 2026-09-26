@@ -168,7 +168,7 @@ export class UsersService implements OnModuleInit {
     password?: string;
     fullName?: string | null;
     phoneNumber?: string | null;
-    roleIds?: number[];
+
     cccd?: string | null;
     employeeCode?: string | null;
     createdByUserId?: number;
@@ -201,7 +201,6 @@ export class UsersService implements OnModuleInit {
   }
 
   private async insertUserRecord(data: any) {
-    const roleIds = (data.roleIds ?? []).filter((id: number) => id > 0);
     try {
       return await this.prisma.user.create({
         data: {
@@ -211,9 +210,6 @@ export class UsersService implements OnModuleInit {
           phoneNumber: data.phoneNumber?.trim() || null,
           cccd: data.cccd?.trim() || null,
           employeeCode: data.employeeCode?.trim() || null,
-          ...(roleIds.length > 0 && {
-            roles: { connect: roleIds.map((id: number) => ({ id })) },
-          }),
         },
       });
     } catch (e: any) {
@@ -710,39 +706,7 @@ export class UsersService implements OnModuleInit {
     };
   }
 
-  /** Gán lại vai trò cho user (thay thế toàn bộ role hiện tại). Lưu vào bảng _RoleToUser (quan hệ User-Role). */
-  async assignRoles(data: {
-    userId: number;
-    roleIds?: number[];
-    role_ids?: number[];
-  }) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: data.userId },
-    });
-    if (!user) {
-      throw new RpcException({
-        message: `User with id ${data.userId} not found`,
-        code: GRPC.NOT_FOUND,
-      });
-    }
-    const rawIds = data.roleIds ?? data.role_ids ?? [];
-    const roleIds = Array.isArray(rawIds)
-      ? rawIds.filter((id: number) => Number(id) > 0).map(Number)
-      : [];
-    await this.prisma.user.update({
-      where: { id: data.userId },
-      data: {
-        roles:
-          roleIds.length > 0
-            ? { set: roleIds.map((id) => ({ id })) }
-            : { set: [] },
-      },
-    });
 
-    // Xoá Cache Profile để user cập nhật phân quyền ngay lập tức
-    await this.cache.del(`user:profile:${data.userId}`);
-    return { success: true, message: 'Đã cập nhật vai trò.' };
-  }
 
   
   async getSubordinates(data: { userId: number }) {

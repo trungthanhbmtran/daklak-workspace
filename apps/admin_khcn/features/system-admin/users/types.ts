@@ -26,8 +26,7 @@ export interface UserCreatePayload {
   password?: string;
   fullName?: string;
   phoneNumber?: string;
-  roleIds?: number[];
-  /** CCCD từ HRM */
+    /** CCCD từ HRM */
   cccd?: string;
   /** Mã số điện tử từ HRM */
   employeeCode?: string;

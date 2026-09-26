@@ -19,19 +19,7 @@ function normalizeUser(raw: Record<string, unknown>): UserItem {
 function normalizeUserDetail(raw: Record<string, unknown>): UserDetail {
   const base = normalizeUser(raw);
 
-  // Roles: backend trả [{id, code, name}] hoặc [string]
-  const rolesRaw = raw.roles ?? raw.roleNames ?? raw.role_names;
-  const roles: Array<{ id?: number; code?: string; name?: string }> = Array.isArray(rolesRaw)
-    ? (rolesRaw as unknown[]).map((r) => {
-        if (typeof r === "string") return { name: r, code: r };
-        const o = (r as Record<string, unknown>);
-        return {
-          id: o.id != null ? Number(o.id) : undefined,
-          code: o.code != null ? String(o.code) : undefined,
-          name: o.name != null ? String(o.name) : o.code != null ? String(o.code) : String(r),
-        };
-      })
-    : [];
+
 
   // Policies: backend trả [{description, resource, action, effect}]
   const policiesRaw = raw.policies ?? (raw as Record<string, unknown>).policiesList;
@@ -53,7 +41,6 @@ function normalizeUserDetail(raw: Record<string, unknown>): UserDetail {
   return {
     ...base,
     ...(status != null && { status }),
-    roles,
     policies,
     ...(lastLogin != null && { lastLogin: String(lastLogin) }),
   };
@@ -109,7 +96,6 @@ export const userApi = {
       password: payload.password,
       fullName: payload.fullName,
       phoneNumber: payload.phoneNumber,
-      roleIds: payload.roleIds,
       cccd: payload.cccd,
       employeeCode: payload.employeeCode,
     };
@@ -125,12 +111,6 @@ export const userApi = {
     return { success: data?.success ?? true, message: data?.message };
   },
 
-  /** Gán lại vai trò cho user (POST /users/:id/assign-roles) */
-  assignRoles: async (id: number, roleIds: number[]): Promise<{ success: boolean; message?: string }> => {
-    const res = await apiClient.post(`/users/${id}/assign-roles`, { roleIds });
-    const data = unwrapData<{ success?: boolean; message?: string } | null>(res);
-    return { success: data?.success ?? true, message: data?.message };
-  },
 
   /** Cập nhật tùy chọn nhận thông báo cá nhân (PUT /users/:id/notification-prefs) */
   updateNotificationPrefs: async (id: number, prefs: Record<string, boolean>) => {

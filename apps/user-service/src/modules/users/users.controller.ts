@@ -17,7 +17,7 @@ export class UsersController {
         password: data.password,
         fullName: data.fullName ?? data.full_name ?? null,
         phoneNumber: data.phoneNumber ?? data.phone_number ?? null,
-        roleIds: data.roleIds ?? data.role_ids ?? [],
+
         cccd: data.cccd ?? null,
         employeeCode: data.employeeCode ?? data.employee_code ?? null,
         createdByUserId:
@@ -97,12 +97,7 @@ export class UsersController {
     return this.usersService.setUserActive({ userId, isActive });
   }
 
-  @GrpcMethod('UserService', 'AssignRoles')
-  async assignRoles(@Payload() data: AssignRolesGrpcDto) {
-    const userId = data.userId ?? data.user_id ?? 0;
-    const roleIds = data.roleIds ?? data.role_ids ?? [];
-    return this.usersService.assignRoles({ userId, roleIds });
-  }
+
 
   @GrpcMethod('UserService', 'AssignPosition')
   async assignPosition(@Payload() data: AssignPositionGrpcDto) {

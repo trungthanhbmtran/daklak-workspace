@@ -8,8 +8,7 @@ export class CreateUserGrpcDto {
   @IsString() @IsOptional() full_name?: string;
   @IsString() @IsOptional() phoneNumber?: string;
   @IsString() @IsOptional() phone_number?: string;
-  @IsArray() @IsOptional() roleIds?: number[];
-  @IsArray() @IsOptional() role_ids?: number[];
+
   @IsString() @IsOptional() cccd?: string;
   @IsString() @IsOptional() employeeCode?: string;
   @IsString() @IsOptional() employee_code?: string;
@@ -64,12 +63,7 @@ export class SetUserActiveGrpcDto {
   @IsBoolean() @IsOptional() is_active?: boolean;
 }
 
-export class AssignRolesGrpcDto {
-  @IsInt() @IsOptional() userId?: number;
-  @IsInt() @IsOptional() user_id?: number;
-  @IsArray() @IsOptional() roleIds?: number[];
-  @IsArray() @IsOptional() role_ids?: number[];
-}
+
 
 export class AssignPositionGrpcDto {
   @IsInt() userId: number;

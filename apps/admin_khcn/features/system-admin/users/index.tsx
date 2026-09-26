@@ -7,7 +7,6 @@ import {
   useUserList,
   useUserDetail,
   useSetUserActive,
-  useAssignRoles,
 } from "./hooks/useUserApi";
 import { useUserUI } from "./hooks/useUserUI";
 import { UserTable } from "./components/UserTable";
@@ -44,7 +43,6 @@ export function UserClient() {
   }, [ui.state.searchTerm]);
   const { data: detailUser, isLoading: isLoadingDetail } = useUserDetail(ui.state.detailId);
   const setActiveMutation = useSetUserActive();
-  const assignRolesMutation = useAssignRoles();
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4">
@@ -88,8 +86,6 @@ export function UserClient() {
                   onClose={() => ui.setters.setDetailId(null)}
                   onSetActive={(id, isActive) => setActiveMutation.mutate({ id, isActive })}
                   isSettingActive={setActiveMutation.isPending}
-                  onAssignRoles={(payload) => assignRolesMutation.mutate(payload)}
-                  isAssigningRoles={assignRolesMutation.isPending}
                 />
           )}
 

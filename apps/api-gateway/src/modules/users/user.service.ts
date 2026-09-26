@@ -138,7 +138,7 @@ export class UserService implements OnModuleInit {
           password: body.password,
           fullName: body.fullName,
           phoneNumber: body.phoneNumber,
-          roleIds: body.roleIds,
+
           cccd: body.cccd,
           employeeCode: body.employeeCode,
           createdByUserId: createdByUserId || undefined,
@@ -200,20 +200,7 @@ export class UserService implements OnModuleInit {
     return result;
   }
 
-  async assignRoles(id: number, roleIds?: number[]) {
-    const roles = Array.isArray(roleIds) ? roleIds : [];
-    const result = await firstValueFrom(
-      this.userGrpcService.AssignRoles({ userId: id, roleIds: roles }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-    try {
-      await this.redisService.getClient().del(`user:profile:${id}`);
-    } catch (err) {
-      console.error('Failed to clear user cache on assignRoles:', err);
-    }
-    return result;
-  }
+
 
   async update(id: string) {
     throw new NotAcceptableException('UserService mới chưa hỗ trợ UpdateUser.');
