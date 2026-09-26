@@ -122,7 +122,8 @@ export class TransformInterceptor<T> implements NestInterceptor<T, any> {
       path.endsWith('/staffing') ||
       path.includes('/staffing-report') ||
       path.endsWith('/subtree') ||
-      path.endsWith('/info')
+      path.endsWith('/info') ||
+      path.endsWith('/job-titles')
     ) {
       return false;
     }
