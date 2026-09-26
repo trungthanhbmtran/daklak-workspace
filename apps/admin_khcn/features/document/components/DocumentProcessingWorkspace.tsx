@@ -125,7 +125,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
       </div>
 
       {/* Split Screen Layout */}
-      <div className="flex flex-1 gap-4 min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 gap-4 min-h-0">
         {/* CỘT TRÁI: Trình xem văn bản */}
         <div className="flex-1 bg-muted/20 border rounded-lg flex flex-col overflow-hidden relative shadow-inner">
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
@@ -149,7 +149,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
         </div>
 
         {/* CỘT PHẢI: Thao tác & Lịch sử */}
-        <div className="w-[420px] flex flex-col gap-4 shrink-0">
+        <div className="w-full lg:w-[420px] flex flex-col gap-4 shrink-0">
 
           {/* Card Thao tác Tổng hợp */}
           <Card className="border shadow-md shrink-0 border-primary/10">

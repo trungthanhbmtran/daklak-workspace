@@ -270,7 +270,7 @@ export function PopoverMultiSelect({
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[350px] sm:w-[500px] max-h-[500px] flex flex-col p-0 overflow-hidden border-primary/20 gap-0 bg-background shadow-lg"
+        className="w-[90vw] sm:w-[500px] max-w-full max-h-[500px] flex flex-col p-0 overflow-hidden border-primary/20 gap-0 bg-background shadow-lg"
         align="start"
         sideOffset={5}
       >

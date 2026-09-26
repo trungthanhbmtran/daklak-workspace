@@ -122,7 +122,7 @@ export default function ConditionExpressionInput({ value, onChange }: ConditionE
               <ChevronDown className="h-3 w-3" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-[480px] p-0 shadow-xl" sideOffset={6}>
+          <PopoverContent align="end" className="w-[95vw] sm:w-[480px] max-w-full p-0 shadow-xl" sideOffset={6}>
             {/* Tabs */}
             <div className="flex border-b bg-muted/30">
               {(["templates", "vars"] as const).map((t) => (
