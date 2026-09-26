@@ -162,18 +162,15 @@ export class MenusService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        roles: { include: { policies: { include: { resource: true } } } },
-      },
+        policies: { include: { resource: true } },},
     });
 
     // PBAC chuẩn: Set resource codes mà user có quyền (bất kỳ action nào)
     const allowedResources = new Set<string>();
 
-    for (const role of user?.roles ?? []) {
-      for (const p of role.policies ?? []) {
-        if (p.resource?.code) {
-          allowedResources.add(p.resource.code);
-        }
+    for (const p of user?.policies ?? []) {
+      if (p.resource?.code) {
+        allowedResources.add(p.resource.code);
       }
     }
 

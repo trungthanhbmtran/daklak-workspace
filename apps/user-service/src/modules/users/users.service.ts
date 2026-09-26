@@ -323,9 +323,7 @@ export class UsersService implements OnModuleInit {
     const user = await this.prisma.user.findFirst({
       where: { id: userId, isActive: true },
       include: {
-        roles: {
-          include: { policies: { include: { resource: true } } },
-        },
+        policies: { include: { resource: true } },
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -358,9 +356,7 @@ export class UsersService implements OnModuleInit {
       },
       include: {
         credential: true,
-        roles: {
-          include: { policies: { include: { resource: true } } },
-        },
+        policies: { include: { resource: true } },
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -494,9 +490,7 @@ export class UsersService implements OnModuleInit {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
-        roles: {
-          include: { policies: { include: { resource: true } } },
-        },
+        policies: { include: { resource: true } },
         jobPositions: {
           where: { endDate: null },
           include: { unit: true, jobTitle: true },
@@ -516,16 +510,11 @@ export class UsersService implements OnModuleInit {
 
   private mapUserPermissionsAndRoles(user: any) {
     const base = this.toUserResponse(user);
-    const roles = user.roles ?? [];
-    const roleNames = roles.map(
-      (r: any) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
-    );
-
+    const roleNames: string[] = [];
     const permissionsFlattenSet = new Set<string>();
     const policiesList: any[] = [];
 
-    for (const role of user.roles ?? []) {
-      for (const policy of role.policies ?? []) {
+    for (const policy of user.policies ?? []) {
         const resourceCode = policy.resource?.code ?? '';
         if (resourceCode && policy.action) {
           permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);
@@ -545,7 +534,6 @@ export class UsersService implements OnModuleInit {
           effect: policy.effect ?? 'ALLOW',
         });
       }
-    }
 
     const permissionsFlatten = Array.from(permissionsFlattenSet);
 
@@ -558,7 +546,6 @@ export class UsersService implements OnModuleInit {
       ...base,
       roleNames,
       role_names: roleNames,
-      roles,
       policies: policiesList,
       permissionsFlatten,
       permissions_flatten: permissionsFlatten,
@@ -613,7 +600,6 @@ export class UsersService implements OnModuleInit {
         skip,
         take,
         include: {
-          roles: { select: { id: true, code: true, name: true } },
           jobPositions: {
             where: { endDate: null },
             include: {
@@ -654,7 +640,7 @@ export class UsersService implements OnModuleInit {
     const users = await this.prisma.user.findMany({
       where: { id: { in: validIds } },
       include: {
-        roles: true,
+        
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -665,10 +651,7 @@ export class UsersService implements OnModuleInit {
     const results = users.map((u) => {
       const base = this.toUserResponse(u);
       const firstPos = u.jobPositions?.[0];
-      const roles = u.roles ?? [];
-      const roleNames = roles.map(
-        (r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
-      );
+      const roleNames: string[] = [];
       return {
         ...base,
         roleNames,

@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 
 @ApiTags('PBAC – Chính sách phân quyền')
-@Controller('admin/roles')
+@Controller('admin/policys')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class PbacController implements OnModuleInit {
@@ -39,38 +39,37 @@ export class PbacController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách vai trò' })
+  @ApiOperation({ summary: 'Lấy danh sách nhóm quyền' })
   @ApiResponse({
     status: 200,
-    description: 'Danh sách vai trò (cả số người dùng, số chính sách)',
+    description: 'Danh sách nhóm quyền (cả số người dùng, số chính sách)',
   })
   async findAll() {
-    return firstValueFrom(this.pbacService.FindAllRoles({})).catch((e) => {
+    return firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Chi tiết một vai trò (kèm danh sách chính sách)',
+    summary: 'Chi tiết một nhóm quyền (kèm danh sách chính sách)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Vai trò và danh sách chính sách',
+    description: 'Nhóm quyền và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.FindOneRole({ id })).catch((e) => {
+    return firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo vai trò mới' })
-  @ApiResponse({ status: 201, description: 'Vai trò vừa được tạo (camelCase)' })
+  @ApiOperation({ summary: 'Tạo nhóm quyền mới' })
+  @ApiResponse({ status: 201, description: 'Nhóm quyền vừa được tạo' })
   async create(
     @Body()
     body: {
-      code: string;
       name: string;
       description?: string;
       policies?: {
@@ -82,8 +81,7 @@ export class PbacController implements OnModuleInit {
     },
   ) {
     return firstValueFrom(
-      this.pbacService.CreateRole({
-        code: body.code,
+      this.pbacService.CreateUserGroup({
         name: body.name,
         description: body.description,
         policies: body.policies,
@@ -94,10 +92,10 @@ export class PbacController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật vai trò' })
+  @ApiOperation({ summary: 'Cập nhật nhóm quyền' })
   @ApiResponse({
     status: 200,
-    description: 'Vai trò sau khi cập nhật (camelCase)',
+    description: 'Nhóm quyền sau khi cập nhật',
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -114,7 +112,7 @@ export class PbacController implements OnModuleInit {
     },
   ) {
     return firstValueFrom(
-      this.pbacService.UpdateRole({
+      this.pbacService.UpdateUserGroup({
         id,
         name: body.name,
         description: body.description,
@@ -127,11 +125,11 @@ export class PbacController implements OnModuleInit {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Xoá vai trò (không xoá được khi có user được gán)',
+    summary: 'Xoá nhóm quyền',
   })
   @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.DeleteRole({ id })).catch((e) => {
+    return firstValueFrom(this.pbacService.DeleteUserGroup({ id })).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
   }

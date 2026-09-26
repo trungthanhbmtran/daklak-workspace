@@ -1,3 +1,3 @@
 export { PolicySidebar } from "./components/PolicySidebar";
 export { PolicyForm } from "./components/PolicyForm";
-export type { Policy, Permission } from "./types";
+export type { Policy } from "./types";

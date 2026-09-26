@@ -231,10 +231,7 @@ export function UserDetailSheet({
         </SheetContent>
       </Sheet>
 
-                        onSave={(userId, roleIds) => onAssignRoles?.({ id: userId, roleIds })}
-                  isSaving={!!isAssigningRoles}
-                />
-          )}
+
     </>
   );
 }

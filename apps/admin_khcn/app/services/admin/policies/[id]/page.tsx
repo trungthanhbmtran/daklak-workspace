@@ -1,4 +1,4 @@
-import { RoleForm } from "@/features/system-admin/roles";
+import { PolicyForm } from "@/features/system-admin/policies";
 
 export const metadata = {
   title: "Chi tiết Vai trò | Quản trị Hệ thống",
@@ -10,9 +10,9 @@ interface PageProps {
 
 export default async function RoleDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const roleId = Number(id);
+  const policyId = Number(id);
 
-  if (isNaN(roleId)) {
+  if (isNaN(policyId)) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">ID vai trò không hợp lệ.</p>
@@ -20,5 +20,5 @@ export default async function RoleDetailPage({ params }: PageProps) {
     );
   }
 
-  return <RoleForm roleId={roleId} />;
+  return <PolicyForm policyId={policyId} />;
 }

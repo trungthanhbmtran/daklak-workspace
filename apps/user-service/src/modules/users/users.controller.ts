@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException, Payload } from '@nestjs/microservices';
-import { CreateUserGrpcDto, LoginGrpcDto, RefreshGrpcDto, SetPasswordGrpcDto, FindOneGrpcDto, ListUsersGrpcDto, GetUsersByIdsGrpcDto, SetUserActiveGrpcDto, AssignRolesGrpcDto, AssignPositionGrpcDto, GetSubordinatesGrpcDto } from './dto/user.grpc.dto';
+import { CreateUserGrpcDto, LoginGrpcDto, RefreshGrpcDto, SetPasswordGrpcDto, FindOneGrpcDto, ListUsersGrpcDto, GetUsersByIdsGrpcDto, SetUserActiveGrpcDto, AssignPositionGrpcDto, GetSubordinatesGrpcDto } from './dto/user.grpc.dto';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { UsersService } from './users.service';
 

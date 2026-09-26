@@ -1,4 +1,4 @@
-import { RoleSidebar } from "@/features/system-admin/roles";
+import { PolicySidebar } from "@/features/system-admin/policies";
 
 export default function RolesLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +11,7 @@ export default function RolesLayout({ children }: { children: React.ReactNode })
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 min-w-0 overflow-hidden">
-        <RoleSidebar />
+        <PolicySidebar />
         <div className="flex-1 h-full min-w-0 hidden lg:block overflow-y-auto p-1">
           {children}
         </div>

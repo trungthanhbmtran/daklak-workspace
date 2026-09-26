@@ -117,7 +117,7 @@ export default function PolicyCardDialog({ resourceName, perms, form }: PolicyCa
                       </div>
                       <Switch
                         checked={isEnabled}
-                        onCheckedChange={(checked) => handleTogglePolicy(actionCode, checked, perm.id)}
+                        onCheckedChange={(checked) => handleTogglePolicy(actionCode, checked, perm.id ?? 0)}
                       />
                     </div>
 

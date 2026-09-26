@@ -79,11 +79,9 @@ export class KpisService implements OnModuleInit {
   }
 
   async findCriteria(user: any, page?: string, limit?: string) {
-    const userRoles = user?.roles || [];
-    const checkRole = (roleCode: string) =>
-      userRoles.some((r: any) => r === roleCode || r?.code === roleCode);
-    const hasGlobalAccess =
-      checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
+    const hasGlobalAccess = 
+      user?.permissionsFlatten?.includes('KPI:MANAGE') || 
+      user?.permissionsFlatten?.includes('SYSTEM:MANAGE');
     const res: any = await firstValueFrom(
       this.kpiService.FindCriteria({
         isAdmin: hasGlobalAccess,

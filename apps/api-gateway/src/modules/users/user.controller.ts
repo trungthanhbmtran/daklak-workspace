@@ -69,7 +69,7 @@ export class UserController {
   @Post()
   @ApiOperation({
     summary:
-      'Tạo user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode từ HRM)',
+      'Tạo user (email, username, password, fullName, phoneNumber, cccd, employeeCode từ HRM)',
   })
   @ApiResponse({
     status: 201,

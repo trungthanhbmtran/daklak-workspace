@@ -9,13 +9,11 @@ import type { UserWithPbac } from '@/common/types/grpc-user.type';
 /** Key lưu user trên gRPC context để guard khác dùng */
 export const GRPC_USER_KEY = 'user';
 
-function flattenPermissions(roles: UserWithPbac['roles']): string[] {
+function flattenPermissions(policies: UserWithPbac['policies']): string[] {
   const set = new Set<string>();
-  for (const role of roles) {
-    for (const p of role.policies ?? []) {
-      const resourceCode = p.resource?.code ?? '';
-      if (resourceCode) set.add(`${resourceCode}:${p.action}`);
-    }
+  for (const p of policies ?? []) {
+    const resourceCode = p.resource?.code ?? '';
+    if (resourceCode) set.add(`${resourceCode}:${p.action}`);
   }
   return Array.from(set);
 }
@@ -58,11 +56,7 @@ export class GrpcAuthGuard implements CanActivate {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        roles: {
-          include: {
-            policies: { include: { resource: true } },
-          },
-        },
+        policies: { include: { resource: true } },
       },
     });
 
@@ -74,7 +68,7 @@ export class GrpcAuthGuard implements CanActivate {
     }
 
     const userWithPbac = user as unknown as UserWithPbac;
-    userWithPbac.permissionsFlatten = flattenPermissions(userWithPbac.roles);
+    userWithPbac.permissionsFlatten = flattenPermissions(userWithPbac.policies);
 
     (rpcContext as Record<string, unknown>)[GRPC_USER_KEY] = userWithPbac;
     return true;

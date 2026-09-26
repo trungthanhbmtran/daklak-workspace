@@ -35,8 +35,8 @@ export function PolicySidebar() {
   });
 
   const filteredPolicys = useMemo(() => policys.filter((r: Policy) =>
-    r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.code.toLowerCase().includes(searchTerm.toLowerCase())
+    r.name || "".toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.code || "".toLowerCase().includes(searchTerm.toLowerCase())
   ), [policys, searchTerm]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPolicys.length / PAGE_SIZE));

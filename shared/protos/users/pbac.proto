@@ -3,14 +3,15 @@ syntax = "proto3";
 package pbac;
 import "common/common.proto";
 
-// PBAC: Chính sách phân quyền (Policy-Based) – Vai trò + Ma trận quyền
+// PBAC: Chính sách phân quyền (Policy-Based) – Nhóm người dùng (UserGroup) + Ma trận quyền
 service PbacService {
-  // --- Vai trò (Roles) ---
-  rpc CreateRole (CreateRoleRequest) returns (RoleResponse);
-  rpc FindAllRoles (common.Empty) returns (FindAllRolesResponse);
-  rpc FindOneRole (FindOneRoleRequest) returns (RoleDetailResponse);
-  rpc UpdateRole (UpdateRoleRequest) returns (RoleResponse);
-  rpc DeleteRole (DeleteRoleRequest) returns (RoleResponse);
+  // --- Nhóm người dùng (UserGroups) ---
+  rpc CreateUserGroup (CreateUserGroupRequest) returns (UserGroupResponse);
+  rpc FindAllUserGroups (common.Empty) returns (FindAllUserGroupsResponse);
+  rpc FindOneUserGroup (FindOneUserGroupRequest) returns (UserGroupDetailResponse);
+  rpc UpdateUserGroup (UpdateUserGroupRequest) returns (UserGroupResponse);
+  rpc DeleteUserGroup (DeleteUserGroupRequest) returns (UserGroupResponse);
+  
   // --- Tài nguyên & Quyền CRUD ---
   rpc GetResources (common.Empty) returns (GetResourcesResponse);
   rpc CreateResource (CreateResourceRequest) returns (ResourceResponse);
@@ -60,52 +61,48 @@ message PolicyItem {
   string conditions = 5;
 }
 
-message CreateRoleRequest {
-  string code = 1;
+message CreateUserGroupRequest {
+  string name = 1;
+  string description = 2;
+  repeated PolicyItem policies = 3;
+}
+
+message FindOneUserGroupRequest {
+  int32 id = 1;
+}
+
+message UpdateUserGroupRequest {
+  int32 id = 1;
   string name = 2;
   string description = 3;
   repeated PolicyItem policies = 4;
 }
 
-message FindOneRoleRequest {
+message DeleteUserGroupRequest {
   int32 id = 1;
 }
 
-message UpdateRoleRequest {
+message UserGroupResponse {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message UserGroupDetailResponse {
   int32 id = 1;
   string name = 2;
   string description = 3;
   repeated PolicyItem policies = 4;
 }
 
-message DeleteRoleRequest {
+message UserGroupWithCount {
   int32 id = 1;
+  string name = 2;
+  string description = 3;
+  int32 users_count = 4;
+  int32 policies_count = 5;
 }
 
-message RoleResponse {
-  int32 id = 1;
-  string code = 2;
-  string name = 3;
-  string description = 4;
-}
-
-message RoleDetailResponse {
-  int32 id = 1;
-  string code = 2;
-  string name = 3;
-  string description = 4;
-  repeated PolicyItem policies = 5;
-}
-
-message RoleWithCount {
-  int32 id = 1;
-  string code = 2;
-  string name = 3;
-  string description = 4;
-  int32 users_count = 5;
-  int32 permissions_count = 6;
-}
-
-message FindAllRolesResponse {
-  repeated RoleWithCount roles = 1;
+message FindAllUserGroupsResponse {
+  repeated UserGroupWithCount user_groups = 1;
 }

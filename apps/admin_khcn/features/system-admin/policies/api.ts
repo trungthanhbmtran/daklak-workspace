@@ -1,6 +1,19 @@
+export interface Policy {
+  id?: number;
+  resourceCode?: string;
+  action?: string;
+  effect?: 'ALLOW' | 'DENY';
+  resourceId?: number;
+  conditions?: { expression?: string };
+  code?: string;
+  name?: string;
+  description?: string;
+  active?: number;
+  policies?: Policy[];
+}
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
-import { Policy, Permission, Policy } from "./types";
+import { PolicyFilter, Permission } from "./types";
 
 /** Response từ GET /policys — gateway trả về { data: { policys } } hoặc { data: [...] } */
 const policysListRes = (res: unknown): Policy[] => {

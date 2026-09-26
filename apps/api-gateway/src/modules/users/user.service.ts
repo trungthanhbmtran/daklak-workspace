@@ -92,7 +92,7 @@ export class UserService implements OnModuleInit {
         cccd: data.cccd,
         employeeCode: data.employeeCode ?? data.employee_code,
         lastLogin: data.lastLogin ?? data.last_login,
-        roles: data.roles,
+        policies: data.policies,
       },
     };
   }

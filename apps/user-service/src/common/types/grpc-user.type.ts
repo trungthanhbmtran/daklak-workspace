@@ -1,13 +1,11 @@
-import type { User, Role, Policy, Resource } from '../../../src/generated/prisma/client'
+import type { User, Policy, Resource } from '../../../src/generated/prisma/client'
 
 /**
  * User được gắn vào gRPC context sau khi GrpcAuthGuard xác thực (PBAC).
  * permissionsFlatten: ['user:create', 'user:read', ...] từ Vai trò -> Quyền -> Resource.code:action
  */
 export type UserWithPbac = User & {
-  roles: (Role & {
-    policies: (Policy & { resource: Resource })[];
-  })[];
+  policies: (Policy & { resource: Resource })[];
   /** Đã flatten để check nhanh: resourceCode:action */
   permissionsFlatten?: string[];
 };
