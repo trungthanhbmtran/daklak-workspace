@@ -7,8 +7,8 @@ import { seedUserGroups } from './04-pbac.seed';
 
 import { usersSeed } from "./05-users.seed";
 import { seedJobTitles } from './06-job-titles.seed';
-import { organizationsDakLakProvinceSeed } from "./07-organizations-dak-lak-province.seed";
-import { jobPositionsSeed } from "./08-job-positions.seed";
+import { seedOrganizationsDakLakProvince } from "./07-organizations-dak-lak-province.seed";
+import { seedJobPositions } from "./08-job-positions.seed";
 import { seedCategoriesDanhMCDNgChung } from './09-categories-danh-m-c-d-ng-chung.seed';
 
 export async function runSeeds(prisma: PrismaClient) {
@@ -25,9 +25,9 @@ export async function runSeeds(prisma: PrismaClient) {
   console.log('Running seedJobTitles...');
   await seedJobTitles(prisma);
   console.log('Running seedOrganizationsDakLakProvince...');
-  await organizationsDakLakProvinceSeed(prisma);
+  await seedOrganizationsDakLakProvince(prisma);
   console.log('Running seedJobPositions...');
-  await jobPositionsSeed(prisma);
+  await seedJobPositions(prisma);
   console.log('Running seedCategoriesDanhMCDNgChung...');
   await seedCategoriesDanhMCDNgChung(prisma);
 }
