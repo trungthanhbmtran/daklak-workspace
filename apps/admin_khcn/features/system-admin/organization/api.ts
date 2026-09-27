@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
 import type {
   OrganizationUnitNode,
@@ -54,8 +54,11 @@ function normalizeStaffingSlotItem(s: any): StaffingSlotItem {
     slotOrder: s.slotOrder ?? s.slot_order,
     description: s.description,
     geographicAreas: s.geographicAreas ?? s.geographic_areas ?? [],
+    geographicAreaIds: s.geographicAreaIds ?? s.geographic_area_ids ?? [],
     domains: s.domains ?? [],
+    domainIds: s.domainIds ?? s.domain_ids ?? [],
     monitoredUnits: s.monitoredUnits ?? s.monitored_units ?? [],
+    monitoredUnitIds: s.monitoredUnitIds ?? s.monitored_unit_ids ?? [],
     assignedEmployeeName: s.assignedEmployeeName ?? s.assigned_employee_name,
     assignedEmployeeCode: s.assignedEmployeeCode ?? s.assigned_employee_code,
   };
@@ -93,10 +96,11 @@ export const organizationApi = {
       data: normalizeUnitNode(unwrapData<any>(r)),
     })),
 
-  getScope: (id: number): Promise<{ data: { domains: { id: number; name: string }[], scope: string } }> =>
+  getScope: (id: number): Promise<{ data: { domains: { id: number; name: string }[], domainIds: number[], scope: string } }> =>
     apiClient.get(`/organizations/${id}/scope`).then((r: any) => ({
       data: {
         domains: r.data?.domains ?? [],
+        domainIds: r.data?.domainIds ?? [],
         scope: r.data?.scope,
       }
     })),

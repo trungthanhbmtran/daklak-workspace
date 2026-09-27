@@ -770,15 +770,15 @@ export class UsersService implements OnModuleInit {
 
   
   async assignUserGroups(data: { userId: number; userGroupIds: number[] }) {
-    await this.prisma.(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       await tx.userToUserGroup.deleteMany({
-        where: { userId: data.userId },
+        where: { A: data.userId },
       });
       if (data.userGroupIds && data.userGroupIds.length > 0) {
         await tx.userToUserGroup.createMany({
           data: data.userGroupIds.map((groupId) => ({
-            userId: data.userId,
-            userGroupId: groupId,
+            A: data.userId,
+            B: groupId,
           })),
         });
       }

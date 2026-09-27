@@ -9,6 +9,7 @@ export interface OrganizationUnitNode {
   parentId: number | null;
   hierarchyPath?: string;
   domains?: { id: number; name: string }[];
+  domainIds?: number[];
   subordinateUnits?: OrganizationUnitNode[];
   scope?: string;
   children?: OrganizationUnitNode[];
@@ -56,8 +57,11 @@ export interface StaffingSlotItem {
   slotOrder: number;
   description?: string;
   geographicAreas?: { id: number; name: string }[];
+  geographicAreaIds?: number[];
   domains?: { id: number; name: string }[];
+  domainIds?: number[];
   monitoredUnits?: { id: number; name: string }[];
+  monitoredUnitIds?: number[];
   assignedEmployeeName?: string;
   assignedEmployeeCode?: string;
 }

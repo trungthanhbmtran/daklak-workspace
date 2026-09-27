@@ -20,16 +20,16 @@ type Props = {
 };
 
 export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, unitDomainIds, subordinateUnits, onSave, isSaving }: Props) {
-  const [domainIds, setDomainIds] = useState<number[]>((existingSlot?.domains ?? []).map(x => x.id));
-  const [geoAreaIds, setGeoAreaIds] = useState<number[]>((existingSlot?.geographicAreas ?? []).map(x => x.id));
-  const [unitIds, setUnitIds] = useState<number[]>((existingSlot?.monitoredUnits ?? []).map(x => x.id));
+  const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
+  const [geoAreaIds, setGeoAreaIds] = useState<number[]>(existingSlot?.geographicAreaIds ?? []);
+  const [unitIds, setUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
 
   const { items: geoAreas, isFetching: loadingGeo, q: geoQ, setQ: setGeoQ, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geoAreaIds);
 
   useEffect(() => {
-    setDomainIds((existingSlot?.domains ?? []).map(x => x.id));
-    setGeoAreaIds((existingSlot?.geographicAreas ?? []).map(x => x.id));
-    setUnitIds((existingSlot?.monitoredUnits ?? []).map(x => x.id));
+    setDomainIds(existingSlot?.domainIds ?? []);
+    setGeoAreaIds(existingSlot?.geographicAreaIds ?? []);
+    setUnitIds(existingSlot?.monitoredUnitIds ?? []);
   }, [existingSlot]);
 
   return (

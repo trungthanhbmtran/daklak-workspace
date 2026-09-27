@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   Inject,
   OnModuleInit,
@@ -264,6 +264,7 @@ export class OrganizationsService implements OnModuleInit {
         success: true, 
         ...data,
         domains: data.domains ?? [],
+        domainIds: (data.domains ?? []).map((x: any) => x.id),
         scope: data.scope ?? ''
       };
     } catch (err: any) {
@@ -383,8 +384,11 @@ export class OrganizationsService implements OnModuleInit {
         slotOrder: s.slotOrder ?? s.slot_order,
         description: s.description ?? '',
         domains: s.domains ?? [],
+        domainIds: (s.domains ?? []).map((x: any) => x.id),
         geographicAreas: s.geographicAreas ?? s.geographic_areas ?? [],
+        geographicAreaIds: (s.geographicAreas ?? s.geographic_areas ?? []).map((x: any) => x.id),
         monitoredUnits: s.monitoredUnits ?? s.monitored_units ?? [],
+        monitoredUnitIds: (s.monitoredUnits ?? s.monitored_units ?? []).map((x: any) => x.id),
         assignedEmployeeName: s.assignedEmployeeName ?? s.assigned_employee_name ?? '',
         assignedEmployeeCode: s.assignedEmployeeCode ?? s.assigned_employee_code ?? ''
       }))
