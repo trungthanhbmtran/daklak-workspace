@@ -6,7 +6,7 @@ export const resourceApi = {
   getResources: async (): Promise<Resource[]> => {
     const res = await apiClient.get("/resources");
     const data = (res as any)?.data ?? res;
-    const list = Array.isArray(data) ? data : [];
+    const list = data?.resources || [];
     return list.map((r: any) => ({
       id: Number(r.id),
       code: String(r.code ?? ""),

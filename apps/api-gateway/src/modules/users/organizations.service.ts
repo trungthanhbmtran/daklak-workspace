@@ -36,11 +36,11 @@ export class OrganizationsService implements OnModuleInit {
 
   private mapToOrganizationNode(node: any): any {
     if (!node) return null;
-    const { children, typeCode, type_code, category_code, categoryCode, parent_id, parentId, domains, ...rest } = node;
-    const rawParentId = parentId ?? parent_id;
+    const { children, typeCode, categoryCode, parentId, domains, ...rest } = node;
+    const rawParentId = parentId;
     return {
       ...rest,
-      categoryCode: categoryCode ?? category_code ?? typeCode ?? type_code ?? undefined,
+      categoryCode: categoryCode ?? typeCode ?? undefined,
       parentId: rawParentId === 0 ? null : (rawParentId ?? null),
       domains: domains ?? [],
       children: Array.isArray(children) ? children.map(c => this.mapToOrganizationNode(c)) : undefined,
@@ -369,28 +369,28 @@ export class OrganizationsService implements OnModuleInit {
   private mapStaffingReportItem(rep: any): any {
     return {
       id: rep.id,
-      unitId: rep.unitId ?? rep.unit_id,
-      jobTitleId: rep.jobTitleId ?? rep.job_title_id,
-      jobTitleName: rep.jobTitleName ?? rep.job_title_name ?? '',
+      unitId: rep.unitId,
+      jobTitleId: rep.jobTitleId,
+      jobTitleName: rep.jobTitleName ?? '',
       quantity: rep.quantity ?? 0,
-      currentCount: rep.currentCount ?? rep.current_count ?? 0,
-      currentEmployeeNames: rep.currentEmployeeNames ?? rep.current_employee_names ?? [],
-      jobTitleDomainName: rep.jobTitleDomainName ?? rep.job_title_domain_name ?? '',
-      jobTitleMonitoredUnitNames: rep.jobTitleMonitoredUnitNames ?? rep.job_title_monitored_unit_names ?? [],
-      jobTitleGeographicAreaName: rep.jobTitleGeographicAreaName ?? rep.job_title_geographic_area_name ?? '',
+      currentCount: rep.currentCount ?? 0,
+      currentEmployeeNames: rep.currentEmployeeNames ?? [],
+      jobTitleDomainName: rep.jobTitleDomainName ?? '',
+      jobTitleMonitoredUnitNames: rep.jobTitleMonitoredUnitNames ?? [],
+      jobTitleGeographicAreaName: rep.jobTitleGeographicAreaName ?? '',
       slots: (rep.slots ?? []).map((s: any) => ({
         id: s.id,
-        staffingId: s.staffingId ?? s.staffing_id,
-        slotOrder: s.slotOrder ?? s.slot_order,
+        staffingId: s.staffingId,
+        slotOrder: s.slotOrder,
         description: s.description ?? '',
         domains: s.domains ?? [],
         domainIds: (s.domains ?? []).map((x: any) => x.id),
-        geographicAreas: s.geographicAreas ?? s.geographic_areas ?? [],
-        geographicAreaIds: (s.geographicAreas ?? s.geographic_areas ?? []).map((x: any) => x.id),
-        monitoredUnits: s.monitoredUnits ?? s.monitored_units ?? [],
-        monitoredUnitIds: (s.monitoredUnits ?? s.monitored_units ?? []).map((x: any) => x.id),
-        assignedEmployeeName: s.assignedEmployeeName ?? s.assigned_employee_name ?? '',
-        assignedEmployeeCode: s.assignedEmployeeCode ?? s.assigned_employee_code ?? ''
+        geographicAreas: s.geographicAreas ?? [],
+        geographicAreaIds: (s.geographicAreas ?? []).map((x: any) => x.id),
+        monitoredUnits: s.monitoredUnits ?? [],
+        monitoredUnitIds: (s.monitoredUnits ?? []).map((x: any) => x.id),
+        assignedEmployeeName: s.assignedEmployeeName ?? '',
+        assignedEmployeeCode: s.assignedEmployeeCode ?? ''
       }))
     };
   }
@@ -497,3 +497,4 @@ export class OrganizationsService implements OnModuleInit {
     return { success: res.success };
   }
 }
+

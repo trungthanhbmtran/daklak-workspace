@@ -45,9 +45,10 @@ export class PbacController implements OnModuleInit {
     description: 'Danh sách nhóm quyền (cả số người dùng, số chính sách)',
   })
   async findAll() {
-    return firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => {
+    const result = await firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    return { success: true, data: result };
   }
 
   @Get(':id')
@@ -59,9 +60,10 @@ export class PbacController implements OnModuleInit {
     description: 'Nhóm quyền và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => {
+    const result = await firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    return { success: true, data: result };
   }
 
   @Post()
@@ -80,7 +82,7 @@ export class PbacController implements OnModuleInit {
       }[];
     },
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.pbacService.CreateUserGroup({
         name: body.name,
         description: body.description,
@@ -89,6 +91,7 @@ export class PbacController implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    return { success: true, data: result };
   }
 
   @Put(':id')
@@ -111,7 +114,7 @@ export class PbacController implements OnModuleInit {
       }[];
     },
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.pbacService.UpdateUserGroup({
         id,
         name: body.name,
@@ -121,6 +124,7 @@ export class PbacController implements OnModuleInit {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    return { success: true, data: result };
   }
 
   @Delete(':id')
@@ -129,8 +133,9 @@ export class PbacController implements OnModuleInit {
   })
   @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.DeleteUserGroup({ id })).catch((e) => {
+    const result = await firstValueFrom(this.pbacService.DeleteUserGroup({ id })).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+    return { success: true, data: result };
   }
 }

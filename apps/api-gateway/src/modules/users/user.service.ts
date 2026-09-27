@@ -85,16 +85,16 @@ export class UserService implements OnModuleInit {
         id: data.id,
         email: data.email,
         username: data.username,
-        fullName: data.fullName ?? data.full_name,
-        phoneNumber: data.phoneNumber ?? data.phone_number,
-        avatarUrl: data.avatarUrl ?? data.avatar_url,
-        isActive: data.isActive ?? data.is_active ?? true,
+        fullName: data.fullName,
+        phoneNumber: data.phoneNumber,
+        avatarUrl: data.avatarUrl,
+        isActive: data.isActive ?? true,
         cccd: data.cccd,
-        employeeCode: data.employeeCode ?? data.employee_code,
-        lastLogin: data.lastLogin ?? data.last_login,
+        employeeCode: data.employeeCode,
+        lastLogin: data.lastLogin,
         policies: data.policies,
-        userGroups: data.userGroups ?? data.user_groups,
-        userGroupIds: (data.userGroups ?? data.user_groups ?? []).map((g: any) => g.id),
+        userGroups: data.userGroups,
+        userGroupIds: (data.userGroups || []).map((g: any) => g.id),
       },
     };
   }
@@ -163,7 +163,7 @@ export class UserService implements OnModuleInit {
         `Tài khoản đã được tạo: ${fullName || email} (${email}). Thông báo đăng nhập đã gửi tới email người dùng.`,
       );
     }
-    return created;
+    return { success: true, data: created };
   }
 
   async assignPosition(id: number, body: any) {
@@ -182,7 +182,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on assignPosition:', err);
     }
-    return result;
+    return { success: true, data: result };
   }
 
   async setActive(id: number, isActive: boolean) {
@@ -199,7 +199,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on setActive:', err);
     }
-    return result;
+    return { success: true, data: result };
   }
 
   async assignUserGroups(id: number, userGroupIds: number[]) {
@@ -216,7 +216,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on assignUserGroups:', err);
     }
-    return result;
+    return { success: true, data: result };
   }
 
 

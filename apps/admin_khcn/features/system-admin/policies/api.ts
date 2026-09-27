@@ -15,27 +15,6 @@ export interface Policy {
 import apiClient from "@/lib/axiosInstance";
 import { PolicyFilter, Permission } from "./types";
 
-const parsePolicy = (row: any): Policy => ({
-  id: Number(row.id),
-  code: String(row.code ?? ""),
-  name: String(row.name ?? ""),
-  description: String(row.description ?? ""),
-  active: 1,
-  policies: (row.policies || []).map((p: any) => ({
-    id: p.id,
-    resourceId: p.resourceId,
-    resourceCode: p.resourceCode || "",
-    action: p.action,
-    effect: p.effect,
-    conditions: p.conditions,
-  })),
-});
-
-const policysListRes = (res: any): Policy[] => {
-  const data = res?.data ?? res;
-  return (data?.userGroups || []).map(parsePolicy);
-};
-
 /** Response từ GET /resources — gateway trả về danh sách resource */
 const permissionMatrixToFlat = (res: any): Permission[] => {
   const data = res?.data ?? res;
@@ -56,17 +35,10 @@ const permissionMatrixToFlat = (res: any): Permission[] => {
   return out;
 };
 
-/** Response từ GET /policys/:id — gateway trả về { data } hoặc policy trực tiếp */
-const policyDetailRes = (res: any): Policy | null => {
-  const data = res?.data ?? res;
-  if (!data || !data.id) return null;
-  return parsePolicy(data);
-};
-
 export const policyApi = {
   getPolicys: async (): Promise<Policy[]> => {
-    const res = await apiClient.get("/policys");
-    return policysListRes(res);
+    const res: any = await apiClient.get("/policys");
+    return res?.data?.userGroups ?? res?.userGroups ?? res ?? [];
   },
 
   getPermissionMatrix: async (): Promise<Permission[]> => {
@@ -75,8 +47,9 @@ export const policyApi = {
   },
 
   getPolicyById: async (id: number): Promise<Policy | null> => {
-    const res = await apiClient.get(`/policys/${id}`);
-    return policyDetailRes(res);
+    const res: any = await apiClient.get(`/policys/${id}`);
+    const data = res?.data ?? res;
+    return data && data.id ? data : null;
   },
 
   savePolicy: (data: Partial<Policy>) => {
