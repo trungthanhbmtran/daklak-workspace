@@ -59,6 +59,7 @@ message PolicyItem {
   string action = 3;
   string effect = 4;
   string conditions = 5;
+  string resource_code = 6;
 }
 
 message CreateUserGroupRequest {

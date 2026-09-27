@@ -105,6 +105,7 @@ export class PbacService {
         id: p.id,
         resourceId: p.resourceId,
         resource_id: p.resourceId,
+        resource_code: p.resource?.code ?? '',
         action: p.action,
         effect: p.effect,
         conditions: p.conditions ? JSON.stringify(p.conditions) : '',

@@ -15,41 +15,31 @@ export interface Policy {
 import apiClient from "@/lib/axiosInstance";
 import { PolicyFilter, Permission } from "./types";
 
-/** Response từ GET /policys — gateway trả về { data: { policys } } hoặc { data: [...] } */
-const policysListRes = (res: unknown): Policy[] => {
-  const rawData = (res as { data?: any })?.data ?? res;
-  let list: any[] = [];
-  if (Array.isArray(rawData)) {
-    list = rawData;
-  } else if (rawData && typeof rawData === 'object') {
-    list = rawData.userGroups || rawData.user_groups || rawData.policys || [];
-  }
-  return list.map((r: unknown) => {
-    const row = r as Record<string, unknown>;
-    const rawPolicies = (row.policies as any[]) || [];
-    const policies: Policy[] = rawPolicies.map((p) => ({
-      id: p.id,
-      resourceId: p.resourceId,
-      resourceCode: p.resource?.code ?? p.resourceCode ?? "",
-      action: p.action,
-      effect: p.effect,
-      conditions: p.conditions,
-    }));
-    return {
-      id: Number(row.id),
-      code: String(row.code ?? ""),
-      name: String(row.name ?? ""),
-      description: String(row.description ?? ""),
-      active: 1,
-      policies: policies,
-  };
-  });
+const parsePolicy = (row: any): Policy => ({
+  id: Number(row.id),
+  code: String(row.code ?? ""),
+  name: String(row.name ?? ""),
+  description: String(row.description ?? ""),
+  active: 1,
+  policies: (row.policies || []).map((p: any) => ({
+    id: p.id,
+    resourceId: p.resourceId,
+    resourceCode: p.resourceCode || "",
+    action: p.action,
+    effect: p.effect,
+    conditions: p.conditions,
+  })),
+});
+
+const policysListRes = (res: any): Policy[] => {
+  const data = res?.data ?? res;
+  return (data?.userGroups || []).map(parsePolicy);
 };
 
 /** Response từ GET /resources — gateway trả về danh sách resource */
-const permissionMatrixToFlat = (res: unknown): Permission[] => {
-  const data = (res as { data?: unknown[] })?.data ?? res;
-  const resources = (Array.isArray(data) ? data : []) as Array<{ id: number; code: string; name: string }>;
+const permissionMatrixToFlat = (res: any): Permission[] => {
+  const data = res?.data ?? res;
+  const resources = data?.resources || [];
   const out: Permission[] = [];
   const STD_ACTIONS = ['VIEW', 'CREATE', 'UPDATE', 'DELETE', 'MANAGE'];
   
@@ -67,27 +57,10 @@ const permissionMatrixToFlat = (res: unknown): Permission[] => {
 };
 
 /** Response từ GET /policys/:id — gateway trả về { data } hoặc policy trực tiếp */
-const policyDetailRes = (res: unknown): Policy | null => {
-  const raw = (res as { data?: Record<string, unknown> })?.data ?? res;
-  const r = raw as Record<string, unknown>;
-  if (!r || r.id === 0) return null;
-  const rawPolicies = (r.policies as any[]) ?? [];
-  const policies: Policy[] = rawPolicies.map((p) => ({
-    id: p.id,
-    resourceId: p.resourceId,
-    resourceCode: p.resource?.code ?? p.resourceCode ?? "",
-    action: p.action,
-    effect: p.effect,
-    conditions: p.conditions,
-  }));
-  return {
-    id: Number(r.id),
-    code: String(r.code ?? ""),
-    name: String(r.name ?? ""),
-    description: String(r.description ?? ""),
-    active: 1,
-    policies: policies,
-  };
+const policyDetailRes = (res: any): Policy | null => {
+  const data = res?.data ?? res;
+  if (!data || !data.id) return null;
+  return parsePolicy(data);
 };
 
 export const policyApi = {

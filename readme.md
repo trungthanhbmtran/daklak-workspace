@@ -4,6 +4,23 @@ npx prisma migrate dev --name mo_ta_su_thay_doi
 npx prisma generate
 Hướng dẫn build và deploy ứng dụng Daklak (Next.js 16.1.6, NestJS, Prisma) bằng Docker Compose thông qua GitHub Actions.
 
+## Danh Sách Tài Khoản Đăng Nhập (Test Accounts)
+Sau khi chạy seed Database thành công, bạn có thể sử dụng các tài khoản sau để đăng nhập.
+*(Tất cả đều dùng chung mật khẩu mặc định là: **`admin`** hoặc **`Admin@123`** tùy tài khoản)*
+
+**Tài khoản Quản trị Hệ thống (Mật khẩu: `admin`):**
+- `superadmin` / `superadmin@sys.com` (Quản trị cấp cao)
+- `admin` / `admin@sys.com` (Quản trị hệ thống)
+
+**Tài khoản Quản trị Đơn vị (Mật khẩu: `admin`):**
+- `orgadmin` / `orgadmin@daklak.gov.vn` (Admin của một đơn vị cụ thể)
+
+**Tài khoản Lãnh đạo & Nhân sự Sở KH&CN (Mật khẩu: `Admin@123`):**
+- `buithanhtoan` (Giám đốc Sở KH&CN - Toàn quyền đơn vị)
+- `phamgiaviet` (Phó Giám đốc)
+- `trantrungthanh` (Nhân viên Trung tâm IOC)
+- `nguyenthiquynhmai` (Nhân viên Trung tâm IOC)
+
 ## 1. Hướng Dẫn Sử Dụng AI Agent Skills (Dành cho Lập Trình Viên)
 Dự án được cấu hình sẵn các thư mục kỹ năng (skills) đặc biệt dành cho AI (như Github Copilot, Gemini, Cursor) trong thư mục `.agents/skills`. Để AI viết code chính xác theo chuẩn kiến trúc dự án, bạn nên sử dụng các Slash Command hoặc Prompt gợi ý:
 
