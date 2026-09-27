@@ -43,7 +43,7 @@ ENV PROTO_PATH=/app/protos
 
 
 # [Bảo Mật] Tạo và chuyển sang user app không có đặc quyền
-RUN groupadd -r app && useradd -r -m -g app app && chown app:app /app
+RUN groupadd -r app && useradd -r -m -s /bin/bash -g app app && chown app:app /app
 USER app
 
 # Cài đặt Prod Dependencies trực tiếp dưới quyền app
