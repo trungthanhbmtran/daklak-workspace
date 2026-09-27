@@ -62,3 +62,5 @@ EXPOSE 8080
 
 CMD ["node", "dist/apps/media-service/src/main.js"]
 
+
+# Trigger rebuild
