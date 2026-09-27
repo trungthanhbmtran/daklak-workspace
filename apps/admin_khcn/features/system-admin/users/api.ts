@@ -58,8 +58,9 @@ export const userApi = {
       const res = await apiClient.get("/users", { params });
       const rawRes = res as any;
       
-      // Axios interceptor returns the raw JSON body: { success: true, data: [...], meta: { total, skip, take } }
-      const meta = rawRes?.meta ?? { total: 0 };
+      // Axios interceptor returns the raw JSON body. TransformInterceptor might wrap pagination inside meta.pagination
+      const metaObj = rawRes?.meta ?? {};
+      const meta = { total: metaObj.pagination?.total ?? metaObj.total ?? 0 };
       const arr = Array.isArray(rawRes?.data) ? rawRes.data : [];
       
       return {

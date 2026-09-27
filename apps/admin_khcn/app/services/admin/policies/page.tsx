@@ -12,8 +12,8 @@ export default function RolesPage() {
         <ShieldAlert className="h-10 w-10 text-muted-foreground/40" />
       </div>
       <h3 className="font-bold text-foreground">Chưa chọn Vai trò</h3>
-      <p className="text-xs text-muted-foreground max-w-[220px] mt-1">
-        Vui lòng chọn vai trò bên trái để bắt đầu thiết lập quyền truy cập tài nguyên.
+      <p className="text-xs text-muted-foreground max-w-[250px] mt-1">
+        Vui lòng chọn một vai trò từ danh sách bên trái hoặc tạo mới để bắt đầu thiết lập quyền truy cập.
       </p>
     </Card>
   );
