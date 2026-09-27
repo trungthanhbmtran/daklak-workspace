@@ -11,6 +11,9 @@ import {
   UseGuards,
   Req,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -25,6 +28,15 @@ import * as mammoth from 'mammoth';
 @Controller('admin/ai-assistants')
 @UseGuards(JwtAuthGuard)
 export class AiAssistantGatewayController implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private aiAssistantService: any;
 
   constructor(

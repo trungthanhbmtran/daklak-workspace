@@ -27,7 +27,7 @@ export function useDocumentFormData() {
         fetchList("DOCUMENT_DOMAIN"),
         fetchList("URGENCY_LEVEL"),
         fetchList("SECURITY_LEVEL"),
-        fetchList("TRANSPARENCY_CAT").catch(() => []),
+        fetchList("TRANSPARENCY_CAT"),
       ]);
       return { types, fields, urgencies, securityLevels, reportTypes };
     },

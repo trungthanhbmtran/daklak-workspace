@@ -10,6 +10,9 @@ import {
   Query,
   UseGuards,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -21,6 +24,15 @@ import { RequirePolicy } from '../../common/decorators/require-policy.decorator'
 @Controller('admin/portal-menus')
 @UseGuards(JwtAuthGuard, PbacGuard)
 export class PortalMenuController {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private portalMenuService: any;
 
   constructor(
@@ -48,9 +60,7 @@ export class PortalMenuController {
     console.log('Gateway: Calling ListPortalMenus with query:', query);
     const result = await firstValueFrom(
       this.portalMenuService.listPortalMenus(query),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     console.log('Gateway: ListPortalMenus response received');
     return result;
   }
@@ -60,9 +70,7 @@ export class PortalMenuController {
     console.log('Gateway: Calling GetQuickSetupData');
     const result = await firstValueFrom(
       this.portalMenuService.getQuickSetupData({}),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     console.log('Gateway: GetQuickSetupData response received');
     return result;
   }
@@ -81,9 +89,7 @@ export class PortalMenuController {
   async update(@Param('id') id: string, @Body() dto: any) {
     return firstValueFrom(
       this.portalMenuService.updatePortalMenu({ id, ...dto }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   @Delete(':id')
@@ -91,8 +97,6 @@ export class PortalMenuController {
   async remove(@Param('id') id: string) {
     return firstValueFrom(
       this.portalMenuService.deletePortalMenu({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 }

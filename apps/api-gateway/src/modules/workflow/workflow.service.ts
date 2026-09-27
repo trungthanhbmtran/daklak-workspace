@@ -48,7 +48,7 @@ export class WorkflowService implements OnModuleInit {
     try {
       const wfRes: any = await firstValueFrom(
         this.workflowGrpcService.FindWorkflowByCode({ code: workflowCode })
-      ).catch(() => null);
+      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; });
 
       if (!wfRes || !wfRes.id) return { success: true, data: [] };
 
@@ -59,7 +59,7 @@ export class WorkflowService implements OnModuleInit {
           actionName: 'ASSIGN',
           evalContext: { fields: {} },
         })
-      ).catch(() => null);
+      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; });
 
       if (!nextNodeRes || !nextNodeRes.nextNodeData) return { success: true, data: [] };
       const rule = JSON.parse(nextNodeRes.nextNodeData).assignments?.[0];
@@ -72,48 +72,49 @@ export class WorkflowService implements OnModuleInit {
           rankOperator: rule.rankOperator || 'lt',
           rankValue: rule.rankValue,
         })
-      ).catch(() => null);
+      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; });
 
       const allowedCodes = conditionsRes?.allowedEmployeeCodes ?? conditionsRes?.allowed_employee_codes ?? [];
       return { success: true, data: allowedCodes, message: 'OK' };
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'Lỗi điều phối danh sách nhân sự');
     }
+
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
   }
 
   async getMicroservices() {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
   }
 
   async getTriggers() {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
   }
 
   async getModules() {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListModules({}),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
   }
 
   async getOrgRoles() {
     const result = (await firstValueFrom(
       this.orgGrpcService.ListJobTitles({}),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     const items = (result?.data ?? []).map((j: any) => ({
       code: j.code,
       name: j.name,
@@ -134,9 +135,7 @@ export class WorkflowService implements OnModuleInit {
     };
     const result = (await firstValueFrom(
       this.workflowGrpcService.CreateWorkflow(payload),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
 
     return {
       success: true,
@@ -157,9 +156,7 @@ export class WorkflowService implements OnModuleInit {
 
     const result = (await firstValueFrom(
       this.workflowGrpcService.UpdateWorkflow(payload),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
 
     return {
       success: true,
@@ -175,9 +172,7 @@ export class WorkflowService implements OnModuleInit {
     const search = query.search;
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListWorkflows({ skip, take, search }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
 
     return {
       success: true,
@@ -196,9 +191,7 @@ export class WorkflowService implements OnModuleInit {
         actionData: body.actionData || body,
         userRoles,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: true,
       data: result || {},
@@ -222,9 +215,7 @@ export class WorkflowService implements OnModuleInit {
         status,
         search,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: true,
       data: result?.data || [],
@@ -236,18 +227,14 @@ export class WorkflowService implements OnModuleInit {
   async getInstance(id: string) {
     const result = await firstValueFrom(
       this.workflowGrpcService.GetInstance({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result || {}, meta: {}, message: 'OK' };
   }
 
   async getLogs(instanceId: string) {
     const response = (await firstValueFrom(
       this.workflowGrpcService.GetLogs({ instanceId }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: true,
       data: response?.logs || [],
@@ -259,18 +246,14 @@ export class WorkflowService implements OnModuleInit {
   async findOne(id: string) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindOneWorkflow({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return { success: true, data: result || {}, meta: {}, message: 'OK' };
   }
 
   async delete(id: string) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.DeleteWorkflow({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: result?.success ?? true,
       data: {},
@@ -282,9 +265,7 @@ export class WorkflowService implements OnModuleInit {
   async publish(id: string) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.PublishWorkflow({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: true,
       data: result || {},
@@ -296,9 +277,7 @@ export class WorkflowService implements OnModuleInit {
   async applyModule(id: string, moduleCode: string) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ApplyModule({ id, moduleCode }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: true,
       data: result || {},
@@ -315,9 +294,7 @@ export class WorkflowService implements OnModuleInit {
         initialContext: body.initialContext,
         initiatorId,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return {
       success: true,
       data: result || {},

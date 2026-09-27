@@ -3,6 +3,9 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
@@ -10,6 +13,15 @@ import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
 export class MasterPlansService implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private masterPlanService: any;
   private orgService: any;
   private userService: any;
@@ -198,9 +210,7 @@ export class MasterPlansService implements OnModuleInit {
         callerAncestorUnitIds,
         isLeader,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (res?.data) {
       if (Array.isArray(res.data)) {
         await this.populateUsers(res.data);
@@ -222,9 +232,7 @@ export class MasterPlansService implements OnModuleInit {
         title,
         durationDays: parseInt(durationDays || '0', 10),
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async findById(user: any, id: string) {
@@ -253,9 +261,7 @@ export class MasterPlansService implements OnModuleInit {
         callerAncestorUnitIds,
         isLeader,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (res) {
       await this.populateUsers([res]);
     }
@@ -309,25 +315,19 @@ export class MasterPlansService implements OnModuleInit {
     if (user?.unitId) {
       body.departmentId = parseInt(user.unitId, 10);
     }
-    return firstValueFrom(this.masterPlanService.Create(body)).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    return firstValueFrom(this.masterPlanService.Create(body)).catch((e) => this.handleRpcError(e));
   }
 
   async update(user: any, id: string, body: any) {
     body.updatedByCode = user?.employeeCode || 'system';
     return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async remove(id: string) {
     return firstValueFrom(
       this.masterPlanService.Delete({ id: parseInt(id, 10) }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 }

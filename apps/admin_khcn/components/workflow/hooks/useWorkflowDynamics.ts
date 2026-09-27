@@ -9,9 +9,9 @@ export function useWorkflowDynamics() {
       const [svcs, trigs, roles, modules, org] = await Promise.all([
         workflowApi.getServices(),
         workflowApi.getTriggers(),
-        workflowApi.getTaskRoles().catch(() => []),
-        workflowApi.getModules().catch(() => []),
-        workflowApi.getOrgRoles().catch(() => []),
+        workflowApi.getTaskRoles(),
+        workflowApi.getModules(),
+        workflowApi.getOrgRoles(),
       ]);
       return {
         dynamicServices: svcs || [],

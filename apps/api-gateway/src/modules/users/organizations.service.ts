@@ -12,6 +12,15 @@ import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
 export class OrganizationsService implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private orgGrpcService: any;
   private userGrpcService: any;
   private reportGrpcService: any;
@@ -76,26 +85,26 @@ export class OrganizationsService implements OnModuleInit {
   async getUnitTypes() {
     const res = (await firstValueFrom(
       this.orgGrpcService.ListUnitTypes({}),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return { success: true, data: res.data };
   }
 
   async getFullTree(user: any, q?: string) {
     const res = (await firstValueFrom(
       this.orgGrpcService.GetFullTree({ q: q || '' }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     let nodes = res.nodes || [];
 
     const userId = user?.id;
-    const userInfo: any = userId
-      ? await firstValueFrom(
-        this.userGrpcService.FindOne({ id: userId }),
-      ).catch(() => null)
-      : null;
+    let userInfo: any = null;
+    if (userId) {
+      try {
+        userInfo = await firstValueFrom(this.userGrpcService.FindOne({ id: userId }));
+      } catch (err: any) {
+        if (err?.code === 5) throw new NotFoundException('Người dùng không tồn tại');
+        throw new InternalServerErrorException(err?.message || 'Lỗi kiểm tra thông tin người dùng');
+      }
+    }
 
     const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes(
       'ORGANIZATION:MANAGE',
@@ -139,18 +148,20 @@ export class OrganizationsService implements OnModuleInit {
   async getOrganizations(user: any, q?: string) {
     const res = (await firstValueFrom(
       this.orgGrpcService.GetOrganizations({ q: q || '' }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
 
     let flatList = res.nodes || [];
 
     const userId = user?.id;
-    const userInfo: any = userId
-      ? await firstValueFrom(
-        this.userGrpcService.FindOne({ id: userId }),
-      ).catch(() => null)
-      : null;
+    let userInfo: any = null;
+    if (userId) {
+      try {
+        userInfo = await firstValueFrom(this.userGrpcService.FindOne({ id: userId }));
+      } catch (err: any) {
+        if (err?.code === 5) throw new NotFoundException('Người dùng không tồn tại');
+        throw new InternalServerErrorException(err?.message || 'Lỗi kiểm tra thông tin người dùng');
+      }
+    }
 
     const isAdmin: boolean = !!userInfo?.permissionsFlatten?.includes(
       'ORGANIZATION:MANAGE',
@@ -176,9 +187,7 @@ export class OrganizationsService implements OnModuleInit {
       this.orgGrpcService.ListJobTitles({
         unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     const data = res.data || [];
     const isParty = (j: any) => ["DANG", "PARTY"].includes(j.category?.toUpperCase() ?? "") || ["DANG", "PARTY"].includes(j.type?.toUpperCase() ?? "");
     const partyTitles = data.filter(isParty);
@@ -188,15 +197,20 @@ export class OrganizationsService implements OnModuleInit {
   }
 
   async updateJobTitle(id: number, body: any) {
-    const result = await firstValueFrom(
-      this.orgGrpcService.UpdateJobTitle({
-        id,
-        domainId: body.domainId,
-      }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-    return { success: true, data: result };
+    try {
+      const result = await firstValueFrom(
+        this.orgGrpcService.UpdateJobTitle({
+          id,
+          domainId: body.domainId,
+        }),
+      );
+      return { success: true, data: result };
+    } catch (err: any) {
+      const message = err?.details ?? err?.message ?? 'Lỗi cập nhật chức danh';
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 3) throw new BadRequestException(message);
+      throw new InternalServerErrorException(message);
+    }
   }
 
   async getOne(id: number) {
@@ -223,13 +237,13 @@ export class OrganizationsService implements OnModuleInit {
 
   async getDetail(identifier: string) {
     const isNumeric = /^\d+$/.test(identifier);
-    
+
     const enrichWithSubordinates = async (mapped: any, id: number) => {
       try {
         const allOrgsRes: any = await firstValueFrom(this.orgGrpcService.GetOrganizations({ q: '' }));
         mapped.subordinateUnits = (allOrgsRes.nodes || []).filter((n: any) => n.parentId === id || n.parent_id === id).map((n: any) => this.mapToOrganizationNode(n));
-      } catch (e) {
-        mapped.subordinateUnits = [];
+      } catch (err: any) {
+        throw new InternalServerErrorException(err?.message || 'Lỗi lấy danh sách đơn vị cấp dưới');
       }
       return mapped;
     };
@@ -260,8 +274,8 @@ export class OrganizationsService implements OnModuleInit {
     try {
       const result: any = await firstValueFrom(this.orgGrpcService.GetUnitScope({ id }));
       const data = result?.data ?? result;
-      return { 
-        success: true, 
+      return {
+        success: true,
         ...data,
         domains: data.domains ?? [],
         domainIds: (data.domains ?? []).map((x: any) => x.id),
@@ -347,23 +361,26 @@ export class OrganizationsService implements OnModuleInit {
   async getSubTree(id: number) {
     const res = (await firstValueFrom(
       this.orgGrpcService.GetSubTree({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return { success: true, data: (res.nodes || []).map(n => this.mapToOrganizationNode(n)) };
   }
 
   async setStaffing(body: any) {
-    const result = await firstValueFrom(
-      this.orgGrpcService.SetStaffing({
-        unitId: body.unitId,
-        jobTitleId: body.jobTitleId,
-        quantity: body.quantity,
-      }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-    return { success: true, data: result };
+    try {
+      const result = await firstValueFrom(
+        this.orgGrpcService.SetStaffing({
+          unitId: body.unitId,
+          jobTitleId: body.jobTitleId,
+          quantity: body.quantity,
+        }),
+      );
+      return { success: true, data: result };
+    } catch (err: any) {
+      const message = err?.details ?? err?.message ?? 'Lỗi thiết lập biên chế';
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 3) throw new BadRequestException(message);
+      throw new InternalServerErrorException(message);
+    }
   }
 
   private mapStaffingReportItem(rep: any): any {
@@ -400,22 +417,27 @@ export class OrganizationsService implements OnModuleInit {
       const res = (await firstValueFrom(
         this.orgGrpcService.GetStaffingReport({ unitId: id }),
       )) as any;
-      
-      const jtRes = await this.getJobTitles(id.toString()).catch(() => ({ data: { allTitles: [] } }));
+
+      let jtRes: any;
+      try {
+        jtRes = await this.getJobTitles(id.toString());
+      } catch (err: any) {
+        throw new InternalServerErrorException(err?.message || 'Lỗi lấy danh sách chức danh');
+      }
       const allTitles = jtRes.data?.allTitles || [];
       const isParty = (j: any) => ["DANG", "PARTY"].includes(j.category?.toUpperCase() ?? "") || ["DANG", "PARTY"].includes(j.type?.toUpperCase() ?? "");
-      
+
       const partyReport: any[] = [];
       const govReport: any[] = [];
       const reportData = (res.data || []).map((r: any) => this.mapStaffingReportItem(r));
-      
+
       reportData.forEach((rep: any) => {
         const jt = allTitles.find((j: any) => j.id === (rep.jobTitleId || rep.job_title_id));
         const party = jt ? isParty(jt) : false;
         if (party) partyReport.push(rep);
         else govReport.push(rep);
       });
-      
+
       return { success: true, data: { partyReport, govReport, allReport: reportData } };
     } catch (err: any) {
       throw new InternalServerErrorException(err.message || 'RPC Call Failed');
@@ -435,19 +457,24 @@ export class OrganizationsService implements OnModuleInit {
     ) {
       throw new BadRequestException('monitoredUnitIds phải là một mảng');
     }
-    const result = await firstValueFrom(
-      this.orgGrpcService.SetStaffingSlot({
-        staffingId: body.staffingId,
-        slotOrder: body.slotOrder,
-        description: body.description,
-        domainIds: body.domainIds,
-        geographicAreaIds: body.geographicAreaIds,
-        monitoredUnitIds: body.monitoredUnitIds,
-      }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
-    return { success: true, data: result };
+    try {
+      const result = await firstValueFrom(
+        this.orgGrpcService.SetStaffingSlot({
+          staffingId: body.staffingId,
+          slotOrder: body.slotOrder,
+          description: body.description,
+          domainIds: body.domainIds,
+          geographicAreaIds: body.geographicAreaIds,
+          monitoredUnitIds: body.monitoredUnitIds,
+        }),
+      );
+      return { success: true, data: result };
+    } catch (err: any) {
+      const message = err?.details ?? err?.message ?? 'Lỗi thiết lập vị trí biên chế';
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 3) throw new BadRequestException(message);
+      throw new InternalServerErrorException(message);
+    }
   }
 
   async getPublicOrgUnits() {
@@ -480,21 +507,30 @@ export class OrganizationsService implements OnModuleInit {
   }
 
   async getUnitTypeJobTemplates(unitTypeId: number) {
-    const res = await firstValueFrom(
-      this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    }) as any;
-    return { success: true, data: res.jobTitleIds || [] };
+    try {
+      const res = await firstValueFrom(
+        this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }),
+      ) as any;
+      return { success: true, data: res.jobTitleIds || [] };
+    } catch (err: any) {
+      const message = err?.details ?? err?.message ?? 'Lỗi lấy mẫu chức danh';
+      if (err?.code === 5) throw new NotFoundException(message);
+      throw new InternalServerErrorException(message);
+    }
   }
 
   async updateUnitTypeJobTemplates(unitTypeId: number, jobTitleIds: number[]) {
-    const res = await firstValueFrom(
-      this.orgGrpcService.UpdateUnitTypeJobTemplates({ unitTypeId, jobTitleIds }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    }) as any;
-    return { success: res.success };
+    try {
+      const res = await firstValueFrom(
+        this.orgGrpcService.UpdateUnitTypeJobTemplates({ unitTypeId, jobTitleIds }),
+      ) as any;
+      return { success: res.success };
+    } catch (err: any) {
+      const message = err?.details ?? err?.message ?? 'Lỗi cập nhật mẫu chức danh';
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 3) throw new BadRequestException(message);
+      throw new InternalServerErrorException(message);
+    }
   }
 }
 

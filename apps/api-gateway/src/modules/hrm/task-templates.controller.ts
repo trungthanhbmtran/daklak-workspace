@@ -11,6 +11,9 @@ import {
   UseGuards,
   Put,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -23,6 +26,15 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class TaskTemplatesController implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private taskTemplateService: any;
 
   constructor(
@@ -40,18 +52,14 @@ export class TaskTemplatesController implements OnModuleInit {
   ) {
     return firstValueFrom(
       this.taskTemplateService.FindTaskTemplates({ classification, rank }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   @Post()
   async create(@Body() body: any) {
     return firstValueFrom(
       this.taskTemplateService.CreateTaskTemplate(body),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   @Post('bulk')
@@ -60,26 +68,20 @@ export class TaskTemplatesController implements OnModuleInit {
       this.taskTemplateService.BulkUpdateTaskTemplates({
         templates: body.templates,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(
       this.taskTemplateService.UpdateTaskTemplate({ id: Number(id), ...body }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return firstValueFrom(
       this.taskTemplateService.DeleteTaskTemplate({ id: Number(id) }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 }

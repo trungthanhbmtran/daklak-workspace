@@ -1,4 +1,10 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import {
+  Injectable, Logger, Inject,
+  InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { TaskRole } from '../../../src/generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { RpcException, ClientProxy } from '@nestjs/microservices';
@@ -43,6 +49,15 @@ export interface PaginatedMeta {
 
 @Injectable()
 export class TasksService {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private readonly logger = new Logger(TasksService.name);
 
   constructor(
@@ -806,7 +821,7 @@ export class TasksService {
         conversationId: rawTask.conversationId,
         content: context.evidence,
         senderId: actorCode || context?.currentEmployeeCode || 'SYSTEM',
-      })).catch(() => { });
+      })).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); });
     }
 
     if (transition.nextNodeData?.autoProgress !== undefined) {
@@ -1314,7 +1329,7 @@ export class TasksService {
           conversationId: task.conversationId,
           content: data.evidence,
           senderId: data.actorCode || 'SYSTEM',
-        })).catch(() => { });
+        })).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); });
       }
     }
 

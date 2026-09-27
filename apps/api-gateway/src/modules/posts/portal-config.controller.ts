@@ -9,6 +9,9 @@ import {
   UseGuards,
   ParseIntPipe,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -20,6 +23,15 @@ import { RequirePolicy } from '../../common/decorators/require-policy.decorator'
 @Controller('admin/portal-configs')
 @UseGuards(JwtAuthGuard, PbacGuard)
 export class PortalConfigController {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private configService: any;
 
   constructor(
@@ -63,9 +75,7 @@ export class PortalConfigController {
   ) {
     const res: any = await firstValueFrom(
       this.configService.update({ id, ...dto }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: res.data };
   }
 
@@ -80,9 +90,7 @@ export class PortalConfigController {
         name: dto.name,
         description: dto.description,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: res.data };
   }
 
@@ -100,9 +108,7 @@ export class PortalConfigController {
   ) {
     const res: any = await firstValueFrom(
       this.configService.batchUpsert({ data: dto.data }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: res.data };
   }
 }

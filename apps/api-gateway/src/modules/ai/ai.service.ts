@@ -1,4 +1,10 @@
-import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
+import {
+  Injectable, Inject, OnModuleInit, Logger,
+  InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
@@ -18,6 +24,15 @@ interface CircuitBreakerState {
 
 @Injectable()
 export class AiService implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private configService: any;
   private userConfigService: any;
   private readonly logger = new Logger(AiService.name);
@@ -51,7 +66,7 @@ export class AiService implements OnModuleInit {
       if (userId) {
         const userConfigResponse = (await firstValueFrom(
           this.userConfigService.GetConfigs({ userId }),
-        ).catch(() => null)) as any;
+        ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; })) as any;
 
         const userConfigs = userConfigResponse?.configs || [];
         aiProvidersConfig = userConfigs.find(

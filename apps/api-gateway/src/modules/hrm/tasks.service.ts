@@ -3,6 +3,9 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -11,6 +14,15 @@ import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class TasksService implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private taskService: any;
   private userService: any;
 
@@ -203,9 +215,7 @@ export class TasksService implements OnModuleInit {
 
     const response: any = await firstValueFrom(
       this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -276,9 +286,7 @@ export class TasksService implements OnModuleInit {
 
     const response: any = await firstValueFrom(
       this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
 
     if (response?.data) {
       if (Array.isArray(response.data)) {
@@ -312,9 +320,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -337,9 +343,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -381,9 +385,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -409,9 +411,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -513,9 +513,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -539,9 +537,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
     }
@@ -558,9 +554,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (breakdownResponse?.data) this.translateTaskData(breakdownResponse.data);
     return breakdownResponse;
   }
@@ -584,9 +578,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async addComment(
@@ -614,9 +606,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async requestCoordination(req: any, id: number, body: any) {
@@ -642,9 +632,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (!taskResponse) throw new Error('Task not found.');
 
     return firstValueFrom(
@@ -660,9 +648,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async getSubTasks(req: any, id: number) {
@@ -684,9 +670,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       if (Array.isArray(response.data)) {
         await this.populateUsers(response.data);
@@ -702,25 +686,19 @@ export class TasksService implements OnModuleInit {
   async getTaskHistory(id: number) {
     return firstValueFrom(
       this.taskService.GetTaskHistory({ taskId: id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async upsertTaskKpiSetting(id: number, body: any) {
     return firstValueFrom(
       this.taskService.UpsertTaskKpiSetting({ taskId: id, ...body }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async getTaskKpiSetting(id: number) {
     return firstValueFrom(
       this.taskService.GetTaskKpiSetting({ taskId: id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async getTask(req: any, id: number) {
@@ -734,9 +712,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     if (response?.data) this.translateTaskData(response.data);
     return response;
   }
@@ -744,9 +720,7 @@ export class TasksService implements OnModuleInit {
   async listSteps(req: any, id: number) {
     const response: any = await firstValueFrom(
       this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req)),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       if (Array.isArray(response.data)) {
         await this.populateUsers(response.data);
@@ -769,9 +743,7 @@ export class TasksService implements OnModuleInit {
         { taskId: id, ...body },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       await this.populateUsers([response.data]);
     }
@@ -802,9 +774,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       await this.populateUsers([response.data]);
     }
@@ -817,9 +787,7 @@ export class TasksService implements OnModuleInit {
         { taskId: id, stepId },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async recordAttendance(req: any, id: number) {
@@ -835,9 +803,7 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async getAttendanceStats(req: any, id: number) {
@@ -853,8 +819,6 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 }

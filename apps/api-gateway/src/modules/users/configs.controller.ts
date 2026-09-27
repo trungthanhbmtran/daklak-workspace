@@ -7,6 +7,9 @@ import {
   Put,
   UseGuards,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -18,6 +21,15 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 @Controller('admin/system-configs')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ConfigsController implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private configService: any;
 
   constructor(
@@ -32,9 +44,7 @@ export class ConfigsController implements OnModuleInit {
   async getConfigs() {
     const response = (await firstValueFrom(
       this.configService.GetConfigs({}),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
     return response.configs || [];
   }
 
@@ -42,8 +52,6 @@ export class ConfigsController implements OnModuleInit {
   async updateConfig(
     @Body() body: { key: string; value: string; description?: string },
   ) {
-    return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) => this.handleRpcError(e));
   }
 }

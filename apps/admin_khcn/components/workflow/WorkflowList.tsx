@@ -97,8 +97,9 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
         take: pageSize,
         search: searchTerm || undefined
       });
+      if (!res?.data) return;
       setWorkflows(res.data);
-      setTotalItems(res?.meta?.total || (res?.data?.length || 0));
+      setTotalItems(res.meta?.total || res.data.length || 0);
     } catch (error) {
       console.error("Failed to load workflows:", error);
       toast.error((error as any)?.response?.data?.message || "Không thể tải danh sách quy trình");

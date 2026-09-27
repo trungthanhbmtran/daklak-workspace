@@ -5,6 +5,9 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -13,6 +16,15 @@ import { MICROSERVICES } from '../../core/constants/services';
 @ApiTags('Public HRM')
 @Controller('public/hrm/employees')
 export class PublicHrmController implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private employeeService: any;
 
   constructor(
@@ -44,9 +56,7 @@ export class PublicHrmController implements OnModuleInit {
 
     const response = await firstValueFrom(
       this.employeeService.ListEmployees(req),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return response;
   }
 }

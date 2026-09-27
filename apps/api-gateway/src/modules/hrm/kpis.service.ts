@@ -3,6 +3,9 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
@@ -10,6 +13,15 @@ import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
 export class KpisService implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private kpiService: any;
   private orgService: any;
   private employeeService: any;
@@ -67,15 +79,11 @@ export class KpisService implements OnModuleInit {
   }
 
   async findPeriods() {
-    return firstValueFrom(this.kpiService.FindPeriods({})).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    return firstValueFrom(this.kpiService.FindPeriods({})).catch((e) => this.handleRpcError(e));
   }
 
   async createPeriod(body: any) {
-    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch((e) => this.handleRpcError(e));
   }
 
   async findCriteria(user: any, page?: string, limit?: string) {
@@ -88,9 +96,7 @@ export class KpisService implements OnModuleInit {
         page: page ? Number(page) : 1,
         limit: limit ? Number(limit) : 0,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
 
     if (res) {
       res.meta = res.meta || {};
@@ -110,34 +116,26 @@ export class KpisService implements OnModuleInit {
   }
 
   async createCriterion(body: any) {
-    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch((e) => this.handleRpcError(e));
   }
 
   async updateCriterion(id: string, body: any) {
     return firstValueFrom(
       this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async deleteCriterion(id: string) {
     return firstValueFrom(
       this.kpiService.DeleteCriterion({ id: Number(id) }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async createEvaluation(user: any, body: any) {
     if (user) {
       body.evaluatorCode = user.employeeCode || user.username;
     }
-    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch((e) => this.handleRpcError(e));
   }
 
   async findEvaluations(user: any, employeeCode: string) {
@@ -167,9 +165,7 @@ export class KpisService implements OnModuleInit {
         isFetchingOwn,
         callerDescendantUnitIds,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async calculatePersonalKpi(
@@ -187,17 +183,13 @@ export class KpisService implements OnModuleInit {
           ? Number(body.staffingSlotId)
           : undefined,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async getEvaluationDetail(id: string) {
     return firstValueFrom(
       this.kpiService.GetEvaluationDetail({ id: Number(id) }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async submitSelfScore(id: string, body: any) {
@@ -206,9 +198,7 @@ export class KpisService implements OnModuleInit {
         id: Number(id),
         data: JSON.stringify(body),
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async approveEvaluation(user: any, id: string, body: any) {
@@ -219,8 +209,6 @@ export class KpisService implements OnModuleInit {
         data: JSON.stringify(body),
         reviewerCode,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
   }
 }

@@ -11,6 +11,9 @@ import {
   OnModuleInit,
   ParseIntPipe,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,6 +31,15 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class PbacController implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private pbacService: any;
 
   constructor(
@@ -45,9 +57,7 @@ export class PbacController implements OnModuleInit {
     description: 'Danh sách nhóm quyền (cả số người dùng, số chính sách)',
   })
   async findAll() {
-    const result = await firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    const result = await firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
   }
 
@@ -60,9 +70,7 @@ export class PbacController implements OnModuleInit {
     description: 'Nhóm quyền và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const result = await firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    const result = await firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
   }
 
@@ -88,9 +96,7 @@ export class PbacController implements OnModuleInit {
         description: body.description,
         policies: body.policies,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
   }
 
@@ -121,9 +127,7 @@ export class PbacController implements OnModuleInit {
         description: body.description,
         policies: body.policies,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
   }
 
@@ -133,9 +137,7 @@ export class PbacController implements OnModuleInit {
   })
   @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const result = await firstValueFrom(this.pbacService.DeleteUserGroup({ id })).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    const result = await firstValueFrom(this.pbacService.DeleteUserGroup({ id })).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
   }
 }

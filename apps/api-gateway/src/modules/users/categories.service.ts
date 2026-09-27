@@ -3,6 +3,9 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -22,6 +25,15 @@ function toFrontendItem(c: any) {
 
 @Injectable()
 export class CategoriesService implements OnModuleInit {
+  private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    const code = e?.code;
+    const message = e?.details || e?.message || defaultMsg;
+    if (code === 5) throw new NotFoundException(message);
+    if (code === 6) throw new ConflictException(message);
+    if (code === 3) throw new BadRequestException(message);
+    throw new InternalServerErrorException(message);
+  }
+
   private categoryService: any;
 
   constructor(
@@ -92,9 +104,7 @@ export class CategoriesService implements OnModuleInit {
     if (!group) {
       const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({}),
-      ).catch((e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      });
+      ).catch((e) => this.handleRpcError(e));
       const response = {
         success: true,
         data: result?.data?.map(toFrontendItem) || [],
@@ -111,9 +121,7 @@ export class CategoriesService implements OnModuleInit {
         skip: skipNum,
         selectedIds: selectedIdsArr,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
 
     const response = {
       success: true,
@@ -139,9 +147,7 @@ export class CategoriesService implements OnModuleInit {
         description: body.description,
         order: body.order,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
 
     await this.redisService.delPattern(`category_group:${body.group}*`);
     await this.redisService.delPattern(`category_group:all*`);
@@ -170,9 +176,7 @@ export class CategoriesService implements OnModuleInit {
     };
     const res = await firstValueFrom(
       this.categoryService.Update(payload),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
 
     // Invalidate all cache pattern for categories since we don't know the exact group before fetching, 
     // or we can just invalidate all to be safe.
@@ -184,9 +188,7 @@ export class CategoriesService implements OnModuleInit {
   async delete(id: number) {
     const res = (await firstValueFrom(
       this.categoryService.Delete({ id }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    })) as any;
+    ).catch((e) => this.handleRpcError(e))) as any;
 
     await this.redisService.delPattern(`category_group:*`);
 
@@ -206,9 +208,7 @@ export class CategoriesService implements OnModuleInit {
     if (!group) {
       const result: any = await firstValueFrom(
         this.categoryService.GetAllCategories({ lang }),
-      ).catch((e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      });
+      ).catch((e) => this.handleRpcError(e));
       return {
         success: true,
         data: result?.data,
@@ -223,9 +223,7 @@ export class CategoriesService implements OnModuleInit {
         take: limitNum,
         skip: skipNum,
       }),
-    ).catch((e) => {
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-    });
+    ).catch((e) => this.handleRpcError(e));
     return {
       success: true,
       data: result?.data,
