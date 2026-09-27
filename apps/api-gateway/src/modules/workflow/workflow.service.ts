@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -79,6 +80,7 @@ export class WorkflowService implements OnModuleInit {
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'Lỗi điều phối danh sách nhân sự');
     }
+  }
 
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
     const code = e?.code;
@@ -87,7 +89,6 @@ export class WorkflowService implements OnModuleInit {
     if (code === 6) throw new ConflictException(message);
     if (code === 3) throw new BadRequestException(message);
     throw new InternalServerErrorException(message);
-  }
   }
 
   async getMicroservices() {
