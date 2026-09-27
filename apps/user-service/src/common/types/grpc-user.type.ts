@@ -1,4 +1,8 @@
-import type { User, Policy, Resource } from '../../../src/generated/prisma/client'
+import type {
+  User,
+  Policy,
+  Resource,
+} from '../../../src/generated/prisma/client';
 
 /**
  * User được gắn vào gRPC context sau khi GrpcAuthGuard xác thực (PBAC).

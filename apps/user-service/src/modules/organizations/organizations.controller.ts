@@ -5,7 +5,7 @@ import { OrganizationsService } from './organizations.service';
 
 @Controller()
 export class OrganizationsController {
-  constructor(private readonly orgService: OrganizationsService) { }
+  constructor(private readonly orgService: OrganizationsService) {}
 
   private getCatName(cat: any): string {
     if (!cat) return '';
@@ -124,8 +124,8 @@ export class OrganizationsController {
         message: 'Đơn vị không tồn tại',
       });
     }
-      return {
-        domains: this.getDomains(unit),
+    return {
+      domains: this.getDomains(unit),
       scope: (unit as any).scope ?? '',
     };
   }
@@ -246,7 +246,7 @@ export class OrganizationsController {
   async getDescendants(data: { id: number }) {
     const res = await this.orgService.getDescendants(data.id);
     return {
-      ids: res.data || []
+      ids: res.data || [],
     };
   }
 
@@ -304,13 +304,22 @@ export class OrganizationsController {
             slotOrder: slot.slotOrder,
             description: slot.description ?? '',
             domains: (slot.domains ?? [])
-              .map((d: any) => ({ id: d.domainId, name: this.getCatName(d.domain) }))
+              .map((d: any) => ({
+                id: d.domainId,
+                name: this.getCatName(d.domain),
+              }))
               .filter((x: any) => x.id),
             geographicAreas: (slot.geographicAreas ?? [])
-              .map((ga: any) => ({ id: ga.geographicAreaId, name: this.getCatName(ga.geographicArea) }))
+              .map((ga: any) => ({
+                id: ga.geographicAreaId,
+                name: this.getCatName(ga.geographicArea),
+              }))
               .filter((x: any) => x.id),
             monitoredUnits: (slot.monitoredUnits ?? [])
-              .map((mu: any) => ({ id: mu.unitId, name: mu.unit?.name ?? mu.unit?.code ?? '' }))
+              .map((mu: any) => ({
+                id: mu.unitId,
+                name: mu.unit?.name ?? mu.unit?.code ?? '',
+              }))
               .filter((x: any) => x.id),
             assignedEmployeeName: slot.assignedEmployeeName ?? '',
             assignedEmployeeCode: slot.assignedEmployeeCode ?? '',
@@ -371,10 +380,16 @@ export class OrganizationsController {
         .map((d: any) => ({ id: d.domainId, name: this.getCatName(d.domain) }))
         .filter((x: any) => x.id),
       geographicAreas: (slot.geographicAreas ?? [])
-        .map((ga: any) => ({ id: ga.geographicAreaId, name: this.getCatName(ga.geographicArea) }))
+        .map((ga: any) => ({
+          id: ga.geographicAreaId,
+          name: this.getCatName(ga.geographicArea),
+        }))
         .filter((x: any) => x.id),
       monitoredUnits: (slot.monitoredUnits ?? [])
-        .map((mu: any) => ({ id: mu.unitId, name: mu.unit?.name ?? mu.unit?.code ?? '' }))
+        .map((mu: any) => ({
+          id: mu.unitId,
+          name: mu.unit?.name ?? mu.unit?.code ?? '',
+        }))
         .filter((x: any) => x.id),
     };
   }
@@ -414,15 +429,21 @@ export class OrganizationsController {
   async getUnitTypeJobTemplates(data: { unitTypeId: number }) {
     const res = await this.orgService.getUnitTypeJobTemplates(data.unitTypeId);
     return {
-      jobTitleIds: res.jobTitleIds || []
+      jobTitleIds: res.jobTitleIds || [],
     };
   }
 
   @GrpcMethod('OrganizationService', 'UpdateUnitTypeJobTemplates')
-  async updateUnitTypeJobTemplates(data: { unitTypeId: number, jobTitleIds: number[] }) {
-    const res = await this.orgService.updateUnitTypeJobTemplates(data.unitTypeId, data.jobTitleIds || []);
+  async updateUnitTypeJobTemplates(data: {
+    unitTypeId: number;
+    jobTitleIds: number[];
+  }) {
+    const res = await this.orgService.updateUnitTypeJobTemplates(
+      data.unitTypeId,
+      data.jobTitleIds || [],
+    );
     return {
-      success: res.success
+      success: res.success,
     };
   }
 
@@ -431,8 +452,15 @@ export class OrganizationsController {
       id: j.id,
       code: j.code,
       name: j.name,
-      domain: j.domain ? { id: j.domainId ?? j.domain.id, name: this.getCatName(j.domain) } : undefined,
-      geographicArea: j.geographicArea ? { id: j.geographicAreaId ?? j.geographicArea.id, name: this.getCatName(j.geographicArea) } : undefined,
+      domain: j.domain
+        ? { id: j.domainId ?? j.domain.id, name: this.getCatName(j.domain) }
+        : undefined,
+      geographicArea: j.geographicArea
+        ? {
+            id: j.geographicAreaId ?? j.geographicArea.id,
+            name: this.getCatName(j.geographicArea),
+          }
+        : undefined,
       category: j.category ?? '',
       rank: j.rank ?? 0,
       type: j.type ?? '',

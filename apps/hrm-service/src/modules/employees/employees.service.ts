@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { firstValueFrom } from 'rxjs';
@@ -9,23 +9,16 @@ export enum EmployeeErrorCode {
   CONFLICT = 6,
 }
 
-interface UserServiceClient {
-  GetSubordinates(req: { userId: number }): unknown; // thay bằng type thực từ .proto nếu có
-}
+/** TTL cache cho node data của workflow: 30 phút */
+const WORKFLOW_NODE_CACHE_TTL_MS = 30 * 60 * 1000;
 
 @Injectable()
-export class EmployeesService implements OnModuleInit {
+export class EmployeesService {
   private readonly logger = new Logger(EmployeesService.name);
-  private userService: UserServiceClient;
 
   constructor(
     private readonly prisma: PrismaService,
-    @Inject('USER_PACKAGE') private readonly userClient: { getService: (name: string) => UserServiceClient },
-  ) { }
-
-  onModuleInit() {
-    this.userService = this.userClient.getService('UserService');
-  }
+  ) {}
 
   // ─── Private mapping helper ──────────────────────────────────────────────────
 
@@ -307,6 +300,7 @@ export class EmployeesService implements OnModuleInit {
     excludeEmployeeCode?: string;
     ids?: number[];
     codes?: string[];
+
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
@@ -318,39 +312,7 @@ export class EmployeesService implements OnModuleInit {
       allowedCodesFromCodesParam = params.codes;
     }
 
-    let allowedCodesFromAssignable: string[] | null = null;
-    if (params.assignableOnly && params.callerUserId) {
-      try {
-        const subordinatesRes: { allowedEmployeeCodes?: string[]; allowed_employee_codes?: string[] } =
-          await firstValueFrom(this.userService.GetSubordinates({ userId: params.callerUserId }) as any);
-        allowedCodesFromAssignable = subordinatesRes?.allowedEmployeeCodes ?? subordinatesRes?.allowed_employee_codes ?? [];
-      } catch (error) {
-        this.logger.error('Failed to get subordinates', error instanceof Error ? error.stack : String(error));
-        allowedCodesFromAssignable = []; // Fallback an toàn: không lộ dữ liệu ngoài phạm vi cho phép
-      }
-    }
-
-    if (allowedCodesFromCodesParam && allowedCodesFromAssignable) {
-      const intersection = allowedCodesFromCodesParam.filter((c) => allowedCodesFromAssignable!.includes(c));
-      where.employeeCode = { in: intersection };
-    } else if (allowedCodesFromAssignable) {
-      where.employeeCode = { in: allowedCodesFromAssignable };
-      if (allowedCodesFromAssignable.length === 0) {
-        return {
-          success: true,
-          message: 'OK',
-          data: [],
-          meta: {
-            pagination: {
-              total: 0,
-              page: page,
-              pageSize: pageSize,
-              totalPages: 0
-            }
-          },
-        };
-      }
-    } else if (allowedCodesFromCodesParam) {
+    if (allowedCodesFromCodesParam) {
       where.employeeCode = { in: allowedCodesFromCodesParam };
     }
 
@@ -414,3 +376,5 @@ export class EmployeesService implements OnModuleInit {
     };
   }
 }
+
+

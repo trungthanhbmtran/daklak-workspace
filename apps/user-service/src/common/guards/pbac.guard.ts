@@ -32,7 +32,6 @@ export class PbacGuard implements CanActivate {
       });
     }
 
-
     const userPermissions = user.permissionsFlatten ?? [];
     const hasPermission = requiredPermissions.some((p) =>
       userPermissions.includes(p),

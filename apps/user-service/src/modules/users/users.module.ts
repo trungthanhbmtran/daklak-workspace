@@ -43,7 +43,7 @@ const protoRoot =
             arguments: {
               'x-dead-letter-exchange': 'dlx_notifications',
               'x-dead-letter-routing-key': 'notifications',
-            }
+            },
           },
         },
       },

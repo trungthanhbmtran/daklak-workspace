@@ -1,6 +1,18 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException, Payload } from '@nestjs/microservices';
-import { CreateUserGrpcDto, LoginGrpcDto, RefreshGrpcDto, SetPasswordGrpcDto, FindOneGrpcDto, ListUsersGrpcDto, GetUsersByIdsGrpcDto, SetUserActiveGrpcDto, AssignPositionGrpcDto, GetSubordinatesGrpcDto } from './dto/user.grpc.dto';
+import {
+  CreateUserGrpcDto,
+  LoginGrpcDto,
+  RefreshGrpcDto,
+  SetPasswordGrpcDto,
+  FindOneGrpcDto,
+  ListUsersGrpcDto,
+  GetUsersByIdsGrpcDto,
+  SetUserActiveGrpcDto,
+  AssignPositionGrpcDto,
+  GetSubordinatesGrpcDto,
+  FindUsersByConditionsGrpcDto,
+} from './dto/user.grpc.dto';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { UsersService } from './users.service';
 
@@ -70,8 +82,13 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'GetEmployeesByScope')
-  getEmployeesByScope(@Payload() data: { domain_id?: number, monitored_unit_id?: number }) {
-    return this.usersService.getEmployeesByScope(data.domain_id, data.monitored_unit_id);
+  getEmployeesByScope(
+    @Payload() data: { domain_id?: number; monitored_unit_id?: number },
+  ) {
+    return this.usersService.getEmployeesByScope(
+      data.domain_id,
+      data.monitored_unit_id,
+    );
   }
 
   @GrpcMethod('UserService', 'ListUsers')
@@ -97,11 +114,17 @@ export class UsersController {
     return this.usersService.setUserActive({ userId, isActive });
   }
 
-
-
   @GrpcMethod('UserService', 'AssignPosition')
   @GrpcMethod('UserService', 'AssignUserGroups')
-  async assignUserGroups(@Payload() data: { user_id?: number; userId?: number; user_group_ids?: number[]; userGroupIds?: number[] }) {
+  async assignUserGroups(
+    @Payload()
+    data: {
+      user_id?: number;
+      userId?: number;
+      user_group_ids?: number[];
+      userGroupIds?: number[];
+    },
+  ) {
     const userId = data.userId ?? data.user_id ?? 0;
     const userGroupIds = data.userGroupIds ?? data.user_group_ids ?? [];
     return this.usersService.assignUserGroups({ userId, userGroupIds });
@@ -130,6 +153,21 @@ export class UsersController {
   async getSubordinates(@Payload() data: GetSubordinatesGrpcDto) {
     const userId = data.userId ?? data.user_id ?? 0;
     return this.usersService.getSubordinates({ userId });
+  }
+
+  @GrpcMethod('UserService', 'FindUsersByConditions')
+  async findUsersByConditions(@Payload() data: FindUsersByConditionsGrpcDto) {
+    const callerUserId = data.callerUserId ?? data.caller_user_id ?? 0;
+    const unitScope = data.unitScope ?? data.unit_scope ?? 'SAME_UNIT';
+    const rankOperator = data.rankOperator ?? data.rank_operator ?? 'lt';
+    const rankValue = data.rankValue ?? data.rank_value;
+    
+    return this.usersService.findUsersByConditions({
+      callerUserId,
+      unitScope,
+      rankOperator,
+      rankValue,
+    });
   }
 
   @GrpcMethod('UserService', 'UpdateUser')

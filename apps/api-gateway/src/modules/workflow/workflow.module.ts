@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { WorkflowController } from './workflow.controller';
@@ -9,6 +9,7 @@ import { WorkflowService } from './workflow.service';
     registerGrpcService(MICROSERVICES.WORKFLOW),
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
+    registerGrpcService(MICROSERVICES.USER),
   ],
   controllers: [WorkflowController],
   providers: [WorkflowService],

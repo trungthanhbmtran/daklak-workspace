@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   Inject,
   OnModuleInit,
@@ -19,11 +19,13 @@ export class WorkflowService implements OnModuleInit {
   private workflowGrpcService: any;
   private categoryGrpcService: any;
   private orgGrpcService: any;
+  private userGrpcService: any;
 
   constructor(
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
+    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
   ) {}
 
   onModuleInit() {
@@ -36,6 +38,47 @@ export class WorkflowService implements OnModuleInit {
     this.orgGrpcService = this.orgClient.getService(
       MICROSERVICES.ORGANIZATION.SERVICE,
     );
+    this.userGrpcService = this.userClient.getService(
+      MICROSERVICES.USER.SERVICE,
+    );
+  }
+
+  
+  async getAssignableUsers(workflowCode: string, currentNodeId: string, callerUserId: number) {
+    try {
+      const wfRes: any = await firstValueFrom(
+        this.workflowGrpcService.FindWorkflowByCode({ code: workflowCode })
+      ).catch(() => null);
+
+      if (!wfRes || !wfRes.id) return { success: true, data: [] };
+
+      const nextNodeRes: any = await firstValueFrom(
+        this.workflowGrpcService.GetNextNode({
+          workflowId: wfRes.id,
+          currentNodeId: currentNodeId,
+          actionName: 'ASSIGN',
+          evalContext: { fields: {} },
+        })
+      ).catch(() => null);
+
+      if (!nextNodeRes || !nextNodeRes.nextNodeData) return { success: true, data: [] };
+      const rule = JSON.parse(nextNodeRes.nextNodeData).assignments?.[0];
+      if (!rule) return { success: true, data: [] };
+
+      const conditionsRes: any = await firstValueFrom(
+        this.userGrpcService.FindUsersByConditions({
+          callerUserId,
+          unitScope: rule.unitScope || 'SAME_UNIT',
+          rankOperator: rule.rankOperator || 'lt',
+          rankValue: rule.rankValue,
+        })
+      ).catch(() => null);
+
+      const allowedCodes = conditionsRes?.allowedEmployeeCodes ?? conditionsRes?.allowed_employee_codes ?? [];
+      return { success: true, data: allowedCodes, message: 'OK' };
+    } catch (e: any) {
+      throw new InternalServerErrorException(e.message || 'Lỗi điều phối danh sách nhân sự');
+    }
   }
 
   async getMicroservices() {
@@ -392,3 +435,5 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 }
+
+

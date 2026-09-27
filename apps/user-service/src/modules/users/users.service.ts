@@ -47,7 +47,7 @@ export class UsersService implements OnModuleInit {
           initialContext: context,
         }),
       );
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(`Failed to trigger workflow ${trigger}: ${e.message}`);
     }
   }
@@ -59,46 +59,102 @@ export class UsersService implements OnModuleInit {
     jobTitleId: number;
     isPrimary: boolean;
   }) {
-    await this.checkStaffingLimit(dto.unitId, dto.jobTitleId);
-    
-    const newPosition = await this.createJobPositionRecord(dto);
+    const newPosition = await this.prisma.$transaction(async (tx: any) => {
+      await this.checkStaffingLimitTx(tx, dto.unitId, dto.jobTitleId);
 
-    // Auto-assign to a StaffingSlot and update currentCount
-    if (newPosition.user?.employeeCode) {
-      const employeeCode = newPosition.user.employeeCode;
-      const staffing = await this.prisma.organizationStaffing.findUnique({
-        where: { unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId } },
-      });
-      if (staffing) {
-        const availableSlot = await this.prisma.staffingSlot.findFirst({
+      const pos = await this.createJobPositionRecordTx(tx, dto);
+
+      if (pos.user?.employeeCode) {
+        const employeeCode = pos.user.employeeCode;
+        const staffing = await tx.organizationStaffing.findUnique({
           where: {
-            staffingId: staffing.id,
-            OR: [
-              { assignedEmployeeCode: null },
-              { assignedEmployeeCode: '' }
-            ]
+            unitId_jobTitleId: {
+              unitId: dto.unitId,
+              jobTitleId: dto.jobTitleId,
+            },
           },
-          orderBy: { slotOrder: 'asc' }
         });
+        if (staffing) {
+          const availableSlot = await tx.staffingSlot.findFirst({
+            where: {
+              staffingId: staffing.id,
+              OR: [
+                { assignedEmployeeCode: null },
+                { assignedEmployeeCode: '' },
+              ],
+            },
+            orderBy: { slotOrder: 'asc' },
+          });
 
-        if (availableSlot) {
-          await this.prisma.staffingSlot.update({
-            where: { id: availableSlot.id },
-            data: { assignedEmployeeCode: employeeCode }
-          });
-          
-          await this.prisma.organizationStaffing.update({
-            where: { id: staffing.id },
-            data: { currentCount: { increment: 1 } }
-          });
+          if (availableSlot) {
+            await tx.staffingSlot.update({
+              where: { id: availableSlot.id },
+              data: { assignedEmployeeCode: employeeCode },
+            });
+
+            await tx.organizationStaffing.update({
+              where: { id: staffing.id },
+              data: { currentCount: { increment: 1 } },
+            });
+          }
         }
       }
-    }
-    
+
+      return pos;
+    });
+
     this.notifyPositionAssigned(newPosition);
     await this.clearUserProfileCache(dto.userId);
 
     return newPosition;
+  }
+
+  private async checkStaffingLimitTx(
+    tx: any,
+    unitId: number,
+    jobTitleId: number,
+  ) {
+    const staffing = await tx.organizationStaffing.findUnique({
+      where: { unitId_jobTitleId: { unitId, jobTitleId } },
+    });
+
+    if (!staffing) {
+      throw new RpcException({
+        message: 'Đơn vị này chưa có chỉ tiêu (Định biên) cho chức danh này.',
+        code: GRPC.INVALID_ARGUMENT,
+      });
+    }
+
+    if (staffing.currentCount >= staffing.quantity) {
+      throw new RpcException({
+        message: `Đã hết chỉ tiêu định biên! (Hiện có: ${staffing.currentCount}/${staffing.quantity})`,
+        code: GRPC.INVALID_ARGUMENT,
+      });
+    }
+  }
+
+  private createJobPositionRecordTx(
+    tx: any,
+    dto: {
+      userId: number;
+      unitId: number;
+      jobTitleId: number;
+      isPrimary: boolean;
+    },
+  ) {
+    return tx.jobPosition.create({
+      data: {
+        userId: dto.userId,
+        unitId: dto.unitId,
+        jobTitleId: dto.jobTitleId,
+        isPrimary: dto.isPrimary,
+      },
+      include: {
+        unit: true,
+        jobTitle: true,
+        user: true,
+      },
+    });
   }
 
   private async checkStaffingLimit(unitId: number, jobTitleId: number) {
@@ -121,7 +177,12 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  private async createJobPositionRecord(dto: { userId: number; unitId: number; jobTitleId: number; isPrimary: boolean }) {
+  private async createJobPositionRecord(dto: {
+    userId: number;
+    unitId: number;
+    jobTitleId: number;
+    isPrimary: boolean;
+  }) {
     return this.prisma.jobPosition.create({
       data: {
         userId: dto.userId,
@@ -175,13 +236,13 @@ export class UsersService implements OnModuleInit {
     createdByEmail?: string;
   }) {
     await this.validateUsername(data.username);
-    
+
     const user = await this.insertUserRecord(data);
-    
+
     await this.createCredential(user.id, data.password);
-    
+
     this.sendUserCreationNotifications(user, data);
-    
+
     await this.triggerUserCreatedWorkflow(user, data.createdByUserId);
 
     return this.toUserResponse(user);
@@ -215,11 +276,16 @@ export class UsersService implements OnModuleInit {
           ...(data.email && { email: data.email }),
           ...(data.username && { username: data.username }),
           ...(data.fullName !== undefined && { fullName: data.fullName }),
-          ...(data.phoneNumber !== undefined && { phoneNumber: data.phoneNumber }),
+          ...(data.phoneNumber !== undefined && {
+            phoneNumber: data.phoneNumber,
+          }),
           ...(data.cccd !== undefined && { cccd: data.cccd }),
-          ...(data.employeeCode !== undefined && { employeeCode: data.employeeCode }),
+          ...(data.employeeCode !== undefined && {
+            employeeCode: data.employeeCode,
+          }),
         },
       });
+      await this.clearUserProfileCache(data.id);
       return this.toUserResponse(user);
     } catch (e: any) {
       if (e?.code === 'P2002') {
@@ -242,6 +308,7 @@ export class UsersService implements OnModuleInit {
     }
 
     await this.prisma.user.delete({ where: { id } });
+    await this.clearUserProfileCache(id);
     return true;
   }
 
@@ -254,6 +321,46 @@ export class UsersService implements OnModuleInit {
       throw new RpcException({
         message: 'Username đã tồn tại',
         code: GRPC.INVALID_ARGUMENT,
+      });
+    }
+  }
+
+  private async insertUserRecordTx(tx: any, data: any) {
+    try {
+      return await tx.user.create({
+        data: {
+          email: data.email,
+          username: data.username || null,
+          fullName: data.fullName?.trim() || null,
+          phoneNumber: data.phoneNumber?.trim() || null,
+          cccd: data.cccd?.trim() || null,
+          employeeCode: data.employeeCode?.trim() || null,
+        },
+      });
+    } catch (e: any) {
+      if (e?.code === 'P2002') {
+        const target = Array.isArray(e?.meta?.target)
+          ? e.meta.target[0]
+          : 'email';
+        throw new RpcException({
+          message:
+            target === 'email'
+              ? 'Email đã tồn tại'
+              : target === 'username'
+                ? 'Username đã tồn tại'
+                : 'Dữ liệu trùng lặp',
+          code: GRPC.INVALID_ARGUMENT,
+        });
+      }
+      throw e;
+    }
+  }
+
+  private async createCredentialTx(tx: any, userId: number, password?: string) {
+    if (password && password.trim()) {
+      const hash = await bcrypt.hash(password, 10);
+      await tx.credential.create({
+        data: { userId, passwordHash: hash },
       });
     }
   }
@@ -334,7 +441,10 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  private async triggerUserCreatedWorkflow(user: any, createdByUserId?: number) {
+  private async triggerUserCreatedWorkflow(
+    user: any,
+    createdByUserId?: number,
+  ) {
     await this.triggerWorkflow('USER_CREATED', {
       userId: user.id,
       email: user.email,
@@ -366,7 +476,10 @@ export class UsersService implements OnModuleInit {
     deviceInfo?: string;
     ipAddress?: string;
   }) {
-    const user = await this.validateUserCredentials(data.usernameOrEmail, data.password);
+    const user = await this.validateUserCredentials(
+      data.usernameOrEmail,
+      data.password,
+    );
     const tokens = await this.generateAuthTokens(user.id);
     return this.formatAuthResponse(user, tokens);
   }
@@ -398,7 +511,10 @@ export class UsersService implements OnModuleInit {
     return this.formatAuthResponse(user, tokens);
   }
 
-  private async validateUserCredentials(usernameOrEmail?: string, password?: string) {
+  private async validateUserCredentials(
+    usernameOrEmail?: string,
+    password?: string,
+  ) {
     const key = String(usernameOrEmail ?? '').trim();
     const pwd = String(password ?? '').trim();
     if (!key || !pwd) {
@@ -429,7 +545,8 @@ export class UsersService implements OnModuleInit {
     }
     if (!user.credential) {
       throw new RpcException({
-        message: 'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.',
+        message:
+          'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.',
         code: GRPC.UNAUTHENTICATED,
       });
     }
@@ -538,7 +655,7 @@ export class UsersService implements OnModuleInit {
 
     const user = await this.fetchUserWithRelations(data.id);
     const response = this.mapUserPermissionsAndRoles(user);
-    
+
     await this.cache.set(cacheKey, response, 600000);
 
     return response;
@@ -553,10 +670,10 @@ export class UsersService implements OnModuleInit {
           include: {
             user_groups: {
               include: {
-                policies: { include: { resource: true } }
-              }
-            }
-          }
+                policies: { include: { resource: true } },
+              },
+            },
+          },
         },
         jobPositions: {
           where: { endDate: null },
@@ -592,25 +709,36 @@ export class UsersService implements OnModuleInit {
     }
 
     for (const policy of allPolicies) {
-        const resourceCode = policy.resource?.code ?? '';
-        if (resourceCode && policy.action) {
-          permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);
-          if (policy.action === '*') {
-            const commonActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'MANAGE', 'PUBLISH', 'APPROVE', 'ASSIGN', 'PARTICIPATE'];
-            commonActions.forEach(a => {
-              permissionsFlattenSet.add(`${resourceCode}:${a}`);
-              permissionsFlattenSet.add(`${resourceCode}.${a}`);
-            });
-            permissionsFlattenSet.add(`${resourceCode}.*`);
-          }
+      const resourceCode = policy.resource?.code ?? '';
+      if (resourceCode && policy.action) {
+        permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);
+        if (policy.action === '*') {
+          const commonActions = [
+            'READ',
+            'CREATE',
+            'UPDATE',
+            'DELETE',
+            'VIEW',
+            'MANAGE',
+            'PUBLISH',
+            'APPROVE',
+            'ASSIGN',
+            'PARTICIPATE',
+          ];
+          commonActions.forEach((a) => {
+            permissionsFlattenSet.add(`${resourceCode}:${a}`);
+            permissionsFlattenSet.add(`${resourceCode}.${a}`);
+          });
+          permissionsFlattenSet.add(`${resourceCode}.*`);
         }
-        policiesList.push({
-          description: `${policy.action} trên ${policy.resource?.name ?? policy.resource?.code ?? policy.resourceId ?? '—'}`,
-          resource: policy.resource?.code ?? String(policy.resourceId ?? '—'),
-          action: policy.action,
-          effect: policy.effect ?? 'ALLOW',
-        });
       }
+      policiesList.push({
+        description: `${policy.action} trên ${policy.resource?.name ?? policy.resource?.code ?? policy.resourceId ?? '—'}`,
+        resource: policy.resource?.code ?? String(policy.resourceId ?? '—'),
+        action: policy.action,
+        effect: policy.effect ?? 'ALLOW',
+      });
+    }
 
     const permissionsFlatten = Array.from(permissionsFlattenSet);
 
@@ -687,13 +815,11 @@ export class UsersService implements OnModuleInit {
             },
           },
         },
-      })
+      }),
     ]);
 
-    const page = Math.floor(skip / take) + 1;
-
     return {
-      data: allUsers.map((u) => this.toUserResponse(u)),
+      data: allUsers.map((u: any) => this.toUserResponse(u)),
       meta: {
         total,
         skip,
@@ -717,7 +843,6 @@ export class UsersService implements OnModuleInit {
     const users = await this.prisma.user.findMany({
       where: { id: { in: validIds } },
       include: {
-        
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -725,7 +850,7 @@ export class UsersService implements OnModuleInit {
       },
     });
 
-    const results = users.map((u) => {
+    const results = users.map((u: any) => {
       const base = this.toUserResponse(u);
       const firstPos = u.jobPositions?.[0];
       const roleNames: string[] = [];
@@ -766,11 +891,8 @@ export class UsersService implements OnModuleInit {
     };
   }
 
-
-
-  
   async assignUserGroups(data: { userId: number; userGroupIds: number[] }) {
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: any) => {
       await tx.userToUserGroup.deleteMany({
         where: { A: data.userId },
       });
@@ -783,6 +905,9 @@ export class UsersService implements OnModuleInit {
         });
       }
     });
+
+    await this.clearUserProfileCache(data.userId);
+
     return {
       success: true,
       message: 'Đã cập nhật nhóm quyền.',
@@ -791,8 +916,68 @@ export class UsersService implements OnModuleInit {
 
   async getSubordinates(data: { userId: number }) {
     const user = await this.fetchUserForSubordinates(data.userId);
-    const activeJobPositions = user.jobPositions.filter(pos => pos.unitId && pos.jobTitle);
-    const unitIds = activeJobPositions.map(pos => pos.unitId);
+    const activeJobPositions = user.jobPositions.filter(
+      (pos: any) => pos.unitId && pos.jobTitle,
+    );
+    const unitIds = activeJobPositions.map((pos: any) => pos.unitId);
+
+    const result = {
+      deptIds: new Set<number>(),
+      empCodes: new Set<string>(),
+      domainIds: new Set<number>(),
+    };
+
+    const userPolicies: any[] = [...(user.policies || [])];
+    if (user.UserToUserGroup) {
+      user.UserToUserGroup.forEach((utg: any) => {
+        if (utg.user_groups?.policies) {
+          userPolicies.push(...utg.user_groups.policies);
+        }
+      });
+    }
+    const delegatePolicies = userPolicies.filter(
+      (p: any) => p.action === 'DELEGATE' && p.effect === 'ALLOW'
+    ).map(p => ({
+      ...p,
+      conditionsParsed: p.conditions 
+        ? typeof p.conditions === 'string' 
+          ? JSON.parse(p.conditions) 
+          : p.conditions 
+        : {}
+    }));
+
+    if (unitIds.length > 0) {
+      const orgData = await this.fetchOrganizationDataForSubordinates(
+        unitIds,
+        activeJobPositions,
+      );
+
+      for (const pos of activeJobPositions) {
+        this.processJobPositionSubordinates(
+          pos,
+          orgData,
+          user.employeeCode ?? null,
+          result,
+          delegatePolicies
+        );
+      }
+    }
+
+    await this.processChildUnitsPositions(result);
+
+    if (user.employeeCode) {
+      result.empCodes.delete(user.employeeCode);
+    }
+
+    return this.formatSubordinatesResponse(result);
+  }
+
+  async findUsersByConditions(data: { callerUserId: number; unitScope: string; rankOperator: string; rankValue?: string }) {
+    const user = await this.fetchUserForSubordinates(data.callerUserId);
+    const activeJobPositions = user.jobPositions.filter(
+      (pos: any) => pos.unitId && pos.jobTitle,
+    );
+    const unitIds = activeJobPositions.map((pos: any) => pos.unitId);
 
     const result = {
       deptIds: new Set<number>(),
@@ -801,10 +986,27 @@ export class UsersService implements OnModuleInit {
     };
 
     if (unitIds.length > 0) {
-      const orgData = await this.fetchOrganizationDataForSubordinates(unitIds, activeJobPositions);
-      
+      const orgData = await this.fetchOrganizationDataForSubordinates(
+        unitIds,
+        activeJobPositions,
+      );
+
       for (const pos of activeJobPositions) {
-        this.processJobPositionSubordinates(pos, orgData, user.employeeCode, result);
+        this.processJobPositionSubordinates(
+          pos,
+          orgData,
+          user.employeeCode ?? null,
+          result,
+          [{
+            action: 'DELEGATE',
+            effect: 'ALLOW',
+            conditionsParsed: {
+              unitScope: data.unitScope,
+              targetRankOperator: data.rankOperator,
+              targetRankValue: data.rankValue,
+            }
+          }]
+        );
       }
     }
 
@@ -825,6 +1027,16 @@ export class UsersService implements OnModuleInit {
           where: { endDate: null },
           include: { jobTitle: true, unit: true },
         },
+        policies: { include: { resource: true } },
+        UserToUserGroup: {
+          include: {
+            user_groups: {
+              include: {
+                policies: { include: { resource: true } },
+              },
+            },
+          },
+        },
       },
     });
     if (!user) {
@@ -836,10 +1048,17 @@ export class UsersService implements OnModuleInit {
     return user;
   }
 
-  private async fetchOrganizationDataForSubordinates(unitIds: number[], activeJobPositions: any[]) {
+  private async fetchOrganizationDataForSubordinates(
+    unitIds: number[],
+    activeJobPositions: any[],
+  ) {
     const [allRanksData, childUnitsData, staffingsData] = await Promise.all([
       this.prisma.jobPosition.findMany({
-        where: { unitId: { in: unitIds }, endDate: null, user: { isActive: true } },
+        where: {
+          unitId: { in: unitIds as number[] },
+          endDate: null,
+          user: { is: { isActive: true } },
+        },
         include: { jobTitle: true, user: true },
       }),
       this.prisma.organizationUnit.findMany({
@@ -847,90 +1066,135 @@ export class UsersService implements OnModuleInit {
       }),
       this.prisma.organizationStaffing.findMany({
         where: {
-          OR: activeJobPositions.map(pos => ({ unitId: pos.unitId, jobTitleId: pos.jobTitleId }))
+          OR: activeJobPositions.map((pos) => ({
+            unitId: pos.unitId,
+            jobTitleId: pos.jobTitleId,
+          })),
         },
-        include: { slots: { include: { monitoredUnits: true, domains: true } } },
-      })
+        include: {
+          slots: { include: { monitoredUnits: true, domains: true } },
+        },
+      }),
     ]);
     return { allRanksData, childUnitsData, staffingsData };
   }
 
-  private processJobPositionSubordinates(pos: any, orgData: any, employeeCode: string | null, result: any) {
+  private processJobPositionSubordinates(
+    pos: any,
+    orgData: any,
+    employeeCode: string | null,
+    result: { deptIds: Set<number>; empCodes: Set<string>; domainIds: Set<number> },
+    delegatePolicies: any[] = []
+  ) {
     const { allRanksData, childUnitsData, staffingsData } = orgData;
     const myRank = pos.jobTitle.rank;
-    const allRanksInUnit = allRanksData.filter((p: any) => p.unitId === pos.unitId);
+    const allRanksInUnit = allRanksData.filter(
+      (p: any) => p.unitId === pos.unitId,
+    );
 
     const distinctRanksInUnit = [
       ...new Set(allRanksInUnit.map((p: any) => p.jobTitle.rank)),
     ].sort((a: any, b: any) => a - b) as number[];
-    const minRank = distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
-    const secondMinRank = distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
+    const minRank =
+      distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
+    const secondMinRank =
+      distinctRanksInUnit.length > 1 ? distinctRanksInUnit[1] : minRank;
 
-    const childUnits = childUnitsData.filter((c: any) => c.parentId === pos.unitId);
+    const childUnits = childUnitsData.filter(
+      (c: any) => c.parentId === pos.unitId,
+    );
     const hasChildUnits = childUnits.length > 0;
 
-    // 1. Giao việc trong cùng đơn vị
-    const sameUnitSubordinates = this.getSubordinatesInSameUnitMemory(
-      pos, myRank, distinctRanksInUnit, hasChildUnits, allRanksInUnit
-    );
-    sameUnitSubordinates.forEach((code) => result.empCodes.add(code));
+    // 1 & 2. Giao việc bằng Policy Động (Dynamic PBAC) hoặc Hardcode (Fallback)
+    let hasDynamicPolicies = false;
+    for (const policy of delegatePolicies) {
+      const cond = policy.conditionsParsed;
+      if (!cond) continue;
+      hasDynamicPolicies = true;
 
-    // 2. Đối với đơn vị cấp dưới
-    const isHead = myRank === minRank;
-    const isDeputy = myRank === secondMinRank && myRank > minRank;
-    if (isHead || isDeputy) {
-      childUnits.forEach((child: any) => result.deptIds.add(child.id));
-    }
+      // 1. Giao trong cùng đơn vị
+      if (cond.unitScope === 'SAME_UNIT' || cond.unitScope === 'ALL') {
+        allRanksInUnit.forEach((p: any) => {
+          let isValid = false;
+          const targetRank = p.jobTitle.rank;
+          if (cond.targetRankOperator === 'lt') isValid = targetRank > myRank;
+          if (cond.targetRankOperator === 'lte') isValid = targetRank >= myRank;
+          if (cond.targetRankOperator === 'any') isValid = true;
+          if (cond.targetRankOperator === 'exact' && cond.targetRankValue) {
+             const exactValue = cond.targetRankValue === 'minRank' ? minRank : (cond.targetRankValue === 'secondMinRank' ? secondMinRank : Number(cond.targetRankValue));
+             isValid = targetRank === exactValue;
+          }
+          if (isValid && p.user?.employeeCode) result.empCodes.add(p.user.employeeCode);
+        });
+      }
 
-    // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots)
-    const staffings = staffingsData.filter((st: any) => st.unitId === pos.unitId && st.jobTitleId === pos.jobTitleId);
-    for (const st of staffings) {
-      for (const slot of st.slots) {
-        if (slot.assignedEmployeeCode === employeeCode) {
-          for (const mu of slot.monitoredUnits) {
-            result.deptIds.add(mu.unitId);
-          }
-          if (slot.domains) {
-            for (const d of slot.domains) {
-              result.domainIds.add(d.domainId);
-            }
-          }
-        }
+      // 2. Đối với đơn vị cấp dưới
+      if (cond.unitScope === 'CHILD_UNIT' || cond.unitScope === 'ALL') {
+        childUnits.forEach((child: any) => result.deptIds.add(child.id));
       }
     }
+
+    if (!hasDynamicPolicies) {
+      // Logic cũ (Fallback)
+      const sameUnitSubordinates = this.getSubordinatesInSameUnitMemory(
+        pos,
+        myRank,
+        distinctRanksInUnit,
+        hasChildUnits,
+        allRanksInUnit,
+      );
+      sameUnitSubordinates.forEach((code) => result.empCodes.add(code));
+
+      const isHead = myRank === minRank;
+      const isDeputy = myRank === secondMinRank && myRank > minRank;
+      if (isHead || isDeputy) {
+        childUnits.forEach((child: any) => result.deptIds.add(child.id));
+      }
+    }
+
+    // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots) - Đã tối ưu O(N) functional
+    staffingsData
+      .filter((st: any) => st.unitId === pos.unitId && st.jobTitleId === pos.jobTitleId)
+      .flatMap((st: any) => st.slots || [])
+      .filter((slot: any) => slot.assignedEmployeeCode === employeeCode)
+      .forEach((slot: any) => {
+        (slot.monitoredUnits || []).forEach((mu: any) => result.deptIds.add(mu.unitId));
+        (slot.domains || []).forEach((d: any) => result.domainIds.add(d.domainId));
+      });
   }
 
-  private async processChildUnitsPositions(result: any) {
-    const deptIdsArray = Array.from(result.deptIds) as number[];
+  private async processChildUnitsPositions(result: { deptIds: Set<number>; empCodes: Set<string>; domainIds: Set<number> }) {
+    const deptIdsArray = Array.from(result.deptIds);
     if (deptIdsArray.length === 0) return;
 
     const allChildPositions = await this.prisma.jobPosition.findMany({
       where: {
         unitId: { in: deptIdsArray },
         endDate: null,
-        user: { isActive: true },
+        user: { is: { isActive: true } },
       },
-      include: { jobTitle: true, user: true },
+      select: {
+        unitId: true,
+        jobTitle: { select: { rank: true } },
+        user: { select: { employeeCode: true } },
+      },
     });
 
-    for (const deptId of deptIdsArray) {
-      const positions = allChildPositions.filter(p => p.unitId === deptId);
-      if (positions.length === 0) continue;
+    const positionsByUnit = new Map<number, any[]>();
+    allChildPositions.forEach((pos: any) => {
+      if (!positionsByUnit.has(pos.unitId)) positionsByUnit.set(pos.unitId, []);
+      positionsByUnit.get(pos.unitId)!.push(pos);
+    });
 
-      const distinctRanks = [
-        ...new Set(positions.map((p) => p.jobTitle.rank)),
-      ].sort((a, b) => a - b);
-      const topRank = distinctRanks[0];
-
-      for (const p of positions) {
-        if (p.jobTitle.rank === topRank && p.user && p.user.employeeCode) {
-          result.empCodes.add(p.user.employeeCode);
-        }
-      }
+    for (const positions of positionsByUnit.values()) {
+      const topRank = Math.min(...positions.map((p) => p.jobTitle?.rank ?? Infinity));
+      positions
+        .filter((p) => p.jobTitle?.rank === topRank && p.user?.employeeCode)
+        .forEach((p) => result.empCodes.add(p.user.employeeCode));
     }
   }
 
-  private formatSubordinatesResponse(result: any) {
+  private formatSubordinatesResponse(result: { deptIds: Set<number>; empCodes: Set<string>; domainIds: Set<number> }) {
     const deptIds = Array.from(result.deptIds);
     const empCodes = Array.from(result.empCodes);
     const domainIds = Array.from(result.domainIds);
@@ -949,7 +1213,7 @@ export class UsersService implements OnModuleInit {
     myRank: number,
     distinctRanksInUnit: number[],
     hasChildUnits: boolean,
-    allRanksInUnit: any[]
+    allRanksInUnit: any[],
   ): string[] {
     const minRank =
       distinctRanksInUnit.length > 0 ? distinctRanksInUnit[0] : myRank;
@@ -962,7 +1226,7 @@ export class UsersService implements OnModuleInit {
     // -> Thấy TẤT CẢ chức vụ thấp hơn trong cùng đơn vị
     if (!hasChildUnits) {
       return allRanksInUnit
-        .filter(p => p.jobTitle.rank > myRank && p.user?.employeeCode)
+        .filter((p) => p.jobTitle.rank > myRank && p.user?.employeeCode)
         .map((p) => p.user.employeeCode) as string[];
     }
 
@@ -971,7 +1235,9 @@ export class UsersService implements OnModuleInit {
     if (isHead) {
       if (distinctRanksInUnit.length <= 1) return [];
       return allRanksInUnit
-        .filter(p => p.jobTitle.rank === secondMinRank && p.user?.employeeCode)
+        .filter(
+          (p) => p.jobTitle.rank === secondMinRank && p.user?.employeeCode,
+        )
         .map((p) => p.user.employeeCode) as string[];
     }
 
@@ -983,7 +1249,6 @@ export class UsersService implements OnModuleInit {
     // Chuyên viên không giao cho ai
     return [];
   }
-
 
   async getEmployeesByScope(domainId?: number, monitoredUnitId?: number) {
     const employeeCodes = new Set<string>();
@@ -1002,7 +1267,7 @@ export class UsersService implements OnModuleInit {
 
     const slots = await this.prisma.staffingSlot.findMany({
       where: whereObj,
-      select: { assignedEmployeeCode: true }
+      select: { assignedEmployeeCode: true },
     });
 
     for (const slot of slots) {
@@ -1013,8 +1278,6 @@ export class UsersService implements OnModuleInit {
 
     return { employeeCodes: Array.from(employeeCodes) };
   }
-
-  
 
   private toUserResponse(user: {
     id: number;

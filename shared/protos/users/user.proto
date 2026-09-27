@@ -20,8 +20,10 @@ service UserService {
   rpc RevokeRefreshToken (RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
   // Đặt/đổi mật khẩu cho user (khi đã có tài khoản)
   rpc SetPassword (SetPasswordRequest) returns (SetPasswordResponse);
-  // Lấy danh sách phòng ban và nhân viên cấp dưới trực tiếp để giao việc
+  // Lấy danh sách phòng ban và nhân viên cấp dưới trực tiếp để giao việc (Legacy)
   rpc GetSubordinates (GetSubordinatesRequest) returns (GetSubordinatesResponse);
+  // Master Data API: Truy vấn danh sách nhân sự dựa trên điều kiện linh hoạt (Dùng cho Workflow Engine)
+  rpc FindUsersByConditions (FindUsersByConditionsRequest) returns (GetSubordinatesResponse);
   // Lấy danh sách nhân viên phụ trách theo domain và monitored_unit
   rpc GetEmployeesByScope (GetEmployeesByScopeRequest) returns (GetEmployeesByScopeResponse);
   // Cập nhật thông tin user
@@ -193,6 +195,13 @@ message GetSubordinatesResponse {
   repeated int32 allowed_department_ids = 1;
   repeated string allowed_employee_codes = 2;
   repeated int32 allowed_domain_ids = 3;
+}
+
+message FindUsersByConditionsRequest {
+  int32 caller_user_id = 1;
+  string unit_scope = 2;       // "SAME_UNIT", "CHILD_UNIT", "ALL"
+  string rank_operator = 3;    // "lt", "lte", "gt", "gte", "any", "exact"
+  string rank_value = 4;       // "minRank", "secondMinRank", hoặc số cụ thể
 }
 
 message GetEmployeesByScopeRequest {

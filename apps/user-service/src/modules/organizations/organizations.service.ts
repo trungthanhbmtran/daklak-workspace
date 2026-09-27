@@ -25,7 +25,7 @@ export class OrganizationsService {
   private treeCache = new Map<string, { data: any; expiresAt: number }>();
   private readonly CACHE_TTL_MS = 3600 * 1000; // 1 giờ
 
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   // ----------------- Helper cache (gộp logic get/set/invalidate lặp lại) -----------------
   private getCache<T = any>(key: string): T | undefined {
@@ -36,7 +36,10 @@ export class OrganizationsService {
   }
 
   private setCache(key: string, data: any) {
-    this.treeCache.set(key, { data, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    this.treeCache.set(key, {
+      data,
+      expiresAt: Date.now() + this.CACHE_TTL_MS,
+    });
   }
 
   private invalidateCache() {
@@ -60,7 +63,10 @@ export class OrganizationsService {
         where: { code: data.typeCode },
       });
       if (!unitType) {
-        throw new RpcException({ message: 'Mã loại tổ chức không hợp lệ', code: GRPC.NOT_FOUND });
+        throw new RpcException({
+          message: 'Mã loại tổ chức không hợp lệ',
+          code: GRPC.NOT_FOUND,
+        });
       }
       resolvedTypeId = unitType.id;
     }
@@ -82,7 +88,10 @@ export class OrganizationsService {
       const validDomainIds = domainIds.filter((id) => id > 0);
       if (validDomainIds.length > 0) {
         await tx.unitDomain.createMany({
-          data: validDomainIds.map((domainId) => ({ unitId: created.id, domainId })),
+          data: validDomainIds.map((domainId) => ({
+            unitId: created.id,
+            domainId,
+          })),
           skipDuplicates: true,
         });
       }
@@ -144,7 +153,8 @@ export class OrganizationsService {
     });
     if (!unit) return null;
 
-    const trimmedCode = data.code !== undefined ? String(data.code).trim() : undefined;
+    const trimmedCode =
+      data.code !== undefined ? String(data.code).trim() : undefined;
 
     // parentId 0 hoặc undefined = không đổi; null = chuyển lên gốc; > 0 = đổi cha mới
     const effectiveParentId = data.parentId === 0 ? undefined : data.parentId;
@@ -152,9 +162,16 @@ export class OrganizationsService {
     // Chạy song song các việc validate độc lập (mã trùng, cha mới tồn tại, type tồn tại)
     // thay vì await tuần tự từng cái.
     const [existingCode, newParent, newType] = await Promise.all([
-      trimmedCode ? this.prisma.organizationUnit.findFirst({ where: { code: trimmedCode, id: { not: id } } }) : null,
+      trimmedCode
+        ? this.prisma.organizationUnit.findFirst({
+            where: { code: trimmedCode, id: { not: id } },
+          })
+        : null,
       effectiveParentId !== undefined && effectiveParentId !== null
-        ? this.prisma.organizationUnit.findUnique({ where: { id: effectiveParentId }, select: { id: true } })
+        ? this.prisma.organizationUnit.findUnique({
+            where: { id: effectiveParentId },
+            select: { id: true },
+          })
         : null,
       !data.typeId && data.typeCode
         ? this.prisma.unitType.findUnique({ where: { code: data.typeCode } })
@@ -162,21 +179,31 @@ export class OrganizationsService {
     ]);
 
     if (trimmedCode && existingCode) {
-      throw new RpcException({ message: `Mã đơn vị "${trimmedCode}" đã được sử dụng`, code: 3 });
+      throw new RpcException({
+        message: `Mã đơn vị "${trimmedCode}" đã được sử dụng`,
+        code: 3,
+      });
     }
 
     if (effectiveParentId !== undefined) {
       if (effectiveParentId === id) {
-        throw new RpcException({ message: 'Đơn vị không thể là cha của chính nó', code: 3 });
+        throw new RpcException({
+          message: 'Đơn vị không thể là cha của chính nó',
+          code: 3,
+        });
       }
       if (unit.children.length > 0) {
         throw new RpcException({
-          message: 'Không thể đổi đơn vị cha khi có đơn vị con. Hãy di chuyển hoặc xóa đơn vị con trước.',
+          message:
+            'Không thể đổi đơn vị cha khi có đơn vị con. Hãy di chuyển hoặc xóa đơn vị con trước.',
           code: 9,
         });
       }
       if (effectiveParentId !== null && !newParent) {
-        throw new RpcException({ message: 'Đơn vị cha không tồn tại', code: GRPC.NOT_FOUND });
+        throw new RpcException({
+          message: 'Đơn vị cha không tồn tại',
+          code: GRPC.NOT_FOUND,
+        });
       }
     }
 
@@ -184,8 +211,14 @@ export class OrganizationsService {
     if (!finalTypeId && newType) finalTypeId = newType.id;
 
     if (finalTypeId !== undefined && finalTypeId > 0) {
-      const typeExists = await this.prisma.unitType.findUnique({ where: { id: finalTypeId } });
-      if (!typeExists) throw new RpcException({ message: 'Loại đơn vị không tồn tại', code: 3 });
+      const typeExists = await this.prisma.unitType.findUnique({
+        where: { id: finalTypeId },
+      });
+      if (!typeExists)
+        throw new RpcException({
+          message: 'Loại đơn vị không tồn tại',
+          code: 3,
+        });
     }
 
     const updateData: any = {};
@@ -194,10 +227,15 @@ export class OrganizationsService {
       updateData.hierarchyPath = trimmedCode; // hierarchyPath luôn theo code, chỉ cần set 1 lần
     }
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.shortName !== undefined) updateData.shortName = data.shortName || null;
-    if (finalTypeId !== undefined && finalTypeId > 0) updateData.typeId = finalTypeId;
+    if (data.shortName !== undefined)
+      updateData.shortName = data.shortName || null;
+    if (finalTypeId !== undefined && finalTypeId > 0)
+      updateData.typeId = finalTypeId;
 
-    await this.prisma.organizationUnit.update({ where: { id }, data: updateData });
+    await this.prisma.organizationUnit.update({
+      where: { id },
+      data: updateData,
+    });
 
     this.invalidateCache();
 
@@ -207,22 +245,30 @@ export class OrganizationsService {
     });
   }
 
-  async updateUnitScope(id: number, data: { domainIds?: number[]; scope?: string }) {
-    const unit = await this.prisma.organizationUnit.findUnique({ where: { id }, select: { id: true } });
+  async updateUnitScope(
+    id: number,
+    data: { domainIds?: number[]; scope?: string },
+  ) {
+    const unit = await this.prisma.organizationUnit.findUnique({
+      where: { id },
+      select: { id: true },
+    });
     if (!unit) return null;
 
     if (data.domainIds !== undefined) {
-      const ids = Array.isArray(data.domainIds) ? data.domainIds.filter((d) => d > 0) : [];
+      const ids = Array.isArray(data.domainIds)
+        ? data.domainIds.filter((d) => d > 0)
+        : [];
       // delete + create phải atomic để không có khoảng trống dữ liệu nếu 1 trong 2 lệnh lỗi.
       await this.prisma.$transaction([
         this.prisma.unitDomain.deleteMany({ where: { unitId: id } }),
         ...(ids.length > 0
           ? [
-            this.prisma.unitDomain.createMany({
-              data: ids.map((domainId) => ({ unitId: id, domainId })),
-              skipDuplicates: true,
-            }),
-          ]
+              this.prisma.unitDomain.createMany({
+                data: ids.map((domainId) => ({ unitId: id, domainId })),
+                skipDuplicates: true,
+              }),
+            ]
           : []),
       ]);
     }
@@ -243,7 +289,8 @@ export class OrganizationsService {
     if (!unit) return false;
     if (unit.children.length > 0) {
       throw new RpcException({
-        message: 'Không thể xóa đơn vị có đơn vị con. Hãy xóa đơn vị con trước.',
+        message:
+          'Không thể xóa đơn vị có đơn vị con. Hãy xóa đơn vị con trước.',
         code: 9,
       });
     }
@@ -254,45 +301,69 @@ export class OrganizationsService {
     return true;
   }
 
-  // Lấy cây tổ chức (Full Tree)
+  // Lấy cây tổ chức (Full Tree) - Đã tối ưu (Tìm kiếm qua DB Database Engine thay vì DFS In-memory)
   async getFullTree(q?: string) {
-    let fullTree = this.getCache<any[]>('FULL_TREE');
-
-    if (!fullTree) {
-      const units = await this.prisma.organizationUnit.findMany({
-        orderBy: { hierarchyPath: 'asc' },
-        include: { type: true },
-      });
-      fullTree = buildTree(units, null);
-      this.setCache('FULL_TREE', fullTree);
+    if (!q || !q.trim()) {
+      let fullTree = this.getCache<any[]>('FULL_TREE');
+      if (!fullTree) {
+        const units = await this.prisma.organizationUnit.findMany({
+          orderBy: { hierarchyPath: 'asc' },
+          include: { type: true },
+        });
+        fullTree = buildTree(units, null);
+        this.setCache('FULL_TREE', fullTree);
+      }
+      return { data: fullTree };
     }
 
-    if (!q || !q.trim()) return { data: fullTree };
-
+    // Tối ưu hóa: Tìm kiếm trực tiếp bằng DB Engine thay vì duyệt DFS in-memory toàn cây
     const lowerQ = q.toLowerCase().trim();
-    const filterTree = (nodes: any[]): any[] => {
-      const result: any[] = [];
-      for (const node of nodes) {
-        const filteredChildren = filterTree(node.children || []);
-        const matches =
-          node.name?.toLowerCase().includes(lowerQ) ||
-          node.code?.toLowerCase().includes(lowerQ) ||
-          node.shortName?.toLowerCase().includes(lowerQ);
+    const matchedUnits = await this.prisma.organizationUnit.findMany({
+      where: {
+        OR: [
+          { name: { contains: lowerQ } },
+          { code: { contains: lowerQ } },
+          { shortName: { contains: lowerQ } }
+        ]
+      },
+      select: { hierarchyPath: true }
+    });
 
-        if (matches || filteredChildren.length > 0) {
-          result.push({ ...node, children: filteredChildren });
+    if (matchedUnits.length === 0) return { data: [] };
+
+    // Thu thập tất cả các mã cha từ hierarchyPath (VD: H15.07.04 -> H15, H15.07, H15.07.04)
+    const relevantPaths = new Set<string>();
+    matchedUnits.forEach(u => {
+      if (u.hierarchyPath) {
+        const parts = u.hierarchyPath.split('.');
+        let currentPath = '';
+        for (const part of parts) {
+          if (!part) continue;
+          currentPath = currentPath ? `${currentPath}.${part}` : part;
+          relevantPaths.add(currentPath);
         }
       }
-      return result;
-    };
+    });
 
-    return { data: filterTree(fullTree) };
+    const units = await this.prisma.organizationUnit.findMany({
+      where: { hierarchyPath: { in: Array.from(relevantPaths) } },
+      orderBy: { hierarchyPath: 'asc' },
+      include: { type: true },
+    });
+
+    return { data: buildTree(units, null) };
   }
 
   // Lấy danh sách phẳng (có thể lọc theo tên, mã)
   async getOrganizations(q?: string) {
     const where: any = q
-      ? { OR: [{ name: { contains: q } }, { code: { contains: q } }, { shortName: { contains: q } }] }
+      ? {
+          OR: [
+            { name: { contains: q } },
+            { code: { contains: q } },
+            { shortName: { contains: q } },
+          ],
+        }
       : {};
     const units = await this.prisma.organizationUnit.findMany({
       where,
@@ -313,12 +384,17 @@ export class OrganizationsService {
       select: { code: true, hierarchyPath: true, parentId: true },
     });
     if (!root) {
-      throw new RpcException({ message: 'Đơn vị không tồn tại', code: GRPC.NOT_FOUND });
+      throw new RpcException({
+        message: 'Đơn vị không tồn tại',
+        code: GRPC.NOT_FOUND,
+      });
     }
 
     const prefix = (root.code || root.hierarchyPath || '') + '.';
     const units = await this.prisma.organizationUnit.findMany({
-      where: { OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }] },
+      where: {
+        OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }],
+      },
       orderBy: { hierarchyPath: 'asc' },
       include: { type: true },
     });
@@ -338,7 +414,9 @@ export class OrganizationsService {
 
     const prefix = (root.code || root.hierarchyPath || '') + '.';
     const units = await this.prisma.organizationUnit.findMany({
-      where: { OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }] },
+      where: {
+        OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }],
+      },
       select: { id: true },
     });
 
@@ -347,11 +425,21 @@ export class OrganizationsService {
 
   // --- 2. QUẢN LÝ ĐỊNH BIÊN (STAFFING) ---
 
-  async setStaffing(dto: { unitId: number; jobTitleId: number; quantity: number }) {
+  async setStaffing(dto: {
+    unitId: number;
+    jobTitleId: number;
+    quantity: number;
+  }) {
     return this.prisma.organizationStaffing.upsert({
-      where: { unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId } },
+      where: {
+        unitId_jobTitleId: { unitId: dto.unitId, jobTitleId: dto.jobTitleId },
+      },
       update: { quantity: dto.quantity },
-      create: { unitId: dto.unitId, jobTitleId: dto.jobTitleId, quantity: dto.quantity },
+      create: {
+        unitId: dto.unitId,
+        jobTitleId: dto.jobTitleId,
+        quantity: dto.quantity,
+      },
     });
   }
 
@@ -365,10 +453,18 @@ export class OrganizationsService {
           orderBy: { slotOrder: 'asc' },
           include: {
             domains: {
-              include: { domain: { include: { translations: { where: { langCode: 'vi' } } } } },
+              include: {
+                domain: {
+                  include: { translations: { where: { langCode: 'vi' } } },
+                },
+              },
             },
             geographicAreas: {
-              include: { geographicArea: { include: { translations: { where: { langCode: 'vi' } } } } },
+              include: {
+                geographicArea: {
+                  include: { translations: { where: { langCode: 'vi' } } },
+                },
+              },
             },
             monitoredUnits: { include: { unit: true } },
           },
@@ -378,7 +474,11 @@ export class OrganizationsService {
 
     const employeeCodes = [
       ...new Set(
-        items.flatMap((item) => item.slots.map((s) => (s as any).assignedEmployeeCode).filter(Boolean)),
+        items.flatMap((item) =>
+          item.slots
+            .map((s) => (s as any).assignedEmployeeCode)
+            .filter(Boolean),
+        ),
       ),
     ];
 
@@ -389,22 +489,33 @@ export class OrganizationsService {
         select: { employeeCode: true, fullName: true },
       });
       users.forEach((u) => {
-        if (u.employeeCode && u.fullName) userMap.set(u.employeeCode, u.fullName);
+        if (u.employeeCode && u.fullName)
+          userMap.set(u.employeeCode, u.fullName);
       });
     }
 
     const data = items.map((item) => {
-      const assignedUserBySlot: Record<number, { fullName: string; employeeCode: string | null }> = {};
+      const assignedUserBySlot: Record<
+        number,
+        { fullName: string; employeeCode: string | null }
+      > = {};
 
       const mappedSlots = item.slots.map((slot) => {
         const code = (slot as any).assignedEmployeeCode;
         const fullName = code ? userMap.get(code) : undefined;
-        if (fullName) assignedUserBySlot[slot.slotOrder] = { fullName, employeeCode: code };
+        if (fullName)
+          assignedUserBySlot[slot.slotOrder] = { fullName, employeeCode: code };
 
-        return { ...slot, assignedEmployeeCode: code || '', assignedEmployeeName: fullName || '' };
+        return {
+          ...slot,
+          assignedEmployeeCode: code || '',
+          assignedEmployeeName: fullName || '',
+        };
       });
 
-      const currentEmployeeNames = Object.values(assignedUserBySlot).map((u) => u.fullName);
+      const currentEmployeeNames = Object.values(assignedUserBySlot).map(
+        (u) => u.fullName,
+      );
 
       return {
         ...item,
@@ -421,7 +532,9 @@ export class OrganizationsService {
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
   async listJobTitles(unitId?: number) {
     if (!unitId || unitId === 0) {
-      return { data: await this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' } }) };
+      return {
+        data: await this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' } }),
+      };
     }
 
     const unit = await this.prisma.organizationUnit.findUnique({
@@ -465,7 +578,9 @@ export class OrganizationsService {
     geographicAreaIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const staffing = await this.prisma.organizationStaffing.findUnique({ where: { id: staffingId } });
+    const staffing = await this.prisma.organizationStaffing.findUnique({
+      where: { id: staffingId },
+    });
     if (!staffing) throw new Error('Staffing not found');
 
     const slot = await this.prisma.staffingSlot.upsert({
@@ -478,7 +593,11 @@ export class OrganizationsService {
     // dữ liệu nửa vời nếu 1 bước giữa chừng lỗi.
     const ops: any[] = [];
     if (domainIds !== undefined) {
-      ops.push(this.prisma.staffingSlotDomain.deleteMany({ where: { slotId: slot.id } }));
+      ops.push(
+        this.prisma.staffingSlotDomain.deleteMany({
+          where: { slotId: slot.id },
+        }),
+      );
       if (domainIds.length > 0) {
         ops.push(
           this.prisma.staffingSlotDomain.createMany({
@@ -488,21 +607,35 @@ export class OrganizationsService {
       }
     }
     if (geographicAreaIds !== undefined) {
-      ops.push(this.prisma.staffingSlotGeographicArea.deleteMany({ where: { slotId: slot.id } }));
+      ops.push(
+        this.prisma.staffingSlotGeographicArea.deleteMany({
+          where: { slotId: slot.id },
+        }),
+      );
       if (geographicAreaIds.length > 0) {
         ops.push(
           this.prisma.staffingSlotGeographicArea.createMany({
-            data: geographicAreaIds.map((geographicAreaId) => ({ slotId: slot.id, geographicAreaId })),
+            data: geographicAreaIds.map((geographicAreaId) => ({
+              slotId: slot.id,
+              geographicAreaId,
+            })),
           }),
         );
       }
     }
     if (monitoredUnitIds !== undefined) {
-      ops.push(this.prisma.staffingSlotMonitoredUnit.deleteMany({ where: { slotId: slot.id } }));
+      ops.push(
+        this.prisma.staffingSlotMonitoredUnit.deleteMany({
+          where: { slotId: slot.id },
+        }),
+      );
       if (monitoredUnitIds.length > 0) {
         ops.push(
           this.prisma.staffingSlotMonitoredUnit.createMany({
-            data: monitoredUnitIds.map((unitId) => ({ slotId: slot.id, unitId })),
+            data: monitoredUnitIds.map((unitId) => ({
+              slotId: slot.id,
+              unitId,
+            })),
           }),
         );
       }
@@ -521,7 +654,9 @@ export class OrganizationsService {
 
   // --- 3. QUẢN LÝ LOẠI ĐƠN VỊ ---
   async listUnitTypes() {
-    return { data: await this.prisma.unitType.findMany({ orderBy: { level: 'asc' } }) };
+    return {
+      data: await this.prisma.unitType.findMany({ orderBy: { level: 'asc' } }),
+    };
   }
 
   async getUnitTypeJobTemplates(unitTypeId: number) {
@@ -537,11 +672,14 @@ export class OrganizationsService {
       this.prisma.unitTypeJobTemplate.deleteMany({ where: { unitTypeId } }),
       ...(jobTitleIds?.length > 0
         ? [
-          this.prisma.unitTypeJobTemplate.createMany({
-            data: jobTitleIds.map((jobTitleId) => ({ unitTypeId, jobTitleId })),
-            skipDuplicates: true,
-          }),
-        ]
+            this.prisma.unitTypeJobTemplate.createMany({
+              data: jobTitleIds.map((jobTitleId) => ({
+                unitTypeId,
+                jobTitleId,
+              })),
+              skipDuplicates: true,
+            }),
+          ]
         : []),
     ]);
 

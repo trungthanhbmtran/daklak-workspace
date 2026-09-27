@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 
-
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
   async getAll(lang?: string) {
@@ -31,7 +30,7 @@ export class CategoriesService {
           description: trans?.description || '',
         };
       }),
-      total: items.length
+      total: items.length,
     };
   }
 
@@ -64,14 +63,20 @@ export class CategoriesService {
     // 1. Luôn fetch selected items (dù không khớp search) để đảm bảo chúng xuất hiện
     const selectedItems = hasSelected
       ? await this.prisma.category.findMany({
-        where: {
-          groupCode: group,
-          id: { in: selectedIds },
-          ...(restrictIds ? { id: { in: restrictIds.filter(id => selectedIds.includes(id)) } } : {}),
-        },
-        include: { translations: { where: { langCode: targetLang } } },
-        orderBy: { order: 'asc' },
-      })
+          where: {
+            groupCode: group,
+            id: { in: selectedIds },
+            ...(restrictIds
+              ? {
+                  id: {
+                    in: restrictIds.filter((id) => selectedIds.includes(id)),
+                  },
+                }
+              : {}),
+          },
+          include: { translations: { where: { langCode: targetLang } } },
+          orderBy: { order: 'asc' },
+        })
       : [];
 
     // 2. Fetch search results (loại trừ các ID đã có trong selected)
@@ -83,17 +88,18 @@ export class CategoriesService {
       ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
       ...(search?.trim()
         ? {
-          translations: {
-            some: {
-              langCode: targetLang,
-              name: { contains: search.trim() },
+            translations: {
+              some: {
+                langCode: targetLang,
+                name: { contains: search.trim() },
+              },
             },
-          },
-        }
+          }
         : {}),
     };
 
-    const actualLimit = limit && limit > 0 ? Math.max(limit - selectedItems.length, 0) : 0;
+    const actualLimit =
+      limit && limit > 0 ? Math.max(limit - selectedItems.length, 0) : 0;
 
     const [totalCount, searchItems] = await Promise.all([
       this.prisma.category.count({ where }),
@@ -103,7 +109,7 @@ export class CategoriesService {
         include: { translations: { where: { langCode: targetLang } } },
         ...(actualLimit > 0 ? { take: actualLimit } : {}),
         ...(skip ? { skip } : {}),
-      })
+      }),
     ]);
 
     // 3. Merge: selected first, rồi search results
@@ -202,7 +208,9 @@ export class CategoriesService {
 
     // Cấm thêm mới vào nhóm danh mục dùng chung từ giao diện
     if (data.group === 'CATEGORY_GROUPS') {
-      throw new Error('Không được phép thêm mới nhóm danh mục dùng chung hệ thống');
+      throw new Error(
+        'Không được phép thêm mới nhóm danh mục dùng chung hệ thống',
+      );
     }
 
     const created = await this.prisma.category.create({
@@ -248,12 +256,18 @@ export class CategoriesService {
       isActive?: boolean;
     },
   ) {
-    const category = await this.prisma.category.findUnique({ where: { id }, include: { translations: true } });
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: { translations: true },
+    });
     if (!category) return null;
 
     if (category.groupCode === 'CATEGORY_GROUPS') {
       const code = data.code ?? category.code;
-      const name = data.name ?? category.translations.find((t) => t.langCode === 'vi')?.name ?? code;
+      const name =
+        data.name ??
+        category.translations.find((t) => t.langCode === 'vi')?.name ??
+        code;
       const order = data.order ?? category.order;
       await this.updateGroup({ code, name, order });
     }

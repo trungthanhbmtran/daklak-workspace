@@ -35,13 +35,17 @@ export class CategoriesController {
     selectedIds?: number[];
     parentUnitId?: number;
   }) {
-    const result = await this.catService.getByGroup(data.group || '', data.lang, {
-      search: data.search,
-      limit: data.take,
-      skip: data.skip,
-      selectedIds: data.selectedIds ?? [],
-      parentUnitId: data.parentUnitId,
-    });
+    const result = await this.catService.getByGroup(
+      data.group || '',
+      data.lang,
+      {
+        search: data.search,
+        limit: data.take,
+        skip: data.skip,
+        selectedIds: data.selectedIds ?? [],
+        parentUnitId: data.parentUnitId,
+      },
+    );
     return {
       data: result.data.map((item) => ({
         ...toItem(item),

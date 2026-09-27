@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import {  GrpcMethod, RpcException , Payload } from '@nestjs/microservices';
+import { GrpcMethod, RpcException, Payload } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { MenusService } from './menus.service';
 

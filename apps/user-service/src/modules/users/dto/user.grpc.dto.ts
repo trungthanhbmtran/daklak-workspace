@@ -1,4 +1,10 @@
-import { IsString, IsInt, IsOptional, IsBoolean, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+} from 'class-validator';
 
 export class CreateUserGrpcDto {
   @IsString() @IsOptional() email?: string;
@@ -63,8 +69,6 @@ export class SetUserActiveGrpcDto {
   @IsBoolean() @IsOptional() is_active?: boolean;
 }
 
-
-
 export class AssignPositionGrpcDto {
   @IsInt() userId: number;
   @IsInt() unitId: number;
@@ -75,4 +79,15 @@ export class AssignPositionGrpcDto {
 export class GetSubordinatesGrpcDto {
   @IsInt() @IsOptional() userId?: number;
   @IsInt() @IsOptional() user_id?: number;
+}
+
+export class FindUsersByConditionsGrpcDto {
+  @IsInt() callerUserId: number;
+  @IsInt() @IsOptional() caller_user_id?: number;
+  @IsString() unitScope: string;
+  @IsString() @IsOptional() unit_scope?: string;
+  @IsString() rankOperator: string;
+  @IsString() @IsOptional() rank_operator?: string;
+  @IsString() @IsOptional() rankValue?: string;
+  @IsString() @IsOptional() rank_value?: string;
 }

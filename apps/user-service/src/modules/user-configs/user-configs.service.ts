@@ -13,7 +13,7 @@ export class UserConfigsService {
     const configs = await this.prisma.userConfig.findMany({
       where: { userId },
     });
-    return configs.map(c => ({
+    return configs.map((c) => ({
       key: c.key,
       value: c.value,
     }));

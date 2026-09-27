@@ -24,4 +24,4 @@ import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
     AiAssistantModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

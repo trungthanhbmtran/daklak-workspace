@@ -162,17 +162,31 @@ export class MenusService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        policies: { include: { resource: true } },},
+        policies: { include: { resource: true } },
+        UserToUserGroup: {
+          include: {
+            user_groups: {
+              include: {
+                policies: { include: { resource: true } },
+              },
+            },
+          },
+        },
+      },
     });
 
-    // PBAC chuẩn: Set resource codes mà user có quyền (bất kỳ action nào)
+    // PBAC chuẩn: Set resource codes mà user có quyền (Bao gồm cá nhân + Nhóm)
     const allowedResources = new Set<string>();
 
-    for (const p of user?.policies ?? []) {
-      if (p.resource?.code) {
-        allowedResources.add(p.resource.code);
-      }
-    }
+    (user?.policies ?? []).forEach((p) => {
+      if (p.resource?.code) allowedResources.add(p.resource.code);
+    });
+
+    (user?.UserToUserGroup ?? []).forEach((utg) => {
+      (utg.user_groups?.policies ?? []).forEach((p) => {
+        if (p.resource?.code) allowedResources.add(p.resource.code);
+      });
+    });
 
     // 2. Query Menu
     const rawMenus = await this.prisma.menu.findMany({

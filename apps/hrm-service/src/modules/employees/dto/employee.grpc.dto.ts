@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, IsBoolean, IsArray } from 'class-validator';
+﻿import { IsString, IsOptional, IsInt, IsBoolean, IsArray } from 'class-validator';
 
 export class CreateEmployeeGrpcDto {
   @IsString() @IsOptional() firstname?: string;
@@ -40,4 +40,11 @@ export class ListEmployeesGrpcDto {
   @IsInt() @IsOptional() jobTitleId?: number;
   @IsString() @IsOptional() status?: string;
   @IsBoolean() @IsOptional() includeChildren?: boolean;
+  @IsBoolean() @IsOptional() assignableOnly?: boolean;
+  @IsInt() @IsOptional() callerUserId?: number;
+  @IsArray() @IsOptional() descendantUnitIds?: number[];
+  @IsString() @IsOptional() excludeEmployeeCode?: string;
+  @IsArray() @IsOptional() ids?: number[];
+  @IsArray() @IsOptional() codes?: string[];
 }
+
