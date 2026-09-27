@@ -174,10 +174,7 @@ export class MasterPlansService implements OnModuleInit {
       user?.username === 'admin' ||
       user?.username === 'system';
     const isLeader =
-      user?.roles?.some((r: any) => {
-        const code = typeof r === 'string' ? r : r.code;
-        return code?.includes('LEADER') || code?.includes('MANAGER');
-      }) || false;
+      user?.permissionsFlatten?.includes('PLAN:APPROVE') || false;
 
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
@@ -236,10 +233,7 @@ export class MasterPlansService implements OnModuleInit {
       user?.username === 'admin' ||
       user?.username === 'system';
     const isLeader =
-      user?.roles?.some((r: any) => {
-        const code = typeof r === 'string' ? r : r.code;
-        return code?.includes('LEADER') || code?.includes('MANAGER');
-      }) || false;
+      user?.permissionsFlatten?.includes('PLAN:APPROVE') || false;
 
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {

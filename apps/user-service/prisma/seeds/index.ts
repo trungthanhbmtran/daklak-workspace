@@ -3,6 +3,7 @@ import { PrismaClient } from '../../src/generated/prisma/client';
 import { seedResources } from './01-resources.seed';
 import { seedCommonCategoriesEGovStandard } from './02-common-categories-e-gov-standard.seed';
 import { seed1UnitTypesNewModel } from './03-1-unit-types-new-model.seed';
+import { seedUserGroups } from './04-pbac.seed';
 
 import { usersSeed } from "./05-users.seed";
 import { seedJobTitles } from './06-job-titles.seed';
@@ -17,8 +18,8 @@ export async function runSeeds(prisma: PrismaClient) {
   await seedCommonCategoriesEGovStandard(prisma);
   console.log('Running seed1UnitTypesNewModel...');
   await seed1UnitTypesNewModel(prisma);
-  console.log('Running seedRoles...');
-  
+  console.log('Running seedUserGroups...');
+  await seedUserGroups(prisma);
   console.log('Running seedUsers...');
   await usersSeed(prisma);
   console.log('Running seedJobTitles...');

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   Inject,
   OnModuleInit,
@@ -188,7 +188,7 @@ export class WorkflowService implements OnModuleInit {
   }
 
   async resume(instanceId: string, nodeId: string, body: any, user: any) {
-    const userRoles = user?.roles || [];
+    const userRoles: string[] = [];
     const result = (await firstValueFrom(
       this.workflowGrpcService.ResumeWorkflow({
         instanceId,
