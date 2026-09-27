@@ -21,7 +21,7 @@ export class UserService implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
     private readonly notificationsService: NotificationsService,
     private readonly redisService: RedisService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.userGrpcService = this.client.getService(MICROSERVICES.USER.SERVICE);
@@ -39,8 +39,8 @@ export class UserService implements OnModuleInit {
 
     const userInfo: any = userId
       ? await firstValueFrom(
-          this.userGrpcService.FindOne({ id: userId }),
-        ).catch(() => null)
+        this.userGrpcService.FindOne({ id: userId }),
+      ).catch(() => null)
       : null;
 
     const isAdmin: boolean =
@@ -93,6 +93,8 @@ export class UserService implements OnModuleInit {
         employeeCode: data.employeeCode ?? data.employee_code,
         lastLogin: data.lastLogin ?? data.last_login,
         policies: data.policies,
+        userGroups: data.userGroups ?? data.user_groups,
+        userGroupIds: (data.userGroups ?? data.user_groups ?? []).map((g: any) => g.id),
       },
     };
   }
@@ -196,6 +198,23 @@ export class UserService implements OnModuleInit {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
       console.error('Failed to clear user cache on setActive:', err);
+    }
+    return result;
+  }
+
+  async assignUserGroups(id: number, userGroupIds: number[]) {
+    const result = await firstValueFrom(
+      this.userGrpcService.AssignUserGroups({
+        userId: id,
+        userGroupIds: userGroupIds,
+      }),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
+    try {
+      await this.redisService.getClient().del(`user:profile:${id}`);
+    } catch (err) {
+      console.error('Failed to clear user cache on assignUserGroups:', err);
     }
     return result;
   }

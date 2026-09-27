@@ -100,6 +100,14 @@ export class UsersController {
 
 
   @GrpcMethod('UserService', 'AssignPosition')
+  @GrpcMethod('UserService', 'AssignUserGroups')
+  async assignUserGroups(@Payload() data: { user_id?: number; userId?: number; user_group_ids?: number[]; userGroupIds?: number[] }) {
+    const userId = data.userId ?? data.user_id ?? 0;
+    const userGroupIds = data.userGroupIds ?? data.user_group_ids ?? [];
+    return this.usersService.assignUserGroups({ userId, userGroupIds });
+  }
+
+  @GrpcMethod('UserService', 'AssignPosition')
   async assignPosition(@Payload() data: AssignPositionGrpcDto) {
     const result = await this.usersService.assignPosition({
       userId: data.userId,

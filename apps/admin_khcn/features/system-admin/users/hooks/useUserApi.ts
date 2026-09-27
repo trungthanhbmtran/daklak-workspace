@@ -108,3 +108,22 @@ export function useDeleteUser() {
     },
   });
 }
+
+export function useAssignUserGroups() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, userGroupIds }: { id: number; userGroupIds: number[] }) =>
+      userApi.assignUserGroups(id, userGroupIds),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: USER_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: USER_KEYS.list() });
+      toast.success("Đã cập nhật nhóm quyền.");
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string }; message?: string } })?.response?.data?.message
+        ?? (err as Error)?.message
+        ?? "Không thể cập nhật nhóm quyền.";
+      toast.error(msg);
+    },
+  });
+}

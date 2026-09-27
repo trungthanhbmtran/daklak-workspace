@@ -7,7 +7,7 @@ export async function seedResources(prisma: PrismaClient) {
     // System & Admin
     { code: 'SYSTEM', name: 'Hệ thống', serviceCode: 'USER_SERVICE' },
     { code: 'USER', name: 'Quản lý Người dùng', serviceCode: 'USER_SERVICE' },
-    { code: 'ROLE', name: 'Quản lý Vai trò', serviceCode: 'USER_SERVICE' },
+    { code: 'ROLE', name: 'Quản lý Nhóm quyền (PBAC)', serviceCode: 'USER_SERVICE' },
     { code: 'RESOURCE', name: 'Quản lý Tài nguyên', serviceCode: 'USER_SERVICE' },
     { code: 'MENU', name: 'Quản lý Menu', serviceCode: 'USER_SERVICE' },
     { code: 'ORGANIZATION', name: 'Cây tổ chức', serviceCode: 'USER_SERVICE' },

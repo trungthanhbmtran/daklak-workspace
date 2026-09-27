@@ -22,6 +22,7 @@ import {
 import { Text } from "@/components/ui/typography";
 import { useUserPolicies } from "../hooks/useUserApi";
 import type { UserDetail } from "../types";
+import { AssignUserGroupsModal } from "./AssignUserGroupsModal";
 
 interface UserDetailSheetProps {
   user: UserDetail | null;
@@ -41,6 +42,7 @@ export function UserDetailSheet({
   isSettingActive,
 }: UserDetailSheetProps) {
   const [policiesOpen, setPoliciesOpen] = useState(false);
+  const [assignUserGroupsOpen, setAssignUserGroupsOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
   const observerTarget = useRef<HTMLLIElement>(null);
 
@@ -133,7 +135,7 @@ export function UserDetailSheet({
                     <Text variant="small" className="flex items-center gap-2 text-muted-foreground uppercase tracking-widest">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 1. Định danh tài khoản
                     </Text>
-                    
+
                     <div className="flex items-center gap-3 bg-muted/5 p-4 rounded-lg border border-border/50">
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <User className="h-6 w-6 text-primary" />
@@ -172,7 +174,12 @@ export function UserDetailSheet({
                         </Button>
                       </CollapsibleTrigger>
 
-                      <CollapsibleContent className="mt-3">
+                      <CollapsibleContent className="mt-3 space-y-3">
+                        <div className="flex justify-end">
+                          <Button size="sm" variant="outline" className="text-xs h-7 px-3" onClick={() => setAssignUserGroupsOpen(true)}>
+                            <Shield className="w-3 h-3 mr-1.5" /> Gán Nhóm quyền
+                          </Button>
+                        </div>
                         <div className="bg-muted/5 rounded-lg border p-4 shadow-sm">
                           {isPoliciesLoading ? (
                             <Text variant="muted" className="flex items-center justify-center gap-2 py-6">
@@ -252,6 +259,12 @@ export function UserDetailSheet({
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      <AssignUserGroupsModal 
+        user={user}
+        isOpen={assignUserGroupsOpen}
+        onClose={() => setAssignUserGroupsOpen(false)}
+      />
     </>
   );
 }

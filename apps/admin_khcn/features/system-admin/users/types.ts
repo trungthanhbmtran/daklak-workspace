@@ -16,6 +16,8 @@ export interface UserItem {
 export type UserDetail = UserItem & {
   status?: string;
   roles?: Array<{ id?: number; code?: string; name?: string } | string>;
+  userGroups?: Array<{ id?: number; code?: string; name?: string } | string>;
+  userGroupIds?: number[];
   policies?: { description?: string; resource?: string; action?: string; effect?: string }[];
   lastLogin?: string | number | null;
 };

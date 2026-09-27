@@ -769,6 +769,26 @@ export class UsersService implements OnModuleInit {
 
 
   
+  async assignUserGroups(data: { userId: number; userGroupIds: number[] }) {
+    await this.prisma.(async (tx) => {
+      await tx.userToUserGroup.deleteMany({
+        where: { userId: data.userId },
+      });
+      if (data.userGroupIds && data.userGroupIds.length > 0) {
+        await tx.userToUserGroup.createMany({
+          data: data.userGroupIds.map((groupId) => ({
+            userId: data.userId,
+            userGroupId: groupId,
+          })),
+        });
+      }
+    });
+    return {
+      success: true,
+      message: 'Đã cập nhật nhóm quyền.',
+    };
+  }
+
   async getSubordinates(data: { userId: number }) {
     const user = await this.fetchUserForSubordinates(data.userId);
     const activeJobPositions = user.jobPositions.filter(pos => pos.unitId && pos.jobTitle);

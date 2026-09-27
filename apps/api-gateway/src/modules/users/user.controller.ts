@@ -27,7 +27,7 @@ import { UserService } from './user.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách user' })
@@ -113,6 +113,15 @@ export class UserController {
     return this.userService.setActive(id, body.isActive);
   }
 
+  @Post(':id/assign-user-groups')
+  @ApiOperation({ summary: 'Gán nhóm quyền (PBAC User Groups) cho user' })
+  @ApiResponse({ status: 200, description: 'success, message' })
+  async assignUserGroups(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { userGroupIds: number[] },
+  ) {
+    return this.userService.assignUserGroups(id, body.userGroupIds);
+  }
 
 
   @Put(':id')

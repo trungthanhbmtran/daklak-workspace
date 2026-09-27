@@ -26,21 +26,28 @@ function normalizeUserDetail(raw: Record<string, unknown>): UserDetail {
   const policies: { description?: string; resource?: string; action?: string; effect?: string }[] =
     Array.isArray(policiesRaw)
       ? (policiesRaw as unknown[]).map((p) => {
-          const o = (p != null && typeof p === "object" ? p : {}) as Record<string, unknown>;
-          return {
-            description: String(o.description ?? o.name ?? ""),
-            resource: String(o.resource ?? o.resource_code ?? o.resourceCode ?? ""),
-            action: o.action != null ? String(o.action) : undefined,
-            effect: o.effect != null ? String(o.effect) : "ALLOW",
-          };
-        })
+        const o = (p != null && typeof p === "object" ? p : {}) as Record<string, unknown>;
+        return {
+          description: String(o.description ?? o.name ?? ""),
+          resource: String(o.resource ?? o.resource_code ?? o.resourceCode ?? ""),
+          action: o.action != null ? String(o.action) : undefined,
+          effect: o.effect != null ? String(o.effect) : "ALLOW",
+        };
+      })
       : [];
 
   const lastLogin = raw.lastLogin ?? raw.last_login;
   const status = raw.status != null ? String(raw.status) : undefined;
+  
+  const userGroupsRaw = raw.userGroups ?? raw.roles ?? (raw as Record<string, unknown>).user_groups ?? (raw as Record<string, unknown>).rolesList;
+  const userGroups = Array.isArray(userGroupsRaw) ? userGroupsRaw : [];
+
   return {
     ...base,
     ...(status != null && { status }),
+    roles: userGroups as Array<{ id?: number; code?: string; name?: string } | string>,
+    userGroups: userGroups as Array<{ id?: number; code?: string; name?: string } | string>,
+    userGroupIds: (raw.userGroupIds as number[]) ?? [],
     policies,
     ...(lastLogin != null && { lastLogin: String(lastLogin) }),
   };
@@ -57,12 +64,12 @@ export const userApi = {
     try {
       const res = await apiClient.get("/users", { params });
       const rawRes = res as any;
-      
+
       // Axios interceptor returns the raw JSON body. TransformInterceptor might wrap pagination inside meta.pagination
       const metaObj = rawRes?.meta ?? {};
       const meta = { total: metaObj.pagination?.total ?? metaObj.total ?? 0 };
       const arr = Array.isArray(rawRes?.data) ? rawRes.data : [];
-      
+
       return {
         data: arr.map((r: any) => normalizeUser(r as Record<string, unknown>)),
         meta
@@ -131,6 +138,12 @@ export const userApi = {
 
   remove: async (id: number): Promise<{ success: boolean }> => {
     const res = await apiClient.delete(`/users/${id}`);
+    const data = unwrapData<{ success?: boolean } | null>(res);
+    return { success: data?.success ?? true };
+  },
+
+  assignUserGroups: async (id: number, userGroupIds: number[]): Promise<{ success: boolean }> => {
+    const res = await apiClient.post(`/users/${id}/assign-user-groups`, { userGroupIds });
     const data = unwrapData<{ success?: boolean } | null>(res);
     return { success: data?.success ?? true };
   },
