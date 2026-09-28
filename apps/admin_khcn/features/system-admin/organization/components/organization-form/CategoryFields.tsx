@@ -5,6 +5,8 @@ import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/f
 import { UnitTypeSelector } from "../UnitTypeSelector";
 import { useGetCategoryByGroup } from "../../../categories/hooks/useCategoryApi";
 import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../../hooks/useUnitTypeCategories";
+import { useUnitTypesQuery } from "../../hooks/useOrganizationQueries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function CategoryFields() {
   const { control, watch } = useFormContext();
@@ -14,6 +16,14 @@ export function CategoryFields() {
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
   const selectedCat  = categoryItems.find((c) => c.code === categoryCode);
   const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
+
+  const { data: unitTypesRes } = useUnitTypesQuery();
+  const allUnitTypes = unitTypesRes?.data || [];
+  
+  // Filter unit types by selected categoryCode
+  const filteredUnitTypes = categoryCode 
+    ? allUnitTypes.filter((t: any) => t.categoryCode === categoryCode) 
+    : [];
 
   return (
     <div className="space-y-3">
@@ -35,6 +45,36 @@ export function CategoryFields() {
           </FormItem>
         )}
       />
+
+      {categoryCode && filteredUnitTypes.length > 0 && (
+        <FormField control={control} name="typeId"
+          render={({ field }) => (
+            <FormItem className="mt-4">
+              <p className="text-sm font-medium leading-none">
+                Loại đơn vị cụ thể <span className="text-destructive">*</span>
+              </p>
+              <FormControl>
+                <Select
+                  value={field.value?.toString() || ""}
+                  onValueChange={(val) => field.onChange(Number(val))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn loại đơn vị..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredUnitTypes.map((t: any) => (
+                      <SelectItem key={t.id} value={t.id.toString()}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       {categoryMeta && (
         <div className="rounded-md border bg-muted/30 p-3 space-y-2">
           <div className="flex flex-wrap gap-1.5">

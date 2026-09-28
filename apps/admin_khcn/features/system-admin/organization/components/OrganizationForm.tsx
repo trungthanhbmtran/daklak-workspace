@@ -27,11 +27,11 @@ export function OrganizationForm() {
 
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
-    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" },
+    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", typeId: undefined, domainIds: [], scope: "" },
   });
 
   useEffect(() => {
-    form.reset({ code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" });
+    form.reset({ code: "", name: "", shortName: "", categoryCode: "", typeId: undefined, domainIds: [], scope: "" });
   }, [parentId, form]);
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
@@ -40,6 +40,7 @@ export function OrganizationForm() {
       name: values.name.trim(),
       shortName: values.shortName?.trim() || undefined,
       categoryCode: values.categoryCode,
+      typeId: values.typeId,
       parentId: parentId ?? undefined,
     });
     router.push('/services/admin/organization');

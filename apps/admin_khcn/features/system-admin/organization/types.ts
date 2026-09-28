@@ -6,6 +6,7 @@ export interface OrganizationUnitNode {
   shortName?: string;
   /** Tag phân loại: CHINH_QUYEN | DANG | THAM_MUU | CHUYEN_MON | SU_NGHIEP | PHONG_THUOC_SN */
   categoryCode?: string;
+  typeId?: number;
   parentId: number | null;
   hierarchyPath?: string;
   domains?: { id: number; name: string }[];
@@ -21,6 +22,7 @@ export interface CreateUnitPayload {
   name: string;
   shortName?: string;
   categoryCode: string;
+  typeId: number;
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
@@ -32,6 +34,7 @@ export interface UpdateUnitPayload {
   name?: string;
   shortName?: string;
   categoryCode?: string;
+  typeId?: number;
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;

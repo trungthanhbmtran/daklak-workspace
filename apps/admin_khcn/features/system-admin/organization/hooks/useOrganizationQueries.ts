@@ -46,3 +46,10 @@ export function useOrganizationScopeQuery(id?: number) {
   });
 }
 
+export function useUnitTypesQuery() {
+  return useQuery({
+    queryKey: [...organizationQueryKeys.all, "unit-types"],
+    queryFn: () => organizationApi.getUnitTypes(),
+    staleTime: STALE_TIME,
+  });
+}

@@ -9,6 +9,8 @@ import { Trash2, ArrowLeftCircleIcon } from "lucide-react";
 import { UnitTypeSelector } from "./UnitTypeSelector";
 import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";
 import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../hooks/useUnitTypeCategories";
+import { useUnitTypesQuery } from "../hooks/useOrganizationQueries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,7 +48,7 @@ export function OrganizationUnitEdit() {
 
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
-    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", domainIds: [], scope: "" },
+    defaultValues: { code: "", name: "", shortName: "", categoryCode: "", typeId: undefined, domainIds: [], scope: "" },
   });
 
   useEffect(() => {
@@ -56,6 +58,7 @@ export function OrganizationUnitEdit() {
         name: unit.name ?? "",
         shortName: unit.shortName ?? "",
         categoryCode: unit.categoryCode ?? "",
+        typeId: unit.typeId ?? undefined,
         domainIds: (unit.domains ?? []).map((d: any) => d.id),
         scope: unit.scope ?? "",
       });
@@ -68,6 +71,14 @@ export function OrganizationUnitEdit() {
   const selectedCat = categoryItems.find((c) => c.code === categoryCode);
   const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
 
+  const { data: unitTypesRes } = useUnitTypesQuery();
+  const allUnitTypes = unitTypesRes?.data || [];
+  
+  // Filter unit types by selected categoryCode
+  const filteredUnitTypes = categoryCode 
+    ? allUnitTypes.filter((t: any) => t.categoryCode === categoryCode) 
+    : [];
+
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     if (selectedId == null) return;
     await actions.updateUnit(selectedId, {
@@ -75,6 +86,7 @@ export function OrganizationUnitEdit() {
       name: values.name.trim(),
       shortName: values.shortName,
       categoryCode: values.categoryCode,
+      typeId: values.typeId,
       scope: values.scope,
     });
   };
@@ -150,6 +162,37 @@ export function OrganizationUnitEdit() {
                     </FormItem>
                   )}
                 />
+                
+                {categoryCode && filteredUnitTypes.length > 0 && (
+                  <FormField control={form.control} name="typeId"
+                    render={({ field }) => (
+                      <FormItem className="mt-4">
+                        <p className="text-sm font-medium leading-none">
+                          Loại đơn vị cụ thể <span className="text-destructive">*</span>
+                        </p>
+                        <FormControl>
+                          <Select
+                            value={field.value?.toString() || ""}
+                            onValueChange={(val) => field.onChange(Number(val))}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Chọn loại đơn vị..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {filteredUnitTypes.map((t: any) => (
+                                <SelectItem key={t.id} value={t.id.toString()}>
+                                  {t.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 {categoryMeta && (
                   <div className="rounded-md border bg-muted/30 p-3 space-y-2">
                     <div className="flex flex-wrap gap-1.5">

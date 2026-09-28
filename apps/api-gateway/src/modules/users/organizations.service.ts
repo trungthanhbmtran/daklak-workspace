@@ -43,13 +43,33 @@ export class OrganizationsService implements OnModuleInit {
     );
   }
 
+  private getCategoryCodeFromTypeCode(typeCode?: string): string | undefined {
+    if (!typeCode) return undefined;
+    const CHINH_QUYEN = ['CQ_TU', 'UBND_TINH', 'HDND_TINH', 'SO_NGANH', 'PHONG_BAN_SO', 'TO_CHUC_CTXH'];
+    const DANG = ['CQ_DANG', 'BAN_DANG', 'PHONG_BAN_DANG', 'VAN_PHONG_DANG_UY'];
+    const THAM_MUU = ['VAN_PHONG', 'THANH_TRA'];
+    const CHUYEN_MON = ['CHI_CUC'];
+    const SU_NGHIEP = ['DVSN', 'TRUNG_TAM'];
+    const PHONG_THUOC_SN = ['PHONG_BAN_TRUNG_TAM'];
+
+    if (CHINH_QUYEN.includes(typeCode)) return 'CHINH_QUYEN';
+    if (DANG.includes(typeCode)) return 'DANG';
+    if (THAM_MUU.includes(typeCode)) return 'THAM_MUU';
+    if (CHUYEN_MON.includes(typeCode)) return 'CHUYEN_MON';
+    if (SU_NGHIEP.includes(typeCode)) return 'SU_NGHIEP';
+    if (PHONG_THUOC_SN.includes(typeCode)) return 'PHONG_THUOC_SN';
+    
+    return 'CHINH_QUYEN'; // fallback
+  }
+
   private mapToOrganizationNode(node: any): any {
     if (!node) return null;
     const { children, typeCode, categoryCode, parentId, domains, ...rest } = node;
     const rawParentId = parentId;
     return {
       ...rest,
-      categoryCode: categoryCode ?? typeCode ?? undefined,
+      typeCode,
+      categoryCode: this.getCategoryCodeFromTypeCode(typeCode),
       parentId: rawParentId === 0 ? null : (rawParentId ?? null),
       domains: domains ?? [],
       children: Array.isArray(children) ? children.map(c => this.mapToOrganizationNode(c)) : undefined,
@@ -67,7 +87,7 @@ export class OrganizationsService implements OnModuleInit {
           name: body.name,
           shortName: body.shortName,
           typeId: body.typeId,
-          typeCode: body.categoryCode,
+          typeCode: body.typeCode,
           parentId: body.parentId,
           domainIds: body.domainIds ?? [],
           scope: body.scope,
@@ -86,7 +106,13 @@ export class OrganizationsService implements OnModuleInit {
     const res = (await firstValueFrom(
       this.orgGrpcService.ListUnitTypes({}),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { success: true, data: res.data };
+    
+    const dataWithCategory = (res.data || []).map((t: any) => ({
+      ...t,
+      categoryCode: this.getCategoryCodeFromTypeCode(t.code)
+    }));
+
+    return { success: true, data: dataWithCategory };
   }
 
   async getFullTree(user: any, q?: string) {
@@ -305,7 +331,7 @@ export class OrganizationsService implements OnModuleInit {
         name: body.name,
         shortName: body.shortName,
         typeId: body.typeId,
-        typeCode: body.categoryCode,
+        typeCode: body.typeCode,
       };
       if (body.parentId !== undefined) payload.parentId = body.parentId;
       const result = await firstValueFrom(
