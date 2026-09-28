@@ -52,15 +52,18 @@ export async function seedOrganizationsDakLakProvince(prisma: PrismaClient) {
       shortName: 'Sở NN&PTNT',
     },
     { code: 'H15.19', name: 'Sở Dân tộc và Tôn giáo', shortName: 'Sở Dân tộc' },
-    { code: 'H15.20', name: 'Thanh tra Tỉnh', shortName: 'Thanh tra Tỉnh' },
-    { code: 'H15.01', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND' },
+    { code: 'H15.20', name: 'Thanh tra Tỉnh', shortName: 'Thanh tra Tỉnh', typeCode: 'THANH_TRA' },
+    { code: 'H15.01', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND', typeCode: 'VAN_PHONG' },
   ];
 
   for (const d of depts) {
+    const typeId = (d as any).typeCode ? unitTypeMap[(d as any).typeCode]?.id : soTypeId;
+    const { typeCode, ...rest } = d as any;
+    
     await prisma.organizationUnit.upsert({
-      where: { code: d.code },
-      update: { parentId: province.id, typeId: soTypeId },
-      create: { ...d, parentId: province.id, typeId: soTypeId },
+      where: { code: rest.code },
+      update: { parentId: province.id, typeId },
+      create: { ...rest, parentId: province.id, typeId },
     });
   }
 

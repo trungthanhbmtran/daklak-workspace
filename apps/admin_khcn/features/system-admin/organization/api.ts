@@ -123,4 +123,9 @@ export const organizationApi = {
 
   updateUnitTypeJobTemplates: (unitTypeId: number, jobTitleIds: number[]) =>
     apiClient.put(`/organizations/unit-types/${unitTypeId}/job-templates`, { jobTitleIds }).then((r: any) => r?.data ?? r),
+
+  getJobTitleGroups: () =>
+    apiClient.get("/categories", { params: { group: "JOB_TITLE_GROUP", limit: 100 } }).then((r: any) => ({
+      data: r?.data?.data || r?.data || [],
+    })),
 };

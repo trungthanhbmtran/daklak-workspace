@@ -55,6 +55,8 @@ model JobTitle {
   directReports           JobTitle[]             @relation("JobTitleReportsTo")
   staffingPlans           OrganizationStaffing[]
   applicableUnitTemplates UnitTypeJobTemplate[]
+  categoryId              Int?                   @map("category_id")
+  group                   Category?              @relation(fields: [categoryId], references: [id])
 
   @@index([reportsToJobTitleId])
   @@map("job_titles")

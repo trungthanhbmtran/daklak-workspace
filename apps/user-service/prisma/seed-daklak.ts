@@ -16,15 +16,27 @@ async function main() {
 
   // 1. Đảm bảo UnitType
   const typeCoQuanDang = await prisma.unitType.upsert({
-    where: { code: 'CO_QUAN_DANG' },
+    where: { code: 'CQ_DANG' },
     update: {},
-    create: { code: 'CO_QUAN_DANG', name: 'Cơ quan Đảng' },
+    create: { code: 'CQ_DANG', name: 'Cơ quan Đảng', level: 1 },
   });
 
-  const typePhongBan = await prisma.unitType.upsert({
-    where: { code: 'PHONG_BAN' },
+  const typeBanDang = await prisma.unitType.upsert({
+    where: { code: 'BAN_DANG' },
     update: {},
-    create: { code: 'PHONG_BAN', name: 'Phòng/Ban chuyên môn', level: 2 },
+    create: { code: 'BAN_DANG', name: 'Các Ban Đảng', level: 2 },
+  });
+
+  const typePhongBanDang = await prisma.unitType.upsert({
+    where: { code: 'PHONG_BAN_DANG' },
+    update: {},
+    create: { code: 'PHONG_BAN_DANG', name: 'Phòng chuyên môn Đảng', level: 3 },
+  });
+
+  const typeVanPhongDang = await prisma.unitType.upsert({
+    where: { code: 'VAN_PHONG_DANG_UY' },
+    update: {},
+    create: { code: 'VAN_PHONG_DANG_UY', name: 'Văn phòng Đảng ủy', level: 3 },
   });
 
   // 2. Tổ chức / Đơn vị
@@ -40,11 +52,11 @@ async function main() {
 
   const btcTu = await prisma.organizationUnit.upsert({
     where: { code: 'BTCTU_DAKLAK' },
-    update: { parentId: tinhUy.id },
+    update: { parentId: tinhUy.id, typeId: typeBanDang.id },
     create: {
       code: 'BTCTU_DAKLAK',
       name: 'Ban Tổ chức Tỉnh ủy Đắk Lắk',
-      typeId: typeCoQuanDang.id,
+      typeId: typeBanDang.id,
       parentId: tinhUy.id,
     },
   });
@@ -61,13 +73,14 @@ async function main() {
     'BTCTU_DAKLAK': btcTu
   };
   for (const div of divisions) {
+    const typeId = div.code === 'VAN_PHONG' ? typeVanPhongDang.id : typePhongBanDang.id;
     const org = await prisma.organizationUnit.upsert({
       where: { code: div.code },
-      update: { parentId: btcTu.id },
+      update: { parentId: btcTu.id, typeId },
       create: {
         code: div.code,
         name: div.name,
-        typeId: typePhongBan.id,
+        typeId,
         parentId: btcTu.id,
       },
     });

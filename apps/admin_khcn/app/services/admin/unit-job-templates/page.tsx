@@ -23,14 +23,21 @@ export default function UnitJobTemplatesPage() {
   });
   const unitTypes = unitTypesRes?.data || [];
 
-  // 2. Lấy danh sách toàn bộ Chức danh
+  // 2. Lấy danh sách nhóm vị trí việc làm (Category)
+  const { data: groupsRes, isLoading: isLoadingGroups } = useQuery({
+    queryKey: ["admin", "job-title-groups"],
+    queryFn: () => organizationApi.getJobTitleGroups(),
+  });
+  const jobTitleGroups = groupsRes?.data || [];
+
+  // 3. Lấy danh sách toàn bộ Chức danh
   const { data: jobTitlesRes, isLoading: isLoadingJobTitles } = useQuery({
     queryKey: ["admin", "all-job-titles"],
     queryFn: () => organizationApi.getJobTitles(),
   });
   const allJobTitles = jobTitlesRes?.data?.allTitles || [];
 
-  // 3. Lấy cấu hình chức danh cho loại đơn vị đang chọn
+  // 4. Lấy cấu hình chức danh cho loại đơn vị đang chọn
   const { data: templatesRes, isLoading: isLoadingTemplates } = useQuery({
     queryKey: ["admin", "unit-type-job-templates", selectedUnitTypeId],
     queryFn: () => organizationApi.getUnitTypeJobTemplates(selectedUnitTypeId!),
@@ -61,7 +68,7 @@ export default function UnitJobTemplatesPage() {
       <div className="flex items-center px-6 py-4 border-b shrink-0 bg-muted/20">
         <Building2 className="mr-2 h-5 w-5 text-muted-foreground" />
         <div>
-          <h1 className="text-lg font-semibold">Phân loại chức danh theo Loại đơn vị</h1>
+          <h1 className="text-lg font-semibold">Phân loại chức danh theo Loại đơn vị / Phòng ban</h1>
           <p className="text-sm text-muted-foreground">
             Cấu hình danh sách chức danh khả dụng khi thiết lập định biên cho từng loại đơn vị
           </p>
@@ -72,7 +79,7 @@ export default function UnitJobTemplatesPage() {
         {/* LEFT PANEL: Danh sách Unit Types */}
         <div className="w-[300px] border-r flex flex-col shrink-0">
           <div className="px-4 py-3 border-b bg-muted/30">
-            <h2 className="text-sm font-medium text-muted-foreground">Loại đơn vị</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">Các Loại đơn vị</h2>
           </div>
           <ScrollArea className="flex-1">
             <div className="p-3 space-y-1">
@@ -106,10 +113,10 @@ export default function UnitJobTemplatesPage() {
           {selectedUnitTypeId ? (
             <JobTitleSelectionPanel
               key={selectedUnitTypeId} // Ép re-render để lấy lại state mỗi khi đổi Unit Type
-              unitTypeId={selectedUnitTypeId}
               allJobTitles={allJobTitles}
+              jobTitleGroups={jobTitleGroups}
               serverCheckedIds={currentAssignedIds}
-              isLoading={isLoadingTemplates || isLoadingJobTitles}
+              isLoading={isLoadingTemplates || isLoadingJobTitles || isLoadingGroups}
               onSave={mutation.mutate}
               isSaving={mutation.isPending}
             />
@@ -128,15 +135,15 @@ export default function UnitJobTemplatesPage() {
 }
 
 function JobTitleSelectionPanel({
-  unitTypeId,
   allJobTitles,
+  jobTitleGroups,
   serverCheckedIds,
   isLoading,
   onSave,
   isSaving,
 }: {
-  unitTypeId: number;
   allJobTitles: any[];
+  jobTitleGroups: any[];
   serverCheckedIds: number[];
   isLoading: boolean;
   onSave: (ids: number[]) => void;
@@ -177,28 +184,23 @@ function JobTitleSelectionPanel({
     onSave(Array.from(localCheckedIds));
   };
 
-  const groupedJobTitles = [
-    {
-      key: 'LEADERSHIP_PARTY',
-      label: 'Nhóm vị trí việc làm lãnh đạo, quản lý và trợ lý, thư ký (Đảng)',
-      items: allJobTitles.filter((jt) => ['EXECUTIVE', 'MANAGER'].includes(jt.category) && jt.type === 'PARTY'),
-    },
-    {
-      key: 'LEADERSHIP_GOV',
-      label: 'Nhóm vị trí việc làm lãnh đạo, quản lý và trợ lý, thư ký (Chính quyền)',
-      items: allJobTitles.filter((jt) => ['EXECUTIVE', 'MANAGER'].includes(jt.category) && jt.type !== 'PARTY'),
-    },
-    {
-      key: 'STAFF',
-      label: 'Nhóm vị trí việc làm chuyên môn, nghiệp vụ',
-      items: allJobTitles.filter((jt) => jt.category === 'STAFF'),
-    },
-    {
-      key: 'SUPPORT',
-      label: 'Nhóm vị trí việc làm hỗ trợ, phục vụ',
-      items: allJobTitles.filter((jt) => jt.category === 'SUPPORT' || !['EXECUTIVE', 'MANAGER', 'STAFF'].includes(jt.category)),
-    },
-  ];
+  // Build dynamic groups based on JobTitle.categoryId
+  const groupedJobTitles = jobTitleGroups.map((group) => {
+    return {
+      key: group.code || group.id.toString(),
+      label: group.name || group.translations?.[0]?.name || group.code,
+      items: allJobTitles.filter((jt) => jt.categoryId === group.id),
+    };
+  });
+  
+  const unassignedItems = allJobTitles.filter((jt) => !jt.categoryId);
+  if (unassignedItems.length > 0) {
+    groupedJobTitles.push({
+      key: 'UNASSIGNED',
+      label: 'Chưa phân nhóm (Khác)',
+      items: unassignedItems,
+    });
+  }
 
   return (
     <div className="flex flex-col h-full absolute inset-0">
@@ -226,7 +228,7 @@ function JobTitleSelectionPanel({
                   <div className="h-px flex-1 bg-border/50"></div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {group.items.map((jt) => {
+                  {group.items.map((jt: any) => {
                     const isChecked = localCheckedIds.has(jt.id);
                     return (
                       <label
@@ -257,7 +259,7 @@ function JobTitleSelectionPanel({
             );
           })}
         </div>
-        <div className="h-6" /> {/* padding bottom */}
+        <div className="h-6" />
       </ScrollArea>
     </div>
   );

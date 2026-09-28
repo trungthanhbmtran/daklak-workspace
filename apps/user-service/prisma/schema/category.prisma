@@ -9,6 +9,7 @@ model Category {
   staffingSlotGeographicAreas StaffingSlotGeographicArea[]
   group                       CategoryGroup                @relation(fields: [groupCode], references: [code])
   translations                CategoryTranslation[]
+  jobTitles                   JobTitle[]
 
   @@unique([groupCode, code])
   @@index([groupCode])

@@ -231,6 +231,7 @@ message JobTitleItem {
   string category = 9;
   int32 rank = 10;
   string type = 11;
+  int32 category_id = 12;
 }
 
 message UnitTypeItem {

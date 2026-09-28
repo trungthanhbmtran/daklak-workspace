@@ -1,4 +1,4 @@
-﻿import { Controller } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { OrganizationsService } from './organizations.service';
@@ -462,6 +462,7 @@ export class OrganizationsController {
           }
         : undefined,
       category: j.category ?? '',
+      categoryId: j.categoryId ?? 0,
       rank: j.rank ?? 0,
       type: j.type ?? '',
     };
