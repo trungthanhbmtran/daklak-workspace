@@ -682,6 +682,22 @@ export async function seedCommonCategoriesEGovStandard(prisma: PrismaClient) {
     // VĂN PHÒNG UBND
     // =========================
 
+    // =========================
+    // CƠ QUAN ĐẢNG
+    // =========================
+
+    { group: 'DOMAIN', code: 'CO_QUAN_DANG', nameVi: 'Các cơ quan Đảng' },
+    { code: 'TO_CHUC_XAY_DUNG_DANG', parentCode: 'CO_QUAN_DANG', nameVi: 'Tổ chức xây dựng Đảng' },
+    { code: 'KIEM_TRA_GIAM_SAT_DANG', parentCode: 'CO_QUAN_DANG', nameVi: 'Kiểm tra, giám sát Đảng' },
+    { code: 'TUYEN_GIAO', parentCode: 'CO_QUAN_DANG', nameVi: 'Tuyên giáo' },
+    { code: 'DAN_VAN', parentCode: 'CO_QUAN_DANG', nameVi: 'Dân vận' },
+    { code: 'NOI_CHINH', parentCode: 'CO_QUAN_DANG', nameVi: 'Nội chính' },
+    { code: 'VAN_PHONG_CAP_UY', parentCode: 'CO_QUAN_DANG', nameVi: 'Văn phòng Cấp ủy' },
+
+    // =========================
+    // VĂN PHÒNG UBND
+    // =========================
+
     { group: 'DOMAIN', code: 'VAN_PHONG_UBND', nameVi: 'Văn phòng UBND' },
     {
       code: 'CHI_DAO_DIEU_HANH',

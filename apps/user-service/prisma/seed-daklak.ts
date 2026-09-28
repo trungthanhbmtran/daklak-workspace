@@ -88,21 +88,21 @@ async function main() {
   }
 
   // 3. Chức danh (JobTitle)
-  const jobTitles = [
-    { code: 'R_BTCTU_TB', name: 'Trưởng ban' },
-    { code: 'R_BTCTU_PTB', name: 'Phó Trưởng ban' },
-    { code: 'R_P_TCD_DV_TP', name: 'Trưởng phòng Tổ chức đảng, đảng viên' },
-    { code: 'R_P_TCD_DV_PTP', name: 'Phó Trưởng phòng Tổ chức đảng, đảng viên' },
-    { code: 'R_P_TCD_DV_CV', name: 'Công chức Phòng Tổ chức đảng, đảng viên' },
-    { code: 'R_P_TCCB_TP', name: 'Trưởng phòng Tổ chức cán bộ' },
-    { code: 'R_P_TCCB_CV', name: 'Chuyên viên Phòng Tổ chức cán bộ' },
-    { code: 'R_P_BVCTNB_TP', name: 'Trưởng phòng Bảo vệ chính trị nội bộ' },
-    { code: 'R_P_BVCTNB_CV', name: 'Công chức và Cán bộ Công an biệt phái' },
-    { code: 'R_VP_CVP', name: 'Chánh Văn phòng Ban Tổ chức Tỉnh ủy' },
-    { code: 'R_VP_NV', name: 'Nhân viên Văn phòng Ban' },
+  const jobTitles: any[] = [
+    { code: 'R_BTCTU_TB', name: 'Trưởng ban', typeCode: 'BAN_DANG' },
+    { code: 'R_BTCTU_PTB', name: 'Phó Trưởng ban', typeCode: 'BAN_DANG' },
+    { code: 'R_P_TCD_DV_TP', name: 'Trưởng phòng Tổ chức đảng, đảng viên', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_P_TCD_DV_PTP', name: 'Phó Trưởng phòng Tổ chức đảng, đảng viên', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_P_TCD_DV_CV', name: 'Công chức Phòng Tổ chức đảng, đảng viên', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_P_TCCB_TP', name: 'Trưởng phòng Tổ chức cán bộ', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_P_TCCB_CV', name: 'Chuyên viên Phòng Tổ chức cán bộ', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_P_BVCTNB_TP', name: 'Trưởng phòng Bảo vệ chính trị nội bộ', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_P_BVCTNB_CV', name: 'Công chức và Cán bộ Công an biệt phái', typeCode: 'PHONG_BAN_DANG' },
+    { code: 'R_VP_CVP', name: 'Chánh Văn phòng Ban Tổ chức Tỉnh ủy', typeCode: 'VAN_PHONG_DANG_UY' },
+    { code: 'R_VP_NV', name: 'Nhân viên Văn phòng Ban', typeCode: 'VAN_PHONG_DANG_UY' },
   ];
 
-  const jobs = {};
+  const jobs: Record<string, any> = {};
   for (const jt of jobTitles) {
     const job = await prisma.jobTitle.upsert({
       where: { code: jt.code },
@@ -110,6 +110,21 @@ async function main() {
       create: { code: jt.code, name: jt.name },
     });
     jobs[jt.code] = job;
+    
+    // Link to UnitType
+    let typeId: number | undefined;
+    if (jt.typeCode === 'BAN_DANG') typeId = typeBanDang.id;
+    else if (jt.typeCode === 'PHONG_BAN_DANG') typeId = typePhongBanDang.id;
+    else if (jt.typeCode === 'VAN_PHONG_DANG_UY') typeId = typeVanPhongDang.id;
+    else if (jt.typeCode === 'CQ_DANG') typeId = typeCoQuanDang.id;
+
+    if (typeId) {
+      await prisma.unitTypeJobTemplate.upsert({
+        where: { unitTypeId_jobTitleId: { unitTypeId: typeId, jobTitleId: job.id } },
+        update: {},
+        create: { unitTypeId: typeId, jobTitleId: job.id },
+      });
+    }
   }
 
   // 4. Tạo User và JobPosition
