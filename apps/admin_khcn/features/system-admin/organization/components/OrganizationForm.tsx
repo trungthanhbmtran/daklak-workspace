@@ -39,7 +39,6 @@ export function OrganizationForm() {
       code: values.code.trim(),
       name: values.name.trim(),
       shortName: values.shortName?.trim() || undefined,
-      categoryCode: values.categoryCode,
       typeId: values.typeId,
       parentId: parentId ?? undefined,
     });

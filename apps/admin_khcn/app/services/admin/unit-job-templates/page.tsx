@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Building2, Save, Search, Users, Tags, ArrowRight } from "lucide-react";
@@ -76,7 +76,7 @@ export default function UnitJobTemplatesPage() {
   // Group unit types by their categoryCode
   const groupedUnitTypes = useMemo(() => {
     const map = new Map<string, { label: string; meta: any; items: any[] }>();
-    
+
     // Khởi tạo các nhóm từ categoryItems
     categoryItems.forEach(cat => {
       map.set(cat.code, {
@@ -137,7 +137,7 @@ export default function UnitJobTemplatesPage() {
               />
             </div>
           </div>
-          
+
           <ScrollArea className="flex-1">
             <div className="p-3">
               {isLoadingUnitTypes || isLoadingCategories ? (
@@ -247,6 +247,7 @@ function JobTitleSelectionPanel({
     new Set(serverCheckedIds)
   );
 
+
   useEffect(() => {
     if (!isLoading) {
       setLocalCheckedIds(new Set(serverCheckedIds));
@@ -267,6 +268,10 @@ function JobTitleSelectionPanel({
     );
   }
 
+  const handleSave = () => {
+    onSave(Array.from(localCheckedIds));
+  };
+
   const toggle = (id: number) => {
     const next = new Set(localCheckedIds);
     if (next.has(id)) next.delete(id);
@@ -274,13 +279,23 @@ function JobTitleSelectionPanel({
     setLocalCheckedIds(next);
   };
 
-  const handleSave = () => {
-    onSave(Array.from(localCheckedIds));
+  const toggleGroup = (items: any[]) => {
+    if (!items || items.length === 0) return;
+    const next = new Set(localCheckedIds);
+    const allChecked = items.every(it => next.has(it.id));
+
+    if (allChecked) {
+      items.forEach(it => next.delete(it.id));
+    } else {
+      items.forEach(it => next.add(it.id));
+    }
+
+    setLocalCheckedIds(next);
   };
 
   // Build dynamic groups based on JobTitle.categoryId and filter by search
   const lowerSearch = searchText.toLowerCase();
-  
+
   const groupedJobTitles = jobTitleGroups.map((group) => {
     return {
       key: group.code || group.id.toString(),
@@ -292,7 +307,7 @@ function JobTitleSelectionPanel({
       }),
     };
   });
-  
+
   const unassignedItems = allJobTitles.filter((jt) => {
     if (jt.categoryId) return false;
     if (lowerSearch && !jt.name.toLowerCase().includes(lowerSearch) && !jt.code.toLowerCase().includes(lowerSearch)) return false;
@@ -318,7 +333,7 @@ function JobTitleSelectionPanel({
             Đã chọn <span className="font-semibold text-primary">{localCheckedIds.size}</span> / {allJobTitles.length} chức danh
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="relative w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -336,12 +351,12 @@ function JobTitleSelectionPanel({
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-6 py-6">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-6">
         {totalFiltered === 0 ? (
-           <div className="flex flex-col items-center justify-center text-muted-foreground py-16">
-              <Users className="h-12 w-12 text-muted-foreground/30 mb-3" />
-              <p>Không tìm thấy chức danh nào phù hợp với tìm kiếm.</p>
-           </div>
+          <div className="flex flex-col items-center justify-center text-muted-foreground py-16">
+            <Users className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <p>Không tìm thấy chức danh nào phù hợp với tìm kiếm.</p>
+          </div>
         ) : (
           <div className="space-y-8 max-w-7xl mx-auto">
             {groupedJobTitles.map((group) => {
@@ -350,6 +365,14 @@ function JobTitleSelectionPanel({
                 <div key={group.key} className="space-y-4 animate-in fade-in duration-300">
                   <div className="flex items-center gap-3">
                     <h3 className="text-sm font-semibold text-foreground tracking-tight">{group.label}</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-[11px] px-2 text-muted-foreground hover:text-primary shrink-0"
+                      onClick={() => toggleGroup(group.items)}
+                    >
+                      {group.items.every(it => localCheckedIds.has(it.id)) ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                    </Button>
                     <div className="h-px flex-1 bg-border/60"></div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -369,7 +392,7 @@ function JobTitleSelectionPanel({
                             checked={isChecked}
                             onCheckedChange={() => toggle(jt.id)}
                             className={cn(
-                              "mt-0.5 h-5 w-5 rounded-sm transition-all",
+                              "mt-0.5 h-5 w-5 rounded-sm transition-all shrink-0",
                               isChecked ? "data-[state=checked]:bg-primary data-[state=checked]:border-primary" : ""
                             )}
                           />
@@ -388,8 +411,8 @@ function JobTitleSelectionPanel({
             })}
           </div>
         )}
-        <div className="h-8" />
-      </ScrollArea>
+        <div className="h-8 shrink-0" />
+      </div>
     </div>
   );
 }

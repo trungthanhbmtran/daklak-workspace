@@ -6,15 +6,13 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2, ArrowLeftCircleIcon } from "lucide-react";
 
-import { UnitTypeSelector } from "./UnitTypeSelector";
 import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";
-import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../hooks/useUnitTypeCategories";
+import { UNIT_TYPE_CATEGORY_GROUP } from "../hooks/useUnitTypeCategories";
 import { useUnitTypesQuery } from "../hooks/useOrganizationQueries";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
@@ -65,19 +63,10 @@ export function OrganizationUnitEdit() {
     }
   }, [unit, form]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const categoryCode = form.watch("categoryCode");
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
-  const selectedCat = categoryItems.find((c) => c.code === categoryCode);
-  const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
-
+  
   const { data: unitTypesRes } = useUnitTypesQuery();
   const allUnitTypes = unitTypesRes?.data || [];
-  
-  // Filter unit types by selected categoryCode
-  const filteredUnitTypes = categoryCode 
-    ? allUnitTypes.filter((t: any) => t.categoryCode === categoryCode) 
-    : [];
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     if (selectedId == null) return;
@@ -85,7 +74,6 @@ export function OrganizationUnitEdit() {
       code: values.code.trim(),
       name: values.name.trim(),
       shortName: values.shortName,
-      categoryCode: values.categoryCode,
       typeId: values.typeId,
       scope: values.scope,
     });
@@ -149,74 +137,47 @@ export function OrganizationUnitEdit() {
 
               <Separator />
 
-              {/* ── Phân loại ── */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium leading-none">Phân loại tổ chức</p>
-                <FormField control={form.control} name="categoryCode"
+                <FormField control={form.control} name="typeId"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Loại hình tổ chức <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <UnitTypeSelector value={field.value} onChange={field.onChange} />
+                        <Select
+                          value={field.value?.toString() || ""}
+                          onValueChange={(val) => {
+                            const numVal = Number(val);
+                            field.onChange(numVal);
+                            const selectedType = allUnitTypes.find((t: any) => t.id === numVal);
+                            if (selectedType) {
+                              form.setValue("categoryCode", selectedType.categoryCode, { shouldDirty: true });
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Chọn loại hình tổ chức..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoryItems.map(cat => {
+                              const typesInCat = allUnitTypes.filter((t: any) => t.categoryCode === cat.code);
+                              if (typesInCat.length === 0) return null;
+                              return (
+                                <SelectGroup key={cat.code}>
+                                  <SelectLabel className="font-semibold text-primary">{cat.name}</SelectLabel>
+                                  {typesInCat.map((t: any) => (
+                                    <SelectItem key={t.id} value={t.id.toString()} className="pl-6">
+                                      {t.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
-                {categoryCode && filteredUnitTypes.length > 0 && (
-                  <FormField control={form.control} name="typeId"
-                    render={({ field }) => (
-                      <FormItem className="mt-4">
-                        <p className="text-sm font-medium leading-none">
-                          Loại đơn vị cụ thể <span className="text-destructive">*</span>
-                        </p>
-                        <FormControl>
-                          <Select
-                            value={field.value?.toString() || ""}
-                            onValueChange={(val) => field.onChange(Number(val))}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Chọn loại đơn vị..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filteredUnitTypes.map((t: any) => (
-                                <SelectItem key={t.id} value={t.id.toString()}>
-                                  {t.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {categoryMeta && (
-                  <div className="rounded-md border bg-muted/30 p-3 space-y-2">
-                    <div className="flex flex-wrap gap-1.5">
-                      {categoryMeta.signingAuthority && (
-                        <Badge variant="secondary" className="text-xs">
-                          {categoryMeta.signingAuthority === "FULL" && "Toàn quyền ký"}
-                          {categoryMeta.signingAuthority === "DELEGATED" && "Ký theo ủy quyền"}
-                          {categoryMeta.signingAuthority === "INTERNAL" && "Nội bộ"}
-                        </Badge>
-                      )}
-                      {categoryMeta.politicalSystem && (
-                        <Badge variant="outline" className="text-xs font-mono">
-                          {categoryMeta.politicalSystem}
-                        </Badge>
-                      )}
-                    </div>
-                    {categoryMeta.purposeNote && (
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {categoryMeta.purposeNote}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
             </CardContent>
 
             <Separator />

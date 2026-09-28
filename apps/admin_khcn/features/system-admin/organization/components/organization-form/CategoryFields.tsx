@@ -2,16 +2,14 @@ import { useFormContext } from "react-hook-form";
 import { Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { UnitTypeSelector } from "../UnitTypeSelector";
 import { useGetCategoryByGroup } from "../../../categories/hooks/useCategoryApi";
 import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../../hooks/useUnitTypeCategories";
 import { useUnitTypesQuery } from "../../hooks/useOrganizationQueries";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 
 export function CategoryFields() {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
   
-   
   const categoryCode = watch("categoryCode");
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
   const selectedCat  = categoryItems.find((c) => c.code === categoryCode);
@@ -20,13 +18,8 @@ export function CategoryFields() {
   const { data: unitTypesRes } = useUnitTypesQuery();
   const allUnitTypes = unitTypesRes?.data || [];
   
-  // Filter unit types by selected categoryCode
-  const filteredUnitTypes = categoryCode 
-    ? allUnitTypes.filter((t: any) => t.categoryCode === categoryCode) 
-    : [];
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div>
         <p className="text-sm font-medium leading-none">
           Phân loại tổ chức <span className="text-destructive">*</span>
@@ -35,46 +28,48 @@ export function CategoryFields() {
           Xác định thẩm quyền ký duyệt và luồng nghiệp vụ
         </p>
       </div>
-      <FormField control={control} name="categoryCode"
+
+      <FormField control={control} name="typeId"
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <UnitTypeSelector value={field.value} onChange={field.onChange} />
+              <Select
+                value={field.value?.toString() || ""}
+                onValueChange={(val) => {
+                  const numVal = Number(val);
+                  field.onChange(numVal);
+                  const selectedType = allUnitTypes.find((t: any) => t.id === numVal);
+                  if (selectedType) {
+                    setValue("categoryCode", selectedType.categoryCode, { shouldDirty: true });
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Chọn loại hình tổ chức..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryItems.map(cat => {
+                    const typesInCat = allUnitTypes.filter((t: any) => t.categoryCode === cat.code);
+                    if (typesInCat.length === 0) return null;
+                    return (
+                      <SelectGroup key={cat.code}>
+                        <SelectLabel className="font-semibold text-primary">{cat.name}</SelectLabel>
+                        {typesInCat.map((t: any) => (
+                          <SelectItem key={t.id} value={t.id.toString()} className="pl-6">
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      {categoryCode && filteredUnitTypes.length > 0 && (
-        <FormField control={control} name="typeId"
-          render={({ field }) => (
-            <FormItem className="mt-4">
-              <p className="text-sm font-medium leading-none">
-                Loại đơn vị cụ thể <span className="text-destructive">*</span>
-              </p>
-              <FormControl>
-                <Select
-                  value={field.value?.toString() || ""}
-                  onValueChange={(val) => field.onChange(Number(val))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn loại đơn vị..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredUnitTypes.map((t: any) => (
-                      <SelectItem key={t.id} value={t.id.toString()}>
-                        {t.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
       {categoryMeta && (
         <div className="rounded-md border bg-muted/30 p-3 space-y-2">
           <div className="flex flex-wrap gap-1.5">

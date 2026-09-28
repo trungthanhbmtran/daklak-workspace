@@ -21,7 +21,7 @@ export interface CreateUnitPayload {
   code: string;
   name: string;
   shortName?: string;
-  categoryCode: string;
+  categoryCode?: string;
   typeId: number;
   parentId?: number | null;
   domainIds?: number[];
