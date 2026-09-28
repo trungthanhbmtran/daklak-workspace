@@ -546,10 +546,7 @@ export class OrganizationsService {
     const items = await this.prisma.jobTitle.findMany({
       orderBy: { code: 'asc' },
       where: {
-        OR: [
-          { applicableUnitTemplates: { none: {} } },
-          { applicableUnitTemplates: { some: { unitTypeId: unit.typeId } } },
-        ],
+        applicableUnitTemplates: { some: { unitTypeId: unit.typeId } },
       },
     });
     return { data: items };
