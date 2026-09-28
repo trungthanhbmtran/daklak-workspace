@@ -18,6 +18,7 @@ export async function seed1UnitTypesNewModel(prisma: PrismaClient) {
     { code: 'CHI_CUC', name: 'Chi cục / Tổng cục', level: 2 },
     { code: 'TRUNG_TAM', name: 'Trung tâm', level: 3 },
     { code: 'CQ_DANG', name: 'Cơ quan Đảng', level: 1 },
+    { code: 'VAN_PHONG_DANG_UY', name: 'Văn phòng Đảng ủy', level: 3 },
     { code: 'TO_CHUC_CTXH', name: 'Tổ chức Chính trị - Xã hội', level: 2 },
   ];
 

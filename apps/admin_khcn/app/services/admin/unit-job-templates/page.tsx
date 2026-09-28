@@ -177,6 +177,29 @@ function JobTitleSelectionPanel({
     onSave(Array.from(localCheckedIds));
   };
 
+  const groupedJobTitles = [
+    {
+      key: 'LEADERSHIP_PARTY',
+      label: 'Nhóm vị trí việc làm lãnh đạo, quản lý và trợ lý, thư ký (Đảng)',
+      items: allJobTitles.filter((jt) => ['EXECUTIVE', 'MANAGER'].includes(jt.category) && jt.type === 'PARTY'),
+    },
+    {
+      key: 'LEADERSHIP_GOV',
+      label: 'Nhóm vị trí việc làm lãnh đạo, quản lý và trợ lý, thư ký (Chính quyền)',
+      items: allJobTitles.filter((jt) => ['EXECUTIVE', 'MANAGER'].includes(jt.category) && jt.type !== 'PARTY'),
+    },
+    {
+      key: 'STAFF',
+      label: 'Nhóm vị trí việc làm chuyên môn, nghiệp vụ',
+      items: allJobTitles.filter((jt) => jt.category === 'STAFF'),
+    },
+    {
+      key: 'SUPPORT',
+      label: 'Nhóm vị trí việc làm hỗ trợ, phục vụ',
+      items: allJobTitles.filter((jt) => jt.category === 'SUPPORT' || !['EXECUTIVE', 'MANAGER', 'STAFF'].includes(jt.category)),
+    },
+  ];
+
   return (
     <div className="flex flex-col h-full absolute inset-0">
       <div className="px-6 py-4 border-b flex items-center justify-between bg-background shrink-0">
@@ -193,29 +216,44 @@ function JobTitleSelectionPanel({
       </div>
 
       <ScrollArea className="flex-1 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {allJobTitles.map((jt) => {
-            const isChecked = localCheckedIds.has(jt.id);
+        <div className="space-y-8">
+          {groupedJobTitles.map((group) => {
+            if (group.items.length === 0) return null;
             return (
-              <label
-                key={jt.id}
-                className={cn(
-                  "flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors shadow-sm",
-                  isChecked 
-                    ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20" 
-                    : "border-border hover:bg-muted/50 hover:border-muted-foreground/30 bg-background"
-                )}
-              >
-                <Checkbox
-                  checked={isChecked}
-                  onCheckedChange={() => toggle(jt.id)}
-                  className="mt-0.5"
-                />
-                <div className="space-y-1 min-w-0">
-                  <p className="text-sm font-medium leading-snug truncate" title={jt.name}>{jt.name}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{jt.code}</p>
+              <div key={group.key} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground/80">{group.label}</h3>
+                  <div className="h-px flex-1 bg-border/50"></div>
                 </div>
-              </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {group.items.map((jt) => {
+                    const isChecked = localCheckedIds.has(jt.id);
+                    return (
+                      <label
+                        key={jt.id}
+                        className={cn(
+                          "flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-colors shadow-sm",
+                          isChecked
+                            ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
+                            : "border-border hover:bg-muted/50 hover:border-muted-foreground/30 bg-background"
+                        )}
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={() => toggle(jt.id)}
+                          className="mt-0.5"
+                        />
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-sm font-medium leading-snug truncate" title={jt.name}>
+                            {jt.name}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate">{jt.code}</p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </div>
