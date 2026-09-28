@@ -15,7 +15,7 @@ export async function usersSeed(prisma: PrismaClient) {
     where: { name: 'Cán bộ / Chuyên viên' },
   });
 
-  const defaultPassword = 'admin'; // Cấp lại mật khẩu thống nhất là admin cho tiện test
+  const defaultPassword = 'Admin@123'; // Cấp lại mật khẩu thống nhất là Admin@123 cho tiện test
   const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
   // --- CMS USERS ---
