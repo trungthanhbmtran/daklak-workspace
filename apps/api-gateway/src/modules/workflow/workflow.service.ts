@@ -354,7 +354,7 @@ export class WorkflowService implements OnModuleInit {
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
 
     const parsedData = (result?.data || []).map(
-      this.mapIntegrationResponse.bind(this),
+      (item: any) => this.mapIntegrationResponse(item)
     );
     return { success: true, data: parsedData, meta: {}, message: 'OK' };
   }

@@ -1,0 +1,152 @@
+import { PrismaClient } from '../src/generated/prisma';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) throw new Error('DATABASE_URL is not set');
+const mariadbUrl = dbUrl.replace(/^mysql:\/\//, 'mariadb://');
+const adapter = new PrismaMariaDb(mariadbUrl);
+
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+  console.log('Bắt đầu cập nhật cơ sở dữ liệu cho Tỉnh ủy Đắk Lắk...');
+
+  // 1. Đảm bảo UnitType
+  const typeCoQuanDang = await prisma.unitType.upsert({
+    where: { code: 'CO_QUAN_DANG' },
+    update: {},
+    create: { code: 'CO_QUAN_DANG', name: 'Cơ quan Đảng' },
+  });
+
+  const typePhongBan = await prisma.unitType.upsert({
+    where: { code: 'PHONG_BAN' },
+    update: {},
+    create: { code: 'PHONG_BAN', name: 'Phòng/Ban chuyên môn', level: 2 },
+  });
+
+  // 2. Tổ chức / Đơn vị
+  const tinhUy = await prisma.organizationUnit.upsert({
+    where: { code: 'TU_DAKLAK' },
+    update: {},
+    create: {
+      code: 'TU_DAKLAK',
+      name: 'Tỉnh ủy Đắk Lắk',
+      typeId: typeCoQuanDang.id,
+    },
+  });
+
+  const btcTu = await prisma.organizationUnit.upsert({
+    where: { code: 'BTCTU_DAKLAK' },
+    update: { parentId: tinhUy.id },
+    create: {
+      code: 'BTCTU_DAKLAK',
+      name: 'Ban Tổ chức Tỉnh ủy Đắk Lắk',
+      typeId: typeCoQuanDang.id,
+      parentId: tinhUy.id,
+    },
+  });
+
+  // Các phòng ban thuộc Ban Tổ chức Tỉnh ủy
+  const divisions = [
+    { code: 'P_TCD_DV', name: 'Phòng Tổ chức đảng, đảng viên' },
+    { code: 'P_TCCB', name: 'Phòng Tổ chức cán bộ' },
+    { code: 'P_BVCTNB', name: 'Phòng Bảo vệ chính trị nội bộ' },
+    { code: 'VAN_PHONG', name: 'Văn phòng Ban' },
+  ];
+
+  const orgUnits = {};
+  for (const div of divisions) {
+    const org = await prisma.organizationUnit.upsert({
+      where: { code: div.code },
+      update: { parentId: btcTu.id },
+      create: {
+        code: div.code,
+        name: div.name,
+        typeId: typePhongBan.id,
+        parentId: btcTu.id,
+      },
+    });
+    orgUnits[div.code] = org;
+  }
+
+  // 3. Chức danh (JobTitle)
+  const jobTitles = [
+    { code: 'R_P_TCD_DV_TP', name: 'Trưởng phòng Tổ chức đảng, đảng viên' },
+    { code: 'R_P_TCD_DV_PTP', name: 'Phó Trưởng phòng Tổ chức đảng, đảng viên' },
+    { code: 'R_P_TCD_DV_CV', name: 'Công chức Phòng Tổ chức đảng, đảng viên' },
+    { code: 'R_P_TCCB_TP', name: 'Trưởng phòng Tổ chức cán bộ' },
+    { code: 'R_P_TCCB_CV', name: 'Chuyên viên Phòng Tổ chức cán bộ' },
+    { code: 'R_P_BVCTNB_TP', name: 'Trưởng phòng Bảo vệ chính trị nội bộ' },
+    { code: 'R_P_BVCTNB_CV', name: 'Công chức và Cán bộ Công an biệt phái' },
+    { code: 'R_VP_CVP', name: 'Chánh Văn phòng Ban Tổ chức Tỉnh ủy' },
+    { code: 'R_VP_NV', name: 'Nhân viên Văn phòng Ban' },
+  ];
+
+  const jobs = {};
+  for (const jt of jobTitles) {
+    const job = await prisma.jobTitle.upsert({
+      where: { code: jt.code },
+      update: { name: jt.name },
+      create: { code: jt.code, name: jt.name },
+    });
+    jobs[jt.code] = job;
+  }
+
+  // 4. Tạo User và JobPosition
+  const usersToSeed = [
+    { email: 'hoangxuanviet@daklak.gov.vn', username: 'hoangxuanviet', fullName: 'Hoàng Xuân Việt', jobCode: 'R_P_TCD_DV_TP', orgCode: 'P_TCD_DV', isLeader: true },
+    { email: 'nguyenngocsan@daklak.gov.vn', username: 'nguyenngocsan', fullName: 'Nguyễn Ngọc San', jobCode: 'R_P_TCD_DV_PTP', orgCode: 'P_TCD_DV', isLeader: false },
+    { email: 'tranhaitrieu@daklak.gov.vn', username: 'tranhaitrieu', fullName: 'Trần Hải Triều', jobCode: 'R_P_TCCB_TP', orgCode: 'P_TCCB', isLeader: true },
+    { email: 'phanhuuan@daklak.gov.vn', username: 'phanhuuan', fullName: 'Phan Hữu Ân', jobCode: 'R_P_TCCB_CV', orgCode: 'P_TCCB', isLeader: false },
+    { email: 'nguyenthanhthuy@daklak.gov.vn', username: 'nguyenthanhthuy', fullName: 'Nguyễn Thanh Thủy', jobCode: 'R_P_BVCTNB_TP', orgCode: 'P_BVCTNB', isLeader: true },
+    { email: 'nguyenthihongthuy@daklak.gov.vn', username: 'nguyenthihongthuy', fullName: 'Nguyễn Thị Hồng Thúy', jobCode: 'R_VP_CVP', orgCode: 'VAN_PHONG', isLeader: true },
+    { email: 'nguyenhieuthong@daklak.gov.vn', username: 'nguyenhieuthong', fullName: 'Nguyễn Hiếu Thông', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false },
+  ];
+
+  for (const u of usersToSeed) {
+    const user = await prisma.user.upsert({
+      where: { email: u.email },
+      update: { fullName: u.fullName },
+      create: {
+        email: u.email,
+        username: u.username,
+        fullName: u.fullName,
+      }
+    });
+
+    // Check if JobPosition already exists
+    const existingPosition = await prisma.jobPosition.findFirst({
+      where: {
+        userId: user.id,
+        unitId: orgUnits[u.orgCode].id,
+        jobTitleId: jobs[u.jobCode].id
+      }
+    });
+
+    if (!existingPosition) {
+      await prisma.jobPosition.create({
+        data: {
+          userId: user.id,
+          unitId: orgUnits[u.orgCode].id,
+          jobTitleId: jobs[u.jobCode].id,
+          isPrimary: true,
+          isUnitLeader: u.isLeader,
+        }
+      });
+    }
+  }
+
+  console.log('✅ Hoàn thành cập nhật dữ liệu Ban Tổ chức Tỉnh ủy Đắk Lắk.');
+}
+
+main()
+  .catch(e => {
+    console.error('Lỗi khi seed data:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
