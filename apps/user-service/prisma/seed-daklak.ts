@@ -57,7 +57,9 @@ async function main() {
     { code: 'VAN_PHONG', name: 'Văn phòng Ban' },
   ];
 
-  const orgUnits = {};
+  const orgUnits: any = {
+    'BTCTU_DAKLAK': btcTu
+  };
   for (const div of divisions) {
     const org = await prisma.organizationUnit.upsert({
       where: { code: div.code },
@@ -74,6 +76,8 @@ async function main() {
 
   // 3. Chức danh (JobTitle)
   const jobTitles = [
+    { code: 'R_BTCTU_TB', name: 'Trưởng ban' },
+    { code: 'R_BTCTU_PTB', name: 'Phó Trưởng ban' },
     { code: 'R_P_TCD_DV_TP', name: 'Trưởng phòng Tổ chức đảng, đảng viên' },
     { code: 'R_P_TCD_DV_PTP', name: 'Phó Trưởng phòng Tổ chức đảng, đảng viên' },
     { code: 'R_P_TCD_DV_CV', name: 'Công chức Phòng Tổ chức đảng, đảng viên' },
@@ -97,14 +101,31 @@ async function main() {
 
   // 4. Tạo User và JobPosition
   const usersToSeed = [
+    // Lãnh đạo Ban
+    { email: 'nguyenthuonghai@daklak.gov.vn', username: 'nguyenthuonghai', fullName: 'Nguyễn Thượng Hải', jobCode: 'R_BTCTU_TB', orgCode: 'BTCTU_DAKLAK', isLeader: true },
+    { email: 'luuvinhhung@daklak.gov.vn', username: 'luuvinhhung', fullName: 'Lưu Vĩnh Hưng', jobCode: 'R_BTCTU_PTB', orgCode: 'BTCTU_DAKLAK', isLeader: false },
+    { email: 'phamthixuyen@daklak.gov.vn', username: 'phamthixuyen', fullName: 'Phạm Thị Xuyến', jobCode: 'R_BTCTU_PTB', orgCode: 'BTCTU_DAKLAK', isLeader: false },
+    { email: 'nguyenbakim@daklak.gov.vn', username: 'nguyenbakim', fullName: 'Nguyễn Bá Kim', jobCode: 'R_BTCTU_PTB', orgCode: 'BTCTU_DAKLAK', isLeader: false },
+    { email: 'nguyenhuutoan@daklak.gov.vn', username: 'nguyenhuutoan', fullName: 'Nguyễn Hữu Toàn', jobCode: 'R_BTCTU_PTB', orgCode: 'BTCTU_DAKLAK', isLeader: false },
+    { email: 'nguyenvanha@daklak.gov.vn', username: 'nguyenvanha', fullName: 'Nguyễn Văn Hà', jobCode: 'R_BTCTU_PTB', orgCode: 'BTCTU_DAKLAK', isLeader: false },
+    
+    // Lãnh đạo, chuyên viên các phòng ban
     { email: 'hoangxuanviet@daklak.gov.vn', username: 'hoangxuanviet', fullName: 'Hoàng Xuân Việt', jobCode: 'R_P_TCD_DV_TP', orgCode: 'P_TCD_DV', isLeader: true },
     { email: 'nguyenngocsan@daklak.gov.vn', username: 'nguyenngocsan', fullName: 'Nguyễn Ngọc San', jobCode: 'R_P_TCD_DV_PTP', orgCode: 'P_TCD_DV', isLeader: false },
+    { email: 'nguyenvana@daklak.gov.vn', username: 'nguyenvana', fullName: 'Nguyễn Văn A', jobCode: 'R_P_TCD_DV_CV', orgCode: 'P_TCD_DV', isLeader: false }, // Chuyên viên thêm
     { email: 'tranhaitrieu@daklak.gov.vn', username: 'tranhaitrieu', fullName: 'Trần Hải Triều', jobCode: 'R_P_TCCB_TP', orgCode: 'P_TCCB', isLeader: true },
     { email: 'phanhuuan@daklak.gov.vn', username: 'phanhuuan', fullName: 'Phan Hữu Ân', jobCode: 'R_P_TCCB_CV', orgCode: 'P_TCCB', isLeader: false },
     { email: 'nguyenthanhthuy@daklak.gov.vn', username: 'nguyenthanhthuy', fullName: 'Nguyễn Thanh Thủy', jobCode: 'R_P_BVCTNB_TP', orgCode: 'P_BVCTNB', isLeader: true },
+    { email: 'tranvanb@daklak.gov.vn', username: 'tranvanb', fullName: 'Trần Văn B', jobCode: 'R_P_BVCTNB_CV', orgCode: 'P_BVCTNB', isLeader: false }, // Chuyên viên thêm
     { email: 'nguyenthihongthuy@daklak.gov.vn', username: 'nguyenthihongthuy', fullName: 'Nguyễn Thị Hồng Thúy', jobCode: 'R_VP_CVP', orgCode: 'VAN_PHONG', isLeader: true },
     { email: 'nguyenhieuthong@daklak.gov.vn', username: 'nguyenhieuthong', fullName: 'Nguyễn Hiếu Thông', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false },
+    // Tài khoản Quản trị
+    { email: 'admin_btc@daklak.gov.vn', username: 'admin_btc', fullName: 'Quản trị viên Hệ thống', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false },
   ];
+
+  const bcrypt = require('bcrypt');
+  const DEFAULT_PASSWORD = 'Admin@123';
+  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
   for (const u of usersToSeed) {
     const user = await prisma.user.upsert({
@@ -115,6 +136,12 @@ async function main() {
         username: u.username,
         fullName: u.fullName,
       }
+    });
+
+    await prisma.credential.upsert({
+      where: { userId: user.id },
+      update: { passwordHash },
+      create: { userId: user.id, passwordHash },
     });
 
     // Check if JobPosition already exists
