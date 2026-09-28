@@ -537,6 +537,7 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     // 2. Quản trị hệ thống (chỉ SUPER_ADMIN + ADMIN thấy)
     { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: '/services/admin', icon: 'Settings2', order: 99, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'SYS_ORG', name: 'Cơ cấu tổ chức', route: '/services/admin/organization', icon: 'Building2', order: 1, parentCode: 'SYS_GROUP', linkedResourceCode: 'ORGANIZATION', type: 'MENU' },
+    { code: 'SYS_UNIT_JOB_TEMPLATE', name: 'Phân loại chức danh', route: '/services/admin/unit-job-templates', icon: 'Briefcase', order: 1.5, parentCode: 'SYS_GROUP', linkedResourceCode: 'ORGANIZATION', type: 'MENU' },
     { code: 'SYS_USER', name: 'Người dùng', route: '/services/admin/users', icon: 'Users', order: 2, parentCode: 'SYS_GROUP', linkedResourceCode: 'USER', type: 'MENU' },
     { code: 'SYS_ROLE', name: 'Vai trò & Quyền', route: '/services/admin/policies', icon: 'ShieldCheck', order: 3, parentCode: 'SYS_GROUP', linkedResourceCode: 'ROLE', type: 'MENU' },
     { code: 'SYS_RESOURCE', name: 'Tài nguyên PBAC', route: '/services/admin/resources', icon: 'Database', order: 4, parentCode: 'SYS_GROUP', linkedResourceCode: 'RESOURCE', type: 'MENU' },
