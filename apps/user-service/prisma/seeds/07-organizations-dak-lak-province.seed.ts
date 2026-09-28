@@ -8,7 +8,7 @@ export async function seedOrganizationsDakLakProvince(prisma: PrismaClient) {
   const DEFAULT_PASSWORD = 'Admin@123';
 
 
-  
+
   console.log('📦 Seeding Organization Units...');
   const ubndTinhTypeId = unitTypeMap['UBND_TINH'].id;
   const soTypeId = unitTypeMap['SO_NGANH'].id;
@@ -59,7 +59,7 @@ export async function seedOrganizationsDakLakProvince(prisma: PrismaClient) {
   for (const d of depts) {
     const typeId = (d as any).typeCode ? unitTypeMap[(d as any).typeCode]?.id : soTypeId;
     const { typeCode, ...rest } = d as any;
-    
+
     await prisma.organizationUnit.upsert({
       where: { code: rest.code },
       update: { parentId: province.id, typeId },
