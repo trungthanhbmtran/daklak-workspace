@@ -19,7 +19,7 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
           options: {
             urls: [config.get<string>('RABBITMQ_URL') || 'amqp://root:mypassword@rabbitmq:5672'],
             queue: config.get<string>('NOTIFICATION_QUEUE') || 'notifications',
-            queueOptions: { 
+            queueOptions: {
               durable: true,
               arguments: {
                 'x-dead-letter-exchange': 'dlx_notifications',
@@ -50,6 +50,16 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
         options: {
           package: 'user',
           protoPath: require('path').join(PROTO_ROOT, 'users/user.proto'),
+          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
+          loader: { keepCase: false, longs: String, enums: String, defaults: true, includeDirs: [PROTO_ROOT] },
+        },
+      },
+      {
+        name: 'SYSTEM_CONFIG_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'users',
+          protoPath: require('path').join(PROTO_ROOT, 'users/system_config.proto'),
           url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
           loader: { keepCase: false, longs: String, enums: String, defaults: true, includeDirs: [PROTO_ROOT] },
         },

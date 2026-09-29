@@ -89,7 +89,13 @@ export class ExecutionService {
     return instance;
   }
 
-  async advanceProcess(instanceId: string, nodeId: string) {
+  async advanceProcess(instanceId: string, nodeId: string, visited: Set<string> = new Set()) {
+    if (visited.has(nodeId)) {
+      this.logger.error(`Cycle detected in workflow graph for instance ${instanceId} at node ${nodeId}`);
+      throw new Error(`Cycle detected in workflow graph at node ${nodeId}`);
+    }
+    visited.add(nodeId);
+
     const graph = await this.getGraph(instanceId);
     if (!graph) return;
 
@@ -122,11 +128,11 @@ export class ExecutionService {
 
     switch (node.type) {
       case 'serviceTask':
-        return this.handleServiceTask(instance, node, graph);
+        return this.handleServiceTask(instance, node, graph, visited);
       case 'end':
         return this.handleEndTask(instance.id);
       case 'start':
-        return this.handleStartTask(instance.id, node, graph);
+        return this.handleStartTask(instance.id, node, graph, visited);
       case 'userTask':
         return this.handleUserTask(instance, node);
       default:
@@ -135,7 +141,7 @@ export class ExecutionService {
     }
   }
 
-  private async handleServiceTask(instance: any, node: any, graph: any) {
+  private async handleServiceTask(instance: any, node: any, graph: any, visited: Set<string>) {
     if (node.action !== 'DYNAMIC_INTEGRATION') {
       return; // Early return for unsupported actions
     }
@@ -162,7 +168,7 @@ export class ExecutionService {
 
     const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
     if (nextEdges.length > 0) {
-      await this.advanceProcess(instance.id, nextEdges[0].target);
+      await this.advanceProcess(instance.id, nextEdges[0].target, visited);
     }
   }
 
@@ -186,10 +192,10 @@ export class ExecutionService {
     });
   }
 
-  private async handleStartTask(instanceId: string, node: any, graph: any) {
+  private async handleStartTask(instanceId: string, node: any, graph: any, visited: Set<string>) {
     const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
     if (nextEdges.length > 0) {
-      await this.advanceProcess(instanceId, nextEdges[0].target);
+      await this.advanceProcess(instanceId, nextEdges[0].target, visited);
     }
   }
 

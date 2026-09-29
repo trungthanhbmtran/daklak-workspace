@@ -7,15 +7,18 @@ import { lastValueFrom } from 'rxjs';
 @Injectable()
 export class KpiEvaluationsService implements OnModuleInit {
   private docSvc: any;
+  private sysConfigSvc: any;
 
   constructor(
     private prisma: PrismaService,
     private cache: AppCacheService,
-    @Inject('DOCUMENT_PACKAGE') private documentClient: ClientGrpc
+    @Inject('DOCUMENT_PACKAGE') private documentClient: ClientGrpc,
+    @Inject('SYSTEM_CONFIG_PACKAGE') private systemConfigClient: ClientGrpc
   ) { }
 
   onModuleInit() {
     this.docSvc = this.documentClient.getService<any>('DocumentService');
+    this.sysConfigSvc = this.systemConfigClient.getService<any>('SystemConfigService');
   }
 
   // 1. Quản lý Kỳ Đánh Giá (KpiPeriod)
@@ -84,8 +87,21 @@ export class KpiEvaluationsService implements OnModuleInit {
     try {
       const employee = await this.prisma.employee.findUnique({ where: { employeeCode }});
       
+      let lgspOrganId = "H15.151"; // Fallback
+      try {
+        const configRes: any = await lastValueFrom(this.sysConfigSvc.GetConfigs({}));
+        if (configRes && configRes.configs) {
+          const orgConfig = configRes.configs.find((c: any) => c.key === 'LGSP_ORGANIZATION_ID');
+          if (orgConfig && orgConfig.value) {
+            lgspOrganId = orgConfig.value;
+          }
+        }
+      } catch (e: any) {
+        console.warn(`[Integration] Could not fetch LGSP_ORGANIZATION_ID from user-service: ${e.message}`);
+      }
+
       const payload = {
-        fromOrganId: "H15.151", // Fallback to department code if we can fetch it via GRPC later
+        fromOrganId: lgspOrganId,
         documentType: "8",
         trangThaiTiepNhan: "fail",
         startDate: periodStart.toISOString().split('T')[0],
