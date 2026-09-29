@@ -4,7 +4,7 @@ import { PrismaService } from '@/database/prisma.service';
 import { TaskSharedService } from '../task-shared/task-shared.service';
 import { Task } from '../../generated/prisma';
 
-type TaskWithParticipants = Task & { participants: { employeeCode: string; participantRole: string }[] };
+type TaskWithParticipants = Task & { participants: { employeeCode: string; participantRole: string }[], notificationLogs: { type: string }[] };
 
 interface TaskWarning {
   taskId: number;
@@ -41,12 +41,7 @@ export class TasksCronService {
           where: {
             isDeleted: false,
             status: { notIn: ['COMPLETED', 'CANCELLED', 'REJECTED', 'DONE', 'TEMPLATE'] },
-            dueDate: { not: null },
-            OR: [
-              { isDeadlineWarned: false },
-              { isOverdueWarned: false },
-              { isRiskWarned: false }
-            ]
+            dueDate: { not: null }
           },
           take,
           ...(cursorId ? { skip: 1, cursor: { id: cursorId } } : {}),
@@ -54,7 +49,8 @@ export class TasksCronService {
           include: { 
             participants: { 
               select: { employeeCode: true, participantRole: true } 
-            } 
+            },
+            notificationLogs: { select: { type: true } }
           }
         });
 
@@ -99,14 +95,11 @@ export class TasksCronService {
     const userMap = new Map(emps.filter(e => e.userId).map(e => [e.employeeCode, e.userId as string]));
 
     // 3. Chuẩn bị Transaction Cập nhật DB Hàng loạt (Batch Query)
-    const deadlineIds = warnings.filter(w => w.warnType === 'DEADLINE').map(w => w.taskId);
-    const overdueIds = warnings.filter(w => w.warnType === 'OVERDUE').map(w => w.taskId);
-    const riskIds = warnings.filter(w => w.warnType === 'RISK').map(w => w.taskId);
-
     const txs: any[] = [];
-    if (deadlineIds.length > 0) txs.push(this.prisma.task.updateMany({ where: { id: { in: deadlineIds } }, data: { isDeadlineWarned: true } }));
-    if (overdueIds.length > 0) txs.push(this.prisma.task.updateMany({ where: { id: { in: overdueIds } }, data: { isOverdueWarned: true } }));
-    if (riskIds.length > 0) txs.push(this.prisma.task.updateMany({ where: { id: { in: riskIds } }, data: { isRiskWarned: true } }));
+    const logEntries = warnings.map(w => ({ taskId: w.taskId, type: w.warnType }));
+    if (logEntries.length > 0) {
+      txs.push(this.prisma.taskNotificationLog.createMany({ data: logEntries, skipDuplicates: true }));
+    }
 
     txs.push(this.prisma.taskHistory.createMany({
       data: warnings.map(w => ({
@@ -136,17 +129,20 @@ export class TasksCronService {
     const startDate = task.startDate ? new Date(task.startDate) : null;
 
     // A. Kiểm tra Trễ hạn (Overdue)
-    if (!task.isOverdueWarned && dueDate < now) {
+    const hasOverdueWarned = task.notificationLogs.some(l => l.type === 'OVERDUE');
+    if (!hasOverdueWarned && dueDate < now) {
       return this.buildWarning(task, 'OVERDUE', 'Cảnh báo công việc trễ hạn', `Công việc "${task.title}" đã trễ hạn từ ${dueDate.toLocaleDateString('vi-VN')}.`);
     }
 
     // B. Kiểm tra Sắp đến hạn (Deadline)
-    if (!task.isDeadlineWarned && dueDate <= futureDate && dueDate >= now) {
+    const hasDeadlineWarned = task.notificationLogs.some(l => l.type === 'DEADLINE');
+    if (!hasDeadlineWarned && dueDate <= futureDate && dueDate >= now) {
       return this.buildWarning(task, 'DEADLINE', 'Cảnh báo hạn chót công việc', `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`);
     }
 
     // C. Kiểm tra Risk (Nguy cơ chậm tiến độ)
-    if (!task.isRiskWarned && dueDate > futureDate && startDate && task.progress != null) {
+    const hasRiskWarned = task.notificationLogs.some(l => l.type === 'RISK');
+    if (!hasRiskWarned && dueDate > futureDate && startDate && task.progress != null) {
       const totalDuration = dueDate.getTime() - startDate.getTime();
       const elapsed = now.getTime() - startDate.getTime();
       

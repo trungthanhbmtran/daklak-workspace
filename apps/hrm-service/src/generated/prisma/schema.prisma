@@ -222,7 +222,7 @@ model KpiFormDocument {
 generator client {
   provider     = "prisma-client-js"
   engineType   = "binary"
-  output       = "./"
+  output       = "../../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -272,10 +272,6 @@ model Task {
   completedAt DateTime? @map("completed_at")
   isCompleted Boolean   @default(false) @map("is_completed")
 
-  isDeadlineWarned Boolean @default(false) @map("is_deadline_warned")
-  isOverdueWarned  Boolean @default(false) @map("is_overdue_warned")
-  isRiskWarned     Boolean @default(false) @map("is_risk_warned")
-
   domainId        Int? @map("domain_id")
   monitoredUnitId Int? @map("monitored_unit_id")
   planId          Int? @map("plan_id")
@@ -297,8 +293,9 @@ model Task {
   histories    TaskHistory[]
   steps        TaskStep[]
 
-  ancestors   TaskClosure[] @relation("TaskClosureDescendant")
-  descendants TaskClosure[] @relation("TaskClosureAncestor")
+  ancestors        TaskClosure[]         @relation("TaskClosureDescendant")
+  descendants      TaskClosure[]         @relation("TaskClosureAncestor")
+  notificationLogs TaskNotificationLog[]
 
   @@index([dueDate])
   @@index([status, dueDate])
@@ -393,6 +390,19 @@ model TaskHistory {
 
   @@index([taskId])
   @@map("task_histories")
+}
+
+model TaskNotificationLog {
+  id        Int      @id @default(autoincrement())
+  taskId    Int      @map("task_id")
+  type      String   @map("type")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, type])
+  @@index([taskId])
+  @@map("task_notification_logs")
 }
 
 model TaskRankTemplate {

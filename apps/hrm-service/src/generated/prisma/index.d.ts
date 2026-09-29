@@ -89,6 +89,11 @@ export type TaskClosure = $Result.DefaultSelection<Prisma.$TaskClosurePayload>
  */
 export type TaskHistory = $Result.DefaultSelection<Prisma.$TaskHistoryPayload>
 /**
+ * Model TaskNotificationLog
+ * 
+ */
+export type TaskNotificationLog = $Result.DefaultSelection<Prisma.$TaskNotificationLogPayload>
+/**
  * Model TaskRankTemplate
  * 
  */
@@ -389,6 +394,16 @@ export class PrismaClient<
     * ```
     */
   get taskHistory(): Prisma.TaskHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.taskNotificationLog`: Exposes CRUD operations for the **TaskNotificationLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TaskNotificationLogs
+    * const taskNotificationLogs = await prisma.taskNotificationLog.findMany()
+    * ```
+    */
+  get taskNotificationLog(): Prisma.TaskNotificationLogDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.taskRankTemplate`: Exposes CRUD operations for the **TaskRankTemplate** model.
@@ -871,6 +886,7 @@ export namespace Prisma {
     TaskParticipant: 'TaskParticipant',
     TaskClosure: 'TaskClosure',
     TaskHistory: 'TaskHistory',
+    TaskNotificationLog: 'TaskNotificationLog',
     TaskRankTemplate: 'TaskRankTemplate',
     RankQuota: 'RankQuota'
   };
@@ -888,7 +904,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskRankTemplate" | "rankQuota"
+      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskNotificationLog" | "taskRankTemplate" | "rankQuota"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1882,6 +1898,72 @@ export namespace Prisma {
           }
         }
       }
+      TaskNotificationLog: {
+        payload: Prisma.$TaskNotificationLogPayload<ExtArgs>
+        fields: Prisma.TaskNotificationLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TaskNotificationLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TaskNotificationLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>
+          }
+          findFirst: {
+            args: Prisma.TaskNotificationLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TaskNotificationLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>
+          }
+          findMany: {
+            args: Prisma.TaskNotificationLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>[]
+          }
+          create: {
+            args: Prisma.TaskNotificationLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>
+          }
+          createMany: {
+            args: Prisma.TaskNotificationLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.TaskNotificationLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>
+          }
+          update: {
+            args: Prisma.TaskNotificationLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.TaskNotificationLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TaskNotificationLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.TaskNotificationLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TaskNotificationLogPayload>
+          }
+          aggregate: {
+            args: Prisma.TaskNotificationLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTaskNotificationLog>
+          }
+          groupBy: {
+            args: Prisma.TaskNotificationLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TaskNotificationLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TaskNotificationLogCountArgs<ExtArgs>
+            result: $Utils.Optional<TaskNotificationLogCountAggregateOutputType> | number
+          }
+        }
+      }
       TaskRankTemplate: {
         payload: Prisma.$TaskRankTemplatePayload<ExtArgs>
         fields: Prisma.TaskRankTemplateFieldRefs
@@ -2152,6 +2234,7 @@ export namespace Prisma {
     taskParticipant?: TaskParticipantOmit
     taskClosure?: TaskClosureOmit
     taskHistory?: TaskHistoryOmit
+    taskNotificationLog?: TaskNotificationLogOmit
     taskRankTemplate?: TaskRankTemplateOmit
     rankQuota?: RankQuotaOmit
   }
@@ -2463,6 +2546,7 @@ export namespace Prisma {
     steps: number
     ancestors: number
     descendants: number
+    notificationLogs: number
   }
 
   export type TaskCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2473,6 +2557,7 @@ export namespace Prisma {
     steps?: boolean | TaskCountOutputTypeCountStepsArgs
     ancestors?: boolean | TaskCountOutputTypeCountAncestorsArgs
     descendants?: boolean | TaskCountOutputTypeCountDescendantsArgs
+    notificationLogs?: boolean | TaskCountOutputTypeCountNotificationLogsArgs
   }
 
   // Custom InputTypes
@@ -2533,6 +2618,13 @@ export namespace Prisma {
    */
   export type TaskCountOutputTypeCountDescendantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskClosureWhereInput
+  }
+
+  /**
+   * TaskCountOutputType without action
+   */
+  export type TaskCountOutputTypeCountNotificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TaskNotificationLogWhereInput
   }
 
 
@@ -12518,9 +12610,6 @@ export namespace Prisma {
     dueDate: Date | null
     completedAt: Date | null
     isCompleted: boolean | null
-    isDeadlineWarned: boolean | null
-    isOverdueWarned: boolean | null
-    isRiskWarned: boolean | null
     domainId: number | null
     monitoredUnitId: number | null
     planId: number | null
@@ -12547,9 +12636,6 @@ export namespace Prisma {
     dueDate: Date | null
     completedAt: Date | null
     isCompleted: boolean | null
-    isDeadlineWarned: boolean | null
-    isOverdueWarned: boolean | null
-    isRiskWarned: boolean | null
     domainId: number | null
     monitoredUnitId: number | null
     planId: number | null
@@ -12576,9 +12662,6 @@ export namespace Prisma {
     dueDate: number
     completedAt: number
     isCompleted: number
-    isDeadlineWarned: number
-    isOverdueWarned: number
-    isRiskWarned: number
     domainId: number
     monitoredUnitId: number
     planId: number
@@ -12626,9 +12709,6 @@ export namespace Prisma {
     dueDate?: true
     completedAt?: true
     isCompleted?: true
-    isDeadlineWarned?: true
-    isOverdueWarned?: true
-    isRiskWarned?: true
     domainId?: true
     monitoredUnitId?: true
     planId?: true
@@ -12655,9 +12735,6 @@ export namespace Prisma {
     dueDate?: true
     completedAt?: true
     isCompleted?: true
-    isDeadlineWarned?: true
-    isOverdueWarned?: true
-    isRiskWarned?: true
     domainId?: true
     monitoredUnitId?: true
     planId?: true
@@ -12684,9 +12761,6 @@ export namespace Prisma {
     dueDate?: true
     completedAt?: true
     isCompleted?: true
-    isDeadlineWarned?: true
-    isOverdueWarned?: true
-    isRiskWarned?: true
     domainId?: true
     monitoredUnitId?: true
     planId?: true
@@ -12801,9 +12875,6 @@ export namespace Prisma {
     dueDate: Date | null
     completedAt: Date | null
     isCompleted: boolean
-    isDeadlineWarned: boolean
-    isOverdueWarned: boolean
-    isRiskWarned: boolean
     domainId: number | null
     monitoredUnitId: number | null
     planId: number | null
@@ -12850,9 +12921,6 @@ export namespace Prisma {
     dueDate?: boolean
     completedAt?: boolean
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: boolean
     monitoredUnitId?: boolean
     planId?: boolean
@@ -12871,6 +12939,7 @@ export namespace Prisma {
     steps?: boolean | Task$stepsArgs<ExtArgs>
     ancestors?: boolean | Task$ancestorsArgs<ExtArgs>
     descendants?: boolean | Task$descendantsArgs<ExtArgs>
+    notificationLogs?: boolean | Task$notificationLogsArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["task"]>
 
@@ -12891,9 +12960,6 @@ export namespace Prisma {
     dueDate?: boolean
     completedAt?: boolean
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: boolean
     monitoredUnitId?: boolean
     planId?: boolean
@@ -12906,7 +12972,7 @@ export namespace Prisma {
     isDeleted?: boolean
   }
 
-  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "type" | "meetingLink" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "isDeadlineWarned" | "isOverdueWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
+  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "type" | "meetingLink" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     plan?: boolean | Task$planArgs<ExtArgs>
     kpiEvaluations?: boolean | Task$kpiEvaluationsArgs<ExtArgs>
@@ -12916,6 +12982,7 @@ export namespace Prisma {
     steps?: boolean | Task$stepsArgs<ExtArgs>
     ancestors?: boolean | Task$ancestorsArgs<ExtArgs>
     descendants?: boolean | Task$descendantsArgs<ExtArgs>
+    notificationLogs?: boolean | Task$notificationLogsArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -12930,6 +12997,7 @@ export namespace Prisma {
       steps: Prisma.$TaskStepPayload<ExtArgs>[]
       ancestors: Prisma.$TaskClosurePayload<ExtArgs>[]
       descendants: Prisma.$TaskClosurePayload<ExtArgs>[]
+      notificationLogs: Prisma.$TaskNotificationLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -12946,9 +13014,6 @@ export namespace Prisma {
       dueDate: Date | null
       completedAt: Date | null
       isCompleted: boolean
-      isDeadlineWarned: boolean
-      isOverdueWarned: boolean
-      isRiskWarned: boolean
       domainId: number | null
       monitoredUnitId: number | null
       planId: number | null
@@ -13307,6 +13372,7 @@ export namespace Prisma {
     steps<T extends Task$stepsArgs<ExtArgs> = {}>(args?: Subset<T, Task$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ancestors<T extends Task$ancestorsArgs<ExtArgs> = {}>(args?: Subset<T, Task$ancestorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     descendants<T extends Task$descendantsArgs<ExtArgs> = {}>(args?: Subset<T, Task$descendantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskClosurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notificationLogs<T extends Task$notificationLogsArgs<ExtArgs> = {}>(args?: Subset<T, Task$notificationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13350,9 +13416,6 @@ export namespace Prisma {
     readonly dueDate: FieldRef<"Task", 'DateTime'>
     readonly completedAt: FieldRef<"Task", 'DateTime'>
     readonly isCompleted: FieldRef<"Task", 'Boolean'>
-    readonly isDeadlineWarned: FieldRef<"Task", 'Boolean'>
-    readonly isOverdueWarned: FieldRef<"Task", 'Boolean'>
-    readonly isRiskWarned: FieldRef<"Task", 'Boolean'>
     readonly domainId: FieldRef<"Task", 'Int'>
     readonly monitoredUnitId: FieldRef<"Task", 'Int'>
     readonly planId: FieldRef<"Task", 'Int'>
@@ -13895,6 +13958,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskClosureScalarFieldEnum | TaskClosureScalarFieldEnum[]
+  }
+
+  /**
+   * Task.notificationLogs
+   */
+  export type Task$notificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    where?: TaskNotificationLogWhereInput
+    orderBy?: TaskNotificationLogOrderByWithRelationInput | TaskNotificationLogOrderByWithRelationInput[]
+    cursor?: TaskNotificationLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TaskNotificationLogScalarFieldEnum | TaskNotificationLogScalarFieldEnum[]
   }
 
   /**
@@ -18899,6 +18986,967 @@ export namespace Prisma {
 
 
   /**
+   * Model TaskNotificationLog
+   */
+
+  export type AggregateTaskNotificationLog = {
+    _count: TaskNotificationLogCountAggregateOutputType | null
+    _avg: TaskNotificationLogAvgAggregateOutputType | null
+    _sum: TaskNotificationLogSumAggregateOutputType | null
+    _min: TaskNotificationLogMinAggregateOutputType | null
+    _max: TaskNotificationLogMaxAggregateOutputType | null
+  }
+
+  export type TaskNotificationLogAvgAggregateOutputType = {
+    id: number | null
+    taskId: number | null
+  }
+
+  export type TaskNotificationLogSumAggregateOutputType = {
+    id: number | null
+    taskId: number | null
+  }
+
+  export type TaskNotificationLogMinAggregateOutputType = {
+    id: number | null
+    taskId: number | null
+    type: string | null
+    createdAt: Date | null
+  }
+
+  export type TaskNotificationLogMaxAggregateOutputType = {
+    id: number | null
+    taskId: number | null
+    type: string | null
+    createdAt: Date | null
+  }
+
+  export type TaskNotificationLogCountAggregateOutputType = {
+    id: number
+    taskId: number
+    type: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type TaskNotificationLogAvgAggregateInputType = {
+    id?: true
+    taskId?: true
+  }
+
+  export type TaskNotificationLogSumAggregateInputType = {
+    id?: true
+    taskId?: true
+  }
+
+  export type TaskNotificationLogMinAggregateInputType = {
+    id?: true
+    taskId?: true
+    type?: true
+    createdAt?: true
+  }
+
+  export type TaskNotificationLogMaxAggregateInputType = {
+    id?: true
+    taskId?: true
+    type?: true
+    createdAt?: true
+  }
+
+  export type TaskNotificationLogCountAggregateInputType = {
+    id?: true
+    taskId?: true
+    type?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type TaskNotificationLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TaskNotificationLog to aggregate.
+     */
+    where?: TaskNotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskNotificationLogs to fetch.
+     */
+    orderBy?: TaskNotificationLogOrderByWithRelationInput | TaskNotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TaskNotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskNotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskNotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TaskNotificationLogs
+    **/
+    _count?: true | TaskNotificationLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TaskNotificationLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TaskNotificationLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TaskNotificationLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TaskNotificationLogMaxAggregateInputType
+  }
+
+  export type GetTaskNotificationLogAggregateType<T extends TaskNotificationLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateTaskNotificationLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTaskNotificationLog[P]>
+      : GetScalarType<T[P], AggregateTaskNotificationLog[P]>
+  }
+
+
+
+
+  export type TaskNotificationLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TaskNotificationLogWhereInput
+    orderBy?: TaskNotificationLogOrderByWithAggregationInput | TaskNotificationLogOrderByWithAggregationInput[]
+    by: TaskNotificationLogScalarFieldEnum[] | TaskNotificationLogScalarFieldEnum
+    having?: TaskNotificationLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TaskNotificationLogCountAggregateInputType | true
+    _avg?: TaskNotificationLogAvgAggregateInputType
+    _sum?: TaskNotificationLogSumAggregateInputType
+    _min?: TaskNotificationLogMinAggregateInputType
+    _max?: TaskNotificationLogMaxAggregateInputType
+  }
+
+  export type TaskNotificationLogGroupByOutputType = {
+    id: number
+    taskId: number
+    type: string
+    createdAt: Date
+    _count: TaskNotificationLogCountAggregateOutputType | null
+    _avg: TaskNotificationLogAvgAggregateOutputType | null
+    _sum: TaskNotificationLogSumAggregateOutputType | null
+    _min: TaskNotificationLogMinAggregateOutputType | null
+    _max: TaskNotificationLogMaxAggregateOutputType | null
+  }
+
+  type GetTaskNotificationLogGroupByPayload<T extends TaskNotificationLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TaskNotificationLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TaskNotificationLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TaskNotificationLogGroupByOutputType[P]>
+            : GetScalarType<T[P], TaskNotificationLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TaskNotificationLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    taskId?: boolean
+    type?: boolean
+    createdAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["taskNotificationLog"]>
+
+
+
+  export type TaskNotificationLogSelectScalar = {
+    id?: boolean
+    taskId?: boolean
+    type?: boolean
+    createdAt?: boolean
+  }
+
+  export type TaskNotificationLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "taskId" | "type" | "createdAt", ExtArgs["result"]["taskNotificationLog"]>
+  export type TaskNotificationLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+  }
+
+  export type $TaskNotificationLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TaskNotificationLog"
+    objects: {
+      task: Prisma.$TaskPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      taskId: number
+      type: string
+      createdAt: Date
+    }, ExtArgs["result"]["taskNotificationLog"]>
+    composites: {}
+  }
+
+  type TaskNotificationLogGetPayload<S extends boolean | null | undefined | TaskNotificationLogDefaultArgs> = $Result.GetResult<Prisma.$TaskNotificationLogPayload, S>
+
+  type TaskNotificationLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TaskNotificationLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TaskNotificationLogCountAggregateInputType | true
+    }
+
+  export interface TaskNotificationLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TaskNotificationLog'], meta: { name: 'TaskNotificationLog' } }
+    /**
+     * Find zero or one TaskNotificationLog that matches the filter.
+     * @param {TaskNotificationLogFindUniqueArgs} args - Arguments to find a TaskNotificationLog
+     * @example
+     * // Get one TaskNotificationLog
+     * const taskNotificationLog = await prisma.taskNotificationLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TaskNotificationLogFindUniqueArgs>(args: SelectSubset<T, TaskNotificationLogFindUniqueArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TaskNotificationLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TaskNotificationLogFindUniqueOrThrowArgs} args - Arguments to find a TaskNotificationLog
+     * @example
+     * // Get one TaskNotificationLog
+     * const taskNotificationLog = await prisma.taskNotificationLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TaskNotificationLogFindUniqueOrThrowArgs>(args: SelectSubset<T, TaskNotificationLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TaskNotificationLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogFindFirstArgs} args - Arguments to find a TaskNotificationLog
+     * @example
+     * // Get one TaskNotificationLog
+     * const taskNotificationLog = await prisma.taskNotificationLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TaskNotificationLogFindFirstArgs>(args?: SelectSubset<T, TaskNotificationLogFindFirstArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TaskNotificationLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogFindFirstOrThrowArgs} args - Arguments to find a TaskNotificationLog
+     * @example
+     * // Get one TaskNotificationLog
+     * const taskNotificationLog = await prisma.taskNotificationLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TaskNotificationLogFindFirstOrThrowArgs>(args?: SelectSubset<T, TaskNotificationLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TaskNotificationLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TaskNotificationLogs
+     * const taskNotificationLogs = await prisma.taskNotificationLog.findMany()
+     * 
+     * // Get first 10 TaskNotificationLogs
+     * const taskNotificationLogs = await prisma.taskNotificationLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const taskNotificationLogWithIdOnly = await prisma.taskNotificationLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TaskNotificationLogFindManyArgs>(args?: SelectSubset<T, TaskNotificationLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TaskNotificationLog.
+     * @param {TaskNotificationLogCreateArgs} args - Arguments to create a TaskNotificationLog.
+     * @example
+     * // Create one TaskNotificationLog
+     * const TaskNotificationLog = await prisma.taskNotificationLog.create({
+     *   data: {
+     *     // ... data to create a TaskNotificationLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends TaskNotificationLogCreateArgs>(args: SelectSubset<T, TaskNotificationLogCreateArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TaskNotificationLogs.
+     * @param {TaskNotificationLogCreateManyArgs} args - Arguments to create many TaskNotificationLogs.
+     * @example
+     * // Create many TaskNotificationLogs
+     * const taskNotificationLog = await prisma.taskNotificationLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TaskNotificationLogCreateManyArgs>(args?: SelectSubset<T, TaskNotificationLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a TaskNotificationLog.
+     * @param {TaskNotificationLogDeleteArgs} args - Arguments to delete one TaskNotificationLog.
+     * @example
+     * // Delete one TaskNotificationLog
+     * const TaskNotificationLog = await prisma.taskNotificationLog.delete({
+     *   where: {
+     *     // ... filter to delete one TaskNotificationLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TaskNotificationLogDeleteArgs>(args: SelectSubset<T, TaskNotificationLogDeleteArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TaskNotificationLog.
+     * @param {TaskNotificationLogUpdateArgs} args - Arguments to update one TaskNotificationLog.
+     * @example
+     * // Update one TaskNotificationLog
+     * const taskNotificationLog = await prisma.taskNotificationLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TaskNotificationLogUpdateArgs>(args: SelectSubset<T, TaskNotificationLogUpdateArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TaskNotificationLogs.
+     * @param {TaskNotificationLogDeleteManyArgs} args - Arguments to filter TaskNotificationLogs to delete.
+     * @example
+     * // Delete a few TaskNotificationLogs
+     * const { count } = await prisma.taskNotificationLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TaskNotificationLogDeleteManyArgs>(args?: SelectSubset<T, TaskNotificationLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TaskNotificationLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TaskNotificationLogs
+     * const taskNotificationLog = await prisma.taskNotificationLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TaskNotificationLogUpdateManyArgs>(args: SelectSubset<T, TaskNotificationLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one TaskNotificationLog.
+     * @param {TaskNotificationLogUpsertArgs} args - Arguments to update or create a TaskNotificationLog.
+     * @example
+     * // Update or create a TaskNotificationLog
+     * const taskNotificationLog = await prisma.taskNotificationLog.upsert({
+     *   create: {
+     *     // ... data to create a TaskNotificationLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TaskNotificationLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TaskNotificationLogUpsertArgs>(args: SelectSubset<T, TaskNotificationLogUpsertArgs<ExtArgs>>): Prisma__TaskNotificationLogClient<$Result.GetResult<Prisma.$TaskNotificationLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TaskNotificationLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogCountArgs} args - Arguments to filter TaskNotificationLogs to count.
+     * @example
+     * // Count the number of TaskNotificationLogs
+     * const count = await prisma.taskNotificationLog.count({
+     *   where: {
+     *     // ... the filter for the TaskNotificationLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends TaskNotificationLogCountArgs>(
+      args?: Subset<T, TaskNotificationLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TaskNotificationLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TaskNotificationLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TaskNotificationLogAggregateArgs>(args: Subset<T, TaskNotificationLogAggregateArgs>): Prisma.PrismaPromise<GetTaskNotificationLogAggregateType<T>>
+
+    /**
+     * Group by TaskNotificationLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TaskNotificationLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TaskNotificationLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TaskNotificationLogGroupByArgs['orderBy'] }
+        : { orderBy?: TaskNotificationLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TaskNotificationLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTaskNotificationLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TaskNotificationLog model
+   */
+  readonly fields: TaskNotificationLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TaskNotificationLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TaskNotificationLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TaskNotificationLog model
+   */
+  interface TaskNotificationLogFieldRefs {
+    readonly id: FieldRef<"TaskNotificationLog", 'Int'>
+    readonly taskId: FieldRef<"TaskNotificationLog", 'Int'>
+    readonly type: FieldRef<"TaskNotificationLog", 'String'>
+    readonly createdAt: FieldRef<"TaskNotificationLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TaskNotificationLog findUnique
+   */
+  export type TaskNotificationLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskNotificationLog to fetch.
+     */
+    where: TaskNotificationLogWhereUniqueInput
+  }
+
+  /**
+   * TaskNotificationLog findUniqueOrThrow
+   */
+  export type TaskNotificationLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskNotificationLog to fetch.
+     */
+    where: TaskNotificationLogWhereUniqueInput
+  }
+
+  /**
+   * TaskNotificationLog findFirst
+   */
+  export type TaskNotificationLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskNotificationLog to fetch.
+     */
+    where?: TaskNotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskNotificationLogs to fetch.
+     */
+    orderBy?: TaskNotificationLogOrderByWithRelationInput | TaskNotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TaskNotificationLogs.
+     */
+    cursor?: TaskNotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskNotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskNotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TaskNotificationLogs.
+     */
+    distinct?: TaskNotificationLogScalarFieldEnum | TaskNotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * TaskNotificationLog findFirstOrThrow
+   */
+  export type TaskNotificationLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskNotificationLog to fetch.
+     */
+    where?: TaskNotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskNotificationLogs to fetch.
+     */
+    orderBy?: TaskNotificationLogOrderByWithRelationInput | TaskNotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TaskNotificationLogs.
+     */
+    cursor?: TaskNotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskNotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskNotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TaskNotificationLogs.
+     */
+    distinct?: TaskNotificationLogScalarFieldEnum | TaskNotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * TaskNotificationLog findMany
+   */
+  export type TaskNotificationLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which TaskNotificationLogs to fetch.
+     */
+    where?: TaskNotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TaskNotificationLogs to fetch.
+     */
+    orderBy?: TaskNotificationLogOrderByWithRelationInput | TaskNotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TaskNotificationLogs.
+     */
+    cursor?: TaskNotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TaskNotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TaskNotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TaskNotificationLogs.
+     */
+    distinct?: TaskNotificationLogScalarFieldEnum | TaskNotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * TaskNotificationLog create
+   */
+  export type TaskNotificationLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TaskNotificationLog.
+     */
+    data: XOR<TaskNotificationLogCreateInput, TaskNotificationLogUncheckedCreateInput>
+  }
+
+  /**
+   * TaskNotificationLog createMany
+   */
+  export type TaskNotificationLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TaskNotificationLogs.
+     */
+    data: TaskNotificationLogCreateManyInput | TaskNotificationLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TaskNotificationLog update
+   */
+  export type TaskNotificationLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TaskNotificationLog.
+     */
+    data: XOR<TaskNotificationLogUpdateInput, TaskNotificationLogUncheckedUpdateInput>
+    /**
+     * Choose, which TaskNotificationLog to update.
+     */
+    where: TaskNotificationLogWhereUniqueInput
+  }
+
+  /**
+   * TaskNotificationLog updateMany
+   */
+  export type TaskNotificationLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TaskNotificationLogs.
+     */
+    data: XOR<TaskNotificationLogUpdateManyMutationInput, TaskNotificationLogUncheckedUpdateManyInput>
+    /**
+     * Filter which TaskNotificationLogs to update
+     */
+    where?: TaskNotificationLogWhereInput
+    /**
+     * Limit how many TaskNotificationLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TaskNotificationLog upsert
+   */
+  export type TaskNotificationLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TaskNotificationLog to update in case it exists.
+     */
+    where: TaskNotificationLogWhereUniqueInput
+    /**
+     * In case the TaskNotificationLog found by the `where` argument doesn't exist, create a new TaskNotificationLog with this data.
+     */
+    create: XOR<TaskNotificationLogCreateInput, TaskNotificationLogUncheckedCreateInput>
+    /**
+     * In case the TaskNotificationLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TaskNotificationLogUpdateInput, TaskNotificationLogUncheckedUpdateInput>
+  }
+
+  /**
+   * TaskNotificationLog delete
+   */
+  export type TaskNotificationLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter which TaskNotificationLog to delete.
+     */
+    where: TaskNotificationLogWhereUniqueInput
+  }
+
+  /**
+   * TaskNotificationLog deleteMany
+   */
+  export type TaskNotificationLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TaskNotificationLogs to delete
+     */
+    where?: TaskNotificationLogWhereInput
+    /**
+     * Limit how many TaskNotificationLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TaskNotificationLog without action
+   */
+  export type TaskNotificationLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TaskNotificationLog
+     */
+    select?: TaskNotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TaskNotificationLog
+     */
+    omit?: TaskNotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TaskNotificationLogInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model TaskRankTemplate
    */
 
@@ -21086,9 +22134,6 @@ export namespace Prisma {
     dueDate: 'dueDate',
     completedAt: 'completedAt',
     isCompleted: 'isCompleted',
-    isDeadlineWarned: 'isDeadlineWarned',
-    isOverdueWarned: 'isOverdueWarned',
-    isRiskWarned: 'isRiskWarned',
     domainId: 'domainId',
     monitoredUnitId: 'monitoredUnitId',
     planId: 'planId',
@@ -21167,6 +22212,16 @@ export namespace Prisma {
   };
 
   export type TaskHistoryScalarFieldEnum = (typeof TaskHistoryScalarFieldEnum)[keyof typeof TaskHistoryScalarFieldEnum]
+
+
+  export const TaskNotificationLogScalarFieldEnum: {
+    id: 'id',
+    taskId: 'taskId',
+    type: 'type',
+    createdAt: 'createdAt'
+  };
+
+  export type TaskNotificationLogScalarFieldEnum = (typeof TaskNotificationLogScalarFieldEnum)[keyof typeof TaskNotificationLogScalarFieldEnum]
 
 
   export const TaskRankTemplateScalarFieldEnum: {
@@ -21387,6 +22442,13 @@ export namespace Prisma {
   };
 
   export type TaskHistoryOrderByRelevanceFieldEnum = (typeof TaskHistoryOrderByRelevanceFieldEnum)[keyof typeof TaskHistoryOrderByRelevanceFieldEnum]
+
+
+  export const TaskNotificationLogOrderByRelevanceFieldEnum: {
+    type: 'type'
+  };
+
+  export type TaskNotificationLogOrderByRelevanceFieldEnum = (typeof TaskNotificationLogOrderByRelevanceFieldEnum)[keyof typeof TaskNotificationLogOrderByRelevanceFieldEnum]
 
 
   export const TaskRankTemplateOrderByRelevanceFieldEnum: {
@@ -22397,9 +23459,6 @@ export namespace Prisma {
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
     isCompleted?: BoolFilter<"Task"> | boolean
-    isDeadlineWarned?: BoolFilter<"Task"> | boolean
-    isOverdueWarned?: BoolFilter<"Task"> | boolean
-    isRiskWarned?: BoolFilter<"Task"> | boolean
     domainId?: IntNullableFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableFilter<"Task"> | number | null
     planId?: IntNullableFilter<"Task"> | number | null
@@ -22418,6 +23477,7 @@ export namespace Prisma {
     steps?: TaskStepListRelationFilter
     ancestors?: TaskClosureListRelationFilter
     descendants?: TaskClosureListRelationFilter
+    notificationLogs?: TaskNotificationLogListRelationFilter
   }
 
   export type TaskOrderByWithRelationInput = {
@@ -22435,9 +23495,6 @@ export namespace Prisma {
     dueDate?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
     isCompleted?: SortOrder
-    isDeadlineWarned?: SortOrder
-    isOverdueWarned?: SortOrder
-    isRiskWarned?: SortOrder
     domainId?: SortOrderInput | SortOrder
     monitoredUnitId?: SortOrderInput | SortOrder
     planId?: SortOrderInput | SortOrder
@@ -22456,6 +23513,7 @@ export namespace Prisma {
     steps?: TaskStepOrderByRelationAggregateInput
     ancestors?: TaskClosureOrderByRelationAggregateInput
     descendants?: TaskClosureOrderByRelationAggregateInput
+    notificationLogs?: TaskNotificationLogOrderByRelationAggregateInput
     _relevance?: TaskOrderByRelevanceInput
   }
 
@@ -22477,9 +23535,6 @@ export namespace Prisma {
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
     isCompleted?: BoolFilter<"Task"> | boolean
-    isDeadlineWarned?: BoolFilter<"Task"> | boolean
-    isOverdueWarned?: BoolFilter<"Task"> | boolean
-    isRiskWarned?: BoolFilter<"Task"> | boolean
     domainId?: IntNullableFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableFilter<"Task"> | number | null
     planId?: IntNullableFilter<"Task"> | number | null
@@ -22498,6 +23553,7 @@ export namespace Prisma {
     steps?: TaskStepListRelationFilter
     ancestors?: TaskClosureListRelationFilter
     descendants?: TaskClosureListRelationFilter
+    notificationLogs?: TaskNotificationLogListRelationFilter
   }, "id">
 
   export type TaskOrderByWithAggregationInput = {
@@ -22515,9 +23571,6 @@ export namespace Prisma {
     dueDate?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
     isCompleted?: SortOrder
-    isDeadlineWarned?: SortOrder
-    isOverdueWarned?: SortOrder
-    isRiskWarned?: SortOrder
     domainId?: SortOrderInput | SortOrder
     monitoredUnitId?: SortOrderInput | SortOrder
     planId?: SortOrderInput | SortOrder
@@ -22553,9 +23606,6 @@ export namespace Prisma {
     dueDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     completedAt?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     isCompleted?: BoolWithAggregatesFilter<"Task"> | boolean
-    isDeadlineWarned?: BoolWithAggregatesFilter<"Task"> | boolean
-    isOverdueWarned?: BoolWithAggregatesFilter<"Task"> | boolean
-    isRiskWarned?: BoolWithAggregatesFilter<"Task"> | boolean
     domainId?: IntNullableWithAggregatesFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableWithAggregatesFilter<"Task"> | number | null
     planId?: IntNullableWithAggregatesFilter<"Task"> | number | null
@@ -22913,6 +23963,60 @@ export namespace Prisma {
     oldValue?: JsonNullableWithAggregatesFilter<"TaskHistory">
     newValue?: JsonNullableWithAggregatesFilter<"TaskHistory">
     createdAt?: DateTimeWithAggregatesFilter<"TaskHistory"> | Date | string
+  }
+
+  export type TaskNotificationLogWhereInput = {
+    AND?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
+    OR?: TaskNotificationLogWhereInput[]
+    NOT?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
+    id?: IntFilter<"TaskNotificationLog"> | number
+    taskId?: IntFilter<"TaskNotificationLog"> | number
+    type?: StringFilter<"TaskNotificationLog"> | string
+    createdAt?: DateTimeFilter<"TaskNotificationLog"> | Date | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+  }
+
+  export type TaskNotificationLogOrderByWithRelationInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    type?: SortOrder
+    createdAt?: SortOrder
+    task?: TaskOrderByWithRelationInput
+    _relevance?: TaskNotificationLogOrderByRelevanceInput
+  }
+
+  export type TaskNotificationLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    taskId_type?: TaskNotificationLogTaskIdTypeCompoundUniqueInput
+    AND?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
+    OR?: TaskNotificationLogWhereInput[]
+    NOT?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
+    taskId?: IntFilter<"TaskNotificationLog"> | number
+    type?: StringFilter<"TaskNotificationLog"> | string
+    createdAt?: DateTimeFilter<"TaskNotificationLog"> | Date | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+  }, "id" | "taskId_type">
+
+  export type TaskNotificationLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    type?: SortOrder
+    createdAt?: SortOrder
+    _count?: TaskNotificationLogCountOrderByAggregateInput
+    _avg?: TaskNotificationLogAvgOrderByAggregateInput
+    _max?: TaskNotificationLogMaxOrderByAggregateInput
+    _min?: TaskNotificationLogMinOrderByAggregateInput
+    _sum?: TaskNotificationLogSumOrderByAggregateInput
+  }
+
+  export type TaskNotificationLogScalarWhereWithAggregatesInput = {
+    AND?: TaskNotificationLogScalarWhereWithAggregatesInput | TaskNotificationLogScalarWhereWithAggregatesInput[]
+    OR?: TaskNotificationLogScalarWhereWithAggregatesInput[]
+    NOT?: TaskNotificationLogScalarWhereWithAggregatesInput | TaskNotificationLogScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"TaskNotificationLog"> | number
+    taskId?: IntWithAggregatesFilter<"TaskNotificationLog"> | number
+    type?: StringWithAggregatesFilter<"TaskNotificationLog"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"TaskNotificationLog"> | Date | string
   }
 
   export type TaskRankTemplateWhereInput = {
@@ -24100,9 +25204,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -24120,6 +25221,7 @@ export namespace Prisma {
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateInput = {
@@ -24137,9 +25239,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -24157,6 +25256,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUpdateInput = {
@@ -24173,9 +25273,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -24193,6 +25290,7 @@ export namespace Prisma {
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateInput = {
@@ -24210,9 +25308,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24230,6 +25325,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateManyInput = {
@@ -24247,9 +25343,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -24276,9 +25369,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -24305,9 +25395,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24651,6 +25738,51 @@ export namespace Prisma {
     actorCode?: NullableStringFieldUpdateOperationsInput | string | null
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskNotificationLogCreateInput = {
+    type: string
+    createdAt?: Date | string
+    task: TaskCreateNestedOneWithoutNotificationLogsInput
+  }
+
+  export type TaskNotificationLogUncheckedCreateInput = {
+    id?: number
+    taskId: number
+    type: string
+    createdAt?: Date | string
+  }
+
+  export type TaskNotificationLogUpdateInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    task?: TaskUpdateOneRequiredWithoutNotificationLogsNestedInput
+  }
+
+  export type TaskNotificationLogUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    taskId?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskNotificationLogCreateManyInput = {
+    id?: number
+    taskId: number
+    type: string
+    createdAt?: Date | string
+  }
+
+  export type TaskNotificationLogUpdateManyMutationInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskNotificationLogUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    taskId?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -25886,6 +27018,12 @@ export namespace Prisma {
     none?: TaskClosureWhereInput
   }
 
+  export type TaskNotificationLogListRelationFilter = {
+    every?: TaskNotificationLogWhereInput
+    some?: TaskNotificationLogWhereInput
+    none?: TaskNotificationLogWhereInput
+  }
+
   export type TaskAttachmentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -25899,6 +27037,10 @@ export namespace Prisma {
   }
 
   export type TaskClosureOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TaskNotificationLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -25923,9 +27065,6 @@ export namespace Prisma {
     dueDate?: SortOrder
     completedAt?: SortOrder
     isCompleted?: SortOrder
-    isDeadlineWarned?: SortOrder
-    isOverdueWarned?: SortOrder
-    isRiskWarned?: SortOrder
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
     planId?: SortOrder
@@ -25962,9 +27101,6 @@ export namespace Prisma {
     dueDate?: SortOrder
     completedAt?: SortOrder
     isCompleted?: SortOrder
-    isDeadlineWarned?: SortOrder
-    isOverdueWarned?: SortOrder
-    isRiskWarned?: SortOrder
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
     planId?: SortOrder
@@ -25991,9 +27127,6 @@ export namespace Prisma {
     dueDate?: SortOrder
     completedAt?: SortOrder
     isCompleted?: SortOrder
-    isDeadlineWarned?: SortOrder
-    isOverdueWarned?: SortOrder
-    isRiskWarned?: SortOrder
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
     planId?: SortOrder
@@ -26269,6 +27402,48 @@ export namespace Prisma {
   }
 
   export type TaskHistorySumOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+  }
+
+  export type TaskNotificationLogOrderByRelevanceInput = {
+    fields: TaskNotificationLogOrderByRelevanceFieldEnum | TaskNotificationLogOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type TaskNotificationLogTaskIdTypeCompoundUniqueInput = {
+    taskId: number
+    type: string
+  }
+
+  export type TaskNotificationLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    type?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TaskNotificationLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+  }
+
+  export type TaskNotificationLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    type?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TaskNotificationLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    taskId?: SortOrder
+    type?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TaskNotificationLogSumOrderByAggregateInput = {
     id?: SortOrder
     taskId?: SortOrder
   }
@@ -27052,6 +28227,13 @@ export namespace Prisma {
     connect?: TaskClosureWhereUniqueInput | TaskClosureWhereUniqueInput[]
   }
 
+  export type TaskNotificationLogCreateNestedManyWithoutTaskInput = {
+    create?: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput> | TaskNotificationLogCreateWithoutTaskInput[] | TaskNotificationLogUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskNotificationLogCreateOrConnectWithoutTaskInput | TaskNotificationLogCreateOrConnectWithoutTaskInput[]
+    createMany?: TaskNotificationLogCreateManyTaskInputEnvelope
+    connect?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+  }
+
   export type KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutTaskInput, KpiEvaluationTaskUncheckedCreateWithoutTaskInput> | KpiEvaluationTaskCreateWithoutTaskInput[] | KpiEvaluationTaskUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutTaskInput | KpiEvaluationTaskCreateOrConnectWithoutTaskInput[]
@@ -27099,6 +28281,13 @@ export namespace Prisma {
     connectOrCreate?: TaskClosureCreateOrConnectWithoutAncestorInput | TaskClosureCreateOrConnectWithoutAncestorInput[]
     createMany?: TaskClosureCreateManyAncestorInputEnvelope
     connect?: TaskClosureWhereUniqueInput | TaskClosureWhereUniqueInput[]
+  }
+
+  export type TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput = {
+    create?: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput> | TaskNotificationLogCreateWithoutTaskInput[] | TaskNotificationLogUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskNotificationLogCreateOrConnectWithoutTaskInput | TaskNotificationLogCreateOrConnectWithoutTaskInput[]
+    createMany?: TaskNotificationLogCreateManyTaskInputEnvelope
+    connect?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
   }
 
   export type MasterPlanUpdateOneWithoutTasksNestedInput = {
@@ -27209,6 +28398,20 @@ export namespace Prisma {
     deleteMany?: TaskClosureScalarWhereInput | TaskClosureScalarWhereInput[]
   }
 
+  export type TaskNotificationLogUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput> | TaskNotificationLogCreateWithoutTaskInput[] | TaskNotificationLogUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskNotificationLogCreateOrConnectWithoutTaskInput | TaskNotificationLogCreateOrConnectWithoutTaskInput[]
+    upsert?: TaskNotificationLogUpsertWithWhereUniqueWithoutTaskInput | TaskNotificationLogUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: TaskNotificationLogCreateManyTaskInputEnvelope
+    set?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    disconnect?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    delete?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    connect?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    update?: TaskNotificationLogUpdateWithWhereUniqueWithoutTaskInput | TaskNotificationLogUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: TaskNotificationLogUpdateManyWithWhereWithoutTaskInput | TaskNotificationLogUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: TaskNotificationLogScalarWhereInput | TaskNotificationLogScalarWhereInput[]
+  }
+
   export type KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutTaskInput, KpiEvaluationTaskUncheckedCreateWithoutTaskInput> | KpiEvaluationTaskCreateWithoutTaskInput[] | KpiEvaluationTaskUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutTaskInput | KpiEvaluationTaskCreateOrConnectWithoutTaskInput[]
@@ -27305,6 +28508,20 @@ export namespace Prisma {
     update?: TaskClosureUpdateWithWhereUniqueWithoutAncestorInput | TaskClosureUpdateWithWhereUniqueWithoutAncestorInput[]
     updateMany?: TaskClosureUpdateManyWithWhereWithoutAncestorInput | TaskClosureUpdateManyWithWhereWithoutAncestorInput[]
     deleteMany?: TaskClosureScalarWhereInput | TaskClosureScalarWhereInput[]
+  }
+
+  export type TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput> | TaskNotificationLogCreateWithoutTaskInput[] | TaskNotificationLogUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: TaskNotificationLogCreateOrConnectWithoutTaskInput | TaskNotificationLogCreateOrConnectWithoutTaskInput[]
+    upsert?: TaskNotificationLogUpsertWithWhereUniqueWithoutTaskInput | TaskNotificationLogUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: TaskNotificationLogCreateManyTaskInputEnvelope
+    set?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    disconnect?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    delete?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    connect?: TaskNotificationLogWhereUniqueInput | TaskNotificationLogWhereUniqueInput[]
+    update?: TaskNotificationLogUpdateWithWhereUniqueWithoutTaskInput | TaskNotificationLogUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: TaskNotificationLogUpdateManyWithWhereWithoutTaskInput | TaskNotificationLogUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: TaskNotificationLogScalarWhereInput | TaskNotificationLogScalarWhereInput[]
   }
 
   export type TaskCreateNestedOneWithoutStepsInput = {
@@ -27407,6 +28624,20 @@ export namespace Prisma {
     upsert?: TaskUpsertWithoutHistoriesInput
     connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutHistoriesInput, TaskUpdateWithoutHistoriesInput>, TaskUncheckedUpdateWithoutHistoriesInput>
+  }
+
+  export type TaskCreateNestedOneWithoutNotificationLogsInput = {
+    create?: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutNotificationLogsInput
+    connect?: TaskWhereUniqueInput
+  }
+
+  export type TaskUpdateOneRequiredWithoutNotificationLogsNestedInput = {
+    create?: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutNotificationLogsInput
+    upsert?: TaskUpsertWithoutNotificationLogsInput
+    connect?: TaskWhereUniqueInput
+    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutNotificationLogsInput, TaskUpdateWithoutNotificationLogsInput>, TaskUncheckedUpdateWithoutNotificationLogsInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -28711,9 +29942,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -28730,6 +29958,7 @@ export namespace Prisma {
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutKpiEvaluationsInput = {
@@ -28747,9 +29976,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -28766,6 +29992,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutKpiEvaluationsInput = {
@@ -28840,9 +30067,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28859,6 +30083,7 @@ export namespace Prisma {
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutKpiEvaluationsInput = {
@@ -28876,9 +30101,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -28895,6 +30117,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type KpiEvaluationUpsertWithoutTasksInput = {
@@ -29154,9 +30377,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -29173,6 +30393,7 @@ export namespace Prisma {
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutPlanInput = {
@@ -29190,9 +30411,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -29209,6 +30427,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutPlanInput = {
@@ -29255,9 +30474,6 @@ export namespace Prisma {
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     completedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
     isCompleted?: BoolFilter<"Task"> | boolean
-    isDeadlineWarned?: BoolFilter<"Task"> | boolean
-    isOverdueWarned?: BoolFilter<"Task"> | boolean
-    isRiskWarned?: BoolFilter<"Task"> | boolean
     domainId?: IntNullableFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableFilter<"Task"> | number | null
     planId?: IntNullableFilter<"Task"> | number | null
@@ -29520,6 +30736,27 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TaskNotificationLogCreateWithoutTaskInput = {
+    type: string
+    createdAt?: Date | string
+  }
+
+  export type TaskNotificationLogUncheckedCreateWithoutTaskInput = {
+    id?: number
+    type: string
+    createdAt?: Date | string
+  }
+
+  export type TaskNotificationLogCreateOrConnectWithoutTaskInput = {
+    where: TaskNotificationLogWhereUniqueInput
+    create: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput>
+  }
+
+  export type TaskNotificationLogCreateManyTaskInputEnvelope = {
+    data: TaskNotificationLogCreateManyTaskInput | TaskNotificationLogCreateManyTaskInput[]
+    skipDuplicates?: boolean
+  }
+
   export type MasterPlanUpsertWithoutTasksInput = {
     update: XOR<MasterPlanUpdateWithoutTasksInput, MasterPlanUncheckedUpdateWithoutTasksInput>
     create: XOR<MasterPlanCreateWithoutTasksInput, MasterPlanUncheckedCreateWithoutTasksInput>
@@ -29725,6 +30962,32 @@ export namespace Prisma {
     data: XOR<TaskClosureUpdateManyMutationInput, TaskClosureUncheckedUpdateManyWithoutAncestorInput>
   }
 
+  export type TaskNotificationLogUpsertWithWhereUniqueWithoutTaskInput = {
+    where: TaskNotificationLogWhereUniqueInput
+    update: XOR<TaskNotificationLogUpdateWithoutTaskInput, TaskNotificationLogUncheckedUpdateWithoutTaskInput>
+    create: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput>
+  }
+
+  export type TaskNotificationLogUpdateWithWhereUniqueWithoutTaskInput = {
+    where: TaskNotificationLogWhereUniqueInput
+    data: XOR<TaskNotificationLogUpdateWithoutTaskInput, TaskNotificationLogUncheckedUpdateWithoutTaskInput>
+  }
+
+  export type TaskNotificationLogUpdateManyWithWhereWithoutTaskInput = {
+    where: TaskNotificationLogScalarWhereInput
+    data: XOR<TaskNotificationLogUpdateManyMutationInput, TaskNotificationLogUncheckedUpdateManyWithoutTaskInput>
+  }
+
+  export type TaskNotificationLogScalarWhereInput = {
+    AND?: TaskNotificationLogScalarWhereInput | TaskNotificationLogScalarWhereInput[]
+    OR?: TaskNotificationLogScalarWhereInput[]
+    NOT?: TaskNotificationLogScalarWhereInput | TaskNotificationLogScalarWhereInput[]
+    id?: IntFilter<"TaskNotificationLog"> | number
+    taskId?: IntFilter<"TaskNotificationLog"> | number
+    type?: StringFilter<"TaskNotificationLog"> | string
+    createdAt?: DateTimeFilter<"TaskNotificationLog"> | Date | string
+  }
+
   export type TaskCreateWithoutStepsInput = {
     parentId?: number | null
     title: string
@@ -29739,9 +31002,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -29758,6 +31018,7 @@ export namespace Prisma {
     histories?: TaskHistoryCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutStepsInput = {
@@ -29775,9 +31036,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -29794,6 +31052,7 @@ export namespace Prisma {
     histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutStepsInput = {
@@ -29826,9 +31085,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29845,6 +31101,7 @@ export namespace Prisma {
     histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutStepsInput = {
@@ -29862,9 +31119,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -29881,6 +31135,7 @@ export namespace Prisma {
     histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutAttachmentsInput = {
@@ -29897,9 +31152,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -29916,6 +31168,7 @@ export namespace Prisma {
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutAttachmentsInput = {
@@ -29933,9 +31186,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -29952,6 +31202,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutAttachmentsInput = {
@@ -29984,9 +31235,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30003,6 +31251,7 @@ export namespace Prisma {
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutAttachmentsInput = {
@@ -30020,9 +31269,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30039,6 +31285,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutParticipantsInput = {
@@ -30055,9 +31302,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -30074,6 +31318,7 @@ export namespace Prisma {
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutParticipantsInput = {
@@ -30091,9 +31336,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -30110,6 +31352,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutParticipantsInput = {
@@ -30204,9 +31447,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30223,6 +31463,7 @@ export namespace Prisma {
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutParticipantsInput = {
@@ -30240,9 +31481,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30259,6 +31497,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type EmployeeUpsertWithoutTaskParticipantsInput = {
@@ -30343,9 +31582,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -30362,6 +31598,7 @@ export namespace Prisma {
     histories?: TaskHistoryCreateNestedManyWithoutTaskInput
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutDescendantsInput = {
@@ -30379,9 +31616,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -30398,6 +31632,7 @@ export namespace Prisma {
     histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutDescendantsInput = {
@@ -30419,9 +31654,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -30438,6 +31670,7 @@ export namespace Prisma {
     histories?: TaskHistoryCreateNestedManyWithoutTaskInput
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutAncestorsInput = {
@@ -30455,9 +31688,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -30474,6 +31704,7 @@ export namespace Prisma {
     histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutAncestorsInput = {
@@ -30506,9 +31737,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30525,6 +31753,7 @@ export namespace Prisma {
     histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutDescendantsInput = {
@@ -30542,9 +31771,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30561,6 +31787,7 @@ export namespace Prisma {
     histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUpsertWithoutAncestorsInput = {
@@ -30588,9 +31815,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30607,6 +31831,7 @@ export namespace Prisma {
     histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutAncestorsInput = {
@@ -30624,9 +31849,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30643,6 +31865,7 @@ export namespace Prisma {
     histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutHistoriesInput = {
@@ -30659,9 +31882,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -30678,6 +31898,7 @@ export namespace Prisma {
     steps?: TaskStepCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutHistoriesInput = {
@@ -30695,9 +31916,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     planId?: number | null
@@ -30714,6 +31932,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
     ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
     descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutHistoriesInput = {
@@ -30746,9 +31965,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30765,6 +31981,7 @@ export namespace Prisma {
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutHistoriesInput = {
@@ -30782,9 +31999,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     planId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30798,6 +32012,157 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
+  }
+
+  export type TaskCreateWithoutNotificationLogsInput = {
+    parentId?: number | null
+    title: string
+    description?: string | null
+    status?: string
+    priority?: string
+    type?: string
+    meetingLink?: string | null
+    progress?: number
+    rejectReason?: string | null
+    startDate?: Date | string | null
+    dueDate?: Date | string | null
+    completedAt?: Date | string | null
+    isCompleted?: boolean
+    domainId?: number | null
+    monitoredUnitId?: number | null
+    workflowInstId?: string | null
+    conversationId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    creatorEmployeeCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isDeleted?: boolean
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+  }
+
+  export type TaskUncheckedCreateWithoutNotificationLogsInput = {
+    id?: number
+    parentId?: number | null
+    title: string
+    description?: string | null
+    status?: string
+    priority?: string
+    type?: string
+    meetingLink?: string | null
+    progress?: number
+    rejectReason?: string | null
+    startDate?: Date | string | null
+    dueDate?: Date | string | null
+    completedAt?: Date | string | null
+    isCompleted?: boolean
+    domainId?: number | null
+    monitoredUnitId?: number | null
+    planId?: number | null
+    workflowInstId?: string | null
+    conversationId?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    creatorEmployeeCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isDeleted?: boolean
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+  }
+
+  export type TaskCreateOrConnectWithoutNotificationLogsInput = {
+    where: TaskWhereUniqueInput
+    create: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
+  }
+
+  export type TaskUpsertWithoutNotificationLogsInput = {
+    update: XOR<TaskUpdateWithoutNotificationLogsInput, TaskUncheckedUpdateWithoutNotificationLogsInput>
+    create: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
+    where?: TaskWhereInput
+  }
+
+  export type TaskUpdateToOneWithWhereWithoutNotificationLogsInput = {
+    where?: TaskWhereInput
+    data: XOR<TaskUpdateWithoutNotificationLogsInput, TaskUncheckedUpdateWithoutNotificationLogsInput>
+  }
+
+  export type TaskUpdateWithoutNotificationLogsInput = {
+    parentId?: NullableIntFieldUpdateOperationsInput | number | null
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
+    progress?: FloatFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    domainId?: NullableIntFieldUpdateOperationsInput | number | null
+    monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
+    workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    creatorEmployeeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+  }
+
+  export type TaskUncheckedUpdateWithoutNotificationLogsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    parentId?: NullableIntFieldUpdateOperationsInput | number | null
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    priority?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
+    progress?: FloatFieldUpdateOperationsInput | number
+    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    domainId?: NullableIntFieldUpdateOperationsInput | number | null
+    monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
+    planId?: NullableIntFieldUpdateOperationsInput | number | null
+    workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
+    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    creatorEmployeeCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
@@ -31382,9 +32747,6 @@ export namespace Prisma {
     dueDate?: Date | string | null
     completedAt?: Date | string | null
     isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isOverdueWarned?: boolean
-    isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
     workflowInstId?: string | null
@@ -31410,9 +32772,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31429,6 +32788,7 @@ export namespace Prisma {
     steps?: TaskStepUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutPlanInput = {
@@ -31446,9 +32806,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31465,6 +32822,7 @@ export namespace Prisma {
     steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
     ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
     descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutPlanInput = {
@@ -31482,9 +32840,6 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
     workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31568,6 +32923,12 @@ export namespace Prisma {
   export type TaskClosureCreateManyAncestorInput = {
     descendantId: number
     depth: number
+  }
+
+  export type TaskNotificationLogCreateManyTaskInput = {
+    id?: number
+    type: string
+    createdAt?: Date | string
   }
 
   export type KpiEvaluationTaskUpdateWithoutTaskInput = {
@@ -31786,6 +33147,23 @@ export namespace Prisma {
   export type TaskClosureUncheckedUpdateManyWithoutAncestorInput = {
     descendantId?: IntFieldUpdateOperationsInput | number
     depth?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type TaskNotificationLogUpdateWithoutTaskInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskNotificationLogUncheckedUpdateWithoutTaskInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TaskNotificationLogUncheckedUpdateManyWithoutTaskInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

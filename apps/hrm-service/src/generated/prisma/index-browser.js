@@ -277,9 +277,6 @@ exports.Prisma.TaskScalarFieldEnum = {
   dueDate: 'dueDate',
   completedAt: 'completedAt',
   isCompleted: 'isCompleted',
-  isDeadlineWarned: 'isDeadlineWarned',
-  isOverdueWarned: 'isOverdueWarned',
-  isRiskWarned: 'isRiskWarned',
   domainId: 'domainId',
   monitoredUnitId: 'monitoredUnitId',
   planId: 'planId',
@@ -339,6 +336,13 @@ exports.Prisma.TaskHistoryScalarFieldEnum = {
   actorCode: 'actorCode',
   oldValue: 'oldValue',
   newValue: 'newValue',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.TaskNotificationLogScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  type: 'type',
   createdAt: 'createdAt'
 };
 
@@ -499,6 +503,10 @@ exports.Prisma.TaskHistoryOrderByRelevanceFieldEnum = {
   actorCode: 'actorCode'
 };
 
+exports.Prisma.TaskNotificationLogOrderByRelevanceFieldEnum = {
+  type: 'type'
+};
+
 exports.Prisma.TaskRankTemplateOrderByRelevanceFieldEnum = {
   classification: 'classification',
   rank: 'rank',
@@ -540,6 +548,7 @@ exports.Prisma.ModelName = {
   TaskParticipant: 'TaskParticipant',
   TaskClosure: 'TaskClosure',
   TaskHistory: 'TaskHistory',
+  TaskNotificationLog: 'TaskNotificationLog',
   TaskRankTemplate: 'TaskRankTemplate',
   RankQuota: 'RankQuota'
 };
