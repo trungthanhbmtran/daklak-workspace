@@ -166,10 +166,19 @@ export class MasterPlansService implements OnModuleInit {
     unitId: number,
   ): number[] {
     const ids: number[] = [];
+    const visited = new Set<number>();
     let current = unitMap[unitId];
-    if (current) ids.push(unitId);
+    if (current) {
+      ids.push(unitId);
+      visited.add(unitId);
+    }
     while (current?.parentId) {
+      if (visited.has(current.parentId)) {
+        console.warn(`[MasterPlansService] Cycle detected at unitId: ${current.parentId}`);
+        break;
+      }
       ids.push(current.parentId);
+      visited.add(current.parentId);
       current = unitMap[current.parentId];
     }
     return ids;
@@ -271,22 +280,22 @@ export class MasterPlansService implements OnModuleInit {
   async generateFromAi(_text: string) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const mockPlan = {
-      title: 'Triển khai CĐS ngành Y Tế Đắk Lắk',
-      objective: 'Đưa 100% hồ sơ bệnh án lên nền tảng số hóa trong năm 2026.',
+      title: 'Triá»ƒn khai CÄS ngÃ nh Y Táº¿ Äáº¯k Láº¯k',
+      objective: 'ÄÆ°a 100% há»“ sÆ¡ bá»‡nh Ã¡n lÃªn ná»n táº£ng sá»‘ hÃ³a trong nÄƒm 2026.',
       startDate: new Date().toISOString(),
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       tasks: [
         {
-          title: 'Khảo sát hiện trạng bệnh án điện tử',
+          title: 'Kháº£o sÃ¡t hiá»‡n tráº¡ng bá»‡nh Ã¡n Ä‘iá»‡n tá»­',
           description:
-            'Làm việc với các bệnh viện tuyến tỉnh để rà soát hạ tầng server.',
+            'LÃ m viá»‡c vá»›i cÃ¡c bá»‡nh viá»‡n tuyáº¿n tá»‰nh Ä‘á»ƒ rÃ  soÃ¡t háº¡ táº§ng server.',
           priority: 'HIGH',
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           assigneeCode: 'E001',
         },
         {
-          title: 'Đào tạo sử dụng phần mềm quản lý',
-          description: 'Mở lớp tập huấn cho 500 y bác sĩ.',
+          title: 'ÄÃ o táº¡o sá»­ dá»¥ng pháº§n má»m quáº£n lÃ½',
+          description: 'Má»Ÿ lá»›p táº­p huáº¥n cho 500 y bÃ¡c sÄ©.',
           priority: 'MEDIUM',
           dueDate: new Date(
             Date.now() + 14 * 24 * 60 * 60 * 1000,
@@ -294,8 +303,8 @@ export class MasterPlansService implements OnModuleInit {
           assigneeCode: 'E002',
         },
         {
-          title: 'Ban hành quy chế an toàn dữ liệu',
-          description: 'Dự thảo và xin chữ ký Sở Y Tế.',
+          title: 'Ban hÃ nh quy cháº¿ an toÃ n dá»¯ liá»‡u',
+          description: 'Dá»± tháº£o vÃ  xin chá»¯ kÃ½ Sá»Ÿ Y Táº¿.',
           priority: 'URGENT',
           dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
           assigneeCode: 'E003',
@@ -306,7 +315,7 @@ export class MasterPlansService implements OnModuleInit {
     return {
       success: true,
       data: mockPlan,
-      message: 'AI đã phân tích và đề xuất thành công',
+      message: 'AI Ä‘Ã£ phÃ¢n tÃ­ch vÃ  Ä‘á» xuáº¥t thÃ nh cÃ´ng',
     };
   }
 
