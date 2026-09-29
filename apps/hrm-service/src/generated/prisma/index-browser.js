@@ -170,79 +170,11 @@ exports.Prisma.KpiDomainWeightScalarFieldEnum = {
   attitudeWeight: 'attitudeWeight'
 };
 
-exports.Prisma.TaskKpiSettingScalarFieldEnum = {
-  taskId: 'taskId',
-  baseScore: 'baseScore',
-  weight: 'weight',
-  scoringMethod: 'scoringMethod',
-  isCrossDomain: 'isCrossDomain',
-  crossDomainMultiplier: 'crossDomainMultiplier',
-  bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay',
-  standardDurationDays: 'standardDurationDays',
-  kpiCriteriaId: 'kpiCriteriaId'
-};
-
 exports.Prisma.KpiPeriodScalarFieldEnum = {
   id: 'id',
   name: 'name',
   startDate: 'startDate',
   endDate: 'endDate',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.KpiCriteriaScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  categoryId: 'categoryId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.KpiCriteriaSettingScalarFieldEnum = {
-  criteriaId: 'criteriaId',
-  weight: 'weight',
-  baseScore: 'baseScore',
-  scoringMethod: 'scoringMethod',
-  difficulty: 'difficulty',
-  difficultyMultiplier: 'difficultyMultiplier',
-  bonusThresholdDays: 'bonusThresholdDays',
-  bonusPerDay: 'bonusPerDay',
-  penaltyPerDay: 'penaltyPerDay',
-  integrationCode: 'integrationCode',
-  formula: 'formula'
-};
-
-exports.Prisma.EmployeeKpiTargetScalarFieldEnum = {
-  id: 'id',
-  employeeCode: 'employeeCode',
-  periodId: 'periodId',
-  criteriaId: 'criteriaId',
-  targetValue: 'targetValue',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.JobTitleKpiTargetScalarFieldEnum = {
-  id: 'id',
-  jobTitleId: 'jobTitleId',
-  periodId: 'periodId',
-  criteriaId: 'criteriaId',
-  targetValue: 'targetValue',
-  weight: 'weight',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.StaffingSlotKpiTargetScalarFieldEnum = {
-  id: 'id',
-  staffingSlotId: 'staffingSlotId',
-  periodId: 'periodId',
-  criteriaId: 'criteriaId',
-  targetValue: 'targetValue',
-  weight: 'weight',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -261,17 +193,6 @@ exports.Prisma.KpiEvaluationScalarFieldEnum = {
   taskScoreFinal: 'taskScoreFinal',
   totalScore: 'totalScore',
   reviewerCode: 'reviewerCode',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.KpiEvaluationDetailScalarFieldEnum = {
-  id: 'id',
-  evaluationId: 'evaluationId',
-  criteriaId: 'criteriaId',
-  selfScore: 'selfScore',
-  reviewerScore: 'reviewerScore',
-  notes: 'notes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -305,6 +226,7 @@ exports.Prisma.KpiFormTemplateScalarFieldEnum = {
   formCode: 'formCode',
   name: 'name',
   description: 'description',
+  templateFileId: 'templateFileId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -313,6 +235,7 @@ exports.Prisma.KpiFormDocumentScalarFieldEnum = {
   id: 'id',
   formCode: 'formCode',
   evaluationId: 'evaluationId',
+  documentFileId: 'documentFileId',
   contentJson: 'contentJson',
   status: 'status',
   submitterCode: 'submitterCode',
@@ -456,10 +379,6 @@ exports.Prisma.NullableJsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.JsonNullValueInput = {
-  JsonNull: Prisma.JsonNull
-};
-
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
@@ -501,28 +420,8 @@ exports.Prisma.KpiDomainWeightOrderByRelevanceFieldEnum = {
   domainCode: 'domainCode'
 };
 
-exports.Prisma.TaskKpiSettingOrderByRelevanceFieldEnum = {
-  scoringMethod: 'scoringMethod'
-};
-
 exports.Prisma.KpiPeriodOrderByRelevanceFieldEnum = {
   name: 'name'
-};
-
-exports.Prisma.KpiCriteriaOrderByRelevanceFieldEnum = {
-  name: 'name',
-  description: 'description'
-};
-
-exports.Prisma.KpiCriteriaSettingOrderByRelevanceFieldEnum = {
-  scoringMethod: 'scoringMethod',
-  difficulty: 'difficulty',
-  integrationCode: 'integrationCode',
-  formula: 'formula'
-};
-
-exports.Prisma.EmployeeKpiTargetOrderByRelevanceFieldEnum = {
-  employeeCode: 'employeeCode'
 };
 
 exports.Prisma.KpiEvaluationOrderByRelevanceFieldEnum = {
@@ -530,10 +429,6 @@ exports.Prisma.KpiEvaluationOrderByRelevanceFieldEnum = {
   phase: 'phase',
   status: 'status',
   reviewerCode: 'reviewerCode'
-};
-
-exports.Prisma.KpiEvaluationDetailOrderByRelevanceFieldEnum = {
-  notes: 'notes'
 };
 
 exports.Prisma.KpiEvaluationTaskOrderByRelevanceFieldEnum = {
@@ -545,11 +440,13 @@ exports.Prisma.KpiEvaluationTaskOrderByRelevanceFieldEnum = {
 exports.Prisma.KpiFormTemplateOrderByRelevanceFieldEnum = {
   formCode: 'formCode',
   name: 'name',
-  description: 'description'
+  description: 'description',
+  templateFileId: 'templateFileId'
 };
 
 exports.Prisma.KpiFormDocumentOrderByRelevanceFieldEnum = {
   formCode: 'formCode',
+  documentFileId: 'documentFileId',
   status: 'status',
   submitterCode: 'submitterCode',
   signerCode: 'signerCode',
@@ -630,15 +527,8 @@ exports.Prisma.ModelName = {
   Employee: 'Employee',
   KpiRuleSet: 'KpiRuleSet',
   KpiDomainWeight: 'KpiDomainWeight',
-  TaskKpiSetting: 'TaskKpiSetting',
   KpiPeriod: 'KpiPeriod',
-  KpiCriteria: 'KpiCriteria',
-  KpiCriteriaSetting: 'KpiCriteriaSetting',
-  EmployeeKpiTarget: 'EmployeeKpiTarget',
-  JobTitleKpiTarget: 'JobTitleKpiTarget',
-  StaffingSlotKpiTarget: 'StaffingSlotKpiTarget',
   KpiEvaluation: 'KpiEvaluation',
-  KpiEvaluationDetail: 'KpiEvaluationDetail',
   KpiEvaluationTask: 'KpiEvaluationTask',
   KpiFormTemplate: 'KpiFormTemplate',
   KpiFormDocument: 'KpiFormDocument',

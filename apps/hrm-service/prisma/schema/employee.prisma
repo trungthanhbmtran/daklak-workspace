@@ -36,7 +36,6 @@ model Employee {
   kpiEvaluations     KpiEvaluation[]     @relation("KpiEmployee")
   kpiReviews         KpiEvaluation[]     @relation("KpiReviewer")
   taskParticipants   TaskParticipant[]   @relation("EmployeeTasks")
-  employeeKpiTargets EmployeeKpiTarget[] @relation("EmployeeKpiTargets")
 
   @@map("employees")
 }

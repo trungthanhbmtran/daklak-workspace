@@ -33,7 +33,6 @@ model Task {
   isDeleted           Boolean  @default(false) @map("is_deleted")
 
   plan           MasterPlan?         @relation(fields: [planId], references: [id])
-  kpiSettings    TaskKpiSetting?
   kpiEvaluations KpiEvaluationTask[]
 
   participants TaskParticipant[]

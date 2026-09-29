@@ -23,11 +23,11 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🔹 Cleaning old seed data...');
-  await prisma.kpiEvaluationDetail.deleteMany({});
+  
   await prisma.kpiEvaluation.deleteMany({});
 
-  await prisma.taskKpiSetting.deleteMany({});
-  await prisma.kpiCriteria.deleteMany({});
+  
+  
   await prisma.kpiPeriod.deleteMany({});
   await prisma.rankQuota.deleteMany({});
   await prisma.taskRankTemplate.deleteMany({});
@@ -378,74 +378,7 @@ async function main() {
   await prisma.rankQuota.createMany({ data: rankQuotas });
   console.log(`✅ Đã seed ${rankQuotas.length} Rank Quotas.`);
 
-  // --- Seed KPI Criteria (Updated for Rank Quotas) ---
-  console.log('🔹 Seed KPI Criteria (Đề án Vị trí việc làm 01/07/2026)...');
-  const kpiCriteriaData = [
-    {
-      name: 'Chính trị tư tưởng, đạo đức và lối sống',
-      description: 'Chấp hành chủ trương, đường lối, quy định của Đảng, Nhà nước; giữ gìn phẩm chất đạo đức, lối sống, không có biểu hiện suy thoái.',
-      settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-    },
-    {
-      name: 'Tác phong, lề lối làm việc và tinh thần phối hợp',
-      description: 'Có trách nhiệm với công việc; phối hợp tốt với đồng nghiệp, cơ quan khác; thái độ phục vụ nhân dân chuẩn mực.',
-      settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-    },
-    {
-      name: 'Ý thức tổ chức kỷ luật và thời giờ làm việc',
-      description: 'Chấp hành sự phân công của tổ chức; tuân thủ nội quy, quy chế cơ quan; đảm bảo thời gian, ngày công làm việc.',
-      settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'INTEGRATION_API', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 2, integrationCode: 'TIMEKEEPER_API' }
-    },
-    {
-      name: 'Chuyên môn: Khối lượng công việc hoàn thành',
-      description: 'Đánh giá mức độ hoàn thành khối lượng công việc theo định mức VTVL (Tự động đếm Task).',
-      settings: { weight: 15.0, baseScore: 15.0, scoringMethod: 'AUTO', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-    },
-    {
-      name: 'Chuyên môn: Chất lượng và hiệu quả',
-      description: 'Đánh giá chất lượng sản phẩm đầu ra, mức độ sai sót và hiệu quả mang lại.',
-      settings: { weight: 15.0, baseScore: 15.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-    },
-    {
-      name: 'Chuyên môn: Tiến độ thực hiện',
-      description: 'Đánh giá thời gian hoàn thành so với hạn chót (Deadline) và thời gian chuẩn được giao.',
-      settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'AUTO', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 1, penaltyPerDay: 2 }
-    },
-    {
-      name: 'Kết quả thực hiện nhiệm vụ đột xuất, phát sinh',
-      description: 'Mức độ sẵn sàng và hiệu quả xử lý các công việc phát sinh ngoài kế hoạch do Lãnh đạo giao.',
-      settings: { weight: 15.0, baseScore: 15.0, scoringMethod: 'AUTO', difficulty: 'HARD', difficultyMultiplier: 1.5, bonusThresholdDays: 0, bonusPerDay: 2, penaltyPerDay: 3 }
-    },
-    {
-      name: 'Năng lực lãnh đạo, chỉ đạo, quản lý và điều hành',
-      description: '(Dành cho chức vụ Lãnh đạo/Quản lý) Xây dựng kế hoạch, tổ chức thực hiện, kiểm tra và năng lực điều hành phòng ban/cơ quan.',
-      settings: { weight: 10.0, baseScore: 10.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-    },
-    {
-      name: 'Đổi mới, sáng tạo, đề xuất giải pháp, sáng kiến',
-      description: 'Có sáng kiến, giải pháp cải tiến quy trình công tác, ứng dụng công nghệ thông tin mang lại hiệu quả.',
-      settings: { weight: 5.0, baseScore: 5.0, scoringMethod: 'MANUAL', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-    },
-    {
-      name: 'Điểm trừ: Vi phạm nội quy, trễ hạn công việc',
-      description: 'Điểm trừ tự động khi vi phạm quy chế hoặc có các công việc bị đánh dấu quá hạn, bị trả về nhiều lần.',
-      settings: { weight: -5.0, baseScore: 0.0, scoringMethod: 'AUTO', difficulty: 'NORMAL', difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 5 }
-    }
-  ];
-
-  for (const criteria of kpiCriteriaData) {
-    await prisma.kpiCriteria.create({
-      data: {
-        name: criteria.name,
-        description: criteria.description,
-        settings: {
-          create: criteria.settings
-        }
-      }
-    });
-  }
-  console.log(`✅ Đã seed ${kpiCriteriaData.length} KPI Criteria theo chuẩn VTVL.`);
-  const { seedBtctuKpiEngine } = require('./btctu-kpi-engine.seed');
+    const { seedBtctuKpiEngine } = require('./btctu-kpi-engine.seed');
   await seedBtctuKpiEngine(prisma);
 }
 

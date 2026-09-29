@@ -29,50 +29,15 @@ export type KpiRuleSet = $Result.DefaultSelection<Prisma.$KpiRuleSetPayload>
  */
 export type KpiDomainWeight = $Result.DefaultSelection<Prisma.$KpiDomainWeightPayload>
 /**
- * Model TaskKpiSetting
- * 
- */
-export type TaskKpiSetting = $Result.DefaultSelection<Prisma.$TaskKpiSettingPayload>
-/**
  * Model KpiPeriod
  * 
  */
 export type KpiPeriod = $Result.DefaultSelection<Prisma.$KpiPeriodPayload>
 /**
- * Model KpiCriteria
- * 
- */
-export type KpiCriteria = $Result.DefaultSelection<Prisma.$KpiCriteriaPayload>
-/**
- * Model KpiCriteriaSetting
- * 
- */
-export type KpiCriteriaSetting = $Result.DefaultSelection<Prisma.$KpiCriteriaSettingPayload>
-/**
- * Model EmployeeKpiTarget
- * 
- */
-export type EmployeeKpiTarget = $Result.DefaultSelection<Prisma.$EmployeeKpiTargetPayload>
-/**
- * Model JobTitleKpiTarget
- * 
- */
-export type JobTitleKpiTarget = $Result.DefaultSelection<Prisma.$JobTitleKpiTargetPayload>
-/**
- * Model StaffingSlotKpiTarget
- * 
- */
-export type StaffingSlotKpiTarget = $Result.DefaultSelection<Prisma.$StaffingSlotKpiTargetPayload>
-/**
  * Model KpiEvaluation
  * 
  */
 export type KpiEvaluation = $Result.DefaultSelection<Prisma.$KpiEvaluationPayload>
-/**
- * Model KpiEvaluationDetail
- * 
- */
-export type KpiEvaluationDetail = $Result.DefaultSelection<Prisma.$KpiEvaluationDetailPayload>
 /**
  * Model KpiEvaluationTask
  * 
@@ -306,16 +271,6 @@ export class PrismaClient<
   get kpiDomainWeight(): Prisma.KpiDomainWeightDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.taskKpiSetting`: Exposes CRUD operations for the **TaskKpiSetting** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more TaskKpiSettings
-    * const taskKpiSettings = await prisma.taskKpiSetting.findMany()
-    * ```
-    */
-  get taskKpiSetting(): Prisma.TaskKpiSettingDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.kpiPeriod`: Exposes CRUD operations for the **KpiPeriod** model.
     * Example usage:
     * ```ts
@@ -326,56 +281,6 @@ export class PrismaClient<
   get kpiPeriod(): Prisma.KpiPeriodDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.kpiCriteria`: Exposes CRUD operations for the **KpiCriteria** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more KpiCriteria
-    * const kpiCriteria = await prisma.kpiCriteria.findMany()
-    * ```
-    */
-  get kpiCriteria(): Prisma.KpiCriteriaDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.kpiCriteriaSetting`: Exposes CRUD operations for the **KpiCriteriaSetting** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more KpiCriteriaSettings
-    * const kpiCriteriaSettings = await prisma.kpiCriteriaSetting.findMany()
-    * ```
-    */
-  get kpiCriteriaSetting(): Prisma.KpiCriteriaSettingDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.employeeKpiTarget`: Exposes CRUD operations for the **EmployeeKpiTarget** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more EmployeeKpiTargets
-    * const employeeKpiTargets = await prisma.employeeKpiTarget.findMany()
-    * ```
-    */
-  get employeeKpiTarget(): Prisma.EmployeeKpiTargetDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.jobTitleKpiTarget`: Exposes CRUD operations for the **JobTitleKpiTarget** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more JobTitleKpiTargets
-    * const jobTitleKpiTargets = await prisma.jobTitleKpiTarget.findMany()
-    * ```
-    */
-  get jobTitleKpiTarget(): Prisma.JobTitleKpiTargetDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.staffingSlotKpiTarget`: Exposes CRUD operations for the **StaffingSlotKpiTarget** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more StaffingSlotKpiTargets
-    * const staffingSlotKpiTargets = await prisma.staffingSlotKpiTarget.findMany()
-    * ```
-    */
-  get staffingSlotKpiTarget(): Prisma.StaffingSlotKpiTargetDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.kpiEvaluation`: Exposes CRUD operations for the **KpiEvaluation** model.
     * Example usage:
     * ```ts
@@ -384,16 +289,6 @@ export class PrismaClient<
     * ```
     */
   get kpiEvaluation(): Prisma.KpiEvaluationDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.kpiEvaluationDetail`: Exposes CRUD operations for the **KpiEvaluationDetail** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more KpiEvaluationDetails
-    * const kpiEvaluationDetails = await prisma.kpiEvaluationDetail.findMany()
-    * ```
-    */
-  get kpiEvaluationDetail(): Prisma.KpiEvaluationDetailDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.kpiEvaluationTask`: Exposes CRUD operations for the **KpiEvaluationTask** model.
@@ -964,15 +859,8 @@ export namespace Prisma {
     Employee: 'Employee',
     KpiRuleSet: 'KpiRuleSet',
     KpiDomainWeight: 'KpiDomainWeight',
-    TaskKpiSetting: 'TaskKpiSetting',
     KpiPeriod: 'KpiPeriod',
-    KpiCriteria: 'KpiCriteria',
-    KpiCriteriaSetting: 'KpiCriteriaSetting',
-    EmployeeKpiTarget: 'EmployeeKpiTarget',
-    JobTitleKpiTarget: 'JobTitleKpiTarget',
-    StaffingSlotKpiTarget: 'StaffingSlotKpiTarget',
     KpiEvaluation: 'KpiEvaluation',
-    KpiEvaluationDetail: 'KpiEvaluationDetail',
     KpiEvaluationTask: 'KpiEvaluationTask',
     KpiFormTemplate: 'KpiFormTemplate',
     KpiFormDocument: 'KpiFormDocument',
@@ -1000,7 +888,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "taskKpiSetting" | "kpiPeriod" | "kpiCriteria" | "kpiCriteriaSetting" | "employeeKpiTarget" | "jobTitleKpiTarget" | "staffingSlotKpiTarget" | "kpiEvaluation" | "kpiEvaluationDetail" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskRankTemplate" | "rankQuota"
+      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskRankTemplate" | "rankQuota"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1202,72 +1090,6 @@ export namespace Prisma {
           }
         }
       }
-      TaskKpiSetting: {
-        payload: Prisma.$TaskKpiSettingPayload<ExtArgs>
-        fields: Prisma.TaskKpiSettingFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.TaskKpiSettingFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.TaskKpiSettingFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
-          }
-          findFirst: {
-            args: Prisma.TaskKpiSettingFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.TaskKpiSettingFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
-          }
-          findMany: {
-            args: Prisma.TaskKpiSettingFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>[]
-          }
-          create: {
-            args: Prisma.TaskKpiSettingCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
-          }
-          createMany: {
-            args: Prisma.TaskKpiSettingCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.TaskKpiSettingDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
-          }
-          update: {
-            args: Prisma.TaskKpiSettingUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
-          }
-          deleteMany: {
-            args: Prisma.TaskKpiSettingDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.TaskKpiSettingUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.TaskKpiSettingUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskKpiSettingPayload>
-          }
-          aggregate: {
-            args: Prisma.TaskKpiSettingAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateTaskKpiSetting>
-          }
-          groupBy: {
-            args: Prisma.TaskKpiSettingGroupByArgs<ExtArgs>
-            result: $Utils.Optional<TaskKpiSettingGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.TaskKpiSettingCountArgs<ExtArgs>
-            result: $Utils.Optional<TaskKpiSettingCountAggregateOutputType> | number
-          }
-        }
-      }
       KpiPeriod: {
         payload: Prisma.$KpiPeriodPayload<ExtArgs>
         fields: Prisma.KpiPeriodFieldRefs
@@ -1334,336 +1156,6 @@ export namespace Prisma {
           }
         }
       }
-      KpiCriteria: {
-        payload: Prisma.$KpiCriteriaPayload<ExtArgs>
-        fields: Prisma.KpiCriteriaFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.KpiCriteriaFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.KpiCriteriaFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>
-          }
-          findFirst: {
-            args: Prisma.KpiCriteriaFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.KpiCriteriaFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>
-          }
-          findMany: {
-            args: Prisma.KpiCriteriaFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>[]
-          }
-          create: {
-            args: Prisma.KpiCriteriaCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>
-          }
-          createMany: {
-            args: Prisma.KpiCriteriaCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.KpiCriteriaDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>
-          }
-          update: {
-            args: Prisma.KpiCriteriaUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>
-          }
-          deleteMany: {
-            args: Prisma.KpiCriteriaDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.KpiCriteriaUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.KpiCriteriaUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaPayload>
-          }
-          aggregate: {
-            args: Prisma.KpiCriteriaAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateKpiCriteria>
-          }
-          groupBy: {
-            args: Prisma.KpiCriteriaGroupByArgs<ExtArgs>
-            result: $Utils.Optional<KpiCriteriaGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.KpiCriteriaCountArgs<ExtArgs>
-            result: $Utils.Optional<KpiCriteriaCountAggregateOutputType> | number
-          }
-        }
-      }
-      KpiCriteriaSetting: {
-        payload: Prisma.$KpiCriteriaSettingPayload<ExtArgs>
-        fields: Prisma.KpiCriteriaSettingFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.KpiCriteriaSettingFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.KpiCriteriaSettingFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
-          }
-          findFirst: {
-            args: Prisma.KpiCriteriaSettingFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.KpiCriteriaSettingFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
-          }
-          findMany: {
-            args: Prisma.KpiCriteriaSettingFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>[]
-          }
-          create: {
-            args: Prisma.KpiCriteriaSettingCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
-          }
-          createMany: {
-            args: Prisma.KpiCriteriaSettingCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.KpiCriteriaSettingDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
-          }
-          update: {
-            args: Prisma.KpiCriteriaSettingUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
-          }
-          deleteMany: {
-            args: Prisma.KpiCriteriaSettingDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.KpiCriteriaSettingUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.KpiCriteriaSettingUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiCriteriaSettingPayload>
-          }
-          aggregate: {
-            args: Prisma.KpiCriteriaSettingAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateKpiCriteriaSetting>
-          }
-          groupBy: {
-            args: Prisma.KpiCriteriaSettingGroupByArgs<ExtArgs>
-            result: $Utils.Optional<KpiCriteriaSettingGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.KpiCriteriaSettingCountArgs<ExtArgs>
-            result: $Utils.Optional<KpiCriteriaSettingCountAggregateOutputType> | number
-          }
-        }
-      }
-      EmployeeKpiTarget: {
-        payload: Prisma.$EmployeeKpiTargetPayload<ExtArgs>
-        fields: Prisma.EmployeeKpiTargetFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.EmployeeKpiTargetFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.EmployeeKpiTargetFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
-          }
-          findFirst: {
-            args: Prisma.EmployeeKpiTargetFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.EmployeeKpiTargetFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
-          }
-          findMany: {
-            args: Prisma.EmployeeKpiTargetFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>[]
-          }
-          create: {
-            args: Prisma.EmployeeKpiTargetCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
-          }
-          createMany: {
-            args: Prisma.EmployeeKpiTargetCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.EmployeeKpiTargetDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
-          }
-          update: {
-            args: Prisma.EmployeeKpiTargetUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
-          }
-          deleteMany: {
-            args: Prisma.EmployeeKpiTargetDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.EmployeeKpiTargetUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.EmployeeKpiTargetUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EmployeeKpiTargetPayload>
-          }
-          aggregate: {
-            args: Prisma.EmployeeKpiTargetAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateEmployeeKpiTarget>
-          }
-          groupBy: {
-            args: Prisma.EmployeeKpiTargetGroupByArgs<ExtArgs>
-            result: $Utils.Optional<EmployeeKpiTargetGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.EmployeeKpiTargetCountArgs<ExtArgs>
-            result: $Utils.Optional<EmployeeKpiTargetCountAggregateOutputType> | number
-          }
-        }
-      }
-      JobTitleKpiTarget: {
-        payload: Prisma.$JobTitleKpiTargetPayload<ExtArgs>
-        fields: Prisma.JobTitleKpiTargetFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.JobTitleKpiTargetFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.JobTitleKpiTargetFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
-          }
-          findFirst: {
-            args: Prisma.JobTitleKpiTargetFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.JobTitleKpiTargetFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
-          }
-          findMany: {
-            args: Prisma.JobTitleKpiTargetFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>[]
-          }
-          create: {
-            args: Prisma.JobTitleKpiTargetCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
-          }
-          createMany: {
-            args: Prisma.JobTitleKpiTargetCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.JobTitleKpiTargetDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
-          }
-          update: {
-            args: Prisma.JobTitleKpiTargetUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
-          }
-          deleteMany: {
-            args: Prisma.JobTitleKpiTargetDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.JobTitleKpiTargetUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.JobTitleKpiTargetUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobTitleKpiTargetPayload>
-          }
-          aggregate: {
-            args: Prisma.JobTitleKpiTargetAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateJobTitleKpiTarget>
-          }
-          groupBy: {
-            args: Prisma.JobTitleKpiTargetGroupByArgs<ExtArgs>
-            result: $Utils.Optional<JobTitleKpiTargetGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.JobTitleKpiTargetCountArgs<ExtArgs>
-            result: $Utils.Optional<JobTitleKpiTargetCountAggregateOutputType> | number
-          }
-        }
-      }
-      StaffingSlotKpiTarget: {
-        payload: Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>
-        fields: Prisma.StaffingSlotKpiTargetFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.StaffingSlotKpiTargetFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.StaffingSlotKpiTargetFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
-          }
-          findFirst: {
-            args: Prisma.StaffingSlotKpiTargetFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.StaffingSlotKpiTargetFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
-          }
-          findMany: {
-            args: Prisma.StaffingSlotKpiTargetFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>[]
-          }
-          create: {
-            args: Prisma.StaffingSlotKpiTargetCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
-          }
-          createMany: {
-            args: Prisma.StaffingSlotKpiTargetCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.StaffingSlotKpiTargetDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
-          }
-          update: {
-            args: Prisma.StaffingSlotKpiTargetUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
-          }
-          deleteMany: {
-            args: Prisma.StaffingSlotKpiTargetDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.StaffingSlotKpiTargetUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.StaffingSlotKpiTargetUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$StaffingSlotKpiTargetPayload>
-          }
-          aggregate: {
-            args: Prisma.StaffingSlotKpiTargetAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateStaffingSlotKpiTarget>
-          }
-          groupBy: {
-            args: Prisma.StaffingSlotKpiTargetGroupByArgs<ExtArgs>
-            result: $Utils.Optional<StaffingSlotKpiTargetGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.StaffingSlotKpiTargetCountArgs<ExtArgs>
-            result: $Utils.Optional<StaffingSlotKpiTargetCountAggregateOutputType> | number
-          }
-        }
-      }
       KpiEvaluation: {
         payload: Prisma.$KpiEvaluationPayload<ExtArgs>
         fields: Prisma.KpiEvaluationFieldRefs
@@ -1727,72 +1219,6 @@ export namespace Prisma {
           count: {
             args: Prisma.KpiEvaluationCountArgs<ExtArgs>
             result: $Utils.Optional<KpiEvaluationCountAggregateOutputType> | number
-          }
-        }
-      }
-      KpiEvaluationDetail: {
-        payload: Prisma.$KpiEvaluationDetailPayload<ExtArgs>
-        fields: Prisma.KpiEvaluationDetailFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.KpiEvaluationDetailFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.KpiEvaluationDetailFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>
-          }
-          findFirst: {
-            args: Prisma.KpiEvaluationDetailFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.KpiEvaluationDetailFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>
-          }
-          findMany: {
-            args: Prisma.KpiEvaluationDetailFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>[]
-          }
-          create: {
-            args: Prisma.KpiEvaluationDetailCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>
-          }
-          createMany: {
-            args: Prisma.KpiEvaluationDetailCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          delete: {
-            args: Prisma.KpiEvaluationDetailDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>
-          }
-          update: {
-            args: Prisma.KpiEvaluationDetailUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>
-          }
-          deleteMany: {
-            args: Prisma.KpiEvaluationDetailDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.KpiEvaluationDetailUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.KpiEvaluationDetailUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KpiEvaluationDetailPayload>
-          }
-          aggregate: {
-            args: Prisma.KpiEvaluationDetailAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateKpiEvaluationDetail>
-          }
-          groupBy: {
-            args: Prisma.KpiEvaluationDetailGroupByArgs<ExtArgs>
-            result: $Utils.Optional<KpiEvaluationDetailGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.KpiEvaluationDetailCountArgs<ExtArgs>
-            result: $Utils.Optional<KpiEvaluationDetailCountAggregateOutputType> | number
           }
         }
       }
@@ -2714,15 +2140,8 @@ export namespace Prisma {
     employee?: EmployeeOmit
     kpiRuleSet?: KpiRuleSetOmit
     kpiDomainWeight?: KpiDomainWeightOmit
-    taskKpiSetting?: TaskKpiSettingOmit
     kpiPeriod?: KpiPeriodOmit
-    kpiCriteria?: KpiCriteriaOmit
-    kpiCriteriaSetting?: KpiCriteriaSettingOmit
-    employeeKpiTarget?: EmployeeKpiTargetOmit
-    jobTitleKpiTarget?: JobTitleKpiTargetOmit
-    staffingSlotKpiTarget?: StaffingSlotKpiTargetOmit
     kpiEvaluation?: KpiEvaluationOmit
-    kpiEvaluationDetail?: KpiEvaluationDetailOmit
     kpiEvaluationTask?: KpiEvaluationTaskOmit
     kpiFormTemplate?: KpiFormTemplateOmit
     kpiFormDocument?: KpiFormDocumentOmit
@@ -2818,14 +2237,12 @@ export namespace Prisma {
     kpiEvaluations: number
     kpiReviews: number
     taskParticipants: number
-    employeeKpiTargets: number
   }
 
   export type EmployeeCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     kpiEvaluations?: boolean | EmployeeCountOutputTypeCountKpiEvaluationsArgs
     kpiReviews?: boolean | EmployeeCountOutputTypeCountKpiReviewsArgs
     taskParticipants?: boolean | EmployeeCountOutputTypeCountTaskParticipantsArgs
-    employeeKpiTargets?: boolean | EmployeeCountOutputTypeCountEmployeeKpiTargetsArgs
   }
 
   // Custom InputTypes
@@ -2858,13 +2275,6 @@ export namespace Prisma {
    */
   export type EmployeeCountOutputTypeCountTaskParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskParticipantWhereInput
-  }
-
-  /**
-   * EmployeeCountOutputType without action
-   */
-  export type EmployeeCountOutputTypeCountEmployeeKpiTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EmployeeKpiTargetWhereInput
   }
 
 
@@ -2914,16 +2324,10 @@ export namespace Prisma {
 
   export type KpiPeriodCountOutputType = {
     evaluations: number
-    targets: number
-    jobTitleTargets: number
-    staffingSlotTargets: number
   }
 
   export type KpiPeriodCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     evaluations?: boolean | KpiPeriodCountOutputTypeCountEvaluationsArgs
-    targets?: boolean | KpiPeriodCountOutputTypeCountTargetsArgs
-    jobTitleTargets?: boolean | KpiPeriodCountOutputTypeCountJobTitleTargetsArgs
-    staffingSlotTargets?: boolean | KpiPeriodCountOutputTypeCountStaffingSlotTargetsArgs
   }
 
   // Custom InputTypes
@@ -2944,107 +2348,17 @@ export namespace Prisma {
     where?: KpiEvaluationWhereInput
   }
 
-  /**
-   * KpiPeriodCountOutputType without action
-   */
-  export type KpiPeriodCountOutputTypeCountTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EmployeeKpiTargetWhereInput
-  }
-
-  /**
-   * KpiPeriodCountOutputType without action
-   */
-  export type KpiPeriodCountOutputTypeCountJobTitleTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: JobTitleKpiTargetWhereInput
-  }
-
-  /**
-   * KpiPeriodCountOutputType without action
-   */
-  export type KpiPeriodCountOutputTypeCountStaffingSlotTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: StaffingSlotKpiTargetWhereInput
-  }
-
-
-  /**
-   * Count Type KpiCriteriaCountOutputType
-   */
-
-  export type KpiCriteriaCountOutputType = {
-    details: number
-    tasks: number
-    targets: number
-    jobTitleTargets: number
-    staffingSlotTargets: number
-  }
-
-  export type KpiCriteriaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    details?: boolean | KpiCriteriaCountOutputTypeCountDetailsArgs
-    tasks?: boolean | KpiCriteriaCountOutputTypeCountTasksArgs
-    targets?: boolean | KpiCriteriaCountOutputTypeCountTargetsArgs
-    jobTitleTargets?: boolean | KpiCriteriaCountOutputTypeCountJobTitleTargetsArgs
-    staffingSlotTargets?: boolean | KpiCriteriaCountOutputTypeCountStaffingSlotTargetsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * KpiCriteriaCountOutputType without action
-   */
-  export type KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaCountOutputType
-     */
-    select?: KpiCriteriaCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * KpiCriteriaCountOutputType without action
-   */
-  export type KpiCriteriaCountOutputTypeCountDetailsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationDetailWhereInput
-  }
-
-  /**
-   * KpiCriteriaCountOutputType without action
-   */
-  export type KpiCriteriaCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskKpiSettingWhereInput
-  }
-
-  /**
-   * KpiCriteriaCountOutputType without action
-   */
-  export type KpiCriteriaCountOutputTypeCountTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EmployeeKpiTargetWhereInput
-  }
-
-  /**
-   * KpiCriteriaCountOutputType without action
-   */
-  export type KpiCriteriaCountOutputTypeCountJobTitleTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: JobTitleKpiTargetWhereInput
-  }
-
-  /**
-   * KpiCriteriaCountOutputType without action
-   */
-  export type KpiCriteriaCountOutputTypeCountStaffingSlotTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: StaffingSlotKpiTargetWhereInput
-  }
-
 
   /**
    * Count Type KpiEvaluationCountOutputType
    */
 
   export type KpiEvaluationCountOutputType = {
-    details: number
     tasks: number
     documents: number
   }
 
   export type KpiEvaluationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    details?: boolean | KpiEvaluationCountOutputTypeCountDetailsArgs
     tasks?: boolean | KpiEvaluationCountOutputTypeCountTasksArgs
     documents?: boolean | KpiEvaluationCountOutputTypeCountDocumentsArgs
   }
@@ -3058,13 +2372,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the KpiEvaluationCountOutputType
      */
     select?: KpiEvaluationCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * KpiEvaluationCountOutputType without action
-   */
-  export type KpiEvaluationCountOutputTypeCountDetailsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationDetailWhereInput
   }
 
   /**
@@ -3598,7 +2905,6 @@ export namespace Prisma {
     kpiEvaluations?: boolean | Employee$kpiEvaluationsArgs<ExtArgs>
     kpiReviews?: boolean | Employee$kpiReviewsArgs<ExtArgs>
     taskParticipants?: boolean | Employee$taskParticipantsArgs<ExtArgs>
-    employeeKpiTargets?: boolean | Employee$employeeKpiTargetsArgs<ExtArgs>
     _count?: boolean | EmployeeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["employee"]>
 
@@ -3636,7 +2942,6 @@ export namespace Prisma {
     kpiEvaluations?: boolean | Employee$kpiEvaluationsArgs<ExtArgs>
     kpiReviews?: boolean | Employee$kpiReviewsArgs<ExtArgs>
     taskParticipants?: boolean | Employee$taskParticipantsArgs<ExtArgs>
-    employeeKpiTargets?: boolean | Employee$employeeKpiTargetsArgs<ExtArgs>
     _count?: boolean | EmployeeCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -3646,7 +2951,6 @@ export namespace Prisma {
       kpiEvaluations: Prisma.$KpiEvaluationPayload<ExtArgs>[]
       kpiReviews: Prisma.$KpiEvaluationPayload<ExtArgs>[]
       taskParticipants: Prisma.$TaskParticipantPayload<ExtArgs>[]
-      employeeKpiTargets: Prisma.$EmployeeKpiTargetPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -4016,7 +3320,6 @@ export namespace Prisma {
     kpiEvaluations<T extends Employee$kpiEvaluationsArgs<ExtArgs> = {}>(args?: Subset<T, Employee$kpiEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     kpiReviews<T extends Employee$kpiReviewsArgs<ExtArgs> = {}>(args?: Subset<T, Employee$kpiReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskParticipants<T extends Employee$taskParticipantsArgs<ExtArgs> = {}>(args?: Subset<T, Employee$taskParticipantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    employeeKpiTargets<T extends Employee$employeeKpiTargetsArgs<ExtArgs> = {}>(args?: Subset<T, Employee$employeeKpiTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4487,30 +3790,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskParticipantScalarFieldEnum | TaskParticipantScalarFieldEnum[]
-  }
-
-  /**
-   * Employee.employeeKpiTargets
-   */
-  export type Employee$employeeKpiTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    where?: EmployeeKpiTargetWhereInput
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EmployeeKpiTargetScalarFieldEnum | EmployeeKpiTargetScalarFieldEnum[]
   }
 
   /**
@@ -6636,1080 +5915,6 @@ export namespace Prisma {
 
 
   /**
-   * Model TaskKpiSetting
-   */
-
-  export type AggregateTaskKpiSetting = {
-    _count: TaskKpiSettingCountAggregateOutputType | null
-    _avg: TaskKpiSettingAvgAggregateOutputType | null
-    _sum: TaskKpiSettingSumAggregateOutputType | null
-    _min: TaskKpiSettingMinAggregateOutputType | null
-    _max: TaskKpiSettingMaxAggregateOutputType | null
-  }
-
-  export type TaskKpiSettingAvgAggregateOutputType = {
-    taskId: number | null
-    baseScore: number | null
-    weight: number | null
-    crossDomainMultiplier: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    standardDurationDays: number | null
-    kpiCriteriaId: number | null
-  }
-
-  export type TaskKpiSettingSumAggregateOutputType = {
-    taskId: number | null
-    baseScore: number | null
-    weight: number | null
-    crossDomainMultiplier: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    standardDurationDays: number | null
-    kpiCriteriaId: number | null
-  }
-
-  export type TaskKpiSettingMinAggregateOutputType = {
-    taskId: number | null
-    baseScore: number | null
-    weight: number | null
-    scoringMethod: string | null
-    isCrossDomain: boolean | null
-    crossDomainMultiplier: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    standardDurationDays: number | null
-    kpiCriteriaId: number | null
-  }
-
-  export type TaskKpiSettingMaxAggregateOutputType = {
-    taskId: number | null
-    baseScore: number | null
-    weight: number | null
-    scoringMethod: string | null
-    isCrossDomain: boolean | null
-    crossDomainMultiplier: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    standardDurationDays: number | null
-    kpiCriteriaId: number | null
-  }
-
-  export type TaskKpiSettingCountAggregateOutputType = {
-    taskId: number
-    baseScore: number
-    weight: number
-    scoringMethod: number
-    isCrossDomain: number
-    crossDomainMultiplier: number
-    bonusPerDay: number
-    penaltyPerDay: number
-    standardDurationDays: number
-    kpiCriteriaId: number
-    _all: number
-  }
-
-
-  export type TaskKpiSettingAvgAggregateInputType = {
-    taskId?: true
-    baseScore?: true
-    weight?: true
-    crossDomainMultiplier?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    standardDurationDays?: true
-    kpiCriteriaId?: true
-  }
-
-  export type TaskKpiSettingSumAggregateInputType = {
-    taskId?: true
-    baseScore?: true
-    weight?: true
-    crossDomainMultiplier?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    standardDurationDays?: true
-    kpiCriteriaId?: true
-  }
-
-  export type TaskKpiSettingMinAggregateInputType = {
-    taskId?: true
-    baseScore?: true
-    weight?: true
-    scoringMethod?: true
-    isCrossDomain?: true
-    crossDomainMultiplier?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    standardDurationDays?: true
-    kpiCriteriaId?: true
-  }
-
-  export type TaskKpiSettingMaxAggregateInputType = {
-    taskId?: true
-    baseScore?: true
-    weight?: true
-    scoringMethod?: true
-    isCrossDomain?: true
-    crossDomainMultiplier?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    standardDurationDays?: true
-    kpiCriteriaId?: true
-  }
-
-  export type TaskKpiSettingCountAggregateInputType = {
-    taskId?: true
-    baseScore?: true
-    weight?: true
-    scoringMethod?: true
-    isCrossDomain?: true
-    crossDomainMultiplier?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    standardDurationDays?: true
-    kpiCriteriaId?: true
-    _all?: true
-  }
-
-  export type TaskKpiSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which TaskKpiSetting to aggregate.
-     */
-    where?: TaskKpiSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of TaskKpiSettings to fetch.
-     */
-    orderBy?: TaskKpiSettingOrderByWithRelationInput | TaskKpiSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: TaskKpiSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` TaskKpiSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` TaskKpiSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned TaskKpiSettings
-    **/
-    _count?: true | TaskKpiSettingCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: TaskKpiSettingAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: TaskKpiSettingSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: TaskKpiSettingMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: TaskKpiSettingMaxAggregateInputType
-  }
-
-  export type GetTaskKpiSettingAggregateType<T extends TaskKpiSettingAggregateArgs> = {
-        [P in keyof T & keyof AggregateTaskKpiSetting]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateTaskKpiSetting[P]>
-      : GetScalarType<T[P], AggregateTaskKpiSetting[P]>
-  }
-
-
-
-
-  export type TaskKpiSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskKpiSettingWhereInput
-    orderBy?: TaskKpiSettingOrderByWithAggregationInput | TaskKpiSettingOrderByWithAggregationInput[]
-    by: TaskKpiSettingScalarFieldEnum[] | TaskKpiSettingScalarFieldEnum
-    having?: TaskKpiSettingScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: TaskKpiSettingCountAggregateInputType | true
-    _avg?: TaskKpiSettingAvgAggregateInputType
-    _sum?: TaskKpiSettingSumAggregateInputType
-    _min?: TaskKpiSettingMinAggregateInputType
-    _max?: TaskKpiSettingMaxAggregateInputType
-  }
-
-  export type TaskKpiSettingGroupByOutputType = {
-    taskId: number
-    baseScore: number | null
-    weight: number | null
-    scoringMethod: string
-    isCrossDomain: boolean
-    crossDomainMultiplier: number
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    standardDurationDays: number | null
-    kpiCriteriaId: number | null
-    _count: TaskKpiSettingCountAggregateOutputType | null
-    _avg: TaskKpiSettingAvgAggregateOutputType | null
-    _sum: TaskKpiSettingSumAggregateOutputType | null
-    _min: TaskKpiSettingMinAggregateOutputType | null
-    _max: TaskKpiSettingMaxAggregateOutputType | null
-  }
-
-  type GetTaskKpiSettingGroupByPayload<T extends TaskKpiSettingGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<TaskKpiSettingGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof TaskKpiSettingGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], TaskKpiSettingGroupByOutputType[P]>
-            : GetScalarType<T[P], TaskKpiSettingGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type TaskKpiSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    taskId?: boolean
-    baseScore?: boolean
-    weight?: boolean
-    scoringMethod?: boolean
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: boolean
-    bonusPerDay?: boolean
-    penaltyPerDay?: boolean
-    standardDurationDays?: boolean
-    kpiCriteriaId?: boolean
-    kpiCriteria?: boolean | TaskKpiSetting$kpiCriteriaArgs<ExtArgs>
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["taskKpiSetting"]>
-
-
-
-  export type TaskKpiSettingSelectScalar = {
-    taskId?: boolean
-    baseScore?: boolean
-    weight?: boolean
-    scoringMethod?: boolean
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: boolean
-    bonusPerDay?: boolean
-    penaltyPerDay?: boolean
-    standardDurationDays?: boolean
-    kpiCriteriaId?: boolean
-  }
-
-  export type TaskKpiSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"taskId" | "baseScore" | "weight" | "scoringMethod" | "isCrossDomain" | "crossDomainMultiplier" | "bonusPerDay" | "penaltyPerDay" | "standardDurationDays" | "kpiCriteriaId", ExtArgs["result"]["taskKpiSetting"]>
-  export type TaskKpiSettingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    kpiCriteria?: boolean | TaskKpiSetting$kpiCriteriaArgs<ExtArgs>
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-  }
-
-  export type $TaskKpiSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "TaskKpiSetting"
-    objects: {
-      kpiCriteria: Prisma.$KpiCriteriaPayload<ExtArgs> | null
-      task: Prisma.$TaskPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      taskId: number
-      baseScore: number | null
-      weight: number | null
-      scoringMethod: string
-      isCrossDomain: boolean
-      crossDomainMultiplier: number
-      bonusPerDay: number | null
-      penaltyPerDay: number | null
-      standardDurationDays: number | null
-      kpiCriteriaId: number | null
-    }, ExtArgs["result"]["taskKpiSetting"]>
-    composites: {}
-  }
-
-  type TaskKpiSettingGetPayload<S extends boolean | null | undefined | TaskKpiSettingDefaultArgs> = $Result.GetResult<Prisma.$TaskKpiSettingPayload, S>
-
-  type TaskKpiSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<TaskKpiSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: TaskKpiSettingCountAggregateInputType | true
-    }
-
-  export interface TaskKpiSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TaskKpiSetting'], meta: { name: 'TaskKpiSetting' } }
-    /**
-     * Find zero or one TaskKpiSetting that matches the filter.
-     * @param {TaskKpiSettingFindUniqueArgs} args - Arguments to find a TaskKpiSetting
-     * @example
-     * // Get one TaskKpiSetting
-     * const taskKpiSetting = await prisma.taskKpiSetting.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends TaskKpiSettingFindUniqueArgs>(args: SelectSubset<T, TaskKpiSettingFindUniqueArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one TaskKpiSetting that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {TaskKpiSettingFindUniqueOrThrowArgs} args - Arguments to find a TaskKpiSetting
-     * @example
-     * // Get one TaskKpiSetting
-     * const taskKpiSetting = await prisma.taskKpiSetting.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends TaskKpiSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, TaskKpiSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first TaskKpiSetting that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingFindFirstArgs} args - Arguments to find a TaskKpiSetting
-     * @example
-     * // Get one TaskKpiSetting
-     * const taskKpiSetting = await prisma.taskKpiSetting.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends TaskKpiSettingFindFirstArgs>(args?: SelectSubset<T, TaskKpiSettingFindFirstArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first TaskKpiSetting that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingFindFirstOrThrowArgs} args - Arguments to find a TaskKpiSetting
-     * @example
-     * // Get one TaskKpiSetting
-     * const taskKpiSetting = await prisma.taskKpiSetting.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends TaskKpiSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, TaskKpiSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more TaskKpiSettings that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all TaskKpiSettings
-     * const taskKpiSettings = await prisma.taskKpiSetting.findMany()
-     * 
-     * // Get first 10 TaskKpiSettings
-     * const taskKpiSettings = await prisma.taskKpiSetting.findMany({ take: 10 })
-     * 
-     * // Only select the `taskId`
-     * const taskKpiSettingWithTaskIdOnly = await prisma.taskKpiSetting.findMany({ select: { taskId: true } })
-     * 
-     */
-    findMany<T extends TaskKpiSettingFindManyArgs>(args?: SelectSubset<T, TaskKpiSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a TaskKpiSetting.
-     * @param {TaskKpiSettingCreateArgs} args - Arguments to create a TaskKpiSetting.
-     * @example
-     * // Create one TaskKpiSetting
-     * const TaskKpiSetting = await prisma.taskKpiSetting.create({
-     *   data: {
-     *     // ... data to create a TaskKpiSetting
-     *   }
-     * })
-     * 
-     */
-    create<T extends TaskKpiSettingCreateArgs>(args: SelectSubset<T, TaskKpiSettingCreateArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many TaskKpiSettings.
-     * @param {TaskKpiSettingCreateManyArgs} args - Arguments to create many TaskKpiSettings.
-     * @example
-     * // Create many TaskKpiSettings
-     * const taskKpiSetting = await prisma.taskKpiSetting.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends TaskKpiSettingCreateManyArgs>(args?: SelectSubset<T, TaskKpiSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a TaskKpiSetting.
-     * @param {TaskKpiSettingDeleteArgs} args - Arguments to delete one TaskKpiSetting.
-     * @example
-     * // Delete one TaskKpiSetting
-     * const TaskKpiSetting = await prisma.taskKpiSetting.delete({
-     *   where: {
-     *     // ... filter to delete one TaskKpiSetting
-     *   }
-     * })
-     * 
-     */
-    delete<T extends TaskKpiSettingDeleteArgs>(args: SelectSubset<T, TaskKpiSettingDeleteArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one TaskKpiSetting.
-     * @param {TaskKpiSettingUpdateArgs} args - Arguments to update one TaskKpiSetting.
-     * @example
-     * // Update one TaskKpiSetting
-     * const taskKpiSetting = await prisma.taskKpiSetting.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends TaskKpiSettingUpdateArgs>(args: SelectSubset<T, TaskKpiSettingUpdateArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more TaskKpiSettings.
-     * @param {TaskKpiSettingDeleteManyArgs} args - Arguments to filter TaskKpiSettings to delete.
-     * @example
-     * // Delete a few TaskKpiSettings
-     * const { count } = await prisma.taskKpiSetting.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends TaskKpiSettingDeleteManyArgs>(args?: SelectSubset<T, TaskKpiSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more TaskKpiSettings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many TaskKpiSettings
-     * const taskKpiSetting = await prisma.taskKpiSetting.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends TaskKpiSettingUpdateManyArgs>(args: SelectSubset<T, TaskKpiSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one TaskKpiSetting.
-     * @param {TaskKpiSettingUpsertArgs} args - Arguments to update or create a TaskKpiSetting.
-     * @example
-     * // Update or create a TaskKpiSetting
-     * const taskKpiSetting = await prisma.taskKpiSetting.upsert({
-     *   create: {
-     *     // ... data to create a TaskKpiSetting
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the TaskKpiSetting we want to update
-     *   }
-     * })
-     */
-    upsert<T extends TaskKpiSettingUpsertArgs>(args: SelectSubset<T, TaskKpiSettingUpsertArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of TaskKpiSettings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingCountArgs} args - Arguments to filter TaskKpiSettings to count.
-     * @example
-     * // Count the number of TaskKpiSettings
-     * const count = await prisma.taskKpiSetting.count({
-     *   where: {
-     *     // ... the filter for the TaskKpiSettings we want to count
-     *   }
-     * })
-    **/
-    count<T extends TaskKpiSettingCountArgs>(
-      args?: Subset<T, TaskKpiSettingCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], TaskKpiSettingCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a TaskKpiSetting.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends TaskKpiSettingAggregateArgs>(args: Subset<T, TaskKpiSettingAggregateArgs>): Prisma.PrismaPromise<GetTaskKpiSettingAggregateType<T>>
-
-    /**
-     * Group by TaskKpiSetting.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskKpiSettingGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends TaskKpiSettingGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: TaskKpiSettingGroupByArgs['orderBy'] }
-        : { orderBy?: TaskKpiSettingGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, TaskKpiSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTaskKpiSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the TaskKpiSetting model
-   */
-  readonly fields: TaskKpiSettingFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for TaskKpiSetting.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__TaskKpiSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    kpiCriteria<T extends TaskKpiSetting$kpiCriteriaArgs<ExtArgs> = {}>(args?: Subset<T, TaskKpiSetting$kpiCriteriaArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the TaskKpiSetting model
-   */
-  interface TaskKpiSettingFieldRefs {
-    readonly taskId: FieldRef<"TaskKpiSetting", 'Int'>
-    readonly baseScore: FieldRef<"TaskKpiSetting", 'Float'>
-    readonly weight: FieldRef<"TaskKpiSetting", 'Float'>
-    readonly scoringMethod: FieldRef<"TaskKpiSetting", 'String'>
-    readonly isCrossDomain: FieldRef<"TaskKpiSetting", 'Boolean'>
-    readonly crossDomainMultiplier: FieldRef<"TaskKpiSetting", 'Float'>
-    readonly bonusPerDay: FieldRef<"TaskKpiSetting", 'Float'>
-    readonly penaltyPerDay: FieldRef<"TaskKpiSetting", 'Float'>
-    readonly standardDurationDays: FieldRef<"TaskKpiSetting", 'Float'>
-    readonly kpiCriteriaId: FieldRef<"TaskKpiSetting", 'Int'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * TaskKpiSetting findUnique
-   */
-  export type TaskKpiSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskKpiSetting to fetch.
-     */
-    where: TaskKpiSettingWhereUniqueInput
-  }
-
-  /**
-   * TaskKpiSetting findUniqueOrThrow
-   */
-  export type TaskKpiSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskKpiSetting to fetch.
-     */
-    where: TaskKpiSettingWhereUniqueInput
-  }
-
-  /**
-   * TaskKpiSetting findFirst
-   */
-  export type TaskKpiSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskKpiSetting to fetch.
-     */
-    where?: TaskKpiSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of TaskKpiSettings to fetch.
-     */
-    orderBy?: TaskKpiSettingOrderByWithRelationInput | TaskKpiSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for TaskKpiSettings.
-     */
-    cursor?: TaskKpiSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` TaskKpiSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` TaskKpiSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of TaskKpiSettings.
-     */
-    distinct?: TaskKpiSettingScalarFieldEnum | TaskKpiSettingScalarFieldEnum[]
-  }
-
-  /**
-   * TaskKpiSetting findFirstOrThrow
-   */
-  export type TaskKpiSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskKpiSetting to fetch.
-     */
-    where?: TaskKpiSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of TaskKpiSettings to fetch.
-     */
-    orderBy?: TaskKpiSettingOrderByWithRelationInput | TaskKpiSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for TaskKpiSettings.
-     */
-    cursor?: TaskKpiSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` TaskKpiSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` TaskKpiSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of TaskKpiSettings.
-     */
-    distinct?: TaskKpiSettingScalarFieldEnum | TaskKpiSettingScalarFieldEnum[]
-  }
-
-  /**
-   * TaskKpiSetting findMany
-   */
-  export type TaskKpiSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskKpiSettings to fetch.
-     */
-    where?: TaskKpiSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of TaskKpiSettings to fetch.
-     */
-    orderBy?: TaskKpiSettingOrderByWithRelationInput | TaskKpiSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing TaskKpiSettings.
-     */
-    cursor?: TaskKpiSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` TaskKpiSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` TaskKpiSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of TaskKpiSettings.
-     */
-    distinct?: TaskKpiSettingScalarFieldEnum | TaskKpiSettingScalarFieldEnum[]
-  }
-
-  /**
-   * TaskKpiSetting create
-   */
-  export type TaskKpiSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * The data needed to create a TaskKpiSetting.
-     */
-    data: XOR<TaskKpiSettingCreateInput, TaskKpiSettingUncheckedCreateInput>
-  }
-
-  /**
-   * TaskKpiSetting createMany
-   */
-  export type TaskKpiSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many TaskKpiSettings.
-     */
-    data: TaskKpiSettingCreateManyInput | TaskKpiSettingCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * TaskKpiSetting update
-   */
-  export type TaskKpiSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * The data needed to update a TaskKpiSetting.
-     */
-    data: XOR<TaskKpiSettingUpdateInput, TaskKpiSettingUncheckedUpdateInput>
-    /**
-     * Choose, which TaskKpiSetting to update.
-     */
-    where: TaskKpiSettingWhereUniqueInput
-  }
-
-  /**
-   * TaskKpiSetting updateMany
-   */
-  export type TaskKpiSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update TaskKpiSettings.
-     */
-    data: XOR<TaskKpiSettingUpdateManyMutationInput, TaskKpiSettingUncheckedUpdateManyInput>
-    /**
-     * Filter which TaskKpiSettings to update
-     */
-    where?: TaskKpiSettingWhereInput
-    /**
-     * Limit how many TaskKpiSettings to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * TaskKpiSetting upsert
-   */
-  export type TaskKpiSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * The filter to search for the TaskKpiSetting to update in case it exists.
-     */
-    where: TaskKpiSettingWhereUniqueInput
-    /**
-     * In case the TaskKpiSetting found by the `where` argument doesn't exist, create a new TaskKpiSetting with this data.
-     */
-    create: XOR<TaskKpiSettingCreateInput, TaskKpiSettingUncheckedCreateInput>
-    /**
-     * In case the TaskKpiSetting was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<TaskKpiSettingUpdateInput, TaskKpiSettingUncheckedUpdateInput>
-  }
-
-  /**
-   * TaskKpiSetting delete
-   */
-  export type TaskKpiSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    /**
-     * Filter which TaskKpiSetting to delete.
-     */
-    where: TaskKpiSettingWhereUniqueInput
-  }
-
-  /**
-   * TaskKpiSetting deleteMany
-   */
-  export type TaskKpiSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which TaskKpiSettings to delete
-     */
-    where?: TaskKpiSettingWhereInput
-    /**
-     * Limit how many TaskKpiSettings to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * TaskKpiSetting.kpiCriteria
-   */
-  export type TaskKpiSetting$kpiCriteriaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    where?: KpiCriteriaWhereInput
-  }
-
-  /**
-   * TaskKpiSetting without action
-   */
-  export type TaskKpiSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model KpiPeriod
    */
 
@@ -7916,9 +6121,6 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     evaluations?: boolean | KpiPeriod$evaluationsArgs<ExtArgs>
-    targets?: boolean | KpiPeriod$targetsArgs<ExtArgs>
-    jobTitleTargets?: boolean | KpiPeriod$jobTitleTargetsArgs<ExtArgs>
-    staffingSlotTargets?: boolean | KpiPeriod$staffingSlotTargetsArgs<ExtArgs>
     _count?: boolean | KpiPeriodCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["kpiPeriod"]>
 
@@ -7936,9 +6138,6 @@ export namespace Prisma {
   export type KpiPeriodOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "startDate" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiPeriod"]>
   export type KpiPeriodInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     evaluations?: boolean | KpiPeriod$evaluationsArgs<ExtArgs>
-    targets?: boolean | KpiPeriod$targetsArgs<ExtArgs>
-    jobTitleTargets?: boolean | KpiPeriod$jobTitleTargetsArgs<ExtArgs>
-    staffingSlotTargets?: boolean | KpiPeriod$staffingSlotTargetsArgs<ExtArgs>
     _count?: boolean | KpiPeriodCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -7946,9 +6145,6 @@ export namespace Prisma {
     name: "KpiPeriod"
     objects: {
       evaluations: Prisma.$KpiEvaluationPayload<ExtArgs>[]
-      targets: Prisma.$EmployeeKpiTargetPayload<ExtArgs>[]
-      jobTitleTargets: Prisma.$JobTitleKpiTargetPayload<ExtArgs>[]
-      staffingSlotTargets: Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -8298,9 +6494,6 @@ export namespace Prisma {
   export interface Prisma__KpiPeriodClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     evaluations<T extends KpiPeriod$evaluationsArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriod$evaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    targets<T extends KpiPeriod$targetsArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriod$targetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    jobTitleTargets<T extends KpiPeriod$jobTitleTargetsArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriod$jobTitleTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    staffingSlotTargets<T extends KpiPeriod$staffingSlotTargetsArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriod$staffingSlotTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8708,78 +6901,6 @@ export namespace Prisma {
   }
 
   /**
-   * KpiPeriod.targets
-   */
-  export type KpiPeriod$targetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    where?: EmployeeKpiTargetWhereInput
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EmployeeKpiTargetScalarFieldEnum | EmployeeKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * KpiPeriod.jobTitleTargets
-   */
-  export type KpiPeriod$jobTitleTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    where?: JobTitleKpiTargetWhereInput
-    orderBy?: JobTitleKpiTargetOrderByWithRelationInput | JobTitleKpiTargetOrderByWithRelationInput[]
-    cursor?: JobTitleKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: JobTitleKpiTargetScalarFieldEnum | JobTitleKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * KpiPeriod.staffingSlotTargets
-   */
-  export type KpiPeriod$staffingSlotTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    where?: StaffingSlotKpiTargetWhereInput
-    orderBy?: StaffingSlotKpiTargetOrderByWithRelationInput | StaffingSlotKpiTargetOrderByWithRelationInput[]
-    cursor?: StaffingSlotKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: StaffingSlotKpiTargetScalarFieldEnum | StaffingSlotKpiTargetScalarFieldEnum[]
-  }
-
-  /**
    * KpiPeriod without action
    */
   export type KpiPeriodDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8795,5268 +6916,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiPeriodInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model KpiCriteria
-   */
-
-  export type AggregateKpiCriteria = {
-    _count: KpiCriteriaCountAggregateOutputType | null
-    _avg: KpiCriteriaAvgAggregateOutputType | null
-    _sum: KpiCriteriaSumAggregateOutputType | null
-    _min: KpiCriteriaMinAggregateOutputType | null
-    _max: KpiCriteriaMaxAggregateOutputType | null
-  }
-
-  export type KpiCriteriaAvgAggregateOutputType = {
-    id: number | null
-    categoryId: number | null
-  }
-
-  export type KpiCriteriaSumAggregateOutputType = {
-    id: number | null
-    categoryId: number | null
-  }
-
-  export type KpiCriteriaMinAggregateOutputType = {
-    id: number | null
-    name: string | null
-    description: string | null
-    categoryId: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type KpiCriteriaMaxAggregateOutputType = {
-    id: number | null
-    name: string | null
-    description: string | null
-    categoryId: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type KpiCriteriaCountAggregateOutputType = {
-    id: number
-    name: number
-    description: number
-    categoryId: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type KpiCriteriaAvgAggregateInputType = {
-    id?: true
-    categoryId?: true
-  }
-
-  export type KpiCriteriaSumAggregateInputType = {
-    id?: true
-    categoryId?: true
-  }
-
-  export type KpiCriteriaMinAggregateInputType = {
-    id?: true
-    name?: true
-    description?: true
-    categoryId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type KpiCriteriaMaxAggregateInputType = {
-    id?: true
-    name?: true
-    description?: true
-    categoryId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type KpiCriteriaCountAggregateInputType = {
-    id?: true
-    name?: true
-    description?: true
-    categoryId?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type KpiCriteriaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KpiCriteria to aggregate.
-     */
-    where?: KpiCriteriaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteria to fetch.
-     */
-    orderBy?: KpiCriteriaOrderByWithRelationInput | KpiCriteriaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: KpiCriteriaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteria from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteria.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned KpiCriteria
-    **/
-    _count?: true | KpiCriteriaCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: KpiCriteriaAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: KpiCriteriaSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: KpiCriteriaMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: KpiCriteriaMaxAggregateInputType
-  }
-
-  export type GetKpiCriteriaAggregateType<T extends KpiCriteriaAggregateArgs> = {
-        [P in keyof T & keyof AggregateKpiCriteria]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateKpiCriteria[P]>
-      : GetScalarType<T[P], AggregateKpiCriteria[P]>
-  }
-
-
-
-
-  export type KpiCriteriaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiCriteriaWhereInput
-    orderBy?: KpiCriteriaOrderByWithAggregationInput | KpiCriteriaOrderByWithAggregationInput[]
-    by: KpiCriteriaScalarFieldEnum[] | KpiCriteriaScalarFieldEnum
-    having?: KpiCriteriaScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: KpiCriteriaCountAggregateInputType | true
-    _avg?: KpiCriteriaAvgAggregateInputType
-    _sum?: KpiCriteriaSumAggregateInputType
-    _min?: KpiCriteriaMinAggregateInputType
-    _max?: KpiCriteriaMaxAggregateInputType
-  }
-
-  export type KpiCriteriaGroupByOutputType = {
-    id: number
-    name: string
-    description: string | null
-    categoryId: number | null
-    createdAt: Date
-    updatedAt: Date
-    _count: KpiCriteriaCountAggregateOutputType | null
-    _avg: KpiCriteriaAvgAggregateOutputType | null
-    _sum: KpiCriteriaSumAggregateOutputType | null
-    _min: KpiCriteriaMinAggregateOutputType | null
-    _max: KpiCriteriaMaxAggregateOutputType | null
-  }
-
-  type GetKpiCriteriaGroupByPayload<T extends KpiCriteriaGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<KpiCriteriaGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof KpiCriteriaGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], KpiCriteriaGroupByOutputType[P]>
-            : GetScalarType<T[P], KpiCriteriaGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type KpiCriteriaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    description?: boolean
-    categoryId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    settings?: boolean | KpiCriteria$settingsArgs<ExtArgs>
-    details?: boolean | KpiCriteria$detailsArgs<ExtArgs>
-    tasks?: boolean | KpiCriteria$tasksArgs<ExtArgs>
-    targets?: boolean | KpiCriteria$targetsArgs<ExtArgs>
-    jobTitleTargets?: boolean | KpiCriteria$jobTitleTargetsArgs<ExtArgs>
-    staffingSlotTargets?: boolean | KpiCriteria$staffingSlotTargetsArgs<ExtArgs>
-    _count?: boolean | KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["kpiCriteria"]>
-
-
-
-  export type KpiCriteriaSelectScalar = {
-    id?: boolean
-    name?: boolean
-    description?: boolean
-    categoryId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type KpiCriteriaOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "categoryId" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiCriteria"]>
-  export type KpiCriteriaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    settings?: boolean | KpiCriteria$settingsArgs<ExtArgs>
-    details?: boolean | KpiCriteria$detailsArgs<ExtArgs>
-    tasks?: boolean | KpiCriteria$tasksArgs<ExtArgs>
-    targets?: boolean | KpiCriteria$targetsArgs<ExtArgs>
-    jobTitleTargets?: boolean | KpiCriteria$jobTitleTargetsArgs<ExtArgs>
-    staffingSlotTargets?: boolean | KpiCriteria$staffingSlotTargetsArgs<ExtArgs>
-    _count?: boolean | KpiCriteriaCountOutputTypeDefaultArgs<ExtArgs>
-  }
-
-  export type $KpiCriteriaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "KpiCriteria"
-    objects: {
-      settings: Prisma.$KpiCriteriaSettingPayload<ExtArgs> | null
-      details: Prisma.$KpiEvaluationDetailPayload<ExtArgs>[]
-      tasks: Prisma.$TaskKpiSettingPayload<ExtArgs>[]
-      targets: Prisma.$EmployeeKpiTargetPayload<ExtArgs>[]
-      jobTitleTargets: Prisma.$JobTitleKpiTargetPayload<ExtArgs>[]
-      staffingSlotTargets: Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      name: string
-      description: string | null
-      categoryId: number | null
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["kpiCriteria"]>
-    composites: {}
-  }
-
-  type KpiCriteriaGetPayload<S extends boolean | null | undefined | KpiCriteriaDefaultArgs> = $Result.GetResult<Prisma.$KpiCriteriaPayload, S>
-
-  type KpiCriteriaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<KpiCriteriaFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: KpiCriteriaCountAggregateInputType | true
-    }
-
-  export interface KpiCriteriaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiCriteria'], meta: { name: 'KpiCriteria' } }
-    /**
-     * Find zero or one KpiCriteria that matches the filter.
-     * @param {KpiCriteriaFindUniqueArgs} args - Arguments to find a KpiCriteria
-     * @example
-     * // Get one KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends KpiCriteriaFindUniqueArgs>(args: SelectSubset<T, KpiCriteriaFindUniqueArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one KpiCriteria that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {KpiCriteriaFindUniqueOrThrowArgs} args - Arguments to find a KpiCriteria
-     * @example
-     * // Get one KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends KpiCriteriaFindUniqueOrThrowArgs>(args: SelectSubset<T, KpiCriteriaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KpiCriteria that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaFindFirstArgs} args - Arguments to find a KpiCriteria
-     * @example
-     * // Get one KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends KpiCriteriaFindFirstArgs>(args?: SelectSubset<T, KpiCriteriaFindFirstArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KpiCriteria that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaFindFirstOrThrowArgs} args - Arguments to find a KpiCriteria
-     * @example
-     * // Get one KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends KpiCriteriaFindFirstOrThrowArgs>(args?: SelectSubset<T, KpiCriteriaFindFirstOrThrowArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more KpiCriteria that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.findMany()
-     * 
-     * // Get first 10 KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const kpiCriteriaWithIdOnly = await prisma.kpiCriteria.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends KpiCriteriaFindManyArgs>(args?: SelectSubset<T, KpiCriteriaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a KpiCriteria.
-     * @param {KpiCriteriaCreateArgs} args - Arguments to create a KpiCriteria.
-     * @example
-     * // Create one KpiCriteria
-     * const KpiCriteria = await prisma.kpiCriteria.create({
-     *   data: {
-     *     // ... data to create a KpiCriteria
-     *   }
-     * })
-     * 
-     */
-    create<T extends KpiCriteriaCreateArgs>(args: SelectSubset<T, KpiCriteriaCreateArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many KpiCriteria.
-     * @param {KpiCriteriaCreateManyArgs} args - Arguments to create many KpiCriteria.
-     * @example
-     * // Create many KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends KpiCriteriaCreateManyArgs>(args?: SelectSubset<T, KpiCriteriaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a KpiCriteria.
-     * @param {KpiCriteriaDeleteArgs} args - Arguments to delete one KpiCriteria.
-     * @example
-     * // Delete one KpiCriteria
-     * const KpiCriteria = await prisma.kpiCriteria.delete({
-     *   where: {
-     *     // ... filter to delete one KpiCriteria
-     *   }
-     * })
-     * 
-     */
-    delete<T extends KpiCriteriaDeleteArgs>(args: SelectSubset<T, KpiCriteriaDeleteArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one KpiCriteria.
-     * @param {KpiCriteriaUpdateArgs} args - Arguments to update one KpiCriteria.
-     * @example
-     * // Update one KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends KpiCriteriaUpdateArgs>(args: SelectSubset<T, KpiCriteriaUpdateArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more KpiCriteria.
-     * @param {KpiCriteriaDeleteManyArgs} args - Arguments to filter KpiCriteria to delete.
-     * @example
-     * // Delete a few KpiCriteria
-     * const { count } = await prisma.kpiCriteria.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends KpiCriteriaDeleteManyArgs>(args?: SelectSubset<T, KpiCriteriaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more KpiCriteria.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends KpiCriteriaUpdateManyArgs>(args: SelectSubset<T, KpiCriteriaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one KpiCriteria.
-     * @param {KpiCriteriaUpsertArgs} args - Arguments to update or create a KpiCriteria.
-     * @example
-     * // Update or create a KpiCriteria
-     * const kpiCriteria = await prisma.kpiCriteria.upsert({
-     *   create: {
-     *     // ... data to create a KpiCriteria
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the KpiCriteria we want to update
-     *   }
-     * })
-     */
-    upsert<T extends KpiCriteriaUpsertArgs>(args: SelectSubset<T, KpiCriteriaUpsertArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of KpiCriteria.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaCountArgs} args - Arguments to filter KpiCriteria to count.
-     * @example
-     * // Count the number of KpiCriteria
-     * const count = await prisma.kpiCriteria.count({
-     *   where: {
-     *     // ... the filter for the KpiCriteria we want to count
-     *   }
-     * })
-    **/
-    count<T extends KpiCriteriaCountArgs>(
-      args?: Subset<T, KpiCriteriaCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], KpiCriteriaCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a KpiCriteria.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends KpiCriteriaAggregateArgs>(args: Subset<T, KpiCriteriaAggregateArgs>): Prisma.PrismaPromise<GetKpiCriteriaAggregateType<T>>
-
-    /**
-     * Group by KpiCriteria.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends KpiCriteriaGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: KpiCriteriaGroupByArgs['orderBy'] }
-        : { orderBy?: KpiCriteriaGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, KpiCriteriaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKpiCriteriaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the KpiCriteria model
-   */
-  readonly fields: KpiCriteriaFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for KpiCriteria.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__KpiCriteriaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    settings<T extends KpiCriteria$settingsArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteria$settingsArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    details<T extends KpiCriteria$detailsArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteria$detailsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    tasks<T extends KpiCriteria$tasksArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteria$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    targets<T extends KpiCriteria$targetsArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteria$targetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    jobTitleTargets<T extends KpiCriteria$jobTitleTargetsArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteria$jobTitleTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    staffingSlotTargets<T extends KpiCriteria$staffingSlotTargetsArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteria$staffingSlotTargetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the KpiCriteria model
-   */
-  interface KpiCriteriaFieldRefs {
-    readonly id: FieldRef<"KpiCriteria", 'Int'>
-    readonly name: FieldRef<"KpiCriteria", 'String'>
-    readonly description: FieldRef<"KpiCriteria", 'String'>
-    readonly categoryId: FieldRef<"KpiCriteria", 'Int'>
-    readonly createdAt: FieldRef<"KpiCriteria", 'DateTime'>
-    readonly updatedAt: FieldRef<"KpiCriteria", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * KpiCriteria findUnique
-   */
-  export type KpiCriteriaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteria to fetch.
-     */
-    where: KpiCriteriaWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteria findUniqueOrThrow
-   */
-  export type KpiCriteriaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteria to fetch.
-     */
-    where: KpiCriteriaWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteria findFirst
-   */
-  export type KpiCriteriaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteria to fetch.
-     */
-    where?: KpiCriteriaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteria to fetch.
-     */
-    orderBy?: KpiCriteriaOrderByWithRelationInput | KpiCriteriaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for KpiCriteria.
-     */
-    cursor?: KpiCriteriaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteria from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteria.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiCriteria.
-     */
-    distinct?: KpiCriteriaScalarFieldEnum | KpiCriteriaScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria findFirstOrThrow
-   */
-  export type KpiCriteriaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteria to fetch.
-     */
-    where?: KpiCriteriaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteria to fetch.
-     */
-    orderBy?: KpiCriteriaOrderByWithRelationInput | KpiCriteriaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for KpiCriteria.
-     */
-    cursor?: KpiCriteriaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteria from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteria.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiCriteria.
-     */
-    distinct?: KpiCriteriaScalarFieldEnum | KpiCriteriaScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria findMany
-   */
-  export type KpiCriteriaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteria to fetch.
-     */
-    where?: KpiCriteriaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteria to fetch.
-     */
-    orderBy?: KpiCriteriaOrderByWithRelationInput | KpiCriteriaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing KpiCriteria.
-     */
-    cursor?: KpiCriteriaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteria from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteria.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiCriteria.
-     */
-    distinct?: KpiCriteriaScalarFieldEnum | KpiCriteriaScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria create
-   */
-  export type KpiCriteriaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * The data needed to create a KpiCriteria.
-     */
-    data: XOR<KpiCriteriaCreateInput, KpiCriteriaUncheckedCreateInput>
-  }
-
-  /**
-   * KpiCriteria createMany
-   */
-  export type KpiCriteriaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many KpiCriteria.
-     */
-    data: KpiCriteriaCreateManyInput | KpiCriteriaCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * KpiCriteria update
-   */
-  export type KpiCriteriaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * The data needed to update a KpiCriteria.
-     */
-    data: XOR<KpiCriteriaUpdateInput, KpiCriteriaUncheckedUpdateInput>
-    /**
-     * Choose, which KpiCriteria to update.
-     */
-    where: KpiCriteriaWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteria updateMany
-   */
-  export type KpiCriteriaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update KpiCriteria.
-     */
-    data: XOR<KpiCriteriaUpdateManyMutationInput, KpiCriteriaUncheckedUpdateManyInput>
-    /**
-     * Filter which KpiCriteria to update
-     */
-    where?: KpiCriteriaWhereInput
-    /**
-     * Limit how many KpiCriteria to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * KpiCriteria upsert
-   */
-  export type KpiCriteriaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * The filter to search for the KpiCriteria to update in case it exists.
-     */
-    where: KpiCriteriaWhereUniqueInput
-    /**
-     * In case the KpiCriteria found by the `where` argument doesn't exist, create a new KpiCriteria with this data.
-     */
-    create: XOR<KpiCriteriaCreateInput, KpiCriteriaUncheckedCreateInput>
-    /**
-     * In case the KpiCriteria was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<KpiCriteriaUpdateInput, KpiCriteriaUncheckedUpdateInput>
-  }
-
-  /**
-   * KpiCriteria delete
-   */
-  export type KpiCriteriaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-    /**
-     * Filter which KpiCriteria to delete.
-     */
-    where: KpiCriteriaWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteria deleteMany
-   */
-  export type KpiCriteriaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KpiCriteria to delete
-     */
-    where?: KpiCriteriaWhereInput
-    /**
-     * Limit how many KpiCriteria to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * KpiCriteria.settings
-   */
-  export type KpiCriteria$settingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    where?: KpiCriteriaSettingWhereInput
-  }
-
-  /**
-   * KpiCriteria.details
-   */
-  export type KpiCriteria$detailsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    where?: KpiEvaluationDetailWhereInput
-    orderBy?: KpiEvaluationDetailOrderByWithRelationInput | KpiEvaluationDetailOrderByWithRelationInput[]
-    cursor?: KpiEvaluationDetailWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: KpiEvaluationDetailScalarFieldEnum | KpiEvaluationDetailScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria.tasks
-   */
-  export type KpiCriteria$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    where?: TaskKpiSettingWhereInput
-    orderBy?: TaskKpiSettingOrderByWithRelationInput | TaskKpiSettingOrderByWithRelationInput[]
-    cursor?: TaskKpiSettingWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: TaskKpiSettingScalarFieldEnum | TaskKpiSettingScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria.targets
-   */
-  export type KpiCriteria$targetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    where?: EmployeeKpiTargetWhereInput
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EmployeeKpiTargetScalarFieldEnum | EmployeeKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria.jobTitleTargets
-   */
-  export type KpiCriteria$jobTitleTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    where?: JobTitleKpiTargetWhereInput
-    orderBy?: JobTitleKpiTargetOrderByWithRelationInput | JobTitleKpiTargetOrderByWithRelationInput[]
-    cursor?: JobTitleKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: JobTitleKpiTargetScalarFieldEnum | JobTitleKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria.staffingSlotTargets
-   */
-  export type KpiCriteria$staffingSlotTargetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    where?: StaffingSlotKpiTargetWhereInput
-    orderBy?: StaffingSlotKpiTargetOrderByWithRelationInput | StaffingSlotKpiTargetOrderByWithRelationInput[]
-    cursor?: StaffingSlotKpiTargetWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: StaffingSlotKpiTargetScalarFieldEnum | StaffingSlotKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteria without action
-   */
-  export type KpiCriteriaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteria
-     */
-    select?: KpiCriteriaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteria
-     */
-    omit?: KpiCriteriaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model KpiCriteriaSetting
-   */
-
-  export type AggregateKpiCriteriaSetting = {
-    _count: KpiCriteriaSettingCountAggregateOutputType | null
-    _avg: KpiCriteriaSettingAvgAggregateOutputType | null
-    _sum: KpiCriteriaSettingSumAggregateOutputType | null
-    _min: KpiCriteriaSettingMinAggregateOutputType | null
-    _max: KpiCriteriaSettingMaxAggregateOutputType | null
-  }
-
-  export type KpiCriteriaSettingAvgAggregateOutputType = {
-    criteriaId: number | null
-    weight: number | null
-    baseScore: number | null
-    difficultyMultiplier: number | null
-    bonusThresholdDays: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-  }
-
-  export type KpiCriteriaSettingSumAggregateOutputType = {
-    criteriaId: number | null
-    weight: number | null
-    baseScore: number | null
-    difficultyMultiplier: number | null
-    bonusThresholdDays: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-  }
-
-  export type KpiCriteriaSettingMinAggregateOutputType = {
-    criteriaId: number | null
-    weight: number | null
-    baseScore: number | null
-    scoringMethod: string | null
-    difficulty: string | null
-    difficultyMultiplier: number | null
-    bonusThresholdDays: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    integrationCode: string | null
-    formula: string | null
-  }
-
-  export type KpiCriteriaSettingMaxAggregateOutputType = {
-    criteriaId: number | null
-    weight: number | null
-    baseScore: number | null
-    scoringMethod: string | null
-    difficulty: string | null
-    difficultyMultiplier: number | null
-    bonusThresholdDays: number | null
-    bonusPerDay: number | null
-    penaltyPerDay: number | null
-    integrationCode: string | null
-    formula: string | null
-  }
-
-  export type KpiCriteriaSettingCountAggregateOutputType = {
-    criteriaId: number
-    weight: number
-    baseScore: number
-    scoringMethod: number
-    difficulty: number
-    difficultyMultiplier: number
-    bonusThresholdDays: number
-    bonusPerDay: number
-    penaltyPerDay: number
-    integrationCode: number
-    formula: number
-    _all: number
-  }
-
-
-  export type KpiCriteriaSettingAvgAggregateInputType = {
-    criteriaId?: true
-    weight?: true
-    baseScore?: true
-    difficultyMultiplier?: true
-    bonusThresholdDays?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-  }
-
-  export type KpiCriteriaSettingSumAggregateInputType = {
-    criteriaId?: true
-    weight?: true
-    baseScore?: true
-    difficultyMultiplier?: true
-    bonusThresholdDays?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-  }
-
-  export type KpiCriteriaSettingMinAggregateInputType = {
-    criteriaId?: true
-    weight?: true
-    baseScore?: true
-    scoringMethod?: true
-    difficulty?: true
-    difficultyMultiplier?: true
-    bonusThresholdDays?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    integrationCode?: true
-    formula?: true
-  }
-
-  export type KpiCriteriaSettingMaxAggregateInputType = {
-    criteriaId?: true
-    weight?: true
-    baseScore?: true
-    scoringMethod?: true
-    difficulty?: true
-    difficultyMultiplier?: true
-    bonusThresholdDays?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    integrationCode?: true
-    formula?: true
-  }
-
-  export type KpiCriteriaSettingCountAggregateInputType = {
-    criteriaId?: true
-    weight?: true
-    baseScore?: true
-    scoringMethod?: true
-    difficulty?: true
-    difficultyMultiplier?: true
-    bonusThresholdDays?: true
-    bonusPerDay?: true
-    penaltyPerDay?: true
-    integrationCode?: true
-    formula?: true
-    _all?: true
-  }
-
-  export type KpiCriteriaSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KpiCriteriaSetting to aggregate.
-     */
-    where?: KpiCriteriaSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteriaSettings to fetch.
-     */
-    orderBy?: KpiCriteriaSettingOrderByWithRelationInput | KpiCriteriaSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: KpiCriteriaSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteriaSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteriaSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned KpiCriteriaSettings
-    **/
-    _count?: true | KpiCriteriaSettingCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: KpiCriteriaSettingAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: KpiCriteriaSettingSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: KpiCriteriaSettingMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: KpiCriteriaSettingMaxAggregateInputType
-  }
-
-  export type GetKpiCriteriaSettingAggregateType<T extends KpiCriteriaSettingAggregateArgs> = {
-        [P in keyof T & keyof AggregateKpiCriteriaSetting]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateKpiCriteriaSetting[P]>
-      : GetScalarType<T[P], AggregateKpiCriteriaSetting[P]>
-  }
-
-
-
-
-  export type KpiCriteriaSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiCriteriaSettingWhereInput
-    orderBy?: KpiCriteriaSettingOrderByWithAggregationInput | KpiCriteriaSettingOrderByWithAggregationInput[]
-    by: KpiCriteriaSettingScalarFieldEnum[] | KpiCriteriaSettingScalarFieldEnum
-    having?: KpiCriteriaSettingScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: KpiCriteriaSettingCountAggregateInputType | true
-    _avg?: KpiCriteriaSettingAvgAggregateInputType
-    _sum?: KpiCriteriaSettingSumAggregateInputType
-    _min?: KpiCriteriaSettingMinAggregateInputType
-    _max?: KpiCriteriaSettingMaxAggregateInputType
-  }
-
-  export type KpiCriteriaSettingGroupByOutputType = {
-    criteriaId: number
-    weight: number
-    baseScore: number | null
-    scoringMethod: string
-    difficulty: string
-    difficultyMultiplier: number
-    bonusThresholdDays: number
-    bonusPerDay: number
-    penaltyPerDay: number
-    integrationCode: string | null
-    formula: string | null
-    _count: KpiCriteriaSettingCountAggregateOutputType | null
-    _avg: KpiCriteriaSettingAvgAggregateOutputType | null
-    _sum: KpiCriteriaSettingSumAggregateOutputType | null
-    _min: KpiCriteriaSettingMinAggregateOutputType | null
-    _max: KpiCriteriaSettingMaxAggregateOutputType | null
-  }
-
-  type GetKpiCriteriaSettingGroupByPayload<T extends KpiCriteriaSettingGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<KpiCriteriaSettingGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof KpiCriteriaSettingGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], KpiCriteriaSettingGroupByOutputType[P]>
-            : GetScalarType<T[P], KpiCriteriaSettingGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type KpiCriteriaSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    criteriaId?: boolean
-    weight?: boolean
-    baseScore?: boolean
-    scoringMethod?: boolean
-    difficulty?: boolean
-    difficultyMultiplier?: boolean
-    bonusThresholdDays?: boolean
-    bonusPerDay?: boolean
-    penaltyPerDay?: boolean
-    integrationCode?: boolean
-    formula?: boolean
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["kpiCriteriaSetting"]>
-
-
-
-  export type KpiCriteriaSettingSelectScalar = {
-    criteriaId?: boolean
-    weight?: boolean
-    baseScore?: boolean
-    scoringMethod?: boolean
-    difficulty?: boolean
-    difficultyMultiplier?: boolean
-    bonusThresholdDays?: boolean
-    bonusPerDay?: boolean
-    penaltyPerDay?: boolean
-    integrationCode?: boolean
-    formula?: boolean
-  }
-
-  export type KpiCriteriaSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"criteriaId" | "weight" | "baseScore" | "scoringMethod" | "difficulty" | "difficultyMultiplier" | "bonusThresholdDays" | "bonusPerDay" | "penaltyPerDay" | "integrationCode" | "formula", ExtArgs["result"]["kpiCriteriaSetting"]>
-  export type KpiCriteriaSettingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }
-
-  export type $KpiCriteriaSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "KpiCriteriaSetting"
-    objects: {
-      criteria: Prisma.$KpiCriteriaPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      criteriaId: number
-      weight: number
-      baseScore: number | null
-      scoringMethod: string
-      difficulty: string
-      difficultyMultiplier: number
-      bonusThresholdDays: number
-      bonusPerDay: number
-      penaltyPerDay: number
-      integrationCode: string | null
-      formula: string | null
-    }, ExtArgs["result"]["kpiCriteriaSetting"]>
-    composites: {}
-  }
-
-  type KpiCriteriaSettingGetPayload<S extends boolean | null | undefined | KpiCriteriaSettingDefaultArgs> = $Result.GetResult<Prisma.$KpiCriteriaSettingPayload, S>
-
-  type KpiCriteriaSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<KpiCriteriaSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: KpiCriteriaSettingCountAggregateInputType | true
-    }
-
-  export interface KpiCriteriaSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiCriteriaSetting'], meta: { name: 'KpiCriteriaSetting' } }
-    /**
-     * Find zero or one KpiCriteriaSetting that matches the filter.
-     * @param {KpiCriteriaSettingFindUniqueArgs} args - Arguments to find a KpiCriteriaSetting
-     * @example
-     * // Get one KpiCriteriaSetting
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends KpiCriteriaSettingFindUniqueArgs>(args: SelectSubset<T, KpiCriteriaSettingFindUniqueArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one KpiCriteriaSetting that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {KpiCriteriaSettingFindUniqueOrThrowArgs} args - Arguments to find a KpiCriteriaSetting
-     * @example
-     * // Get one KpiCriteriaSetting
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends KpiCriteriaSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, KpiCriteriaSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KpiCriteriaSetting that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingFindFirstArgs} args - Arguments to find a KpiCriteriaSetting
-     * @example
-     * // Get one KpiCriteriaSetting
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends KpiCriteriaSettingFindFirstArgs>(args?: SelectSubset<T, KpiCriteriaSettingFindFirstArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KpiCriteriaSetting that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingFindFirstOrThrowArgs} args - Arguments to find a KpiCriteriaSetting
-     * @example
-     * // Get one KpiCriteriaSetting
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends KpiCriteriaSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, KpiCriteriaSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more KpiCriteriaSettings that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all KpiCriteriaSettings
-     * const kpiCriteriaSettings = await prisma.kpiCriteriaSetting.findMany()
-     * 
-     * // Get first 10 KpiCriteriaSettings
-     * const kpiCriteriaSettings = await prisma.kpiCriteriaSetting.findMany({ take: 10 })
-     * 
-     * // Only select the `criteriaId`
-     * const kpiCriteriaSettingWithCriteriaIdOnly = await prisma.kpiCriteriaSetting.findMany({ select: { criteriaId: true } })
-     * 
-     */
-    findMany<T extends KpiCriteriaSettingFindManyArgs>(args?: SelectSubset<T, KpiCriteriaSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a KpiCriteriaSetting.
-     * @param {KpiCriteriaSettingCreateArgs} args - Arguments to create a KpiCriteriaSetting.
-     * @example
-     * // Create one KpiCriteriaSetting
-     * const KpiCriteriaSetting = await prisma.kpiCriteriaSetting.create({
-     *   data: {
-     *     // ... data to create a KpiCriteriaSetting
-     *   }
-     * })
-     * 
-     */
-    create<T extends KpiCriteriaSettingCreateArgs>(args: SelectSubset<T, KpiCriteriaSettingCreateArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many KpiCriteriaSettings.
-     * @param {KpiCriteriaSettingCreateManyArgs} args - Arguments to create many KpiCriteriaSettings.
-     * @example
-     * // Create many KpiCriteriaSettings
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends KpiCriteriaSettingCreateManyArgs>(args?: SelectSubset<T, KpiCriteriaSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a KpiCriteriaSetting.
-     * @param {KpiCriteriaSettingDeleteArgs} args - Arguments to delete one KpiCriteriaSetting.
-     * @example
-     * // Delete one KpiCriteriaSetting
-     * const KpiCriteriaSetting = await prisma.kpiCriteriaSetting.delete({
-     *   where: {
-     *     // ... filter to delete one KpiCriteriaSetting
-     *   }
-     * })
-     * 
-     */
-    delete<T extends KpiCriteriaSettingDeleteArgs>(args: SelectSubset<T, KpiCriteriaSettingDeleteArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one KpiCriteriaSetting.
-     * @param {KpiCriteriaSettingUpdateArgs} args - Arguments to update one KpiCriteriaSetting.
-     * @example
-     * // Update one KpiCriteriaSetting
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends KpiCriteriaSettingUpdateArgs>(args: SelectSubset<T, KpiCriteriaSettingUpdateArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more KpiCriteriaSettings.
-     * @param {KpiCriteriaSettingDeleteManyArgs} args - Arguments to filter KpiCriteriaSettings to delete.
-     * @example
-     * // Delete a few KpiCriteriaSettings
-     * const { count } = await prisma.kpiCriteriaSetting.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends KpiCriteriaSettingDeleteManyArgs>(args?: SelectSubset<T, KpiCriteriaSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more KpiCriteriaSettings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many KpiCriteriaSettings
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends KpiCriteriaSettingUpdateManyArgs>(args: SelectSubset<T, KpiCriteriaSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one KpiCriteriaSetting.
-     * @param {KpiCriteriaSettingUpsertArgs} args - Arguments to update or create a KpiCriteriaSetting.
-     * @example
-     * // Update or create a KpiCriteriaSetting
-     * const kpiCriteriaSetting = await prisma.kpiCriteriaSetting.upsert({
-     *   create: {
-     *     // ... data to create a KpiCriteriaSetting
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the KpiCriteriaSetting we want to update
-     *   }
-     * })
-     */
-    upsert<T extends KpiCriteriaSettingUpsertArgs>(args: SelectSubset<T, KpiCriteriaSettingUpsertArgs<ExtArgs>>): Prisma__KpiCriteriaSettingClient<$Result.GetResult<Prisma.$KpiCriteriaSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of KpiCriteriaSettings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingCountArgs} args - Arguments to filter KpiCriteriaSettings to count.
-     * @example
-     * // Count the number of KpiCriteriaSettings
-     * const count = await prisma.kpiCriteriaSetting.count({
-     *   where: {
-     *     // ... the filter for the KpiCriteriaSettings we want to count
-     *   }
-     * })
-    **/
-    count<T extends KpiCriteriaSettingCountArgs>(
-      args?: Subset<T, KpiCriteriaSettingCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], KpiCriteriaSettingCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a KpiCriteriaSetting.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends KpiCriteriaSettingAggregateArgs>(args: Subset<T, KpiCriteriaSettingAggregateArgs>): Prisma.PrismaPromise<GetKpiCriteriaSettingAggregateType<T>>
-
-    /**
-     * Group by KpiCriteriaSetting.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiCriteriaSettingGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends KpiCriteriaSettingGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: KpiCriteriaSettingGroupByArgs['orderBy'] }
-        : { orderBy?: KpiCriteriaSettingGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, KpiCriteriaSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKpiCriteriaSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the KpiCriteriaSetting model
-   */
-  readonly fields: KpiCriteriaSettingFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for KpiCriteriaSetting.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__KpiCriteriaSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    criteria<T extends KpiCriteriaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteriaDefaultArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the KpiCriteriaSetting model
-   */
-  interface KpiCriteriaSettingFieldRefs {
-    readonly criteriaId: FieldRef<"KpiCriteriaSetting", 'Int'>
-    readonly weight: FieldRef<"KpiCriteriaSetting", 'Float'>
-    readonly baseScore: FieldRef<"KpiCriteriaSetting", 'Float'>
-    readonly scoringMethod: FieldRef<"KpiCriteriaSetting", 'String'>
-    readonly difficulty: FieldRef<"KpiCriteriaSetting", 'String'>
-    readonly difficultyMultiplier: FieldRef<"KpiCriteriaSetting", 'Float'>
-    readonly bonusThresholdDays: FieldRef<"KpiCriteriaSetting", 'Int'>
-    readonly bonusPerDay: FieldRef<"KpiCriteriaSetting", 'Float'>
-    readonly penaltyPerDay: FieldRef<"KpiCriteriaSetting", 'Float'>
-    readonly integrationCode: FieldRef<"KpiCriteriaSetting", 'String'>
-    readonly formula: FieldRef<"KpiCriteriaSetting", 'String'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * KpiCriteriaSetting findUnique
-   */
-  export type KpiCriteriaSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteriaSetting to fetch.
-     */
-    where: KpiCriteriaSettingWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteriaSetting findUniqueOrThrow
-   */
-  export type KpiCriteriaSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteriaSetting to fetch.
-     */
-    where: KpiCriteriaSettingWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteriaSetting findFirst
-   */
-  export type KpiCriteriaSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteriaSetting to fetch.
-     */
-    where?: KpiCriteriaSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteriaSettings to fetch.
-     */
-    orderBy?: KpiCriteriaSettingOrderByWithRelationInput | KpiCriteriaSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for KpiCriteriaSettings.
-     */
-    cursor?: KpiCriteriaSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteriaSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteriaSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiCriteriaSettings.
-     */
-    distinct?: KpiCriteriaSettingScalarFieldEnum | KpiCriteriaSettingScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteriaSetting findFirstOrThrow
-   */
-  export type KpiCriteriaSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteriaSetting to fetch.
-     */
-    where?: KpiCriteriaSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteriaSettings to fetch.
-     */
-    orderBy?: KpiCriteriaSettingOrderByWithRelationInput | KpiCriteriaSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for KpiCriteriaSettings.
-     */
-    cursor?: KpiCriteriaSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteriaSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteriaSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiCriteriaSettings.
-     */
-    distinct?: KpiCriteriaSettingScalarFieldEnum | KpiCriteriaSettingScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteriaSetting findMany
-   */
-  export type KpiCriteriaSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiCriteriaSettings to fetch.
-     */
-    where?: KpiCriteriaSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiCriteriaSettings to fetch.
-     */
-    orderBy?: KpiCriteriaSettingOrderByWithRelationInput | KpiCriteriaSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing KpiCriteriaSettings.
-     */
-    cursor?: KpiCriteriaSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiCriteriaSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiCriteriaSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiCriteriaSettings.
-     */
-    distinct?: KpiCriteriaSettingScalarFieldEnum | KpiCriteriaSettingScalarFieldEnum[]
-  }
-
-  /**
-   * KpiCriteriaSetting create
-   */
-  export type KpiCriteriaSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * The data needed to create a KpiCriteriaSetting.
-     */
-    data: XOR<KpiCriteriaSettingCreateInput, KpiCriteriaSettingUncheckedCreateInput>
-  }
-
-  /**
-   * KpiCriteriaSetting createMany
-   */
-  export type KpiCriteriaSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many KpiCriteriaSettings.
-     */
-    data: KpiCriteriaSettingCreateManyInput | KpiCriteriaSettingCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * KpiCriteriaSetting update
-   */
-  export type KpiCriteriaSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * The data needed to update a KpiCriteriaSetting.
-     */
-    data: XOR<KpiCriteriaSettingUpdateInput, KpiCriteriaSettingUncheckedUpdateInput>
-    /**
-     * Choose, which KpiCriteriaSetting to update.
-     */
-    where: KpiCriteriaSettingWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteriaSetting updateMany
-   */
-  export type KpiCriteriaSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update KpiCriteriaSettings.
-     */
-    data: XOR<KpiCriteriaSettingUpdateManyMutationInput, KpiCriteriaSettingUncheckedUpdateManyInput>
-    /**
-     * Filter which KpiCriteriaSettings to update
-     */
-    where?: KpiCriteriaSettingWhereInput
-    /**
-     * Limit how many KpiCriteriaSettings to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * KpiCriteriaSetting upsert
-   */
-  export type KpiCriteriaSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * The filter to search for the KpiCriteriaSetting to update in case it exists.
-     */
-    where: KpiCriteriaSettingWhereUniqueInput
-    /**
-     * In case the KpiCriteriaSetting found by the `where` argument doesn't exist, create a new KpiCriteriaSetting with this data.
-     */
-    create: XOR<KpiCriteriaSettingCreateInput, KpiCriteriaSettingUncheckedCreateInput>
-    /**
-     * In case the KpiCriteriaSetting was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<KpiCriteriaSettingUpdateInput, KpiCriteriaSettingUncheckedUpdateInput>
-  }
-
-  /**
-   * KpiCriteriaSetting delete
-   */
-  export type KpiCriteriaSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-    /**
-     * Filter which KpiCriteriaSetting to delete.
-     */
-    where: KpiCriteriaSettingWhereUniqueInput
-  }
-
-  /**
-   * KpiCriteriaSetting deleteMany
-   */
-  export type KpiCriteriaSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KpiCriteriaSettings to delete
-     */
-    where?: KpiCriteriaSettingWhereInput
-    /**
-     * Limit how many KpiCriteriaSettings to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * KpiCriteriaSetting without action
-   */
-  export type KpiCriteriaSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiCriteriaSetting
-     */
-    select?: KpiCriteriaSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiCriteriaSetting
-     */
-    omit?: KpiCriteriaSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiCriteriaSettingInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model EmployeeKpiTarget
-   */
-
-  export type AggregateEmployeeKpiTarget = {
-    _count: EmployeeKpiTargetCountAggregateOutputType | null
-    _avg: EmployeeKpiTargetAvgAggregateOutputType | null
-    _sum: EmployeeKpiTargetSumAggregateOutputType | null
-    _min: EmployeeKpiTargetMinAggregateOutputType | null
-    _max: EmployeeKpiTargetMaxAggregateOutputType | null
-  }
-
-  export type EmployeeKpiTargetAvgAggregateOutputType = {
-    id: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-  }
-
-  export type EmployeeKpiTargetSumAggregateOutputType = {
-    id: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-  }
-
-  export type EmployeeKpiTargetMinAggregateOutputType = {
-    id: number | null
-    employeeCode: string | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type EmployeeKpiTargetMaxAggregateOutputType = {
-    id: number | null
-    employeeCode: string | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type EmployeeKpiTargetCountAggregateOutputType = {
-    id: number
-    employeeCode: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type EmployeeKpiTargetAvgAggregateInputType = {
-    id?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-  }
-
-  export type EmployeeKpiTargetSumAggregateInputType = {
-    id?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-  }
-
-  export type EmployeeKpiTargetMinAggregateInputType = {
-    id?: true
-    employeeCode?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type EmployeeKpiTargetMaxAggregateInputType = {
-    id?: true
-    employeeCode?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type EmployeeKpiTargetCountAggregateInputType = {
-    id?: true
-    employeeCode?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type EmployeeKpiTargetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EmployeeKpiTarget to aggregate.
-     */
-    where?: EmployeeKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of EmployeeKpiTargets to fetch.
-     */
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` EmployeeKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` EmployeeKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned EmployeeKpiTargets
-    **/
-    _count?: true | EmployeeKpiTargetCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: EmployeeKpiTargetAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: EmployeeKpiTargetSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: EmployeeKpiTargetMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: EmployeeKpiTargetMaxAggregateInputType
-  }
-
-  export type GetEmployeeKpiTargetAggregateType<T extends EmployeeKpiTargetAggregateArgs> = {
-        [P in keyof T & keyof AggregateEmployeeKpiTarget]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateEmployeeKpiTarget[P]>
-      : GetScalarType<T[P], AggregateEmployeeKpiTarget[P]>
-  }
-
-
-
-
-  export type EmployeeKpiTargetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EmployeeKpiTargetWhereInput
-    orderBy?: EmployeeKpiTargetOrderByWithAggregationInput | EmployeeKpiTargetOrderByWithAggregationInput[]
-    by: EmployeeKpiTargetScalarFieldEnum[] | EmployeeKpiTargetScalarFieldEnum
-    having?: EmployeeKpiTargetScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: EmployeeKpiTargetCountAggregateInputType | true
-    _avg?: EmployeeKpiTargetAvgAggregateInputType
-    _sum?: EmployeeKpiTargetSumAggregateInputType
-    _min?: EmployeeKpiTargetMinAggregateInputType
-    _max?: EmployeeKpiTargetMaxAggregateInputType
-  }
-
-  export type EmployeeKpiTargetGroupByOutputType = {
-    id: number
-    employeeCode: string
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    createdAt: Date
-    updatedAt: Date
-    _count: EmployeeKpiTargetCountAggregateOutputType | null
-    _avg: EmployeeKpiTargetAvgAggregateOutputType | null
-    _sum: EmployeeKpiTargetSumAggregateOutputType | null
-    _min: EmployeeKpiTargetMinAggregateOutputType | null
-    _max: EmployeeKpiTargetMaxAggregateOutputType | null
-  }
-
-  type GetEmployeeKpiTargetGroupByPayload<T extends EmployeeKpiTargetGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<EmployeeKpiTargetGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof EmployeeKpiTargetGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], EmployeeKpiTargetGroupByOutputType[P]>
-            : GetScalarType<T[P], EmployeeKpiTargetGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type EmployeeKpiTargetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    employeeCode?: boolean
-    periodId?: boolean
-    criteriaId?: boolean
-    targetValue?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    employee?: boolean | EmployeeDefaultArgs<ExtArgs>
-    period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["employeeKpiTarget"]>
-
-
-
-  export type EmployeeKpiTargetSelectScalar = {
-    id?: boolean
-    employeeCode?: boolean
-    periodId?: boolean
-    criteriaId?: boolean
-    targetValue?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type EmployeeKpiTargetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "employeeCode" | "periodId" | "criteriaId" | "targetValue" | "createdAt" | "updatedAt", ExtArgs["result"]["employeeKpiTarget"]>
-  export type EmployeeKpiTargetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    employee?: boolean | EmployeeDefaultArgs<ExtArgs>
-    period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }
-
-  export type $EmployeeKpiTargetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "EmployeeKpiTarget"
-    objects: {
-      employee: Prisma.$EmployeePayload<ExtArgs>
-      period: Prisma.$KpiPeriodPayload<ExtArgs>
-      criteria: Prisma.$KpiCriteriaPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      employeeCode: string
-      periodId: number
-      criteriaId: number
-      targetValue: number
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["employeeKpiTarget"]>
-    composites: {}
-  }
-
-  type EmployeeKpiTargetGetPayload<S extends boolean | null | undefined | EmployeeKpiTargetDefaultArgs> = $Result.GetResult<Prisma.$EmployeeKpiTargetPayload, S>
-
-  type EmployeeKpiTargetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<EmployeeKpiTargetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: EmployeeKpiTargetCountAggregateInputType | true
-    }
-
-  export interface EmployeeKpiTargetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EmployeeKpiTarget'], meta: { name: 'EmployeeKpiTarget' } }
-    /**
-     * Find zero or one EmployeeKpiTarget that matches the filter.
-     * @param {EmployeeKpiTargetFindUniqueArgs} args - Arguments to find a EmployeeKpiTarget
-     * @example
-     * // Get one EmployeeKpiTarget
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends EmployeeKpiTargetFindUniqueArgs>(args: SelectSubset<T, EmployeeKpiTargetFindUniqueArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one EmployeeKpiTarget that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {EmployeeKpiTargetFindUniqueOrThrowArgs} args - Arguments to find a EmployeeKpiTarget
-     * @example
-     * // Get one EmployeeKpiTarget
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends EmployeeKpiTargetFindUniqueOrThrowArgs>(args: SelectSubset<T, EmployeeKpiTargetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EmployeeKpiTarget that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetFindFirstArgs} args - Arguments to find a EmployeeKpiTarget
-     * @example
-     * // Get one EmployeeKpiTarget
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends EmployeeKpiTargetFindFirstArgs>(args?: SelectSubset<T, EmployeeKpiTargetFindFirstArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EmployeeKpiTarget that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetFindFirstOrThrowArgs} args - Arguments to find a EmployeeKpiTarget
-     * @example
-     * // Get one EmployeeKpiTarget
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends EmployeeKpiTargetFindFirstOrThrowArgs>(args?: SelectSubset<T, EmployeeKpiTargetFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more EmployeeKpiTargets that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all EmployeeKpiTargets
-     * const employeeKpiTargets = await prisma.employeeKpiTarget.findMany()
-     * 
-     * // Get first 10 EmployeeKpiTargets
-     * const employeeKpiTargets = await prisma.employeeKpiTarget.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const employeeKpiTargetWithIdOnly = await prisma.employeeKpiTarget.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends EmployeeKpiTargetFindManyArgs>(args?: SelectSubset<T, EmployeeKpiTargetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a EmployeeKpiTarget.
-     * @param {EmployeeKpiTargetCreateArgs} args - Arguments to create a EmployeeKpiTarget.
-     * @example
-     * // Create one EmployeeKpiTarget
-     * const EmployeeKpiTarget = await prisma.employeeKpiTarget.create({
-     *   data: {
-     *     // ... data to create a EmployeeKpiTarget
-     *   }
-     * })
-     * 
-     */
-    create<T extends EmployeeKpiTargetCreateArgs>(args: SelectSubset<T, EmployeeKpiTargetCreateArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many EmployeeKpiTargets.
-     * @param {EmployeeKpiTargetCreateManyArgs} args - Arguments to create many EmployeeKpiTargets.
-     * @example
-     * // Create many EmployeeKpiTargets
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends EmployeeKpiTargetCreateManyArgs>(args?: SelectSubset<T, EmployeeKpiTargetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a EmployeeKpiTarget.
-     * @param {EmployeeKpiTargetDeleteArgs} args - Arguments to delete one EmployeeKpiTarget.
-     * @example
-     * // Delete one EmployeeKpiTarget
-     * const EmployeeKpiTarget = await prisma.employeeKpiTarget.delete({
-     *   where: {
-     *     // ... filter to delete one EmployeeKpiTarget
-     *   }
-     * })
-     * 
-     */
-    delete<T extends EmployeeKpiTargetDeleteArgs>(args: SelectSubset<T, EmployeeKpiTargetDeleteArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one EmployeeKpiTarget.
-     * @param {EmployeeKpiTargetUpdateArgs} args - Arguments to update one EmployeeKpiTarget.
-     * @example
-     * // Update one EmployeeKpiTarget
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends EmployeeKpiTargetUpdateArgs>(args: SelectSubset<T, EmployeeKpiTargetUpdateArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more EmployeeKpiTargets.
-     * @param {EmployeeKpiTargetDeleteManyArgs} args - Arguments to filter EmployeeKpiTargets to delete.
-     * @example
-     * // Delete a few EmployeeKpiTargets
-     * const { count } = await prisma.employeeKpiTarget.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends EmployeeKpiTargetDeleteManyArgs>(args?: SelectSubset<T, EmployeeKpiTargetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EmployeeKpiTargets.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many EmployeeKpiTargets
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends EmployeeKpiTargetUpdateManyArgs>(args: SelectSubset<T, EmployeeKpiTargetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one EmployeeKpiTarget.
-     * @param {EmployeeKpiTargetUpsertArgs} args - Arguments to update or create a EmployeeKpiTarget.
-     * @example
-     * // Update or create a EmployeeKpiTarget
-     * const employeeKpiTarget = await prisma.employeeKpiTarget.upsert({
-     *   create: {
-     *     // ... data to create a EmployeeKpiTarget
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the EmployeeKpiTarget we want to update
-     *   }
-     * })
-     */
-    upsert<T extends EmployeeKpiTargetUpsertArgs>(args: SelectSubset<T, EmployeeKpiTargetUpsertArgs<ExtArgs>>): Prisma__EmployeeKpiTargetClient<$Result.GetResult<Prisma.$EmployeeKpiTargetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of EmployeeKpiTargets.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetCountArgs} args - Arguments to filter EmployeeKpiTargets to count.
-     * @example
-     * // Count the number of EmployeeKpiTargets
-     * const count = await prisma.employeeKpiTarget.count({
-     *   where: {
-     *     // ... the filter for the EmployeeKpiTargets we want to count
-     *   }
-     * })
-    **/
-    count<T extends EmployeeKpiTargetCountArgs>(
-      args?: Subset<T, EmployeeKpiTargetCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], EmployeeKpiTargetCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a EmployeeKpiTarget.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends EmployeeKpiTargetAggregateArgs>(args: Subset<T, EmployeeKpiTargetAggregateArgs>): Prisma.PrismaPromise<GetEmployeeKpiTargetAggregateType<T>>
-
-    /**
-     * Group by EmployeeKpiTarget.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EmployeeKpiTargetGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends EmployeeKpiTargetGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: EmployeeKpiTargetGroupByArgs['orderBy'] }
-        : { orderBy?: EmployeeKpiTargetGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, EmployeeKpiTargetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEmployeeKpiTargetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the EmployeeKpiTarget model
-   */
-  readonly fields: EmployeeKpiTargetFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for EmployeeKpiTarget.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__EmployeeKpiTargetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    employee<T extends EmployeeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, EmployeeDefaultArgs<ExtArgs>>): Prisma__EmployeeClient<$Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    period<T extends KpiPeriodDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriodDefaultArgs<ExtArgs>>): Prisma__KpiPeriodClient<$Result.GetResult<Prisma.$KpiPeriodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    criteria<T extends KpiCriteriaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteriaDefaultArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the EmployeeKpiTarget model
-   */
-  interface EmployeeKpiTargetFieldRefs {
-    readonly id: FieldRef<"EmployeeKpiTarget", 'Int'>
-    readonly employeeCode: FieldRef<"EmployeeKpiTarget", 'String'>
-    readonly periodId: FieldRef<"EmployeeKpiTarget", 'Int'>
-    readonly criteriaId: FieldRef<"EmployeeKpiTarget", 'Int'>
-    readonly targetValue: FieldRef<"EmployeeKpiTarget", 'Float'>
-    readonly createdAt: FieldRef<"EmployeeKpiTarget", 'DateTime'>
-    readonly updatedAt: FieldRef<"EmployeeKpiTarget", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * EmployeeKpiTarget findUnique
-   */
-  export type EmployeeKpiTargetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which EmployeeKpiTarget to fetch.
-     */
-    where: EmployeeKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * EmployeeKpiTarget findUniqueOrThrow
-   */
-  export type EmployeeKpiTargetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which EmployeeKpiTarget to fetch.
-     */
-    where: EmployeeKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * EmployeeKpiTarget findFirst
-   */
-  export type EmployeeKpiTargetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which EmployeeKpiTarget to fetch.
-     */
-    where?: EmployeeKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of EmployeeKpiTargets to fetch.
-     */
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for EmployeeKpiTargets.
-     */
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` EmployeeKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` EmployeeKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of EmployeeKpiTargets.
-     */
-    distinct?: EmployeeKpiTargetScalarFieldEnum | EmployeeKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * EmployeeKpiTarget findFirstOrThrow
-   */
-  export type EmployeeKpiTargetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which EmployeeKpiTarget to fetch.
-     */
-    where?: EmployeeKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of EmployeeKpiTargets to fetch.
-     */
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for EmployeeKpiTargets.
-     */
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` EmployeeKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` EmployeeKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of EmployeeKpiTargets.
-     */
-    distinct?: EmployeeKpiTargetScalarFieldEnum | EmployeeKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * EmployeeKpiTarget findMany
-   */
-  export type EmployeeKpiTargetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which EmployeeKpiTargets to fetch.
-     */
-    where?: EmployeeKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of EmployeeKpiTargets to fetch.
-     */
-    orderBy?: EmployeeKpiTargetOrderByWithRelationInput | EmployeeKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing EmployeeKpiTargets.
-     */
-    cursor?: EmployeeKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` EmployeeKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` EmployeeKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of EmployeeKpiTargets.
-     */
-    distinct?: EmployeeKpiTargetScalarFieldEnum | EmployeeKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * EmployeeKpiTarget create
-   */
-  export type EmployeeKpiTargetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * The data needed to create a EmployeeKpiTarget.
-     */
-    data: XOR<EmployeeKpiTargetCreateInput, EmployeeKpiTargetUncheckedCreateInput>
-  }
-
-  /**
-   * EmployeeKpiTarget createMany
-   */
-  export type EmployeeKpiTargetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many EmployeeKpiTargets.
-     */
-    data: EmployeeKpiTargetCreateManyInput | EmployeeKpiTargetCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * EmployeeKpiTarget update
-   */
-  export type EmployeeKpiTargetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * The data needed to update a EmployeeKpiTarget.
-     */
-    data: XOR<EmployeeKpiTargetUpdateInput, EmployeeKpiTargetUncheckedUpdateInput>
-    /**
-     * Choose, which EmployeeKpiTarget to update.
-     */
-    where: EmployeeKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * EmployeeKpiTarget updateMany
-   */
-  export type EmployeeKpiTargetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update EmployeeKpiTargets.
-     */
-    data: XOR<EmployeeKpiTargetUpdateManyMutationInput, EmployeeKpiTargetUncheckedUpdateManyInput>
-    /**
-     * Filter which EmployeeKpiTargets to update
-     */
-    where?: EmployeeKpiTargetWhereInput
-    /**
-     * Limit how many EmployeeKpiTargets to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * EmployeeKpiTarget upsert
-   */
-  export type EmployeeKpiTargetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * The filter to search for the EmployeeKpiTarget to update in case it exists.
-     */
-    where: EmployeeKpiTargetWhereUniqueInput
-    /**
-     * In case the EmployeeKpiTarget found by the `where` argument doesn't exist, create a new EmployeeKpiTarget with this data.
-     */
-    create: XOR<EmployeeKpiTargetCreateInput, EmployeeKpiTargetUncheckedCreateInput>
-    /**
-     * In case the EmployeeKpiTarget was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<EmployeeKpiTargetUpdateInput, EmployeeKpiTargetUncheckedUpdateInput>
-  }
-
-  /**
-   * EmployeeKpiTarget delete
-   */
-  export type EmployeeKpiTargetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter which EmployeeKpiTarget to delete.
-     */
-    where: EmployeeKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * EmployeeKpiTarget deleteMany
-   */
-  export type EmployeeKpiTargetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EmployeeKpiTargets to delete
-     */
-    where?: EmployeeKpiTargetWhereInput
-    /**
-     * Limit how many EmployeeKpiTargets to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * EmployeeKpiTarget without action
-   */
-  export type EmployeeKpiTargetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EmployeeKpiTarget
-     */
-    select?: EmployeeKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EmployeeKpiTarget
-     */
-    omit?: EmployeeKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EmployeeKpiTargetInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model JobTitleKpiTarget
-   */
-
-  export type AggregateJobTitleKpiTarget = {
-    _count: JobTitleKpiTargetCountAggregateOutputType | null
-    _avg: JobTitleKpiTargetAvgAggregateOutputType | null
-    _sum: JobTitleKpiTargetSumAggregateOutputType | null
-    _min: JobTitleKpiTargetMinAggregateOutputType | null
-    _max: JobTitleKpiTargetMaxAggregateOutputType | null
-  }
-
-  export type JobTitleKpiTargetAvgAggregateOutputType = {
-    id: number | null
-    jobTitleId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-  }
-
-  export type JobTitleKpiTargetSumAggregateOutputType = {
-    id: number | null
-    jobTitleId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-  }
-
-  export type JobTitleKpiTargetMinAggregateOutputType = {
-    id: number | null
-    jobTitleId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type JobTitleKpiTargetMaxAggregateOutputType = {
-    id: number | null
-    jobTitleId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type JobTitleKpiTargetCountAggregateOutputType = {
-    id: number
-    jobTitleId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type JobTitleKpiTargetAvgAggregateInputType = {
-    id?: true
-    jobTitleId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-  }
-
-  export type JobTitleKpiTargetSumAggregateInputType = {
-    id?: true
-    jobTitleId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-  }
-
-  export type JobTitleKpiTargetMinAggregateInputType = {
-    id?: true
-    jobTitleId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type JobTitleKpiTargetMaxAggregateInputType = {
-    id?: true
-    jobTitleId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type JobTitleKpiTargetCountAggregateInputType = {
-    id?: true
-    jobTitleId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type JobTitleKpiTargetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which JobTitleKpiTarget to aggregate.
-     */
-    where?: JobTitleKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of JobTitleKpiTargets to fetch.
-     */
-    orderBy?: JobTitleKpiTargetOrderByWithRelationInput | JobTitleKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: JobTitleKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` JobTitleKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` JobTitleKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned JobTitleKpiTargets
-    **/
-    _count?: true | JobTitleKpiTargetCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: JobTitleKpiTargetAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: JobTitleKpiTargetSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: JobTitleKpiTargetMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: JobTitleKpiTargetMaxAggregateInputType
-  }
-
-  export type GetJobTitleKpiTargetAggregateType<T extends JobTitleKpiTargetAggregateArgs> = {
-        [P in keyof T & keyof AggregateJobTitleKpiTarget]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateJobTitleKpiTarget[P]>
-      : GetScalarType<T[P], AggregateJobTitleKpiTarget[P]>
-  }
-
-
-
-
-  export type JobTitleKpiTargetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: JobTitleKpiTargetWhereInput
-    orderBy?: JobTitleKpiTargetOrderByWithAggregationInput | JobTitleKpiTargetOrderByWithAggregationInput[]
-    by: JobTitleKpiTargetScalarFieldEnum[] | JobTitleKpiTargetScalarFieldEnum
-    having?: JobTitleKpiTargetScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: JobTitleKpiTargetCountAggregateInputType | true
-    _avg?: JobTitleKpiTargetAvgAggregateInputType
-    _sum?: JobTitleKpiTargetSumAggregateInputType
-    _min?: JobTitleKpiTargetMinAggregateInputType
-    _max?: JobTitleKpiTargetMaxAggregateInputType
-  }
-
-  export type JobTitleKpiTargetGroupByOutputType = {
-    id: number
-    jobTitleId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight: number
-    createdAt: Date
-    updatedAt: Date
-    _count: JobTitleKpiTargetCountAggregateOutputType | null
-    _avg: JobTitleKpiTargetAvgAggregateOutputType | null
-    _sum: JobTitleKpiTargetSumAggregateOutputType | null
-    _min: JobTitleKpiTargetMinAggregateOutputType | null
-    _max: JobTitleKpiTargetMaxAggregateOutputType | null
-  }
-
-  type GetJobTitleKpiTargetGroupByPayload<T extends JobTitleKpiTargetGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<JobTitleKpiTargetGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof JobTitleKpiTargetGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], JobTitleKpiTargetGroupByOutputType[P]>
-            : GetScalarType<T[P], JobTitleKpiTargetGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type JobTitleKpiTargetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    jobTitleId?: boolean
-    periodId?: boolean
-    criteriaId?: boolean
-    targetValue?: boolean
-    weight?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["jobTitleKpiTarget"]>
-
-
-
-  export type JobTitleKpiTargetSelectScalar = {
-    id?: boolean
-    jobTitleId?: boolean
-    periodId?: boolean
-    criteriaId?: boolean
-    targetValue?: boolean
-    weight?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type JobTitleKpiTargetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobTitleId" | "periodId" | "criteriaId" | "targetValue" | "weight" | "createdAt" | "updatedAt", ExtArgs["result"]["jobTitleKpiTarget"]>
-  export type JobTitleKpiTargetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }
-
-  export type $JobTitleKpiTargetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "JobTitleKpiTarget"
-    objects: {
-      period: Prisma.$KpiPeriodPayload<ExtArgs>
-      criteria: Prisma.$KpiCriteriaPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      jobTitleId: number
-      periodId: number
-      criteriaId: number
-      targetValue: number
-      weight: number
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["jobTitleKpiTarget"]>
-    composites: {}
-  }
-
-  type JobTitleKpiTargetGetPayload<S extends boolean | null | undefined | JobTitleKpiTargetDefaultArgs> = $Result.GetResult<Prisma.$JobTitleKpiTargetPayload, S>
-
-  type JobTitleKpiTargetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<JobTitleKpiTargetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: JobTitleKpiTargetCountAggregateInputType | true
-    }
-
-  export interface JobTitleKpiTargetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['JobTitleKpiTarget'], meta: { name: 'JobTitleKpiTarget' } }
-    /**
-     * Find zero or one JobTitleKpiTarget that matches the filter.
-     * @param {JobTitleKpiTargetFindUniqueArgs} args - Arguments to find a JobTitleKpiTarget
-     * @example
-     * // Get one JobTitleKpiTarget
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends JobTitleKpiTargetFindUniqueArgs>(args: SelectSubset<T, JobTitleKpiTargetFindUniqueArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one JobTitleKpiTarget that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {JobTitleKpiTargetFindUniqueOrThrowArgs} args - Arguments to find a JobTitleKpiTarget
-     * @example
-     * // Get one JobTitleKpiTarget
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends JobTitleKpiTargetFindUniqueOrThrowArgs>(args: SelectSubset<T, JobTitleKpiTargetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first JobTitleKpiTarget that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetFindFirstArgs} args - Arguments to find a JobTitleKpiTarget
-     * @example
-     * // Get one JobTitleKpiTarget
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends JobTitleKpiTargetFindFirstArgs>(args?: SelectSubset<T, JobTitleKpiTargetFindFirstArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first JobTitleKpiTarget that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetFindFirstOrThrowArgs} args - Arguments to find a JobTitleKpiTarget
-     * @example
-     * // Get one JobTitleKpiTarget
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends JobTitleKpiTargetFindFirstOrThrowArgs>(args?: SelectSubset<T, JobTitleKpiTargetFindFirstOrThrowArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more JobTitleKpiTargets that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all JobTitleKpiTargets
-     * const jobTitleKpiTargets = await prisma.jobTitleKpiTarget.findMany()
-     * 
-     * // Get first 10 JobTitleKpiTargets
-     * const jobTitleKpiTargets = await prisma.jobTitleKpiTarget.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const jobTitleKpiTargetWithIdOnly = await prisma.jobTitleKpiTarget.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends JobTitleKpiTargetFindManyArgs>(args?: SelectSubset<T, JobTitleKpiTargetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a JobTitleKpiTarget.
-     * @param {JobTitleKpiTargetCreateArgs} args - Arguments to create a JobTitleKpiTarget.
-     * @example
-     * // Create one JobTitleKpiTarget
-     * const JobTitleKpiTarget = await prisma.jobTitleKpiTarget.create({
-     *   data: {
-     *     // ... data to create a JobTitleKpiTarget
-     *   }
-     * })
-     * 
-     */
-    create<T extends JobTitleKpiTargetCreateArgs>(args: SelectSubset<T, JobTitleKpiTargetCreateArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many JobTitleKpiTargets.
-     * @param {JobTitleKpiTargetCreateManyArgs} args - Arguments to create many JobTitleKpiTargets.
-     * @example
-     * // Create many JobTitleKpiTargets
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends JobTitleKpiTargetCreateManyArgs>(args?: SelectSubset<T, JobTitleKpiTargetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a JobTitleKpiTarget.
-     * @param {JobTitleKpiTargetDeleteArgs} args - Arguments to delete one JobTitleKpiTarget.
-     * @example
-     * // Delete one JobTitleKpiTarget
-     * const JobTitleKpiTarget = await prisma.jobTitleKpiTarget.delete({
-     *   where: {
-     *     // ... filter to delete one JobTitleKpiTarget
-     *   }
-     * })
-     * 
-     */
-    delete<T extends JobTitleKpiTargetDeleteArgs>(args: SelectSubset<T, JobTitleKpiTargetDeleteArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one JobTitleKpiTarget.
-     * @param {JobTitleKpiTargetUpdateArgs} args - Arguments to update one JobTitleKpiTarget.
-     * @example
-     * // Update one JobTitleKpiTarget
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends JobTitleKpiTargetUpdateArgs>(args: SelectSubset<T, JobTitleKpiTargetUpdateArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more JobTitleKpiTargets.
-     * @param {JobTitleKpiTargetDeleteManyArgs} args - Arguments to filter JobTitleKpiTargets to delete.
-     * @example
-     * // Delete a few JobTitleKpiTargets
-     * const { count } = await prisma.jobTitleKpiTarget.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends JobTitleKpiTargetDeleteManyArgs>(args?: SelectSubset<T, JobTitleKpiTargetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more JobTitleKpiTargets.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many JobTitleKpiTargets
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends JobTitleKpiTargetUpdateManyArgs>(args: SelectSubset<T, JobTitleKpiTargetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one JobTitleKpiTarget.
-     * @param {JobTitleKpiTargetUpsertArgs} args - Arguments to update or create a JobTitleKpiTarget.
-     * @example
-     * // Update or create a JobTitleKpiTarget
-     * const jobTitleKpiTarget = await prisma.jobTitleKpiTarget.upsert({
-     *   create: {
-     *     // ... data to create a JobTitleKpiTarget
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the JobTitleKpiTarget we want to update
-     *   }
-     * })
-     */
-    upsert<T extends JobTitleKpiTargetUpsertArgs>(args: SelectSubset<T, JobTitleKpiTargetUpsertArgs<ExtArgs>>): Prisma__JobTitleKpiTargetClient<$Result.GetResult<Prisma.$JobTitleKpiTargetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of JobTitleKpiTargets.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetCountArgs} args - Arguments to filter JobTitleKpiTargets to count.
-     * @example
-     * // Count the number of JobTitleKpiTargets
-     * const count = await prisma.jobTitleKpiTarget.count({
-     *   where: {
-     *     // ... the filter for the JobTitleKpiTargets we want to count
-     *   }
-     * })
-    **/
-    count<T extends JobTitleKpiTargetCountArgs>(
-      args?: Subset<T, JobTitleKpiTargetCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], JobTitleKpiTargetCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a JobTitleKpiTarget.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends JobTitleKpiTargetAggregateArgs>(args: Subset<T, JobTitleKpiTargetAggregateArgs>): Prisma.PrismaPromise<GetJobTitleKpiTargetAggregateType<T>>
-
-    /**
-     * Group by JobTitleKpiTarget.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {JobTitleKpiTargetGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends JobTitleKpiTargetGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: JobTitleKpiTargetGroupByArgs['orderBy'] }
-        : { orderBy?: JobTitleKpiTargetGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, JobTitleKpiTargetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetJobTitleKpiTargetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the JobTitleKpiTarget model
-   */
-  readonly fields: JobTitleKpiTargetFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for JobTitleKpiTarget.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__JobTitleKpiTargetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    period<T extends KpiPeriodDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriodDefaultArgs<ExtArgs>>): Prisma__KpiPeriodClient<$Result.GetResult<Prisma.$KpiPeriodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    criteria<T extends KpiCriteriaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteriaDefaultArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the JobTitleKpiTarget model
-   */
-  interface JobTitleKpiTargetFieldRefs {
-    readonly id: FieldRef<"JobTitleKpiTarget", 'Int'>
-    readonly jobTitleId: FieldRef<"JobTitleKpiTarget", 'Int'>
-    readonly periodId: FieldRef<"JobTitleKpiTarget", 'Int'>
-    readonly criteriaId: FieldRef<"JobTitleKpiTarget", 'Int'>
-    readonly targetValue: FieldRef<"JobTitleKpiTarget", 'Float'>
-    readonly weight: FieldRef<"JobTitleKpiTarget", 'Float'>
-    readonly createdAt: FieldRef<"JobTitleKpiTarget", 'DateTime'>
-    readonly updatedAt: FieldRef<"JobTitleKpiTarget", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * JobTitleKpiTarget findUnique
-   */
-  export type JobTitleKpiTargetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which JobTitleKpiTarget to fetch.
-     */
-    where: JobTitleKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * JobTitleKpiTarget findUniqueOrThrow
-   */
-  export type JobTitleKpiTargetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which JobTitleKpiTarget to fetch.
-     */
-    where: JobTitleKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * JobTitleKpiTarget findFirst
-   */
-  export type JobTitleKpiTargetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which JobTitleKpiTarget to fetch.
-     */
-    where?: JobTitleKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of JobTitleKpiTargets to fetch.
-     */
-    orderBy?: JobTitleKpiTargetOrderByWithRelationInput | JobTitleKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for JobTitleKpiTargets.
-     */
-    cursor?: JobTitleKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` JobTitleKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` JobTitleKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of JobTitleKpiTargets.
-     */
-    distinct?: JobTitleKpiTargetScalarFieldEnum | JobTitleKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * JobTitleKpiTarget findFirstOrThrow
-   */
-  export type JobTitleKpiTargetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which JobTitleKpiTarget to fetch.
-     */
-    where?: JobTitleKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of JobTitleKpiTargets to fetch.
-     */
-    orderBy?: JobTitleKpiTargetOrderByWithRelationInput | JobTitleKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for JobTitleKpiTargets.
-     */
-    cursor?: JobTitleKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` JobTitleKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` JobTitleKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of JobTitleKpiTargets.
-     */
-    distinct?: JobTitleKpiTargetScalarFieldEnum | JobTitleKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * JobTitleKpiTarget findMany
-   */
-  export type JobTitleKpiTargetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which JobTitleKpiTargets to fetch.
-     */
-    where?: JobTitleKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of JobTitleKpiTargets to fetch.
-     */
-    orderBy?: JobTitleKpiTargetOrderByWithRelationInput | JobTitleKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing JobTitleKpiTargets.
-     */
-    cursor?: JobTitleKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` JobTitleKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` JobTitleKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of JobTitleKpiTargets.
-     */
-    distinct?: JobTitleKpiTargetScalarFieldEnum | JobTitleKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * JobTitleKpiTarget create
-   */
-  export type JobTitleKpiTargetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * The data needed to create a JobTitleKpiTarget.
-     */
-    data: XOR<JobTitleKpiTargetCreateInput, JobTitleKpiTargetUncheckedCreateInput>
-  }
-
-  /**
-   * JobTitleKpiTarget createMany
-   */
-  export type JobTitleKpiTargetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many JobTitleKpiTargets.
-     */
-    data: JobTitleKpiTargetCreateManyInput | JobTitleKpiTargetCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * JobTitleKpiTarget update
-   */
-  export type JobTitleKpiTargetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * The data needed to update a JobTitleKpiTarget.
-     */
-    data: XOR<JobTitleKpiTargetUpdateInput, JobTitleKpiTargetUncheckedUpdateInput>
-    /**
-     * Choose, which JobTitleKpiTarget to update.
-     */
-    where: JobTitleKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * JobTitleKpiTarget updateMany
-   */
-  export type JobTitleKpiTargetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update JobTitleKpiTargets.
-     */
-    data: XOR<JobTitleKpiTargetUpdateManyMutationInput, JobTitleKpiTargetUncheckedUpdateManyInput>
-    /**
-     * Filter which JobTitleKpiTargets to update
-     */
-    where?: JobTitleKpiTargetWhereInput
-    /**
-     * Limit how many JobTitleKpiTargets to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * JobTitleKpiTarget upsert
-   */
-  export type JobTitleKpiTargetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * The filter to search for the JobTitleKpiTarget to update in case it exists.
-     */
-    where: JobTitleKpiTargetWhereUniqueInput
-    /**
-     * In case the JobTitleKpiTarget found by the `where` argument doesn't exist, create a new JobTitleKpiTarget with this data.
-     */
-    create: XOR<JobTitleKpiTargetCreateInput, JobTitleKpiTargetUncheckedCreateInput>
-    /**
-     * In case the JobTitleKpiTarget was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<JobTitleKpiTargetUpdateInput, JobTitleKpiTargetUncheckedUpdateInput>
-  }
-
-  /**
-   * JobTitleKpiTarget delete
-   */
-  export type JobTitleKpiTargetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter which JobTitleKpiTarget to delete.
-     */
-    where: JobTitleKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * JobTitleKpiTarget deleteMany
-   */
-  export type JobTitleKpiTargetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which JobTitleKpiTargets to delete
-     */
-    where?: JobTitleKpiTargetWhereInput
-    /**
-     * Limit how many JobTitleKpiTargets to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * JobTitleKpiTarget without action
-   */
-  export type JobTitleKpiTargetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobTitleKpiTarget
-     */
-    select?: JobTitleKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobTitleKpiTarget
-     */
-    omit?: JobTitleKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobTitleKpiTargetInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model StaffingSlotKpiTarget
-   */
-
-  export type AggregateStaffingSlotKpiTarget = {
-    _count: StaffingSlotKpiTargetCountAggregateOutputType | null
-    _avg: StaffingSlotKpiTargetAvgAggregateOutputType | null
-    _sum: StaffingSlotKpiTargetSumAggregateOutputType | null
-    _min: StaffingSlotKpiTargetMinAggregateOutputType | null
-    _max: StaffingSlotKpiTargetMaxAggregateOutputType | null
-  }
-
-  export type StaffingSlotKpiTargetAvgAggregateOutputType = {
-    id: number | null
-    staffingSlotId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-  }
-
-  export type StaffingSlotKpiTargetSumAggregateOutputType = {
-    id: number | null
-    staffingSlotId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-  }
-
-  export type StaffingSlotKpiTargetMinAggregateOutputType = {
-    id: number | null
-    staffingSlotId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type StaffingSlotKpiTargetMaxAggregateOutputType = {
-    id: number | null
-    staffingSlotId: number | null
-    periodId: number | null
-    criteriaId: number | null
-    targetValue: number | null
-    weight: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type StaffingSlotKpiTargetCountAggregateOutputType = {
-    id: number
-    staffingSlotId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type StaffingSlotKpiTargetAvgAggregateInputType = {
-    id?: true
-    staffingSlotId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-  }
-
-  export type StaffingSlotKpiTargetSumAggregateInputType = {
-    id?: true
-    staffingSlotId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-  }
-
-  export type StaffingSlotKpiTargetMinAggregateInputType = {
-    id?: true
-    staffingSlotId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type StaffingSlotKpiTargetMaxAggregateInputType = {
-    id?: true
-    staffingSlotId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type StaffingSlotKpiTargetCountAggregateInputType = {
-    id?: true
-    staffingSlotId?: true
-    periodId?: true
-    criteriaId?: true
-    targetValue?: true
-    weight?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type StaffingSlotKpiTargetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which StaffingSlotKpiTarget to aggregate.
-     */
-    where?: StaffingSlotKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of StaffingSlotKpiTargets to fetch.
-     */
-    orderBy?: StaffingSlotKpiTargetOrderByWithRelationInput | StaffingSlotKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: StaffingSlotKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` StaffingSlotKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` StaffingSlotKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned StaffingSlotKpiTargets
-    **/
-    _count?: true | StaffingSlotKpiTargetCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: StaffingSlotKpiTargetAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: StaffingSlotKpiTargetSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: StaffingSlotKpiTargetMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: StaffingSlotKpiTargetMaxAggregateInputType
-  }
-
-  export type GetStaffingSlotKpiTargetAggregateType<T extends StaffingSlotKpiTargetAggregateArgs> = {
-        [P in keyof T & keyof AggregateStaffingSlotKpiTarget]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateStaffingSlotKpiTarget[P]>
-      : GetScalarType<T[P], AggregateStaffingSlotKpiTarget[P]>
-  }
-
-
-
-
-  export type StaffingSlotKpiTargetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: StaffingSlotKpiTargetWhereInput
-    orderBy?: StaffingSlotKpiTargetOrderByWithAggregationInput | StaffingSlotKpiTargetOrderByWithAggregationInput[]
-    by: StaffingSlotKpiTargetScalarFieldEnum[] | StaffingSlotKpiTargetScalarFieldEnum
-    having?: StaffingSlotKpiTargetScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: StaffingSlotKpiTargetCountAggregateInputType | true
-    _avg?: StaffingSlotKpiTargetAvgAggregateInputType
-    _sum?: StaffingSlotKpiTargetSumAggregateInputType
-    _min?: StaffingSlotKpiTargetMinAggregateInputType
-    _max?: StaffingSlotKpiTargetMaxAggregateInputType
-  }
-
-  export type StaffingSlotKpiTargetGroupByOutputType = {
-    id: number
-    staffingSlotId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight: number
-    createdAt: Date
-    updatedAt: Date
-    _count: StaffingSlotKpiTargetCountAggregateOutputType | null
-    _avg: StaffingSlotKpiTargetAvgAggregateOutputType | null
-    _sum: StaffingSlotKpiTargetSumAggregateOutputType | null
-    _min: StaffingSlotKpiTargetMinAggregateOutputType | null
-    _max: StaffingSlotKpiTargetMaxAggregateOutputType | null
-  }
-
-  type GetStaffingSlotKpiTargetGroupByPayload<T extends StaffingSlotKpiTargetGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<StaffingSlotKpiTargetGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof StaffingSlotKpiTargetGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], StaffingSlotKpiTargetGroupByOutputType[P]>
-            : GetScalarType<T[P], StaffingSlotKpiTargetGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type StaffingSlotKpiTargetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    staffingSlotId?: boolean
-    periodId?: boolean
-    criteriaId?: boolean
-    targetValue?: boolean
-    weight?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["staffingSlotKpiTarget"]>
-
-
-
-  export type StaffingSlotKpiTargetSelectScalar = {
-    id?: boolean
-    staffingSlotId?: boolean
-    periodId?: boolean
-    criteriaId?: boolean
-    targetValue?: boolean
-    weight?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type StaffingSlotKpiTargetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "staffingSlotId" | "periodId" | "criteriaId" | "targetValue" | "weight" | "createdAt" | "updatedAt", ExtArgs["result"]["staffingSlotKpiTarget"]>
-  export type StaffingSlotKpiTargetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }
-
-  export type $StaffingSlotKpiTargetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "StaffingSlotKpiTarget"
-    objects: {
-      period: Prisma.$KpiPeriodPayload<ExtArgs>
-      criteria: Prisma.$KpiCriteriaPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      staffingSlotId: number
-      periodId: number
-      criteriaId: number
-      targetValue: number
-      weight: number
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["staffingSlotKpiTarget"]>
-    composites: {}
-  }
-
-  type StaffingSlotKpiTargetGetPayload<S extends boolean | null | undefined | StaffingSlotKpiTargetDefaultArgs> = $Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload, S>
-
-  type StaffingSlotKpiTargetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<StaffingSlotKpiTargetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: StaffingSlotKpiTargetCountAggregateInputType | true
-    }
-
-  export interface StaffingSlotKpiTargetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StaffingSlotKpiTarget'], meta: { name: 'StaffingSlotKpiTarget' } }
-    /**
-     * Find zero or one StaffingSlotKpiTarget that matches the filter.
-     * @param {StaffingSlotKpiTargetFindUniqueArgs} args - Arguments to find a StaffingSlotKpiTarget
-     * @example
-     * // Get one StaffingSlotKpiTarget
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends StaffingSlotKpiTargetFindUniqueArgs>(args: SelectSubset<T, StaffingSlotKpiTargetFindUniqueArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one StaffingSlotKpiTarget that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {StaffingSlotKpiTargetFindUniqueOrThrowArgs} args - Arguments to find a StaffingSlotKpiTarget
-     * @example
-     * // Get one StaffingSlotKpiTarget
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends StaffingSlotKpiTargetFindUniqueOrThrowArgs>(args: SelectSubset<T, StaffingSlotKpiTargetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first StaffingSlotKpiTarget that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetFindFirstArgs} args - Arguments to find a StaffingSlotKpiTarget
-     * @example
-     * // Get one StaffingSlotKpiTarget
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends StaffingSlotKpiTargetFindFirstArgs>(args?: SelectSubset<T, StaffingSlotKpiTargetFindFirstArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first StaffingSlotKpiTarget that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetFindFirstOrThrowArgs} args - Arguments to find a StaffingSlotKpiTarget
-     * @example
-     * // Get one StaffingSlotKpiTarget
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends StaffingSlotKpiTargetFindFirstOrThrowArgs>(args?: SelectSubset<T, StaffingSlotKpiTargetFindFirstOrThrowArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more StaffingSlotKpiTargets that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all StaffingSlotKpiTargets
-     * const staffingSlotKpiTargets = await prisma.staffingSlotKpiTarget.findMany()
-     * 
-     * // Get first 10 StaffingSlotKpiTargets
-     * const staffingSlotKpiTargets = await prisma.staffingSlotKpiTarget.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const staffingSlotKpiTargetWithIdOnly = await prisma.staffingSlotKpiTarget.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends StaffingSlotKpiTargetFindManyArgs>(args?: SelectSubset<T, StaffingSlotKpiTargetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a StaffingSlotKpiTarget.
-     * @param {StaffingSlotKpiTargetCreateArgs} args - Arguments to create a StaffingSlotKpiTarget.
-     * @example
-     * // Create one StaffingSlotKpiTarget
-     * const StaffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.create({
-     *   data: {
-     *     // ... data to create a StaffingSlotKpiTarget
-     *   }
-     * })
-     * 
-     */
-    create<T extends StaffingSlotKpiTargetCreateArgs>(args: SelectSubset<T, StaffingSlotKpiTargetCreateArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many StaffingSlotKpiTargets.
-     * @param {StaffingSlotKpiTargetCreateManyArgs} args - Arguments to create many StaffingSlotKpiTargets.
-     * @example
-     * // Create many StaffingSlotKpiTargets
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends StaffingSlotKpiTargetCreateManyArgs>(args?: SelectSubset<T, StaffingSlotKpiTargetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a StaffingSlotKpiTarget.
-     * @param {StaffingSlotKpiTargetDeleteArgs} args - Arguments to delete one StaffingSlotKpiTarget.
-     * @example
-     * // Delete one StaffingSlotKpiTarget
-     * const StaffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.delete({
-     *   where: {
-     *     // ... filter to delete one StaffingSlotKpiTarget
-     *   }
-     * })
-     * 
-     */
-    delete<T extends StaffingSlotKpiTargetDeleteArgs>(args: SelectSubset<T, StaffingSlotKpiTargetDeleteArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one StaffingSlotKpiTarget.
-     * @param {StaffingSlotKpiTargetUpdateArgs} args - Arguments to update one StaffingSlotKpiTarget.
-     * @example
-     * // Update one StaffingSlotKpiTarget
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends StaffingSlotKpiTargetUpdateArgs>(args: SelectSubset<T, StaffingSlotKpiTargetUpdateArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more StaffingSlotKpiTargets.
-     * @param {StaffingSlotKpiTargetDeleteManyArgs} args - Arguments to filter StaffingSlotKpiTargets to delete.
-     * @example
-     * // Delete a few StaffingSlotKpiTargets
-     * const { count } = await prisma.staffingSlotKpiTarget.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends StaffingSlotKpiTargetDeleteManyArgs>(args?: SelectSubset<T, StaffingSlotKpiTargetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more StaffingSlotKpiTargets.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many StaffingSlotKpiTargets
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends StaffingSlotKpiTargetUpdateManyArgs>(args: SelectSubset<T, StaffingSlotKpiTargetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one StaffingSlotKpiTarget.
-     * @param {StaffingSlotKpiTargetUpsertArgs} args - Arguments to update or create a StaffingSlotKpiTarget.
-     * @example
-     * // Update or create a StaffingSlotKpiTarget
-     * const staffingSlotKpiTarget = await prisma.staffingSlotKpiTarget.upsert({
-     *   create: {
-     *     // ... data to create a StaffingSlotKpiTarget
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the StaffingSlotKpiTarget we want to update
-     *   }
-     * })
-     */
-    upsert<T extends StaffingSlotKpiTargetUpsertArgs>(args: SelectSubset<T, StaffingSlotKpiTargetUpsertArgs<ExtArgs>>): Prisma__StaffingSlotKpiTargetClient<$Result.GetResult<Prisma.$StaffingSlotKpiTargetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of StaffingSlotKpiTargets.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetCountArgs} args - Arguments to filter StaffingSlotKpiTargets to count.
-     * @example
-     * // Count the number of StaffingSlotKpiTargets
-     * const count = await prisma.staffingSlotKpiTarget.count({
-     *   where: {
-     *     // ... the filter for the StaffingSlotKpiTargets we want to count
-     *   }
-     * })
-    **/
-    count<T extends StaffingSlotKpiTargetCountArgs>(
-      args?: Subset<T, StaffingSlotKpiTargetCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], StaffingSlotKpiTargetCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a StaffingSlotKpiTarget.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends StaffingSlotKpiTargetAggregateArgs>(args: Subset<T, StaffingSlotKpiTargetAggregateArgs>): Prisma.PrismaPromise<GetStaffingSlotKpiTargetAggregateType<T>>
-
-    /**
-     * Group by StaffingSlotKpiTarget.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {StaffingSlotKpiTargetGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends StaffingSlotKpiTargetGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: StaffingSlotKpiTargetGroupByArgs['orderBy'] }
-        : { orderBy?: StaffingSlotKpiTargetGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, StaffingSlotKpiTargetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStaffingSlotKpiTargetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the StaffingSlotKpiTarget model
-   */
-  readonly fields: StaffingSlotKpiTargetFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for StaffingSlotKpiTarget.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__StaffingSlotKpiTargetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    period<T extends KpiPeriodDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriodDefaultArgs<ExtArgs>>): Prisma__KpiPeriodClient<$Result.GetResult<Prisma.$KpiPeriodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    criteria<T extends KpiCriteriaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteriaDefaultArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the StaffingSlotKpiTarget model
-   */
-  interface StaffingSlotKpiTargetFieldRefs {
-    readonly id: FieldRef<"StaffingSlotKpiTarget", 'Int'>
-    readonly staffingSlotId: FieldRef<"StaffingSlotKpiTarget", 'Int'>
-    readonly periodId: FieldRef<"StaffingSlotKpiTarget", 'Int'>
-    readonly criteriaId: FieldRef<"StaffingSlotKpiTarget", 'Int'>
-    readonly targetValue: FieldRef<"StaffingSlotKpiTarget", 'Float'>
-    readonly weight: FieldRef<"StaffingSlotKpiTarget", 'Float'>
-    readonly createdAt: FieldRef<"StaffingSlotKpiTarget", 'DateTime'>
-    readonly updatedAt: FieldRef<"StaffingSlotKpiTarget", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * StaffingSlotKpiTarget findUnique
-   */
-  export type StaffingSlotKpiTargetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which StaffingSlotKpiTarget to fetch.
-     */
-    where: StaffingSlotKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * StaffingSlotKpiTarget findUniqueOrThrow
-   */
-  export type StaffingSlotKpiTargetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which StaffingSlotKpiTarget to fetch.
-     */
-    where: StaffingSlotKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * StaffingSlotKpiTarget findFirst
-   */
-  export type StaffingSlotKpiTargetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which StaffingSlotKpiTarget to fetch.
-     */
-    where?: StaffingSlotKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of StaffingSlotKpiTargets to fetch.
-     */
-    orderBy?: StaffingSlotKpiTargetOrderByWithRelationInput | StaffingSlotKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for StaffingSlotKpiTargets.
-     */
-    cursor?: StaffingSlotKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` StaffingSlotKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` StaffingSlotKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of StaffingSlotKpiTargets.
-     */
-    distinct?: StaffingSlotKpiTargetScalarFieldEnum | StaffingSlotKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * StaffingSlotKpiTarget findFirstOrThrow
-   */
-  export type StaffingSlotKpiTargetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which StaffingSlotKpiTarget to fetch.
-     */
-    where?: StaffingSlotKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of StaffingSlotKpiTargets to fetch.
-     */
-    orderBy?: StaffingSlotKpiTargetOrderByWithRelationInput | StaffingSlotKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for StaffingSlotKpiTargets.
-     */
-    cursor?: StaffingSlotKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` StaffingSlotKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` StaffingSlotKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of StaffingSlotKpiTargets.
-     */
-    distinct?: StaffingSlotKpiTargetScalarFieldEnum | StaffingSlotKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * StaffingSlotKpiTarget findMany
-   */
-  export type StaffingSlotKpiTargetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter, which StaffingSlotKpiTargets to fetch.
-     */
-    where?: StaffingSlotKpiTargetWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of StaffingSlotKpiTargets to fetch.
-     */
-    orderBy?: StaffingSlotKpiTargetOrderByWithRelationInput | StaffingSlotKpiTargetOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing StaffingSlotKpiTargets.
-     */
-    cursor?: StaffingSlotKpiTargetWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` StaffingSlotKpiTargets from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` StaffingSlotKpiTargets.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of StaffingSlotKpiTargets.
-     */
-    distinct?: StaffingSlotKpiTargetScalarFieldEnum | StaffingSlotKpiTargetScalarFieldEnum[]
-  }
-
-  /**
-   * StaffingSlotKpiTarget create
-   */
-  export type StaffingSlotKpiTargetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * The data needed to create a StaffingSlotKpiTarget.
-     */
-    data: XOR<StaffingSlotKpiTargetCreateInput, StaffingSlotKpiTargetUncheckedCreateInput>
-  }
-
-  /**
-   * StaffingSlotKpiTarget createMany
-   */
-  export type StaffingSlotKpiTargetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many StaffingSlotKpiTargets.
-     */
-    data: StaffingSlotKpiTargetCreateManyInput | StaffingSlotKpiTargetCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * StaffingSlotKpiTarget update
-   */
-  export type StaffingSlotKpiTargetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * The data needed to update a StaffingSlotKpiTarget.
-     */
-    data: XOR<StaffingSlotKpiTargetUpdateInput, StaffingSlotKpiTargetUncheckedUpdateInput>
-    /**
-     * Choose, which StaffingSlotKpiTarget to update.
-     */
-    where: StaffingSlotKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * StaffingSlotKpiTarget updateMany
-   */
-  export type StaffingSlotKpiTargetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update StaffingSlotKpiTargets.
-     */
-    data: XOR<StaffingSlotKpiTargetUpdateManyMutationInput, StaffingSlotKpiTargetUncheckedUpdateManyInput>
-    /**
-     * Filter which StaffingSlotKpiTargets to update
-     */
-    where?: StaffingSlotKpiTargetWhereInput
-    /**
-     * Limit how many StaffingSlotKpiTargets to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * StaffingSlotKpiTarget upsert
-   */
-  export type StaffingSlotKpiTargetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * The filter to search for the StaffingSlotKpiTarget to update in case it exists.
-     */
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    /**
-     * In case the StaffingSlotKpiTarget found by the `where` argument doesn't exist, create a new StaffingSlotKpiTarget with this data.
-     */
-    create: XOR<StaffingSlotKpiTargetCreateInput, StaffingSlotKpiTargetUncheckedCreateInput>
-    /**
-     * In case the StaffingSlotKpiTarget was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<StaffingSlotKpiTargetUpdateInput, StaffingSlotKpiTargetUncheckedUpdateInput>
-  }
-
-  /**
-   * StaffingSlotKpiTarget delete
-   */
-  export type StaffingSlotKpiTargetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
-    /**
-     * Filter which StaffingSlotKpiTarget to delete.
-     */
-    where: StaffingSlotKpiTargetWhereUniqueInput
-  }
-
-  /**
-   * StaffingSlotKpiTarget deleteMany
-   */
-  export type StaffingSlotKpiTargetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which StaffingSlotKpiTargets to delete
-     */
-    where?: StaffingSlotKpiTargetWhereInput
-    /**
-     * Limit how many StaffingSlotKpiTargets to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * StaffingSlotKpiTarget without action
-   */
-  export type StaffingSlotKpiTargetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the StaffingSlotKpiTarget
-     */
-    select?: StaffingSlotKpiTargetSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the StaffingSlotKpiTarget
-     */
-    omit?: StaffingSlotKpiTargetOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: StaffingSlotKpiTargetInclude<ExtArgs> | null
   }
 
 
@@ -14374,7 +7233,6 @@ export namespace Prisma {
     reviewer?: boolean | KpiEvaluation$reviewerArgs<ExtArgs>
     period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
     ruleSet?: boolean | KpiEvaluation$ruleSetArgs<ExtArgs>
-    details?: boolean | KpiEvaluation$detailsArgs<ExtArgs>
     tasks?: boolean | KpiEvaluation$tasksArgs<ExtArgs>
     documents?: boolean | KpiEvaluation$documentsArgs<ExtArgs>
     _count?: boolean | KpiEvaluationCountOutputTypeDefaultArgs<ExtArgs>
@@ -14406,7 +7264,6 @@ export namespace Prisma {
     reviewer?: boolean | KpiEvaluation$reviewerArgs<ExtArgs>
     period?: boolean | KpiPeriodDefaultArgs<ExtArgs>
     ruleSet?: boolean | KpiEvaluation$ruleSetArgs<ExtArgs>
-    details?: boolean | KpiEvaluation$detailsArgs<ExtArgs>
     tasks?: boolean | KpiEvaluation$tasksArgs<ExtArgs>
     documents?: boolean | KpiEvaluation$documentsArgs<ExtArgs>
     _count?: boolean | KpiEvaluationCountOutputTypeDefaultArgs<ExtArgs>
@@ -14419,7 +7276,6 @@ export namespace Prisma {
       reviewer: Prisma.$EmployeePayload<ExtArgs> | null
       period: Prisma.$KpiPeriodPayload<ExtArgs>
       ruleSet: Prisma.$KpiRuleSetPayload<ExtArgs> | null
-      details: Prisma.$KpiEvaluationDetailPayload<ExtArgs>[]
       tasks: Prisma.$KpiEvaluationTaskPayload<ExtArgs>[]
       documents: Prisma.$KpiFormDocumentPayload<ExtArgs>[]
     }
@@ -14783,7 +7639,6 @@ export namespace Prisma {
     reviewer<T extends KpiEvaluation$reviewerArgs<ExtArgs> = {}>(args?: Subset<T, KpiEvaluation$reviewerArgs<ExtArgs>>): Prisma__EmployeeClient<$Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     period<T extends KpiPeriodDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiPeriodDefaultArgs<ExtArgs>>): Prisma__KpiPeriodClient<$Result.GetResult<Prisma.$KpiPeriodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     ruleSet<T extends KpiEvaluation$ruleSetArgs<ExtArgs> = {}>(args?: Subset<T, KpiEvaluation$ruleSetArgs<ExtArgs>>): Prisma__KpiRuleSetClient<$Result.GetResult<Prisma.$KpiRuleSetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    details<T extends KpiEvaluation$detailsArgs<ExtArgs> = {}>(args?: Subset<T, KpiEvaluation$detailsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tasks<T extends KpiEvaluation$tasksArgs<ExtArgs> = {}>(args?: Subset<T, KpiEvaluation$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends KpiEvaluation$documentsArgs<ExtArgs> = {}>(args?: Subset<T, KpiEvaluation$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiFormDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -15216,30 +8071,6 @@ export namespace Prisma {
   }
 
   /**
-   * KpiEvaluation.details
-   */
-  export type KpiEvaluation$detailsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    where?: KpiEvaluationDetailWhereInput
-    orderBy?: KpiEvaluationDetailOrderByWithRelationInput | KpiEvaluationDetailOrderByWithRelationInput[]
-    cursor?: KpiEvaluationDetailWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: KpiEvaluationDetailScalarFieldEnum | KpiEvaluationDetailScalarFieldEnum[]
-  }
-
-  /**
    * KpiEvaluation.tasks
    */
   export type KpiEvaluation$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -15303,1027 +8134,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model KpiEvaluationDetail
-   */
-
-  export type AggregateKpiEvaluationDetail = {
-    _count: KpiEvaluationDetailCountAggregateOutputType | null
-    _avg: KpiEvaluationDetailAvgAggregateOutputType | null
-    _sum: KpiEvaluationDetailSumAggregateOutputType | null
-    _min: KpiEvaluationDetailMinAggregateOutputType | null
-    _max: KpiEvaluationDetailMaxAggregateOutputType | null
-  }
-
-  export type KpiEvaluationDetailAvgAggregateOutputType = {
-    id: number | null
-    evaluationId: number | null
-    criteriaId: number | null
-    selfScore: number | null
-    reviewerScore: number | null
-  }
-
-  export type KpiEvaluationDetailSumAggregateOutputType = {
-    id: number | null
-    evaluationId: number | null
-    criteriaId: number | null
-    selfScore: number | null
-    reviewerScore: number | null
-  }
-
-  export type KpiEvaluationDetailMinAggregateOutputType = {
-    id: number | null
-    evaluationId: number | null
-    criteriaId: number | null
-    selfScore: number | null
-    reviewerScore: number | null
-    notes: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type KpiEvaluationDetailMaxAggregateOutputType = {
-    id: number | null
-    evaluationId: number | null
-    criteriaId: number | null
-    selfScore: number | null
-    reviewerScore: number | null
-    notes: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type KpiEvaluationDetailCountAggregateOutputType = {
-    id: number
-    evaluationId: number
-    criteriaId: number
-    selfScore: number
-    reviewerScore: number
-    notes: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type KpiEvaluationDetailAvgAggregateInputType = {
-    id?: true
-    evaluationId?: true
-    criteriaId?: true
-    selfScore?: true
-    reviewerScore?: true
-  }
-
-  export type KpiEvaluationDetailSumAggregateInputType = {
-    id?: true
-    evaluationId?: true
-    criteriaId?: true
-    selfScore?: true
-    reviewerScore?: true
-  }
-
-  export type KpiEvaluationDetailMinAggregateInputType = {
-    id?: true
-    evaluationId?: true
-    criteriaId?: true
-    selfScore?: true
-    reviewerScore?: true
-    notes?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type KpiEvaluationDetailMaxAggregateInputType = {
-    id?: true
-    evaluationId?: true
-    criteriaId?: true
-    selfScore?: true
-    reviewerScore?: true
-    notes?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type KpiEvaluationDetailCountAggregateInputType = {
-    id?: true
-    evaluationId?: true
-    criteriaId?: true
-    selfScore?: true
-    reviewerScore?: true
-    notes?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type KpiEvaluationDetailAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KpiEvaluationDetail to aggregate.
-     */
-    where?: KpiEvaluationDetailWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiEvaluationDetails to fetch.
-     */
-    orderBy?: KpiEvaluationDetailOrderByWithRelationInput | KpiEvaluationDetailOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: KpiEvaluationDetailWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiEvaluationDetails from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiEvaluationDetails.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned KpiEvaluationDetails
-    **/
-    _count?: true | KpiEvaluationDetailCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: KpiEvaluationDetailAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: KpiEvaluationDetailSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: KpiEvaluationDetailMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: KpiEvaluationDetailMaxAggregateInputType
-  }
-
-  export type GetKpiEvaluationDetailAggregateType<T extends KpiEvaluationDetailAggregateArgs> = {
-        [P in keyof T & keyof AggregateKpiEvaluationDetail]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateKpiEvaluationDetail[P]>
-      : GetScalarType<T[P], AggregateKpiEvaluationDetail[P]>
-  }
-
-
-
-
-  export type KpiEvaluationDetailGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationDetailWhereInput
-    orderBy?: KpiEvaluationDetailOrderByWithAggregationInput | KpiEvaluationDetailOrderByWithAggregationInput[]
-    by: KpiEvaluationDetailScalarFieldEnum[] | KpiEvaluationDetailScalarFieldEnum
-    having?: KpiEvaluationDetailScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: KpiEvaluationDetailCountAggregateInputType | true
-    _avg?: KpiEvaluationDetailAvgAggregateInputType
-    _sum?: KpiEvaluationDetailSumAggregateInputType
-    _min?: KpiEvaluationDetailMinAggregateInputType
-    _max?: KpiEvaluationDetailMaxAggregateInputType
-  }
-
-  export type KpiEvaluationDetailGroupByOutputType = {
-    id: number
-    evaluationId: number
-    criteriaId: number
-    selfScore: number | null
-    reviewerScore: number | null
-    notes: string | null
-    createdAt: Date
-    updatedAt: Date
-    _count: KpiEvaluationDetailCountAggregateOutputType | null
-    _avg: KpiEvaluationDetailAvgAggregateOutputType | null
-    _sum: KpiEvaluationDetailSumAggregateOutputType | null
-    _min: KpiEvaluationDetailMinAggregateOutputType | null
-    _max: KpiEvaluationDetailMaxAggregateOutputType | null
-  }
-
-  type GetKpiEvaluationDetailGroupByPayload<T extends KpiEvaluationDetailGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<KpiEvaluationDetailGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof KpiEvaluationDetailGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], KpiEvaluationDetailGroupByOutputType[P]>
-            : GetScalarType<T[P], KpiEvaluationDetailGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type KpiEvaluationDetailSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    evaluationId?: boolean
-    criteriaId?: boolean
-    selfScore?: boolean
-    reviewerScore?: boolean
-    notes?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    evaluation?: boolean | KpiEvaluationDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["kpiEvaluationDetail"]>
-
-
-
-  export type KpiEvaluationDetailSelectScalar = {
-    id?: boolean
-    evaluationId?: boolean
-    criteriaId?: boolean
-    selfScore?: boolean
-    reviewerScore?: boolean
-    notes?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type KpiEvaluationDetailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "evaluationId" | "criteriaId" | "selfScore" | "reviewerScore" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiEvaluationDetail"]>
-  export type KpiEvaluationDetailInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    evaluation?: boolean | KpiEvaluationDefaultArgs<ExtArgs>
-    criteria?: boolean | KpiCriteriaDefaultArgs<ExtArgs>
-  }
-
-  export type $KpiEvaluationDetailPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "KpiEvaluationDetail"
-    objects: {
-      evaluation: Prisma.$KpiEvaluationPayload<ExtArgs>
-      criteria: Prisma.$KpiCriteriaPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      evaluationId: number
-      criteriaId: number
-      selfScore: number | null
-      reviewerScore: number | null
-      notes: string | null
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["kpiEvaluationDetail"]>
-    composites: {}
-  }
-
-  type KpiEvaluationDetailGetPayload<S extends boolean | null | undefined | KpiEvaluationDetailDefaultArgs> = $Result.GetResult<Prisma.$KpiEvaluationDetailPayload, S>
-
-  type KpiEvaluationDetailCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<KpiEvaluationDetailFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: KpiEvaluationDetailCountAggregateInputType | true
-    }
-
-  export interface KpiEvaluationDetailDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiEvaluationDetail'], meta: { name: 'KpiEvaluationDetail' } }
-    /**
-     * Find zero or one KpiEvaluationDetail that matches the filter.
-     * @param {KpiEvaluationDetailFindUniqueArgs} args - Arguments to find a KpiEvaluationDetail
-     * @example
-     * // Get one KpiEvaluationDetail
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends KpiEvaluationDetailFindUniqueArgs>(args: SelectSubset<T, KpiEvaluationDetailFindUniqueArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one KpiEvaluationDetail that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {KpiEvaluationDetailFindUniqueOrThrowArgs} args - Arguments to find a KpiEvaluationDetail
-     * @example
-     * // Get one KpiEvaluationDetail
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends KpiEvaluationDetailFindUniqueOrThrowArgs>(args: SelectSubset<T, KpiEvaluationDetailFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KpiEvaluationDetail that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailFindFirstArgs} args - Arguments to find a KpiEvaluationDetail
-     * @example
-     * // Get one KpiEvaluationDetail
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends KpiEvaluationDetailFindFirstArgs>(args?: SelectSubset<T, KpiEvaluationDetailFindFirstArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KpiEvaluationDetail that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailFindFirstOrThrowArgs} args - Arguments to find a KpiEvaluationDetail
-     * @example
-     * // Get one KpiEvaluationDetail
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends KpiEvaluationDetailFindFirstOrThrowArgs>(args?: SelectSubset<T, KpiEvaluationDetailFindFirstOrThrowArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more KpiEvaluationDetails that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all KpiEvaluationDetails
-     * const kpiEvaluationDetails = await prisma.kpiEvaluationDetail.findMany()
-     * 
-     * // Get first 10 KpiEvaluationDetails
-     * const kpiEvaluationDetails = await prisma.kpiEvaluationDetail.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const kpiEvaluationDetailWithIdOnly = await prisma.kpiEvaluationDetail.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends KpiEvaluationDetailFindManyArgs>(args?: SelectSubset<T, KpiEvaluationDetailFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a KpiEvaluationDetail.
-     * @param {KpiEvaluationDetailCreateArgs} args - Arguments to create a KpiEvaluationDetail.
-     * @example
-     * // Create one KpiEvaluationDetail
-     * const KpiEvaluationDetail = await prisma.kpiEvaluationDetail.create({
-     *   data: {
-     *     // ... data to create a KpiEvaluationDetail
-     *   }
-     * })
-     * 
-     */
-    create<T extends KpiEvaluationDetailCreateArgs>(args: SelectSubset<T, KpiEvaluationDetailCreateArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many KpiEvaluationDetails.
-     * @param {KpiEvaluationDetailCreateManyArgs} args - Arguments to create many KpiEvaluationDetails.
-     * @example
-     * // Create many KpiEvaluationDetails
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends KpiEvaluationDetailCreateManyArgs>(args?: SelectSubset<T, KpiEvaluationDetailCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Delete a KpiEvaluationDetail.
-     * @param {KpiEvaluationDetailDeleteArgs} args - Arguments to delete one KpiEvaluationDetail.
-     * @example
-     * // Delete one KpiEvaluationDetail
-     * const KpiEvaluationDetail = await prisma.kpiEvaluationDetail.delete({
-     *   where: {
-     *     // ... filter to delete one KpiEvaluationDetail
-     *   }
-     * })
-     * 
-     */
-    delete<T extends KpiEvaluationDetailDeleteArgs>(args: SelectSubset<T, KpiEvaluationDetailDeleteArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one KpiEvaluationDetail.
-     * @param {KpiEvaluationDetailUpdateArgs} args - Arguments to update one KpiEvaluationDetail.
-     * @example
-     * // Update one KpiEvaluationDetail
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends KpiEvaluationDetailUpdateArgs>(args: SelectSubset<T, KpiEvaluationDetailUpdateArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more KpiEvaluationDetails.
-     * @param {KpiEvaluationDetailDeleteManyArgs} args - Arguments to filter KpiEvaluationDetails to delete.
-     * @example
-     * // Delete a few KpiEvaluationDetails
-     * const { count } = await prisma.kpiEvaluationDetail.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends KpiEvaluationDetailDeleteManyArgs>(args?: SelectSubset<T, KpiEvaluationDetailDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more KpiEvaluationDetails.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many KpiEvaluationDetails
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends KpiEvaluationDetailUpdateManyArgs>(args: SelectSubset<T, KpiEvaluationDetailUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one KpiEvaluationDetail.
-     * @param {KpiEvaluationDetailUpsertArgs} args - Arguments to update or create a KpiEvaluationDetail.
-     * @example
-     * // Update or create a KpiEvaluationDetail
-     * const kpiEvaluationDetail = await prisma.kpiEvaluationDetail.upsert({
-     *   create: {
-     *     // ... data to create a KpiEvaluationDetail
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the KpiEvaluationDetail we want to update
-     *   }
-     * })
-     */
-    upsert<T extends KpiEvaluationDetailUpsertArgs>(args: SelectSubset<T, KpiEvaluationDetailUpsertArgs<ExtArgs>>): Prisma__KpiEvaluationDetailClient<$Result.GetResult<Prisma.$KpiEvaluationDetailPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of KpiEvaluationDetails.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailCountArgs} args - Arguments to filter KpiEvaluationDetails to count.
-     * @example
-     * // Count the number of KpiEvaluationDetails
-     * const count = await prisma.kpiEvaluationDetail.count({
-     *   where: {
-     *     // ... the filter for the KpiEvaluationDetails we want to count
-     *   }
-     * })
-    **/
-    count<T extends KpiEvaluationDetailCountArgs>(
-      args?: Subset<T, KpiEvaluationDetailCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], KpiEvaluationDetailCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a KpiEvaluationDetail.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends KpiEvaluationDetailAggregateArgs>(args: Subset<T, KpiEvaluationDetailAggregateArgs>): Prisma.PrismaPromise<GetKpiEvaluationDetailAggregateType<T>>
-
-    /**
-     * Group by KpiEvaluationDetail.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiEvaluationDetailGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends KpiEvaluationDetailGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: KpiEvaluationDetailGroupByArgs['orderBy'] }
-        : { orderBy?: KpiEvaluationDetailGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, KpiEvaluationDetailGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKpiEvaluationDetailGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the KpiEvaluationDetail model
-   */
-  readonly fields: KpiEvaluationDetailFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for KpiEvaluationDetail.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__KpiEvaluationDetailClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    evaluation<T extends KpiEvaluationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiEvaluationDefaultArgs<ExtArgs>>): Prisma__KpiEvaluationClient<$Result.GetResult<Prisma.$KpiEvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    criteria<T extends KpiCriteriaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiCriteriaDefaultArgs<ExtArgs>>): Prisma__KpiCriteriaClient<$Result.GetResult<Prisma.$KpiCriteriaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the KpiEvaluationDetail model
-   */
-  interface KpiEvaluationDetailFieldRefs {
-    readonly id: FieldRef<"KpiEvaluationDetail", 'Int'>
-    readonly evaluationId: FieldRef<"KpiEvaluationDetail", 'Int'>
-    readonly criteriaId: FieldRef<"KpiEvaluationDetail", 'Int'>
-    readonly selfScore: FieldRef<"KpiEvaluationDetail", 'Float'>
-    readonly reviewerScore: FieldRef<"KpiEvaluationDetail", 'Float'>
-    readonly notes: FieldRef<"KpiEvaluationDetail", 'String'>
-    readonly createdAt: FieldRef<"KpiEvaluationDetail", 'DateTime'>
-    readonly updatedAt: FieldRef<"KpiEvaluationDetail", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * KpiEvaluationDetail findUnique
-   */
-  export type KpiEvaluationDetailFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiEvaluationDetail to fetch.
-     */
-    where: KpiEvaluationDetailWhereUniqueInput
-  }
-
-  /**
-   * KpiEvaluationDetail findUniqueOrThrow
-   */
-  export type KpiEvaluationDetailFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiEvaluationDetail to fetch.
-     */
-    where: KpiEvaluationDetailWhereUniqueInput
-  }
-
-  /**
-   * KpiEvaluationDetail findFirst
-   */
-  export type KpiEvaluationDetailFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiEvaluationDetail to fetch.
-     */
-    where?: KpiEvaluationDetailWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiEvaluationDetails to fetch.
-     */
-    orderBy?: KpiEvaluationDetailOrderByWithRelationInput | KpiEvaluationDetailOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for KpiEvaluationDetails.
-     */
-    cursor?: KpiEvaluationDetailWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiEvaluationDetails from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiEvaluationDetails.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiEvaluationDetails.
-     */
-    distinct?: KpiEvaluationDetailScalarFieldEnum | KpiEvaluationDetailScalarFieldEnum[]
-  }
-
-  /**
-   * KpiEvaluationDetail findFirstOrThrow
-   */
-  export type KpiEvaluationDetailFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiEvaluationDetail to fetch.
-     */
-    where?: KpiEvaluationDetailWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiEvaluationDetails to fetch.
-     */
-    orderBy?: KpiEvaluationDetailOrderByWithRelationInput | KpiEvaluationDetailOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for KpiEvaluationDetails.
-     */
-    cursor?: KpiEvaluationDetailWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiEvaluationDetails from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiEvaluationDetails.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiEvaluationDetails.
-     */
-    distinct?: KpiEvaluationDetailScalarFieldEnum | KpiEvaluationDetailScalarFieldEnum[]
-  }
-
-  /**
-   * KpiEvaluationDetail findMany
-   */
-  export type KpiEvaluationDetailFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * Filter, which KpiEvaluationDetails to fetch.
-     */
-    where?: KpiEvaluationDetailWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of KpiEvaluationDetails to fetch.
-     */
-    orderBy?: KpiEvaluationDetailOrderByWithRelationInput | KpiEvaluationDetailOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing KpiEvaluationDetails.
-     */
-    cursor?: KpiEvaluationDetailWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` KpiEvaluationDetails from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` KpiEvaluationDetails.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of KpiEvaluationDetails.
-     */
-    distinct?: KpiEvaluationDetailScalarFieldEnum | KpiEvaluationDetailScalarFieldEnum[]
-  }
-
-  /**
-   * KpiEvaluationDetail create
-   */
-  export type KpiEvaluationDetailCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * The data needed to create a KpiEvaluationDetail.
-     */
-    data: XOR<KpiEvaluationDetailCreateInput, KpiEvaluationDetailUncheckedCreateInput>
-  }
-
-  /**
-   * KpiEvaluationDetail createMany
-   */
-  export type KpiEvaluationDetailCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many KpiEvaluationDetails.
-     */
-    data: KpiEvaluationDetailCreateManyInput | KpiEvaluationDetailCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * KpiEvaluationDetail update
-   */
-  export type KpiEvaluationDetailUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * The data needed to update a KpiEvaluationDetail.
-     */
-    data: XOR<KpiEvaluationDetailUpdateInput, KpiEvaluationDetailUncheckedUpdateInput>
-    /**
-     * Choose, which KpiEvaluationDetail to update.
-     */
-    where: KpiEvaluationDetailWhereUniqueInput
-  }
-
-  /**
-   * KpiEvaluationDetail updateMany
-   */
-  export type KpiEvaluationDetailUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update KpiEvaluationDetails.
-     */
-    data: XOR<KpiEvaluationDetailUpdateManyMutationInput, KpiEvaluationDetailUncheckedUpdateManyInput>
-    /**
-     * Filter which KpiEvaluationDetails to update
-     */
-    where?: KpiEvaluationDetailWhereInput
-    /**
-     * Limit how many KpiEvaluationDetails to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * KpiEvaluationDetail upsert
-   */
-  export type KpiEvaluationDetailUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * The filter to search for the KpiEvaluationDetail to update in case it exists.
-     */
-    where: KpiEvaluationDetailWhereUniqueInput
-    /**
-     * In case the KpiEvaluationDetail found by the `where` argument doesn't exist, create a new KpiEvaluationDetail with this data.
-     */
-    create: XOR<KpiEvaluationDetailCreateInput, KpiEvaluationDetailUncheckedCreateInput>
-    /**
-     * In case the KpiEvaluationDetail was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<KpiEvaluationDetailUpdateInput, KpiEvaluationDetailUncheckedUpdateInput>
-  }
-
-  /**
-   * KpiEvaluationDetail delete
-   */
-  export type KpiEvaluationDetailDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
-    /**
-     * Filter which KpiEvaluationDetail to delete.
-     */
-    where: KpiEvaluationDetailWhereUniqueInput
-  }
-
-  /**
-   * KpiEvaluationDetail deleteMany
-   */
-  export type KpiEvaluationDetailDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KpiEvaluationDetails to delete
-     */
-    where?: KpiEvaluationDetailWhereInput
-    /**
-     * Limit how many KpiEvaluationDetails to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * KpiEvaluationDetail without action
-   */
-  export type KpiEvaluationDetailDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KpiEvaluationDetail
-     */
-    select?: KpiEvaluationDetailSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KpiEvaluationDetail
-     */
-    omit?: KpiEvaluationDetailOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: KpiEvaluationDetailInclude<ExtArgs> | null
   }
 
 
@@ -17571,6 +9381,7 @@ export namespace Prisma {
     formCode: string | null
     name: string | null
     description: string | null
+    templateFileId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -17579,6 +9390,7 @@ export namespace Prisma {
     formCode: string | null
     name: string | null
     description: string | null
+    templateFileId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -17587,6 +9399,7 @@ export namespace Prisma {
     formCode: number
     name: number
     description: number
+    templateFileId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -17597,6 +9410,7 @@ export namespace Prisma {
     formCode?: true
     name?: true
     description?: true
+    templateFileId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -17605,6 +9419,7 @@ export namespace Prisma {
     formCode?: true
     name?: true
     description?: true
+    templateFileId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -17613,6 +9428,7 @@ export namespace Prisma {
     formCode?: true
     name?: true
     description?: true
+    templateFileId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -17694,6 +9510,7 @@ export namespace Prisma {
     formCode: string
     name: string
     description: string | null
+    templateFileId: string | null
     createdAt: Date
     updatedAt: Date
     _count: KpiFormTemplateCountAggregateOutputType | null
@@ -17719,6 +9536,7 @@ export namespace Prisma {
     formCode?: boolean
     name?: boolean
     description?: boolean
+    templateFileId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     documents?: boolean | KpiFormTemplate$documentsArgs<ExtArgs>
@@ -17731,11 +9549,12 @@ export namespace Prisma {
     formCode?: boolean
     name?: boolean
     description?: boolean
+    templateFileId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type KpiFormTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"formCode" | "name" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiFormTemplate"]>
+  export type KpiFormTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"formCode" | "name" | "description" | "templateFileId" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiFormTemplate"]>
   export type KpiFormTemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     documents?: boolean | KpiFormTemplate$documentsArgs<ExtArgs>
     _count?: boolean | KpiFormTemplateCountOutputTypeDefaultArgs<ExtArgs>
@@ -17750,6 +9569,7 @@ export namespace Prisma {
       formCode: string
       name: string
       description: string | null
+      templateFileId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["kpiFormTemplate"]>
@@ -18125,6 +9945,7 @@ export namespace Prisma {
     readonly formCode: FieldRef<"KpiFormTemplate", 'String'>
     readonly name: FieldRef<"KpiFormTemplate", 'String'>
     readonly description: FieldRef<"KpiFormTemplate", 'String'>
+    readonly templateFileId: FieldRef<"KpiFormTemplate", 'String'>
     readonly createdAt: FieldRef<"KpiFormTemplate", 'DateTime'>
     readonly updatedAt: FieldRef<"KpiFormTemplate", 'DateTime'>
   }
@@ -18543,6 +10364,7 @@ export namespace Prisma {
     id: number | null
     formCode: string | null
     evaluationId: number | null
+    documentFileId: string | null
     status: string | null
     submitterCode: string | null
     signerCode: string | null
@@ -18556,6 +10378,7 @@ export namespace Prisma {
     id: number | null
     formCode: string | null
     evaluationId: number | null
+    documentFileId: string | null
     status: string | null
     submitterCode: string | null
     signerCode: string | null
@@ -18569,6 +10392,7 @@ export namespace Prisma {
     id: number
     formCode: number
     evaluationId: number
+    documentFileId: number
     contentJson: number
     status: number
     submitterCode: number
@@ -18595,6 +10419,7 @@ export namespace Prisma {
     id?: true
     formCode?: true
     evaluationId?: true
+    documentFileId?: true
     status?: true
     submitterCode?: true
     signerCode?: true
@@ -18608,6 +10433,7 @@ export namespace Prisma {
     id?: true
     formCode?: true
     evaluationId?: true
+    documentFileId?: true
     status?: true
     submitterCode?: true
     signerCode?: true
@@ -18621,6 +10447,7 @@ export namespace Prisma {
     id?: true
     formCode?: true
     evaluationId?: true
+    documentFileId?: true
     contentJson?: true
     status?: true
     submitterCode?: true
@@ -18722,7 +10549,8 @@ export namespace Prisma {
     id: number
     formCode: string
     evaluationId: number
-    contentJson: JsonValue
+    documentFileId: string | null
+    contentJson: JsonValue | null
     status: string
     submitterCode: string | null
     signerCode: string | null
@@ -18755,6 +10583,7 @@ export namespace Prisma {
     id?: boolean
     formCode?: boolean
     evaluationId?: boolean
+    documentFileId?: boolean
     contentJson?: boolean
     status?: boolean
     submitterCode?: boolean
@@ -18773,6 +10602,7 @@ export namespace Prisma {
     id?: boolean
     formCode?: boolean
     evaluationId?: boolean
+    documentFileId?: boolean
     contentJson?: boolean
     status?: boolean
     submitterCode?: boolean
@@ -18783,7 +10613,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type KpiFormDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "formCode" | "evaluationId" | "contentJson" | "status" | "submitterCode" | "signerCode" | "decisionNumber" | "decisionDate" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiFormDocument"]>
+  export type KpiFormDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "formCode" | "evaluationId" | "documentFileId" | "contentJson" | "status" | "submitterCode" | "signerCode" | "decisionNumber" | "decisionDate" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiFormDocument"]>
   export type KpiFormDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     template?: boolean | KpiFormTemplateDefaultArgs<ExtArgs>
     evaluation?: boolean | KpiEvaluationDefaultArgs<ExtArgs>
@@ -18799,7 +10629,8 @@ export namespace Prisma {
       id: number
       formCode: string
       evaluationId: number
-      contentJson: Prisma.JsonValue
+      documentFileId: string | null
+      contentJson: Prisma.JsonValue | null
       status: string
       submitterCode: string | null
       signerCode: string | null
@@ -19181,6 +11012,7 @@ export namespace Prisma {
     readonly id: FieldRef<"KpiFormDocument", 'Int'>
     readonly formCode: FieldRef<"KpiFormDocument", 'String'>
     readonly evaluationId: FieldRef<"KpiFormDocument", 'Int'>
+    readonly documentFileId: FieldRef<"KpiFormDocument", 'String'>
     readonly contentJson: FieldRef<"KpiFormDocument", 'Json'>
     readonly status: FieldRef<"KpiFormDocument", 'String'>
     readonly submitterCode: FieldRef<"KpiFormDocument", 'String'>
@@ -21024,7 +12856,6 @@ export namespace Prisma {
     updatedAt?: boolean
     isDeleted?: boolean
     plan?: boolean | Task$planArgs<ExtArgs>
-    kpiSettings?: boolean | Task$kpiSettingsArgs<ExtArgs>
     kpiEvaluations?: boolean | Task$kpiEvaluationsArgs<ExtArgs>
     participants?: boolean | Task$participantsArgs<ExtArgs>
     attachments?: boolean | Task$attachmentsArgs<ExtArgs>
@@ -21069,7 +12900,6 @@ export namespace Prisma {
   export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "type" | "meetingLink" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "isDeadlineWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     plan?: boolean | Task$planArgs<ExtArgs>
-    kpiSettings?: boolean | Task$kpiSettingsArgs<ExtArgs>
     kpiEvaluations?: boolean | Task$kpiEvaluationsArgs<ExtArgs>
     participants?: boolean | Task$participantsArgs<ExtArgs>
     attachments?: boolean | Task$attachmentsArgs<ExtArgs>
@@ -21084,7 +12914,6 @@ export namespace Prisma {
     name: "Task"
     objects: {
       plan: Prisma.$MasterPlanPayload<ExtArgs> | null
-      kpiSettings: Prisma.$TaskKpiSettingPayload<ExtArgs> | null
       kpiEvaluations: Prisma.$KpiEvaluationTaskPayload<ExtArgs>[]
       participants: Prisma.$TaskParticipantPayload<ExtArgs>[]
       attachments: Prisma.$TaskAttachmentPayload<ExtArgs>[]
@@ -21461,7 +13290,6 @@ export namespace Prisma {
   export interface Prisma__TaskClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     plan<T extends Task$planArgs<ExtArgs> = {}>(args?: Subset<T, Task$planArgs<ExtArgs>>): Prisma__MasterPlanClient<$Result.GetResult<Prisma.$MasterPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    kpiSettings<T extends Task$kpiSettingsArgs<ExtArgs> = {}>(args?: Subset<T, Task$kpiSettingsArgs<ExtArgs>>): Prisma__TaskKpiSettingClient<$Result.GetResult<Prisma.$TaskKpiSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     kpiEvaluations<T extends Task$kpiEvaluationsArgs<ExtArgs> = {}>(args?: Subset<T, Task$kpiEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiEvaluationTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     participants<T extends Task$participantsArgs<ExtArgs> = {}>(args?: Subset<T, Task$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     attachments<T extends Task$attachmentsArgs<ExtArgs> = {}>(args?: Subset<T, Task$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskAttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -21888,25 +13716,6 @@ export namespace Prisma {
      */
     include?: MasterPlanInclude<ExtArgs> | null
     where?: MasterPlanWhereInput
-  }
-
-  /**
-   * Task.kpiSettings
-   */
-  export type Task$kpiSettingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskKpiSetting
-     */
-    select?: TaskKpiSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskKpiSetting
-     */
-    omit?: TaskKpiSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskKpiSettingInclude<ExtArgs> | null
-    where?: TaskKpiSettingWhereInput
   }
 
   /**
@@ -29141,22 +20950,6 @@ export namespace Prisma {
   export type KpiDomainWeightScalarFieldEnum = (typeof KpiDomainWeightScalarFieldEnum)[keyof typeof KpiDomainWeightScalarFieldEnum]
 
 
-  export const TaskKpiSettingScalarFieldEnum: {
-    taskId: 'taskId',
-    baseScore: 'baseScore',
-    weight: 'weight',
-    scoringMethod: 'scoringMethod',
-    isCrossDomain: 'isCrossDomain',
-    crossDomainMultiplier: 'crossDomainMultiplier',
-    bonusPerDay: 'bonusPerDay',
-    penaltyPerDay: 'penaltyPerDay',
-    standardDurationDays: 'standardDurationDays',
-    kpiCriteriaId: 'kpiCriteriaId'
-  };
-
-  export type TaskKpiSettingScalarFieldEnum = (typeof TaskKpiSettingScalarFieldEnum)[keyof typeof TaskKpiSettingScalarFieldEnum]
-
-
   export const KpiPeriodScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -29167,76 +20960,6 @@ export namespace Prisma {
   };
 
   export type KpiPeriodScalarFieldEnum = (typeof KpiPeriodScalarFieldEnum)[keyof typeof KpiPeriodScalarFieldEnum]
-
-
-  export const KpiCriteriaScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    description: 'description',
-    categoryId: 'categoryId',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type KpiCriteriaScalarFieldEnum = (typeof KpiCriteriaScalarFieldEnum)[keyof typeof KpiCriteriaScalarFieldEnum]
-
-
-  export const KpiCriteriaSettingScalarFieldEnum: {
-    criteriaId: 'criteriaId',
-    weight: 'weight',
-    baseScore: 'baseScore',
-    scoringMethod: 'scoringMethod',
-    difficulty: 'difficulty',
-    difficultyMultiplier: 'difficultyMultiplier',
-    bonusThresholdDays: 'bonusThresholdDays',
-    bonusPerDay: 'bonusPerDay',
-    penaltyPerDay: 'penaltyPerDay',
-    integrationCode: 'integrationCode',
-    formula: 'formula'
-  };
-
-  export type KpiCriteriaSettingScalarFieldEnum = (typeof KpiCriteriaSettingScalarFieldEnum)[keyof typeof KpiCriteriaSettingScalarFieldEnum]
-
-
-  export const EmployeeKpiTargetScalarFieldEnum: {
-    id: 'id',
-    employeeCode: 'employeeCode',
-    periodId: 'periodId',
-    criteriaId: 'criteriaId',
-    targetValue: 'targetValue',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type EmployeeKpiTargetScalarFieldEnum = (typeof EmployeeKpiTargetScalarFieldEnum)[keyof typeof EmployeeKpiTargetScalarFieldEnum]
-
-
-  export const JobTitleKpiTargetScalarFieldEnum: {
-    id: 'id',
-    jobTitleId: 'jobTitleId',
-    periodId: 'periodId',
-    criteriaId: 'criteriaId',
-    targetValue: 'targetValue',
-    weight: 'weight',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type JobTitleKpiTargetScalarFieldEnum = (typeof JobTitleKpiTargetScalarFieldEnum)[keyof typeof JobTitleKpiTargetScalarFieldEnum]
-
-
-  export const StaffingSlotKpiTargetScalarFieldEnum: {
-    id: 'id',
-    staffingSlotId: 'staffingSlotId',
-    periodId: 'periodId',
-    criteriaId: 'criteriaId',
-    targetValue: 'targetValue',
-    weight: 'weight',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type StaffingSlotKpiTargetScalarFieldEnum = (typeof StaffingSlotKpiTargetScalarFieldEnum)[keyof typeof StaffingSlotKpiTargetScalarFieldEnum]
 
 
   export const KpiEvaluationScalarFieldEnum: {
@@ -29258,20 +20981,6 @@ export namespace Prisma {
   };
 
   export type KpiEvaluationScalarFieldEnum = (typeof KpiEvaluationScalarFieldEnum)[keyof typeof KpiEvaluationScalarFieldEnum]
-
-
-  export const KpiEvaluationDetailScalarFieldEnum: {
-    id: 'id',
-    evaluationId: 'evaluationId',
-    criteriaId: 'criteriaId',
-    selfScore: 'selfScore',
-    reviewerScore: 'reviewerScore',
-    notes: 'notes',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type KpiEvaluationDetailScalarFieldEnum = (typeof KpiEvaluationDetailScalarFieldEnum)[keyof typeof KpiEvaluationDetailScalarFieldEnum]
 
 
   export const KpiEvaluationTaskScalarFieldEnum: {
@@ -29306,6 +21015,7 @@ export namespace Prisma {
     formCode: 'formCode',
     name: 'name',
     description: 'description',
+    templateFileId: 'templateFileId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -29317,6 +21027,7 @@ export namespace Prisma {
     id: 'id',
     formCode: 'formCode',
     evaluationId: 'evaluationId',
+    documentFileId: 'documentFileId',
     contentJson: 'contentJson',
     status: 'status',
     submitterCode: 'submitterCode',
@@ -29496,13 +21207,6 @@ export namespace Prisma {
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
-  export const JsonNullValueInput: {
-    JsonNull: typeof JsonNull
-  };
-
-  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
   export const JsonNullValueFilter: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull,
@@ -29562,43 +21266,11 @@ export namespace Prisma {
   export type KpiDomainWeightOrderByRelevanceFieldEnum = (typeof KpiDomainWeightOrderByRelevanceFieldEnum)[keyof typeof KpiDomainWeightOrderByRelevanceFieldEnum]
 
 
-  export const TaskKpiSettingOrderByRelevanceFieldEnum: {
-    scoringMethod: 'scoringMethod'
-  };
-
-  export type TaskKpiSettingOrderByRelevanceFieldEnum = (typeof TaskKpiSettingOrderByRelevanceFieldEnum)[keyof typeof TaskKpiSettingOrderByRelevanceFieldEnum]
-
-
   export const KpiPeriodOrderByRelevanceFieldEnum: {
     name: 'name'
   };
 
   export type KpiPeriodOrderByRelevanceFieldEnum = (typeof KpiPeriodOrderByRelevanceFieldEnum)[keyof typeof KpiPeriodOrderByRelevanceFieldEnum]
-
-
-  export const KpiCriteriaOrderByRelevanceFieldEnum: {
-    name: 'name',
-    description: 'description'
-  };
-
-  export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]
-
-
-  export const KpiCriteriaSettingOrderByRelevanceFieldEnum: {
-    scoringMethod: 'scoringMethod',
-    difficulty: 'difficulty',
-    integrationCode: 'integrationCode',
-    formula: 'formula'
-  };
-
-  export type KpiCriteriaSettingOrderByRelevanceFieldEnum = (typeof KpiCriteriaSettingOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaSettingOrderByRelevanceFieldEnum]
-
-
-  export const EmployeeKpiTargetOrderByRelevanceFieldEnum: {
-    employeeCode: 'employeeCode'
-  };
-
-  export type EmployeeKpiTargetOrderByRelevanceFieldEnum = (typeof EmployeeKpiTargetOrderByRelevanceFieldEnum)[keyof typeof EmployeeKpiTargetOrderByRelevanceFieldEnum]
 
 
   export const KpiEvaluationOrderByRelevanceFieldEnum: {
@@ -29609,13 +21281,6 @@ export namespace Prisma {
   };
 
   export type KpiEvaluationOrderByRelevanceFieldEnum = (typeof KpiEvaluationOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationOrderByRelevanceFieldEnum]
-
-
-  export const KpiEvaluationDetailOrderByRelevanceFieldEnum: {
-    notes: 'notes'
-  };
-
-  export type KpiEvaluationDetailOrderByRelevanceFieldEnum = (typeof KpiEvaluationDetailOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationDetailOrderByRelevanceFieldEnum]
 
 
   export const KpiEvaluationTaskOrderByRelevanceFieldEnum: {
@@ -29630,7 +21295,8 @@ export namespace Prisma {
   export const KpiFormTemplateOrderByRelevanceFieldEnum: {
     formCode: 'formCode',
     name: 'name',
-    description: 'description'
+    description: 'description',
+    templateFileId: 'templateFileId'
   };
 
   export type KpiFormTemplateOrderByRelevanceFieldEnum = (typeof KpiFormTemplateOrderByRelevanceFieldEnum)[keyof typeof KpiFormTemplateOrderByRelevanceFieldEnum]
@@ -29638,6 +21304,7 @@ export namespace Prisma {
 
   export const KpiFormDocumentOrderByRelevanceFieldEnum: {
     formCode: 'formCode',
+    documentFileId: 'documentFileId',
     status: 'status',
     submitterCode: 'submitterCode',
     signerCode: 'signerCode',
@@ -29829,7 +21496,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationListRelationFilter
     kpiReviews?: KpiEvaluationListRelationFilter
     taskParticipants?: TaskParticipantListRelationFilter
-    employeeKpiTargets?: EmployeeKpiTargetListRelationFilter
   }
 
   export type EmployeeOrderByWithRelationInput = {
@@ -29860,7 +21526,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationOrderByRelationAggregateInput
     kpiReviews?: KpiEvaluationOrderByRelationAggregateInput
     taskParticipants?: TaskParticipantOrderByRelationAggregateInput
-    employeeKpiTargets?: EmployeeKpiTargetOrderByRelationAggregateInput
     _relevance?: EmployeeOrderByRelevanceInput
   }
 
@@ -29895,7 +21560,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationListRelationFilter
     kpiReviews?: KpiEvaluationListRelationFilter
     taskParticipants?: TaskParticipantListRelationFilter
-    employeeKpiTargets?: EmployeeKpiTargetListRelationFilter
   }, "id" | "employeeCode">
 
   export type EmployeeOrderByWithAggregationInput = {
@@ -30116,92 +21780,6 @@ export namespace Prisma {
     attitudeWeight?: FloatWithAggregatesFilter<"KpiDomainWeight"> | number
   }
 
-  export type TaskKpiSettingWhereInput = {
-    AND?: TaskKpiSettingWhereInput | TaskKpiSettingWhereInput[]
-    OR?: TaskKpiSettingWhereInput[]
-    NOT?: TaskKpiSettingWhereInput | TaskKpiSettingWhereInput[]
-    taskId?: IntFilter<"TaskKpiSetting"> | number
-    baseScore?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    weight?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    scoringMethod?: StringFilter<"TaskKpiSetting"> | string
-    isCrossDomain?: BoolFilter<"TaskKpiSetting"> | boolean
-    crossDomainMultiplier?: FloatFilter<"TaskKpiSetting"> | number
-    bonusPerDay?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    penaltyPerDay?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    standardDurationDays?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    kpiCriteriaId?: IntNullableFilter<"TaskKpiSetting"> | number | null
-    kpiCriteria?: XOR<KpiCriteriaNullableScalarRelationFilter, KpiCriteriaWhereInput> | null
-    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }
-
-  export type TaskKpiSettingOrderByWithRelationInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrderInput | SortOrder
-    weight?: SortOrderInput | SortOrder
-    scoringMethod?: SortOrder
-    isCrossDomain?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrderInput | SortOrder
-    penaltyPerDay?: SortOrderInput | SortOrder
-    standardDurationDays?: SortOrderInput | SortOrder
-    kpiCriteriaId?: SortOrderInput | SortOrder
-    kpiCriteria?: KpiCriteriaOrderByWithRelationInput
-    task?: TaskOrderByWithRelationInput
-    _relevance?: TaskKpiSettingOrderByRelevanceInput
-  }
-
-  export type TaskKpiSettingWhereUniqueInput = Prisma.AtLeast<{
-    taskId?: number
-    AND?: TaskKpiSettingWhereInput | TaskKpiSettingWhereInput[]
-    OR?: TaskKpiSettingWhereInput[]
-    NOT?: TaskKpiSettingWhereInput | TaskKpiSettingWhereInput[]
-    baseScore?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    weight?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    scoringMethod?: StringFilter<"TaskKpiSetting"> | string
-    isCrossDomain?: BoolFilter<"TaskKpiSetting"> | boolean
-    crossDomainMultiplier?: FloatFilter<"TaskKpiSetting"> | number
-    bonusPerDay?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    penaltyPerDay?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    standardDurationDays?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    kpiCriteriaId?: IntNullableFilter<"TaskKpiSetting"> | number | null
-    kpiCriteria?: XOR<KpiCriteriaNullableScalarRelationFilter, KpiCriteriaWhereInput> | null
-    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }, "taskId">
-
-  export type TaskKpiSettingOrderByWithAggregationInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrderInput | SortOrder
-    weight?: SortOrderInput | SortOrder
-    scoringMethod?: SortOrder
-    isCrossDomain?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrderInput | SortOrder
-    penaltyPerDay?: SortOrderInput | SortOrder
-    standardDurationDays?: SortOrderInput | SortOrder
-    kpiCriteriaId?: SortOrderInput | SortOrder
-    _count?: TaskKpiSettingCountOrderByAggregateInput
-    _avg?: TaskKpiSettingAvgOrderByAggregateInput
-    _max?: TaskKpiSettingMaxOrderByAggregateInput
-    _min?: TaskKpiSettingMinOrderByAggregateInput
-    _sum?: TaskKpiSettingSumOrderByAggregateInput
-  }
-
-  export type TaskKpiSettingScalarWhereWithAggregatesInput = {
-    AND?: TaskKpiSettingScalarWhereWithAggregatesInput | TaskKpiSettingScalarWhereWithAggregatesInput[]
-    OR?: TaskKpiSettingScalarWhereWithAggregatesInput[]
-    NOT?: TaskKpiSettingScalarWhereWithAggregatesInput | TaskKpiSettingScalarWhereWithAggregatesInput[]
-    taskId?: IntWithAggregatesFilter<"TaskKpiSetting"> | number
-    baseScore?: FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
-    weight?: FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
-    scoringMethod?: StringWithAggregatesFilter<"TaskKpiSetting"> | string
-    isCrossDomain?: BoolWithAggregatesFilter<"TaskKpiSetting"> | boolean
-    crossDomainMultiplier?: FloatWithAggregatesFilter<"TaskKpiSetting"> | number
-    bonusPerDay?: FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
-    penaltyPerDay?: FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
-    standardDurationDays?: FloatNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
-    kpiCriteriaId?: IntNullableWithAggregatesFilter<"TaskKpiSetting"> | number | null
-  }
-
   export type KpiPeriodWhereInput = {
     AND?: KpiPeriodWhereInput | KpiPeriodWhereInput[]
     OR?: KpiPeriodWhereInput[]
@@ -30213,9 +21791,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KpiPeriod"> | Date | string
     updatedAt?: DateTimeFilter<"KpiPeriod"> | Date | string
     evaluations?: KpiEvaluationListRelationFilter
-    targets?: EmployeeKpiTargetListRelationFilter
-    jobTitleTargets?: JobTitleKpiTargetListRelationFilter
-    staffingSlotTargets?: StaffingSlotKpiTargetListRelationFilter
   }
 
   export type KpiPeriodOrderByWithRelationInput = {
@@ -30226,9 +21801,6 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     evaluations?: KpiEvaluationOrderByRelationAggregateInput
-    targets?: EmployeeKpiTargetOrderByRelationAggregateInput
-    jobTitleTargets?: JobTitleKpiTargetOrderByRelationAggregateInput
-    staffingSlotTargets?: StaffingSlotKpiTargetOrderByRelationAggregateInput
     _relevance?: KpiPeriodOrderByRelevanceInput
   }
 
@@ -30243,9 +21815,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KpiPeriod"> | Date | string
     updatedAt?: DateTimeFilter<"KpiPeriod"> | Date | string
     evaluations?: KpiEvaluationListRelationFilter
-    targets?: EmployeeKpiTargetListRelationFilter
-    jobTitleTargets?: JobTitleKpiTargetListRelationFilter
-    staffingSlotTargets?: StaffingSlotKpiTargetListRelationFilter
   }, "id">
 
   export type KpiPeriodOrderByWithAggregationInput = {
@@ -30274,399 +21843,6 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"KpiPeriod"> | Date | string
   }
 
-  export type KpiCriteriaWhereInput = {
-    AND?: KpiCriteriaWhereInput | KpiCriteriaWhereInput[]
-    OR?: KpiCriteriaWhereInput[]
-    NOT?: KpiCriteriaWhereInput | KpiCriteriaWhereInput[]
-    id?: IntFilter<"KpiCriteria"> | number
-    name?: StringFilter<"KpiCriteria"> | string
-    description?: StringNullableFilter<"KpiCriteria"> | string | null
-    categoryId?: IntNullableFilter<"KpiCriteria"> | number | null
-    createdAt?: DateTimeFilter<"KpiCriteria"> | Date | string
-    updatedAt?: DateTimeFilter<"KpiCriteria"> | Date | string
-    settings?: XOR<KpiCriteriaSettingNullableScalarRelationFilter, KpiCriteriaSettingWhereInput> | null
-    details?: KpiEvaluationDetailListRelationFilter
-    tasks?: TaskKpiSettingListRelationFilter
-    targets?: EmployeeKpiTargetListRelationFilter
-    jobTitleTargets?: JobTitleKpiTargetListRelationFilter
-    staffingSlotTargets?: StaffingSlotKpiTargetListRelationFilter
-  }
-
-  export type KpiCriteriaOrderByWithRelationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    categoryId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    settings?: KpiCriteriaSettingOrderByWithRelationInput
-    details?: KpiEvaluationDetailOrderByRelationAggregateInput
-    tasks?: TaskKpiSettingOrderByRelationAggregateInput
-    targets?: EmployeeKpiTargetOrderByRelationAggregateInput
-    jobTitleTargets?: JobTitleKpiTargetOrderByRelationAggregateInput
-    staffingSlotTargets?: StaffingSlotKpiTargetOrderByRelationAggregateInput
-    _relevance?: KpiCriteriaOrderByRelevanceInput
-  }
-
-  export type KpiCriteriaWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: KpiCriteriaWhereInput | KpiCriteriaWhereInput[]
-    OR?: KpiCriteriaWhereInput[]
-    NOT?: KpiCriteriaWhereInput | KpiCriteriaWhereInput[]
-    name?: StringFilter<"KpiCriteria"> | string
-    description?: StringNullableFilter<"KpiCriteria"> | string | null
-    categoryId?: IntNullableFilter<"KpiCriteria"> | number | null
-    createdAt?: DateTimeFilter<"KpiCriteria"> | Date | string
-    updatedAt?: DateTimeFilter<"KpiCriteria"> | Date | string
-    settings?: XOR<KpiCriteriaSettingNullableScalarRelationFilter, KpiCriteriaSettingWhereInput> | null
-    details?: KpiEvaluationDetailListRelationFilter
-    tasks?: TaskKpiSettingListRelationFilter
-    targets?: EmployeeKpiTargetListRelationFilter
-    jobTitleTargets?: JobTitleKpiTargetListRelationFilter
-    staffingSlotTargets?: StaffingSlotKpiTargetListRelationFilter
-  }, "id">
-
-  export type KpiCriteriaOrderByWithAggregationInput = {
-    id?: SortOrder
-    name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    categoryId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: KpiCriteriaCountOrderByAggregateInput
-    _avg?: KpiCriteriaAvgOrderByAggregateInput
-    _max?: KpiCriteriaMaxOrderByAggregateInput
-    _min?: KpiCriteriaMinOrderByAggregateInput
-    _sum?: KpiCriteriaSumOrderByAggregateInput
-  }
-
-  export type KpiCriteriaScalarWhereWithAggregatesInput = {
-    AND?: KpiCriteriaScalarWhereWithAggregatesInput | KpiCriteriaScalarWhereWithAggregatesInput[]
-    OR?: KpiCriteriaScalarWhereWithAggregatesInput[]
-    NOT?: KpiCriteriaScalarWhereWithAggregatesInput | KpiCriteriaScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"KpiCriteria"> | number
-    name?: StringWithAggregatesFilter<"KpiCriteria"> | string
-    description?: StringNullableWithAggregatesFilter<"KpiCriteria"> | string | null
-    categoryId?: IntNullableWithAggregatesFilter<"KpiCriteria"> | number | null
-    createdAt?: DateTimeWithAggregatesFilter<"KpiCriteria"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"KpiCriteria"> | Date | string
-  }
-
-  export type KpiCriteriaSettingWhereInput = {
-    AND?: KpiCriteriaSettingWhereInput | KpiCriteriaSettingWhereInput[]
-    OR?: KpiCriteriaSettingWhereInput[]
-    NOT?: KpiCriteriaSettingWhereInput | KpiCriteriaSettingWhereInput[]
-    criteriaId?: IntFilter<"KpiCriteriaSetting"> | number
-    weight?: FloatFilter<"KpiCriteriaSetting"> | number
-    baseScore?: FloatNullableFilter<"KpiCriteriaSetting"> | number | null
-    scoringMethod?: StringFilter<"KpiCriteriaSetting"> | string
-    difficulty?: StringFilter<"KpiCriteriaSetting"> | string
-    difficultyMultiplier?: FloatFilter<"KpiCriteriaSetting"> | number
-    bonusThresholdDays?: IntFilter<"KpiCriteriaSetting"> | number
-    bonusPerDay?: FloatFilter<"KpiCriteriaSetting"> | number
-    penaltyPerDay?: FloatFilter<"KpiCriteriaSetting"> | number
-    integrationCode?: StringNullableFilter<"KpiCriteriaSetting"> | string | null
-    formula?: StringNullableFilter<"KpiCriteriaSetting"> | string | null
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }
-
-  export type KpiCriteriaSettingOrderByWithRelationInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrderInput | SortOrder
-    scoringMethod?: SortOrder
-    difficulty?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    integrationCode?: SortOrderInput | SortOrder
-    formula?: SortOrderInput | SortOrder
-    criteria?: KpiCriteriaOrderByWithRelationInput
-    _relevance?: KpiCriteriaSettingOrderByRelevanceInput
-  }
-
-  export type KpiCriteriaSettingWhereUniqueInput = Prisma.AtLeast<{
-    criteriaId?: number
-    AND?: KpiCriteriaSettingWhereInput | KpiCriteriaSettingWhereInput[]
-    OR?: KpiCriteriaSettingWhereInput[]
-    NOT?: KpiCriteriaSettingWhereInput | KpiCriteriaSettingWhereInput[]
-    weight?: FloatFilter<"KpiCriteriaSetting"> | number
-    baseScore?: FloatNullableFilter<"KpiCriteriaSetting"> | number | null
-    scoringMethod?: StringFilter<"KpiCriteriaSetting"> | string
-    difficulty?: StringFilter<"KpiCriteriaSetting"> | string
-    difficultyMultiplier?: FloatFilter<"KpiCriteriaSetting"> | number
-    bonusThresholdDays?: IntFilter<"KpiCriteriaSetting"> | number
-    bonusPerDay?: FloatFilter<"KpiCriteriaSetting"> | number
-    penaltyPerDay?: FloatFilter<"KpiCriteriaSetting"> | number
-    integrationCode?: StringNullableFilter<"KpiCriteriaSetting"> | string | null
-    formula?: StringNullableFilter<"KpiCriteriaSetting"> | string | null
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }, "criteriaId">
-
-  export type KpiCriteriaSettingOrderByWithAggregationInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrderInput | SortOrder
-    scoringMethod?: SortOrder
-    difficulty?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    integrationCode?: SortOrderInput | SortOrder
-    formula?: SortOrderInput | SortOrder
-    _count?: KpiCriteriaSettingCountOrderByAggregateInput
-    _avg?: KpiCriteriaSettingAvgOrderByAggregateInput
-    _max?: KpiCriteriaSettingMaxOrderByAggregateInput
-    _min?: KpiCriteriaSettingMinOrderByAggregateInput
-    _sum?: KpiCriteriaSettingSumOrderByAggregateInput
-  }
-
-  export type KpiCriteriaSettingScalarWhereWithAggregatesInput = {
-    AND?: KpiCriteriaSettingScalarWhereWithAggregatesInput | KpiCriteriaSettingScalarWhereWithAggregatesInput[]
-    OR?: KpiCriteriaSettingScalarWhereWithAggregatesInput[]
-    NOT?: KpiCriteriaSettingScalarWhereWithAggregatesInput | KpiCriteriaSettingScalarWhereWithAggregatesInput[]
-    criteriaId?: IntWithAggregatesFilter<"KpiCriteriaSetting"> | number
-    weight?: FloatWithAggregatesFilter<"KpiCriteriaSetting"> | number
-    baseScore?: FloatNullableWithAggregatesFilter<"KpiCriteriaSetting"> | number | null
-    scoringMethod?: StringWithAggregatesFilter<"KpiCriteriaSetting"> | string
-    difficulty?: StringWithAggregatesFilter<"KpiCriteriaSetting"> | string
-    difficultyMultiplier?: FloatWithAggregatesFilter<"KpiCriteriaSetting"> | number
-    bonusThresholdDays?: IntWithAggregatesFilter<"KpiCriteriaSetting"> | number
-    bonusPerDay?: FloatWithAggregatesFilter<"KpiCriteriaSetting"> | number
-    penaltyPerDay?: FloatWithAggregatesFilter<"KpiCriteriaSetting"> | number
-    integrationCode?: StringNullableWithAggregatesFilter<"KpiCriteriaSetting"> | string | null
-    formula?: StringNullableWithAggregatesFilter<"KpiCriteriaSetting"> | string | null
-  }
-
-  export type EmployeeKpiTargetWhereInput = {
-    AND?: EmployeeKpiTargetWhereInput | EmployeeKpiTargetWhereInput[]
-    OR?: EmployeeKpiTargetWhereInput[]
-    NOT?: EmployeeKpiTargetWhereInput | EmployeeKpiTargetWhereInput[]
-    id?: IntFilter<"EmployeeKpiTarget"> | number
-    employeeCode?: StringFilter<"EmployeeKpiTarget"> | string
-    periodId?: IntFilter<"EmployeeKpiTarget"> | number
-    criteriaId?: IntFilter<"EmployeeKpiTarget"> | number
-    targetValue?: FloatFilter<"EmployeeKpiTarget"> | number
-    createdAt?: DateTimeFilter<"EmployeeKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"EmployeeKpiTarget"> | Date | string
-    employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
-    period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }
-
-  export type EmployeeKpiTargetOrderByWithRelationInput = {
-    id?: SortOrder
-    employeeCode?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    employee?: EmployeeOrderByWithRelationInput
-    period?: KpiPeriodOrderByWithRelationInput
-    criteria?: KpiCriteriaOrderByWithRelationInput
-    _relevance?: EmployeeKpiTargetOrderByRelevanceInput
-  }
-
-  export type EmployeeKpiTargetWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    employeeCode_periodId_criteriaId?: EmployeeKpiTargetEmployeeCodePeriodIdCriteriaIdCompoundUniqueInput
-    AND?: EmployeeKpiTargetWhereInput | EmployeeKpiTargetWhereInput[]
-    OR?: EmployeeKpiTargetWhereInput[]
-    NOT?: EmployeeKpiTargetWhereInput | EmployeeKpiTargetWhereInput[]
-    employeeCode?: StringFilter<"EmployeeKpiTarget"> | string
-    periodId?: IntFilter<"EmployeeKpiTarget"> | number
-    criteriaId?: IntFilter<"EmployeeKpiTarget"> | number
-    targetValue?: FloatFilter<"EmployeeKpiTarget"> | number
-    createdAt?: DateTimeFilter<"EmployeeKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"EmployeeKpiTarget"> | Date | string
-    employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
-    period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }, "id" | "employeeCode_periodId_criteriaId">
-
-  export type EmployeeKpiTargetOrderByWithAggregationInput = {
-    id?: SortOrder
-    employeeCode?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: EmployeeKpiTargetCountOrderByAggregateInput
-    _avg?: EmployeeKpiTargetAvgOrderByAggregateInput
-    _max?: EmployeeKpiTargetMaxOrderByAggregateInput
-    _min?: EmployeeKpiTargetMinOrderByAggregateInput
-    _sum?: EmployeeKpiTargetSumOrderByAggregateInput
-  }
-
-  export type EmployeeKpiTargetScalarWhereWithAggregatesInput = {
-    AND?: EmployeeKpiTargetScalarWhereWithAggregatesInput | EmployeeKpiTargetScalarWhereWithAggregatesInput[]
-    OR?: EmployeeKpiTargetScalarWhereWithAggregatesInput[]
-    NOT?: EmployeeKpiTargetScalarWhereWithAggregatesInput | EmployeeKpiTargetScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"EmployeeKpiTarget"> | number
-    employeeCode?: StringWithAggregatesFilter<"EmployeeKpiTarget"> | string
-    periodId?: IntWithAggregatesFilter<"EmployeeKpiTarget"> | number
-    criteriaId?: IntWithAggregatesFilter<"EmployeeKpiTarget"> | number
-    targetValue?: FloatWithAggregatesFilter<"EmployeeKpiTarget"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"EmployeeKpiTarget"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"EmployeeKpiTarget"> | Date | string
-  }
-
-  export type JobTitleKpiTargetWhereInput = {
-    AND?: JobTitleKpiTargetWhereInput | JobTitleKpiTargetWhereInput[]
-    OR?: JobTitleKpiTargetWhereInput[]
-    NOT?: JobTitleKpiTargetWhereInput | JobTitleKpiTargetWhereInput[]
-    id?: IntFilter<"JobTitleKpiTarget"> | number
-    jobTitleId?: IntFilter<"JobTitleKpiTarget"> | number
-    periodId?: IntFilter<"JobTitleKpiTarget"> | number
-    criteriaId?: IntFilter<"JobTitleKpiTarget"> | number
-    targetValue?: FloatFilter<"JobTitleKpiTarget"> | number
-    weight?: FloatFilter<"JobTitleKpiTarget"> | number
-    createdAt?: DateTimeFilter<"JobTitleKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"JobTitleKpiTarget"> | Date | string
-    period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }
-
-  export type JobTitleKpiTargetOrderByWithRelationInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    period?: KpiPeriodOrderByWithRelationInput
-    criteria?: KpiCriteriaOrderByWithRelationInput
-  }
-
-  export type JobTitleKpiTargetWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    jobTitleId_periodId_criteriaId?: JobTitleKpiTargetJobTitleIdPeriodIdCriteriaIdCompoundUniqueInput
-    AND?: JobTitleKpiTargetWhereInput | JobTitleKpiTargetWhereInput[]
-    OR?: JobTitleKpiTargetWhereInput[]
-    NOT?: JobTitleKpiTargetWhereInput | JobTitleKpiTargetWhereInput[]
-    jobTitleId?: IntFilter<"JobTitleKpiTarget"> | number
-    periodId?: IntFilter<"JobTitleKpiTarget"> | number
-    criteriaId?: IntFilter<"JobTitleKpiTarget"> | number
-    targetValue?: FloatFilter<"JobTitleKpiTarget"> | number
-    weight?: FloatFilter<"JobTitleKpiTarget"> | number
-    createdAt?: DateTimeFilter<"JobTitleKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"JobTitleKpiTarget"> | Date | string
-    period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }, "id" | "jobTitleId_periodId_criteriaId">
-
-  export type JobTitleKpiTargetOrderByWithAggregationInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: JobTitleKpiTargetCountOrderByAggregateInput
-    _avg?: JobTitleKpiTargetAvgOrderByAggregateInput
-    _max?: JobTitleKpiTargetMaxOrderByAggregateInput
-    _min?: JobTitleKpiTargetMinOrderByAggregateInput
-    _sum?: JobTitleKpiTargetSumOrderByAggregateInput
-  }
-
-  export type JobTitleKpiTargetScalarWhereWithAggregatesInput = {
-    AND?: JobTitleKpiTargetScalarWhereWithAggregatesInput | JobTitleKpiTargetScalarWhereWithAggregatesInput[]
-    OR?: JobTitleKpiTargetScalarWhereWithAggregatesInput[]
-    NOT?: JobTitleKpiTargetScalarWhereWithAggregatesInput | JobTitleKpiTargetScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"JobTitleKpiTarget"> | number
-    jobTitleId?: IntWithAggregatesFilter<"JobTitleKpiTarget"> | number
-    periodId?: IntWithAggregatesFilter<"JobTitleKpiTarget"> | number
-    criteriaId?: IntWithAggregatesFilter<"JobTitleKpiTarget"> | number
-    targetValue?: FloatWithAggregatesFilter<"JobTitleKpiTarget"> | number
-    weight?: FloatWithAggregatesFilter<"JobTitleKpiTarget"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"JobTitleKpiTarget"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"JobTitleKpiTarget"> | Date | string
-  }
-
-  export type StaffingSlotKpiTargetWhereInput = {
-    AND?: StaffingSlotKpiTargetWhereInput | StaffingSlotKpiTargetWhereInput[]
-    OR?: StaffingSlotKpiTargetWhereInput[]
-    NOT?: StaffingSlotKpiTargetWhereInput | StaffingSlotKpiTargetWhereInput[]
-    id?: IntFilter<"StaffingSlotKpiTarget"> | number
-    staffingSlotId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    periodId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    criteriaId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    targetValue?: FloatFilter<"StaffingSlotKpiTarget"> | number
-    weight?: FloatFilter<"StaffingSlotKpiTarget"> | number
-    createdAt?: DateTimeFilter<"StaffingSlotKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"StaffingSlotKpiTarget"> | Date | string
-    period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }
-
-  export type StaffingSlotKpiTargetOrderByWithRelationInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    period?: KpiPeriodOrderByWithRelationInput
-    criteria?: KpiCriteriaOrderByWithRelationInput
-  }
-
-  export type StaffingSlotKpiTargetWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    staffingSlotId_periodId_criteriaId?: StaffingSlotKpiTargetStaffingSlotIdPeriodIdCriteriaIdCompoundUniqueInput
-    AND?: StaffingSlotKpiTargetWhereInput | StaffingSlotKpiTargetWhereInput[]
-    OR?: StaffingSlotKpiTargetWhereInput[]
-    NOT?: StaffingSlotKpiTargetWhereInput | StaffingSlotKpiTargetWhereInput[]
-    staffingSlotId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    periodId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    criteriaId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    targetValue?: FloatFilter<"StaffingSlotKpiTarget"> | number
-    weight?: FloatFilter<"StaffingSlotKpiTarget"> | number
-    createdAt?: DateTimeFilter<"StaffingSlotKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"StaffingSlotKpiTarget"> | Date | string
-    period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }, "id" | "staffingSlotId_periodId_criteriaId">
-
-  export type StaffingSlotKpiTargetOrderByWithAggregationInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: StaffingSlotKpiTargetCountOrderByAggregateInput
-    _avg?: StaffingSlotKpiTargetAvgOrderByAggregateInput
-    _max?: StaffingSlotKpiTargetMaxOrderByAggregateInput
-    _min?: StaffingSlotKpiTargetMinOrderByAggregateInput
-    _sum?: StaffingSlotKpiTargetSumOrderByAggregateInput
-  }
-
-  export type StaffingSlotKpiTargetScalarWhereWithAggregatesInput = {
-    AND?: StaffingSlotKpiTargetScalarWhereWithAggregatesInput | StaffingSlotKpiTargetScalarWhereWithAggregatesInput[]
-    OR?: StaffingSlotKpiTargetScalarWhereWithAggregatesInput[]
-    NOT?: StaffingSlotKpiTargetScalarWhereWithAggregatesInput | StaffingSlotKpiTargetScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"StaffingSlotKpiTarget"> | number
-    staffingSlotId?: IntWithAggregatesFilter<"StaffingSlotKpiTarget"> | number
-    periodId?: IntWithAggregatesFilter<"StaffingSlotKpiTarget"> | number
-    criteriaId?: IntWithAggregatesFilter<"StaffingSlotKpiTarget"> | number
-    targetValue?: FloatWithAggregatesFilter<"StaffingSlotKpiTarget"> | number
-    weight?: FloatWithAggregatesFilter<"StaffingSlotKpiTarget"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"StaffingSlotKpiTarget"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"StaffingSlotKpiTarget"> | Date | string
-  }
-
   export type KpiEvaluationWhereInput = {
     AND?: KpiEvaluationWhereInput | KpiEvaluationWhereInput[]
     OR?: KpiEvaluationWhereInput[]
@@ -30690,7 +21866,6 @@ export namespace Prisma {
     reviewer?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
     period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
     ruleSet?: XOR<KpiRuleSetNullableScalarRelationFilter, KpiRuleSetWhereInput> | null
-    details?: KpiEvaluationDetailListRelationFilter
     tasks?: KpiEvaluationTaskListRelationFilter
     documents?: KpiFormDocumentListRelationFilter
   }
@@ -30715,7 +21890,6 @@ export namespace Prisma {
     reviewer?: EmployeeOrderByWithRelationInput
     period?: KpiPeriodOrderByWithRelationInput
     ruleSet?: KpiRuleSetOrderByWithRelationInput
-    details?: KpiEvaluationDetailOrderByRelationAggregateInput
     tasks?: KpiEvaluationTaskOrderByRelationAggregateInput
     documents?: KpiFormDocumentOrderByRelationAggregateInput
     _relevance?: KpiEvaluationOrderByRelevanceInput
@@ -30744,7 +21918,6 @@ export namespace Prisma {
     reviewer?: XOR<EmployeeNullableScalarRelationFilter, EmployeeWhereInput> | null
     period?: XOR<KpiPeriodScalarRelationFilter, KpiPeriodWhereInput>
     ruleSet?: XOR<KpiRuleSetNullableScalarRelationFilter, KpiRuleSetWhereInput> | null
-    details?: KpiEvaluationDetailListRelationFilter
     tasks?: KpiEvaluationTaskListRelationFilter
     documents?: KpiFormDocumentListRelationFilter
   }, "id">
@@ -30791,82 +21964,6 @@ export namespace Prisma {
     reviewerCode?: StringNullableWithAggregatesFilter<"KpiEvaluation"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"KpiEvaluation"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KpiEvaluation"> | Date | string
-  }
-
-  export type KpiEvaluationDetailWhereInput = {
-    AND?: KpiEvaluationDetailWhereInput | KpiEvaluationDetailWhereInput[]
-    OR?: KpiEvaluationDetailWhereInput[]
-    NOT?: KpiEvaluationDetailWhereInput | KpiEvaluationDetailWhereInput[]
-    id?: IntFilter<"KpiEvaluationDetail"> | number
-    evaluationId?: IntFilter<"KpiEvaluationDetail"> | number
-    criteriaId?: IntFilter<"KpiEvaluationDetail"> | number
-    selfScore?: FloatNullableFilter<"KpiEvaluationDetail"> | number | null
-    reviewerScore?: FloatNullableFilter<"KpiEvaluationDetail"> | number | null
-    notes?: StringNullableFilter<"KpiEvaluationDetail"> | string | null
-    createdAt?: DateTimeFilter<"KpiEvaluationDetail"> | Date | string
-    updatedAt?: DateTimeFilter<"KpiEvaluationDetail"> | Date | string
-    evaluation?: XOR<KpiEvaluationScalarRelationFilter, KpiEvaluationWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }
-
-  export type KpiEvaluationDetailOrderByWithRelationInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrderInput | SortOrder
-    reviewerScore?: SortOrderInput | SortOrder
-    notes?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    evaluation?: KpiEvaluationOrderByWithRelationInput
-    criteria?: KpiCriteriaOrderByWithRelationInput
-    _relevance?: KpiEvaluationDetailOrderByRelevanceInput
-  }
-
-  export type KpiEvaluationDetailWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: KpiEvaluationDetailWhereInput | KpiEvaluationDetailWhereInput[]
-    OR?: KpiEvaluationDetailWhereInput[]
-    NOT?: KpiEvaluationDetailWhereInput | KpiEvaluationDetailWhereInput[]
-    evaluationId?: IntFilter<"KpiEvaluationDetail"> | number
-    criteriaId?: IntFilter<"KpiEvaluationDetail"> | number
-    selfScore?: FloatNullableFilter<"KpiEvaluationDetail"> | number | null
-    reviewerScore?: FloatNullableFilter<"KpiEvaluationDetail"> | number | null
-    notes?: StringNullableFilter<"KpiEvaluationDetail"> | string | null
-    createdAt?: DateTimeFilter<"KpiEvaluationDetail"> | Date | string
-    updatedAt?: DateTimeFilter<"KpiEvaluationDetail"> | Date | string
-    evaluation?: XOR<KpiEvaluationScalarRelationFilter, KpiEvaluationWhereInput>
-    criteria?: XOR<KpiCriteriaScalarRelationFilter, KpiCriteriaWhereInput>
-  }, "id">
-
-  export type KpiEvaluationDetailOrderByWithAggregationInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrderInput | SortOrder
-    reviewerScore?: SortOrderInput | SortOrder
-    notes?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: KpiEvaluationDetailCountOrderByAggregateInput
-    _avg?: KpiEvaluationDetailAvgOrderByAggregateInput
-    _max?: KpiEvaluationDetailMaxOrderByAggregateInput
-    _min?: KpiEvaluationDetailMinOrderByAggregateInput
-    _sum?: KpiEvaluationDetailSumOrderByAggregateInput
-  }
-
-  export type KpiEvaluationDetailScalarWhereWithAggregatesInput = {
-    AND?: KpiEvaluationDetailScalarWhereWithAggregatesInput | KpiEvaluationDetailScalarWhereWithAggregatesInput[]
-    OR?: KpiEvaluationDetailScalarWhereWithAggregatesInput[]
-    NOT?: KpiEvaluationDetailScalarWhereWithAggregatesInput | KpiEvaluationDetailScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"KpiEvaluationDetail"> | number
-    evaluationId?: IntWithAggregatesFilter<"KpiEvaluationDetail"> | number
-    criteriaId?: IntWithAggregatesFilter<"KpiEvaluationDetail"> | number
-    selfScore?: FloatNullableWithAggregatesFilter<"KpiEvaluationDetail"> | number | null
-    reviewerScore?: FloatNullableWithAggregatesFilter<"KpiEvaluationDetail"> | number | null
-    notes?: StringNullableWithAggregatesFilter<"KpiEvaluationDetail"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"KpiEvaluationDetail"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"KpiEvaluationDetail"> | Date | string
   }
 
   export type KpiEvaluationTaskWhereInput = {
@@ -31022,6 +22119,7 @@ export namespace Prisma {
     formCode?: StringFilter<"KpiFormTemplate"> | string
     name?: StringFilter<"KpiFormTemplate"> | string
     description?: StringNullableFilter<"KpiFormTemplate"> | string | null
+    templateFileId?: StringNullableFilter<"KpiFormTemplate"> | string | null
     createdAt?: DateTimeFilter<"KpiFormTemplate"> | Date | string
     updatedAt?: DateTimeFilter<"KpiFormTemplate"> | Date | string
     documents?: KpiFormDocumentListRelationFilter
@@ -31031,6 +22129,7 @@ export namespace Prisma {
     formCode?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
+    templateFileId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     documents?: KpiFormDocumentOrderByRelationAggregateInput
@@ -31044,6 +22143,7 @@ export namespace Prisma {
     NOT?: KpiFormTemplateWhereInput | KpiFormTemplateWhereInput[]
     name?: StringFilter<"KpiFormTemplate"> | string
     description?: StringNullableFilter<"KpiFormTemplate"> | string | null
+    templateFileId?: StringNullableFilter<"KpiFormTemplate"> | string | null
     createdAt?: DateTimeFilter<"KpiFormTemplate"> | Date | string
     updatedAt?: DateTimeFilter<"KpiFormTemplate"> | Date | string
     documents?: KpiFormDocumentListRelationFilter
@@ -31053,6 +22153,7 @@ export namespace Prisma {
     formCode?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
+    templateFileId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: KpiFormTemplateCountOrderByAggregateInput
@@ -31067,6 +22168,7 @@ export namespace Prisma {
     formCode?: StringWithAggregatesFilter<"KpiFormTemplate"> | string
     name?: StringWithAggregatesFilter<"KpiFormTemplate"> | string
     description?: StringNullableWithAggregatesFilter<"KpiFormTemplate"> | string | null
+    templateFileId?: StringNullableWithAggregatesFilter<"KpiFormTemplate"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"KpiFormTemplate"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KpiFormTemplate"> | Date | string
   }
@@ -31078,7 +22180,8 @@ export namespace Prisma {
     id?: IntFilter<"KpiFormDocument"> | number
     formCode?: StringFilter<"KpiFormDocument"> | string
     evaluationId?: IntFilter<"KpiFormDocument"> | number
-    contentJson?: JsonFilter<"KpiFormDocument">
+    documentFileId?: StringNullableFilter<"KpiFormDocument"> | string | null
+    contentJson?: JsonNullableFilter<"KpiFormDocument">
     status?: StringFilter<"KpiFormDocument"> | string
     submitterCode?: StringNullableFilter<"KpiFormDocument"> | string | null
     signerCode?: StringNullableFilter<"KpiFormDocument"> | string | null
@@ -31094,7 +22197,8 @@ export namespace Prisma {
     id?: SortOrder
     formCode?: SortOrder
     evaluationId?: SortOrder
-    contentJson?: SortOrder
+    documentFileId?: SortOrderInput | SortOrder
+    contentJson?: SortOrderInput | SortOrder
     status?: SortOrder
     submitterCode?: SortOrderInput | SortOrder
     signerCode?: SortOrderInput | SortOrder
@@ -31114,7 +22218,8 @@ export namespace Prisma {
     NOT?: KpiFormDocumentWhereInput | KpiFormDocumentWhereInput[]
     formCode?: StringFilter<"KpiFormDocument"> | string
     evaluationId?: IntFilter<"KpiFormDocument"> | number
-    contentJson?: JsonFilter<"KpiFormDocument">
+    documentFileId?: StringNullableFilter<"KpiFormDocument"> | string | null
+    contentJson?: JsonNullableFilter<"KpiFormDocument">
     status?: StringFilter<"KpiFormDocument"> | string
     submitterCode?: StringNullableFilter<"KpiFormDocument"> | string | null
     signerCode?: StringNullableFilter<"KpiFormDocument"> | string | null
@@ -31130,7 +22235,8 @@ export namespace Prisma {
     id?: SortOrder
     formCode?: SortOrder
     evaluationId?: SortOrder
-    contentJson?: SortOrder
+    documentFileId?: SortOrderInput | SortOrder
+    contentJson?: SortOrderInput | SortOrder
     status?: SortOrder
     submitterCode?: SortOrderInput | SortOrder
     signerCode?: SortOrderInput | SortOrder
@@ -31152,7 +22258,8 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"KpiFormDocument"> | number
     formCode?: StringWithAggregatesFilter<"KpiFormDocument"> | string
     evaluationId?: IntWithAggregatesFilter<"KpiFormDocument"> | number
-    contentJson?: JsonWithAggregatesFilter<"KpiFormDocument">
+    documentFileId?: StringNullableWithAggregatesFilter<"KpiFormDocument"> | string | null
+    contentJson?: JsonNullableWithAggregatesFilter<"KpiFormDocument">
     status?: StringWithAggregatesFilter<"KpiFormDocument"> | string
     submitterCode?: StringNullableWithAggregatesFilter<"KpiFormDocument"> | string | null
     signerCode?: StringNullableWithAggregatesFilter<"KpiFormDocument"> | string | null
@@ -31291,7 +22398,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     isDeleted?: BoolFilter<"Task"> | boolean
     plan?: XOR<MasterPlanNullableScalarRelationFilter, MasterPlanWhereInput> | null
-    kpiSettings?: XOR<TaskKpiSettingNullableScalarRelationFilter, TaskKpiSettingWhereInput> | null
     kpiEvaluations?: KpiEvaluationTaskListRelationFilter
     participants?: TaskParticipantListRelationFilter
     attachments?: TaskAttachmentListRelationFilter
@@ -31329,7 +22435,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     plan?: MasterPlanOrderByWithRelationInput
-    kpiSettings?: TaskKpiSettingOrderByWithRelationInput
     kpiEvaluations?: KpiEvaluationTaskOrderByRelationAggregateInput
     participants?: TaskParticipantOrderByRelationAggregateInput
     attachments?: TaskAttachmentOrderByRelationAggregateInput
@@ -31371,7 +22476,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     isDeleted?: BoolFilter<"Task"> | boolean
     plan?: XOR<MasterPlanNullableScalarRelationFilter, MasterPlanWhereInput> | null
-    kpiSettings?: XOR<TaskKpiSettingNullableScalarRelationFilter, TaskKpiSettingWhereInput> | null
     kpiEvaluations?: KpiEvaluationTaskListRelationFilter
     participants?: TaskParticipantListRelationFilter
     attachments?: TaskAttachmentListRelationFilter
@@ -31991,7 +23095,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
-    employeeKpiTargets?: EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateInput = {
@@ -32022,7 +23125,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUpdateInput = {
@@ -32052,7 +23154,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateInput = {
@@ -32083,7 +23184,6 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeCreateManyInput = {
@@ -32328,95 +23428,6 @@ export namespace Prisma {
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
   }
 
-  export type TaskKpiSettingCreateInput = {
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-    kpiCriteria?: KpiCriteriaCreateNestedOneWithoutTasksInput
-    task: TaskCreateNestedOneWithoutKpiSettingsInput
-  }
-
-  export type TaskKpiSettingUncheckedCreateInput = {
-    taskId: number
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-    kpiCriteriaId?: number | null
-  }
-
-  export type TaskKpiSettingUpdateInput = {
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-    kpiCriteria?: KpiCriteriaUpdateOneWithoutTasksNestedInput
-    task?: TaskUpdateOneRequiredWithoutKpiSettingsNestedInput
-  }
-
-  export type TaskKpiSettingUncheckedUpdateInput = {
-    taskId?: IntFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-    kpiCriteriaId?: NullableIntFieldUpdateOperationsInput | number | null
-  }
-
-  export type TaskKpiSettingCreateManyInput = {
-    taskId: number
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-    kpiCriteriaId?: number | null
-  }
-
-  export type TaskKpiSettingUpdateManyMutationInput = {
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-  }
-
-  export type TaskKpiSettingUncheckedUpdateManyInput = {
-    taskId?: IntFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-    kpiCriteriaId?: NullableIntFieldUpdateOperationsInput | number | null
-  }
-
   export type KpiPeriodCreateInput = {
     name: string
     startDate: Date | string
@@ -32424,9 +23435,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     evaluations?: KpiEvaluationCreateNestedManyWithoutPeriodInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutPeriodInput
   }
 
   export type KpiPeriodUncheckedCreateInput = {
@@ -32437,9 +23445,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
   }
 
   export type KpiPeriodUpdateInput = {
@@ -32449,9 +23454,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     evaluations?: KpiEvaluationUpdateManyWithoutPeriodNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutPeriodNestedInput
   }
 
   export type KpiPeriodUncheckedUpdateInput = {
@@ -32462,9 +23464,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     evaluations?: KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
   }
 
   export type KpiPeriodCreateManyInput = {
@@ -32493,395 +23492,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type KpiCriteriaCreateInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUpdateInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaCreateManyInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type KpiCriteriaUpdateManyMutationInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiCriteriaUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiCriteriaSettingCreateInput = {
-    weight?: number
-    baseScore?: number | null
-    scoringMethod?: string
-    difficulty?: string
-    difficultyMultiplier?: number
-    bonusThresholdDays?: number
-    bonusPerDay?: number
-    penaltyPerDay?: number
-    integrationCode?: string | null
-    formula?: string | null
-    criteria: KpiCriteriaCreateNestedOneWithoutSettingsInput
-  }
-
-  export type KpiCriteriaSettingUncheckedCreateInput = {
-    criteriaId: number
-    weight?: number
-    baseScore?: number | null
-    scoringMethod?: string
-    difficulty?: string
-    difficultyMultiplier?: number
-    bonusThresholdDays?: number
-    bonusPerDay?: number
-    penaltyPerDay?: number
-    integrationCode?: string | null
-    formula?: string | null
-  }
-
-  export type KpiCriteriaSettingUpdateInput = {
-    weight?: FloatFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    difficulty?: StringFieldUpdateOperationsInput | string
-    difficultyMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusThresholdDays?: IntFieldUpdateOperationsInput | number
-    bonusPerDay?: FloatFieldUpdateOperationsInput | number
-    penaltyPerDay?: FloatFieldUpdateOperationsInput | number
-    integrationCode?: NullableStringFieldUpdateOperationsInput | string | null
-    formula?: NullableStringFieldUpdateOperationsInput | string | null
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutSettingsNestedInput
-  }
-
-  export type KpiCriteriaSettingUncheckedUpdateInput = {
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    difficulty?: StringFieldUpdateOperationsInput | string
-    difficultyMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusThresholdDays?: IntFieldUpdateOperationsInput | number
-    bonusPerDay?: FloatFieldUpdateOperationsInput | number
-    penaltyPerDay?: FloatFieldUpdateOperationsInput | number
-    integrationCode?: NullableStringFieldUpdateOperationsInput | string | null
-    formula?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type KpiCriteriaSettingCreateManyInput = {
-    criteriaId: number
-    weight?: number
-    baseScore?: number | null
-    scoringMethod?: string
-    difficulty?: string
-    difficultyMultiplier?: number
-    bonusThresholdDays?: number
-    bonusPerDay?: number
-    penaltyPerDay?: number
-    integrationCode?: string | null
-    formula?: string | null
-  }
-
-  export type KpiCriteriaSettingUpdateManyMutationInput = {
-    weight?: FloatFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    difficulty?: StringFieldUpdateOperationsInput | string
-    difficultyMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusThresholdDays?: IntFieldUpdateOperationsInput | number
-    bonusPerDay?: FloatFieldUpdateOperationsInput | number
-    penaltyPerDay?: FloatFieldUpdateOperationsInput | number
-    integrationCode?: NullableStringFieldUpdateOperationsInput | string | null
-    formula?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type KpiCriteriaSettingUncheckedUpdateManyInput = {
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    difficulty?: StringFieldUpdateOperationsInput | string
-    difficultyMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusThresholdDays?: IntFieldUpdateOperationsInput | number
-    bonusPerDay?: FloatFieldUpdateOperationsInput | number
-    penaltyPerDay?: FloatFieldUpdateOperationsInput | number
-    integrationCode?: NullableStringFieldUpdateOperationsInput | string | null
-    formula?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type EmployeeKpiTargetCreateInput = {
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    employee: EmployeeCreateNestedOneWithoutEmployeeKpiTargetsInput
-    period: KpiPeriodCreateNestedOneWithoutTargetsInput
-    criteria: KpiCriteriaCreateNestedOneWithoutTargetsInput
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateInput = {
-    id?: number
-    employeeCode: string
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type EmployeeKpiTargetUpdateInput = {
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    employee?: EmployeeUpdateOneRequiredWithoutEmployeeKpiTargetsNestedInput
-    period?: KpiPeriodUpdateOneRequiredWithoutTargetsNestedInput
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutTargetsNestedInput
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type EmployeeKpiTargetCreateManyInput = {
-    id?: number
-    employeeCode: string
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type EmployeeKpiTargetUpdateManyMutationInput = {
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetCreateInput = {
-    jobTitleId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    period: KpiPeriodCreateNestedOneWithoutJobTitleTargetsInput
-    criteria: KpiCriteriaCreateNestedOneWithoutJobTitleTargetsInput
-  }
-
-  export type JobTitleKpiTargetUncheckedCreateInput = {
-    id?: number
-    jobTitleId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobTitleKpiTargetUpdateInput = {
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    period?: KpiPeriodUpdateOneRequiredWithoutJobTitleTargetsNestedInput
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutJobTitleTargetsNestedInput
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetCreateManyInput = {
-    id?: number
-    jobTitleId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobTitleKpiTargetUpdateManyMutationInput = {
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetCreateInput = {
-    staffingSlotId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    period: KpiPeriodCreateNestedOneWithoutStaffingSlotTargetsInput
-    criteria: KpiCriteriaCreateNestedOneWithoutStaffingSlotTargetsInput
-  }
-
-  export type StaffingSlotKpiTargetUncheckedCreateInput = {
-    id?: number
-    staffingSlotId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type StaffingSlotKpiTargetUpdateInput = {
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    period?: KpiPeriodUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetCreateManyInput = {
-    id?: number
-    staffingSlotId: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type StaffingSlotKpiTargetUpdateManyMutationInput = {
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type KpiEvaluationCreateInput = {
     staffingSlotId?: number | null
     phase?: string
@@ -32897,7 +23507,6 @@ export namespace Prisma {
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
@@ -32918,7 +23527,6 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -32938,7 +23546,6 @@ export namespace Prisma {
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
@@ -32959,7 +23566,6 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -33009,78 +23615,6 @@ export namespace Prisma {
     taskScoreFinal?: NullableFloatFieldUpdateOperationsInput | number | null
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailCreateInput = {
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluation: KpiEvaluationCreateNestedOneWithoutDetailsInput
-    criteria: KpiCriteriaCreateNestedOneWithoutDetailsInput
-  }
-
-  export type KpiEvaluationDetailUncheckedCreateInput = {
-    id?: number
-    evaluationId: number
-    criteriaId: number
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type KpiEvaluationDetailUpdateInput = {
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluation?: KpiEvaluationUpdateOneRequiredWithoutDetailsNestedInput
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutDetailsNestedInput
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    evaluationId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailCreateManyInput = {
-    id?: number
-    evaluationId: number
-    criteriaId: number
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type KpiEvaluationDetailUpdateManyMutationInput = {
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    evaluationId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33259,6 +23793,7 @@ export namespace Prisma {
     formCode: string
     name: string
     description?: string | null
+    templateFileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInput
@@ -33268,6 +23803,7 @@ export namespace Prisma {
     formCode: string
     name: string
     description?: string | null
+    templateFileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInput
@@ -33277,6 +23813,7 @@ export namespace Prisma {
     formCode?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    templateFileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInput
@@ -33286,6 +23823,7 @@ export namespace Prisma {
     formCode?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    templateFileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInput
@@ -33295,6 +23833,7 @@ export namespace Prisma {
     formCode: string
     name: string
     description?: string | null
+    templateFileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -33303,6 +23842,7 @@ export namespace Prisma {
     formCode?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    templateFileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33311,12 +23851,14 @@ export namespace Prisma {
     formCode?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    templateFileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KpiFormDocumentCreateInput = {
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -33332,7 +23874,8 @@ export namespace Prisma {
     id?: number
     formCode: string
     evaluationId: number
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -33343,7 +23886,8 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpdateInput = {
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33359,7 +23903,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     formCode?: StringFieldUpdateOperationsInput | string
     evaluationId?: IntFieldUpdateOperationsInput | number
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33373,7 +23918,8 @@ export namespace Prisma {
     id?: number
     formCode: string
     evaluationId: number
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -33384,7 +23930,8 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpdateManyMutationInput = {
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33398,7 +23945,8 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     formCode?: StringFieldUpdateOperationsInput | string
     evaluationId?: IntFieldUpdateOperationsInput | number
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33547,7 +24095,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -33584,7 +24131,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -33620,7 +24166,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -33657,7 +24202,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -34390,12 +24934,6 @@ export namespace Prisma {
     none?: TaskParticipantWhereInput
   }
 
-  export type EmployeeKpiTargetListRelationFilter = {
-    every?: EmployeeKpiTargetWhereInput
-    some?: EmployeeKpiTargetWhereInput
-    none?: EmployeeKpiTargetWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -34406,10 +24944,6 @@ export namespace Prisma {
   }
 
   export type TaskParticipantOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type EmployeeKpiTargetOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -34811,130 +25345,6 @@ export namespace Prisma {
     attitudeWeight?: SortOrder
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type KpiCriteriaNullableScalarRelationFilter = {
-    is?: KpiCriteriaWhereInput | null
-    isNot?: KpiCriteriaWhereInput | null
-  }
-
-  export type TaskScalarRelationFilter = {
-    is?: TaskWhereInput
-    isNot?: TaskWhereInput
-  }
-
-  export type TaskKpiSettingOrderByRelevanceInput = {
-    fields: TaskKpiSettingOrderByRelevanceFieldEnum | TaskKpiSettingOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type TaskKpiSettingCountOrderByAggregateInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrder
-    weight?: SortOrder
-    scoringMethod?: SortOrder
-    isCrossDomain?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    standardDurationDays?: SortOrder
-    kpiCriteriaId?: SortOrder
-  }
-
-  export type TaskKpiSettingAvgOrderByAggregateInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrder
-    weight?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    standardDurationDays?: SortOrder
-    kpiCriteriaId?: SortOrder
-  }
-
-  export type TaskKpiSettingMaxOrderByAggregateInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrder
-    weight?: SortOrder
-    scoringMethod?: SortOrder
-    isCrossDomain?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    standardDurationDays?: SortOrder
-    kpiCriteriaId?: SortOrder
-  }
-
-  export type TaskKpiSettingMinOrderByAggregateInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrder
-    weight?: SortOrder
-    scoringMethod?: SortOrder
-    isCrossDomain?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    standardDurationDays?: SortOrder
-    kpiCriteriaId?: SortOrder
-  }
-
-  export type TaskKpiSettingSumOrderByAggregateInput = {
-    taskId?: SortOrder
-    baseScore?: SortOrder
-    weight?: SortOrder
-    crossDomainMultiplier?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    standardDurationDays?: SortOrder
-    kpiCriteriaId?: SortOrder
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type JobTitleKpiTargetListRelationFilter = {
-    every?: JobTitleKpiTargetWhereInput
-    some?: JobTitleKpiTargetWhereInput
-    none?: JobTitleKpiTargetWhereInput
-  }
-
-  export type StaffingSlotKpiTargetListRelationFilter = {
-    every?: StaffingSlotKpiTargetWhereInput
-    some?: StaffingSlotKpiTargetWhereInput
-    none?: StaffingSlotKpiTargetWhereInput
-  }
-
-  export type JobTitleKpiTargetOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type StaffingSlotKpiTargetOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type KpiPeriodOrderByRelevanceInput = {
     fields: KpiPeriodOrderByRelevanceFieldEnum | KpiPeriodOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -34976,145 +25386,15 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type KpiCriteriaSettingNullableScalarRelationFilter = {
-    is?: KpiCriteriaSettingWhereInput | null
-    isNot?: KpiCriteriaSettingWhereInput | null
-  }
-
-  export type KpiEvaluationDetailListRelationFilter = {
-    every?: KpiEvaluationDetailWhereInput
-    some?: KpiEvaluationDetailWhereInput
-    none?: KpiEvaluationDetailWhereInput
-  }
-
-  export type TaskKpiSettingListRelationFilter = {
-    every?: TaskKpiSettingWhereInput
-    some?: TaskKpiSettingWhereInput
-    none?: TaskKpiSettingWhereInput
-  }
-
-  export type KpiEvaluationDetailOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type TaskKpiSettingOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type KpiCriteriaOrderByRelevanceInput = {
-    fields: KpiCriteriaOrderByRelevanceFieldEnum | KpiCriteriaOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type KpiCriteriaCountOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    categoryId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KpiCriteriaAvgOrderByAggregateInput = {
-    id?: SortOrder
-    categoryId?: SortOrder
-  }
-
-  export type KpiCriteriaMaxOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    categoryId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KpiCriteriaMinOrderByAggregateInput = {
-    id?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    categoryId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KpiCriteriaSumOrderByAggregateInput = {
-    id?: SortOrder
-    categoryId?: SortOrder
-  }
-
-  export type KpiCriteriaScalarRelationFilter = {
-    is?: KpiCriteriaWhereInput
-    isNot?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaSettingOrderByRelevanceInput = {
-    fields: KpiCriteriaSettingOrderByRelevanceFieldEnum | KpiCriteriaSettingOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type KpiCriteriaSettingCountOrderByAggregateInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrder
-    scoringMethod?: SortOrder
-    difficulty?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    integrationCode?: SortOrder
-    formula?: SortOrder
-  }
-
-  export type KpiCriteriaSettingAvgOrderByAggregateInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-  }
-
-  export type KpiCriteriaSettingMaxOrderByAggregateInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrder
-    scoringMethod?: SortOrder
-    difficulty?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    integrationCode?: SortOrder
-    formula?: SortOrder
-  }
-
-  export type KpiCriteriaSettingMinOrderByAggregateInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrder
-    scoringMethod?: SortOrder
-    difficulty?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
-    integrationCode?: SortOrder
-    formula?: SortOrder
-  }
-
-  export type KpiCriteriaSettingSumOrderByAggregateInput = {
-    criteriaId?: SortOrder
-    weight?: SortOrder
-    baseScore?: SortOrder
-    difficultyMultiplier?: SortOrder
-    bonusThresholdDays?: SortOrder
-    bonusPerDay?: SortOrder
-    penaltyPerDay?: SortOrder
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type EmployeeScalarRelationFilter = {
@@ -35122,184 +25402,14 @@ export namespace Prisma {
     isNot?: EmployeeWhereInput
   }
 
-  export type KpiPeriodScalarRelationFilter = {
-    is?: KpiPeriodWhereInput
-    isNot?: KpiPeriodWhereInput
-  }
-
-  export type EmployeeKpiTargetOrderByRelevanceInput = {
-    fields: EmployeeKpiTargetOrderByRelevanceFieldEnum | EmployeeKpiTargetOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type EmployeeKpiTargetEmployeeCodePeriodIdCriteriaIdCompoundUniqueInput = {
-    employeeCode: string
-    periodId: number
-    criteriaId: number
-  }
-
-  export type EmployeeKpiTargetCountOrderByAggregateInput = {
-    id?: SortOrder
-    employeeCode?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type EmployeeKpiTargetAvgOrderByAggregateInput = {
-    id?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-  }
-
-  export type EmployeeKpiTargetMaxOrderByAggregateInput = {
-    id?: SortOrder
-    employeeCode?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type EmployeeKpiTargetMinOrderByAggregateInput = {
-    id?: SortOrder
-    employeeCode?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type EmployeeKpiTargetSumOrderByAggregateInput = {
-    id?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-  }
-
-  export type JobTitleKpiTargetJobTitleIdPeriodIdCriteriaIdCompoundUniqueInput = {
-    jobTitleId: number
-    periodId: number
-    criteriaId: number
-  }
-
-  export type JobTitleKpiTargetCountOrderByAggregateInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type JobTitleKpiTargetAvgOrderByAggregateInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-  }
-
-  export type JobTitleKpiTargetMaxOrderByAggregateInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type JobTitleKpiTargetMinOrderByAggregateInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type JobTitleKpiTargetSumOrderByAggregateInput = {
-    id?: SortOrder
-    jobTitleId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-  }
-
-  export type StaffingSlotKpiTargetStaffingSlotIdPeriodIdCriteriaIdCompoundUniqueInput = {
-    staffingSlotId: number
-    periodId: number
-    criteriaId: number
-  }
-
-  export type StaffingSlotKpiTargetCountOrderByAggregateInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type StaffingSlotKpiTargetAvgOrderByAggregateInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-  }
-
-  export type StaffingSlotKpiTargetMaxOrderByAggregateInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type StaffingSlotKpiTargetMinOrderByAggregateInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type StaffingSlotKpiTargetSumOrderByAggregateInput = {
-    id?: SortOrder
-    staffingSlotId?: SortOrder
-    periodId?: SortOrder
-    criteriaId?: SortOrder
-    targetValue?: SortOrder
-    weight?: SortOrder
-  }
-
   export type EmployeeNullableScalarRelationFilter = {
     is?: EmployeeWhereInput | null
     isNot?: EmployeeWhereInput | null
+  }
+
+  export type KpiPeriodScalarRelationFilter = {
+    is?: KpiPeriodWhereInput
+    isNot?: KpiPeriodWhereInput
   }
 
   export type KpiRuleSetNullableScalarRelationFilter = {
@@ -35411,69 +25521,30 @@ export namespace Prisma {
     totalScore?: SortOrder
   }
 
-  export type KpiEvaluationScalarRelationFilter = {
-    is?: KpiEvaluationWhereInput
-    isNot?: KpiEvaluationWhereInput
-  }
-
-  export type KpiEvaluationDetailOrderByRelevanceInput = {
-    fields: KpiEvaluationDetailOrderByRelevanceFieldEnum | KpiEvaluationDetailOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type KpiEvaluationDetailCountOrderByAggregateInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrder
-    reviewerScore?: SortOrder
-    notes?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KpiEvaluationDetailAvgOrderByAggregateInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrder
-    reviewerScore?: SortOrder
-  }
-
-  export type KpiEvaluationDetailMaxOrderByAggregateInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrder
-    reviewerScore?: SortOrder
-    notes?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KpiEvaluationDetailMinOrderByAggregateInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrder
-    reviewerScore?: SortOrder
-    notes?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type KpiEvaluationDetailSumOrderByAggregateInput = {
-    id?: SortOrder
-    evaluationId?: SortOrder
-    criteriaId?: SortOrder
-    selfScore?: SortOrder
-    reviewerScore?: SortOrder
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type TaskNullableScalarRelationFilter = {
     is?: TaskWhereInput | null
     isNot?: TaskWhereInput | null
+  }
+
+  export type KpiEvaluationScalarRelationFilter = {
+    is?: KpiEvaluationWhereInput
+    isNot?: KpiEvaluationWhereInput
   }
 
   export type KpiEvaluationTaskOrderByRelevanceInput = {
@@ -35601,6 +25672,7 @@ export namespace Prisma {
     formCode?: SortOrder
     name?: SortOrder
     description?: SortOrder
+    templateFileId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35609,6 +25681,7 @@ export namespace Prisma {
     formCode?: SortOrder
     name?: SortOrder
     description?: SortOrder
+    templateFileId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35617,31 +25690,9 @@ export namespace Prisma {
     formCode?: SortOrder
     name?: SortOrder
     description?: SortOrder
+    templateFileId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-  export type JsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type KpiFormTemplateScalarRelationFilter = {
@@ -35659,6 +25710,7 @@ export namespace Prisma {
     id?: SortOrder
     formCode?: SortOrder
     evaluationId?: SortOrder
+    documentFileId?: SortOrder
     contentJson?: SortOrder
     status?: SortOrder
     submitterCode?: SortOrder
@@ -35678,6 +25730,7 @@ export namespace Prisma {
     id?: SortOrder
     formCode?: SortOrder
     evaluationId?: SortOrder
+    documentFileId?: SortOrder
     status?: SortOrder
     submitterCode?: SortOrder
     signerCode?: SortOrder
@@ -35691,6 +25744,7 @@ export namespace Prisma {
     id?: SortOrder
     formCode?: SortOrder
     evaluationId?: SortOrder
+    documentFileId?: SortOrder
     status?: SortOrder
     submitterCode?: SortOrder
     signerCode?: SortOrder
@@ -35703,32 +25757,6 @@ export namespace Prisma {
   export type KpiFormDocumentSumOrderByAggregateInput = {
     id?: SortOrder
     evaluationId?: SortOrder
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type TaskListRelationFilter = {
@@ -35808,11 +25836,6 @@ export namespace Prisma {
   export type MasterPlanNullableScalarRelationFilter = {
     is?: MasterPlanWhereInput | null
     isNot?: MasterPlanWhereInput | null
-  }
-
-  export type TaskKpiSettingNullableScalarRelationFilter = {
-    is?: TaskKpiSettingWhereInput | null
-    isNot?: TaskKpiSettingWhereInput | null
   }
 
   export type TaskAttachmentListRelationFilter = {
@@ -35962,6 +25985,11 @@ export namespace Prisma {
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
     planId?: SortOrder
+  }
+
+  export type TaskScalarRelationFilter = {
+    is?: TaskWhereInput
+    isNot?: TaskWhereInput
   }
 
   export type TaskStepOrderByRelevanceInput = {
@@ -36359,13 +26387,6 @@ export namespace Prisma {
     connect?: TaskParticipantWhereUniqueInput | TaskParticipantWhereUniqueInput[]
   }
 
-  export type EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutEmployeeInput, EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput> | EmployeeKpiTargetCreateWithoutEmployeeInput[] | EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput | EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput[]
-    createMany?: EmployeeKpiTargetCreateManyEmployeeInputEnvelope
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-  }
-
   export type KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput = {
     create?: XOR<KpiEvaluationCreateWithoutEmployeeInput, KpiEvaluationUncheckedCreateWithoutEmployeeInput> | KpiEvaluationCreateWithoutEmployeeInput[] | KpiEvaluationUncheckedCreateWithoutEmployeeInput[]
     connectOrCreate?: KpiEvaluationCreateOrConnectWithoutEmployeeInput | KpiEvaluationCreateOrConnectWithoutEmployeeInput[]
@@ -36385,13 +26406,6 @@ export namespace Prisma {
     connectOrCreate?: TaskParticipantCreateOrConnectWithoutEmployeeInput | TaskParticipantCreateOrConnectWithoutEmployeeInput[]
     createMany?: TaskParticipantCreateManyEmployeeInputEnvelope
     connect?: TaskParticipantWhereUniqueInput | TaskParticipantWhereUniqueInput[]
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutEmployeeInput, EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput> | EmployeeKpiTargetCreateWithoutEmployeeInput[] | EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput | EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput[]
-    createMany?: EmployeeKpiTargetCreateManyEmployeeInputEnvelope
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -36464,20 +26478,6 @@ export namespace Prisma {
     deleteMany?: TaskParticipantScalarWhereInput | TaskParticipantScalarWhereInput[]
   }
 
-  export type EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutEmployeeInput, EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput> | EmployeeKpiTargetCreateWithoutEmployeeInput[] | EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput | EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput[]
-    upsert?: EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput | EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput[]
-    createMany?: EmployeeKpiTargetCreateManyEmployeeInputEnvelope
-    set?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    disconnect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    delete?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    update?: EmployeeKpiTargetUpdateWithWhereUniqueWithoutEmployeeInput | EmployeeKpiTargetUpdateWithWhereUniqueWithoutEmployeeInput[]
-    updateMany?: EmployeeKpiTargetUpdateManyWithWhereWithoutEmployeeInput | EmployeeKpiTargetUpdateManyWithWhereWithoutEmployeeInput[]
-    deleteMany?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-  }
-
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -36526,20 +26526,6 @@ export namespace Prisma {
     update?: TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput | TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput[]
     updateMany?: TaskParticipantUpdateManyWithWhereWithoutEmployeeInput | TaskParticipantUpdateManyWithWhereWithoutEmployeeInput[]
     deleteMany?: TaskParticipantScalarWhereInput | TaskParticipantScalarWhereInput[]
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutEmployeeInput, EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput> | EmployeeKpiTargetCreateWithoutEmployeeInput[] | EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput | EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput[]
-    upsert?: EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput | EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput[]
-    createMany?: EmployeeKpiTargetCreateManyEmployeeInputEnvelope
-    set?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    disconnect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    delete?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    update?: EmployeeKpiTargetUpdateWithWhereUniqueWithoutEmployeeInput | EmployeeKpiTargetUpdateWithWhereUniqueWithoutEmployeeInput[]
-    updateMany?: EmployeeKpiTargetUpdateManyWithWhereWithoutEmployeeInput | EmployeeKpiTargetUpdateManyWithWhereWithoutEmployeeInput[]
-    deleteMany?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
   }
 
   export type KpiDomainWeightCreateNestedManyWithoutRuleSetInput = {
@@ -36648,44 +26634,6 @@ export namespace Prisma {
     update?: XOR<XOR<KpiRuleSetUpdateToOneWithWhereWithoutDomainWeightsInput, KpiRuleSetUpdateWithoutDomainWeightsInput>, KpiRuleSetUncheckedUpdateWithoutDomainWeightsInput>
   }
 
-  export type KpiCriteriaCreateNestedOneWithoutTasksInput = {
-    create?: XOR<KpiCriteriaCreateWithoutTasksInput, KpiCriteriaUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutTasksInput
-    connect?: KpiCriteriaWhereUniqueInput
-  }
-
-  export type TaskCreateNestedOneWithoutKpiSettingsInput = {
-    create?: XOR<TaskCreateWithoutKpiSettingsInput, TaskUncheckedCreateWithoutKpiSettingsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutKpiSettingsInput
-    connect?: TaskWhereUniqueInput
-  }
-
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type KpiCriteriaUpdateOneWithoutTasksNestedInput = {
-    create?: XOR<KpiCriteriaCreateWithoutTasksInput, KpiCriteriaUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutTasksInput
-    upsert?: KpiCriteriaUpsertWithoutTasksInput
-    disconnect?: KpiCriteriaWhereInput | boolean
-    delete?: KpiCriteriaWhereInput | boolean
-    connect?: KpiCriteriaWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaUpdateToOneWithWhereWithoutTasksInput, KpiCriteriaUpdateWithoutTasksInput>, KpiCriteriaUncheckedUpdateWithoutTasksInput>
-  }
-
-  export type TaskUpdateOneRequiredWithoutKpiSettingsNestedInput = {
-    create?: XOR<TaskCreateWithoutKpiSettingsInput, TaskUncheckedCreateWithoutKpiSettingsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutKpiSettingsInput
-    upsert?: TaskUpsertWithoutKpiSettingsInput
-    connect?: TaskWhereUniqueInput
-    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutKpiSettingsInput, TaskUpdateWithoutKpiSettingsInput>, TaskUncheckedUpdateWithoutKpiSettingsInput>
-  }
-
   export type KpiEvaluationCreateNestedManyWithoutPeriodInput = {
     create?: XOR<KpiEvaluationCreateWithoutPeriodInput, KpiEvaluationUncheckedCreateWithoutPeriodInput> | KpiEvaluationCreateWithoutPeriodInput[] | KpiEvaluationUncheckedCreateWithoutPeriodInput[]
     connectOrCreate?: KpiEvaluationCreateOrConnectWithoutPeriodInput | KpiEvaluationCreateOrConnectWithoutPeriodInput[]
@@ -36693,53 +26641,11 @@ export namespace Prisma {
     connect?: KpiEvaluationWhereUniqueInput | KpiEvaluationWhereUniqueInput[]
   }
 
-  export type EmployeeKpiTargetCreateNestedManyWithoutPeriodInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutPeriodInput, EmployeeKpiTargetUncheckedCreateWithoutPeriodInput> | EmployeeKpiTargetCreateWithoutPeriodInput[] | EmployeeKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutPeriodInput | EmployeeKpiTargetCreateOrConnectWithoutPeriodInput[]
-    createMany?: EmployeeKpiTargetCreateManyPeriodInputEnvelope
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-  }
-
-  export type JobTitleKpiTargetCreateNestedManyWithoutPeriodInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutPeriodInput, JobTitleKpiTargetUncheckedCreateWithoutPeriodInput> | JobTitleKpiTargetCreateWithoutPeriodInput[] | JobTitleKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutPeriodInput | JobTitleKpiTargetCreateOrConnectWithoutPeriodInput[]
-    createMany?: JobTitleKpiTargetCreateManyPeriodInputEnvelope
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-  }
-
-  export type StaffingSlotKpiTargetCreateNestedManyWithoutPeriodInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput> | StaffingSlotKpiTargetCreateWithoutPeriodInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput | StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyPeriodInputEnvelope
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-  }
-
   export type KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput = {
     create?: XOR<KpiEvaluationCreateWithoutPeriodInput, KpiEvaluationUncheckedCreateWithoutPeriodInput> | KpiEvaluationCreateWithoutPeriodInput[] | KpiEvaluationUncheckedCreateWithoutPeriodInput[]
     connectOrCreate?: KpiEvaluationCreateOrConnectWithoutPeriodInput | KpiEvaluationCreateOrConnectWithoutPeriodInput[]
     createMany?: KpiEvaluationCreateManyPeriodInputEnvelope
     connect?: KpiEvaluationWhereUniqueInput | KpiEvaluationWhereUniqueInput[]
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutPeriodInput, EmployeeKpiTargetUncheckedCreateWithoutPeriodInput> | EmployeeKpiTargetCreateWithoutPeriodInput[] | EmployeeKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutPeriodInput | EmployeeKpiTargetCreateOrConnectWithoutPeriodInput[]
-    createMany?: EmployeeKpiTargetCreateManyPeriodInputEnvelope
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-  }
-
-  export type JobTitleKpiTargetUncheckedCreateNestedManyWithoutPeriodInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutPeriodInput, JobTitleKpiTargetUncheckedCreateWithoutPeriodInput> | JobTitleKpiTargetCreateWithoutPeriodInput[] | JobTitleKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutPeriodInput | JobTitleKpiTargetCreateOrConnectWithoutPeriodInput[]
-    createMany?: JobTitleKpiTargetCreateManyPeriodInputEnvelope
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-  }
-
-  export type StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutPeriodInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput> | StaffingSlotKpiTargetCreateWithoutPeriodInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput | StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyPeriodInputEnvelope
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
   }
 
   export type KpiEvaluationUpdateManyWithoutPeriodNestedInput = {
@@ -36756,48 +26662,6 @@ export namespace Prisma {
     deleteMany?: KpiEvaluationScalarWhereInput | KpiEvaluationScalarWhereInput[]
   }
 
-  export type EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutPeriodInput, EmployeeKpiTargetUncheckedCreateWithoutPeriodInput> | EmployeeKpiTargetCreateWithoutPeriodInput[] | EmployeeKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutPeriodInput | EmployeeKpiTargetCreateOrConnectWithoutPeriodInput[]
-    upsert?: EmployeeKpiTargetUpsertWithWhereUniqueWithoutPeriodInput | EmployeeKpiTargetUpsertWithWhereUniqueWithoutPeriodInput[]
-    createMany?: EmployeeKpiTargetCreateManyPeriodInputEnvelope
-    set?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    disconnect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    delete?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    update?: EmployeeKpiTargetUpdateWithWhereUniqueWithoutPeriodInput | EmployeeKpiTargetUpdateWithWhereUniqueWithoutPeriodInput[]
-    updateMany?: EmployeeKpiTargetUpdateManyWithWhereWithoutPeriodInput | EmployeeKpiTargetUpdateManyWithWhereWithoutPeriodInput[]
-    deleteMany?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-  }
-
-  export type JobTitleKpiTargetUpdateManyWithoutPeriodNestedInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutPeriodInput, JobTitleKpiTargetUncheckedCreateWithoutPeriodInput> | JobTitleKpiTargetCreateWithoutPeriodInput[] | JobTitleKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutPeriodInput | JobTitleKpiTargetCreateOrConnectWithoutPeriodInput[]
-    upsert?: JobTitleKpiTargetUpsertWithWhereUniqueWithoutPeriodInput | JobTitleKpiTargetUpsertWithWhereUniqueWithoutPeriodInput[]
-    createMany?: JobTitleKpiTargetCreateManyPeriodInputEnvelope
-    set?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    disconnect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    delete?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    update?: JobTitleKpiTargetUpdateWithWhereUniqueWithoutPeriodInput | JobTitleKpiTargetUpdateWithWhereUniqueWithoutPeriodInput[]
-    updateMany?: JobTitleKpiTargetUpdateManyWithWhereWithoutPeriodInput | JobTitleKpiTargetUpdateManyWithWhereWithoutPeriodInput[]
-    deleteMany?: JobTitleKpiTargetScalarWhereInput | JobTitleKpiTargetScalarWhereInput[]
-  }
-
-  export type StaffingSlotKpiTargetUpdateManyWithoutPeriodNestedInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput> | StaffingSlotKpiTargetCreateWithoutPeriodInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput | StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput[]
-    upsert?: StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutPeriodInput | StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutPeriodInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyPeriodInputEnvelope
-    set?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    disconnect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    delete?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    update?: StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutPeriodInput | StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutPeriodInput[]
-    updateMany?: StaffingSlotKpiTargetUpdateManyWithWhereWithoutPeriodInput | StaffingSlotKpiTargetUpdateManyWithWhereWithoutPeriodInput[]
-    deleteMany?: StaffingSlotKpiTargetScalarWhereInput | StaffingSlotKpiTargetScalarWhereInput[]
-  }
-
   export type KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput = {
     create?: XOR<KpiEvaluationCreateWithoutPeriodInput, KpiEvaluationUncheckedCreateWithoutPeriodInput> | KpiEvaluationCreateWithoutPeriodInput[] | KpiEvaluationUncheckedCreateWithoutPeriodInput[]
     connectOrCreate?: KpiEvaluationCreateOrConnectWithoutPeriodInput | KpiEvaluationCreateOrConnectWithoutPeriodInput[]
@@ -36810,402 +26674,6 @@ export namespace Prisma {
     update?: KpiEvaluationUpdateWithWhereUniqueWithoutPeriodInput | KpiEvaluationUpdateWithWhereUniqueWithoutPeriodInput[]
     updateMany?: KpiEvaluationUpdateManyWithWhereWithoutPeriodInput | KpiEvaluationUpdateManyWithWhereWithoutPeriodInput[]
     deleteMany?: KpiEvaluationScalarWhereInput | KpiEvaluationScalarWhereInput[]
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutPeriodInput, EmployeeKpiTargetUncheckedCreateWithoutPeriodInput> | EmployeeKpiTargetCreateWithoutPeriodInput[] | EmployeeKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutPeriodInput | EmployeeKpiTargetCreateOrConnectWithoutPeriodInput[]
-    upsert?: EmployeeKpiTargetUpsertWithWhereUniqueWithoutPeriodInput | EmployeeKpiTargetUpsertWithWhereUniqueWithoutPeriodInput[]
-    createMany?: EmployeeKpiTargetCreateManyPeriodInputEnvelope
-    set?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    disconnect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    delete?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    update?: EmployeeKpiTargetUpdateWithWhereUniqueWithoutPeriodInput | EmployeeKpiTargetUpdateWithWhereUniqueWithoutPeriodInput[]
-    updateMany?: EmployeeKpiTargetUpdateManyWithWhereWithoutPeriodInput | EmployeeKpiTargetUpdateManyWithWhereWithoutPeriodInput[]
-    deleteMany?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutPeriodInput, JobTitleKpiTargetUncheckedCreateWithoutPeriodInput> | JobTitleKpiTargetCreateWithoutPeriodInput[] | JobTitleKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutPeriodInput | JobTitleKpiTargetCreateOrConnectWithoutPeriodInput[]
-    upsert?: JobTitleKpiTargetUpsertWithWhereUniqueWithoutPeriodInput | JobTitleKpiTargetUpsertWithWhereUniqueWithoutPeriodInput[]
-    createMany?: JobTitleKpiTargetCreateManyPeriodInputEnvelope
-    set?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    disconnect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    delete?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    update?: JobTitleKpiTargetUpdateWithWhereUniqueWithoutPeriodInput | JobTitleKpiTargetUpdateWithWhereUniqueWithoutPeriodInput[]
-    updateMany?: JobTitleKpiTargetUpdateManyWithWhereWithoutPeriodInput | JobTitleKpiTargetUpdateManyWithWhereWithoutPeriodInput[]
-    deleteMany?: JobTitleKpiTargetScalarWhereInput | JobTitleKpiTargetScalarWhereInput[]
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput> | StaffingSlotKpiTargetCreateWithoutPeriodInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput | StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput[]
-    upsert?: StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutPeriodInput | StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutPeriodInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyPeriodInputEnvelope
-    set?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    disconnect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    delete?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    update?: StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutPeriodInput | StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutPeriodInput[]
-    updateMany?: StaffingSlotKpiTargetUpdateManyWithWhereWithoutPeriodInput | StaffingSlotKpiTargetUpdateManyWithWhereWithoutPeriodInput[]
-    deleteMany?: StaffingSlotKpiTargetScalarWhereInput | StaffingSlotKpiTargetScalarWhereInput[]
-  }
-
-  export type KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput = {
-    create?: XOR<KpiCriteriaSettingCreateWithoutCriteriaInput, KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput>
-    connectOrCreate?: KpiCriteriaSettingCreateOrConnectWithoutCriteriaInput
-    connect?: KpiCriteriaSettingWhereUniqueInput
-  }
-
-  export type KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutCriteriaInput, KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput> | KpiEvaluationDetailCreateWithoutCriteriaInput[] | KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput | KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput[]
-    createMany?: KpiEvaluationDetailCreateManyCriteriaInputEnvelope
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-  }
-
-  export type TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput> | TaskKpiSettingCreateWithoutKpiCriteriaInput[] | TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput[]
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput | TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput[]
-    createMany?: TaskKpiSettingCreateManyKpiCriteriaInputEnvelope
-    connect?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-  }
-
-  export type EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutCriteriaInput, EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput> | EmployeeKpiTargetCreateWithoutCriteriaInput[] | EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput | EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    createMany?: EmployeeKpiTargetCreateManyCriteriaInputEnvelope
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-  }
-
-  export type JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutCriteriaInput, JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput> | JobTitleKpiTargetCreateWithoutCriteriaInput[] | JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput | JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    createMany?: JobTitleKpiTargetCreateManyCriteriaInputEnvelope
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-  }
-
-  export type StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput> | StaffingSlotKpiTargetCreateWithoutCriteriaInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput | StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyCriteriaInputEnvelope
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-  }
-
-  export type KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput = {
-    create?: XOR<KpiCriteriaSettingCreateWithoutCriteriaInput, KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput>
-    connectOrCreate?: KpiCriteriaSettingCreateOrConnectWithoutCriteriaInput
-    connect?: KpiCriteriaSettingWhereUniqueInput
-  }
-
-  export type KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutCriteriaInput, KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput> | KpiEvaluationDetailCreateWithoutCriteriaInput[] | KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput | KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput[]
-    createMany?: KpiEvaluationDetailCreateManyCriteriaInputEnvelope
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-  }
-
-  export type TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput> | TaskKpiSettingCreateWithoutKpiCriteriaInput[] | TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput[]
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput | TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput[]
-    createMany?: TaskKpiSettingCreateManyKpiCriteriaInputEnvelope
-    connect?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutCriteriaInput, EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput> | EmployeeKpiTargetCreateWithoutCriteriaInput[] | EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput | EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    createMany?: EmployeeKpiTargetCreateManyCriteriaInputEnvelope
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-  }
-
-  export type JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutCriteriaInput, JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput> | JobTitleKpiTargetCreateWithoutCriteriaInput[] | JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput | JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    createMany?: JobTitleKpiTargetCreateManyCriteriaInputEnvelope
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-  }
-
-  export type StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput> | StaffingSlotKpiTargetCreateWithoutCriteriaInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput | StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyCriteriaInputEnvelope
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-  }
-
-  export type KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput = {
-    create?: XOR<KpiCriteriaSettingCreateWithoutCriteriaInput, KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput>
-    connectOrCreate?: KpiCriteriaSettingCreateOrConnectWithoutCriteriaInput
-    upsert?: KpiCriteriaSettingUpsertWithoutCriteriaInput
-    disconnect?: KpiCriteriaSettingWhereInput | boolean
-    delete?: KpiCriteriaSettingWhereInput | boolean
-    connect?: KpiCriteriaSettingWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaSettingUpdateToOneWithWhereWithoutCriteriaInput, KpiCriteriaSettingUpdateWithoutCriteriaInput>, KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutCriteriaInput, KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput> | KpiEvaluationDetailCreateWithoutCriteriaInput[] | KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput | KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput[]
-    upsert?: KpiEvaluationDetailUpsertWithWhereUniqueWithoutCriteriaInput | KpiEvaluationDetailUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: KpiEvaluationDetailCreateManyCriteriaInputEnvelope
-    set?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    disconnect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    delete?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    update?: KpiEvaluationDetailUpdateWithWhereUniqueWithoutCriteriaInput | KpiEvaluationDetailUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: KpiEvaluationDetailUpdateManyWithWhereWithoutCriteriaInput | KpiEvaluationDetailUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: KpiEvaluationDetailScalarWhereInput | KpiEvaluationDetailScalarWhereInput[]
-  }
-
-  export type TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput> | TaskKpiSettingCreateWithoutKpiCriteriaInput[] | TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput[]
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput | TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput[]
-    upsert?: TaskKpiSettingUpsertWithWhereUniqueWithoutKpiCriteriaInput | TaskKpiSettingUpsertWithWhereUniqueWithoutKpiCriteriaInput[]
-    createMany?: TaskKpiSettingCreateManyKpiCriteriaInputEnvelope
-    set?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    disconnect?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    delete?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    connect?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    update?: TaskKpiSettingUpdateWithWhereUniqueWithoutKpiCriteriaInput | TaskKpiSettingUpdateWithWhereUniqueWithoutKpiCriteriaInput[]
-    updateMany?: TaskKpiSettingUpdateManyWithWhereWithoutKpiCriteriaInput | TaskKpiSettingUpdateManyWithWhereWithoutKpiCriteriaInput[]
-    deleteMany?: TaskKpiSettingScalarWhereInput | TaskKpiSettingScalarWhereInput[]
-  }
-
-  export type EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutCriteriaInput, EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput> | EmployeeKpiTargetCreateWithoutCriteriaInput[] | EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput | EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    upsert?: EmployeeKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput | EmployeeKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: EmployeeKpiTargetCreateManyCriteriaInputEnvelope
-    set?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    disconnect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    delete?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    update?: EmployeeKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput | EmployeeKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: EmployeeKpiTargetUpdateManyWithWhereWithoutCriteriaInput | EmployeeKpiTargetUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-  }
-
-  export type JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutCriteriaInput, JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput> | JobTitleKpiTargetCreateWithoutCriteriaInput[] | JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput | JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    upsert?: JobTitleKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput | JobTitleKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: JobTitleKpiTargetCreateManyCriteriaInputEnvelope
-    set?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    disconnect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    delete?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    update?: JobTitleKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput | JobTitleKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: JobTitleKpiTargetUpdateManyWithWhereWithoutCriteriaInput | JobTitleKpiTargetUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: JobTitleKpiTargetScalarWhereInput | JobTitleKpiTargetScalarWhereInput[]
-  }
-
-  export type StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput> | StaffingSlotKpiTargetCreateWithoutCriteriaInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput | StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    upsert?: StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput | StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyCriteriaInputEnvelope
-    set?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    disconnect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    delete?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    update?: StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput | StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: StaffingSlotKpiTargetUpdateManyWithWhereWithoutCriteriaInput | StaffingSlotKpiTargetUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: StaffingSlotKpiTargetScalarWhereInput | StaffingSlotKpiTargetScalarWhereInput[]
-  }
-
-  export type KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput = {
-    create?: XOR<KpiCriteriaSettingCreateWithoutCriteriaInput, KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput>
-    connectOrCreate?: KpiCriteriaSettingCreateOrConnectWithoutCriteriaInput
-    upsert?: KpiCriteriaSettingUpsertWithoutCriteriaInput
-    disconnect?: KpiCriteriaSettingWhereInput | boolean
-    delete?: KpiCriteriaSettingWhereInput | boolean
-    connect?: KpiCriteriaSettingWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaSettingUpdateToOneWithWhereWithoutCriteriaInput, KpiCriteriaSettingUpdateWithoutCriteriaInput>, KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutCriteriaInput, KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput> | KpiEvaluationDetailCreateWithoutCriteriaInput[] | KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput | KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput[]
-    upsert?: KpiEvaluationDetailUpsertWithWhereUniqueWithoutCriteriaInput | KpiEvaluationDetailUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: KpiEvaluationDetailCreateManyCriteriaInputEnvelope
-    set?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    disconnect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    delete?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    update?: KpiEvaluationDetailUpdateWithWhereUniqueWithoutCriteriaInput | KpiEvaluationDetailUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: KpiEvaluationDetailUpdateManyWithWhereWithoutCriteriaInput | KpiEvaluationDetailUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: KpiEvaluationDetailScalarWhereInput | KpiEvaluationDetailScalarWhereInput[]
-  }
-
-  export type TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput> | TaskKpiSettingCreateWithoutKpiCriteriaInput[] | TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput[]
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput | TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput[]
-    upsert?: TaskKpiSettingUpsertWithWhereUniqueWithoutKpiCriteriaInput | TaskKpiSettingUpsertWithWhereUniqueWithoutKpiCriteriaInput[]
-    createMany?: TaskKpiSettingCreateManyKpiCriteriaInputEnvelope
-    set?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    disconnect?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    delete?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    connect?: TaskKpiSettingWhereUniqueInput | TaskKpiSettingWhereUniqueInput[]
-    update?: TaskKpiSettingUpdateWithWhereUniqueWithoutKpiCriteriaInput | TaskKpiSettingUpdateWithWhereUniqueWithoutKpiCriteriaInput[]
-    updateMany?: TaskKpiSettingUpdateManyWithWhereWithoutKpiCriteriaInput | TaskKpiSettingUpdateManyWithWhereWithoutKpiCriteriaInput[]
-    deleteMany?: TaskKpiSettingScalarWhereInput | TaskKpiSettingScalarWhereInput[]
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<EmployeeKpiTargetCreateWithoutCriteriaInput, EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput> | EmployeeKpiTargetCreateWithoutCriteriaInput[] | EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput | EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    upsert?: EmployeeKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput | EmployeeKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: EmployeeKpiTargetCreateManyCriteriaInputEnvelope
-    set?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    disconnect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    delete?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    connect?: EmployeeKpiTargetWhereUniqueInput | EmployeeKpiTargetWhereUniqueInput[]
-    update?: EmployeeKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput | EmployeeKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: EmployeeKpiTargetUpdateManyWithWhereWithoutCriteriaInput | EmployeeKpiTargetUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<JobTitleKpiTargetCreateWithoutCriteriaInput, JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput> | JobTitleKpiTargetCreateWithoutCriteriaInput[] | JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput | JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    upsert?: JobTitleKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput | JobTitleKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: JobTitleKpiTargetCreateManyCriteriaInputEnvelope
-    set?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    disconnect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    delete?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    connect?: JobTitleKpiTargetWhereUniqueInput | JobTitleKpiTargetWhereUniqueInput[]
-    update?: JobTitleKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput | JobTitleKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: JobTitleKpiTargetUpdateManyWithWhereWithoutCriteriaInput | JobTitleKpiTargetUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: JobTitleKpiTargetScalarWhereInput | JobTitleKpiTargetScalarWhereInput[]
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput = {
-    create?: XOR<StaffingSlotKpiTargetCreateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput> | StaffingSlotKpiTargetCreateWithoutCriteriaInput[] | StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput[]
-    connectOrCreate?: StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput | StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput[]
-    upsert?: StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput | StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput[]
-    createMany?: StaffingSlotKpiTargetCreateManyCriteriaInputEnvelope
-    set?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    disconnect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    delete?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    connect?: StaffingSlotKpiTargetWhereUniqueInput | StaffingSlotKpiTargetWhereUniqueInput[]
-    update?: StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput | StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput[]
-    updateMany?: StaffingSlotKpiTargetUpdateManyWithWhereWithoutCriteriaInput | StaffingSlotKpiTargetUpdateManyWithWhereWithoutCriteriaInput[]
-    deleteMany?: StaffingSlotKpiTargetScalarWhereInput | StaffingSlotKpiTargetScalarWhereInput[]
-  }
-
-  export type KpiCriteriaCreateNestedOneWithoutSettingsInput = {
-    create?: XOR<KpiCriteriaCreateWithoutSettingsInput, KpiCriteriaUncheckedCreateWithoutSettingsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutSettingsInput
-    connect?: KpiCriteriaWhereUniqueInput
-  }
-
-  export type KpiCriteriaUpdateOneRequiredWithoutSettingsNestedInput = {
-    create?: XOR<KpiCriteriaCreateWithoutSettingsInput, KpiCriteriaUncheckedCreateWithoutSettingsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutSettingsInput
-    upsert?: KpiCriteriaUpsertWithoutSettingsInput
-    connect?: KpiCriteriaWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaUpdateToOneWithWhereWithoutSettingsInput, KpiCriteriaUpdateWithoutSettingsInput>, KpiCriteriaUncheckedUpdateWithoutSettingsInput>
-  }
-
-  export type EmployeeCreateNestedOneWithoutEmployeeKpiTargetsInput = {
-    create?: XOR<EmployeeCreateWithoutEmployeeKpiTargetsInput, EmployeeUncheckedCreateWithoutEmployeeKpiTargetsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutEmployeeKpiTargetsInput
-    connect?: EmployeeWhereUniqueInput
-  }
-
-  export type KpiPeriodCreateNestedOneWithoutTargetsInput = {
-    create?: XOR<KpiPeriodCreateWithoutTargetsInput, KpiPeriodUncheckedCreateWithoutTargetsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutTargetsInput
-    connect?: KpiPeriodWhereUniqueInput
-  }
-
-  export type KpiCriteriaCreateNestedOneWithoutTargetsInput = {
-    create?: XOR<KpiCriteriaCreateWithoutTargetsInput, KpiCriteriaUncheckedCreateWithoutTargetsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutTargetsInput
-    connect?: KpiCriteriaWhereUniqueInput
-  }
-
-  export type EmployeeUpdateOneRequiredWithoutEmployeeKpiTargetsNestedInput = {
-    create?: XOR<EmployeeCreateWithoutEmployeeKpiTargetsInput, EmployeeUncheckedCreateWithoutEmployeeKpiTargetsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutEmployeeKpiTargetsInput
-    upsert?: EmployeeUpsertWithoutEmployeeKpiTargetsInput
-    connect?: EmployeeWhereUniqueInput
-    update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutEmployeeKpiTargetsInput, EmployeeUpdateWithoutEmployeeKpiTargetsInput>, EmployeeUncheckedUpdateWithoutEmployeeKpiTargetsInput>
-  }
-
-  export type KpiPeriodUpdateOneRequiredWithoutTargetsNestedInput = {
-    create?: XOR<KpiPeriodCreateWithoutTargetsInput, KpiPeriodUncheckedCreateWithoutTargetsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutTargetsInput
-    upsert?: KpiPeriodUpsertWithoutTargetsInput
-    connect?: KpiPeriodWhereUniqueInput
-    update?: XOR<XOR<KpiPeriodUpdateToOneWithWhereWithoutTargetsInput, KpiPeriodUpdateWithoutTargetsInput>, KpiPeriodUncheckedUpdateWithoutTargetsInput>
-  }
-
-  export type KpiCriteriaUpdateOneRequiredWithoutTargetsNestedInput = {
-    create?: XOR<KpiCriteriaCreateWithoutTargetsInput, KpiCriteriaUncheckedCreateWithoutTargetsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutTargetsInput
-    upsert?: KpiCriteriaUpsertWithoutTargetsInput
-    connect?: KpiCriteriaWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaUpdateToOneWithWhereWithoutTargetsInput, KpiCriteriaUpdateWithoutTargetsInput>, KpiCriteriaUncheckedUpdateWithoutTargetsInput>
-  }
-
-  export type KpiPeriodCreateNestedOneWithoutJobTitleTargetsInput = {
-    create?: XOR<KpiPeriodCreateWithoutJobTitleTargetsInput, KpiPeriodUncheckedCreateWithoutJobTitleTargetsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutJobTitleTargetsInput
-    connect?: KpiPeriodWhereUniqueInput
-  }
-
-  export type KpiCriteriaCreateNestedOneWithoutJobTitleTargetsInput = {
-    create?: XOR<KpiCriteriaCreateWithoutJobTitleTargetsInput, KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutJobTitleTargetsInput
-    connect?: KpiCriteriaWhereUniqueInput
-  }
-
-  export type KpiPeriodUpdateOneRequiredWithoutJobTitleTargetsNestedInput = {
-    create?: XOR<KpiPeriodCreateWithoutJobTitleTargetsInput, KpiPeriodUncheckedCreateWithoutJobTitleTargetsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutJobTitleTargetsInput
-    upsert?: KpiPeriodUpsertWithoutJobTitleTargetsInput
-    connect?: KpiPeriodWhereUniqueInput
-    update?: XOR<XOR<KpiPeriodUpdateToOneWithWhereWithoutJobTitleTargetsInput, KpiPeriodUpdateWithoutJobTitleTargetsInput>, KpiPeriodUncheckedUpdateWithoutJobTitleTargetsInput>
-  }
-
-  export type KpiCriteriaUpdateOneRequiredWithoutJobTitleTargetsNestedInput = {
-    create?: XOR<KpiCriteriaCreateWithoutJobTitleTargetsInput, KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutJobTitleTargetsInput
-    upsert?: KpiCriteriaUpsertWithoutJobTitleTargetsInput
-    connect?: KpiCriteriaWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaUpdateToOneWithWhereWithoutJobTitleTargetsInput, KpiCriteriaUpdateWithoutJobTitleTargetsInput>, KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput>
-  }
-
-  export type KpiPeriodCreateNestedOneWithoutStaffingSlotTargetsInput = {
-    create?: XOR<KpiPeriodCreateWithoutStaffingSlotTargetsInput, KpiPeriodUncheckedCreateWithoutStaffingSlotTargetsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutStaffingSlotTargetsInput
-    connect?: KpiPeriodWhereUniqueInput
-  }
-
-  export type KpiCriteriaCreateNestedOneWithoutStaffingSlotTargetsInput = {
-    create?: XOR<KpiCriteriaCreateWithoutStaffingSlotTargetsInput, KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutStaffingSlotTargetsInput
-    connect?: KpiCriteriaWhereUniqueInput
-  }
-
-  export type KpiPeriodUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput = {
-    create?: XOR<KpiPeriodCreateWithoutStaffingSlotTargetsInput, KpiPeriodUncheckedCreateWithoutStaffingSlotTargetsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutStaffingSlotTargetsInput
-    upsert?: KpiPeriodUpsertWithoutStaffingSlotTargetsInput
-    connect?: KpiPeriodWhereUniqueInput
-    update?: XOR<XOR<KpiPeriodUpdateToOneWithWhereWithoutStaffingSlotTargetsInput, KpiPeriodUpdateWithoutStaffingSlotTargetsInput>, KpiPeriodUncheckedUpdateWithoutStaffingSlotTargetsInput>
-  }
-
-  export type KpiCriteriaUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput = {
-    create?: XOR<KpiCriteriaCreateWithoutStaffingSlotTargetsInput, KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutStaffingSlotTargetsInput
-    upsert?: KpiCriteriaUpsertWithoutStaffingSlotTargetsInput
-    connect?: KpiCriteriaWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaUpdateToOneWithWhereWithoutStaffingSlotTargetsInput, KpiCriteriaUpdateWithoutStaffingSlotTargetsInput>, KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput>
   }
 
   export type EmployeeCreateNestedOneWithoutKpiEvaluationsInput = {
@@ -37232,13 +26700,6 @@ export namespace Prisma {
     connect?: KpiRuleSetWhereUniqueInput
   }
 
-  export type KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutEvaluationInput, KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput> | KpiEvaluationDetailCreateWithoutEvaluationInput[] | KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput | KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput[]
-    createMany?: KpiEvaluationDetailCreateManyEvaluationInputEnvelope
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-  }
-
   export type KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutEvaluationInput, KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput> | KpiEvaluationTaskCreateWithoutEvaluationInput[] | KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput | KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput[]
@@ -37253,13 +26714,6 @@ export namespace Prisma {
     connect?: KpiFormDocumentWhereUniqueInput | KpiFormDocumentWhereUniqueInput[]
   }
 
-  export type KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutEvaluationInput, KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput> | KpiEvaluationDetailCreateWithoutEvaluationInput[] | KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput | KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput[]
-    createMany?: KpiEvaluationDetailCreateManyEvaluationInputEnvelope
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-  }
-
   export type KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutEvaluationInput, KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput> | KpiEvaluationTaskCreateWithoutEvaluationInput[] | KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput | KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput[]
@@ -37272,6 +26726,14 @@ export namespace Prisma {
     connectOrCreate?: KpiFormDocumentCreateOrConnectWithoutEvaluationInput | KpiFormDocumentCreateOrConnectWithoutEvaluationInput[]
     createMany?: KpiFormDocumentCreateManyEvaluationInputEnvelope
     connect?: KpiFormDocumentWhereUniqueInput | KpiFormDocumentWhereUniqueInput[]
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput = {
@@ -37310,20 +26772,6 @@ export namespace Prisma {
     update?: XOR<XOR<KpiRuleSetUpdateToOneWithWhereWithoutEvaluationsInput, KpiRuleSetUpdateWithoutEvaluationsInput>, KpiRuleSetUncheckedUpdateWithoutEvaluationsInput>
   }
 
-  export type KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutEvaluationInput, KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput> | KpiEvaluationDetailCreateWithoutEvaluationInput[] | KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput | KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput[]
-    upsert?: KpiEvaluationDetailUpsertWithWhereUniqueWithoutEvaluationInput | KpiEvaluationDetailUpsertWithWhereUniqueWithoutEvaluationInput[]
-    createMany?: KpiEvaluationDetailCreateManyEvaluationInputEnvelope
-    set?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    disconnect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    delete?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    update?: KpiEvaluationDetailUpdateWithWhereUniqueWithoutEvaluationInput | KpiEvaluationDetailUpdateWithWhereUniqueWithoutEvaluationInput[]
-    updateMany?: KpiEvaluationDetailUpdateManyWithWhereWithoutEvaluationInput | KpiEvaluationDetailUpdateManyWithWhereWithoutEvaluationInput[]
-    deleteMany?: KpiEvaluationDetailScalarWhereInput | KpiEvaluationDetailScalarWhereInput[]
-  }
-
   export type KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutEvaluationInput, KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput> | KpiEvaluationTaskCreateWithoutEvaluationInput[] | KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput | KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput[]
@@ -37352,20 +26800,6 @@ export namespace Prisma {
     deleteMany?: KpiFormDocumentScalarWhereInput | KpiFormDocumentScalarWhereInput[]
   }
 
-  export type KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput = {
-    create?: XOR<KpiEvaluationDetailCreateWithoutEvaluationInput, KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput> | KpiEvaluationDetailCreateWithoutEvaluationInput[] | KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput[]
-    connectOrCreate?: KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput | KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput[]
-    upsert?: KpiEvaluationDetailUpsertWithWhereUniqueWithoutEvaluationInput | KpiEvaluationDetailUpsertWithWhereUniqueWithoutEvaluationInput[]
-    createMany?: KpiEvaluationDetailCreateManyEvaluationInputEnvelope
-    set?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    disconnect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    delete?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    connect?: KpiEvaluationDetailWhereUniqueInput | KpiEvaluationDetailWhereUniqueInput[]
-    update?: KpiEvaluationDetailUpdateWithWhereUniqueWithoutEvaluationInput | KpiEvaluationDetailUpdateWithWhereUniqueWithoutEvaluationInput[]
-    updateMany?: KpiEvaluationDetailUpdateManyWithWhereWithoutEvaluationInput | KpiEvaluationDetailUpdateManyWithWhereWithoutEvaluationInput[]
-    deleteMany?: KpiEvaluationDetailScalarWhereInput | KpiEvaluationDetailScalarWhereInput[]
-  }
-
   export type KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutEvaluationInput, KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput> | KpiEvaluationTaskCreateWithoutEvaluationInput[] | KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput | KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput[]
@@ -37392,34 +26826,6 @@ export namespace Prisma {
     update?: KpiFormDocumentUpdateWithWhereUniqueWithoutEvaluationInput | KpiFormDocumentUpdateWithWhereUniqueWithoutEvaluationInput[]
     updateMany?: KpiFormDocumentUpdateManyWithWhereWithoutEvaluationInput | KpiFormDocumentUpdateManyWithWhereWithoutEvaluationInput[]
     deleteMany?: KpiFormDocumentScalarWhereInput | KpiFormDocumentScalarWhereInput[]
-  }
-
-  export type KpiEvaluationCreateNestedOneWithoutDetailsInput = {
-    create?: XOR<KpiEvaluationCreateWithoutDetailsInput, KpiEvaluationUncheckedCreateWithoutDetailsInput>
-    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutDetailsInput
-    connect?: KpiEvaluationWhereUniqueInput
-  }
-
-  export type KpiCriteriaCreateNestedOneWithoutDetailsInput = {
-    create?: XOR<KpiCriteriaCreateWithoutDetailsInput, KpiCriteriaUncheckedCreateWithoutDetailsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutDetailsInput
-    connect?: KpiCriteriaWhereUniqueInput
-  }
-
-  export type KpiEvaluationUpdateOneRequiredWithoutDetailsNestedInput = {
-    create?: XOR<KpiEvaluationCreateWithoutDetailsInput, KpiEvaluationUncheckedCreateWithoutDetailsInput>
-    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutDetailsInput
-    upsert?: KpiEvaluationUpsertWithoutDetailsInput
-    connect?: KpiEvaluationWhereUniqueInput
-    update?: XOR<XOR<KpiEvaluationUpdateToOneWithWhereWithoutDetailsInput, KpiEvaluationUpdateWithoutDetailsInput>, KpiEvaluationUncheckedUpdateWithoutDetailsInput>
-  }
-
-  export type KpiCriteriaUpdateOneRequiredWithoutDetailsNestedInput = {
-    create?: XOR<KpiCriteriaCreateWithoutDetailsInput, KpiCriteriaUncheckedCreateWithoutDetailsInput>
-    connectOrCreate?: KpiCriteriaCreateOrConnectWithoutDetailsInput
-    upsert?: KpiCriteriaUpsertWithoutDetailsInput
-    connect?: KpiCriteriaWhereUniqueInput
-    update?: XOR<XOR<KpiCriteriaUpdateToOneWithWhereWithoutDetailsInput, KpiCriteriaUpdateWithoutDetailsInput>, KpiCriteriaUncheckedUpdateWithoutDetailsInput>
   }
 
   export type TaskCreateNestedOneWithoutKpiEvaluationsInput = {
@@ -37570,12 +26976,6 @@ export namespace Prisma {
     connect?: MasterPlanWhereUniqueInput
   }
 
-  export type TaskKpiSettingCreateNestedOneWithoutTaskInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutTaskInput, TaskKpiSettingUncheckedCreateWithoutTaskInput>
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutTaskInput
-    connect?: TaskKpiSettingWhereUniqueInput
-  }
-
   export type KpiEvaluationTaskCreateNestedManyWithoutTaskInput = {
     create?: XOR<KpiEvaluationTaskCreateWithoutTaskInput, KpiEvaluationTaskUncheckedCreateWithoutTaskInput> | KpiEvaluationTaskCreateWithoutTaskInput[] | KpiEvaluationTaskUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: KpiEvaluationTaskCreateOrConnectWithoutTaskInput | KpiEvaluationTaskCreateOrConnectWithoutTaskInput[]
@@ -37623,12 +27023,6 @@ export namespace Prisma {
     connectOrCreate?: TaskClosureCreateOrConnectWithoutAncestorInput | TaskClosureCreateOrConnectWithoutAncestorInput[]
     createMany?: TaskClosureCreateManyAncestorInputEnvelope
     connect?: TaskClosureWhereUniqueInput | TaskClosureWhereUniqueInput[]
-  }
-
-  export type TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutTaskInput, TaskKpiSettingUncheckedCreateWithoutTaskInput>
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutTaskInput
-    connect?: TaskKpiSettingWhereUniqueInput
   }
 
   export type KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput = {
@@ -37688,16 +27082,6 @@ export namespace Prisma {
     delete?: MasterPlanWhereInput | boolean
     connect?: MasterPlanWhereUniqueInput
     update?: XOR<XOR<MasterPlanUpdateToOneWithWhereWithoutTasksInput, MasterPlanUpdateWithoutTasksInput>, MasterPlanUncheckedUpdateWithoutTasksInput>
-  }
-
-  export type TaskKpiSettingUpdateOneWithoutTaskNestedInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutTaskInput, TaskKpiSettingUncheckedCreateWithoutTaskInput>
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutTaskInput
-    upsert?: TaskKpiSettingUpsertWithoutTaskInput
-    disconnect?: TaskKpiSettingWhereInput | boolean
-    delete?: TaskKpiSettingWhereInput | boolean
-    connect?: TaskKpiSettingWhereUniqueInput
-    update?: XOR<XOR<TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput, TaskKpiSettingUpdateWithoutTaskInput>, TaskKpiSettingUncheckedUpdateWithoutTaskInput>
   }
 
   export type KpiEvaluationTaskUpdateManyWithoutTaskNestedInput = {
@@ -37796,16 +27180,6 @@ export namespace Prisma {
     update?: TaskClosureUpdateWithWhereUniqueWithoutAncestorInput | TaskClosureUpdateWithWhereUniqueWithoutAncestorInput[]
     updateMany?: TaskClosureUpdateManyWithWhereWithoutAncestorInput | TaskClosureUpdateManyWithWhereWithoutAncestorInput[]
     deleteMany?: TaskClosureScalarWhereInput | TaskClosureScalarWhereInput[]
-  }
-
-  export type TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput = {
-    create?: XOR<TaskKpiSettingCreateWithoutTaskInput, TaskKpiSettingUncheckedCreateWithoutTaskInput>
-    connectOrCreate?: TaskKpiSettingCreateOrConnectWithoutTaskInput
-    upsert?: TaskKpiSettingUpsertWithoutTaskInput
-    disconnect?: TaskKpiSettingWhereInput | boolean
-    delete?: TaskKpiSettingWhereInput | boolean
-    connect?: TaskKpiSettingWhereUniqueInput
-    update?: XOR<XOR<TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput, TaskKpiSettingUpdateWithoutTaskInput>, TaskKpiSettingUncheckedUpdateWithoutTaskInput>
   }
 
   export type KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput = {
@@ -38267,29 +27641,6 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
-  export type NestedJsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type NestedEnumTaskRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.TaskRole | EnumTaskRoleFieldRefInput<$PrismaModel>
@@ -38322,7 +27673,6 @@ export namespace Prisma {
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
@@ -38342,7 +27692,6 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -38371,7 +27720,6 @@ export namespace Prisma {
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
@@ -38391,7 +27739,6 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -38433,33 +27780,6 @@ export namespace Prisma {
 
   export type TaskParticipantCreateManyEmployeeInputEnvelope = {
     data: TaskParticipantCreateManyEmployeeInput | TaskParticipantCreateManyEmployeeInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type EmployeeKpiTargetCreateWithoutEmployeeInput = {
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    period: KpiPeriodCreateNestedOneWithoutTargetsInput
-    criteria: KpiCriteriaCreateNestedOneWithoutTargetsInput
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput = {
-    id?: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type EmployeeKpiTargetCreateOrConnectWithoutEmployeeInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    create: XOR<EmployeeKpiTargetCreateWithoutEmployeeInput, EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput>
-  }
-
-  export type EmployeeKpiTargetCreateManyEmployeeInputEnvelope = {
-    data: EmployeeKpiTargetCreateManyEmployeeInput | EmployeeKpiTargetCreateManyEmployeeInput[]
     skipDuplicates?: boolean
   }
 
@@ -38546,35 +27866,6 @@ export namespace Prisma {
     attendedAt?: DateTimeNullableFilter<"TaskParticipant"> | Date | string | null
   }
 
-  export type EmployeeKpiTargetUpsertWithWhereUniqueWithoutEmployeeInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    update: XOR<EmployeeKpiTargetUpdateWithoutEmployeeInput, EmployeeKpiTargetUncheckedUpdateWithoutEmployeeInput>
-    create: XOR<EmployeeKpiTargetCreateWithoutEmployeeInput, EmployeeKpiTargetUncheckedCreateWithoutEmployeeInput>
-  }
-
-  export type EmployeeKpiTargetUpdateWithWhereUniqueWithoutEmployeeInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    data: XOR<EmployeeKpiTargetUpdateWithoutEmployeeInput, EmployeeKpiTargetUncheckedUpdateWithoutEmployeeInput>
-  }
-
-  export type EmployeeKpiTargetUpdateManyWithWhereWithoutEmployeeInput = {
-    where: EmployeeKpiTargetScalarWhereInput
-    data: XOR<EmployeeKpiTargetUpdateManyMutationInput, EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeInput>
-  }
-
-  export type EmployeeKpiTargetScalarWhereInput = {
-    AND?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-    OR?: EmployeeKpiTargetScalarWhereInput[]
-    NOT?: EmployeeKpiTargetScalarWhereInput | EmployeeKpiTargetScalarWhereInput[]
-    id?: IntFilter<"EmployeeKpiTarget"> | number
-    employeeCode?: StringFilter<"EmployeeKpiTarget"> | string
-    periodId?: IntFilter<"EmployeeKpiTarget"> | number
-    criteriaId?: IntFilter<"EmployeeKpiTarget"> | number
-    targetValue?: FloatFilter<"EmployeeKpiTarget"> | number
-    createdAt?: DateTimeFilter<"EmployeeKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"EmployeeKpiTarget"> | Date | string
-  }
-
   export type KpiDomainWeightCreateWithoutRuleSetInput = {
     domainCode: string
     volumeWeight: number
@@ -38616,7 +27907,6 @@ export namespace Prisma {
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
@@ -38636,7 +27926,6 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -38766,234 +28055,6 @@ export namespace Prisma {
     evaluations?: KpiEvaluationUncheckedUpdateManyWithoutRuleSetNestedInput
   }
 
-  export type KpiCriteriaCreateWithoutTasksInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateWithoutTasksInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaCreateOrConnectWithoutTasksInput = {
-    where: KpiCriteriaWhereUniqueInput
-    create: XOR<KpiCriteriaCreateWithoutTasksInput, KpiCriteriaUncheckedCreateWithoutTasksInput>
-  }
-
-  export type TaskCreateWithoutKpiSettingsInput = {
-    parentId?: number | null
-    title: string
-    description?: string | null
-    status?: string
-    priority?: string
-    type?: string
-    meetingLink?: string | null
-    progress?: number
-    rejectReason?: string | null
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
-    completedAt?: Date | string | null
-    isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isRiskWarned?: boolean
-    domainId?: number | null
-    monitoredUnitId?: number | null
-    workflowInstId?: string | null
-    conversationId?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    creatorEmployeeCode?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    isDeleted?: boolean
-    plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
-    steps?: TaskStepCreateNestedManyWithoutTaskInput
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
-  }
-
-  export type TaskUncheckedCreateWithoutKpiSettingsInput = {
-    id?: number
-    parentId?: number | null
-    title: string
-    description?: string | null
-    status?: string
-    priority?: string
-    type?: string
-    meetingLink?: string | null
-    progress?: number
-    rejectReason?: string | null
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
-    completedAt?: Date | string | null
-    isCompleted?: boolean
-    isDeadlineWarned?: boolean
-    isRiskWarned?: boolean
-    domainId?: number | null
-    monitoredUnitId?: number | null
-    planId?: number | null
-    workflowInstId?: string | null
-    conversationId?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    creatorEmployeeCode?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    isDeleted?: boolean
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
-  }
-
-  export type TaskCreateOrConnectWithoutKpiSettingsInput = {
-    where: TaskWhereUniqueInput
-    create: XOR<TaskCreateWithoutKpiSettingsInput, TaskUncheckedCreateWithoutKpiSettingsInput>
-  }
-
-  export type KpiCriteriaUpsertWithoutTasksInput = {
-    update: XOR<KpiCriteriaUpdateWithoutTasksInput, KpiCriteriaUncheckedUpdateWithoutTasksInput>
-    create: XOR<KpiCriteriaCreateWithoutTasksInput, KpiCriteriaUncheckedCreateWithoutTasksInput>
-    where?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaUpdateToOneWithWhereWithoutTasksInput = {
-    where?: KpiCriteriaWhereInput
-    data: XOR<KpiCriteriaUpdateWithoutTasksInput, KpiCriteriaUncheckedUpdateWithoutTasksInput>
-  }
-
-  export type KpiCriteriaUpdateWithoutTasksInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateWithoutTasksInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type TaskUpsertWithoutKpiSettingsInput = {
-    update: XOR<TaskUpdateWithoutKpiSettingsInput, TaskUncheckedUpdateWithoutKpiSettingsInput>
-    create: XOR<TaskCreateWithoutKpiSettingsInput, TaskUncheckedCreateWithoutKpiSettingsInput>
-    where?: TaskWhereInput
-  }
-
-  export type TaskUpdateToOneWithWhereWithoutKpiSettingsInput = {
-    where?: TaskWhereInput
-    data: XOR<TaskUpdateWithoutKpiSettingsInput, TaskUncheckedUpdateWithoutKpiSettingsInput>
-  }
-
-  export type TaskUpdateWithoutKpiSettingsInput = {
-    parentId?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
-    progress?: FloatFieldUpdateOperationsInput | number
-    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
-    domainId?: NullableIntFieldUpdateOperationsInput | number | null
-    monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
-    workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
-    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    creatorEmployeeCode?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
-    steps?: TaskStepUpdateManyWithoutTaskNestedInput
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
-  }
-
-  export type TaskUncheckedUpdateWithoutKpiSettingsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    parentId?: NullableIntFieldUpdateOperationsInput | number | null
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
-    meetingLink?: NullableStringFieldUpdateOperationsInput | string | null
-    progress?: FloatFieldUpdateOperationsInput | number
-    rejectReason?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
-    isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
-    domainId?: NullableIntFieldUpdateOperationsInput | number | null
-    monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
-    planId?: NullableIntFieldUpdateOperationsInput | number | null
-    workflowInstId?: NullableStringFieldUpdateOperationsInput | string | null
-    conversationId?: NullableStringFieldUpdateOperationsInput | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    creatorEmployeeCode?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
-  }
-
   export type KpiEvaluationCreateWithoutPeriodInput = {
     staffingSlotId?: number | null
     phase?: string
@@ -39008,7 +28069,6 @@ export namespace Prisma {
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
@@ -39028,7 +28088,6 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -39040,91 +28099,6 @@ export namespace Prisma {
 
   export type KpiEvaluationCreateManyPeriodInputEnvelope = {
     data: KpiEvaluationCreateManyPeriodInput | KpiEvaluationCreateManyPeriodInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type EmployeeKpiTargetCreateWithoutPeriodInput = {
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    employee: EmployeeCreateNestedOneWithoutEmployeeKpiTargetsInput
-    criteria: KpiCriteriaCreateNestedOneWithoutTargetsInput
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateWithoutPeriodInput = {
-    id?: number
-    employeeCode: string
-    criteriaId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type EmployeeKpiTargetCreateOrConnectWithoutPeriodInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    create: XOR<EmployeeKpiTargetCreateWithoutPeriodInput, EmployeeKpiTargetUncheckedCreateWithoutPeriodInput>
-  }
-
-  export type EmployeeKpiTargetCreateManyPeriodInputEnvelope = {
-    data: EmployeeKpiTargetCreateManyPeriodInput | EmployeeKpiTargetCreateManyPeriodInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type JobTitleKpiTargetCreateWithoutPeriodInput = {
-    jobTitleId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    criteria: KpiCriteriaCreateNestedOneWithoutJobTitleTargetsInput
-  }
-
-  export type JobTitleKpiTargetUncheckedCreateWithoutPeriodInput = {
-    id?: number
-    jobTitleId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobTitleKpiTargetCreateOrConnectWithoutPeriodInput = {
-    where: JobTitleKpiTargetWhereUniqueInput
-    create: XOR<JobTitleKpiTargetCreateWithoutPeriodInput, JobTitleKpiTargetUncheckedCreateWithoutPeriodInput>
-  }
-
-  export type JobTitleKpiTargetCreateManyPeriodInputEnvelope = {
-    data: JobTitleKpiTargetCreateManyPeriodInput | JobTitleKpiTargetCreateManyPeriodInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type StaffingSlotKpiTargetCreateWithoutPeriodInput = {
-    staffingSlotId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    criteria: KpiCriteriaCreateNestedOneWithoutStaffingSlotTargetsInput
-  }
-
-  export type StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput = {
-    id?: number
-    staffingSlotId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type StaffingSlotKpiTargetCreateOrConnectWithoutPeriodInput = {
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    create: XOR<StaffingSlotKpiTargetCreateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput>
-  }
-
-  export type StaffingSlotKpiTargetCreateManyPeriodInputEnvelope = {
-    data: StaffingSlotKpiTargetCreateManyPeriodInput | StaffingSlotKpiTargetCreateManyPeriodInput[]
     skipDuplicates?: boolean
   }
 
@@ -39142,1008 +28116,6 @@ export namespace Prisma {
   export type KpiEvaluationUpdateManyWithWhereWithoutPeriodInput = {
     where: KpiEvaluationScalarWhereInput
     data: XOR<KpiEvaluationUpdateManyMutationInput, KpiEvaluationUncheckedUpdateManyWithoutPeriodInput>
-  }
-
-  export type EmployeeKpiTargetUpsertWithWhereUniqueWithoutPeriodInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    update: XOR<EmployeeKpiTargetUpdateWithoutPeriodInput, EmployeeKpiTargetUncheckedUpdateWithoutPeriodInput>
-    create: XOR<EmployeeKpiTargetCreateWithoutPeriodInput, EmployeeKpiTargetUncheckedCreateWithoutPeriodInput>
-  }
-
-  export type EmployeeKpiTargetUpdateWithWhereUniqueWithoutPeriodInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    data: XOR<EmployeeKpiTargetUpdateWithoutPeriodInput, EmployeeKpiTargetUncheckedUpdateWithoutPeriodInput>
-  }
-
-  export type EmployeeKpiTargetUpdateManyWithWhereWithoutPeriodInput = {
-    where: EmployeeKpiTargetScalarWhereInput
-    data: XOR<EmployeeKpiTargetUpdateManyMutationInput, EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodInput>
-  }
-
-  export type JobTitleKpiTargetUpsertWithWhereUniqueWithoutPeriodInput = {
-    where: JobTitleKpiTargetWhereUniqueInput
-    update: XOR<JobTitleKpiTargetUpdateWithoutPeriodInput, JobTitleKpiTargetUncheckedUpdateWithoutPeriodInput>
-    create: XOR<JobTitleKpiTargetCreateWithoutPeriodInput, JobTitleKpiTargetUncheckedCreateWithoutPeriodInput>
-  }
-
-  export type JobTitleKpiTargetUpdateWithWhereUniqueWithoutPeriodInput = {
-    where: JobTitleKpiTargetWhereUniqueInput
-    data: XOR<JobTitleKpiTargetUpdateWithoutPeriodInput, JobTitleKpiTargetUncheckedUpdateWithoutPeriodInput>
-  }
-
-  export type JobTitleKpiTargetUpdateManyWithWhereWithoutPeriodInput = {
-    where: JobTitleKpiTargetScalarWhereInput
-    data: XOR<JobTitleKpiTargetUpdateManyMutationInput, JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodInput>
-  }
-
-  export type JobTitleKpiTargetScalarWhereInput = {
-    AND?: JobTitleKpiTargetScalarWhereInput | JobTitleKpiTargetScalarWhereInput[]
-    OR?: JobTitleKpiTargetScalarWhereInput[]
-    NOT?: JobTitleKpiTargetScalarWhereInput | JobTitleKpiTargetScalarWhereInput[]
-    id?: IntFilter<"JobTitleKpiTarget"> | number
-    jobTitleId?: IntFilter<"JobTitleKpiTarget"> | number
-    periodId?: IntFilter<"JobTitleKpiTarget"> | number
-    criteriaId?: IntFilter<"JobTitleKpiTarget"> | number
-    targetValue?: FloatFilter<"JobTitleKpiTarget"> | number
-    weight?: FloatFilter<"JobTitleKpiTarget"> | number
-    createdAt?: DateTimeFilter<"JobTitleKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"JobTitleKpiTarget"> | Date | string
-  }
-
-  export type StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutPeriodInput = {
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    update: XOR<StaffingSlotKpiTargetUpdateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedUpdateWithoutPeriodInput>
-    create: XOR<StaffingSlotKpiTargetCreateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedCreateWithoutPeriodInput>
-  }
-
-  export type StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutPeriodInput = {
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    data: XOR<StaffingSlotKpiTargetUpdateWithoutPeriodInput, StaffingSlotKpiTargetUncheckedUpdateWithoutPeriodInput>
-  }
-
-  export type StaffingSlotKpiTargetUpdateManyWithWhereWithoutPeriodInput = {
-    where: StaffingSlotKpiTargetScalarWhereInput
-    data: XOR<StaffingSlotKpiTargetUpdateManyMutationInput, StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodInput>
-  }
-
-  export type StaffingSlotKpiTargetScalarWhereInput = {
-    AND?: StaffingSlotKpiTargetScalarWhereInput | StaffingSlotKpiTargetScalarWhereInput[]
-    OR?: StaffingSlotKpiTargetScalarWhereInput[]
-    NOT?: StaffingSlotKpiTargetScalarWhereInput | StaffingSlotKpiTargetScalarWhereInput[]
-    id?: IntFilter<"StaffingSlotKpiTarget"> | number
-    staffingSlotId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    periodId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    criteriaId?: IntFilter<"StaffingSlotKpiTarget"> | number
-    targetValue?: FloatFilter<"StaffingSlotKpiTarget"> | number
-    weight?: FloatFilter<"StaffingSlotKpiTarget"> | number
-    createdAt?: DateTimeFilter<"StaffingSlotKpiTarget"> | Date | string
-    updatedAt?: DateTimeFilter<"StaffingSlotKpiTarget"> | Date | string
-  }
-
-  export type KpiCriteriaSettingCreateWithoutCriteriaInput = {
-    weight?: number
-    baseScore?: number | null
-    scoringMethod?: string
-    difficulty?: string
-    difficultyMultiplier?: number
-    bonusThresholdDays?: number
-    bonusPerDay?: number
-    penaltyPerDay?: number
-    integrationCode?: string | null
-    formula?: string | null
-  }
-
-  export type KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput = {
-    weight?: number
-    baseScore?: number | null
-    scoringMethod?: string
-    difficulty?: string
-    difficultyMultiplier?: number
-    bonusThresholdDays?: number
-    bonusPerDay?: number
-    penaltyPerDay?: number
-    integrationCode?: string | null
-    formula?: string | null
-  }
-
-  export type KpiCriteriaSettingCreateOrConnectWithoutCriteriaInput = {
-    where: KpiCriteriaSettingWhereUniqueInput
-    create: XOR<KpiCriteriaSettingCreateWithoutCriteriaInput, KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailCreateWithoutCriteriaInput = {
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluation: KpiEvaluationCreateNestedOneWithoutDetailsInput
-  }
-
-  export type KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput = {
-    id?: number
-    evaluationId: number
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type KpiEvaluationDetailCreateOrConnectWithoutCriteriaInput = {
-    where: KpiEvaluationDetailWhereUniqueInput
-    create: XOR<KpiEvaluationDetailCreateWithoutCriteriaInput, KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailCreateManyCriteriaInputEnvelope = {
-    data: KpiEvaluationDetailCreateManyCriteriaInput | KpiEvaluationDetailCreateManyCriteriaInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type TaskKpiSettingCreateWithoutKpiCriteriaInput = {
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-    task: TaskCreateNestedOneWithoutKpiSettingsInput
-  }
-
-  export type TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput = {
-    taskId: number
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-  }
-
-  export type TaskKpiSettingCreateOrConnectWithoutKpiCriteriaInput = {
-    where: TaskKpiSettingWhereUniqueInput
-    create: XOR<TaskKpiSettingCreateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput>
-  }
-
-  export type TaskKpiSettingCreateManyKpiCriteriaInputEnvelope = {
-    data: TaskKpiSettingCreateManyKpiCriteriaInput | TaskKpiSettingCreateManyKpiCriteriaInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type EmployeeKpiTargetCreateWithoutCriteriaInput = {
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    employee: EmployeeCreateNestedOneWithoutEmployeeKpiTargetsInput
-    period: KpiPeriodCreateNestedOneWithoutTargetsInput
-  }
-
-  export type EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput = {
-    id?: number
-    employeeCode: string
-    periodId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type EmployeeKpiTargetCreateOrConnectWithoutCriteriaInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    create: XOR<EmployeeKpiTargetCreateWithoutCriteriaInput, EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type EmployeeKpiTargetCreateManyCriteriaInputEnvelope = {
-    data: EmployeeKpiTargetCreateManyCriteriaInput | EmployeeKpiTargetCreateManyCriteriaInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type JobTitleKpiTargetCreateWithoutCriteriaInput = {
-    jobTitleId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    period: KpiPeriodCreateNestedOneWithoutJobTitleTargetsInput
-  }
-
-  export type JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput = {
-    id?: number
-    jobTitleId: number
-    periodId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobTitleKpiTargetCreateOrConnectWithoutCriteriaInput = {
-    where: JobTitleKpiTargetWhereUniqueInput
-    create: XOR<JobTitleKpiTargetCreateWithoutCriteriaInput, JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type JobTitleKpiTargetCreateManyCriteriaInputEnvelope = {
-    data: JobTitleKpiTargetCreateManyCriteriaInput | JobTitleKpiTargetCreateManyCriteriaInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type StaffingSlotKpiTargetCreateWithoutCriteriaInput = {
-    staffingSlotId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    period: KpiPeriodCreateNestedOneWithoutStaffingSlotTargetsInput
-  }
-
-  export type StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput = {
-    id?: number
-    staffingSlotId: number
-    periodId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type StaffingSlotKpiTargetCreateOrConnectWithoutCriteriaInput = {
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    create: XOR<StaffingSlotKpiTargetCreateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type StaffingSlotKpiTargetCreateManyCriteriaInputEnvelope = {
-    data: StaffingSlotKpiTargetCreateManyCriteriaInput | StaffingSlotKpiTargetCreateManyCriteriaInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type KpiCriteriaSettingUpsertWithoutCriteriaInput = {
-    update: XOR<KpiCriteriaSettingUpdateWithoutCriteriaInput, KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput>
-    create: XOR<KpiCriteriaSettingCreateWithoutCriteriaInput, KpiCriteriaSettingUncheckedCreateWithoutCriteriaInput>
-    where?: KpiCriteriaSettingWhereInput
-  }
-
-  export type KpiCriteriaSettingUpdateToOneWithWhereWithoutCriteriaInput = {
-    where?: KpiCriteriaSettingWhereInput
-    data: XOR<KpiCriteriaSettingUpdateWithoutCriteriaInput, KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type KpiCriteriaSettingUpdateWithoutCriteriaInput = {
-    weight?: FloatFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    difficulty?: StringFieldUpdateOperationsInput | string
-    difficultyMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusThresholdDays?: IntFieldUpdateOperationsInput | number
-    bonusPerDay?: FloatFieldUpdateOperationsInput | number
-    penaltyPerDay?: FloatFieldUpdateOperationsInput | number
-    integrationCode?: NullableStringFieldUpdateOperationsInput | string | null
-    formula?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type KpiCriteriaSettingUncheckedUpdateWithoutCriteriaInput = {
-    weight?: FloatFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    difficulty?: StringFieldUpdateOperationsInput | string
-    difficultyMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusThresholdDays?: IntFieldUpdateOperationsInput | number
-    bonusPerDay?: FloatFieldUpdateOperationsInput | number
-    penaltyPerDay?: FloatFieldUpdateOperationsInput | number
-    integrationCode?: NullableStringFieldUpdateOperationsInput | string | null
-    formula?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type KpiEvaluationDetailUpsertWithWhereUniqueWithoutCriteriaInput = {
-    where: KpiEvaluationDetailWhereUniqueInput
-    update: XOR<KpiEvaluationDetailUpdateWithoutCriteriaInput, KpiEvaluationDetailUncheckedUpdateWithoutCriteriaInput>
-    create: XOR<KpiEvaluationDetailCreateWithoutCriteriaInput, KpiEvaluationDetailUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailUpdateWithWhereUniqueWithoutCriteriaInput = {
-    where: KpiEvaluationDetailWhereUniqueInput
-    data: XOR<KpiEvaluationDetailUpdateWithoutCriteriaInput, KpiEvaluationDetailUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailUpdateManyWithWhereWithoutCriteriaInput = {
-    where: KpiEvaluationDetailScalarWhereInput
-    data: XOR<KpiEvaluationDetailUpdateManyMutationInput, KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaInput>
-  }
-
-  export type KpiEvaluationDetailScalarWhereInput = {
-    AND?: KpiEvaluationDetailScalarWhereInput | KpiEvaluationDetailScalarWhereInput[]
-    OR?: KpiEvaluationDetailScalarWhereInput[]
-    NOT?: KpiEvaluationDetailScalarWhereInput | KpiEvaluationDetailScalarWhereInput[]
-    id?: IntFilter<"KpiEvaluationDetail"> | number
-    evaluationId?: IntFilter<"KpiEvaluationDetail"> | number
-    criteriaId?: IntFilter<"KpiEvaluationDetail"> | number
-    selfScore?: FloatNullableFilter<"KpiEvaluationDetail"> | number | null
-    reviewerScore?: FloatNullableFilter<"KpiEvaluationDetail"> | number | null
-    notes?: StringNullableFilter<"KpiEvaluationDetail"> | string | null
-    createdAt?: DateTimeFilter<"KpiEvaluationDetail"> | Date | string
-    updatedAt?: DateTimeFilter<"KpiEvaluationDetail"> | Date | string
-  }
-
-  export type TaskKpiSettingUpsertWithWhereUniqueWithoutKpiCriteriaInput = {
-    where: TaskKpiSettingWhereUniqueInput
-    update: XOR<TaskKpiSettingUpdateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedUpdateWithoutKpiCriteriaInput>
-    create: XOR<TaskKpiSettingCreateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedCreateWithoutKpiCriteriaInput>
-  }
-
-  export type TaskKpiSettingUpdateWithWhereUniqueWithoutKpiCriteriaInput = {
-    where: TaskKpiSettingWhereUniqueInput
-    data: XOR<TaskKpiSettingUpdateWithoutKpiCriteriaInput, TaskKpiSettingUncheckedUpdateWithoutKpiCriteriaInput>
-  }
-
-  export type TaskKpiSettingUpdateManyWithWhereWithoutKpiCriteriaInput = {
-    where: TaskKpiSettingScalarWhereInput
-    data: XOR<TaskKpiSettingUpdateManyMutationInput, TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaInput>
-  }
-
-  export type TaskKpiSettingScalarWhereInput = {
-    AND?: TaskKpiSettingScalarWhereInput | TaskKpiSettingScalarWhereInput[]
-    OR?: TaskKpiSettingScalarWhereInput[]
-    NOT?: TaskKpiSettingScalarWhereInput | TaskKpiSettingScalarWhereInput[]
-    taskId?: IntFilter<"TaskKpiSetting"> | number
-    baseScore?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    weight?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    scoringMethod?: StringFilter<"TaskKpiSetting"> | string
-    isCrossDomain?: BoolFilter<"TaskKpiSetting"> | boolean
-    crossDomainMultiplier?: FloatFilter<"TaskKpiSetting"> | number
-    bonusPerDay?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    penaltyPerDay?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    standardDurationDays?: FloatNullableFilter<"TaskKpiSetting"> | number | null
-    kpiCriteriaId?: IntNullableFilter<"TaskKpiSetting"> | number | null
-  }
-
-  export type EmployeeKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    update: XOR<EmployeeKpiTargetUpdateWithoutCriteriaInput, EmployeeKpiTargetUncheckedUpdateWithoutCriteriaInput>
-    create: XOR<EmployeeKpiTargetCreateWithoutCriteriaInput, EmployeeKpiTargetUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type EmployeeKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput = {
-    where: EmployeeKpiTargetWhereUniqueInput
-    data: XOR<EmployeeKpiTargetUpdateWithoutCriteriaInput, EmployeeKpiTargetUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type EmployeeKpiTargetUpdateManyWithWhereWithoutCriteriaInput = {
-    where: EmployeeKpiTargetScalarWhereInput
-    data: XOR<EmployeeKpiTargetUpdateManyMutationInput, EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaInput>
-  }
-
-  export type JobTitleKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput = {
-    where: JobTitleKpiTargetWhereUniqueInput
-    update: XOR<JobTitleKpiTargetUpdateWithoutCriteriaInput, JobTitleKpiTargetUncheckedUpdateWithoutCriteriaInput>
-    create: XOR<JobTitleKpiTargetCreateWithoutCriteriaInput, JobTitleKpiTargetUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type JobTitleKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput = {
-    where: JobTitleKpiTargetWhereUniqueInput
-    data: XOR<JobTitleKpiTargetUpdateWithoutCriteriaInput, JobTitleKpiTargetUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type JobTitleKpiTargetUpdateManyWithWhereWithoutCriteriaInput = {
-    where: JobTitleKpiTargetScalarWhereInput
-    data: XOR<JobTitleKpiTargetUpdateManyMutationInput, JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaInput>
-  }
-
-  export type StaffingSlotKpiTargetUpsertWithWhereUniqueWithoutCriteriaInput = {
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    update: XOR<StaffingSlotKpiTargetUpdateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedUpdateWithoutCriteriaInput>
-    create: XOR<StaffingSlotKpiTargetCreateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedCreateWithoutCriteriaInput>
-  }
-
-  export type StaffingSlotKpiTargetUpdateWithWhereUniqueWithoutCriteriaInput = {
-    where: StaffingSlotKpiTargetWhereUniqueInput
-    data: XOR<StaffingSlotKpiTargetUpdateWithoutCriteriaInput, StaffingSlotKpiTargetUncheckedUpdateWithoutCriteriaInput>
-  }
-
-  export type StaffingSlotKpiTargetUpdateManyWithWhereWithoutCriteriaInput = {
-    where: StaffingSlotKpiTargetScalarWhereInput
-    data: XOR<StaffingSlotKpiTargetUpdateManyMutationInput, StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaInput>
-  }
-
-  export type KpiCriteriaCreateWithoutSettingsInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    details?: KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateWithoutSettingsInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaCreateOrConnectWithoutSettingsInput = {
-    where: KpiCriteriaWhereUniqueInput
-    create: XOR<KpiCriteriaCreateWithoutSettingsInput, KpiCriteriaUncheckedCreateWithoutSettingsInput>
-  }
-
-  export type KpiCriteriaUpsertWithoutSettingsInput = {
-    update: XOR<KpiCriteriaUpdateWithoutSettingsInput, KpiCriteriaUncheckedUpdateWithoutSettingsInput>
-    create: XOR<KpiCriteriaCreateWithoutSettingsInput, KpiCriteriaUncheckedCreateWithoutSettingsInput>
-    where?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaUpdateToOneWithWhereWithoutSettingsInput = {
-    where?: KpiCriteriaWhereInput
-    data: XOR<KpiCriteriaUpdateWithoutSettingsInput, KpiCriteriaUncheckedUpdateWithoutSettingsInput>
-  }
-
-  export type KpiCriteriaUpdateWithoutSettingsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateWithoutSettingsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type EmployeeCreateWithoutEmployeeKpiTargetsInput = {
-    userId?: string | null
-    firstname: string
-    lastname: string
-    fullName: string
-    employeeCode: string
-    email?: string | null
-    phone?: string | null
-    gender?: string | null
-    birthday?: Date | string | null
-    identityCard?: string | null
-    employmentType?: string | null
-    employmentStatus?: string
-    contractInfo?: NullableJsonNullValueInput | InputJsonValue
-    address?: string | null
-    avatar?: string | null
-    departmentId?: number | null
-    jobTitleId?: number | null
-    civilServantRankId?: number | null
-    partyTitleId?: number | null
-    startDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    isDeleted?: boolean
-    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
-    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
-    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
-  }
-
-  export type EmployeeUncheckedCreateWithoutEmployeeKpiTargetsInput = {
-    id?: number
-    userId?: string | null
-    firstname: string
-    lastname: string
-    fullName: string
-    employeeCode: string
-    email?: string | null
-    phone?: string | null
-    gender?: string | null
-    birthday?: Date | string | null
-    identityCard?: string | null
-    employmentType?: string | null
-    employmentStatus?: string
-    contractInfo?: NullableJsonNullValueInput | InputJsonValue
-    address?: string | null
-    avatar?: string | null
-    departmentId?: number | null
-    jobTitleId?: number | null
-    civilServantRankId?: number | null
-    partyTitleId?: number | null
-    startDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    isDeleted?: boolean
-    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
-    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
-    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
-  }
-
-  export type EmployeeCreateOrConnectWithoutEmployeeKpiTargetsInput = {
-    where: EmployeeWhereUniqueInput
-    create: XOR<EmployeeCreateWithoutEmployeeKpiTargetsInput, EmployeeUncheckedCreateWithoutEmployeeKpiTargetsInput>
-  }
-
-  export type KpiPeriodCreateWithoutTargetsInput = {
-    name: string
-    startDate: Date | string
-    endDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluations?: KpiEvaluationCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutPeriodInput
-  }
-
-  export type KpiPeriodUncheckedCreateWithoutTargetsInput = {
-    id?: number
-    name: string
-    startDate: Date | string
-    endDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-  }
-
-  export type KpiPeriodCreateOrConnectWithoutTargetsInput = {
-    where: KpiPeriodWhereUniqueInput
-    create: XOR<KpiPeriodCreateWithoutTargetsInput, KpiPeriodUncheckedCreateWithoutTargetsInput>
-  }
-
-  export type KpiCriteriaCreateWithoutTargetsInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateWithoutTargetsInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaCreateOrConnectWithoutTargetsInput = {
-    where: KpiCriteriaWhereUniqueInput
-    create: XOR<KpiCriteriaCreateWithoutTargetsInput, KpiCriteriaUncheckedCreateWithoutTargetsInput>
-  }
-
-  export type EmployeeUpsertWithoutEmployeeKpiTargetsInput = {
-    update: XOR<EmployeeUpdateWithoutEmployeeKpiTargetsInput, EmployeeUncheckedUpdateWithoutEmployeeKpiTargetsInput>
-    create: XOR<EmployeeCreateWithoutEmployeeKpiTargetsInput, EmployeeUncheckedCreateWithoutEmployeeKpiTargetsInput>
-    where?: EmployeeWhereInput
-  }
-
-  export type EmployeeUpdateToOneWithWhereWithoutEmployeeKpiTargetsInput = {
-    where?: EmployeeWhereInput
-    data: XOR<EmployeeUpdateWithoutEmployeeKpiTargetsInput, EmployeeUncheckedUpdateWithoutEmployeeKpiTargetsInput>
-  }
-
-  export type EmployeeUpdateWithoutEmployeeKpiTargetsInput = {
-    userId?: NullableStringFieldUpdateOperationsInput | string | null
-    firstname?: StringFieldUpdateOperationsInput | string
-    lastname?: StringFieldUpdateOperationsInput | string
-    fullName?: StringFieldUpdateOperationsInput | string
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    gender?: NullableStringFieldUpdateOperationsInput | string | null
-    birthday?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    identityCard?: NullableStringFieldUpdateOperationsInput | string | null
-    employmentType?: NullableStringFieldUpdateOperationsInput | string | null
-    employmentStatus?: StringFieldUpdateOperationsInput | string
-    contractInfo?: NullableJsonNullValueInput | InputJsonValue
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    departmentId?: NullableIntFieldUpdateOperationsInput | number | null
-    jobTitleId?: NullableIntFieldUpdateOperationsInput | number | null
-    civilServantRankId?: NullableIntFieldUpdateOperationsInput | number | null
-    partyTitleId?: NullableIntFieldUpdateOperationsInput | number | null
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
-    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
-    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
-  }
-
-  export type EmployeeUncheckedUpdateWithoutEmployeeKpiTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: NullableStringFieldUpdateOperationsInput | string | null
-    firstname?: StringFieldUpdateOperationsInput | string
-    lastname?: StringFieldUpdateOperationsInput | string
-    fullName?: StringFieldUpdateOperationsInput | string
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    gender?: NullableStringFieldUpdateOperationsInput | string | null
-    birthday?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    identityCard?: NullableStringFieldUpdateOperationsInput | string | null
-    employmentType?: NullableStringFieldUpdateOperationsInput | string | null
-    employmentStatus?: StringFieldUpdateOperationsInput | string
-    contractInfo?: NullableJsonNullValueInput | InputJsonValue
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    departmentId?: NullableIntFieldUpdateOperationsInput | number | null
-    jobTitleId?: NullableIntFieldUpdateOperationsInput | number | null
-    civilServantRankId?: NullableIntFieldUpdateOperationsInput | number | null
-    partyTitleId?: NullableIntFieldUpdateOperationsInput | number | null
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
-    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
-    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
-  }
-
-  export type KpiPeriodUpsertWithoutTargetsInput = {
-    update: XOR<KpiPeriodUpdateWithoutTargetsInput, KpiPeriodUncheckedUpdateWithoutTargetsInput>
-    create: XOR<KpiPeriodCreateWithoutTargetsInput, KpiPeriodUncheckedCreateWithoutTargetsInput>
-    where?: KpiPeriodWhereInput
-  }
-
-  export type KpiPeriodUpdateToOneWithWhereWithoutTargetsInput = {
-    where?: KpiPeriodWhereInput
-    data: XOR<KpiPeriodUpdateWithoutTargetsInput, KpiPeriodUncheckedUpdateWithoutTargetsInput>
-  }
-
-  export type KpiPeriodUpdateWithoutTargetsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluations?: KpiEvaluationUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutPeriodNestedInput
-  }
-
-  export type KpiPeriodUncheckedUpdateWithoutTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-  }
-
-  export type KpiCriteriaUpsertWithoutTargetsInput = {
-    update: XOR<KpiCriteriaUpdateWithoutTargetsInput, KpiCriteriaUncheckedUpdateWithoutTargetsInput>
-    create: XOR<KpiCriteriaCreateWithoutTargetsInput, KpiCriteriaUncheckedCreateWithoutTargetsInput>
-    where?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaUpdateToOneWithWhereWithoutTargetsInput = {
-    where?: KpiCriteriaWhereInput
-    data: XOR<KpiCriteriaUpdateWithoutTargetsInput, KpiCriteriaUncheckedUpdateWithoutTargetsInput>
-  }
-
-  export type KpiCriteriaUpdateWithoutTargetsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateWithoutTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiPeriodCreateWithoutJobTitleTargetsInput = {
-    name: string
-    startDate: Date | string
-    endDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluations?: KpiEvaluationCreateNestedManyWithoutPeriodInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutPeriodInput
-  }
-
-  export type KpiPeriodUncheckedCreateWithoutJobTitleTargetsInput = {
-    id?: number
-    name: string
-    startDate: Date | string
-    endDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-  }
-
-  export type KpiPeriodCreateOrConnectWithoutJobTitleTargetsInput = {
-    where: KpiPeriodWhereUniqueInput
-    create: XOR<KpiPeriodCreateWithoutJobTitleTargetsInput, KpiPeriodUncheckedCreateWithoutJobTitleTargetsInput>
-  }
-
-  export type KpiCriteriaCreateWithoutJobTitleTargetsInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaCreateOrConnectWithoutJobTitleTargetsInput = {
-    where: KpiCriteriaWhereUniqueInput
-    create: XOR<KpiCriteriaCreateWithoutJobTitleTargetsInput, KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
-  }
-
-  export type KpiPeriodUpsertWithoutJobTitleTargetsInput = {
-    update: XOR<KpiPeriodUpdateWithoutJobTitleTargetsInput, KpiPeriodUncheckedUpdateWithoutJobTitleTargetsInput>
-    create: XOR<KpiPeriodCreateWithoutJobTitleTargetsInput, KpiPeriodUncheckedCreateWithoutJobTitleTargetsInput>
-    where?: KpiPeriodWhereInput
-  }
-
-  export type KpiPeriodUpdateToOneWithWhereWithoutJobTitleTargetsInput = {
-    where?: KpiPeriodWhereInput
-    data: XOR<KpiPeriodUpdateWithoutJobTitleTargetsInput, KpiPeriodUncheckedUpdateWithoutJobTitleTargetsInput>
-  }
-
-  export type KpiPeriodUpdateWithoutJobTitleTargetsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluations?: KpiEvaluationUpdateManyWithoutPeriodNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutPeriodNestedInput
-  }
-
-  export type KpiPeriodUncheckedUpdateWithoutJobTitleTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-  }
-
-  export type KpiCriteriaUpsertWithoutJobTitleTargetsInput = {
-    update: XOR<KpiCriteriaUpdateWithoutJobTitleTargetsInput, KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput>
-    create: XOR<KpiCriteriaCreateWithoutJobTitleTargetsInput, KpiCriteriaUncheckedCreateWithoutJobTitleTargetsInput>
-    where?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaUpdateToOneWithWhereWithoutJobTitleTargetsInput = {
-    where?: KpiCriteriaWhereInput
-    data: XOR<KpiCriteriaUpdateWithoutJobTitleTargetsInput, KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput>
-  }
-
-  export type KpiCriteriaUpdateWithoutJobTitleTargetsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateWithoutJobTitleTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiPeriodCreateWithoutStaffingSlotTargetsInput = {
-    name: string
-    startDate: Date | string
-    endDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluations?: KpiEvaluationCreateNestedManyWithoutPeriodInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutPeriodInput
-  }
-
-  export type KpiPeriodUncheckedCreateWithoutStaffingSlotTargetsInput = {
-    id?: number
-    name: string
-    startDate: Date | string
-    endDate: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-  }
-
-  export type KpiPeriodCreateOrConnectWithoutStaffingSlotTargetsInput = {
-    where: KpiPeriodWhereUniqueInput
-    create: XOR<KpiPeriodCreateWithoutStaffingSlotTargetsInput, KpiPeriodUncheckedCreateWithoutStaffingSlotTargetsInput>
-  }
-
-  export type KpiCriteriaCreateWithoutStaffingSlotTargetsInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutCriteriaInput
-    tasks?: TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaCreateOrConnectWithoutStaffingSlotTargetsInput = {
-    where: KpiCriteriaWhereUniqueInput
-    create: XOR<KpiCriteriaCreateWithoutStaffingSlotTargetsInput, KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
-  }
-
-  export type KpiPeriodUpsertWithoutStaffingSlotTargetsInput = {
-    update: XOR<KpiPeriodUpdateWithoutStaffingSlotTargetsInput, KpiPeriodUncheckedUpdateWithoutStaffingSlotTargetsInput>
-    create: XOR<KpiPeriodCreateWithoutStaffingSlotTargetsInput, KpiPeriodUncheckedCreateWithoutStaffingSlotTargetsInput>
-    where?: KpiPeriodWhereInput
-  }
-
-  export type KpiPeriodUpdateToOneWithWhereWithoutStaffingSlotTargetsInput = {
-    where?: KpiPeriodWhereInput
-    data: XOR<KpiPeriodUpdateWithoutStaffingSlotTargetsInput, KpiPeriodUncheckedUpdateWithoutStaffingSlotTargetsInput>
-  }
-
-  export type KpiPeriodUpdateWithoutStaffingSlotTargetsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluations?: KpiEvaluationUpdateManyWithoutPeriodNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutPeriodNestedInput
-  }
-
-  export type KpiPeriodUncheckedUpdateWithoutStaffingSlotTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-  }
-
-  export type KpiCriteriaUpsertWithoutStaffingSlotTargetsInput = {
-    update: XOR<KpiCriteriaUpdateWithoutStaffingSlotTargetsInput, KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput>
-    create: XOR<KpiCriteriaCreateWithoutStaffingSlotTargetsInput, KpiCriteriaUncheckedCreateWithoutStaffingSlotTargetsInput>
-    where?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaUpdateToOneWithWhereWithoutStaffingSlotTargetsInput = {
-    where?: KpiCriteriaWhereInput
-    data: XOR<KpiCriteriaUpdateWithoutStaffingSlotTargetsInput, KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput>
-  }
-
-  export type KpiCriteriaUpdateWithoutStaffingSlotTargetsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateWithoutStaffingSlotTargetsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
   }
 
   export type EmployeeCreateWithoutKpiEvaluationsInput = {
@@ -40172,7 +28144,6 @@ export namespace Prisma {
     isDeleted?: boolean
     kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
-    employeeKpiTargets?: EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateWithoutKpiEvaluationsInput = {
@@ -40202,7 +28173,6 @@ export namespace Prisma {
     isDeleted?: boolean
     kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeCreateOrConnectWithoutKpiEvaluationsInput = {
@@ -40236,7 +28206,6 @@ export namespace Prisma {
     isDeleted?: boolean
     kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
     taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
-    employeeKpiTargets?: EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateWithoutKpiReviewsInput = {
@@ -40266,7 +28235,6 @@ export namespace Prisma {
     isDeleted?: boolean
     kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
     taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeCreateOrConnectWithoutKpiReviewsInput = {
@@ -40280,9 +28248,6 @@ export namespace Prisma {
     endDate: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutPeriodInput
   }
 
   export type KpiPeriodUncheckedCreateWithoutEvaluationsInput = {
@@ -40292,9 +28257,6 @@ export namespace Prisma {
     endDate: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutPeriodInput
   }
 
   export type KpiPeriodCreateOrConnectWithoutEvaluationsInput = {
@@ -40332,35 +28294,6 @@ export namespace Prisma {
   export type KpiRuleSetCreateOrConnectWithoutEvaluationsInput = {
     where: KpiRuleSetWhereUniqueInput
     create: XOR<KpiRuleSetCreateWithoutEvaluationsInput, KpiRuleSetUncheckedCreateWithoutEvaluationsInput>
-  }
-
-  export type KpiEvaluationDetailCreateWithoutEvaluationInput = {
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    criteria: KpiCriteriaCreateNestedOneWithoutDetailsInput
-  }
-
-  export type KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput = {
-    id?: number
-    criteriaId: number
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type KpiEvaluationDetailCreateOrConnectWithoutEvaluationInput = {
-    where: KpiEvaluationDetailWhereUniqueInput
-    create: XOR<KpiEvaluationDetailCreateWithoutEvaluationInput, KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput>
-  }
-
-  export type KpiEvaluationDetailCreateManyEvaluationInputEnvelope = {
-    data: KpiEvaluationDetailCreateManyEvaluationInput | KpiEvaluationDetailCreateManyEvaluationInput[]
-    skipDuplicates?: boolean
   }
 
   export type KpiEvaluationTaskCreateWithoutEvaluationInput = {
@@ -40421,7 +28354,8 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentCreateWithoutEvaluationInput = {
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -40435,7 +28369,8 @@ export namespace Prisma {
   export type KpiFormDocumentUncheckedCreateWithoutEvaluationInput = {
     id?: number
     formCode: string
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -40492,7 +28427,6 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutKpiEvaluationsInput = {
@@ -40522,7 +28456,6 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUpsertWithoutKpiReviewsInput = {
@@ -40562,7 +28495,6 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
     taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutKpiReviewsInput = {
@@ -40592,7 +28524,6 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
     taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type KpiPeriodUpsertWithoutEvaluationsInput = {
@@ -40612,9 +28543,6 @@ export namespace Prisma {
     endDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    targets?: EmployeeKpiTargetUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutPeriodNestedInput
   }
 
   export type KpiPeriodUncheckedUpdateWithoutEvaluationsInput = {
@@ -40624,9 +28552,6 @@ export namespace Prisma {
     endDate?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodNestedInput
   }
 
   export type KpiRuleSetUpsertWithoutEvaluationsInput = {
@@ -40665,22 +28590,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     domainWeights?: KpiDomainWeightUncheckedUpdateManyWithoutRuleSetNestedInput
-  }
-
-  export type KpiEvaluationDetailUpsertWithWhereUniqueWithoutEvaluationInput = {
-    where: KpiEvaluationDetailWhereUniqueInput
-    update: XOR<KpiEvaluationDetailUpdateWithoutEvaluationInput, KpiEvaluationDetailUncheckedUpdateWithoutEvaluationInput>
-    create: XOR<KpiEvaluationDetailCreateWithoutEvaluationInput, KpiEvaluationDetailUncheckedCreateWithoutEvaluationInput>
-  }
-
-  export type KpiEvaluationDetailUpdateWithWhereUniqueWithoutEvaluationInput = {
-    where: KpiEvaluationDetailWhereUniqueInput
-    data: XOR<KpiEvaluationDetailUpdateWithoutEvaluationInput, KpiEvaluationDetailUncheckedUpdateWithoutEvaluationInput>
-  }
-
-  export type KpiEvaluationDetailUpdateManyWithWhereWithoutEvaluationInput = {
-    where: KpiEvaluationDetailScalarWhereInput
-    data: XOR<KpiEvaluationDetailUpdateManyMutationInput, KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationInput>
   }
 
   export type KpiEvaluationTaskUpsertWithWhereUniqueWithoutEvaluationInput = {
@@ -40750,7 +28659,8 @@ export namespace Prisma {
     id?: IntFilter<"KpiFormDocument"> | number
     formCode?: StringFilter<"KpiFormDocument"> | string
     evaluationId?: IntFilter<"KpiFormDocument"> | number
-    contentJson?: JsonFilter<"KpiFormDocument">
+    documentFileId?: StringNullableFilter<"KpiFormDocument"> | string | null
+    contentJson?: JsonNullableFilter<"KpiFormDocument">
     status?: StringFilter<"KpiFormDocument"> | string
     submitterCode?: StringNullableFilter<"KpiFormDocument"> | string | null
     signerCode?: StringNullableFilter<"KpiFormDocument"> | string | null
@@ -40758,170 +28668,6 @@ export namespace Prisma {
     decisionDate?: DateTimeNullableFilter<"KpiFormDocument"> | Date | string | null
     createdAt?: DateTimeFilter<"KpiFormDocument"> | Date | string
     updatedAt?: DateTimeFilter<"KpiFormDocument"> | Date | string
-  }
-
-  export type KpiEvaluationCreateWithoutDetailsInput = {
-    staffingSlotId?: number | null
-    phase?: string
-    status?: string
-    generalScoreSelf?: number | null
-    taskScoreSelf?: number | null
-    generalScoreFinal?: number | null
-    taskScoreFinal?: number | null
-    totalScore?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
-  }
-
-  export type KpiEvaluationUncheckedCreateWithoutDetailsInput = {
-    id?: number
-    employeeCode: string
-    periodId: number
-    staffingSlotId?: number | null
-    ruleSetId?: number | null
-    phase?: string
-    status?: string
-    generalScoreSelf?: number | null
-    taskScoreSelf?: number | null
-    generalScoreFinal?: number | null
-    taskScoreFinal?: number | null
-    totalScore?: number | null
-    reviewerCode?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
-  }
-
-  export type KpiEvaluationCreateOrConnectWithoutDetailsInput = {
-    where: KpiEvaluationWhereUniqueInput
-    create: XOR<KpiEvaluationCreateWithoutDetailsInput, KpiEvaluationUncheckedCreateWithoutDetailsInput>
-  }
-
-  export type KpiCriteriaCreateWithoutDetailsInput = {
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingCreateNestedOneWithoutCriteriaInput
-    tasks?: TaskKpiSettingCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaUncheckedCreateWithoutDetailsInput = {
-    id?: number
-    name: string
-    description?: string | null
-    categoryId?: number | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    settings?: KpiCriteriaSettingUncheckedCreateNestedOneWithoutCriteriaInput
-    tasks?: TaskKpiSettingUncheckedCreateNestedManyWithoutKpiCriteriaInput
-    targets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedCreateNestedManyWithoutCriteriaInput
-  }
-
-  export type KpiCriteriaCreateOrConnectWithoutDetailsInput = {
-    where: KpiCriteriaWhereUniqueInput
-    create: XOR<KpiCriteriaCreateWithoutDetailsInput, KpiCriteriaUncheckedCreateWithoutDetailsInput>
-  }
-
-  export type KpiEvaluationUpsertWithoutDetailsInput = {
-    update: XOR<KpiEvaluationUpdateWithoutDetailsInput, KpiEvaluationUncheckedUpdateWithoutDetailsInput>
-    create: XOR<KpiEvaluationCreateWithoutDetailsInput, KpiEvaluationUncheckedCreateWithoutDetailsInput>
-    where?: KpiEvaluationWhereInput
-  }
-
-  export type KpiEvaluationUpdateToOneWithWhereWithoutDetailsInput = {
-    where?: KpiEvaluationWhereInput
-    data: XOR<KpiEvaluationUpdateWithoutDetailsInput, KpiEvaluationUncheckedUpdateWithoutDetailsInput>
-  }
-
-  export type KpiEvaluationUpdateWithoutDetailsInput = {
-    staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
-    phase?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    generalScoreSelf?: NullableFloatFieldUpdateOperationsInput | number | null
-    taskScoreSelf?: NullableFloatFieldUpdateOperationsInput | number | null
-    generalScoreFinal?: NullableFloatFieldUpdateOperationsInput | number | null
-    taskScoreFinal?: NullableFloatFieldUpdateOperationsInput | number | null
-    totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
-  }
-
-  export type KpiEvaluationUncheckedUpdateWithoutDetailsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    periodId?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
-    ruleSetId?: NullableIntFieldUpdateOperationsInput | number | null
-    phase?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    generalScoreSelf?: NullableFloatFieldUpdateOperationsInput | number | null
-    taskScoreSelf?: NullableFloatFieldUpdateOperationsInput | number | null
-    generalScoreFinal?: NullableFloatFieldUpdateOperationsInput | number | null
-    taskScoreFinal?: NullableFloatFieldUpdateOperationsInput | number | null
-    totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
-  }
-
-  export type KpiCriteriaUpsertWithoutDetailsInput = {
-    update: XOR<KpiCriteriaUpdateWithoutDetailsInput, KpiCriteriaUncheckedUpdateWithoutDetailsInput>
-    create: XOR<KpiCriteriaCreateWithoutDetailsInput, KpiCriteriaUncheckedCreateWithoutDetailsInput>
-    where?: KpiCriteriaWhereInput
-  }
-
-  export type KpiCriteriaUpdateToOneWithWhereWithoutDetailsInput = {
-    where?: KpiCriteriaWhereInput
-    data: XOR<KpiCriteriaUpdateWithoutDetailsInput, KpiCriteriaUncheckedUpdateWithoutDetailsInput>
-  }
-
-  export type KpiCriteriaUpdateWithoutDetailsInput = {
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUpdateOneWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUpdateManyWithoutCriteriaNestedInput
-  }
-
-  export type KpiCriteriaUncheckedUpdateWithoutDetailsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    categoryId?: NullableIntFieldUpdateOperationsInput | number | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    settings?: KpiCriteriaSettingUncheckedUpdateOneWithoutCriteriaNestedInput
-    tasks?: TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaNestedInput
-    targets?: EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    jobTitleTargets?: JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
-    staffingSlotTargets?: StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaNestedInput
   }
 
   export type TaskCreateWithoutKpiEvaluationsInput = {
@@ -40950,7 +28696,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
     histories?: TaskHistoryCreateNestedManyWithoutTaskInput
@@ -40986,7 +28731,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
     histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
@@ -41015,7 +28759,6 @@ export namespace Prisma {
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
@@ -41035,7 +28778,6 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
@@ -41081,7 +28823,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
     histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
@@ -41117,7 +28858,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
     histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
@@ -41152,7 +28892,6 @@ export namespace Prisma {
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
@@ -41172,12 +28911,12 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiFormDocumentCreateWithoutTemplateInput = {
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -41191,7 +28930,8 @@ export namespace Prisma {
   export type KpiFormDocumentUncheckedCreateWithoutTemplateInput = {
     id?: number
     evaluationId: number
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -41231,6 +28971,7 @@ export namespace Prisma {
     formCode: string
     name: string
     description?: string | null
+    templateFileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41239,6 +28980,7 @@ export namespace Prisma {
     formCode: string
     name: string
     description?: string | null
+    templateFileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41263,7 +29005,6 @@ export namespace Prisma {
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
-    details?: KpiEvaluationDetailCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
   }
 
@@ -41283,7 +29024,6 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    details?: KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
@@ -41307,6 +29047,7 @@ export namespace Prisma {
     formCode?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    templateFileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41315,6 +29056,7 @@ export namespace Prisma {
     formCode?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    templateFileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41345,7 +29087,6 @@ export namespace Prisma {
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
   }
 
@@ -41365,7 +29106,6 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
@@ -41394,7 +29134,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -41430,7 +29169,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -41532,35 +29270,6 @@ export namespace Prisma {
   export type MasterPlanCreateOrConnectWithoutTasksInput = {
     where: MasterPlanWhereUniqueInput
     create: XOR<MasterPlanCreateWithoutTasksInput, MasterPlanUncheckedCreateWithoutTasksInput>
-  }
-
-  export type TaskKpiSettingCreateWithoutTaskInput = {
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-    kpiCriteria?: KpiCriteriaCreateNestedOneWithoutTasksInput
-  }
-
-  export type TaskKpiSettingUncheckedCreateWithoutTaskInput = {
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-    kpiCriteriaId?: number | null
-  }
-
-  export type TaskKpiSettingCreateOrConnectWithoutTaskInput = {
-    where: TaskKpiSettingWhereUniqueInput
-    create: XOR<TaskKpiSettingCreateWithoutTaskInput, TaskKpiSettingUncheckedCreateWithoutTaskInput>
   }
 
   export type KpiEvaluationTaskCreateWithoutTaskInput = {
@@ -41819,41 +29528,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TaskKpiSettingUpsertWithoutTaskInput = {
-    update: XOR<TaskKpiSettingUpdateWithoutTaskInput, TaskKpiSettingUncheckedUpdateWithoutTaskInput>
-    create: XOR<TaskKpiSettingCreateWithoutTaskInput, TaskKpiSettingUncheckedCreateWithoutTaskInput>
-    where?: TaskKpiSettingWhereInput
-  }
-
-  export type TaskKpiSettingUpdateToOneWithWhereWithoutTaskInput = {
-    where?: TaskKpiSettingWhereInput
-    data: XOR<TaskKpiSettingUpdateWithoutTaskInput, TaskKpiSettingUncheckedUpdateWithoutTaskInput>
-  }
-
-  export type TaskKpiSettingUpdateWithoutTaskInput = {
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-    kpiCriteria?: KpiCriteriaUpdateOneWithoutTasksNestedInput
-  }
-
-  export type TaskKpiSettingUncheckedUpdateWithoutTaskInput = {
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-    kpiCriteriaId?: NullableIntFieldUpdateOperationsInput | number | null
-  }
-
   export type KpiEvaluationTaskUpsertWithWhereUniqueWithoutTaskInput = {
     where: KpiEvaluationTaskWhereUniqueInput
     update: XOR<KpiEvaluationTaskUpdateWithoutTaskInput, KpiEvaluationTaskUncheckedUpdateWithoutTaskInput>
@@ -42043,7 +29717,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -42079,7 +29752,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -42130,7 +29802,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -42166,7 +29837,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -42201,7 +29871,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     histories?: TaskHistoryCreateNestedManyWithoutTaskInput
@@ -42237,7 +29906,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
@@ -42288,7 +29956,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
@@ -42324,7 +29991,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
@@ -42359,7 +30025,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
     histories?: TaskHistoryCreateNestedManyWithoutTaskInput
@@ -42395,7 +30060,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
     histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
@@ -42435,7 +30099,6 @@ export namespace Prisma {
     isDeleted?: boolean
     kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
-    employeeKpiTargets?: EmployeeKpiTargetCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateWithoutTaskParticipantsInput = {
@@ -42465,7 +30128,6 @@ export namespace Prisma {
     isDeleted?: boolean
     kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeCreateOrConnectWithoutTaskParticipantsInput = {
@@ -42510,7 +30172,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
     histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
@@ -42546,7 +30207,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
     histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
@@ -42592,7 +30252,6 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutTaskParticipantsInput = {
@@ -42622,7 +30281,6 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
-    employeeKpiTargets?: EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type TaskCreateWithoutDescendantsInput = {
@@ -42651,7 +30309,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -42687,7 +30344,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -42727,7 +30383,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -42763,7 +30418,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -42814,7 +30468,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -42850,7 +30503,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -42896,7 +30548,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -42932,7 +30583,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -42967,7 +30617,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
-    kpiSettings?: TaskKpiSettingCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -43003,7 +30652,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
-    kpiSettings?: TaskKpiSettingUncheckedCreateNestedOneWithoutTaskInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -43054,7 +30702,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -43090,7 +30737,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -43143,15 +30789,6 @@ export namespace Prisma {
     attendedAt?: Date | string | null
   }
 
-  export type EmployeeKpiTargetCreateManyEmployeeInput = {
-    id?: number
-    periodId: number
-    criteriaId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
   export type KpiEvaluationUpdateWithoutEmployeeInput = {
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
@@ -43166,7 +30803,6 @@ export namespace Prisma {
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
@@ -43186,7 +30822,6 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -43222,7 +30857,6 @@ export namespace Prisma {
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
@@ -43242,7 +30876,6 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -43292,32 +30925,6 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EmployeeKpiTargetUpdateWithoutEmployeeInput = {
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    period?: KpiPeriodUpdateOneRequiredWithoutTargetsNestedInput
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutTargetsNestedInput
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateWithoutEmployeeInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyWithoutEmployeeInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KpiDomainWeightCreateManyRuleSetInput = {
@@ -43386,7 +30993,6 @@ export namespace Prisma {
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
@@ -43406,7 +31012,6 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -43445,35 +31050,6 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type EmployeeKpiTargetCreateManyPeriodInput = {
-    id?: number
-    employeeCode: string
-    criteriaId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobTitleKpiTargetCreateManyPeriodInput = {
-    id?: number
-    jobTitleId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type StaffingSlotKpiTargetCreateManyPeriodInput = {
-    id?: number
-    staffingSlotId: number
-    criteriaId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
   export type KpiEvaluationUpdateWithoutPeriodInput = {
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
@@ -43488,7 +31064,6 @@ export namespace Prisma {
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
-    details?: KpiEvaluationDetailUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
@@ -43508,7 +31083,6 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    details?: KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -43528,300 +31102,6 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type EmployeeKpiTargetUpdateWithoutPeriodInput = {
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    employee?: EmployeeUpdateOneRequiredWithoutEmployeeKpiTargetsNestedInput
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutTargetsNestedInput
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetUpdateWithoutPeriodInput = {
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutJobTitleTargetsNestedInput
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateManyWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetUpdateWithoutPeriodInput = {
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateManyWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailCreateManyCriteriaInput = {
-    id?: number
-    evaluationId: number
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type TaskKpiSettingCreateManyKpiCriteriaInput = {
-    taskId: number
-    baseScore?: number | null
-    weight?: number | null
-    scoringMethod?: string
-    isCrossDomain?: boolean
-    crossDomainMultiplier?: number
-    bonusPerDay?: number | null
-    penaltyPerDay?: number | null
-    standardDurationDays?: number | null
-  }
-
-  export type EmployeeKpiTargetCreateManyCriteriaInput = {
-    id?: number
-    employeeCode: string
-    periodId: number
-    targetValue: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobTitleKpiTargetCreateManyCriteriaInput = {
-    id?: number
-    jobTitleId: number
-    periodId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type StaffingSlotKpiTargetCreateManyCriteriaInput = {
-    id?: number
-    staffingSlotId: number
-    periodId: number
-    targetValue: number
-    weight?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type KpiEvaluationDetailUpdateWithoutCriteriaInput = {
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    evaluation?: KpiEvaluationUpdateOneRequiredWithoutDetailsNestedInput
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    evaluationId?: IntFieldUpdateOperationsInput | number
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateManyWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    evaluationId?: IntFieldUpdateOperationsInput | number
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TaskKpiSettingUpdateWithoutKpiCriteriaInput = {
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-    task?: TaskUpdateOneRequiredWithoutKpiSettingsNestedInput
-  }
-
-  export type TaskKpiSettingUncheckedUpdateWithoutKpiCriteriaInput = {
-    taskId?: IntFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-  }
-
-  export type TaskKpiSettingUncheckedUpdateManyWithoutKpiCriteriaInput = {
-    taskId?: IntFieldUpdateOperationsInput | number
-    baseScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    weight?: NullableFloatFieldUpdateOperationsInput | number | null
-    scoringMethod?: StringFieldUpdateOperationsInput | string
-    isCrossDomain?: BoolFieldUpdateOperationsInput | boolean
-    crossDomainMultiplier?: FloatFieldUpdateOperationsInput | number
-    bonusPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    penaltyPerDay?: NullableFloatFieldUpdateOperationsInput | number | null
-    standardDurationDays?: NullableFloatFieldUpdateOperationsInput | number | null
-  }
-
-  export type EmployeeKpiTargetUpdateWithoutCriteriaInput = {
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    employee?: EmployeeUpdateOneRequiredWithoutEmployeeKpiTargetsNestedInput
-    period?: KpiPeriodUpdateOneRequiredWithoutTargetsNestedInput
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    periodId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type EmployeeKpiTargetUncheckedUpdateManyWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    employeeCode?: StringFieldUpdateOperationsInput | string
-    periodId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetUpdateWithoutCriteriaInput = {
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    period?: KpiPeriodUpdateOneRequiredWithoutJobTitleTargetsNestedInput
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobTitleKpiTargetUncheckedUpdateManyWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    jobTitleId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetUpdateWithoutCriteriaInput = {
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    period?: KpiPeriodUpdateOneRequiredWithoutStaffingSlotTargetsNestedInput
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type StaffingSlotKpiTargetUncheckedUpdateManyWithoutCriteriaInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    staffingSlotId?: IntFieldUpdateOperationsInput | number
-    periodId?: IntFieldUpdateOperationsInput | number
-    targetValue?: FloatFieldUpdateOperationsInput | number
-    weight?: FloatFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailCreateManyEvaluationInput = {
-    id?: number
-    criteriaId: number
-    selfScore?: number | null
-    reviewerScore?: number | null
-    notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
   }
 
   export type KpiEvaluationTaskCreateManyEvaluationInput = {
@@ -43851,7 +31131,8 @@ export namespace Prisma {
   export type KpiFormDocumentCreateManyEvaluationInput = {
     id?: number
     formCode: string
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -43859,35 +31140,6 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-  }
-
-  export type KpiEvaluationDetailUpdateWithoutEvaluationInput = {
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    criteria?: KpiCriteriaUpdateOneRequiredWithoutDetailsNestedInput
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateWithoutEvaluationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    criteriaId?: IntFieldUpdateOperationsInput | number
-    selfScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    reviewerScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KpiEvaluationTaskUpdateWithoutEvaluationInput = {
@@ -43962,7 +31214,8 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpdateWithoutEvaluationInput = {
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -43976,7 +31229,8 @@ export namespace Prisma {
   export type KpiFormDocumentUncheckedUpdateWithoutEvaluationInput = {
     id?: IntFieldUpdateOperationsInput | number
     formCode?: StringFieldUpdateOperationsInput | string
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -43989,7 +31243,8 @@ export namespace Prisma {
   export type KpiFormDocumentUncheckedUpdateManyWithoutEvaluationInput = {
     id?: IntFieldUpdateOperationsInput | number
     formCode?: StringFieldUpdateOperationsInput | string
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44002,7 +31257,8 @@ export namespace Prisma {
   export type KpiFormDocumentCreateManyTemplateInput = {
     id?: number
     evaluationId: number
-    contentJson: JsonNullValueInput | InputJsonValue
+    documentFileId?: string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
     submitterCode?: string | null
     signerCode?: string | null
@@ -44013,7 +31269,8 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpdateWithoutTemplateInput = {
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44027,7 +31284,8 @@ export namespace Prisma {
   export type KpiFormDocumentUncheckedUpdateWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     evaluationId?: IntFieldUpdateOperationsInput | number
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44040,7 +31298,8 @@ export namespace Prisma {
   export type KpiFormDocumentUncheckedUpdateManyWithoutTemplateInput = {
     id?: IntFieldUpdateOperationsInput | number
     evaluationId?: IntFieldUpdateOperationsInput | number
-    contentJson?: JsonNullValueInput | InputJsonValue
+    documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     submitterCode?: NullableStringFieldUpdateOperationsInput | string | null
     signerCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44103,7 +31362,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -44139,7 +31397,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
-    kpiSettings?: TaskKpiSettingUncheckedUpdateOneWithoutTaskNestedInput
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput

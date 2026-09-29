@@ -4,6 +4,9 @@ model KpiFormTemplate {
   name        String  @map("name")
   description String? @db.Text
 
+  // File mẫu XML gốc lưu tại media-service
+  templateFileId String? @map("template_file_id")
+
   documents KpiFormDocument[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -17,8 +20,11 @@ model KpiFormDocument {
   formCode     String @map("form_code")
   evaluationId Int    @map("evaluation_id")
 
-  // Snapshot dữ liệu tại thời điểm nộp (bảo vệ tính toàn vẹn pháp lý)
-  contentJson Json @map("content_json")
+  // ID của file biểu mẫu (XML/PDF) sau khi điền dữ liệu, lưu tại media-service
+  documentFileId String? @map("document_file_id")
+
+  // Dữ liệu bóc tách dạng JSON để truy vấn nhanh (tùy chọn)
+  contentJson Json? @map("content_json")
 
   status        String  @default("DRAFT") @map("status") // DRAFT, SUBMITTED, APPROVED, REJECTED
   submitterCode String? @map("submitter_code")
