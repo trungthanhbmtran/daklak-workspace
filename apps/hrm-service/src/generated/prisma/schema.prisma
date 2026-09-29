@@ -41,6 +41,45 @@ model Employee {
   @@map("employees")
 }
 
+model KpiRuleSet {
+  id       Int     @id @default(autoincrement())
+  unitId   String  @map("unit_code") // Mã tổ chức (Từ user-service, ví dụ: 'BTCTU_DAKLAK')
+  version  String  @map("version") // Phiên bản công thức (Ví dụ: "v1.2026")
+  isActive Boolean @default(true) @map("is_active")
+
+  maxGeneralScore Float @default(30.0) @map("max_general_score")
+  maxTaskScore    Float @default(70.0) @map("max_task_score")
+
+  // Các hệ số giới hạn chung
+  bonusThresholdPct Float @default(10.0) @map("bonus_threshold_pct") // Mức % vượt KH để tính thưởng
+  maxBonusPct       Float @default(120.0) @map("max_bonus_pct") // Khống chế trần thành tố (Ví dụ: <= 120%)
+
+  domainWeights KpiDomainWeight[]
+  evaluations   KpiEvaluation[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([unitId, version])
+  @@map("kpi_rule_sets")
+}
+
+model KpiDomainWeight {
+  id         Int    @id @default(autoincrement())
+  ruleSetId  Int    @map("rule_set_id")
+  domainCode String @map("domain_code") // Mã mảng việc (DOM_THAM_DINH, DOM_VAN_THU...)
+
+  volumeWeight   Float @map("volume_weight") // Trọng số Khối lượng (A)
+  qualityWeight  Float @map("quality_weight") // Trọng số Chất lượng (B)
+  progressWeight Float @map("progress_weight") // Trọng số Tiến độ (C)
+  attitudeWeight Float @map("attitude_weight") // Trọng số Thái độ / Lãnh đạo (D)
+
+  ruleSet KpiRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleSetId, domainCode])
+  @@map("kpi_domain_weights")
+}
+
 model TaskKpiSetting {
   taskId        Int    @id @map("task_id")
   baseScore     Float? @map("base_score")
@@ -173,18 +212,37 @@ model StaffingSlotKpiTarget {
 }
 
 model KpiEvaluation {
-  id             Int     @id @default(autoincrement())
-  employeeCode   String  @map("employee_code")
-  periodId       Int     @map("period_id")
-  staffingSlotId Int?    @map("staffing_slot_id") // Vị trí việc làm / Định biên khi được đánh giá
-  totalScore     Float?  @map("total_score")
-  status         String  @default("DRAFT")
-  reviewerCode   String? @map("reviewer_code")
+  id             Int    @id @default(autoincrement())
+  employeeCode   String @map("employee_code")
+  periodId       Int    @map("period_id")
+  staffingSlotId Int?   @map("staffing_slot_id") // Vị trí việc làm / Định biên khi được đánh giá
 
-  employee Employee              @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
-  reviewer Employee?             @relation("KpiReviewer", fields: [reviewerCode], references: [employeeCode])
-  period   KpiPeriod             @relation(fields: [periodId], references: [id])
-  details  KpiEvaluationDetail[]
+  // Phiên bản luật chấm điểm
+  ruleSetId Int? @map("rule_set_id")
+
+  // Quy trình Workflow Mẫu 01-05
+  phase  String @default("REGISTRATION") @map("phase") // REGISTRATION, SELF_EVAL, COLLECTIVE_EVAL, FINAL
+  status String @default("DRAFT")
+
+  // Điểm tự chấm (Mẫu 02)
+  generalScoreSelf Float? @map("general_score_self")
+  taskScoreSelf    Float? @map("task_score_self")
+
+  // Điểm Hội đồng / Quyết định (Mẫu 05)
+  generalScoreFinal Float? @map("general_score_final")
+  taskScoreFinal    Float? @map("task_score_final")
+  totalScore        Float? @map("total_score")
+
+  reviewerCode String? @map("reviewer_code")
+
+  employee Employee    @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
+  reviewer Employee?   @relation("KpiReviewer", fields: [reviewerCode], references: [employeeCode])
+  period   KpiPeriod   @relation(fields: [periodId], references: [id])
+  ruleSet  KpiRuleSet? @relation(fields: [ruleSetId], references: [id])
+
+  details   KpiEvaluationDetail[]
+  tasks     KpiEvaluationTask[]
+  documents KpiFormDocument[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -207,6 +265,89 @@ model KpiEvaluationDetail {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("kpi_evaluation_details")
+}
+
+// Bảng lưu công việc đăng ký và chấm điểm (Hợp nhất dữ liệu Mẫu 01, Mẫu 02, Mẫu 04)
+model KpiEvaluationTask {
+  id           Int    @id @default(autoincrement())
+  evaluationId Int    @map("evaluation_id")
+  taskName     String @map("task_name")
+  domainCode   String @map("domain_code")
+
+  // Liên kết hệ thống công việc (Task Management)
+  taskId Int?  @map("task_id")
+  task   Task? @relation(fields: [taskId], references: [id])
+
+  // 1. Thành tố Khối lượng (A)
+  plannedQty   Float   @default(1.0) @map("planned_qty")
+  actualQty    Float?  @map("actual_qty")
+  difficultyK  Float   @default(1.0) @map("difficulty_k") // Hệ số độ khó (1.0 - 5.0)
+  isUnexpected Boolean @default(false) @map("is_unexpected") // Việc đột xuất (Lãnh đạo giao thêm)
+
+  // 2. Thành tố Chất lượng (B)
+  errorSeverity String? @map("error_severity") // Phân mức lỗi: NONE, MINOR (nhẹ), MODERATE (trung bình), SEVERE (nghiêm trọng)
+  isOutstanding Boolean @default(false) @map("is_outstanding") // Mẫu 04: Thưởng nhiệm vụ nổi trội (+10%)
+
+  // 3. Thành tố Tiến độ (C)
+  deadlineDays Int?    @map("deadline_days")
+  actualDays   Int?    @map("actual_days")
+  hasExtension Boolean @default(false) @map("has_extension") // Gia hạn hợp lệ duyệt trước 24h
+
+  // 4. Thành tố Thái độ / Lãnh đạo (D)
+  attitudeScore Float? @map("attitude_score") // Do Lãnh đạo/Người đánh giá chấm
+
+  // Kết quả tính toán lưu vết
+  calculatedVolumePct   Float? @map("calculated_volume_pct")
+  calculatedQualityPct  Float? @map("calculated_quality_pct")
+  calculatedProgressPct Float? @map("calculated_progress_pct")
+  calculatedAttitudePct Float? @map("calculated_attitude_pct")
+  finalKpiScore         Float? @map("final_kpi_score")
+
+  evaluation KpiEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("kpi_evaluation_tasks")
+}
+
+// Quản lý các biểu mẫu hành chính (Administrative Forms) độc lập với hệ thống tính toán (Metric Engine)
+model KpiFormTemplate {
+  formCode    String  @id @map("form_code") // Ví dụ: MAU_01, MAU_02
+  name        String  @map("name")
+  description String? @db.Text
+
+  documents KpiFormDocument[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("kpi_form_templates")
+}
+
+model KpiFormDocument {
+  id           Int    @id @default(autoincrement())
+  formCode     String @map("form_code")
+  evaluationId Int    @map("evaluation_id")
+
+  // Snapshot dữ liệu tại thời điểm nộp (bảo vệ tính toàn vẹn pháp lý)
+  contentJson Json @map("content_json")
+
+  status        String  @default("DRAFT") @map("status") // DRAFT, SUBMITTED, APPROVED, REJECTED
+  submitterCode String? @map("submitter_code")
+  signerCode    String? @map("signer_code") // Người ký duyệt
+
+  // Metadata quyết định (Ví dụ cho Mẫu 05)
+  decisionNumber String?   @map("decision_number")
+  decisionDate   DateTime? @map("decision_date") @db.Date
+
+  template   KpiFormTemplate @relation(fields: [formCode], references: [formCode])
+  evaluation KpiEvaluation   @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("kpi_form_documents")
 }
 
 generator client {
@@ -278,8 +419,9 @@ model Task {
   updatedAt           DateTime @updatedAt @map("updated_at")
   isDeleted           Boolean  @default(false) @map("is_deleted")
 
-  plan        MasterPlan?     @relation(fields: [planId], references: [id])
-  kpiSettings TaskKpiSetting?
+  plan           MasterPlan?         @relation(fields: [planId], references: [id])
+  kpiSettings    TaskKpiSetting?
+  kpiEvaluations KpiEvaluationTask[]
 
   participants TaskParticipant[]
   attachments  TaskAttachment[]

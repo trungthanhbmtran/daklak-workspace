@@ -445,6 +445,8 @@ async function main() {
     });
   }
   console.log(`✅ Đã seed ${kpiCriteriaData.length} KPI Criteria theo chuẩn VTVL.`);
+  const { seedBtctuKpiEngine } = require('./btctu-kpi-engine.seed');
+  await seedBtctuKpiEngine(prisma);
 }
 
 main()
