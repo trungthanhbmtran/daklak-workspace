@@ -57,8 +57,8 @@ export class PbacController implements OnModuleInit {
     description: 'Danh sách nhóm quyền (cả số người dùng, số chính sách)',
   })
   async findAll() {
-    const result = await firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result };
+    const result: any = await firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => this.handleRpcError(e));
+    return { success: true, data: result?.userGroups || [] };
   }
 
   @Get(':id')
@@ -70,7 +70,22 @@ export class PbacController implements OnModuleInit {
     description: 'Nhóm quyền và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const result = await firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => this.handleRpcError(e));
+    const result: any = await firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => this.handleRpcError(e));
+    if (result && result.policies) {
+      result.policies = result.policies.map((p: any) => {
+        let parsedConditions = { expression: '' };
+        if (typeof p.conditions === 'string' && p.conditions.trim()) {
+          try {
+            parsedConditions = JSON.parse(p.conditions);
+          } catch (e) {
+            parsedConditions = { expression: p.conditions };
+          }
+        } else if (typeof p.conditions === 'object') {
+          parsedConditions = p.conditions;
+        }
+        return { ...p, conditions: parsedConditions };
+      });
+    }
     return { success: true, data: result };
   }
 
@@ -90,11 +105,15 @@ export class PbacController implements OnModuleInit {
       }[];
     },
   ) {
+    const policies = (body.policies || []).map((p: any) => ({
+      ...p,
+      conditions: p.conditions ? JSON.stringify(p.conditions) : '',
+    }));
     const result = await firstValueFrom(
       this.pbacService.CreateUserGroup({
         name: body.name,
         description: body.description,
-        policies: body.policies,
+        policies,
       }),
     ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
@@ -120,12 +139,16 @@ export class PbacController implements OnModuleInit {
       }[];
     },
   ) {
+    const policies = (body.policies || []).map((p: any) => ({
+      ...p,
+      conditions: p.conditions ? JSON.stringify(p.conditions) : '',
+    }));
     const result = await firstValueFrom(
       this.pbacService.UpdateUserGroup({
         id,
         name: body.name,
         description: body.description,
-        policies: body.policies,
+        policies,
       }),
     ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };

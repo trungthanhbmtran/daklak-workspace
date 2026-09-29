@@ -66,12 +66,19 @@ export class ResourcesController implements OnModuleInit {
       },
     )) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
-    return (rawResources as any[]).map((r: any) => ({
-      id: r.id,
-      code: r.code ?? '',
-      name: r.name ?? r.code ?? '',
-      serviceCode: r.serviceCode ?? null,
-    }));
+    const out: any[] = [];
+    const STD_ACTIONS = ['VIEW', 'CREATE', 'UPDATE', 'DELETE', 'MANAGE'];
+    for (const r of rawResources) {
+      for (const action of STD_ACTIONS) {
+        out.push({
+          id: r.id,
+          module: r.name ?? r.code ?? '',
+          action: action,
+          code: `${r.code}:${action}`,
+        });
+      }
+    }
+    return { success: true, data: out };
   }
 
   @Post()
@@ -80,13 +87,14 @@ export class ResourcesController implements OnModuleInit {
   async createResource(
     @Body() body: { code: string; name: string; serviceCode?: string },
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.pbacService.CreateResource({
         code: body.code,
         name: body.name,
         serviceCode: body.serviceCode,
       }),
     ).catch((e) => this.handleRpcError(e));
+    return { success: true, data: result };
   }
 
   @Put(':id')
@@ -96,7 +104,7 @@ export class ResourcesController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { code?: string; name?: string; serviceCode?: string },
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.pbacService.UpdateResource({
         id,
         code: body.code,
@@ -104,5 +112,6 @@ export class ResourcesController implements OnModuleInit {
         serviceCode: body.serviceCode,
       }),
     ).catch((e) => this.handleRpcError(e));
+    return { success: true, data: result };
   }
 }
