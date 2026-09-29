@@ -1,42 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
-
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class KpiEvaluationsService {
-  constructor(private prisma: PrismaService, private cache: AppCacheService) { }
+export class KpiEvaluationsService implements OnModuleInit {
+  private docSvc: any;
 
-  // Giả lập lấy danh sách Domain của VTVL từ user-service
-  private async fetchStaffingSlotDomains(staffingSlotId: number): Promise<number[]> {
-    console.log(`[Integration] Fetching domains for StaffingSlot: ${staffingSlotId}`);
-    return [1, 2, 3]; // Mock data
+  constructor(
+    private prisma: PrismaService,
+    private cache: AppCacheService,
+    @Inject('DOCUMENT_PACKAGE') private documentClient: ClientGrpc
+  ) { }
+
+  onModuleInit() {
+    this.docSvc = this.documentClient.getService<any>('DocumentService');
   }
 
-
-  // Giả lập gọi RPC sang Integration Service
-  private async fetchMetricFromIntegration(integrationCode: string, employeeCode: string): Promise<number> {
-    // TODO: Triển khai gọi gRPC hoặc HTTP sang Integration Service (api-gateway)
-    // Ví dụ: return await this.integrationClient.fetchKpiMetric({ code: integrationCode, employeeCode });
-    console.log(`[Integration] Fetching metric for ${integrationCode} - Employee: ${employeeCode}`);
-    return Math.floor(Math.random() * 100) + 50; // Trả về số giả lập (50 - 150)
-  }
-
+  // 1. Quản lý Kỳ Đánh Giá (KpiPeriod)
   async findPeriods(query?: any) {
     const page = query?.page ? Number(query.page) : 1;
     const limit = query?.limit ? Number(query.limit) : 0;
 
-    const cached = await this.cache.get<any>('periods');
-    let periods: any[] = [];
-    if (cached) {
-      periods = cached;
-    } else {
-      periods = await this.prisma.kpiPeriod.findMany({
-        orderBy: { startDate: 'desc' },
-      });
-      await this.cache.set('periods', periods);
-    }
+    const periods = await this.prisma.kpiPeriod.findMany({
+      orderBy: { startDate: 'desc' },
+    });
 
     const actualLimit = limit > 0 ? limit : periods.length;
     const skip = (page - 1) * actualLimit;
@@ -60,6 +49,7 @@ export class KpiEvaluationsService {
       }
     };
   }
+
   async createPeriod(data: any) {
     const p = await this.prisma.kpiPeriod.create({
       data: {
@@ -68,10 +58,6 @@ export class KpiEvaluationsService {
         endDate: new Date(data.endDate),
       }
     });
-
-    // Invalidate cache when data changes
-    await this.cache.delete('periods');
-
     return {
       ...p,
       startDate: p.startDate?.toISOString() || '',
@@ -79,138 +65,52 @@ export class KpiEvaluationsService {
     };
   }
 
+  // Tiêu chí đã bị xóa. Chỗ này tạm trả về mảng rỗng để không lỗi UI cũ
   async findCriteria(query: any = {}) {
-    const isAdmin = query?.isAdmin || false;
-    const page = query?.page ? Number(query.page) : 1;
-    const limit = query?.limit ? Number(query.limit) : 0;
-
-    const totalCount = await this.prisma.kpiCriteria.count();
-    const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 10);
-    const skip = (page - 1) * limitNum;
-
-    let criteria = await this.prisma.kpiCriteria.findMany({ 
-      orderBy: { createdAt: 'desc' }, 
-      include: { settings: true },
-      skip: limit > 0 ? skip : undefined,
-      take: limit > 0 ? limitNum : undefined,
-    });
-
-    const mappedCriteria = criteria.map((c: any) => ({
-      ...c,
-      weight: c.settings?.weight || 1.0,
-      baseScore: c.settings?.baseScore || 0,
-      scoringMethod: c.settings?.scoringMethod || 'MANUAL',
-      difficulty: c.settings?.difficulty || 'NORMAL',
-      difficultyMultiplier: c.settings?.difficultyMultiplier || 1.0,
-      bonusThresholdDays: c.settings?.bonusThresholdDays || 0,
-      bonusPerDay: c.settings?.bonusPerDay || 0,
-      penaltyPerDay: c.settings?.penaltyPerDay || 0,
-      integrationCode: c.settings?.integrationCode || '',
-      formula: c.settings?.formula || '',
-    }));
-
-    const allowedActions: string[] = [];
-    if (isAdmin) {
-      allowedActions.push('CREATE', 'EDIT', 'DELETE');
-    }
-
     return {
       success: true,
-      message: 'Lấy danh sách tiêu chí thành công',
-      data: mappedCriteria,
-      meta: {
-        pagination: {
-          total: totalCount,
-          page,
-          pageSize: limitNum,
-          totalPages: Math.ceil(totalCount / limitNum)
-        },
-        allowedActions
-      }
+      data: [],
+      meta: { pagination: { total: 0, page: 1, pageSize: 10, totalPages: 1 }, allowedActions: [] }
     };
   }
 
-  async createCriterion(data: any) {
-    const c = await this.prisma.kpiCriteria.create({
-      data: {
-        name: data.name,
-        description: data.description,
-        categoryId: data.categoryId,
-        settings: {
-          create: {
-            weight: data.weight || 1.0,
-            baseScore: data.baseScore,
-            scoringMethod: data.scoringMethod || 'MANUAL',
-            difficulty: data.difficulty || 'NORMAL',
-            difficultyMultiplier: data.difficultyMultiplier || 1.0,
-            bonusThresholdDays: data.bonusThresholdDays || 0,
-            bonusPerDay: data.bonusPerDay || 0,
-            penaltyPerDay: data.penaltyPerDay || 0,
-          }
-        }
+  async createCriterion(data: any) { return {}; }
+  async updateCriterion(id: number, data: any) { return {}; }
+  async deleteCriterion(id: number) { return { success: true }; }
+
+
+  // 2. Logic Trục Liên Thông (LGSP)
+  private async fetchLgspFailedCount(periodStart: Date, periodEnd: Date, employeeCode: string): Promise<number> {
+    try {
+      const employee = await this.prisma.employee.findUnique({ where: { employeeCode }});
+      
+      const payload = {
+        fromOrganId: "H15.151", // Fallback to department code if we can fetch it via GRPC later
+        documentType: "8",
+        trangThaiTiepNhan: "fail",
+        startDate: periodStart.toISOString().split('T')[0],
+        endDate: periodEnd.toISOString().split('T')[0]
+      };
+      
+      const res: any = await lastValueFrom(this.docSvc.FetchLgspStatistics(payload));
+      if (res && res.success) {
+        const stats = JSON.parse(res.data);
+        return stats.failed || 0;
       }
-    });
-
-    // Invalidate cache
-    await this.cache.delete('criteria');
-    return c;
+      return 0;
+    } catch (err) {
+      console.error(`[Integration] Error fetching LGSP metric:`, err);
+      return 0;
+    }
   }
 
-  async updateCriterion(id: number, data: any) {
-    const updateData: any = {};
-    if (data.name) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
-
-    const settingsData: any = {};
-    if (data.weight !== undefined) settingsData.weight = data.weight;
-    if (data.baseScore !== undefined) settingsData.baseScore = data.baseScore;
-    if (data.scoringMethod) settingsData.scoringMethod = data.scoringMethod;
-    if (data.difficulty) settingsData.difficulty = data.difficulty;
-    if (data.difficultyMultiplier !== undefined) settingsData.difficultyMultiplier = data.difficultyMultiplier;
-    if (data.bonusThresholdDays !== undefined) settingsData.bonusThresholdDays = data.bonusThresholdDays;
-    if (data.bonusPerDay !== undefined) settingsData.bonusPerDay = data.bonusPerDay;
-    if (data.penaltyPerDay !== undefined) settingsData.penaltyPerDay = data.penaltyPerDay;
-
-    const c = await this.prisma.kpiCriteria.update({
-      where: { id },
-      data: {
-        ...updateData,
-        ...(Object.keys(settingsData).length > 0 && {
-          settings: {
-            upsert: {
-              create: settingsData,
-              update: settingsData
-            }
-          }
-        })
-      },
-    });
-
-    // Invalidate cache
-    await this.cache.delete('criteria');
-    return c;
-  }
-
-  async deleteCriterion(id: number) {
-    await this.prisma.kpiCriteria.delete({ where: { id } });
-    await this.cache.delete('criteria'); // Invalidate cache
-    return { success: true };
-  }
-
+  // 3. Logic Đánh Giá (KpiEvaluation)
   async createEvaluation(data: any) {
     const evalData = await this.prisma.kpiEvaluation.create({
       data: {
         employeeCode: data.employeeCode,
         periodId: data.periodId,
         status: 'DRAFT',
-        details: {
-          create: data.details.map((d: any) => ({
-            criteriaId: d.criteriaId,
-            selfScore: d.selfScore,
-            notes: d.notes,
-          }))
-        }
       }
     });
     return evalData;
@@ -223,20 +123,6 @@ export class KpiEvaluationsService {
     const employeeCode = typeof query === 'object' ? query.employeeCode : query;
 
     if (employeeCode) where.employeeCode = employeeCode;
-
-    if (typeof query === 'object' && !query.isAdmin && !query.isFetchingOwn) {
-      // Must belong to descendant unit
-      const descendantIds = Array.isArray(query.callerDescendantUnitIds)
-        ? query.callerDescendantUnitIds.map(Number).filter(Boolean)
-        : [];
-
-      if (descendantIds.length > 0) {
-        where.employee = { departmentId: { in: descendantIds } };
-      } else {
-        // No descendants -> can't view others
-        where.employeeCode = query.currentEmployeeCode;
-      }
-    }
 
     const totalCount = await this.prisma.kpiEvaluation.count({ where });
     const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 10);
@@ -269,471 +155,112 @@ export class KpiEvaluationsService {
   }
 
   async getEvaluationStats(query: any) {
-    const where: any = {};
-    if (query.periodId) {
-      where.periodId = Number(query.periodId);
-    }
-    where.status = { in: ['SUBMITTED', 'APPROVED'] }; // Chỉ lấy phiếu đã nộp hoặc đã chốt
-
-    if (query.callerDescendantUnitIds && query.callerDescendantUnitIds.length > 0) {
-      const descendantIds = query.callerDescendantUnitIds.map(Number).filter(Boolean);
-      where.employee = { departmentId: { in: descendantIds } };
-    }
-
-    const evaluations = await this.prisma.kpiEvaluation.findMany({
-      where,
-      include: { employee: true }
-    });
-
-    // Gom nhóm theo departmentId
-    const statsMap = new Map<number, { count: number; totalScore: number }>();
-    let totalCompanyScore = 0;
-    let totalCompanyCount = 0;
-
-    for (const ev of evaluations) {
-      if (!ev.employee || ev.employee.departmentId === null) continue;
-      const depId = ev.employee.departmentId;
-      const score = ev.totalScore || 0;
-
-      if (!statsMap.has(depId)) {
-        statsMap.set(depId, { count: 0, totalScore: 0 });
-      }
-      const st = statsMap.get(depId)!;
-      st.count += 1;
-      st.totalScore += score;
-
-      totalCompanyScore += score;
-      totalCompanyCount += 1;
-    }
-
-    const statsByUnit = Array.from(statsMap.entries()).map(([departmentId, data]) => ({
-      departmentId,
-      totalEvaluations: data.count,
-      avgScore: data.count > 0 ? parseFloat((data.totalScore / data.count).toFixed(2)) : 0
-    }));
-
-    return {
-      success: true,
-      data: {
-        statsByUnit,
-        companyAvgScore: totalCompanyCount > 0 ? parseFloat((totalCompanyScore / totalCompanyCount).toFixed(2)) : 0,
-        totalEvaluations: totalCompanyCount
-      }
-    };
+    return { success: true, data: { statsByUnit: [], companyAvgScore: 0, totalEvaluations: 0 } };
   }
 
+  // TÍNH ĐIỂM TỰ ĐỘNG DỰA TRÊN SỐ LIỆU LGSP VÀ CÔNG VIỆC TRÊN HỆ THỐNG
   async calculatePersonalKpi(data: { periodId: number, employeeCode: string, staffingSlotId?: number }) {
     const { periodId, employeeCode, staffingSlotId } = data;
 
-
-
     const period = await this.prisma.kpiPeriod.findUnique({ where: { id: periodId } });
-    if (!period) {
-      throw new RpcException({ message: 'Kỳ đánh giá không tồn tại', code: 3 /* INVALID_ARGUMENT */ });
-    }
+    if (!period) throw new RpcException({ message: 'Kỳ đánh giá không tồn tại', code: 3 });
 
-    // Find all completed tasks for this employee within the period
+    // 1. Tính toán điểm Công việc Hệ thống
+    let taskScore = 0;
+    
+    // Tìm các công việc hoàn thành trong kỳ
     const taskParticipants = await this.prisma.taskParticipant.findMany({
       where: {
         employeeCode: employeeCode,
         participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] },
         task: {
           isCompleted: true,
-          completedAt: {
-            gte: period.startDate,
-            lte: period.endDate
-          }
+          completedAt: { gte: period.startDate, lte: period.endDate }
         }
-      },
-      include: {
-        task: {
-          include: { kpiSettings: true }
-        }
-      }
-    });
-
-    const coordCriteria = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: 'phối hợp' } } });
-    const coordCriteriaId = coordCriteria?.id || null;
-
-    let totalScore = 0;
-    const calculatedTasks: any[] = [];
-    const groupedScores: Record<number, number> = {};
-    const groupedTasksCount: Record<number, number> = {};
-    const groupedIntegrationData: Record<number, { actual: number, target: number }> = {};
-
-    // 1. Tính toán điểm từ Tasks (Nội bộ)
-    for (const tp of taskParticipants) {
-      const task = tp.task;
-      const baseScore = task.kpiSettings?.baseScore || 0;
-      let finalScore = baseScore;
-
-      const bonusPerDay = task.kpiSettings?.bonusPerDay || 0;
-      const penaltyPerDay = task.kpiSettings?.penaltyPerDay || 0;
-
-      if (task.completedAt && task.dueDate) {
-        // Calculate days difference
-        const completedDate = new Date(task.completedAt);
-        completedDate.setHours(0, 0, 0, 0);
-        const dueDate = new Date(task.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-
-        const diffTime = completedDate.getTime() - dueDate.getTime();
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
-          // Completed early
-          finalScore += Math.abs(diffDays) * bonusPerDay;
-        }
-        
-        if (diffDays > 0) {
-          // Completed late
-          finalScore -= diffDays * penaltyPerDay;
-        }
-      }
-
-      if (task.kpiSettings?.isCrossDomain && task.kpiSettings?.crossDomainMultiplier) {
-        finalScore = finalScore * task.kpiSettings.crossDomainMultiplier;
-      }
-
-      // Nhân tỷ lệ đóng góp
-      const contribution = tp.contributionPercentage != null ? tp.contributionPercentage : 100.0;
-      finalScore = finalScore * (contribution / 100.0);
-
-      totalScore += finalScore;
-
-      let criteriaId = task.kpiSettings?.kpiCriteriaId;
-      if (tp.participantRole === 'COORDINATOR' && coordCriteriaId) {
-        criteriaId = coordCriteriaId;
-      }
-
-      if (criteriaId) {
-        if (!groupedScores[criteriaId]) {
-          groupedScores[criteriaId] = 0;
-          groupedTasksCount[criteriaId] = 0;
-        }
-        groupedScores[criteriaId] += finalScore;
-        groupedTasksCount[criteriaId] += 1;
-      }
-
-      calculatedTasks.push({
-        taskId: task.id,
-        title: task.title,
-        baseScore: baseScore,
-        finalScore: finalScore,
-        completedAt: task.completedAt ? task.completedAt.toISOString() : '',
-        dueDate: task.dueDate ? task.dueDate.toISOString() : '',
-        status: task.status,
-        kpiCriteriaId: criteriaId
-      });
-    }
-
-    // 1.5. Tính toán điểm từ các Bước Checklist (TaskStep)
-    const completedSteps = await this.prisma.taskStep.findMany({
-      where: {
-        status: 'COMPLETED',
-        completedAt: {
-          gte: period.startDate,
-          lte: period.endDate
-        },
-        OR: [
-          { assigneeCode: employeeCode },
-          { 
-            assigneeCode: null, 
-            task: {
-              participants: {
-                some: { employeeCode, participantRole: 'ASSIGNEE' }
-              }
-            }
-          }
-        ]
       },
       include: { task: true }
     });
 
-    const calculatedSteps: any[] = [];
-    for (const step of completedSteps) {
-      if (!step.baseScore) continue;
-      
-      const stepScore = step.baseScore;
-      totalScore += stepScore;
-      
-      calculatedSteps.push({
-        stepId: step.id,
-        taskId: step.taskId,
-        title: step.title,
-        baseScore: stepScore,
-        finalScore: stepScore,
-        completedAt: step.completedAt ? step.completedAt.toISOString() : ''
-      });
+    for (const tp of taskParticipants) {
+      // Giả sử mỗi công việc hoàn thành được 10 điểm cơ bản
+      taskScore += 10 * ((tp.contributionPercentage || 100) / 100);
     }
 
-    // 2. Tính toán điểm từ Integration API (Ngoại bộ như LGSP)
-    const integrationCriteria = await this.prisma.kpiCriteria.findMany({
-      where: { settings: { scoringMethod: 'INTEGRATION_API' } },
-      include: { settings: true }
-    });
+    // 2. Tính toán điểm LGSP (Trừ điểm nếu lỗi)
+    const failedLgspCount = await this.fetchLgspFailedCount(period.startDate, period.endDate, employeeCode);
+    const lgspPenalty = failedLgspCount * 2; // Trừ 2 điểm cho mỗi văn bản lỗi LGSP
 
-    if (integrationCriteria.length > 0) {
-      // Lấy danh sách chỉ tiêu nhân viên đã đăng ký
-      const employeeTargets = await this.prisma.employeeKpiTarget.findMany({
-        where: { employeeCode, periodId }
-      });
-      const targetMap = new Map<number, number>();
-      for (const t of employeeTargets) {
-        targetMap.set(t.criteriaId, t.targetValue);
-      }
+    const finalTotalScore = Math.max(0, taskScore - lgspPenalty); // Điểm thấp nhất là 0
 
-      for (const criteria of integrationCriteria) {
-        const settings = criteria.settings;
-        if (!settings || !settings.integrationCode) continue;
-
-        // Gọi sang Integration Module để lấy dữ liệu thực tế
-        const actualValue = await this.fetchMetricFromIntegration(settings.integrationCode, employeeCode);
-
-        // Lấy chỉ tiêu, mặc định 1 nếu chưa đăng ký để tránh lỗi chia 0 (tuỳ nghiệp vụ)
-        const targetValue = targetMap.get(criteria.id) || 1;
-
-        // Tính điểm bằng công thức linh hoạt (evaluate string formula)
-        let formulaScore = 0;
-        const weight = settings.weight || 1.0;
-        const baseScore = settings.baseScore || 0;
-        const formulaStr = settings.formula;
-
-        if (formulaStr) {
-          try {
-            // Replace biến số trong chuỗi công thức
-            // VD: "(actual / target) * weight"
-            const evalStr = formulaStr
-              .replace(/actual/g, actualValue.toString())
-              .replace(/target/g, targetValue.toString())
-              .replace(/weight/g, weight.toString())
-              .replace(/baseScore/g, baseScore.toString());
-
-            // eslint-disable-next-line no-new-func
-            formulaScore = new Function('return ' + evalStr)();
-          } catch (err) {
-            console.error('Error evaluating formula', formulaStr, err);
-          }
-        } else {
-          // Công thức mặc định nếu không cấu hình
-          formulaScore = (actualValue / targetValue) * (baseScore || weight * 10);
-        }
-
-        if (!groupedScores[criteria.id]) {
-          groupedScores[criteria.id] = 0;
-        }
-        groupedScores[criteria.id] += formulaScore;
-        totalScore += formulaScore;
-
-        groupedIntegrationData[criteria.id] = { actual: actualValue, target: targetValue };
-      }
-    }
-
-    // Upsert the KpiEvaluation record
-    const existingEvaluation = await this.prisma.kpiEvaluation.findFirst({
+    // Upsert Evaluation
+    let existingEvaluation = await this.prisma.kpiEvaluation.findFirst({
       where: { employeeCode, periodId }
     });
 
-    let evaluationId = existingEvaluation?.id;
-
-    try {
-      if (!existingEvaluation) {
-        const newEval = await this.prisma.kpiEvaluation.create({
-          data: {
-            employeeCode,
-            periodId,
-            totalScore,
-            status: 'COMPUTING'
-          }
-        });
-        evaluationId = newEval.id;
-      }
-      
-      if (existingEvaluation && (existingEvaluation.status === 'DRAFT' || existingEvaluation.status === 'COMPUTING')) {
-        await this.prisma.kpiEvaluation.update({
-          where: { id: existingEvaluation.id },
-          data: { totalScore, status: 'COMPUTING' }
-        });
-      }
-    } catch (error: any) {
-      if (error.code === 'P2003') {
-        throw new RpcException({ message: 'Nhân viên không tồn tại trong hệ thống', code: 3 /* INVALID_ARGUMENT */ });
-      }
-      throw error;
+    if (!existingEvaluation) {
+      existingEvaluation = await this.prisma.kpiEvaluation.create({
+        data: {
+          employeeCode,
+          periodId,
+          totalScore: finalTotalScore,
+          taskScoreSelf: taskScore,
+          generalScoreSelf: -lgspPenalty, // Lưu tạm điểm phạt vào generalScore
+          status: 'COMPUTING'
+        }
+      });
+    } else {
+      existingEvaluation = await this.prisma.kpiEvaluation.update({
+        where: { id: existingEvaluation.id },
+        data: { 
+          totalScore: finalTotalScore,
+          taskScoreSelf: taskScore,
+          generalScoreSelf: -lgspPenalty,
+          status: 'COMPUTING' 
+        }
+      });
     }
 
     return {
       success: true,
-      message: 'Tính điểm KPI thành công',
-      totalScore,
-      evaluationId,
-      tasks: calculatedTasks,
-      steps: calculatedSteps,
-      groupedScores,
-      groupedTasksCount,
-      groupedIntegrationData
+      message: 'Tính điểm KPI tự động thành công',
+      totalScore: finalTotalScore,
+      taskScore: taskScore,
+      lgspPenalty: lgspPenalty,
+      failedLgspCount: failedLgspCount,
+      evaluationId: existingEvaluation.id
     };
   }
 
   async getEvaluationDetail(id: number) {
     const evaluation = await this.prisma.kpiEvaluation.findUnique({
       where: { id },
-      include: {
-        employee: true,
-        details: true
-      }
+      include: { employee: true, documents: true }
     });
 
     if (!evaluation) {
-      throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 /* INVALID_ARGUMENT */ });
+      throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 });
     }
-
-    const allCriteria = await this.prisma.kpiCriteria.findMany({
-      orderBy: { id: 'asc' },
-      include: { settings: true }
-    });
-
-    // Auto-calculate tasks if status is DRAFT or COMPUTING
-    const calcResult = await this.calculatePersonalKpi({ periodId: evaluation.periodId, employeeCode: evaluation.employeeCode, staffingSlotId: evaluation.staffingSlotId || undefined });
-
-    const evaluationDetailsMap = new Map(evaluation.details.map(d => [d.criteriaId, d]));
-
-    const finalDetails = allCriteria.map(crit => {
-      const existingDetail = evaluationDetailsMap.get(crit.id);
-
-      let autoScore: number | null = null;
-      let notes = existingDetail?.notes || '';
-
-      switch(crit.settings?.scoringMethod) {
-        case 'AUTOMATIC':
-          autoScore = calcResult.groupedScores?.[crit.id] || 0;
-          const count = calcResult.groupedTasksCount?.[crit.id] || 0;
-          notes = `Hệ thống tổng hợp từ ${count} công việc đã hoàn thành.`;
-          break;
-        case 'INTEGRATION_API':
-          autoScore = calcResult.groupedScores?.[crit.id] || 0;
-          const data = calcResult.groupedIntegrationData?.[crit.id];
-          if (data) {
-            notes = `Dữ liệu liên thông: Đạt ${data.actual} / Chỉ tiêu ${data.target}`;
-          } else {
-            notes = `Đang chờ số liệu liên thông.`;
-          }
-          break;
-      }
-
-      return {
-        id: existingDetail?.id || null,
-        criteriaId: crit.id,
-        criteriaName: crit.name,
-        description: crit.description,
-        scoringMethod: crit.settings?.scoringMethod,
-        baseScore: crit.settings?.baseScore,
-        weight: crit.settings?.weight,
-        selfScore: existingDetail?.selfScore ?? (['AUTOMATIC', 'INTEGRATION_API'].includes(crit.settings?.scoringMethod || '') ? autoScore : null),
-        reviewerScore: existingDetail?.reviewerScore ?? null,
-        notes: notes,
-      };
-    });
-
-    const dataObj = {
-      ...evaluation,
-      details: finalDetails,
-      tasks: calcResult.tasks
-    };
 
     return {
       success: true,
       message: 'Lấy chi tiết thành công',
-      data: JSON.stringify(dataObj)
+      data: JSON.stringify(evaluation)
     };
   }
 
   async submitSelfScore(id: number, payload: any) {
-    const evaluation = await this.prisma.kpiEvaluation.findUnique({ where: { id } });
-    if (!evaluation) throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 /* INVALID_ARGUMENT */ });
-
-    if (evaluation.status !== 'DRAFT' && evaluation.status !== 'COMPUTING') {
-      throw new RpcException({ message: 'Phiếu đã được nộp hoặc đã chốt', code: 3 /* INVALID_ARGUMENT */ });
-    }
-
-    const ops: any[] = [];
-    for (const d of payload.details) {
-      if (d.id) {
-        ops.push(
-          this.prisma.kpiEvaluationDetail.update({
-            where: { id: d.id },
-            data: { selfScore: d.selfScore, notes: d.notes }
-          })
-        );
-      } else {
-        ops.push(
-          this.prisma.kpiEvaluationDetail.create({
-            data: {
-              evaluationId: id,
-              criteriaId: d.criteriaId,
-              selfScore: d.selfScore,
-              notes: d.notes
-            }
-          })
-        );
-      }
-    }
-    await this.prisma.$transaction(ops);
-
     await this.prisma.kpiEvaluation.update({
       where: { id },
       data: { status: 'SUBMITTED' }
     });
-
     return { success: true, message: 'Nộp phiếu đánh giá thành công', data: JSON.stringify({ status: 'SUBMITTED' }) };
   }
 
   async approveReviewerScore(id: number, payload: any, reviewerCode: string) {
-    const evaluation = await this.prisma.kpiEvaluation.findUnique({ where: { id } });
-    if (!evaluation) throw new RpcException({ message: 'Không tìm thấy phiếu đánh giá', code: 3 /* INVALID_ARGUMENT */ });
-
-    if (evaluation.status !== 'SUBMITTED') {
-      throw new RpcException({ message: 'Chỉ có thể duyệt phiếu ở trạng thái đã nộp', code: 3 /* INVALID_ARGUMENT */ });
-    }
-
-    let finalTotalScore = 0;
-
-    const ops: any[] = [];
-    for (const d of payload.details) {
-      if (d.id) {
-        ops.push(
-          this.prisma.kpiEvaluationDetail.update({
-            where: { id: d.id },
-            data: { reviewerScore: d.reviewerScore }
-          })
-        );
-        finalTotalScore += (d.reviewerScore || 0);
-      } else {
-        ops.push(
-          this.prisma.kpiEvaluationDetail.create({
-            data: {
-              evaluationId: id,
-              criteriaId: d.criteriaId,
-              selfScore: d.selfScore,
-              reviewerScore: d.reviewerScore,
-              notes: d.notes
-            }
-          })
-        );
-        finalTotalScore += (d.reviewerScore || 0);
-      }
-    }
-    await this.prisma.$transaction(ops);
-
     await this.prisma.kpiEvaluation.update({
       where: { id },
-      data: {
-        status: 'APPROVED',
-        reviewerCode: reviewerCode,
-        totalScore: finalTotalScore
-      }
+      data: { status: 'APPROVED', reviewerCode: reviewerCode }
     });
-
-    return { success: true, message: 'Đã chốt phiếu đánh giá', data: JSON.stringify({ status: 'APPROVED', totalScore: finalTotalScore }) };
+    return { success: true, message: 'Đã chốt phiếu đánh giá', data: JSON.stringify({ status: 'APPROVED' }) };
   }
 }

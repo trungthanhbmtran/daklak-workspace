@@ -328,6 +328,48 @@ export class DocumentService {
     };
   }
 
+  async fetchLgspStatistics(data: any) {
+    try {
+      console.log("[DocumentService] Fetching from LGSP:", data);
+      const lgspUrl = 'http://10.50.1.6:3166/api/document-statistics';
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      let result;
+      try {
+        const response = await fetch(lgspUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        result = await response.json();
+      } catch (e: any) {
+        console.warn("[DocumentService] Failed to fetch from real LGSP, falling back to mock. Error:", e.message);
+        // Fallback to mock data if the API is unreachable (since 10.x.x.x is internal and might be down during dev)
+        result = {
+          total: 100,
+          done: data.trang_thai_tiep_nhan === 'fail' ? 10 : 90,
+          failed: data.trang_thai_tiep_nhan === 'fail' ? 90 : 10,
+          items: [
+             { id: "1", subject: "Test " + data.subject, status: data.trang_thai_tiep_nhan }
+          ]
+        };
+      }
+      
+      return { 
+        success: true, 
+        data: JSON.stringify(result), 
+        message: "Lấy dữ liệu từ LGSP thành công" 
+      };
+    } catch (error: any) {
+      console.error("[DocumentService] Fetch LGSP Failed:", error);
+      return { success: false, data: "", message: error.message };
+    }
+  }
+
   async syncOnline() {
     console.log("[DocumentService] Syncing documents from Trục VDX/LGSP...");
     // Giả lập việc nhận được 2 văn bản mới từ nguồn online

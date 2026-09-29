@@ -852,7 +852,7 @@ export class TaskSharedService {
       progress: t.progress ?? 0,
       coassigneeNames: t.coassigneeNames || [],
       children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponse(child)) : [],
-      kpiCriteriaId: t.kpiSettings?.kpiCriteriaId || undefined,
+      
       workflowInstId: t.workflowInstId || (t.metadata ? t.metadata.workflowId : undefined),
       metadata: t.metadata || undefined,
       participants: Array.isArray(t.participants) ? t.participants.map((p: any) => ({

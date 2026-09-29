@@ -14,6 +14,7 @@ service DocumentService {
   rpc ExtractMetadata(ExtractMetadataRequest) returns (ExtractMetadataResponse) {}
   rpc SyncOnline(common.Empty) returns (SyncOnlineResponse) {}
   rpc GetLogs(GetLogsRequest) returns (GetLogsResponse) {}
+  rpc FetchLgspStatistics(FetchLgspStatisticsRequest) returns (FetchLgspStatisticsResponse) {}
   
   // Workflow methods
   rpc ReceiveDocument(WorkflowRequest) returns (DocumentResponse) {}
@@ -70,6 +71,28 @@ message GetStatisticsResponse {
   int32 incomingLate = 3;
   int32 outgoingTotal = 4;
   int32 urgentTotal = 5;
+}
+
+message LgspSearchKeyword {
+  string filter = 1;
+  string value = 2;
+  string type = 3;
+}
+
+message FetchLgspStatisticsRequest {
+  string from_organ_id = 1;
+  string document_type = 2;
+  string trang_thai_tiep_nhan = 3;
+  string subject = 4;
+  string start_date = 5;
+  string end_date = 6;
+  repeated LgspSearchKeyword searchKeyword = 7;
+}
+
+message FetchLgspStatisticsResponse {
+  bool success = 1;
+  string data = 2; // JSON string chứa response gốc từ LGSP
+  string message = 3;
 }
 
 message Document {

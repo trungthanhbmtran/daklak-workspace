@@ -17,7 +17,7 @@ export const organizationUnitSchema = z.object({
    * Dùng để render đúng chức danh, thẩm quyền ký duyệt và luồng giao việc/điều chuyển.
    */
   categoryCode: z.string().min(1, "Vui lòng chọn phân loại đơn vị"),
-  typeId: z.number({ required_error: "Vui lòng chọn loại đơn vị cụ thể", invalid_type_error: "Vui lòng chọn loại đơn vị cụ thể" }).min(1, "Vui lòng chọn loại đơn vị cụ thể"),
+  typeId: z.number().min(1, "Vui lòng chọn loại đơn vị cụ thể"),
   domainIds: z.array(z.number()).optional(),
   scope: z.string().max(500, "Phạm vi quản lý tối đa 500 ký tự").optional(),
 });

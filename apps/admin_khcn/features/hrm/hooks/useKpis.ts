@@ -2,68 +2,10 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { hrmKpiPlansApi, hrmKpiEvaluationsApi, hrmKpiCriteriaApi } from "../api";
+import { hrmKpiPlansApi, hrmKpiEvaluationsApi } from "../api";
 import { hrmKeys } from "../keys";
 import { toast } from "sonner";
 
-export function useKpiCriteriaList(params?: any) {
-  return useQuery({
-    queryKey: [...hrmKeys.kpis(), params],
-    queryFn: async () => {
-      const res = await hrmKpiCriteriaApi.list(params);
-      return res.data;
-    },
-  });
-}
-
-export function useKpiCriteriaListPaginated(params?: any) {
-  return useQuery({
-    queryKey: ['kpiCriteriaPaginated', params?.page, params?.limit],
-    queryFn: async () => {
-      const res = await hrmKpiCriteriaApi.list(params);
-      return res;
-    },
-  });
-}
-
-export function useCreateKpiCriterion() {
-  const queryClient = useQueryClient();
-  return useMutation({
-     
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: (payload: any) => hrmKpiCriteriaApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
-      queryClient.invalidateQueries({ queryKey: ['kpiCriteriaPaginated'] });
-    },
-  });
-}
-
-export function useUpdateKpiCriterion() {
-  const queryClient = useQueryClient();
-  return useMutation({
-     
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmKpiCriteriaApi.update(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
-      queryClient.invalidateQueries({ queryKey: ['kpiCriteriaPaginated'] });
-    },
-  });
-}
-
-export function useDeleteKpiCriterion() {
-  const queryClient = useQueryClient();
-  return useMutation({
-     
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: (id: number) => hrmKpiCriteriaApi.deleteOne(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...hrmKeys.kpis()] });
-      queryClient.invalidateQueries({ queryKey: ['kpiCriteriaPaginated'] });
-    },
-  });
-}
 
 export function useCreateKpiPlan() {
   const queryClient = useQueryClient();

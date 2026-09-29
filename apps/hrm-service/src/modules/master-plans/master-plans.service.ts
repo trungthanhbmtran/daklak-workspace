@@ -303,12 +303,6 @@ export class MasterPlansService {
               description: task.description,
               status: 'TEMPLATE',
               priority: 'MEDIUM',
-              kpiSettings: {
-                create: {
-                  weight: task.weight,
-                  baseScore: task.targetValue
-                }
-              },
               planId: mp.id,
               creatorEmployeeCode: 'SYSTEM',
               participants: {

@@ -126,24 +126,22 @@ export class TasksService {
   private async resolveKpiSettings(data: any, planId: number | null): Promise<KpiSettings> {
     let { baseScore, weight, scoringMethod = 'MANUAL', bonusPerDay, penaltyPerDay } = data;
     let autoKpiCriteriaId: number | null = data.kpiCriteriaId ? parseInt(data.kpiCriteriaId, 10) : null;
-
     if (!autoKpiCriteriaId) {
       const keyword = planId ? 'định mức' : 'đột xuất';
-      const crit = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: keyword } } });
-      if (crit) autoKpiCriteriaId = crit.id;
+      // const crit = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: keyword } } });
+      // if (crit) autoKpiCriteriaId = crit.id;
     }
 
     if (autoKpiCriteriaId) {
-      const s = await this.prisma.kpiCriteriaSetting.findUnique({ where: { criteriaId: autoKpiCriteriaId } });
-      if (s) {
-        baseScore ??= s.baseScore ?? 100;
-        weight ??= s.weight ?? 1.0;
-        if (!data.scoringMethod) scoringMethod = s.scoringMethod ?? 'MANUAL';
-        bonusPerDay ??= s.bonusPerDay ?? 0;
-        penaltyPerDay ??= s.penaltyPerDay ?? 0;
-      }
+      // const s = await this.prisma.kpiCriteriaSetting.findUnique({ where: { criteriaId: autoKpiCriteriaId } });
+      // if (s) {
+      //   baseScore ??= s.baseScore ?? 100;
+      //   weight ??= s.weight ?? 1.0;
+      //   if (!data.scoringMethod) scoringMethod = s.scoringMethod ?? 'MANUAL';
+      //   bonusPerDay ??= s.bonusPerDay ?? 0;
+      //   penaltyPerDay ??= s.penaltyPerDay ?? 0;
+      // }
     }
-
     return { baseScore, weight, scoringMethod, bonusPerDay, penaltyPerDay, autoKpiCriteriaId };
   }
 
@@ -279,7 +277,7 @@ export class TasksService {
       orderBy: { createdAt: 'desc' },
       skip,
       take,
-      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } }, kpiSettings: true }
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } }, _count: { select: { descendants: true } } }
     });
 
     const paginatedMeta: PaginatedMeta = {
@@ -609,7 +607,7 @@ export class TasksService {
             employee: { select: { fullName: true, departmentId: true } }
           } 
         },
-        kpiSettings: true
+        // kpiSettings: true
       },
     });
 
@@ -647,18 +645,18 @@ export class TasksService {
             taskType: data.metadata?.taskType || 'ONE_TIME',
             ...(data.metadata?.recurrence && { recurrence: data.metadata.recurrence })
           },
-          kpiSettings: {
-            create: {
-              baseScore: kpi.baseScore,
-              weight: kpi.weight,
-              scoringMethod: kpi.scoringMethod,
-              bonusPerDay: kpi.bonusPerDay,
-              penaltyPerDay: kpi.penaltyPerDay,
-              kpiCriteriaId: kpi.autoKpiCriteriaId,
-              isCrossDomain,
-              crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0,
-            },
-          },
+          // kpiSettings: {
+          //   create: {
+          //     baseScore: kpi.baseScore,
+          //     weight: kpi.weight,
+          //     scoringMethod: kpi.scoringMethod,
+          //     bonusPerDay: kpi.bonusPerDay,
+          //     penaltyPerDay: kpi.penaltyPerDay,
+          //     kpiCriteriaId: kpi.autoKpiCriteriaId,
+          //     isCrossDomain,
+          //     crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0,
+          //   },
+          // },
         },
       });
 
@@ -1082,7 +1080,7 @@ export class TasksService {
   private async executeUpdateTask(id: number, taskData: any, kpiData: any, actorCode: string | null) {
     const t = await this.prisma.task.update({
       where: { id },
-      data: { ...taskData, ...(Object.keys(kpiData).length > 0 && { kpiSettings: { upsert: { create: kpiData, update: kpiData } } }) },
+      data: { ...taskData },
       include: this.taskInclude,
     });
 

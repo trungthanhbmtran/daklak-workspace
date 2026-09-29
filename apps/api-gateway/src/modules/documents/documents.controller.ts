@@ -161,6 +161,11 @@ export class DocumentsController {
     return this.documentsService.syncOnline();
   }
 
+  @Post('lgsp-statistics')
+  async fetchLgspStatistics(@Body() body: any) {
+    return this.documentsService.fetchLgspStatistics(body);
+  }
+
   @Get(':id/logs')
   async getDocumentLogs(@Param('id') id: string) {
     return this.documentsService.getDocumentLogs(id);

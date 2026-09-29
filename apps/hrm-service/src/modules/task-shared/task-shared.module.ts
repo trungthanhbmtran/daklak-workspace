@@ -73,6 +73,16 @@ const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(),
           url: process.env.CHAT_SERVICE_ADDR || 'chat-service:50061',
           loader: { keepCase: false, longs: String, enums: String, defaults: true, includeDirs: [PROTO_ROOT] },
         },
+      },
+      {
+        name: 'DOCUMENT_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'document',
+          protoPath: require('path').join(PROTO_ROOT, 'document/document.proto'),
+          url: process.env.DOCUMENT_SERVICE_ADDR || 'document-service:50058',
+          loader: { keepCase: false, longs: String, enums: String, defaults: true, includeDirs: [PROTO_ROOT] },
+        },
       }
     ])
   ],

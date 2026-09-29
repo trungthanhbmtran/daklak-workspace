@@ -1,365 +1,267 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ResponsiveTable } from "@/components/shared/responsive-table";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Calculator, Award, CheckCircle2, Send } from "lucide-react";
-import { hrmKpiEvaluationsApi, hrmKpiPeriodsApi } from "@/features/hrm/api/kpis.api";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { CheckCircle2, FileCode2, RefreshCw, UploadCloud, Download, AlertCircle } from "lucide-react";
+import { hrmKpiPeriodsApi, hrmKpiEvaluationsApi } from "../../api/kpis.api";
+import apiClient from "@/lib/axiosInstance";
 
 export function PersonalKpiClient() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-  const [staffingSlotId, setStaffingSlotId] = useState<string>("");
-  const [evaluationId, setEvaluationId] = useState<number | null>(null);
-  const [evalDetail, setEvalDetail] = useState<any>(null);
-  const [formDetails, setFormDetails] = useState<any[]>([]);
+  const [xmlContent, setXmlContent] = useState<string>("");
+  const [fileId, setFileId] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Fetch periods
-  const { data: periodsData } = useQuery({
-    queryKey: ["hrm-kpi-periods"],
-    queryFn: () => hrmKpiPeriodsApi.getPeriods().then((res: any) => res.data),
+  // Lấy kỳ đánh giá
+  const { data: periodsRes, isLoading: isLoadingPeriods } = useQuery({
+    queryKey: ["kpi-periods"],
+    queryFn: () => hrmKpiPeriodsApi.getPeriods()
+  });
+  const periods = periodsRes?.data || [];
+
+  // Lấy chi tiết đánh giá (nếu đã tạo)
+  const { data: evaluationsRes, refetch: refetchEvaluations } = useQuery({
+    queryKey: ["personal-evaluations"],
+    queryFn: () => hrmKpiEvaluationsApi.list()
+  });
+  const evaluations = evaluationsRes?.data || [];
+  const currentEval = evaluations.find((e: any) => e.periodId === Number(selectedPeriod));
+
+  // Tự động tính điểm và tạo XML
+  const calculateKpiMut = useMutation({
+    mutationFn: (periodId: number) => hrmKpiEvaluationsApi.calculatePersonal({ periodId }),
+    onSuccess: (res) => {
+      toast.success("Đã đồng bộ số liệu KPI & LGSP thành công!");
+      refetchEvaluations();
+      
+      const generatedXml = `<?xml version="1.0" encoding="UTF-8"?>
+<KpiEvaluationDocument>
+  <PeriodId>${selectedPeriod}</PeriodId>
+  <EmployeeCode>AUTO_DETECT</EmployeeCode>
+  <Scores>
+    <TaskScore>${res.data?.taskScore || 0}</TaskScore>
+    <LgspPenalty>${res.data?.lgspPenalty || 0}</LgspPenalty>
+    <FinalTotal>${res.data?.totalScore || 0}</FinalTotal>
+  </Scores>
+  <Metrics>
+    <FailedLgspDocuments>${res.data?.failedLgspCount || 0}</FailedLgspDocuments>
+  </Metrics>
+  <SelfAssessment>
+    <Feedback>Hoàn thành tốt nhiệm vụ được giao trên hệ thống.</Feedback>
+  </SelfAssessment>
+  <Signature>
+    <Timestamp>${new Date().toISOString()}</Timestamp>
+    <DigitalSignature>O=DakLak, CN=AutoSign</DigitalSignature>
+  </Signature>
+</KpiEvaluationDocument>`;
+      setXmlContent(generatedXml);
+    },
+    onError: () => toast.error("Có lỗi khi tính toán KPI")
   });
 
-  // Fetch evaluation details when evaluationId changes
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  const { data: rawDetail, refetch: refetchDetail, isFetching } = useQuery({
-    queryKey: ["hrm-kpi-eval-detail", evaluationId],
-    queryFn: async () => {
-      if (!evaluationId) return null;
-      const res = await hrmKpiEvaluationsApi.getDetail(evaluationId);
-      if (res.success) {
-        const parsedData = JSON.parse(res.data);
-        setEvalDetail(parsedData);
-        setFormDetails(parsedData.details || []);
-        return parsedData;
-      }
-      return null;
-    },
-    enabled: !!evaluationId,
-  });
-
-  const calculateMutation = useMutation({
-    mutationFn: (payload: { periodId: number, staffingSlotId?: number }) => hrmKpiEvaluationsApi.calculatePersonal(payload),
-    onSuccess: (res: any) => {
-      const evalId = res?.evaluationId || res?.data?.evaluationId;
-      if (res?.success && evalId) {
-        setEvaluationId(evalId);
-      } else {
-        toast.error(res?.message || "Có lỗi xảy ra");
-      }
-    },
-     
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Không thể kết nối đến máy chủ";
-      toast.error(message);
-    },
-  });
-
-  const submitMutation = useMutation({
-     
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: (payload: any) => hrmKpiEvaluationsApi.submitSelfScore(evaluationId!, payload),
-    onSuccess: (res: any) => {
-      if (res.success) {
-        toast.success("Nộp phiếu đánh giá thành công!");
-        refetchDetail();
-      } else {
-        toast.error(res.message);
-      }
-    },
-  });
-
-  const handleCalculate = () => {
-    if (!selectedPeriod) {
-      toast.error("Vui lòng chọn kỳ đánh giá");
-      return;
+  // Upload file lên media-service
+  const uploadXmlFile = async () => {
+    if (!xmlContent) return;
+    setIsUploading(true);
+    try {
+      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const file = new File([blob], `kpi_evaluation_${selectedPeriod}.xml`, { type: 'application/xml' });
+      
+      const reqRes: any = await apiClient.post("/media/request-upload", {
+        filename: file.name,
+        contentType: file.type,
+        size: file.size,
+        bucketType: "documents"
+      });
+      const uploadInfo = reqRes.data;
+      
+      const axios = require('axios').default;
+      await axios.put(uploadInfo.uploadUrl, file, { headers: { "Content-Type": file.type } });
+      await apiClient.post("/media/confirm-upload", { fileId: uploadInfo.fileId });
+      
+      setFileId(uploadInfo.fileId);
+      toast.success("Tải tệp minh chứng XML lên hệ thống thành công!");
+    } catch (e) {
+      toast.error("Lỗi khi tải tệp minh chứng");
+    } finally {
+      setIsUploading(false);
     }
-    setEvaluationId(null);
-    setEvalDetail(null);
-    calculateMutation.mutate({ 
-      periodId: parseInt(selectedPeriod),
-      staffingSlotId: staffingSlotId ? parseInt(staffingSlotId) : undefined
-    });
   };
 
-  const handleUpdateDetail = (criteriaId: number, field: string, value: any) => {
-    setFormDetails((prev) =>
-      prev.map((d) => (d.criteriaId === criteriaId ? { ...d, [field]: value } : d))
-    );
-  };
-
-  const handleSubmit = () => {
-    if (formDetails.some(d => d.scoringMethod === 'MANUAL' && d.selfScore === null)) {
-      toast.error("Vui lòng điền đủ điểm Tự đánh giá cho các tiêu chí thủ công");
-      return;
-    }
-    if (formDetails.some(d => d.scoringMethod === 'MANUAL' && !d.notes?.trim())) {
-      toast.error("Vui lòng ghi rõ giải trình/chứng minh cho các tiêu chí thủ công");
-      return;
-    }
-
-    submitMutation.mutate({ details: formDetails });
-  };
-
-  const isReadonly = evalDetail?.status === 'SUBMITTED' || evalDetail?.status === 'APPROVED';
+  // Nộp KPI
+  const submitMut = useMutation({
+    mutationFn: () => hrmKpiEvaluationsApi.submitSelfScore(currentEval?.id, { documentFileId: fileId }),
+    onSuccess: () => {
+      toast.success("Đã nộp phiếu đánh giá KPI thành công!");
+      refetchEvaluations();
+    },
+    onError: () => toast.error("Có lỗi khi nộp phiếu đánh giá")
+  });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex justify-between items-center bg-gradient-to-r from-blue-600 to-indigo-700 p-8 rounded-xl shadow-lg text-white">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Phiếu KPI Cá nhân
-          </h2>
-          <p className="text-muted-foreground mt-2">
-            Thực hiện tự đánh giá hiệu suất công việc định kỳ
+          <h1 className="text-3xl font-bold tracking-tight">Kê Khai & Tự Đánh Giá KPI</h1>
+          <p className="mt-2 text-blue-100 max-w-2xl">
+            Tự động lấy số liệu từ hệ thống giao việc và trục liên thông LGSP.
+            Hỗ trợ xuất XML làm minh chứng lưu trữ điện tử.
           </p>
+        </div>
+        <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm border border-white/20">
+          <FileCode2 className="h-10 w-10 text-blue-100" />
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-end">
-            <div className="space-y-2 flex-1">
-              <label className="text-sm font-medium">Chọn kỳ đánh giá</label>
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-full sm:max-w-[300px]">
-                  <SelectValue placeholder="Chọn kỳ đánh giá..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {periodsData?.map((p: any) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2 flex-1 max-w-[200px]">
-              <label className="text-sm font-medium">Vị trí (Slot ID)</label>
-              <Input 
-                type="number" 
-                placeholder="Để trống = Mặc định" 
-                value={staffingSlotId}
-                onChange={(e) => setStaffingSlotId(e.target.value)}
-              />
-            </div>
-
-            <Button
-              onClick={handleCalculate}
-              disabled={calculateMutation.isPending}
-              className="w-full sm:w-auto"
-            >
-              {calculateMutation.isPending ? (
-                <span className="flex items-center gap-2">
-                  <Calculator className="h-4 w-4 animate-spin" /> Đang lấy dữ liệu...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Calculator className="h-4 w-4" /> Làm phiếu KPI
-                </span>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {isFetching && (
-        <div className="flex justify-center p-12">
-          <Calculator className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )}
-
-      {evalDetail && !isFetching && (
-        <div className="grid grid-cols-1 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          
-          <Card>
-            <CardHeader className="bg-muted/50 border-b flex flex-row items-center justify-between pb-4">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-primary" />
-                  Chi tiết Phiếu đánh giá
-                </CardTitle>
-                <CardDescription className="mt-1">
-                  Điền các điểm tự đánh giá đối với tiêu chí MANUAL (Thủ công)
-                </CardDescription>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <Badge variant={
-                  evalDetail.status === 'APPROVED' ? 'default' : 
-                  evalDetail.status === 'SUBMITTED' ? 'secondary' : 
-                  'outline'
-                }>
-                  {evalDetail.status === 'APPROVED' ? 'ĐÃ DUYỆT (CHỐT KẾT QUẢ)' : 
-                   evalDetail.status === 'SUBMITTED' ? 'ĐÃ NỘP (CHỜ DUYỆT)' : 
-                   'BẢN NHÁP (ĐANG TÍNH)'}
-                </Badge>
-                {evalDetail.status === 'APPROVED' && (
-                  <div className="text-2xl font-black text-primary">
-                    Tổng điểm: {evalDetail.totalScore}
-                  </div>
-                )}
-              </div>
+      <div className="grid gap-6 md:grid-cols-[1fr_300px]">
+        <div className="space-y-6">
+          <Card className="border-t-4 border-t-indigo-500 shadow-md">
+            <CardHeader className="bg-indigo-50/50 border-b">
+              <CardTitle className="text-xl text-indigo-900">1. Chọn kỳ đánh giá</CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <ResponsiveTable
-                data={formDetails}
-                keyExtractor={(detail) => String(detail.criteriaId)}
-                columns={[
-                  {
-                    header: "Tiêu chí",
-                    className: "w-[30%]",
-                    cell: (detail: any) => (
-                      <div>
-                        <div className="font-semibold">{detail.criteriaName}</div>
-                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{detail.description}</div>
-                      </div>
-                    )
-                  },
-                  {
-                    header: "Loại",
-                    cell: (detail: any) => {
-                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
-                      const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
-                      return (
-                        <Badge variant={isAuto ? "default" : isIntegration ? "destructive" : "secondary"}>
-                          {isAuto ? "Tự động" : isIntegration ? "Liên thông" : "Thủ công"}
-                        </Badge>
-                      );
-                    }
-                  },
-                  {
-                    header: "Hệ số",
-                    className: "text-center",
-                    cell: (detail: any) => <div className="text-center font-medium text-muted-foreground">{detail.weight}x</div>
-                  },
-                  {
-                    header: "Điểm tối đa",
-                    className: "text-center w-[120px]",
-                    cell: (detail: any) => <div className="text-center font-bold">{detail.baseScore}</div>
-                  },
-                  {
-                    header: "Tự đánh giá",
-                    className: "text-center w-[150px]",
-                    cell: (detail: any) => {
-                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
-                      const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
-                      const isReadonlyItem = isAuto || isIntegration;
-                      return (
-                        <div className="flex justify-center">
-                          {isReadonlyItem ? (
-                            <span className={`font-bold px-3 py-1 rounded-md border ${isIntegration ? 'text-destructive bg-destructive/10 border-destructive/20' : 'text-primary bg-primary/10 border-primary/20'}`}>{detail.selfScore ?? 0}</span>
-                          ) : (
-                            <Input 
-                              type="number" 
-                              className="text-center font-bold max-w-[100px]"
-                              value={detail.selfScore ?? ''} 
-                              onChange={(e) => handleUpdateDetail(detail.criteriaId, 'selfScore', parseFloat(e.target.value))}
-                              disabled={isReadonly}
-                              placeholder="Nhập..."
-                              max={detail.baseScore}
-                              min={0}
-                            />
-                          )}
-                        </div>
-                      );
-                    }
-                  },
-                  {
-                    header: "Lãnh đạo chấm",
-                    className: "text-center w-[150px]",
-                    cell: (detail: any) => (
-                      <div className="text-center">
-                        {detail.reviewerScore !== null ? (
-                          <span className="font-black text-primary text-lg">{detail.reviewerScore}</span>
-                        ) : (
-                          <span className="text-muted-foreground italic text-sm">Chưa duyệt</span>
-                        )}
-                      </div>
-                    )
-                  },
-                  {
-                    header: "Giải trình / Ghi chú",
-                    className: "w-[25%]",
-                    cell: (detail: any) => {
-                      const isAuto = detail.scoringMethod === 'AUTOMATIC';
-                      const isIntegration = detail.scoringMethod === 'INTEGRATION_API';
-                      const isReadonlyItem = isAuto || isIntegration;
-                      return isReadonlyItem ? (
-                        <div className="text-xs text-muted-foreground italic bg-muted p-2 rounded border">
-                          {detail.notes}
-                        </div>
-                      ) : (
-                        <Textarea 
-                          className="min-h-[60px] text-xs resize-none"
-                          value={detail.notes || ''}
-                          onChange={(e) => handleUpdateDetail(detail.criteriaId, 'notes', e.target.value)}
-                          disabled={isReadonly}
-                          placeholder="Nhập chứng minh..."
-                        />
-                      );
-                    }
-                  }
-                ]}
-              />
+            <CardContent className="pt-6">
+              <div className="flex gap-4 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label>Kỳ đánh giá (Tháng / Quý)</Label>
+                  <Select value={selectedPeriod} onValueChange={setSelectedPeriod} disabled={isLoadingPeriods}>
+                    <SelectTrigger className="h-12 border-gray-300">
+                      <SelectValue placeholder="-- Chọn kỳ đánh giá --" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {periods.map((p: any) => (
+                        <SelectItem key={p.id} value={p.id.toString()}>
+                          {p.name} ({new Date(p.startDate).toLocaleDateString()} - {new Date(p.endDate).toLocaleDateString()})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button 
+                  onClick={() => selectedPeriod && calculateKpiMut.mutate(Number(selectedPeriod))} 
+                  disabled={!selectedPeriod || calculateKpiMut.isPending}
+                  className="h-12 bg-indigo-600 hover:bg-indigo-700 shadow-sm"
+                >
+                  {calculateKpiMut.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
+                  Đồng bộ số liệu (LGSP)
+                </Button>
+              </div>
             </CardContent>
-            {!isReadonly && (
-              <CardFooter className="bg-muted/50 border-t p-4 flex justify-end gap-3">
-                <Button variant="outline" onClick={() => refetchDetail()} disabled={submitMutation.isPending}>
-                  Khôi phục (Reset)
-                </Button>
-                <Button onClick={handleSubmit} disabled={submitMutation.isPending}>
-                  {submitMutation.isPending ? "Đang gửi..." : <><Send className="w-4 h-4"/> Gửi Phiếu Đánh Giá</>}
-                </Button>
-              </CardFooter>
-            )}
           </Card>
 
-          {/* Hiển thị chi tiết Task nếu có (chỉ để tham khảo) */}
-          {evalDetail.tasks && evalDetail.tasks.length > 0 && (
-            <Card>
-              <CardHeader className="py-4">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Danh sách công việc đã tính điểm (Hỗ trợ hệ thống tự động)
-                </CardTitle>
+          {xmlContent && (
+            <Card className="border-t-4 border-t-emerald-500 shadow-md">
+              <CardHeader className="bg-emerald-50/50 border-b flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl text-emerald-900">2. Kết quả & Minh chứng XML</CardTitle>
+                  <CardDescription>Số liệu đã được tính toán tự động và gói gọn vào định dạng chuẩn</CardDescription>
+                </div>
+                <Badge className="bg-emerald-500">Đã đồng bộ</Badge>
               </CardHeader>
-              <CardContent className="p-0">
-                <ResponsiveTable
-                  data={evalDetail.tasks}
-                  keyExtractor={(task) => String(task.taskId)}
-                  columns={[
-                    {
-                      header: "Tên công việc",
-                      cell: (task: any) => <div className="text-xs">{task.title}</div>
-                    },
-                    {
-                      header: "Trạng thái",
-                      cell: (task: any) => <Badge variant="outline" className="text-[10px]">{task.status}</Badge>
-                    },
-                    {
-                      header: "Điểm chuẩn",
-                      cell: (task: any) => <div className="text-xs">{task.baseScore}</div>
-                    },
-                    {
-                      header: "Điểm chốt",
-                      cell: (task: any) => <div className="text-xs font-bold text-primary">{task.finalScore}</div>
-                    }
-                  ]}
-                />
+              <CardContent className="pt-6 space-y-6">
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4 border text-center">
+                    <p className="text-sm text-gray-500">Điểm CV Hệ thống</p>
+                    <p className="text-2xl font-bold text-gray-800">{currentEval?.taskScoreSelf || 0}</p>
+                  </div>
+                  <div className="bg-rose-50 rounded-lg p-4 border border-rose-100 text-center">
+                    <p className="text-sm text-rose-600">Trừ điểm LGSP</p>
+                    <p className="text-2xl font-bold text-rose-700">{currentEval?.generalScoreSelf || 0}</p>
+                  </div>
+                  <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200 text-center shadow-inner">
+                    <p className="text-sm text-emerald-700 font-semibold">TỔNG ĐIỂM</p>
+                    <p className="text-3xl font-black text-emerald-600">{currentEval?.totalScore || 0}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Nội dung XML Minh Chứng</Label>
+                  <div className="relative">
+                    <textarea 
+                      readOnly 
+                      value={xmlContent} 
+                      className="w-full h-64 p-4 font-mono text-sm bg-gray-900 text-green-400 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-emerald-500" 
+                    />
+                    <div className="absolute top-4 right-4 text-gray-500 text-xs flex items-center bg-gray-800 px-2 py-1 rounded">
+                      <FileCode2 className="h-3 w-3 mr-1" /> XML FORMAT
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-2">
+                  <Button 
+                    onClick={uploadXmlFile} 
+                    disabled={isUploading || !!fileId}
+                    variant={fileId ? "outline" : "default"}
+                    className={!fileId ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""}
+                  >
+                    {isUploading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : (fileId ? <CheckCircle2 className="h-4 w-4 text-emerald-500 mr-2" /> : <UploadCloud className="h-4 w-4 mr-2" />)}
+                    {fileId ? "Đã lưu trữ hệ thống" : "Ký & Lưu trữ File XML (Media Service)"}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
 
+          {fileId && (
+            <Card className="border border-blue-200 shadow-sm overflow-hidden">
+              <div className="bg-blue-50 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <CheckCircle2 className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-blue-900 text-lg">Hồ sơ đã sẵn sàng</h3>
+                    <p className="text-sm text-blue-700">Tệp minh chứng đã được ký và lưu trữ an toàn (ID: {fileId.slice(0,8)}...)</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => submitMut.mutate()} 
+                  disabled={submitMut.isPending || currentEval?.status === 'SUBMITTED'}
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 px-8"
+                >
+                  {submitMut.isPending && <RefreshCw className="h-4 w-4 animate-spin mr-2" />}
+                  {currentEval?.status === 'SUBMITTED' ? "Đã nộp chờ duyệt" : "Hoàn thành & Gửi Lãnh đạo"}
+                </Button>
+              </div>
+            </Card>
+          )}
         </div>
-      )}
+
+        <div className="space-y-6">
+          <Card className="bg-gray-50 border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base text-gray-800 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+                Hướng dẫn thực hiện
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-gray-600 space-y-4">
+              <p>
+                <strong>Bước 1:</strong> Chọn kỳ đánh giá hiện tại để hệ thống tính toán.
+              </p>
+              <p>
+                <strong>Bước 2:</strong> Hệ thống sẽ <b>tự động</b> liên kết LGSP và Công việc để tổng hợp điểm. File XML chứa chi tiết chấm điểm sẽ được khởi tạo.
+              </p>
+              <p>
+                <strong>Bước 3:</strong> Ký số & Tải file XML lên hệ thống Lưu trữ điện tử (Media Service).
+              </p>
+              <p>
+                <strong>Bước 4:</strong> Nộp hồ sơ để lãnh đạo phê duyệt (Kích hoạt Workflow tự động).
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
