@@ -1,19 +1,6 @@
-export interface Policy {
-  id?: number;
-  resourceCode?: string;
-  action?: string;
-  effect?: 'ALLOW' | 'DENY';
-  resourceId?: number;
-  conditions?: { expression?: string };
-  code?: string;
-  name?: string;
-  description?: string;
-  active?: number;
-  policies?: Policy[];
-}
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
-import { PolicyFilter, Permission } from "./types";
+import { Policy, Permission } from "./types";
 
 export const policyApi = {
   getPolicys: async (): Promise<Policy[]> => {
