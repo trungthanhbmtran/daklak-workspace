@@ -22,7 +22,7 @@ export const policyApi = {
   },
 
   getPermissionMatrix: async (): Promise<Permission[]> => {
-    const res: any = await apiClient.get("/resources");
+    const res: any = await apiClient.get("/resources/permission-matrix");
     return res.data || [];
   },
 

@@ -4,15 +4,8 @@ import type { Resource } from "./types";
 
 export const resourceApi = {
   getResources: async (): Promise<Resource[]> => {
-    const res = await apiClient.get("/resources");
-    const data = (res as any)?.data ?? res;
-    const list = data?.resources || [];
-    return list.map((r: any) => ({
-      id: Number(r.id),
-      code: String(r.code ?? ""),
-      name: String(r.name ?? ""),
-      serviceCode: String(r.serviceCode ?? ""),
-    }));
+    const res: any = await apiClient.get("/resources");
+    return res.data || [];
   },
 
   createResource: (payload: { code: string; name: string; serviceCode?: string }) =>

@@ -66,6 +66,26 @@ export class ResourcesController implements OnModuleInit {
       },
     )) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
+    
+    const resources = rawResources.map((r: any) => ({
+      id: r.id,
+      code: r.code ?? '',
+      name: r.name ?? r.code ?? '',
+      serviceCode: r.serviceCode ?? null,
+    }));
+    return { success: true, data: resources };
+  }
+
+  @Get('permission-matrix')
+  @ApiOperation({ summary: 'Danh sách quyền phẳng (dùng cho form policies)' })
+  @ApiResponse({ status: 200, description: 'Mảng permissions phẳng' })
+  async getPermissionMatrix() {
+    const res = (await firstValueFrom(this.pbacService.GetResources({})).catch(
+      (e) => {
+        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+      },
+    )) as any;
+    const rawResources = res?.resources ?? res?.data?.resources ?? [];
     const out: any[] = [];
     const STD_ACTIONS = ['VIEW', 'CREATE', 'UPDATE', 'DELETE', 'MANAGE'];
     for (const r of rawResources) {
