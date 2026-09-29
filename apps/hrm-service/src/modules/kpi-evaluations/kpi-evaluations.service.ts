@@ -139,6 +139,7 @@ export class KpiEvaluationsService implements OnModuleInit {
     const employeeCode = typeof query === 'object' ? query.employeeCode : query;
 
     if (employeeCode) where.employeeCode = employeeCode;
+    if (query?.periodId) where.periodId = Number(query.periodId);
 
     const totalCount = await this.prisma.kpiEvaluation.count({ where });
     const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 10);
@@ -171,12 +172,59 @@ export class KpiEvaluationsService implements OnModuleInit {
   }
 
   async getEvaluationStats(query: any) {
-    return { success: true, data: { statsByUnit: [], companyAvgScore: 0, totalEvaluations: 0 } };
+    const periodId = query?.periodId ? Number(query.periodId) : undefined;
+    const where: any = {};
+    if (periodId) {
+      where.periodId = periodId;
+    }
+
+    // [Góc nhìn Database Optimizer]: Lấy tổng quan nhanh
+    const totalEvaluations = await this.prisma.kpiEvaluation.count({ where });
+    const scoreAgg = await this.prisma.kpiEvaluation.aggregate({
+      where,
+      _avg: { totalScore: true }
+    });
+    const companyAvgScore = scoreAgg._avg.totalScore || 0;
+
+    // [Góc nhìn Database Optimizer]: Tránh N+1 query bằng cách lấy select các cột cần thiết rồi Gom nhóm (Group By) O(N) ở RAM
+    const allEval = await this.prisma.kpiEvaluation.findMany({
+      where,
+      select: {
+        totalScore: true,
+        employee: {
+          select: { departmentId: true }
+        }
+      }
+    });
+
+    const unitMap = new Map<number, { count: number, totalScore: number }>();
+    for (const item of allEval) {
+      const deptId = item.employee?.departmentId || 0;
+      const score = item.totalScore || 0;
+      
+      const stat = unitMap.get(deptId) || { count: 0, totalScore: 0 };
+      stat.count++;
+      stat.totalScore += score;
+      unitMap.set(deptId, stat);
+    }
+
+    const statsByUnit = Array.from(unitMap.entries()).map(([departmentId, stat]) => ({
+      departmentId,
+      avgScore: stat.count > 0 ? (stat.totalScore / stat.count) : 0,
+      totalEvaluations: stat.count
+    }));
+
+    return { 
+      success: true, 
+      message: 'Thống kê KPI thành công',
+      data: { statsByUnit, companyAvgScore, totalEvaluations } 
+    };
   }
 
   // TÍNH ĐIỂM TỰ ĐỘNG DỰA TRÊN SỐ LIỆU LGSP VÀ CÔNG VIỆC TRÊN HỆ THỐNG
-  async calculatePersonalKpi(data: { periodId: number, employeeCode: string, staffingSlotId?: number }) {
-    const { periodId, employeeCode, staffingSlotId } = data;
+  async calculatePersonalKpi(data: { periodId: number | string, employeeCode: string, staffingSlotId?: number }) {
+    const periodId = Number(data.periodId);
+    const { employeeCode, staffingSlotId } = data;
 
     const period = await this.prisma.kpiPeriod.findUnique({ where: { id: periodId } });
     if (!period) throw new RpcException({ message: 'Kỳ đánh giá không tồn tại', code: 3 });
@@ -247,9 +295,9 @@ export class KpiEvaluationsService implements OnModuleInit {
     };
   }
 
-  async getEvaluationDetail(id: number) {
+  async getEvaluationDetail(id: number | string) {
     const evaluation = await this.prisma.kpiEvaluation.findUnique({
-      where: { id },
+      where: { id: Number(id) },
       include: { employee: true, documents: true }
     });
 
