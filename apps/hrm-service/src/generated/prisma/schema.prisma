@@ -222,7 +222,7 @@ model KpiFormDocument {
 generator client {
   provider     = "prisma-client-js"
   engineType   = "binary"
-  output       = "../../src/generated/prisma"
+  output       = "./"
   moduleFormat = "cjs"
 }
 
@@ -273,6 +273,7 @@ model Task {
   isCompleted Boolean   @default(false) @map("is_completed")
 
   isDeadlineWarned Boolean @default(false) @map("is_deadline_warned")
+  isOverdueWarned  Boolean @default(false) @map("is_overdue_warned")
   isRiskWarned     Boolean @default(false) @map("is_risk_warned")
 
   domainId        Int? @map("domain_id")

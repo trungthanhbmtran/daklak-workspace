@@ -2,6 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '@/database/prisma.service';
 import { TaskSharedService } from '../task-shared/task-shared.service';
+import { Task } from '../../generated/prisma';
+
+type TaskWithParticipants = Task & { participants: { employeeCode: string; participantRole: string }[] };
+
+interface TaskWarning {
+  taskId: number;
+  warnType: 'DEADLINE' | 'OVERDUE' | 'RISK';
+  title: string;
+  message: string;
+  assigneeCodes: string[];
+}
 
 @Injectable()
 export class TasksCronService {
@@ -33,13 +44,18 @@ export class TasksCronService {
             dueDate: { not: null },
             OR: [
               { isDeadlineWarned: false },
+              { isOverdueWarned: false },
               { isRiskWarned: false }
             ]
           },
           take,
           ...(cursorId ? { skip: 1, cursor: { id: cursorId } } : {}),
           orderBy: { id: 'asc' },
-          include: { participants: true }
+          include: { 
+            participants: { 
+              select: { employeeCode: true, participantRole: true } 
+            } 
+          }
         });
 
         if (tasks.length === 0) {
@@ -48,9 +64,7 @@ export class TasksCronService {
         }
         cursorId = tasks[tasks.length - 1].id;
 
-        for (const task of tasks) {
-          await this.processTask(task, now, futureDate);
-        }
+        await this.processTaskBatch(tasks as unknown as TaskWithParticipants[], now, futureDate);
 
         // Nhường lại event loop 50ms để các request khác không bị block
         await new Promise(resolve => setTimeout(resolve, 50));
@@ -61,71 +75,104 @@ export class TasksCronService {
     }
   }
 
-  private async processTask(task: any, now: Date, futureDate: Date) {
-    if (!task.dueDate) return;
+  private async processTaskBatch(tasks: TaskWithParticipants[], now: Date, futureDate: Date) {
+    const warnings: TaskWarning[] = [];
+
+    // 1. Phân tích trên RAM (O(N)) - Sử dụng Early Return
+    for (const task of tasks) {
+      const warning = this.evaluateTaskWarning(task, now, futureDate);
+      if (warning) {
+        warnings.push(warning);
+      }
+    }
+
+    if (warnings.length === 0) return;
+
+    // 2. Thu thập User ID bằng 1 query duy nhất (Giải quyết N+1)
+    const allAssigneeCodes = [...new Set(warnings.flatMap(w => w.assigneeCodes))];
+    const emps = await this.prisma.employee.findMany({
+      where: { employeeCode: { in: allAssigneeCodes } },
+      select: { employeeCode: true, userId: true }
+    });
+    
+    // Hash map O(1) lookup
+    const userMap = new Map(emps.filter(e => e.userId).map(e => [e.employeeCode, e.userId as string]));
+
+    // 3. Chuẩn bị Transaction Cập nhật DB Hàng loạt (Batch Query)
+    const deadlineIds = warnings.filter(w => w.warnType === 'DEADLINE').map(w => w.taskId);
+    const overdueIds = warnings.filter(w => w.warnType === 'OVERDUE').map(w => w.taskId);
+    const riskIds = warnings.filter(w => w.warnType === 'RISK').map(w => w.taskId);
+
+    const txs: any[] = [];
+    if (deadlineIds.length > 0) txs.push(this.prisma.task.updateMany({ where: { id: { in: deadlineIds } }, data: { isDeadlineWarned: true } }));
+    if (overdueIds.length > 0) txs.push(this.prisma.task.updateMany({ where: { id: { in: overdueIds } }, data: { isOverdueWarned: true } }));
+    if (riskIds.length > 0) txs.push(this.prisma.task.updateMany({ where: { id: { in: riskIds } }, data: { isRiskWarned: true } }));
+
+    txs.push(this.prisma.taskHistory.createMany({
+      data: warnings.map(w => ({
+        taskId: w.taskId,
+        action: 'SYSTEM_WARNING',
+        actorCode: 'SYSTEM',
+        newValue: { content: `Hệ thống đã tự động gửi cảnh báo: ${w.title}` },
+      }))
+    }));
+
+    await this.prisma.$transaction(txs);
+
+    // 4. Gửi Notification
+    for (const w of warnings) {
+      const userIds = w.assigneeCodes.map(code => userMap.get(code)).filter(Boolean) as string[];
+      if (userIds.length > 0) {
+        const taskObj = tasks.find(t => t.id === w.taskId);
+        this.taskShared.sendTaskNotification(userIds, w.title, w.message, taskObj);
+      }
+    }
+  }
+
+  private evaluateTaskWarning(task: TaskWithParticipants, now: Date, futureDate: Date): TaskWarning | null {
+    if (!task.dueDate) return null;
 
     const dueDate = new Date(task.dueDate);
     const startDate = task.startDate ? new Date(task.startDate) : null;
 
-    let warnType: 'DEADLINE' | 'RISK' | null = null;
-    let warnTitle = '';
-    let warnMessage = '';
-
-    // 1. Kiểm tra Deadline (Sắp đến hạn)
-    if (!task.isDeadlineWarned && dueDate <= futureDate && dueDate >= now) {
-      warnType = 'DEADLINE';
-      warnTitle = 'Cảnh báo hạn chót công việc';
-      warnMessage = `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`;
+    // A. Kiểm tra Trễ hạn (Overdue)
+    if (!task.isOverdueWarned && dueDate < now) {
+      return this.buildWarning(task, 'OVERDUE', 'Cảnh báo công việc trễ hạn', `Công việc "${task.title}" đã trễ hạn từ ${dueDate.toLocaleDateString('vi-VN')}.`);
     }
 
-    // 2. Kiểm tra Risk (Nguy cơ chậm tiến độ)
-    if (!warnType && !task.isRiskWarned && dueDate > futureDate && startDate && task.progress != null) {
+    // B. Kiểm tra Sắp đến hạn (Deadline)
+    if (!task.isDeadlineWarned && dueDate <= futureDate && dueDate >= now) {
+      return this.buildWarning(task, 'DEADLINE', 'Cảnh báo hạn chót công việc', `Công việc "${task.title}" sắp đến hạn vào ${dueDate.toLocaleDateString('vi-VN')}.`);
+    }
+
+    // C. Kiểm tra Risk (Nguy cơ chậm tiến độ)
+    if (!task.isRiskWarned && dueDate > futureDate && startDate && task.progress != null) {
       const totalDuration = dueDate.getTime() - startDate.getTime();
       const elapsed = now.getTime() - startDate.getTime();
       
       if (totalDuration > 0 && elapsed > 0) {
         const expectedProgress = (elapsed / totalDuration) * 100;
         if (expectedProgress > 50 && (expectedProgress - task.progress > 20)) {
-          warnType = 'RISK';
-          warnTitle = 'Cảnh báo nguy cơ chậm tiến độ';
-          warnMessage = `Công việc "${task.title}" có nguy cơ chậm tiến độ (Thời gian đã qua: ${Math.round(expectedProgress)}%, Tiến độ thực tế: ${task.progress}%).`;
+          return this.buildWarning(task, 'RISK', 'Cảnh báo nguy cơ chậm tiến độ', `Công việc "${task.title}" có nguy cơ chậm tiến độ (Thời gian đã qua: ${Math.round(expectedProgress)}%, Tiến độ thực tế: ${task.progress}%).`);
         }
       }
     }
 
-    // Early return nếu không có cảnh báo
-    if (!warnType) return;
+    return null; // Không vi phạm điều kiện nào -> Early return
+  }
 
-    // Gửi thông báo
+  private buildWarning(task: TaskWithParticipants, warnType: 'DEADLINE' | 'OVERDUE' | 'RISK', title: string, message: string): TaskWarning {
     const assigneeCodes = task.participants
-      .filter((p: any) => p.participantRole === 'ASSIGNEE')
-      .map((p: any) => p.employeeCode)
-      .filter(Boolean) as string[];
+      .filter(p => p.participantRole === 'ASSIGNEE')
+      .map(p => p.employeeCode)
+      .filter(Boolean);
 
-    if (assigneeCodes.length > 0) {
-      const emps = await this.prisma.employee.findMany({
-        where: { employeeCode: { in: assigneeCodes } },
-        select: { userId: true }
-      });
-      const userIds = emps.map(e => e.userId).filter(Boolean) as string[];
-      if (userIds.length > 0) {
-        this.taskShared.sendTaskNotification(userIds, warnTitle, warnMessage, task);
-      }
-    }
-
-    // Cập nhật DB
-    const updateData: any = {};
-    if (warnType === 'DEADLINE') updateData.isDeadlineWarned = true;
-    if (warnType === 'RISK') updateData.isRiskWarned = true;
-
-    await this.prisma.task.update({ where: { id: task.id }, data: updateData });
-    await this.prisma.taskHistory.create({
-      data: {
-        taskId: task.id,
-        action: 'SYSTEM_WARNING',
-        actorCode: 'SYSTEM',
-        newValue: { content: `Hệ thống đã tự động gửi cảnh báo: ${warnTitle}` },
-      }
-    });
+    return {
+      taskId: task.id,
+      warnType,
+      title,
+      message,
+      assigneeCodes
+    };
   }
 }

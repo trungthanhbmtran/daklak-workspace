@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
-import { Eye, Clock, ChevronRight, ChevronDown, Repeat, Briefcase } from "lucide-react";
+import { Eye, Clock, ChevronRight, ChevronDown, Repeat, Briefcase, AlertTriangle } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { Progress } from "@/components/ui/progress";
@@ -284,6 +284,21 @@ export function TaskList() {
                             <Badge variant="secondary" className="flex items-center px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
                               <Clock className="w-3 h-3 mr-1" />
                               VB: {task.sourceDocumentRef}
+                            </Badge>
+                          )}
+                          {task.isOverdueWarned && (
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-red-100 text-red-800 font-bold text-[10px] border-red-300">
+                              <AlertTriangle className="w-3 h-3 mr-1" /> Đã trễ hạn
+                            </Badge>
+                          )}
+                          {task.isDeadlineWarned && !task.isOverdueWarned && (
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-red-50 text-red-700 font-normal text-[10px] border-red-200">
+                              <AlertTriangle className="w-3 h-3 mr-1" /> Sắp tới hạn
+                            </Badge>
+                          )}
+                          {task.isRiskWarned && (
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-orange-50 text-orange-700 font-normal text-[10px] border-orange-200">
+                              <AlertTriangle className="w-3 h-3 mr-1" /> Chậm tiến độ
                             </Badge>
                           )}
                         </div>

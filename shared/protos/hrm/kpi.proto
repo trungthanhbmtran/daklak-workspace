@@ -165,6 +165,10 @@ message CalculatePersonalKpiResponse {
   float totalScore = 3;
   repeated CalculatedTaskScore tasks = 4;
   optional int32 evaluationId = 5;
+  optional float taskScore = 6;
+  optional float lgspPenalty = 7;
+  optional int32 failedLgspCount = 8;
+  optional string xmlContent = 9;
 }
 
 message GetEvaluationDetailRequest {

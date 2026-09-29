@@ -284,6 +284,27 @@ export class KpiEvaluationsService implements OnModuleInit {
       });
     }
 
+    const generatedXml = `<?xml version="1.0" encoding="UTF-8"?>
+<KpiEvaluationDocument>
+  <PeriodId>${periodId}</PeriodId>
+  <EmployeeCode>${employeeCode}</EmployeeCode>
+  <Scores>
+    <TaskScore>${taskScore || 0}</TaskScore>
+    <LgspPenalty>${lgspPenalty || 0}</LgspPenalty>
+    <FinalTotal>${finalTotalScore || 0}</FinalTotal>
+  </Scores>
+  <Metrics>
+    <FailedLgspDocuments>${failedLgspCount || 0}</FailedLgspDocuments>
+  </Metrics>
+  <SelfAssessment>
+    <Feedback>Hoàn thành tốt nhiệm vụ được giao trên hệ thống.</Feedback>
+  </SelfAssessment>
+  <Signature>
+    <Timestamp>${new Date().toISOString()}</Timestamp>
+    <DigitalSignature>O=DakLak, CN=AutoSign</DigitalSignature>
+  </Signature>
+</KpiEvaluationDocument>`;
+
     return {
       success: true,
       message: 'Tính điểm KPI tự động thành công',
@@ -291,7 +312,8 @@ export class KpiEvaluationsService implements OnModuleInit {
       taskScore: taskScore,
       lgspPenalty: lgspPenalty,
       failedLgspCount: failedLgspCount,
-      evaluationId: existingEvaluation.id
+      evaluationId: existingEvaluation.id,
+      xmlContent: generatedXml
     };
   }
 

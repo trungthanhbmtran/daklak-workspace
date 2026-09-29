@@ -278,6 +278,7 @@ exports.Prisma.TaskScalarFieldEnum = {
   completedAt: 'completedAt',
   isCompleted: 'isCompleted',
   isDeadlineWarned: 'isDeadlineWarned',
+  isOverdueWarned: 'isOverdueWarned',
   isRiskWarned: 'isRiskWarned',
   domainId: 'domainId',
   monitoredUnitId: 'monitoredUnitId',

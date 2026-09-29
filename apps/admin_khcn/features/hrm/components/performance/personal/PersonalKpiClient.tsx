@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { CheckCircle2, FileCode2, RefreshCw, UploadCloud, Download, AlertCircle } from "lucide-react";
-import { hrmKpiPeriodsApi, hrmKpiEvaluationsApi } from "../../api/kpis.api";
+import { hrmKpiPeriodsApi, hrmKpiEvaluationsApi } from "@/features/hrm/api/kpis.api";
 import apiClient from "@/lib/axiosInstance";
 
 export function PersonalKpiClient() {
@@ -38,31 +38,13 @@ export function PersonalKpiClient() {
   // Tự động tính điểm và tạo XML
   const calculateKpiMut = useMutation({
     mutationFn: (periodId: number) => hrmKpiEvaluationsApi.calculatePersonal({ periodId }),
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       toast.success("Đã đồng bộ số liệu KPI & LGSP thành công!");
       refetchEvaluations();
       
-      const generatedXml = `<?xml version="1.0" encoding="UTF-8"?>
-<KpiEvaluationDocument>
-  <PeriodId>${selectedPeriod}</PeriodId>
-  <EmployeeCode>AUTO_DETECT</EmployeeCode>
-  <Scores>
-    <TaskScore>${res.data?.taskScore || 0}</TaskScore>
-    <LgspPenalty>${res.data?.lgspPenalty || 0}</LgspPenalty>
-    <FinalTotal>${res.data?.totalScore || 0}</FinalTotal>
-  </Scores>
-  <Metrics>
-    <FailedLgspDocuments>${res.data?.failedLgspCount || 0}</FailedLgspDocuments>
-  </Metrics>
-  <SelfAssessment>
-    <Feedback>Hoàn thành tốt nhiệm vụ được giao trên hệ thống.</Feedback>
-  </SelfAssessment>
-  <Signature>
-    <Timestamp>${new Date().toISOString()}</Timestamp>
-    <DigitalSignature>O=DakLak, CN=AutoSign</DigitalSignature>
-  </Signature>
-</KpiEvaluationDocument>`;
-      setXmlContent(generatedXml);
+      if (res.data?.xmlContent) {
+        setXmlContent(res.data.xmlContent);
+      }
     },
     onError: () => toast.error("Có lỗi khi tính toán KPI")
   });

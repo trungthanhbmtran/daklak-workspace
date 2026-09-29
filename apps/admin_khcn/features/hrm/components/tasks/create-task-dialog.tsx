@@ -34,6 +34,11 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
   const [recurrence, setRecurrence] = useState("MONTHLY"); // DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY
   const [type, setType] = useState("TASK"); // TASK, MEETING, STUDY
   const [meetingLink, setMeetingLink] = useState("");
+  
+  // KPI Targets fields
+  const [isKpiTarget, setIsKpiTarget] = useState(false);
+  const [plannedQty, setPlannedQty] = useState<number>(1);
+  const [difficultyK, setDifficultyK] = useState<number>(1);
 
   const isSubTask = !!parentId;
 
@@ -113,6 +118,9 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
     setRecurrence("MONTHLY");
     setType("TASK");
     setMeetingLink("");
+    setIsKpiTarget(false);
+    setPlannedQty(1);
+    setDifficultyK(1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,7 +139,8 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
       taskType,
       type, // TASK, MEETING, STUDY
       meetingLink: (type === 'MEETING' || type === 'STUDY') && meetingLink.trim() ? meetingLink.trim() : undefined,
-      recurrence: taskType === "PERIODIC" ? recurrence : undefined
+      recurrence: taskType === "PERIODIC" ? recurrence : undefined,
+      metadata: isKpiTarget ? { isKpiTarget: true, plannedQty, difficultyK } : undefined
     };
 
     try {
@@ -201,6 +210,52 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
+              </div>
+              
+              {/* Vùng thiết lập Chỉ tiêu KPI */}
+              <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800 mt-4">
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    id="isKpiTarget" 
+                    checked={isKpiTarget}
+                    onChange={(e) => setIsKpiTarget(e.target.checked)}
+                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <Label htmlFor="isKpiTarget" className="font-semibold text-blue-700 dark:text-blue-400 cursor-pointer">
+                    Giao công việc này làm Chỉ tiêu KPI
+                  </Label>
+                </div>
+                
+                {isKpiTarget && (
+                  <div className="grid grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Khối lượng / Số lượng cần đạt</Label>
+                      <Input 
+                        type="number" 
+                        min={1} 
+                        value={plannedQty} 
+                        onChange={(e) => setPlannedQty(Number(e.target.value))} 
+                        className="bg-white dark:bg-slate-950"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Hệ số độ khó (1.0 - 5.0)</Label>
+                      <Select value={difficultyK.toString()} onValueChange={(val) => setDifficultyK(Number(val))}>
+                        <SelectTrigger className="bg-white dark:bg-slate-950">
+                          <SelectValue placeholder="Chọn độ khó" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1.0 (Dễ - Bình thường)</SelectItem>
+                          <SelectItem value="2">2.0 (Hơi khó)</SelectItem>
+                          <SelectItem value="3">3.0 (Khó)</SelectItem>
+                          <SelectItem value="4">4.0 (Rất khó)</SelectItem>
+                          <SelectItem value="5">5.0 (Đặc biệt phức tạp)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

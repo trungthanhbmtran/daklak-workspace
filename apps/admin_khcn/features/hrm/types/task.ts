@@ -98,4 +98,7 @@ export interface HrmTask {
   workflowInstId?: string;
   metadata?: any;
   participants?: any[];
+  isDeadlineWarned?: boolean;
+  isOverdueWarned?: boolean;
+  isRiskWarned?: boolean;
 }

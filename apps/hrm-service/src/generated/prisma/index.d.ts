@@ -12519,6 +12519,7 @@ export namespace Prisma {
     completedAt: Date | null
     isCompleted: boolean | null
     isDeadlineWarned: boolean | null
+    isOverdueWarned: boolean | null
     isRiskWarned: boolean | null
     domainId: number | null
     monitoredUnitId: number | null
@@ -12547,6 +12548,7 @@ export namespace Prisma {
     completedAt: Date | null
     isCompleted: boolean | null
     isDeadlineWarned: boolean | null
+    isOverdueWarned: boolean | null
     isRiskWarned: boolean | null
     domainId: number | null
     monitoredUnitId: number | null
@@ -12575,6 +12577,7 @@ export namespace Prisma {
     completedAt: number
     isCompleted: number
     isDeadlineWarned: number
+    isOverdueWarned: number
     isRiskWarned: number
     domainId: number
     monitoredUnitId: number
@@ -12624,6 +12627,7 @@ export namespace Prisma {
     completedAt?: true
     isCompleted?: true
     isDeadlineWarned?: true
+    isOverdueWarned?: true
     isRiskWarned?: true
     domainId?: true
     monitoredUnitId?: true
@@ -12652,6 +12656,7 @@ export namespace Prisma {
     completedAt?: true
     isCompleted?: true
     isDeadlineWarned?: true
+    isOverdueWarned?: true
     isRiskWarned?: true
     domainId?: true
     monitoredUnitId?: true
@@ -12680,6 +12685,7 @@ export namespace Prisma {
     completedAt?: true
     isCompleted?: true
     isDeadlineWarned?: true
+    isOverdueWarned?: true
     isRiskWarned?: true
     domainId?: true
     monitoredUnitId?: true
@@ -12796,6 +12802,7 @@ export namespace Prisma {
     completedAt: Date | null
     isCompleted: boolean
     isDeadlineWarned: boolean
+    isOverdueWarned: boolean
     isRiskWarned: boolean
     domainId: number | null
     monitoredUnitId: number | null
@@ -12844,6 +12851,7 @@ export namespace Prisma {
     completedAt?: boolean
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: boolean
     monitoredUnitId?: boolean
@@ -12884,6 +12892,7 @@ export namespace Prisma {
     completedAt?: boolean
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: boolean
     monitoredUnitId?: boolean
@@ -12897,7 +12906,7 @@ export namespace Prisma {
     isDeleted?: boolean
   }
 
-  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "type" | "meetingLink" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "isDeadlineWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
+  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "type" | "meetingLink" | "progress" | "rejectReason" | "startDate" | "dueDate" | "completedAt" | "isCompleted" | "isDeadlineWarned" | "isOverdueWarned" | "isRiskWarned" | "domainId" | "monitoredUnitId" | "planId" | "workflowInstId" | "conversationId" | "metadata" | "creatorEmployeeCode" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     plan?: boolean | Task$planArgs<ExtArgs>
     kpiEvaluations?: boolean | Task$kpiEvaluationsArgs<ExtArgs>
@@ -12938,6 +12947,7 @@ export namespace Prisma {
       completedAt: Date | null
       isCompleted: boolean
       isDeadlineWarned: boolean
+      isOverdueWarned: boolean
       isRiskWarned: boolean
       domainId: number | null
       monitoredUnitId: number | null
@@ -13341,6 +13351,7 @@ export namespace Prisma {
     readonly completedAt: FieldRef<"Task", 'DateTime'>
     readonly isCompleted: FieldRef<"Task", 'Boolean'>
     readonly isDeadlineWarned: FieldRef<"Task", 'Boolean'>
+    readonly isOverdueWarned: FieldRef<"Task", 'Boolean'>
     readonly isRiskWarned: FieldRef<"Task", 'Boolean'>
     readonly domainId: FieldRef<"Task", 'Int'>
     readonly monitoredUnitId: FieldRef<"Task", 'Int'>
@@ -21076,6 +21087,7 @@ export namespace Prisma {
     completedAt: 'completedAt',
     isCompleted: 'isCompleted',
     isDeadlineWarned: 'isDeadlineWarned',
+    isOverdueWarned: 'isOverdueWarned',
     isRiskWarned: 'isRiskWarned',
     domainId: 'domainId',
     monitoredUnitId: 'monitoredUnitId',
@@ -22386,6 +22398,7 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
     isCompleted?: BoolFilter<"Task"> | boolean
     isDeadlineWarned?: BoolFilter<"Task"> | boolean
+    isOverdueWarned?: BoolFilter<"Task"> | boolean
     isRiskWarned?: BoolFilter<"Task"> | boolean
     domainId?: IntNullableFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableFilter<"Task"> | number | null
@@ -22423,6 +22436,7 @@ export namespace Prisma {
     completedAt?: SortOrderInput | SortOrder
     isCompleted?: SortOrder
     isDeadlineWarned?: SortOrder
+    isOverdueWarned?: SortOrder
     isRiskWarned?: SortOrder
     domainId?: SortOrderInput | SortOrder
     monitoredUnitId?: SortOrderInput | SortOrder
@@ -22464,6 +22478,7 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
     isCompleted?: BoolFilter<"Task"> | boolean
     isDeadlineWarned?: BoolFilter<"Task"> | boolean
+    isOverdueWarned?: BoolFilter<"Task"> | boolean
     isRiskWarned?: BoolFilter<"Task"> | boolean
     domainId?: IntNullableFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableFilter<"Task"> | number | null
@@ -22501,6 +22516,7 @@ export namespace Prisma {
     completedAt?: SortOrderInput | SortOrder
     isCompleted?: SortOrder
     isDeadlineWarned?: SortOrder
+    isOverdueWarned?: SortOrder
     isRiskWarned?: SortOrder
     domainId?: SortOrderInput | SortOrder
     monitoredUnitId?: SortOrderInput | SortOrder
@@ -22538,6 +22554,7 @@ export namespace Prisma {
     completedAt?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     isCompleted?: BoolWithAggregatesFilter<"Task"> | boolean
     isDeadlineWarned?: BoolWithAggregatesFilter<"Task"> | boolean
+    isOverdueWarned?: BoolWithAggregatesFilter<"Task"> | boolean
     isRiskWarned?: BoolWithAggregatesFilter<"Task"> | boolean
     domainId?: IntNullableWithAggregatesFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableWithAggregatesFilter<"Task"> | number | null
@@ -24084,6 +24101,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -24120,6 +24138,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -24155,6 +24174,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24191,6 +24211,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24227,6 +24248,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -24255,6 +24277,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24283,6 +24306,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -25900,6 +25924,7 @@ export namespace Prisma {
     completedAt?: SortOrder
     isCompleted?: SortOrder
     isDeadlineWarned?: SortOrder
+    isOverdueWarned?: SortOrder
     isRiskWarned?: SortOrder
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
@@ -25938,6 +25963,7 @@ export namespace Prisma {
     completedAt?: SortOrder
     isCompleted?: SortOrder
     isDeadlineWarned?: SortOrder
+    isOverdueWarned?: SortOrder
     isRiskWarned?: SortOrder
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
@@ -25966,6 +25992,7 @@ export namespace Prisma {
     completedAt?: SortOrder
     isCompleted?: SortOrder
     isDeadlineWarned?: SortOrder
+    isOverdueWarned?: SortOrder
     isRiskWarned?: SortOrder
     domainId?: SortOrder
     monitoredUnitId?: SortOrder
@@ -28685,6 +28712,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -28720,6 +28748,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -28812,6 +28841,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -28847,6 +28877,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -29124,6 +29155,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -29159,6 +29191,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -29223,6 +29256,7 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
     isCompleted?: BoolFilter<"Task"> | boolean
     isDeadlineWarned?: BoolFilter<"Task"> | boolean
+    isOverdueWarned?: BoolFilter<"Task"> | boolean
     isRiskWarned?: BoolFilter<"Task"> | boolean
     domainId?: IntNullableFilter<"Task"> | number | null
     monitoredUnitId?: IntNullableFilter<"Task"> | number | null
@@ -29706,6 +29740,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -29741,6 +29776,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -29791,6 +29827,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -29826,6 +29863,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -29860,6 +29898,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -29895,6 +29934,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -29945,6 +29985,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -29980,6 +30021,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30014,6 +30056,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30049,6 +30092,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30161,6 +30205,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30196,6 +30241,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30298,6 +30344,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30333,6 +30380,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30372,6 +30420,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30407,6 +30456,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30457,6 +30507,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30492,6 +30543,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30537,6 +30589,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30572,6 +30625,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30606,6 +30660,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30641,6 +30696,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -30691,6 +30747,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -30726,6 +30783,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -31325,6 +31383,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
     isCompleted?: boolean
     isDeadlineWarned?: boolean
+    isOverdueWarned?: boolean
     isRiskWarned?: boolean
     domainId?: number | null
     monitoredUnitId?: number | null
@@ -31352,6 +31411,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -31387,6 +31447,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
@@ -31422,6 +31483,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isDeadlineWarned?: BoolFieldUpdateOperationsInput | boolean
+    isOverdueWarned?: BoolFieldUpdateOperationsInput | boolean
     isRiskWarned?: BoolFieldUpdateOperationsInput | boolean
     domainId?: NullableIntFieldUpdateOperationsInput | number | null
     monitoredUnitId?: NullableIntFieldUpdateOperationsInput | number | null
