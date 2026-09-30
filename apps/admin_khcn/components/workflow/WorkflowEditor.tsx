@@ -11,6 +11,7 @@ import {
   BackgroundVariant,
   MiniMap,
   MarkerType,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -104,6 +105,8 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     ],
   });
 
+  const { fitView } = useReactFlow();
+
   const onInit = useCallback((instance: any) => {
     console.log("ReactFlow initialized");
     instance.fitView();
@@ -111,14 +114,13 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
   // Explicitly fit view when nodes change
   useEffect(() => {
-    if (nodes.length > 1 && !isLoading) {
+    if (nodes.length > 0 && !isLoading) {
       // Small timeout to ensure the DOM has updated
       setTimeout(() => {
-        // We can't call fitView directly here easily without the instance, 
-        // but fitView prop on ReactFlow should handle it if the prop changes.
-      }, 100);
+        fitView({ padding: 0.2, duration: 500 });
+      }, 150);
     }
-  }, [nodes.length, isLoading]);
+  }, [nodes.length, isLoading, fitView]);
 
   if (isLoading) {
     return (

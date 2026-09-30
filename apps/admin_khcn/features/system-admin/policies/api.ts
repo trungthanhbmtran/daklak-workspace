@@ -15,6 +15,13 @@ export const policyApi = {
 
   getPolicyById: async (id: number): Promise<Policy | null> => {
     const res: any = await apiClient.get(`/policys/${id}`);
+    if (res?.data?.policies) {
+      res.data.policies = res.data.policies.map((p: any) => ({
+        ...p,
+        resourceCode: p.resourceCode || p.resource_code || p.resource?.code || "",
+        resourceId: p.resourceId || p.resource_id,
+      }));
+    }
     return res.data || null;
   },
 

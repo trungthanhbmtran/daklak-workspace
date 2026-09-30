@@ -107,22 +107,24 @@ export default function UnitJobTemplatesPage() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-background flex-col rounded-xl border overflow-hidden shadow-sm">
-      <div className="flex items-center px-6 py-5 border-b shrink-0 bg-card">
-        <div className="p-2 bg-primary/10 rounded-lg mr-4">
-          <Building2 className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Phân loại chức danh theo Đơn vị</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Thiết lập danh sách chức danh chuẩn (Job Titles) được phép sử dụng cho từng Loại đơn vị (Unit Types).
-          </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 border-b shrink-0 bg-card gap-4 sm:gap-0">
+        <div className="flex items-center">
+          <div className="p-2 bg-primary/10 rounded-lg mr-4 shrink-0">
+            <Building2 className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">Phân loại chức danh theo Đơn vị</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Thiết lập danh sách chức danh chuẩn (Job Titles) được phép sử dụng cho từng Loại đơn vị (Unit Types).
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-muted/20">
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden bg-muted/20">
         {/* LEFT PANEL: Danh sách Unit Types */}
-        <div className="w-[340px] border-r flex flex-col shrink-0 bg-background">
-          <div className="px-4 py-3 border-b flex flex-col gap-2 shadow-sm z-10">
+        <div className="w-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col shrink-0 bg-background h-[35%] lg:h-full">
+          <div className="px-4 py-3 border-b flex flex-col gap-2 shadow-sm z-10 shrink-0">
             <h2 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Chọn Loại Đơn vị
@@ -326,7 +328,7 @@ function JobTitleSelectionPanel({
 
   return (
     <div className="flex flex-col h-full absolute inset-0 bg-background/50">
-      <div className="px-6 py-4 border-b flex flex-wrap gap-4 items-center justify-between bg-card shrink-0 shadow-sm z-10">
+      <div className="px-4 sm:px-6 py-4 border-b flex flex-col lg:flex-row lg:flex-wrap gap-4 items-start lg:items-center justify-between bg-card shrink-0 shadow-sm z-10">
         <div>
           <h2 className="text-base font-semibold text-foreground">Chọn chức danh áp dụng</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -334,8 +336,8 @@ function JobTitleSelectionPanel({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative w-64">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Tìm chức danh..."
@@ -344,7 +346,7 @@ function JobTitleSelectionPanel({
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
-          <Button onClick={handleSave} disabled={isSaving} className="shadow-sm">
+          <Button onClick={handleSave} disabled={isSaving} className="shadow-sm w-full sm:w-auto">
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>

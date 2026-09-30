@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { workflowApi } from "@/features/workflow/api";
 import { toast } from "sonner";
 import { Node, Edge, MarkerType } from "@xyflow/react";
+import { parseWorkflowDefinition } from "../utils/parseWorkflowDefinition";
 
 interface UseWorkflowDataProps {
   id?: string;
@@ -40,24 +41,9 @@ export function useWorkflowData({
         setWorkflowDesc(data.description || "");
         setWorkflowCode(data.code || data.trigger || "");
 
-        // Handle definition which might be stringified JSON or already an object
-        let definition = data.definition;
+        const definition = parseWorkflowDefinition(data);
 
-        // Handle cases where the definition might be wrapped or named differently
-        if (!definition && (data as any).workflowDefinition) {
-          definition = (data as any).workflowDefinition;
-        }
-
-        if (typeof definition === "string") {
-          try {
-            definition = JSON.parse(definition);
-          } catch (e) {
-            console.error("Failed to parse definition string:", e);
-            definition = { nodes: [], edges: [] };
-          }
-        }
-
-        if (definition) {
+        if (definition && definition.nodes) {
           console.log("Definition found:", definition);
           const loadedNodes = (definition.nodes || []).map((node: any) => ({
             ...node,
