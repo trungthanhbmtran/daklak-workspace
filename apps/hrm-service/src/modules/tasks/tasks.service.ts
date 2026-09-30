@@ -16,14 +16,6 @@ import { TaskNotificationService } from '../task-workflow/task-notification.serv
 
 // ─── Internal Interfaces ──────────────────────────────────────────────────────
 
-interface KpiSettings {
-  baseScore: number;
-  weight: number;
-  scoringMethod: string;
-  bonusPerDay: number;
-  penaltyPerDay: number;
-  autoKpiCriteriaId: number | null;
-}
 
 export interface TaskStatsResult {
   overdue: number;
@@ -123,40 +115,6 @@ export class TasksService {
     return baseScore;
   }
 
-  private async resolveKpiSettings(data: any, planId: number | null): Promise<KpiSettings> {
-    let { baseScore, weight, scoringMethod = 'MANUAL', bonusPerDay, penaltyPerDay } = data;
-    let autoKpiCriteriaId: number | null = data.kpiCriteriaId ? parseInt(data.kpiCriteriaId, 10) : null;
-    if (!autoKpiCriteriaId) {
-      const keyword = planId ? 'định mức' : 'đột xuất';
-      // const crit = await this.prisma.kpiCriteria.findFirst({ where: { name: { contains: keyword } } });
-      // if (crit) autoKpiCriteriaId = crit.id;
-    }
-
-    if (autoKpiCriteriaId) {
-      // const s = await this.prisma.kpiCriteriaSetting.findUnique({ where: { criteriaId: autoKpiCriteriaId } });
-      // if (s) {
-      //   baseScore ??= s.baseScore ?? 100;
-      //   weight ??= s.weight ?? 1.0;
-      //   if (!data.scoringMethod) scoringMethod = s.scoringMethod ?? 'MANUAL';
-      //   bonusPerDay ??= s.bonusPerDay ?? 0;
-      //   penaltyPerDay ??= s.penaltyPerDay ?? 0;
-      // }
-    }
-    return { baseScore, weight, scoringMethod, bonusPerDay, penaltyPerDay, autoKpiCriteriaId };
-  }
-
-  private async checkCrossDomain(assigneeCode: string, domainId?: any): Promise<boolean> {
-    if (!domainId || assigneeCode === 'UNASSIGNED') return false;
-    const emp = await this.prisma.employee.findUnique({ where: { employeeCode: assigneeCode }, select: { userId: true } });
-    if (!emp?.userId) return false;
-    try {
-      const res: any = await firstValueFrom(this.shared.userService.GetSubordinates({ userId: emp.userId }));
-      const allowed: number[] = res?.allowedDomainIds || res?.allowed_domain_ids || [];
-      return !allowed.includes(parseInt(domainId, 10));
-    } catch {
-      return false;
-    }
-  }
 
   // ─── Queries ──────────────────────────────────────────────────────────────
 
@@ -606,8 +564,7 @@ export class TasksService {
             participantRole: true,
             employee: { select: { fullName: true, departmentId: true } }
           } 
-        },
-        // kpiSettings: true
+        }
       },
     });
 
@@ -624,7 +581,7 @@ export class TasksService {
     }
   }
 
-  private async executeCreateTaskTransaction(data: any, kpi: any, isCrossDomain: boolean, planId: number | null, parentId: number | null, creatorCode: string, workflowId: string | null, workflowCode: string | null, currentNodeId: string | null) {
+  private async executeCreateTaskTransaction(data: any, planId: number | null, parentId: number | null, creatorCode: string, workflowId: string | null, workflowCode: string | null, currentNodeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
       const task = await tx.task.create({
         data: {
@@ -646,18 +603,6 @@ export class TasksService {
             ...(data.metadata?.recurrence && { recurrence: data.metadata.recurrence }),
             ...(workflowId && { workflowId, workflowCode, currentNodeId })
           },
-          // kpiSettings: {
-          //   create: {
-          //     baseScore: kpi.baseScore,
-          //     weight: kpi.weight,
-          //     scoringMethod: kpi.scoringMethod,
-          //     bonusPerDay: kpi.bonusPerDay,
-          //     penaltyPerDay: kpi.penaltyPerDay,
-          //     kpiCriteriaId: kpi.autoKpiCriteriaId,
-          //     isCrossDomain,
-          //     crossDomainMultiplier: isCrossDomain ? 1.5 : 1.0,
-          //   },
-          // },
         },
       });
 
@@ -772,14 +717,11 @@ export class TasksService {
 
     await this.validateTaskAssignee(assigneeCode);
 
-    const kpi = await this.resolveKpiSettings(data, planId);
-    const isCrossDomain = await this.checkCrossDomain(assigneeCode, data.domainId);
-
     const workflowCode = await this.wf.resolveWorkflowCode(data, planId, parentId);
     const workflowId = workflowCode ? await this.shared.getWorkflowIdByTrigger(workflowCode) : null;
     const currentNodeId = workflowId ? await this.wf.getLocalInitialNodeId(workflowId) : null;
 
-    const newTask = await this.executeCreateTaskTransaction(data, kpi, isCrossDomain, planId, parentId, creatorCode, workflowId, workflowCode, currentNodeId);
+    const newTask = await this.executeCreateTaskTransaction(data, planId, parentId, creatorCode, workflowId, workflowCode, currentNodeId);
 
     newTask.conversationId = await this.createTaskConversation(
       newTask.id,
@@ -1087,20 +1029,10 @@ export class TasksService {
     if (taskData.startDate) taskData.startDate = new Date(taskData.startDate);
     if (taskData.dueDate) taskData.dueDate = new Date(taskData.dueDate);
 
-    const kpiData: any = {};
-    if (baseScore !== undefined) kpiData.baseScore = baseScore;
-    if (weight !== undefined) kpiData.weight = weight;
-    if (scoringMethod !== undefined) kpiData.scoringMethod = scoringMethod;
-    if (bonusPerDay !== undefined) kpiData.bonusPerDay = bonusPerDay;
-    if (penaltyPerDay !== undefined) kpiData.penaltyPerDay = penaltyPerDay;
-    if (kpiCriteriaId !== undefined) kpiData.kpiCriteriaId = kpiCriteriaId;
-    if (isCrossDomain !== undefined) kpiData.isCrossDomain = isCrossDomain;
-    if (crossDomainMultiplier !== undefined) kpiData.crossDomainMultiplier = crossDomainMultiplier;
-
-    return { taskData, kpiData };
+    return { taskData };
   }
 
-  private async executeUpdateTask(id: number, taskData: any, kpiData: any, actorCode: string | null) {
+  private async executeUpdateTask(id: number, taskData: any, actorCode: string | null) {
     const t = await this.prisma.task.update({
       where: { id },
       data: { ...taskData },
@@ -1125,10 +1057,10 @@ export class TasksService {
       throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể thay đổi.');
     }
 
-    const { taskData, kpiData } = this.parseUpdateTaskData(data);
+    const { taskData } = this.parseUpdateTaskData(data);
     const actorCode = data?.currentEmployeeCode || null;
     
-    const t = await this.executeUpdateTask(id, taskData, kpiData, actorCode);
+    const t = await this.executeUpdateTask(id, taskData, actorCode);
     return this.toResponse(t);
   }
 
