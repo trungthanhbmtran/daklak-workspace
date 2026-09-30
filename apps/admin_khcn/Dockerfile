@@ -4,7 +4,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY apps/admin_khcn/package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # ==========================================
 # 2️⃣ Builder Stage
@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/admin_khcn ./
 
 # Build Next.js
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npm run build
 # Copy generated Prisma client to the correct compiled src directory
 RUN cp -r src/generated $(find dist -type d -name src | head -n 1)/ || true
@@ -26,8 +26,8 @@ RUN cp -r src/generated $(find dist -type d -name src | head -n 1)/ || true
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -40,7 +40,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
