@@ -13,7 +13,10 @@ import { RabbitMQService, WORKFLOW_RMQ_CLIENT } from './rabbitmq.service';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
-            urls: [configService.get<string>('RABBITMQ_URL') || 'amqp://admin:admin123@localhost:5672'],
+            urls: [
+              configService.get<string>('RABBITMQ_URL') ||
+                'amqp://admin:admin123@localhost:5672',
+            ],
             queue: 'workflow_events_queue',
             queueOptions: {
               durable: true,
@@ -26,4 +29,4 @@ import { RabbitMQService, WORKFLOW_RMQ_CLIENT } from './rabbitmq.service';
   providers: [RabbitMQService],
   exports: [RabbitMQService, ClientsModule],
 })
-export class RabbitMQModule { }
+export class RabbitMQModule {}

@@ -1,4 +1,9 @@
-import { Injectable, Inject, OnModuleInit, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
@@ -11,7 +16,10 @@ export class StatisticsService implements OnModuleInit {
   private documentService: any;
   private orgService: any;
 
-  private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
+  private unitMapCache: {
+    data: Record<number, any>;
+    expiresAt: number;
+  } | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -31,19 +39,30 @@ export class StatisticsService implements OnModuleInit {
   }
   async getTaskStatistics(filter: any, user: any, metadata: Metadata) {
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
-    const isLeader = isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*');
+    const isLeader =
+      isAdmin ||
+      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
+      user?.permissionsFlatten?.includes('TASK.*');
 
     let finalAssigneeCode = filter.assigneeCode;
     let finalAssignerCode = filter.assignerCode;
-    
-    if (filter.role === 'ASSIGNEE' && user) finalAssigneeCode = user.employeeCode;
-    else if (filter.role === 'OWNER' && user) finalAssignerCode = user.employeeCode;
+
+    if (filter.role === 'ASSIGNEE' && user)
+      finalAssigneeCode = user.employeeCode;
+    else if (filter.role === 'OWNER' && user)
+      finalAssignerCode = user.employeeCode;
 
     const requestPayload = {
       assigneeCode: finalAssigneeCode,
       assignerCode: finalAssignerCode,
-      departmentId: filter.departmentId && filter.departmentId !== 'undefined' ? parseInt(filter.departmentId, 10) : undefined,
-      planId: filter.planId && filter.planId !== 'undefined' ? parseInt(filter.planId, 10) : undefined,
+      departmentId:
+        filter.departmentId && filter.departmentId !== 'undefined'
+          ? parseInt(filter.departmentId, 10)
+          : undefined,
+      planId:
+        filter.planId && filter.planId !== 'undefined'
+          ? parseInt(filter.planId, 10)
+          : undefined,
       isSupervisor: filter.isSupervisor === 'true',
       status: filter.status,
       priority: filter.priority,
@@ -56,21 +75,28 @@ export class StatisticsService implements OnModuleInit {
       role: filter.role,
     };
 
-    const res: any = await firstValueFrom(this.taskService.GetTaskStats(requestPayload, metadata)).catch(e => {
+    const res: any = await firstValueFrom(
+      this.taskService.GetTaskStats(requestPayload, metadata),
+    ).catch((e) => {
       console.error('TaskService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê nhiệm vụ');
     });
 
     if (res?.success && res.data?.departmentStats) {
       let unitMap: Record<number, any> = {};
-      try { unitMap = await this.getUnitMap(); } catch (e) {}
-      
+      try {
+        unitMap = await this.getUnitMap();
+      } catch (e) {}
+
       res.data.departmentStats = res.data.departmentStats.map((s: any) => {
         const deptId = parseInt(s.name, 10);
         if (!isNaN(deptId) && unitMap[deptId]) {
           return { ...s, name: unitMap[deptId].name };
         }
-        return { ...s, name: isNaN(deptId) ? s.name : "Chưa phân công bộ phận" };
+        return {
+          ...s,
+          name: isNaN(deptId) ? s.name : 'Chưa phân công bộ phận',
+        };
       });
     }
 
@@ -78,22 +104,30 @@ export class StatisticsService implements OnModuleInit {
   }
 
   async getPostStatistics(filter: any, metadata: Metadata) {
-    return firstValueFrom(this.postService.GetPostStats(filter, metadata)).catch(e => {
+    return firstValueFrom(
+      this.postService.GetPostStats(filter, metadata),
+    ).catch((e) => {
       console.error('PostService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê bài viết');
     });
   }
 
   private async getUnitMap(): Promise<Record<number, any>> {
-    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now()) return this.unitMapCache.data;
+    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
+      return this.unitMapCache.data;
     try {
-      const orgRes: any = await firstValueFrom(this.orgService.GetOrganizations({}));
+      const orgRes: any = await firstValueFrom(
+        this.orgService.GetOrganizations({}),
+      );
       const unitMap: Record<number, any> = {};
       (orgRes?.nodes || []).forEach((n: any) => {
         const nId = parseInt(n.id, 10);
         if (nId) unitMap[nId] = { id: nId, name: n.name, code: n.code };
       });
-      this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
+      this.unitMapCache = {
+        data: unitMap,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      };
       return unitMap;
     } catch (error) {
       console.error('getUnitMap failed:', error);
@@ -103,39 +137,53 @@ export class StatisticsService implements OnModuleInit {
 
   async getKpiStatistics(filter: any, user: any, metadata: Metadata) {
     const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE');
-    
+
     let callerDescendantUnitIds: number[] = [];
     let unitMap: Record<number, any> = {};
-    try { unitMap = await this.getUnitMap(); } catch (e) {}
+    try {
+      unitMap = await this.getUnitMap();
+    } catch (e) {}
 
     if (!isAdmin && user?.unitId) {
       try {
-        const descRes: any = await firstValueFrom(this.orgService.GetDescendants({ id: parseInt(user.unitId, 10) }));
+        const descRes: any = await firstValueFrom(
+          this.orgService.GetDescendants({ id: parseInt(user.unitId, 10) }),
+        );
         callerDescendantUnitIds = descRes.ids || [];
       } catch (e) {
         callerDescendantUnitIds = [];
       }
     }
 
-    const res: any = await firstValueFrom(this.kpiService.GetEvaluationStats({
-      periodId: filter.periodId,
-      isAdmin,
-      callerDescendantUnitIds,
-    }, metadata)).catch((e) => {
+    const res: any = await firstValueFrom(
+      this.kpiService.GetEvaluationStats(
+        {
+          periodId: filter.periodId,
+          isAdmin,
+          callerDescendantUnitIds,
+        },
+        metadata,
+      ),
+    ).catch((e) => {
       throw new InternalServerErrorException('Lỗi lấy thống kê KPI');
     });
 
     if (res?.success && res.data?.statsByUnit) {
       res.data.statsByUnit = res.data.statsByUnit.map((s: any) => ({
         ...s,
-        departmentName: s.departmentId && unitMap[s.departmentId] ? unitMap[s.departmentId].name : 'Chưa xác định',
+        departmentName:
+          s.departmentId && unitMap[s.departmentId]
+            ? unitMap[s.departmentId].name
+            : 'Chưa xác định',
       }));
     }
     return res;
   }
 
   async getDocumentStatistics(filter: any, metadata: Metadata) {
-    return firstValueFrom(this.documentService.GetStatistics(filter, metadata)).catch(e => {
+    return firstValueFrom(
+      this.documentService.GetStatistics(filter, metadata),
+    ).catch((e) => {
       console.error('DocumentService gRPC Error:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê văn bản');
     });

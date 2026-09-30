@@ -935,16 +935,16 @@ export class UsersService implements OnModuleInit {
         }
       });
     }
-    const delegatePolicies = userPolicies.filter(
-      (p: any) => p.action === 'DELEGATE' && p.effect === 'ALLOW'
-    ).map(p => ({
-      ...p,
-      conditionsParsed: p.conditions 
-        ? typeof p.conditions === 'string' 
-          ? JSON.parse(p.conditions) 
-          : p.conditions 
-        : {}
-    }));
+    const delegatePolicies = userPolicies
+      .filter((p: any) => p.action === 'DELEGATE' && p.effect === 'ALLOW')
+      .map((p) => ({
+        ...p,
+        conditionsParsed: p.conditions
+          ? typeof p.conditions === 'string'
+            ? JSON.parse(p.conditions)
+            : p.conditions
+          : {},
+      }));
 
     if (unitIds.length > 0) {
       const orgData = await this.fetchOrganizationDataForSubordinates(
@@ -958,7 +958,7 @@ export class UsersService implements OnModuleInit {
           orgData,
           user.employeeCode ?? null,
           result,
-          delegatePolicies
+          delegatePolicies,
         );
       }
     }
@@ -972,7 +972,12 @@ export class UsersService implements OnModuleInit {
     return this.formatSubordinatesResponse(result);
   }
 
-  async findUsersByConditions(data: { callerUserId: number; unitScope: string; rankOperator: string; rankValue?: string }) {
+  async findUsersByConditions(data: {
+    callerUserId: number;
+    unitScope: string;
+    rankOperator: string;
+    rankValue?: string;
+  }) {
     const user = await this.fetchUserForSubordinates(data.callerUserId);
     const activeJobPositions = user.jobPositions.filter(
       (pos: any) => pos.unitId && pos.jobTitle,
@@ -997,15 +1002,17 @@ export class UsersService implements OnModuleInit {
           orgData,
           user.employeeCode ?? null,
           result,
-          [{
-            action: 'DELEGATE',
-            effect: 'ALLOW',
-            conditionsParsed: {
-              unitScope: data.unitScope,
-              targetRankOperator: data.rankOperator,
-              targetRankValue: data.rankValue,
-            }
-          }]
+          [
+            {
+              action: 'DELEGATE',
+              effect: 'ALLOW',
+              conditionsParsed: {
+                unitScope: data.unitScope,
+                targetRankOperator: data.rankOperator,
+                targetRankValue: data.rankValue,
+              },
+            },
+          ],
         );
       }
     }
@@ -1055,7 +1062,7 @@ export class UsersService implements OnModuleInit {
     const [allRanksData, childUnitsData, staffingsData] = await Promise.all([
       this.prisma.jobPosition.findMany({
         where: {
-          unitId: { in: unitIds as number[] },
+          unitId: { in: unitIds },
           endDate: null,
           user: { is: { isActive: true } },
         },
@@ -1083,8 +1090,12 @@ export class UsersService implements OnModuleInit {
     pos: any,
     orgData: any,
     employeeCode: string | null,
-    result: { deptIds: Set<number>; empCodes: Set<string>; domainIds: Set<number> },
-    delegatePolicies: any[] = []
+    result: {
+      deptIds: Set<number>;
+      empCodes: Set<string>;
+      domainIds: Set<number>;
+    },
+    delegatePolicies: any[] = [],
   ) {
     const { allRanksData, childUnitsData, staffingsData } = orgData;
     const myRank = pos.jobTitle.rank;
@@ -1121,10 +1132,16 @@ export class UsersService implements OnModuleInit {
           if (cond.targetRankOperator === 'lte') isValid = targetRank >= myRank;
           if (cond.targetRankOperator === 'any') isValid = true;
           if (cond.targetRankOperator === 'exact' && cond.targetRankValue) {
-             const exactValue = cond.targetRankValue === 'minRank' ? minRank : (cond.targetRankValue === 'secondMinRank' ? secondMinRank : Number(cond.targetRankValue));
-             isValid = targetRank === exactValue;
+            const exactValue =
+              cond.targetRankValue === 'minRank'
+                ? minRank
+                : cond.targetRankValue === 'secondMinRank'
+                  ? secondMinRank
+                  : Number(cond.targetRankValue);
+            isValid = targetRank === exactValue;
           }
-          if (isValid && p.user?.employeeCode) result.empCodes.add(p.user.employeeCode);
+          if (isValid && p.user?.employeeCode)
+            result.empCodes.add(p.user.employeeCode);
         });
       }
 
@@ -1154,16 +1171,27 @@ export class UsersService implements OnModuleInit {
 
     // 3. Xác định các đơn vị được phân công theo dõi (Staffing slots) - Đã tối ưu O(N) functional
     staffingsData
-      .filter((st: any) => st.unitId === pos.unitId && st.jobTitleId === pos.jobTitleId)
+      .filter(
+        (st: any) =>
+          st.unitId === pos.unitId && st.jobTitleId === pos.jobTitleId,
+      )
       .flatMap((st: any) => st.slots || [])
       .filter((slot: any) => slot.assignedEmployeeCode === employeeCode)
       .forEach((slot: any) => {
-        (slot.monitoredUnits || []).forEach((mu: any) => result.deptIds.add(mu.unitId));
-        (slot.domains || []).forEach((d: any) => result.domainIds.add(d.domainId));
+        (slot.monitoredUnits || []).forEach((mu: any) =>
+          result.deptIds.add(mu.unitId),
+        );
+        (slot.domains || []).forEach((d: any) =>
+          result.domainIds.add(d.domainId),
+        );
       });
   }
 
-  private async processChildUnitsPositions(result: { deptIds: Set<number>; empCodes: Set<string>; domainIds: Set<number> }) {
+  private async processChildUnitsPositions(result: {
+    deptIds: Set<number>;
+    empCodes: Set<string>;
+    domainIds: Set<number>;
+  }) {
     const deptIdsArray = Array.from(result.deptIds);
     if (deptIdsArray.length === 0) return;
 
@@ -1187,14 +1215,20 @@ export class UsersService implements OnModuleInit {
     });
 
     for (const positions of positionsByUnit.values()) {
-      const topRank = Math.min(...positions.map((p) => p.jobTitle?.rank ?? Infinity));
+      const topRank = Math.min(
+        ...positions.map((p) => p.jobTitle?.rank ?? Infinity),
+      );
       positions
         .filter((p) => p.jobTitle?.rank === topRank && p.user?.employeeCode)
         .forEach((p) => result.empCodes.add(p.user.employeeCode));
     }
   }
 
-  private formatSubordinatesResponse(result: { deptIds: Set<number>; empCodes: Set<string>; domainIds: Set<number> }) {
+  private formatSubordinatesResponse(result: {
+    deptIds: Set<number>;
+    empCodes: Set<string>;
+    domainIds: Set<number>;
+  }) {
     const deptIds = Array.from(result.deptIds);
     const empCodes = Array.from(result.empCodes);
     const domainIds = Array.from(result.domainIds);

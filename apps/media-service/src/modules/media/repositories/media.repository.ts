@@ -4,7 +4,7 @@ import { Media, Prisma } from '../../../../src/generated/prisma/client';
 
 @Injectable()
 export class MediaRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Prisma.MediaCreateInput): Promise<Media> {
     return this.prisma.media.create({ data });
@@ -25,7 +25,10 @@ export class MediaRepository {
     });
   }
 
-  async updateStatus(id: string, status: 'PENDING' | 'COMPLETED' | 'FAILED'): Promise<Media> {
+  async updateStatus(
+    id: string,
+    status: 'PENDING' | 'COMPLETED' | 'FAILED',
+  ): Promise<Media> {
     return this.prisma.media.update({
       where: { id },
       data: { status },

@@ -11,4 +11,4 @@ import { PrismaModule } from '../../infrastructure/prisma/prisma.module';
   providers: [MediaService, MediaRepository],
   exports: [MediaService],
 })
-export class MediaModule { }
+export class MediaModule {}

@@ -27,14 +27,14 @@ const mapToPrisma = (payload: any) => {
   };
 };
 
-// Map Prisma record sang response (chuẩn hoá Object thành string cho gRPC nếu cần, nhưng 
+// Map Prisma record sang response (chuẩn hoá Object thành string cho gRPC nếu cần, nhưng
 // hiện tại để REST trả về JSON object là tốt nhất, gRPC sẽ tự map)
 const mapIntegrationResponse = (data: any) => {
   if (!data) return null;
   const parsedEndpoints = parseJsonField(data.endpoints) ?? [];
   return {
     ...data,
-    // Trả về JSON object cho REST client dễ parse, nếu gRPC yêu cầu string thì sẽ được 
+    // Trả về JSON object cho REST client dễ parse, nếu gRPC yêu cầu string thì sẽ được
     // protobuf tự động encode/decode hoặc xử lý ở client.
     authConfig: parseJsonField(data.authConfig) ?? {},
     headers: parseJsonField(data.headers) ?? {},
@@ -68,7 +68,7 @@ export class IntegrationService {
       where: whereClause,
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return data.map(mapIntegrationResponse);
   }
 

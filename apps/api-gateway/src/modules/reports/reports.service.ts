@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class ReportsService implements OnModuleInit {
@@ -30,7 +31,7 @@ export class ReportsService implements OnModuleInit {
     const payload = payloadObj ? JSON.stringify(payloadObj) : '{}';
     const userData = user ? JSON.stringify(user) : '';
 
-    const meta = new (require('@grpc/grpc-js').Metadata)();
+    const meta = new Metadata();
     if (authHeader) {
       meta.add('authorization', authHeader);
     }

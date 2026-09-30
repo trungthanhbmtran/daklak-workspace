@@ -1,4 +1,8 @@
-export function buildTree(items: any[], parentId: number | null = null, linkKey = 'parentId') {
+export function buildTree(
+  items: any[],
+  parentId: number | null = null,
+  linkKey = 'parentId',
+) {
   return items
     .filter((item) => item[linkKey] === parentId)
     .map((item) => ({

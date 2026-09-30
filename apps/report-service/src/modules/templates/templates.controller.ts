@@ -4,7 +4,7 @@ import { TemplatesService } from './templates.service';
 
 @Controller()
 export class TemplatesController {
-  constructor(private readonly templatesService: TemplatesService) { }
+  constructor(private readonly templatesService: TemplatesService) {}
 
   @GrpcMethod('ReportService', 'CreateTemplate')
   async createTemplate(data: { payload: string }) {

@@ -284,10 +284,12 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async fetchLgspStatistics(body: any) {
-    return firstValueFrom(this.documentService.FetchLgspStatistics(body)).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
-    });
+    return firstValueFrom(this.documentService.FetchLgspStatistics(body)).catch(
+      (e) => {
+        console.error('RPC Call Failed', e.message);
+        throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
+      },
+    );
   }
 
   async syncOnline() {

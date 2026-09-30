@@ -1,0 +1,10 @@
+﻿admin_khcn - Lint: PASS - Test: PASS
+chat-service - Lint: PASS - Test: PASS
+document-service - Lint: PASS - Test: PASS
+hrm-service - Lint: PASS - Test: PASS
+media-service - Lint: PASS - Test: PASS
+notification_service - Lint: PASS - Test: PASS
+portal-goverment - Lint: PASS - Test: PASS
+posts-service - Lint: PASS - Test: PASS
+report-service - Lint: PASS - Test: PASS
+workflow-service - Lint: PASS - Test: PASS

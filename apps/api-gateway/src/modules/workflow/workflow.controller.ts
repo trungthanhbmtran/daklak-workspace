@@ -34,9 +34,10 @@ export class WorkflowController {
   @ApiOperation({
     summary: 'Lấy danh sách các microservice khả dụng cho workflow',
   })
-  
   @Get('assignable-users')
-  @ApiOperation({ summary: 'Lấy danh sách người nhận việc an toàn theo Node (Decoupled)' })
+  @ApiOperation({
+    summary: 'Lấy danh sách người nhận việc an toàn theo Node (Decoupled)',
+  })
   async getAssignableUsers(
     @Query('workflowCode') workflowCode: string,
     @Query('currentNodeId') currentNodeId: string,
@@ -44,9 +45,17 @@ export class WorkflowController {
   ) {
     const callerUserId = req.user.id;
     if (!workflowCode || !currentNodeId) {
-      return { success: false, message: 'Thiếu tham số workflowCode hoặc currentNodeId', data: [] };
+      return {
+        success: false,
+        message: 'Thiếu tham số workflowCode hoặc currentNodeId',
+        data: [],
+      };
     }
-    return this.workflowService.getAssignableUsers(workflowCode, currentNodeId, callerUserId);
+    return this.workflowService.getAssignableUsers(
+      workflowCode,
+      currentNodeId,
+      callerUserId,
+    );
   }
 
   async getMicroservices() {
@@ -212,4 +221,3 @@ export class WorkflowController {
     return this.workflowService.start(id, body, req.user);
   }
 }
-

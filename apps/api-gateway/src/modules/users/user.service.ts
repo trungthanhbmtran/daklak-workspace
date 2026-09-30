@@ -32,7 +32,7 @@ export class UserService implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
     private readonly notificationsService: NotificationsService,
     private readonly redisService: RedisService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.userGrpcService = this.client.getService(MICROSERVICES.USER.SERVICE);
@@ -50,8 +50,11 @@ export class UserService implements OnModuleInit {
 
     const userInfo: any = userId
       ? await firstValueFrom(
-        this.userGrpcService.FindOne({ id: userId }),
-      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; })
+          this.userGrpcService.FindOne({ id: userId }),
+        ).catch((err: any) => {
+          if (err?.code !== 5) this.handleRpcError(err);
+          return null;
+        })
       : null;
 
     const isAdmin: boolean =
@@ -162,7 +165,7 @@ export class UserService implements OnModuleInit {
       const email = (created as { email?: string }).email ?? body.email;
       const fullName =
         (created as { fullName?: string }).fullName ?? body.fullName ?? '';
-      this.notificationsService.push(
+      void this.notificationsService.push(
         String(createdByUserId),
         'Đã tạo tài khoản mới',
         `Tài khoản đã được tạo: ${fullName || email} (${email}). Thông báo đăng nhập đã gửi tới email người dùng.`,
@@ -217,7 +220,6 @@ export class UserService implements OnModuleInit {
     }
     return { success: true, data: result };
   }
-
 
   async update(id: string, body: any) {
     const result = await firstValueFrom(

@@ -24,14 +24,20 @@ export class TaskOutboxWorker {
 
     if (pendingEvents.length === 0) return;
 
-    // 2. Process each event
+    // 2. Đánh dấu tất cả là SYNCING trong 1 query (Batch Update - Tránh N+1)
+    const eventIds = pendingEvents.map((e) => e.id);
+    await this.prisma.outboxEvent.updateMany({
+      where: { id: { in: eventIds } },
+      data: { status: 'SYNCING' },
+    });
+
+    const processedIds: string[] = [];
+    const failedEvents: { id: string; error: string; retryCount: number }[] = [];
+    const taskUpdates: { taskId: number; workflowInstId: string }[] = [];
+
+    // 3. Process each event (Chỉ gọi gRPC, gom DB Operations vào RAM)
     for (const event of pendingEvents) {
       try {
-        await this.prisma.outboxEvent.update({
-          where: { id: event.id },
-          data: { status: 'SYNCING' },
-        });
-
         const payload = event.payload as any;
 
         if (event.commandType === 'START_WORKFLOW') {
@@ -39,36 +45,63 @@ export class TaskOutboxWorker {
             this.shared.workflowService.StartWorkflow(payload)
           );
           
-          if (res?.id) {
-             // Cập nhật lại Task workflowInstId
-             const businessId = payload.businessId;
-             if (businessId) {
-               await this.prisma.task.update({
-                 where: { id: parseInt(businessId, 10) },
-                 data: { workflowInstId: res.id }
-               });
-             }
+          if (res?.id && payload.businessId) {
+             taskUpdates.push({
+               taskId: parseInt(payload.businessId, 10),
+               workflowInstId: res.id
+             });
           }
         } else if (event.commandType === 'VALIDATE_ACTION') {
            // Tương lai xử lý action submit 
         }
 
-        await this.prisma.outboxEvent.update({
-          where: { id: event.id },
-          data: { status: 'PROCESSED', processedAt: new Date() },
-        });
+        processedIds.push(event.id);
       } catch (error: any) {
         this.logger.error(`Failed to process outbox event ${event.id}`, error);
-        
-        await this.prisma.outboxEvent.update({
-          where: { id: event.id },
-          data: { 
-            status: 'FAILED',
-            retryCount: event.retryCount + 1,
-            errorReason: error?.message || 'Unknown error'
-          },
+        failedEvents.push({
+          id: event.id,
+          error: error?.message || 'Unknown error',
+          retryCount: event.retryCount + 1,
         });
       }
+    }
+
+    // 4. Thực thi Cập nhật hàng loạt (Batch Commit) bằng Transaction
+    const txOperations: any[] = [];
+
+    for (const tu of taskUpdates) {
+      txOperations.push(
+        this.prisma.task.update({
+          where: { id: tu.taskId },
+          data: { workflowInstId: tu.workflowInstId }
+        })
+      );
+    }
+
+    if (processedIds.length > 0) {
+      txOperations.push(
+        this.prisma.outboxEvent.updateMany({
+          where: { id: { in: processedIds } },
+          data: { status: 'PROCESSED', processedAt: new Date() },
+        })
+      );
+    }
+
+    for (const fail of failedEvents) {
+      txOperations.push(
+        this.prisma.outboxEvent.update({
+          where: { id: fail.id },
+          data: { 
+            status: 'FAILED',
+            retryCount: fail.retryCount,
+            errorReason: fail.error
+          }
+        })
+      );
+    }
+
+    if (txOperations.length > 0) {
+      await this.prisma.$transaction(txOperations);
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { PrismaService } from '../../prisma/prisma.service';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class IntegrationService implements OnModuleInit {
@@ -29,7 +30,7 @@ export class IntegrationService implements OnModuleInit {
   async onModuleInit() {
     await this.fetchConfig();
     // Poll every 30 seconds
-    setInterval(() => this.fetchConfig(), 30000);
+    setInterval(() => void this.fetchConfig(), 30000);
   }
 
   private async fetchConfig() {
@@ -238,7 +239,6 @@ export class IntegrationService implements OnModuleInit {
   }
 
   async createApiKey(data: any) {
-    const crypto = require('crypto');
     const key = crypto.randomBytes(32).toString('hex');
     const { name, description, isActive } = data;
     const apikey = await this.prisma.apiKey.create({

@@ -79,16 +79,20 @@ export class KpisService implements OnModuleInit {
   }
 
   async findPeriods() {
-    return firstValueFrom(this.kpiService.FindPeriods({})).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.kpiService.FindPeriods({})).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 
   async createPeriod(body: any) {
-    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.kpiService.CreatePeriod(body)).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 
   async findCriteria(user: any, page?: string, limit?: string) {
-    const hasGlobalAccess = 
-      user?.permissionsFlatten?.includes('KPI:MANAGE') || 
+    const hasGlobalAccess =
+      user?.permissionsFlatten?.includes('KPI:MANAGE') ||
       user?.permissionsFlatten?.includes('SYSTEM:MANAGE');
     const res: any = await firstValueFrom(
       this.kpiService.FindCriteria({
@@ -116,7 +120,9 @@ export class KpisService implements OnModuleInit {
   }
 
   async createCriterion(body: any) {
-    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.kpiService.CreateCriterion(body)).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 
   async updateCriterion(id: string, body: any) {
@@ -135,7 +141,9 @@ export class KpisService implements OnModuleInit {
     if (user) {
       body.evaluatorCode = user.employeeCode || user.username;
     }
-    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.kpiService.CreateEvaluation(body)).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 
   async findEvaluations(user: any, employeeCode: string) {

@@ -28,8 +28,12 @@ export class MediaMapper {
       size: media.size,
       bucket: media.bucket,
       ownerId: media.ownerId,
-      createdAt: media.createdAt ? media.createdAt.toISOString() : new Date().toISOString(),
-      updatedAt: media.updatedAt ? media.updatedAt.toISOString() : new Date().toISOString(),
+      createdAt: media.createdAt
+        ? media.createdAt.toISOString()
+        : new Date().toISOString(),
+      updatedAt: media.updatedAt
+        ? media.updatedAt.toISOString()
+        : new Date().toISOString(),
     };
   }
 }

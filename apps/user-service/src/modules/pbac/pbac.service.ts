@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
@@ -212,13 +208,16 @@ export class PbacService {
     return { resources };
   }
 
-  async createResource(data: any) {
-    return null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  createResource(_data: any) {
+    return Promise.resolve(null);
   }
-  async updateResource(id: number, data: any) {
-    return null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateResource(_id: number, _data: any) {
+    return Promise.resolve(null);
   }
-  async deleteResource(id: number) {
-    return null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  deleteResource(_id: number) {
+    return Promise.resolve(null);
   }
 }

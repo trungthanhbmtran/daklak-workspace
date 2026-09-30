@@ -57,7 +57,9 @@ export class PbacController implements OnModuleInit {
     description: 'Danh sách nhóm quyền (cả số người dùng, số chính sách)',
   })
   async findAll() {
-    const result: any = await firstValueFrom(this.pbacService.FindAllUserGroups({})).catch((e) => this.handleRpcError(e));
+    const result: any = await firstValueFrom(
+      this.pbacService.FindAllUserGroups({}),
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result?.userGroups || [] };
   }
 
@@ -70,7 +72,9 @@ export class PbacController implements OnModuleInit {
     description: 'Nhóm quyền và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const result: any = await firstValueFrom(this.pbacService.FindOneUserGroup({ id })).catch((e) => this.handleRpcError(e));
+    const result: any = await firstValueFrom(
+      this.pbacService.FindOneUserGroup({ id }),
+    ).catch((e) => this.handleRpcError(e));
     if (result && result.policies) {
       result.policies = result.policies.map((p: any) => {
         let parsedConditions = { expression: '' };
@@ -160,7 +164,9 @@ export class PbacController implements OnModuleInit {
   })
   @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const result = await firstValueFrom(this.pbacService.DeleteUserGroup({ id })).catch((e) => this.handleRpcError(e));
+    const result = await firstValueFrom(
+      this.pbacService.DeleteUserGroup({ id }),
+    ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result };
   }
 }

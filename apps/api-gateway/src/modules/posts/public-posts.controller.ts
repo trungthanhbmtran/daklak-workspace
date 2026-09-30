@@ -62,7 +62,9 @@ export class PublicPostsController implements OnModuleInit {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.postService.getPost({ id })).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.postService.getPost({ id })).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 
   @Post(':id/view')

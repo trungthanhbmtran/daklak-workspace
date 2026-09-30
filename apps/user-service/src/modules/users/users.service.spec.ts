@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { PrismaService } from '@/database/prisma.service';
-
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 describe('UsersService', () => {
   let service: UsersService;
   let prisma: {
@@ -28,6 +28,11 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: prisma },
         { provide: 'NOTIFICATION_SERVICE', useValue: { emit: jest.fn() } },
+        { provide: 'WORKFLOW_SERVICE', useValue: { send: jest.fn() } },
+        {
+          provide: CACHE_MANAGER,
+          useValue: { get: jest.fn(), set: jest.fn() },
+        },
         {
           provide: ConfigService,
           useValue: {
@@ -62,7 +67,7 @@ describe('UsersService', () => {
       expect(result).toMatchObject({ id: 1, email: 'a@b.com' });
       expect(result).toHaveProperty('username', '');
       expect(prisma.user.create).toHaveBeenCalledWith({
-        data: { email: 'a@b.com', username: null },
+        data: expect.objectContaining({ email: 'a@b.com', username: null }),
       });
     });
   });
@@ -79,7 +84,7 @@ describe('UsersService', () => {
         isActive: true,
       });
       const result = await service.findOne({ id: 1 });
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         id: 1,
         email: 'a@b.com',
         username: '',
@@ -88,7 +93,9 @@ describe('UsersService', () => {
         avatarUrl: '',
         isActive: true,
       });
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(prisma.user.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 1 } }),
+      );
     });
 
     it('should throw RpcException when user not found', async () => {

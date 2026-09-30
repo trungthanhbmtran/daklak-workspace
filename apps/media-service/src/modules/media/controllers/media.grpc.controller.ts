@@ -21,11 +21,15 @@ import { status } from '@grpc/grpc-js';
 @Controller()
 export class MediaGrpcController {
   private readonly logger = new Logger(MediaGrpcController.name);
-  constructor(private readonly mediaService: MediaService) { }
+  constructor(private readonly mediaService: MediaService) {}
 
   @GrpcMethod('MediaService', 'RequestUpload')
-  async requestUpload(@Payload() data: UploadRequestDto): Promise<UploadResponse> {
-    this.logger.log(`Incoming request: RequestUpload, data: ${JSON.stringify(data)}`);
+  async requestUpload(
+    @Payload() data: UploadRequestDto,
+  ): Promise<UploadResponse> {
+    this.logger.log(
+      `Incoming request: RequestUpload, data: ${JSON.stringify(data)}`,
+    );
     try {
       const result = await this.mediaService.requestUpload(data.ownerId, {
         originalName: data.originalName,
@@ -48,7 +52,9 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'ConfirmUpload')
   async confirmUpload(@Payload() data: ConfirmRequestDto): Promise<MediaInfo> {
-    this.logger.log(`Incoming request: ConfirmUpload, data: ${JSON.stringify(data)}`);
+    this.logger.log(
+      `Incoming request: ConfirmUpload, data: ${JSON.stringify(data)}`,
+    );
     try {
       const media = await this.mediaService.confirmUpload(data.fileId);
       const { downloadUrl } = await this.mediaService.getMedia(media.id);
@@ -63,9 +69,13 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'GetMedia')
   async getMedia(@Payload() data: MediaIdRequestDto): Promise<MediaInfo> {
-    this.logger.log(`Incoming request: GetMedia, data: ${JSON.stringify(data)}`);
+    this.logger.log(
+      `Incoming request: GetMedia, data: ${JSON.stringify(data)}`,
+    );
     try {
-      const { media, downloadUrl } = await this.mediaService.getMedia(data.fileId);
+      const { media, downloadUrl } = await this.mediaService.getMedia(
+        data.fileId,
+      );
       return MediaMapper.toGrpcResponse(media, downloadUrl);
     } catch (error) {
       throw new RpcException({
@@ -76,8 +86,12 @@ export class MediaGrpcController {
   }
 
   @GrpcMethod('MediaService', 'InitMultipartUpload')
-  async initMultipartUpload(@Payload() data: InitMultipartRequestDto): Promise<InitMultipartResponse> {
-    this.logger.log(`Incoming request: InitMultipartUpload, data: ${JSON.stringify(data)}`);
+  async initMultipartUpload(
+    @Payload() data: InitMultipartRequestDto,
+  ): Promise<InitMultipartResponse> {
+    this.logger.log(
+      `Incoming request: InitMultipartUpload, data: ${JSON.stringify(data)}`,
+    );
     try {
       const result = await this.mediaService.initMultipartUpload(data.ownerId, {
         originalName: data.originalName,
@@ -99,8 +113,12 @@ export class MediaGrpcController {
   }
 
   @GrpcMethod('MediaService', 'GetMultipartPreSignedUrls')
-  async getMultipartPreSignedUrls(@Payload() data: GetMultipartUrlsRequestDto): Promise<GetMultipartUrlsResponse> {
-    this.logger.log(`Incoming request: GetMultipartPreSignedUrls, data: ${JSON.stringify(data)}`);
+  async getMultipartPreSignedUrls(
+    @Payload() data: GetMultipartUrlsRequestDto,
+  ): Promise<GetMultipartUrlsResponse> {
+    this.logger.log(
+      `Incoming request: GetMultipartPreSignedUrls, data: ${JSON.stringify(data)}`,
+    );
     try {
       const urls = await this.mediaService.getMultipartPreSignedUrls(
         data.fileKey,
@@ -118,8 +136,12 @@ export class MediaGrpcController {
   }
 
   @GrpcMethod('MediaService', 'CompleteMultipartUpload')
-  async completeMultipartUpload(@Payload() data: CompleteMultipartRequestDto): Promise<MediaInfo> {
-    this.logger.log(`Incoming request: CompleteMultipartUpload, data: ${JSON.stringify(data)}`);
+  async completeMultipartUpload(
+    @Payload() data: CompleteMultipartRequestDto,
+  ): Promise<MediaInfo> {
+    this.logger.log(
+      `Incoming request: CompleteMultipartUpload, data: ${JSON.stringify(data)}`,
+    );
     try {
       const media = await this.mediaService.completeMultipartUpload(
         data.fileId,

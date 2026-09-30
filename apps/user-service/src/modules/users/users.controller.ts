@@ -161,7 +161,7 @@ export class UsersController {
     const unitScope = data.unitScope ?? data.unit_scope ?? 'SAME_UNIT';
     const rankOperator = data.rankOperator ?? data.rank_operator ?? 'lt';
     const rankValue = data.rankValue ?? data.rank_value;
-    
+
     return this.usersService.findUsersByConditions({
       callerUserId,
       unitScope,

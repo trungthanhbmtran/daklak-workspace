@@ -52,6 +52,8 @@ export class ConfigsController implements OnModuleInit {
   async updateConfig(
     @Body() body: { key: string; value: string; description?: string },
   ) {
-    return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 }

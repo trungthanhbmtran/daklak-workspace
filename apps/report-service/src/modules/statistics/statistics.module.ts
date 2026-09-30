@@ -4,7 +4,8 @@ import { join } from 'path';
 import { StatisticsController } from './statistics.controller';
 import { StatisticsService } from './statistics.service';
 
-const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../shared/protos');
+const PROTO_ROOT =
+  process.env.PROTO_PATH || join(__dirname, '../../../../../../shared/protos');
 
 @Module({
   imports: [
@@ -16,7 +17,15 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
           package: 'task',
           protoPath: join(PROTO_ROOT, 'hrm/task.proto'),
           url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
-          loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            objects: true,
+            arrays: true,
+            includeDirs: [PROTO_ROOT],
+          },
         },
       },
       {
@@ -25,8 +34,19 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
         options: {
           package: 'post',
           protoPath: join(PROTO_ROOT, 'posts/post.proto'),
-          url: process.env.POSTS_GRPC_URL || process.env.POST_GRPC_URL || '0.0.0.0:50054',
-          loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
+          url:
+            process.env.POSTS_GRPC_URL ||
+            process.env.POST_GRPC_URL ||
+            '0.0.0.0:50054',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            objects: true,
+            arrays: true,
+            includeDirs: [PROTO_ROOT],
+          },
         },
       },
       {
@@ -36,7 +56,15 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
           package: 'document',
           protoPath: join(PROTO_ROOT, 'document/document.proto'),
           url: process.env.DOCUMENT_GRPC_URL || '0.0.0.0:50052',
-          loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            objects: true,
+            arrays: true,
+            includeDirs: [PROTO_ROOT],
+          },
         },
       },
       {
@@ -46,7 +74,15 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
           package: 'kpi',
           protoPath: join(PROTO_ROOT, 'hrm/kpi.proto'),
           url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
-          loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            objects: true,
+            arrays: true,
+            includeDirs: [PROTO_ROOT],
+          },
         },
       },
       {
@@ -55,10 +91,21 @@ const PROTO_ROOT = process.env.PROTO_PATH || join(__dirname, '../../../../../../
         options: {
           package: 'organization',
           protoPath: join(PROTO_ROOT, 'users/organization.proto'),
-          url: process.env.USERS_GRPC_URL || process.env.USER_GRPC_URL || '0.0.0.0:50051',
-          loader: { keepCase: false, longs: String, enums: String, defaults: true, objects: true, arrays: true, includeDirs: [PROTO_ROOT] },
+          url:
+            process.env.USERS_GRPC_URL ||
+            process.env.USER_GRPC_URL ||
+            '0.0.0.0:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            objects: true,
+            arrays: true,
+            includeDirs: [PROTO_ROOT],
+          },
         },
-      }
+      },
     ]),
   ],
   controllers: [StatisticsController],

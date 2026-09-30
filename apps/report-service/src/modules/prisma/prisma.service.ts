@@ -3,9 +3,11 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 
 import { PrismaClient } from '../../generated/prisma/client';
 
-
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) throw new Error('DATABASE_URL is not set');

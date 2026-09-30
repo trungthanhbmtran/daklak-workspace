@@ -27,7 +27,7 @@ import { UserService } from './user.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Get()
   @ApiOperation({ summary: 'Danh sách user' })
@@ -122,7 +122,6 @@ export class UserController {
   ) {
     return this.userService.assignUserGroups(id, body.userGroupIds);
   }
-
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật user' })

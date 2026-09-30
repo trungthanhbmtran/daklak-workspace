@@ -323,17 +323,17 @@ export class OrganizationsService {
         OR: [
           { name: { contains: lowerQ } },
           { code: { contains: lowerQ } },
-          { shortName: { contains: lowerQ } }
-        ]
+          { shortName: { contains: lowerQ } },
+        ],
       },
-      select: { hierarchyPath: true }
+      select: { hierarchyPath: true },
     });
 
     if (matchedUnits.length === 0) return { data: [] };
 
     // Thu thập tất cả các mã cha từ hierarchyPath (VD: H15.07.04 -> H15, H15.07, H15.07.04)
     const relevantPaths = new Set<string>();
-    matchedUnits.forEach(u => {
+    matchedUnits.forEach((u) => {
       if (u.hierarchyPath) {
         const parts = u.hierarchyPath.split('.');
         let currentPath = '';

@@ -74,7 +74,13 @@ export interface MediaServiceGrpc {
   RequestUpload(request: UploadRequest): Observable<UploadResponse>;
   ConfirmUpload(request: ConfirmRequest): Observable<MediaInfo>;
   GetMedia(request: MediaIdRequest): Observable<MediaInfo>;
-  InitMultipartUpload(request: InitMultipartRequest): Observable<InitMultipartResponse>;
-  GetMultipartPreSignedUrls(request: GetMultipartUrlsRequest): Observable<GetMultipartUrlsResponse>;
-  CompleteMultipartUpload(request: CompleteMultipartRequest): Observable<MediaInfo>;
+  InitMultipartUpload(
+    request: InitMultipartRequest,
+  ): Observable<InitMultipartResponse>;
+  GetMultipartPreSignedUrls(
+    request: GetMultipartUrlsRequest,
+  ): Observable<GetMultipartUrlsResponse>;
+  CompleteMultipartUpload(
+    request: CompleteMultipartRequest,
+  ): Observable<MediaInfo>;
 }

@@ -28,7 +28,7 @@ export class GrpcWorkflowController {
   constructor(
     private readonly definitionService: DefinitionService,
     private readonly executionService: ExecutionService,
-  ) { }
+  ) {}
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
   async createWorkflow(@Payload() data: CreateWorkflowGrpcDto) {
@@ -76,7 +76,10 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'ApplyModule')
   async applyModule(@Payload() data: ApplyModuleGrpcDto) {
-    const result = await this.definitionService.applyModule(data.id, data.moduleCode);
+    const result = await this.definitionService.applyModule(
+      data.id,
+      data.moduleCode,
+    );
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
@@ -84,12 +87,15 @@ export class GrpcWorkflowController {
   async startWorkflow(@Payload() data: StartWorkflowGrpcDto) {
     // StartWorkflow uses businessId (UUID of the definition or code string)
     // We use startProcess which accepts the definition CODE
-    const instance = await this.executionService.startProcess(data.businessId || data.workflowId, {
-      variables: data.initialContext,
-      startedBy: data.initiatorId,
-      businessKey: data.businessId,
-      organizationId: data.businessType || 'DEFAULT',
-    });
+    const instance = await this.executionService.startProcess(
+      data.businessId || data.workflowId,
+      {
+        variables: data.initialContext,
+        startedBy: data.initiatorId,
+        businessKey: data.businessId,
+        organizationId: data.businessType || 'DEFAULT',
+      },
+    );
     return this.mapInstanceToResponse(instance);
   }
 
@@ -174,8 +180,12 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'GetAllowedActionsBatch')
-  async getAllowedActionsBatch(@Payload() data: { requests: GetAllowedActionsGrpcDto[] }) {
-    const results = await this.executionService.getAllowedActionsBatch(data.requests || []);
+  async getAllowedActionsBatch(
+    @Payload() data: { requests: GetAllowedActionsGrpcDto[] },
+  ) {
+    const results = await this.executionService.getAllowedActionsBatch(
+      data.requests || [],
+    );
     return { results };
   }
 
@@ -202,8 +212,10 @@ export class GrpcWorkflowController {
       status: instance.status,
       currentNodeId: instance.currentNodeCode,
       context: instance.variables,
-      createdAt: instance.startedAt?.toISOString?.() || new Date().toISOString(),
-      updatedAt: instance.updatedAt?.toISOString?.() || new Date().toISOString(),
+      createdAt:
+        instance.startedAt?.toISOString?.() || new Date().toISOString(),
+      updatedAt:
+        instance.updatedAt?.toISOString?.() || new Date().toISOString(),
       workflowName: instance.version?.definition?.name || '',
       tasks: (instance.tasks || []).map((t: any) => ({
         id: t.id,

@@ -3,6 +3,7 @@ from api.grpc_server import run_grpc_server
 from worker.mq_consumer import start_mq_worker
 from database.session import engine, Base
 
+
 def main():
     # 1. Tạo bảng MySQL nếu chưa có
     print("--- Khởi tạo Database ---")
@@ -14,6 +15,7 @@ def main():
 
     # 3. Chạy gRPC Server ở thread chính
     run_grpc_server()
+
 
 if __name__ == "__main__":
     main()

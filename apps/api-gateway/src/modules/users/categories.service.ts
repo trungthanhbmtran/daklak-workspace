@@ -178,7 +178,7 @@ export class CategoriesService implements OnModuleInit {
       this.categoryService.Update(payload),
     ).catch((e) => this.handleRpcError(e));
 
-    // Invalidate all cache pattern for categories since we don't know the exact group before fetching, 
+    // Invalidate all cache pattern for categories since we don't know the exact group before fetching,
     // or we can just invalidate all to be safe.
     await this.redisService.delPattern(`category_group:*`);
 

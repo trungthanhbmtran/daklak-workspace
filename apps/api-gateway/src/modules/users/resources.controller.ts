@@ -66,7 +66,7 @@ export class ResourcesController implements OnModuleInit {
       },
     )) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
-    
+
     const resources = rawResources.map((r: any) => ({
       id: r.id,
       code: r.code ?? '',

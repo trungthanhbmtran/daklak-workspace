@@ -4,7 +4,7 @@ import { ReportsService } from './reports.service';
 
 @Controller()
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) { }
+  constructor(private readonly reportsService: ReportsService) {}
 
   @GrpcMethod('ReportService', 'GetStaffingReport')
   async getStaffingReport(data: { unitId: number }) {

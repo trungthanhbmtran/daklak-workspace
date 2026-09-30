@@ -50,7 +50,8 @@ export class DefinitionService {
         include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
       });
 
-      if (!def) throw new NotFoundException(`Process definition ${id} not found`);
+      if (!def)
+        throw new NotFoundException(`Process definition ${id} not found`);
 
       const updatedDef = await tx.processDefinition.update({
         where: { id },
@@ -106,10 +107,12 @@ export class DefinitionService {
         where: { id },
         include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
       });
-      if (!def) throw new NotFoundException(`Process definition ${id} not found`);
+      if (!def)
+        throw new NotFoundException(`Process definition ${id} not found`);
 
       const latestVersion = def.versions[0];
-      if (!latestVersion) throw new NotFoundException(`No versions found for process ${id}`);
+      if (!latestVersion)
+        throw new NotFoundException(`No versions found for process ${id}`);
 
       if (latestVersion.status === 'PUBLISHED') {
         return { def, version: latestVersion };
@@ -131,7 +134,7 @@ export class DefinitionService {
         where: { id },
         data: { code: moduleCode, isActive: true },
       });
-      
+
       const latestVersion = await tx.processVersion.findFirst({
         where: { definitionId: id },
         orderBy: { version: 'desc' },

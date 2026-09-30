@@ -42,7 +42,7 @@ export class TemplatesService {
   }
 
   async updateTemplate(id: number, data: any) {
-    // Để update có cấu trúc phức tạp (widgets), thường ta sẽ xóa widgets cũ và tạo mới 
+    // Để update có cấu trúc phức tạp (widgets), thường ta sẽ xóa widgets cũ và tạo mới
     // hoặc upsert. Ở đây làm đơn giản: xóa cũ, thêm mới.
     await this.prisma.reportWidget.deleteMany({ where: { templateId: id } });
 

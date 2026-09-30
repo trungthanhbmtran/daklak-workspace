@@ -22,7 +22,9 @@ export class ExecutionController {
   }
 
   @EventPattern('workflow.task.action_submitted')
-  async handleActionSubmitted(@Payload() data: { taskId: string; payload: any }) {
+  async handleActionSubmitted(
+    @Payload() data: { taskId: string; payload: any },
+  ) {
     await this.executionService.completeTask(data.taskId, data.payload);
   }
 
@@ -48,4 +50,3 @@ export class ExecutionController {
     };
   }
 }
-

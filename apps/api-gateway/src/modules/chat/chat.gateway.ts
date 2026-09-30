@@ -106,23 +106,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('join_room')
-  handleJoinRoom(
+  async handleJoinRoom(
     @MessageBody() data: { conversationId: string },
     @ConnectedSocket() client: Socket,
   ) {
     if (!data || !data.conversationId)
       return { event: 'error', data: 'No conversationId provided' };
-    client.join(`room_${data.conversationId}`);
+    await client.join(`room_${data.conversationId}`);
     return { event: 'joined', data: { conversationId: data.conversationId } };
   }
 
   @SubscribeMessage('leave_room')
-  handleLeaveRoom(
+  async handleLeaveRoom(
     @MessageBody() data: { conversationId: string },
     @ConnectedSocket() client: Socket,
   ) {
     if (!data || !data.conversationId) return;
-    client.leave(`room_${data.conversationId}`);
+    await client.leave(`room_${data.conversationId}`);
     return { event: 'left', data: { conversationId: data.conversationId } };
   }
 

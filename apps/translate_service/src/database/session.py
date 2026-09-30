@@ -7,7 +7,7 @@ import os
 # Thay đổi thông tin kết nối MySQL của Sở tại đây
 # Format: mysql+pymysql://user:password@host:port/dbname
 SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
+    "DATABASE_URL",
     "mysql+pymysql://root:mypassword@mysql:3306/daklak_translation"
 )
 
@@ -16,6 +16,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 # Hàm tiện ích để lấy session
+
+
 def get_db():
     db = SessionLocal()
     try:

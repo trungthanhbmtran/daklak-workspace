@@ -174,7 +174,9 @@ export class MasterPlansService implements OnModuleInit {
     }
     while (current?.parentId) {
       if (visited.has(current.parentId)) {
-        console.warn(`[MasterPlansService] Cycle detected at unitId: ${current.parentId}`);
+        console.warn(
+          `[MasterPlansService] Cycle detected at unitId: ${current.parentId}`,
+        );
         break;
       }
       ids.push(current.parentId);
@@ -281,7 +283,8 @@ export class MasterPlansService implements OnModuleInit {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const mockPlan = {
       title: 'Triá»ƒn khai CÄS ngÃ nh Y Táº¿ Äáº¯k Láº¯k',
-      objective: 'ÄÆ°a 100% há»“ sÆ¡ bá»‡nh Ã¡n lÃªn ná»n táº£ng sá»‘ hÃ³a trong nÄƒm 2026.',
+      objective:
+        'ÄÆ°a 100% há»“ sÆ¡ bá»‡nh Ã¡n lÃªn ná»n táº£ng sá»‘ hÃ³a trong nÄƒm 2026.',
       startDate: new Date().toISOString(),
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       tasks: [
@@ -324,7 +327,9 @@ export class MasterPlansService implements OnModuleInit {
     if (user?.unitId) {
       body.departmentId = parseInt(user.unitId, 10);
     }
-    return firstValueFrom(this.masterPlanService.Create(body)).catch((e) => this.handleRpcError(e));
+    return firstValueFrom(this.masterPlanService.Create(body)).catch((e) =>
+      this.handleRpcError(e),
+    );
   }
 
   async update(user: any, id: string, body: any) {

@@ -6,15 +6,16 @@ from core.translator import SmartTranslator
 
 translator = SmartTranslator()
 
+
 def start_mq_worker():
     # Lấy RabbitMQ URL từ env, fallback localhost nếu thiếu
     amqp_url = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672")
-    
+
     # Kết nối RabbitMQ
     params = pika.URLParameters(amqp_url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
-    
+
     # Sử dụng 'translation_request' để khớp với posts_service
     queue_name = 'translation_request'
     channel.queue_declare(queue=queue_name, durable=False)
@@ -23,22 +24,22 @@ def start_mq_worker():
         payload = json.loads(body)
         # NestJS gửi dữ liệu bọc trong 'data' nếu dùng ClientProxy
         data = payload.get("data") if isinstance(payload, dict) and "data" in payload else payload
-        
+
         post_id = data.get("postId")
         target_lang = data.get("targetLang", "en")
-        
+
         # Các trường cần dịch
         fields_to_translate = ["title", "description", "content"]
-        
+
         print(f"[*] Đang dịch bài viết: {post_id} sang {target_lang}")
-        
+
         def translate_field(field):
             text_to_translate = data.get(field)
             if not text_to_translate or not str(text_to_translate).strip():
                 return None
-                
+
             print(f"  - Đang dịch trường '{field}'...")
-            
+
             # Dịch nội dung
             translated = translator.translate(str(text_to_translate), target_lang)
             return field, translated
@@ -46,19 +47,19 @@ def start_mq_worker():
         # Sử dụng ThreadPoolExecutor để dịch song song các trường
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             future_to_field = {
-                executor.submit(translate_field, field): field 
+                executor.submit(translate_field, field): field
                 for field in fields_to_translate
             }
-            
+
             for future in concurrent.futures.as_completed(future_to_field):
                 field = future_to_field[future]
                 try:
                     result = future.result()
                     if result is None:
                         continue
-                        
+
                     _, translated = result
-                    
+
                     # Gửi kết quả ngược lại cho posts_service qua queue 'translation_response'
                     response_data = {
                         "postId": post_id,
@@ -66,7 +67,7 @@ def start_mq_worker():
                         "translatedText": translated,
                         "field": field
                     }
-                    
+
                     # Publish tới queue phản hồi
                     channel.queue_declare(queue='translation_response', durable=False)
                     channel.basic_publish(
@@ -82,7 +83,7 @@ def start_mq_worker():
                     print(f"  [x] Lỗi khi dịch trường '{field}': {exc}")
 
         print(f"[v] Hoàn thành dịch toàn bộ bài viết: {post_id}")
-        
+
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback)

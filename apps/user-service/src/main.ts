@@ -1,5 +1,3 @@
-import { TransformInterceptor } from '@core/interceptors/transform.interceptor';
-import { AllExceptionsFilter } from '@core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';

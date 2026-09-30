@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsObject, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsObject,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PositionDto {
@@ -36,7 +43,7 @@ export class WorkflowNodeDto {
 
   @IsOptional()
   propertiesJson?: string;
-  
+
   // React Flow Properties
   @IsOptional()
   @ValidateNested()
@@ -82,7 +89,7 @@ export class WorkflowEdgeDto {
   @IsString()
   @IsOptional()
   targetNodeId?: string;
-  
+
   // React Flow Properties
   @IsString()
   @IsOptional()
@@ -258,7 +265,7 @@ export class ListInstancesGrpcDto {
   search?: string;
 }
 
-export class EmptyGrpcDto { }
+export class EmptyGrpcDto {}
 
 export class ValidateActionGrpcDto {
   @IsString()

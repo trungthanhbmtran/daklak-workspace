@@ -18,4 +18,3 @@ export class RabbitMQService {
     return firstValueFrom(this.client.send(pattern, data));
   }
 }
-

@@ -12,6 +12,8 @@ import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AiFeatureService implements OnModuleInit {
@@ -45,11 +47,9 @@ export class AiFeatureService implements OnModuleInit {
   }
 
   private getGrpcMetadata(user: any, headers?: any) {
-    const Metadata = require('@grpc/grpc-js').Metadata;
     const meta = new Metadata();
 
     if (user) {
-      const jwt = require('jsonwebtoken');
       const internalToken = jwt.sign(
         user,
         process.env.JWT_SECRET || 'super-secret',
@@ -70,8 +70,12 @@ export class AiFeatureService implements OnModuleInit {
         if (parsed.name || parsed.description || parsed.knowledge) {
           parts.push('<SystemContext>');
           if (parsed.name) parts.push(`<Name>\n${parsed.name}\n</Name>`);
-          if (parsed.description) parts.push(`<Description>\n${parsed.description}\n</Description>`);
-          if (parsed.knowledge) parts.push(`<KnowledgeBase>\n${parsed.knowledge}\n</KnowledgeBase>`);
+          if (parsed.description)
+            parts.push(`<Description>\n${parsed.description}\n</Description>`);
+          if (parsed.knowledge)
+            parts.push(
+              `<KnowledgeBase>\n${parsed.knowledge}\n</KnowledgeBase>`,
+            );
           parts.push('</SystemContext>');
         }
         if (parsed.instructions) {

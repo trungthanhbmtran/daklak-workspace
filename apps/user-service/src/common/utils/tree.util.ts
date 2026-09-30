@@ -1,29 +1,33 @@
 export function buildTree(
   items: any[],
-  rootParentId: number | null = null,
+  rootParentId: number | null | string = null,
   linkKey = 'parentId',
 ) {
-  // Build adjacency list map O(N)
-  const childrenMap = new Map<number | null | string, any[]>();
+  const nodeMap = new Map<number | string, any>();
+  const roots: any[] = [];
+
+  // Bước 1: Khởi tạo danh sách Node với Array children rỗng (O(N) Time, O(N) Space)
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    nodeMap.set(item.id, { ...item, children: [] });
+  }
+
+  // Bước 2: Liên kết các Node con vào cha (O(N) Time)
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     const pid = item[linkKey] ?? null;
-    if (!childrenMap.has(pid)) {
-      childrenMap.set(pid, []);
+    const node = nodeMap.get(item.id);
+
+    // Nếu Node là Root hoặc ID cha không tồn tại (orphan)
+    if (pid === rootParentId || pid === null || !nodeMap.has(pid)) {
+      roots.push(node);
+    } else {
+      // Đẩy Reference của Node con vào Node cha
+      nodeMap.get(pid).children.push(node);
     }
-    childrenMap.get(pid)!.push(item);
   }
 
-  // Recursive builder O(N) total since each node is visited once
-  const buildNode = (parentId: number | null | string): any[] => {
-    const children = childrenMap.get(parentId) || [];
-    return children.map((child) => ({
-      ...child,
-      children: buildNode(child.id),
-    }));
-  };
-
-  return buildNode(rootParentId);
+  return roots;
 }
 
 /** Hàm cắt tỉa cành khô (Dùng cho Menu) */

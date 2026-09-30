@@ -44,12 +44,18 @@ export class WorkflowService implements OnModuleInit {
     );
   }
 
-  
-  async getAssignableUsers(workflowCode: string, currentNodeId: string, callerUserId: number) {
+  async getAssignableUsers(
+    workflowCode: string,
+    currentNodeId: string,
+    callerUserId: number,
+  ) {
     try {
       const wfRes: any = await firstValueFrom(
-        this.workflowGrpcService.FindWorkflowByCode({ code: workflowCode })
-      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; });
+        this.workflowGrpcService.FindWorkflowByCode({ code: workflowCode }),
+      ).catch((err: any) => {
+        if (err?.code !== 5) this.handleRpcError(err);
+        return null;
+      });
 
       if (!wfRes || !wfRes.id) return { success: true, data: [] };
 
@@ -59,10 +65,14 @@ export class WorkflowService implements OnModuleInit {
           currentNodeId: currentNodeId,
           actionName: 'ASSIGN',
           evalContext: { fields: {} },
-        })
-      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; });
+        }),
+      ).catch((err: any) => {
+        if (err?.code !== 5) this.handleRpcError(err);
+        return null;
+      });
 
-      if (!nextNodeRes || !nextNodeRes.nextNodeData) return { success: true, data: [] };
+      if (!nextNodeRes || !nextNodeRes.nextNodeData)
+        return { success: true, data: [] };
       const rule = JSON.parse(nextNodeRes.nextNodeData).assignments?.[0];
       if (!rule) return { success: true, data: [] };
 
@@ -72,13 +82,21 @@ export class WorkflowService implements OnModuleInit {
           unitScope: rule.unitScope || 'SAME_UNIT',
           rankOperator: rule.rankOperator || 'lt',
           rankValue: rule.rankValue,
-        })
-      ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; });
+        }),
+      ).catch((err: any) => {
+        if (err?.code !== 5) this.handleRpcError(err);
+        return null;
+      });
 
-      const allowedCodes = conditionsRes?.allowedEmployeeCodes ?? conditionsRes?.allowed_employee_codes ?? [];
+      const allowedCodes =
+        conditionsRes?.allowedEmployeeCodes ??
+        conditionsRes?.allowed_employee_codes ??
+        [];
       return { success: true, data: allowedCodes, message: 'OK' };
     } catch (e: any) {
-      throw new InternalServerErrorException(e.message || 'Lỗi điều phối danh sách nhân sự');
+      throw new InternalServerErrorException(
+        e.message || 'Lỗi điều phối danh sách nhân sự',
+      );
     }
   }
 
@@ -353,8 +371,8 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.FindAllIntegrations({ search: search || '' }),
     ).catch((e) => this.handleIntegrationRpcError(e))) as any;
 
-    const parsedData = (result?.data || []).map(
-      (item: any) => this.mapIntegrationResponse(item)
+    const parsedData = (result?.data || []).map((item: any) =>
+      this.mapIntegrationResponse(item),
     );
     return { success: true, data: parsedData, meta: {}, message: 'OK' };
   }
@@ -413,5 +431,3 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 }
-
-

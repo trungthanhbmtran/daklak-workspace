@@ -21,7 +21,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { AiService } from '../ai/ai.service';
 import { QdrantService } from '../ai/qdrant.service';
-const pdfParse = require('pdf-parse');
+import * as pdfParse from 'pdf-parse';
 import * as mammoth from 'mammoth';
 
 @ApiTags('AI Assistants')

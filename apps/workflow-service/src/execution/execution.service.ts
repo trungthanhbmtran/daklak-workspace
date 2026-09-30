@@ -56,7 +56,9 @@ export class ExecutionService {
     });
 
     if (!def || def.versions.length === 0) {
-      throw new NotFoundException(`Active process definition ${code} not found`);
+      throw new NotFoundException(
+        `Active process definition ${code} not found`,
+      );
     }
 
     const version = def.versions[0];
@@ -74,7 +76,11 @@ export class ExecutionService {
     });
 
     // Cache the graph immediately
-    await this.redisService.set(`workflow:${instance.id}:graph`, version.graph, 86400000);
+    await this.redisService.set(
+      `workflow:${instance.id}:graph`,
+      version.graph,
+      86400000,
+    );
 
     this.rabbitMqService.emit('workflow.instance.started', {
       instanceId: instance.id,
@@ -89,9 +95,15 @@ export class ExecutionService {
     return instance;
   }
 
-  async advanceProcess(instanceId: string, nodeId: string, visited: Set<string> = new Set()) {
+  async advanceProcess(
+    instanceId: string,
+    nodeId: string,
+    visited: Set<string> = new Set(),
+  ) {
     if (visited.has(nodeId)) {
-      this.logger.error(`Cycle detected in workflow graph for instance ${instanceId} at node ${nodeId}`);
+      this.logger.error(
+        `Cycle detected in workflow graph for instance ${instanceId} at node ${nodeId}`,
+      );
       throw new Error(`Cycle detected in workflow graph at node ${nodeId}`);
     }
     visited.add(nodeId);
@@ -141,7 +153,12 @@ export class ExecutionService {
     }
   }
 
-  private async handleServiceTask(instance: any, node: any, graph: any, visited: Set<string>) {
+  private async handleServiceTask(
+    instance: any,
+    node: any,
+    graph: any,
+    visited: Set<string>,
+  ) {
     if (node.action !== 'DYNAMIC_INTEGRATION') {
       return; // Early return for unsupported actions
     }
@@ -156,7 +173,9 @@ export class ExecutionService {
     const result = await this.integrationAction.execute(ctx, node.payload);
 
     if (!result.success) {
-      this.logger.error(`Service Task failed for instance ${instance.id} on node ${node.id}`);
+      this.logger.error(
+        `Service Task failed for instance ${instance.id} on node ${node.id}`,
+      );
       await this.prisma.processInstance.update({
         where: { id: instance.id },
         data: { status: 'FAILED' },
@@ -166,14 +185,21 @@ export class ExecutionService {
       return;
     }
 
-    const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
+    const nextEdges =
+      graph.edges?.filter((e: any) => e.source === node.id) || [];
     if (nextEdges.length > 0) {
       await this.advanceProcess(instance.id, nextEdges[0].target, visited);
     }
   }
 
-  private async triggerCompensation(instanceId: string, failedNode: any, graph: any) {
-    this.logger.log(`Triggering Saga Compensation for instance ${instanceId} from node ${failedNode.id}`);
+  private async triggerCompensation(
+    instanceId: string,
+    failedNode: any,
+    graph: any,
+  ) {
+    this.logger.log(
+      `Triggering Saga Compensation for instance ${instanceId} from node ${failedNode.id}`,
+    );
     this.rabbitMqService.emit('workflow.saga.compensation_triggered', {
       instanceId,
       failedNodeCode: failedNode.code || failedNode.id,
@@ -192,8 +218,14 @@ export class ExecutionService {
     });
   }
 
-  private async handleStartTask(instanceId: string, node: any, graph: any, visited: Set<string>) {
-    const nextEdges = graph.edges?.filter((e: any) => e.source === node.id) || [];
+  private async handleStartTask(
+    instanceId: string,
+    node: any,
+    graph: any,
+    visited: Set<string>,
+  ) {
+    const nextEdges =
+      graph.edges?.filter((e: any) => e.source === node.id) || [];
     if (nextEdges.length > 0) {
       await this.advanceProcess(instanceId, nextEdges[0].target, visited);
     }
@@ -282,50 +314,115 @@ export class ExecutionService {
     return { success: true };
   }
 
-  async getInitialNode(workflowId: string): Promise<{ initialNodeId: string; nodeData: string }> {
+  async getInitialNode(
+    workflowId: string,
+  ): Promise<{ initialNodeId: string; nodeData: string }> {
     const def = await this.prisma.processDefinition.findUnique({
       where: { id: workflowId },
       include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
     });
-    if (!def || !def.versions.length) throw new NotFoundException('Workflow not found');
+    if (!def || !def.versions.length)
+      throw new NotFoundException('Workflow not found');
     const graph = def.versions[0].graph as any;
-    const initialNode = graph.nodes?.find((n: any) => n.type === 'start' || n.type === 'START');
+    const initialNode = graph.nodes?.find(
+      (n: any) => n.type === 'start' || n.type === 'START',
+    );
     if (!initialNode) throw new Error('Start node not found');
-    return { initialNodeId: initialNode.id, nodeData: JSON.stringify(initialNode.data || {}) };
+    return {
+      initialNodeId: initialNode.id,
+      nodeData: JSON.stringify(initialNode.data || {}),
+    };
   }
 
-  async validateAction(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; actionName: string; userRoles?: string[]; userId?: string; businessData?: any }): Promise<{ allowed: boolean; reason: string }> {
-    const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
+  async validateAction(payload: {
+    workflowId?: string;
+    instanceId?: string;
+    currentNodeId: string;
+    actionName: string;
+    userRoles?: string[];
+    userId?: string;
+    businessData?: any;
+  }): Promise<{ allowed: boolean; reason: string }> {
+    const graph = await this.getGraphByContext(
+      payload.workflowId,
+      payload.instanceId,
+    );
     if (!graph) return { allowed: false, reason: 'Workflow graph not found' };
 
-    const currentNode = graph.nodes?.find((n: any) => n.id === payload.currentNodeId);
-    if (!currentNode) return { allowed: false, reason: 'Current node not found' };
+    const currentNode = graph.nodes?.find(
+      (n: any) => n.id === payload.currentNodeId,
+    );
+    if (!currentNode)
+      return { allowed: false, reason: 'Current node not found' };
 
-    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId && (e.label === payload.actionName || e.action === payload.actionName || (e.data && e.data.action === payload.actionName)));
-    if (!edges || edges.length === 0) return { allowed: false, reason: 'Action not allowed from this state' };
+    const edges = graph.edges?.filter(
+      (e: any) =>
+        e.source === payload.currentNodeId &&
+        (e.label === payload.actionName ||
+          e.action === payload.actionName ||
+          (e.data && e.data.action === payload.actionName)),
+    );
+    if (!edges || edges.length === 0)
+      return { allowed: false, reason: 'Action not allowed from this state' };
 
     return { allowed: true, reason: '' };
   }
 
-  async getNextNode(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; actionName: string; evalContext?: any }): Promise<{ nextNodeId: string; nextNodeData: string; type: string }> {
-    const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
+  async getNextNode(payload: {
+    workflowId?: string;
+    instanceId?: string;
+    currentNodeId: string;
+    actionName: string;
+    evalContext?: any;
+  }): Promise<{ nextNodeId: string; nextNodeData: string; type: string }> {
+    const graph = await this.getGraphByContext(
+      payload.workflowId,
+      payload.instanceId,
+    );
     if (!graph) throw new NotFoundException('Workflow graph not found');
 
-    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId && (e.label === payload.actionName || e.action === payload.actionName || (e.data && e.data.action === payload.actionName)));
-    if (!edges || edges.length === 0) throw new Error('No path found for action');
+    const edges = graph.edges?.filter(
+      (e: any) =>
+        e.source === payload.currentNodeId &&
+        (e.label === payload.actionName ||
+          e.action === payload.actionName ||
+          (e.data && e.data.action === payload.actionName)),
+    );
+    if (!edges || edges.length === 0)
+      throw new Error('No path found for action');
 
     const targetNodeId = edges[0].target;
     const targetNode = graph.nodes?.find((n: any) => n.id === targetNodeId);
     if (!targetNode) throw new Error('Target node not found');
 
-    return { nextNodeId: targetNode.id, nextNodeData: JSON.stringify(targetNode.data || {}), type: targetNode.type || '' };
+    return {
+      nextNodeId: targetNode.id,
+      nextNodeData: JSON.stringify(targetNode.data || {}),
+      type: targetNode.type || '',
+    };
   }
 
-  
-  async getAllowedActionsBatch(payloads: Array<{ workflowId?: string; instanceId?: string; currentNodeId: string; userRoles?: string[]; userId?: string; businessData?: any }>): Promise<Array<{ actions: string[] }>> {
+  async getAllowedActionsBatch(
+    payloads: Array<{
+      workflowId?: string;
+      instanceId?: string;
+      currentNodeId: string;
+      userRoles?: string[];
+      userId?: string;
+      businessData?: any;
+    }>,
+  ): Promise<Array<{ actions: string[] }>> {
     // Collect unique workflowIds and instanceIds to batch fetch graphs
-    const workflowIds = [...new Set(payloads.map(p => p.workflowId).filter((id): id is string => !!id))];
-    const instanceIds = [...new Set(payloads.map(p => p.instanceId).filter((id): id is string => !!id))];
+    const workflowIds = [
+      ...new Set(
+        payloads.map((p) => p.workflowId).filter((id): id is string => !!id),
+      ),
+    ];
+    const instanceIds = [
+      ...new Set(
+        payloads.map((p) => p.instanceId).filter((id): id is string => !!id),
+      ),
+    ];
 
     const graphMap = new Map<string, any>();
 
@@ -333,11 +430,11 @@ export class ExecutionService {
     if (instanceIds.length > 0) {
       const instances = await this.prisma.processInstance.findMany({
         where: { id: { in: instanceIds } },
-        include: { version: true }
+        include: { version: true },
       });
       for (const inst of instances) {
         if ((inst.version as any)?.graph) {
-           graphMap.set(`inst:${inst.id}`, (inst.version as any).graph);
+          graphMap.set(`inst:${inst.id}`, (inst.version as any).graph);
         }
       }
     }
@@ -346,7 +443,7 @@ export class ExecutionService {
     if (workflowIds.length > 0) {
       const defs = await this.prisma.processDefinition.findMany({
         where: { id: { in: workflowIds } },
-        include: { versions: { orderBy: { version: 'desc' }, take: 1 } }
+        include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
       });
       for (const def of defs) {
         if (def.versions && def.versions[0]) {
@@ -355,7 +452,7 @@ export class ExecutionService {
       }
     }
 
-    return payloads.map(payload => {
+    return payloads.map((payload) => {
       let graph = null;
       if (payload.instanceId) {
         graph = graphMap.get(`inst:${payload.instanceId}`);
@@ -365,26 +462,52 @@ export class ExecutionService {
 
       if (!graph) return { actions: [] };
 
-      const edges = (graph as any).edges?.filter((e: any) => e.source === payload.currentNodeId);
-      return { actions: edges?.map((e: any) => e.label || e.action || (e.data && e.data.action)).filter(Boolean) || [] };
+      const edges = (graph as any).edges?.filter(
+        (e: any) => e.source === payload.currentNodeId,
+      );
+      return {
+        actions:
+          edges
+            ?.map((e: any) => e.label || e.action || (e.data && e.data.action))
+            .filter(Boolean) || [],
+      };
     });
   }
 
-
-  async getAllowedActions(payload: { workflowId?: string; instanceId?: string; currentNodeId: string; userRoles?: string[]; userId?: string; businessData?: any }): Promise<{ actions: string[] }> {
-    const graph = await this.getGraphByContext(payload.workflowId, payload.instanceId);
+  async getAllowedActions(payload: {
+    workflowId?: string;
+    instanceId?: string;
+    currentNodeId: string;
+    userRoles?: string[];
+    userId?: string;
+    businessData?: any;
+  }): Promise<{ actions: string[] }> {
+    const graph = await this.getGraphByContext(
+      payload.workflowId,
+      payload.instanceId,
+    );
     if (!graph) return { actions: [] };
 
-    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId);
-    return { actions: edges?.map((e: any) => e.label || e.action || (e.data && e.data.action)).filter(Boolean) || [] };
+    const edges = graph.edges?.filter(
+      (e: any) => e.source === payload.currentNodeId,
+    );
+    return {
+      actions:
+        edges
+          ?.map((e: any) => e.label || e.action || (e.data && e.data.action))
+          .filter(Boolean) || [],
+    };
   }
 
-  private async getGraphByContext(workflowId?: string, instanceId?: string): Promise<any> {
+  private async getGraphByContext(
+    workflowId?: string,
+    instanceId?: string,
+  ): Promise<any> {
     if (instanceId) {
       return this.getGraph(instanceId);
     }
     if (workflowId) {
-       const def = await this.prisma.processDefinition.findUnique({
+      const def = await this.prisma.processDefinition.findUnique({
         where: { id: workflowId },
         include: { versions: { orderBy: { version: 'desc' }, take: 1 } },
       });
@@ -442,7 +565,10 @@ export class ExecutionService {
         await this.advanceProcess(instanceId, nodeId);
         return { success: true, message: 'Advanced from node' };
       }
-      return { success: false, message: 'No pending task found for this instance' };
+      return {
+        success: false,
+        message: 'No pending task found for this instance',
+      };
     }
 
     return this.completeTask(task.id, actionData);
@@ -460,8 +586,8 @@ export class ExecutionService {
       },
     });
 
-    if (!instance) throw new NotFoundException(`Instance ${instanceId} not found`);
+    if (!instance)
+      throw new NotFoundException(`Instance ${instanceId} not found`);
     return instance;
   }
 }
-

@@ -1,5 +1,8 @@
 import {
-  Injectable, Inject, OnModuleInit, Logger,
+  Injectable,
+  Inject,
+  OnModuleInit,
+  Logger,
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
@@ -66,7 +69,10 @@ export class AiService implements OnModuleInit {
       if (userId) {
         const userConfigResponse = (await firstValueFrom(
           this.userConfigService.GetConfigs({ userId }),
-        ).catch((err: any) => { if (err?.code !== 5) this.handleRpcError(err); return null; })) as any;
+        ).catch((err: any) => {
+          if (err?.code !== 5) this.handleRpcError(err);
+          return null;
+        })) as any;
 
         const userConfigs = userConfigResponse?.configs || [];
         aiProvidersConfig = userConfigs.find(

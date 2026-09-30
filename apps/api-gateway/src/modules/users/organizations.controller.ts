@@ -72,16 +72,20 @@ export class OrganizationsController {
   }
 
   @Get('unit-types/:id/job-templates')
-  @ApiOperation({ summary: 'Lấy danh sách ID chức danh đã được map với Loại đơn vị' })
+  @ApiOperation({
+    summary: 'Lấy danh sách ID chức danh đã được map với Loại đơn vị',
+  })
   async getUnitTypeJobTemplates(@Param('id', ParseIntPipe) id: number) {
     return this.orgService.getUnitTypeJobTemplates(id);
   }
 
   @Put('unit-types/:id/job-templates')
-  @ApiOperation({ summary: 'Cập nhật danh sách chức danh được phép cho Loại đơn vị' })
+  @ApiOperation({
+    summary: 'Cập nhật danh sách chức danh được phép cho Loại đơn vị',
+  })
   async updateUnitTypeJobTemplates(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { jobTitleIds: number[] }
+    @Body() body: { jobTitleIds: number[] },
   ) {
     return this.orgService.updateUnitTypeJobTemplates(id, body.jobTitleIds);
   }
@@ -138,7 +142,10 @@ export class OrganizationsController {
 
   @Get(':id/scope')
   @ApiOperation({ summary: 'Lấy phạm vi phụ trách của đơn vị' })
-  @ApiResponse({ status: 200, description: 'Phạm vi phụ trách (domainIds, scope)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Phạm vi phụ trách (domainIds, scope)',
+  })
   async getUnitScope(@Param('id', ParseIntPipe) id: number) {
     return this.orgService.getUnitScope(id);
   }
