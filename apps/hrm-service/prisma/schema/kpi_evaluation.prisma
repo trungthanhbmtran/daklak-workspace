@@ -1,9 +1,9 @@
 model KpiPeriod {
-  id                  Int                     @id @default(autoincrement())
-  name                String                  @map("name")
-  startDate           DateTime                @map("start_date") @db.Date
-  endDate             DateTime                @map("end_date") @db.Date
-  evaluations         KpiEvaluation[]
+  id          Int             @id @default(autoincrement())
+  name        String          @map("name")
+  startDate   DateTime        @map("start_date") @db.Date
+  endDate     DateTime        @map("end_date") @db.Date
+  evaluations KpiEvaluation[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -438,3 +438,38 @@ model RankQuota {
 
   @@map("rank_quotas")
 }
+
+// =============================================================================
+// DISTRIBUTED WORKFLOW INFRASTRUCTURE (Data Plane)
+// =============================================================================
+
+// Bảng Outbox lưu trữ Command/Event khi hệ thống Offline hoặc để đảm bảo Transaction
+model OutboxEvent {
+  id                 String    @id @default(uuid())
+  workflowInstanceId String?   @map("workflow_instance_id")
+  processVersion     Int?      @map("process_version")
+  nodeId             String?   @map("node_id")
+  commandType        String    @map("command_type")
+  payload            Json
+  status             String    @default("PENDING") // PENDING, SYNCING, PROCESSED, FAILED
+  retryCount         Int       @default(0) @map("retry_count")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  processedAt        DateTime? @map("processed_at")
+  errorReason        String?   @map("error_reason") @db.Text
+
+  @@index([status])
+  @@index([workflowInstanceId])
+  @@map("outbox_events")
+}
+
+// Bảng Inbox chống Duplicate Event (Idempotency) khi mạng chập chờn
+model ProcessedCommand {
+  commandId          String   @id @map("command_id")
+  workflowInstanceId String   @map("workflow_instance_id")
+  processedAt        DateTime @default(now()) @map("processed_at")
+  action             String
+  status             String   @default("SUCCESS") // SUCCESS, REJECTED
+
+  @@index([workflowInstanceId])
+  @@map("processed_commands")
+}

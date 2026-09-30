@@ -624,7 +624,7 @@ export class TasksService {
     }
   }
 
-  private async executeCreateTaskTransaction(data: any, kpi: any, isCrossDomain: boolean, planId: number | null, parentId: number | null, creatorCode: string) {
+  private async executeCreateTaskTransaction(data: any, kpi: any, isCrossDomain: boolean, planId: number | null, parentId: number | null, creatorCode: string, workflowId: string | null, workflowCode: string | null, currentNodeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
       const task = await tx.task.create({
         data: {
@@ -643,7 +643,8 @@ export class TasksService {
           monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
           metadata: {
             taskType: data.metadata?.taskType || 'ONE_TIME',
-            ...(data.metadata?.recurrence && { recurrence: data.metadata.recurrence })
+            ...(data.metadata?.recurrence && { recurrence: data.metadata.recurrence }),
+            ...(workflowId && { workflowId, workflowCode, currentNodeId })
           },
           // kpiSettings: {
           //   create: {
@@ -659,6 +660,25 @@ export class TasksService {
           // },
         },
       });
+
+      if (workflowId) {
+        await (tx as any).outboxEvent.create({
+          data: {
+            commandType: 'START_WORKFLOW',
+            payload: {
+              workflowId,
+              initiatorId: data.currentUserId?.toString() || creatorCode,
+              businessId: task.id.toString(),
+              businessType: 'TASK',
+              initialContext: this.shared.toProtoStruct({
+                taskId: task.id,
+                assigneeCode: data.assigneeCode || 'UNASSIGNED',
+                assignerCode: creatorCode,
+              }),
+            }
+          }
+        });
+      }
 
       const participantsData = this.shared.buildParticipantsData(task.id, data);
       if (participantsData.length > 0) {
@@ -709,23 +729,22 @@ export class TasksService {
   }
 
   private async handlePostCreateWorkflow(newTask: any, data: any, planId: number | null, parentId: number | null, creatorCode: string) {
-    const assigneeCode = data.assigneeCode || 'UNASSIGNED';
-    const workflowCode = await this.wf.resolveWorkflowCode(data, planId, parentId);
-    const wfInit = workflowCode
-      ? await this.wf.initWorkflow(newTask.id, workflowCode, { initiatorId: data.currentUserId?.toString() || creatorCode, assigneeCode, assignerCode: creatorCode })
-      : null;
+    const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
+    const { workflowId, currentNodeId } = existingMetadata;
 
-    if (wfInit) {
-      const nodeData = await this.wf.getCurrentNodeData(wfInit.workflowId, wfInit.currentNodeId);
-      const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
-      const metadata = { ...existingMetadata, workflowId: wfInit.workflowId, workflowCode: wfInit.workflowCode, currentNodeId: wfInit.currentNodeId, ...(wfInit.workflowInstId && { workflowInstId: wfInit.workflowInstId }) };
-
-      const updateData: any = { metadata };
+    if (workflowId && currentNodeId) {
+      const nodeData = await this.wf.getCurrentNodeData(workflowId, currentNodeId);
+      
+      const updateData: any = {};
       if (nodeData?.targetStatus) {
         updateData.status = nodeData.targetStatus;
       }
-
-      await this.prisma.task.update({ where: { id: newTask.id }, data: updateData });
+      
+      if (Object.keys(updateData).length > 0) {
+        await this.prisma.task.update({ where: { id: newTask.id }, data: updateData });
+        newTask.status = updateData.status || newTask.status;
+      }
+      
       await this.wf.seedStepsFromNode(newTask.id, nodeData);
 
       const notifCfg = this.wf.resolveNotificationConfig(nodeData);
@@ -756,7 +775,11 @@ export class TasksService {
     const kpi = await this.resolveKpiSettings(data, planId);
     const isCrossDomain = await this.checkCrossDomain(assigneeCode, data.domainId);
 
-    const newTask = await this.executeCreateTaskTransaction(data, kpi, isCrossDomain, planId, parentId, creatorCode);
+    const workflowCode = await this.wf.resolveWorkflowCode(data, planId, parentId);
+    const workflowId = workflowCode ? await this.shared.getWorkflowIdByTrigger(workflowCode) : null;
+    const currentNodeId = workflowId ? await this.wf.getLocalInitialNodeId(workflowId) : null;
+
+    const newTask = await this.executeCreateTaskTransaction(data, kpi, isCrossDomain, planId, parentId, creatorCode, workflowId, workflowCode, currentNodeId);
 
     newTask.conversationId = await this.createTaskConversation(
       newTask.id,

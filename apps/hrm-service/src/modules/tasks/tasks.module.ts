@@ -6,13 +6,14 @@ import { TaskSharedModule } from '../task-shared/task-shared.module';
 import { TaskWorkflowService } from '../task-workflow/task-workflow.service';
 import { TaskNotificationService } from '../task-workflow/task-notification.service';
 import { TaskWorkflowController } from '../task-workflow/task-workflow.controller';
+import { TaskOutboxWorker } from '../task-workflow/task-outbox.worker';
 
 @Module({
   imports: [
     TaskSharedModule, // @Global — cung cấp NOTIFICATION_SERVICE, USER_PACKAGE, WORKFLOW_PACKAGE, TaskSharedService
   ],
   controllers: [TasksController, TaskWorkflowController],
-  providers: [TasksService, TasksCronService, TaskWorkflowService, TaskNotificationService],
+  providers: [TasksService, TasksCronService, TaskWorkflowService, TaskNotificationService, TaskOutboxWorker],
   exports: [TasksService],
 })
 export class TasksModule {}

@@ -16,8 +16,6 @@ model Task {
   completedAt DateTime? @map("completed_at")
   isCompleted Boolean   @default(false) @map("is_completed")
 
-
-
   domainId        Int? @map("domain_id")
   monitoredUnitId Int? @map("monitored_unit_id")
   planId          Int? @map("plan_id")
@@ -39,8 +37,8 @@ model Task {
   histories    TaskHistory[]
   steps        TaskStep[]
 
-  ancestors   TaskClosure[] @relation("TaskClosureDescendant")
-  descendants TaskClosure[] @relation("TaskClosureAncestor")
+  ancestors        TaskClosure[]         @relation("TaskClosureDescendant")
+  descendants      TaskClosure[]         @relation("TaskClosureAncestor")
   notificationLogs TaskNotificationLog[]
 
   @@index([dueDate])

@@ -103,6 +103,16 @@ export type TaskRankTemplate = $Result.DefaultSelection<Prisma.$TaskRankTemplate
  * 
  */
 export type RankQuota = $Result.DefaultSelection<Prisma.$RankQuotaPayload>
+/**
+ * Model OutboxEvent
+ * 
+ */
+export type OutboxEvent = $Result.DefaultSelection<Prisma.$OutboxEventPayload>
+/**
+ * Model ProcessedCommand
+ * 
+ */
+export type ProcessedCommand = $Result.DefaultSelection<Prisma.$ProcessedCommandPayload>
 
 /**
  * Enums
@@ -424,6 +434,26 @@ export class PrismaClient<
     * ```
     */
   get rankQuota(): Prisma.RankQuotaDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.outboxEvent`: Exposes CRUD operations for the **OutboxEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OutboxEvents
+    * const outboxEvents = await prisma.outboxEvent.findMany()
+    * ```
+    */
+  get outboxEvent(): Prisma.OutboxEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.processedCommand`: Exposes CRUD operations for the **ProcessedCommand** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProcessedCommands
+    * const processedCommands = await prisma.processedCommand.findMany()
+    * ```
+    */
+  get processedCommand(): Prisma.ProcessedCommandDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -888,7 +918,9 @@ export namespace Prisma {
     TaskHistory: 'TaskHistory',
     TaskNotificationLog: 'TaskNotificationLog',
     TaskRankTemplate: 'TaskRankTemplate',
-    RankQuota: 'RankQuota'
+    RankQuota: 'RankQuota',
+    OutboxEvent: 'OutboxEvent',
+    ProcessedCommand: 'ProcessedCommand'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -904,7 +936,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskNotificationLog" | "taskRankTemplate" | "rankQuota"
+      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskNotificationLog" | "taskRankTemplate" | "rankQuota" | "outboxEvent" | "processedCommand"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2096,6 +2128,138 @@ export namespace Prisma {
           }
         }
       }
+      OutboxEvent: {
+        payload: Prisma.$OutboxEventPayload<ExtArgs>
+        fields: Prisma.OutboxEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OutboxEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OutboxEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>
+          }
+          findFirst: {
+            args: Prisma.OutboxEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OutboxEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>
+          }
+          findMany: {
+            args: Prisma.OutboxEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>[]
+          }
+          create: {
+            args: Prisma.OutboxEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>
+          }
+          createMany: {
+            args: Prisma.OutboxEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.OutboxEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>
+          }
+          update: {
+            args: Prisma.OutboxEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.OutboxEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OutboxEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.OutboxEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OutboxEventPayload>
+          }
+          aggregate: {
+            args: Prisma.OutboxEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOutboxEvent>
+          }
+          groupBy: {
+            args: Prisma.OutboxEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OutboxEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OutboxEventCountArgs<ExtArgs>
+            result: $Utils.Optional<OutboxEventCountAggregateOutputType> | number
+          }
+        }
+      }
+      ProcessedCommand: {
+        payload: Prisma.$ProcessedCommandPayload<ExtArgs>
+        fields: Prisma.ProcessedCommandFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProcessedCommandFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProcessedCommandFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>
+          }
+          findFirst: {
+            args: Prisma.ProcessedCommandFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProcessedCommandFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>
+          }
+          findMany: {
+            args: Prisma.ProcessedCommandFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>[]
+          }
+          create: {
+            args: Prisma.ProcessedCommandCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>
+          }
+          createMany: {
+            args: Prisma.ProcessedCommandCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.ProcessedCommandDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>
+          }
+          update: {
+            args: Prisma.ProcessedCommandUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProcessedCommandDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProcessedCommandUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ProcessedCommandUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProcessedCommandPayload>
+          }
+          aggregate: {
+            args: Prisma.ProcessedCommandAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProcessedCommand>
+          }
+          groupBy: {
+            args: Prisma.ProcessedCommandGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProcessedCommandGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProcessedCommandCountArgs<ExtArgs>
+            result: $Utils.Optional<ProcessedCommandCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2237,6 +2401,8 @@ export namespace Prisma {
     taskNotificationLog?: TaskNotificationLogOmit
     taskRankTemplate?: TaskRankTemplateOmit
     rankQuota?: RankQuotaOmit
+    outboxEvent?: OutboxEventOmit
+    processedCommand?: ProcessedCommandOmit
   }
 
   /* Types for Logging */
@@ -21937,6 +22103,1880 @@ export namespace Prisma {
 
 
   /**
+   * Model OutboxEvent
+   */
+
+  export type AggregateOutboxEvent = {
+    _count: OutboxEventCountAggregateOutputType | null
+    _avg: OutboxEventAvgAggregateOutputType | null
+    _sum: OutboxEventSumAggregateOutputType | null
+    _min: OutboxEventMinAggregateOutputType | null
+    _max: OutboxEventMaxAggregateOutputType | null
+  }
+
+  export type OutboxEventAvgAggregateOutputType = {
+    processVersion: number | null
+    retryCount: number | null
+  }
+
+  export type OutboxEventSumAggregateOutputType = {
+    processVersion: number | null
+    retryCount: number | null
+  }
+
+  export type OutboxEventMinAggregateOutputType = {
+    id: string | null
+    workflowInstanceId: string | null
+    processVersion: number | null
+    nodeId: string | null
+    commandType: string | null
+    status: string | null
+    retryCount: number | null
+    createdAt: Date | null
+    processedAt: Date | null
+    errorReason: string | null
+  }
+
+  export type OutboxEventMaxAggregateOutputType = {
+    id: string | null
+    workflowInstanceId: string | null
+    processVersion: number | null
+    nodeId: string | null
+    commandType: string | null
+    status: string | null
+    retryCount: number | null
+    createdAt: Date | null
+    processedAt: Date | null
+    errorReason: string | null
+  }
+
+  export type OutboxEventCountAggregateOutputType = {
+    id: number
+    workflowInstanceId: number
+    processVersion: number
+    nodeId: number
+    commandType: number
+    payload: number
+    status: number
+    retryCount: number
+    createdAt: number
+    processedAt: number
+    errorReason: number
+    _all: number
+  }
+
+
+  export type OutboxEventAvgAggregateInputType = {
+    processVersion?: true
+    retryCount?: true
+  }
+
+  export type OutboxEventSumAggregateInputType = {
+    processVersion?: true
+    retryCount?: true
+  }
+
+  export type OutboxEventMinAggregateInputType = {
+    id?: true
+    workflowInstanceId?: true
+    processVersion?: true
+    nodeId?: true
+    commandType?: true
+    status?: true
+    retryCount?: true
+    createdAt?: true
+    processedAt?: true
+    errorReason?: true
+  }
+
+  export type OutboxEventMaxAggregateInputType = {
+    id?: true
+    workflowInstanceId?: true
+    processVersion?: true
+    nodeId?: true
+    commandType?: true
+    status?: true
+    retryCount?: true
+    createdAt?: true
+    processedAt?: true
+    errorReason?: true
+  }
+
+  export type OutboxEventCountAggregateInputType = {
+    id?: true
+    workflowInstanceId?: true
+    processVersion?: true
+    nodeId?: true
+    commandType?: true
+    payload?: true
+    status?: true
+    retryCount?: true
+    createdAt?: true
+    processedAt?: true
+    errorReason?: true
+    _all?: true
+  }
+
+  export type OutboxEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OutboxEvent to aggregate.
+     */
+    where?: OutboxEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OutboxEvents to fetch.
+     */
+    orderBy?: OutboxEventOrderByWithRelationInput | OutboxEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OutboxEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OutboxEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OutboxEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OutboxEvents
+    **/
+    _count?: true | OutboxEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: OutboxEventAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OutboxEventSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OutboxEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OutboxEventMaxAggregateInputType
+  }
+
+  export type GetOutboxEventAggregateType<T extends OutboxEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateOutboxEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOutboxEvent[P]>
+      : GetScalarType<T[P], AggregateOutboxEvent[P]>
+  }
+
+
+
+
+  export type OutboxEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OutboxEventWhereInput
+    orderBy?: OutboxEventOrderByWithAggregationInput | OutboxEventOrderByWithAggregationInput[]
+    by: OutboxEventScalarFieldEnum[] | OutboxEventScalarFieldEnum
+    having?: OutboxEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OutboxEventCountAggregateInputType | true
+    _avg?: OutboxEventAvgAggregateInputType
+    _sum?: OutboxEventSumAggregateInputType
+    _min?: OutboxEventMinAggregateInputType
+    _max?: OutboxEventMaxAggregateInputType
+  }
+
+  export type OutboxEventGroupByOutputType = {
+    id: string
+    workflowInstanceId: string | null
+    processVersion: number | null
+    nodeId: string | null
+    commandType: string
+    payload: JsonValue
+    status: string
+    retryCount: number
+    createdAt: Date
+    processedAt: Date | null
+    errorReason: string | null
+    _count: OutboxEventCountAggregateOutputType | null
+    _avg: OutboxEventAvgAggregateOutputType | null
+    _sum: OutboxEventSumAggregateOutputType | null
+    _min: OutboxEventMinAggregateOutputType | null
+    _max: OutboxEventMaxAggregateOutputType | null
+  }
+
+  type GetOutboxEventGroupByPayload<T extends OutboxEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OutboxEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OutboxEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OutboxEventGroupByOutputType[P]>
+            : GetScalarType<T[P], OutboxEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OutboxEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    workflowInstanceId?: boolean
+    processVersion?: boolean
+    nodeId?: boolean
+    commandType?: boolean
+    payload?: boolean
+    status?: boolean
+    retryCount?: boolean
+    createdAt?: boolean
+    processedAt?: boolean
+    errorReason?: boolean
+  }, ExtArgs["result"]["outboxEvent"]>
+
+
+
+  export type OutboxEventSelectScalar = {
+    id?: boolean
+    workflowInstanceId?: boolean
+    processVersion?: boolean
+    nodeId?: boolean
+    commandType?: boolean
+    payload?: boolean
+    status?: boolean
+    retryCount?: boolean
+    createdAt?: boolean
+    processedAt?: boolean
+    errorReason?: boolean
+  }
+
+  export type OutboxEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "workflowInstanceId" | "processVersion" | "nodeId" | "commandType" | "payload" | "status" | "retryCount" | "createdAt" | "processedAt" | "errorReason", ExtArgs["result"]["outboxEvent"]>
+
+  export type $OutboxEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OutboxEvent"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      workflowInstanceId: string | null
+      processVersion: number | null
+      nodeId: string | null
+      commandType: string
+      payload: Prisma.JsonValue
+      status: string
+      retryCount: number
+      createdAt: Date
+      processedAt: Date | null
+      errorReason: string | null
+    }, ExtArgs["result"]["outboxEvent"]>
+    composites: {}
+  }
+
+  type OutboxEventGetPayload<S extends boolean | null | undefined | OutboxEventDefaultArgs> = $Result.GetResult<Prisma.$OutboxEventPayload, S>
+
+  type OutboxEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OutboxEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OutboxEventCountAggregateInputType | true
+    }
+
+  export interface OutboxEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OutboxEvent'], meta: { name: 'OutboxEvent' } }
+    /**
+     * Find zero or one OutboxEvent that matches the filter.
+     * @param {OutboxEventFindUniqueArgs} args - Arguments to find a OutboxEvent
+     * @example
+     * // Get one OutboxEvent
+     * const outboxEvent = await prisma.outboxEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OutboxEventFindUniqueArgs>(args: SelectSubset<T, OutboxEventFindUniqueArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OutboxEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OutboxEventFindUniqueOrThrowArgs} args - Arguments to find a OutboxEvent
+     * @example
+     * // Get one OutboxEvent
+     * const outboxEvent = await prisma.outboxEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OutboxEventFindUniqueOrThrowArgs>(args: SelectSubset<T, OutboxEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OutboxEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventFindFirstArgs} args - Arguments to find a OutboxEvent
+     * @example
+     * // Get one OutboxEvent
+     * const outboxEvent = await prisma.outboxEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OutboxEventFindFirstArgs>(args?: SelectSubset<T, OutboxEventFindFirstArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OutboxEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventFindFirstOrThrowArgs} args - Arguments to find a OutboxEvent
+     * @example
+     * // Get one OutboxEvent
+     * const outboxEvent = await prisma.outboxEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OutboxEventFindFirstOrThrowArgs>(args?: SelectSubset<T, OutboxEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OutboxEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OutboxEvents
+     * const outboxEvents = await prisma.outboxEvent.findMany()
+     * 
+     * // Get first 10 OutboxEvents
+     * const outboxEvents = await prisma.outboxEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const outboxEventWithIdOnly = await prisma.outboxEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OutboxEventFindManyArgs>(args?: SelectSubset<T, OutboxEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OutboxEvent.
+     * @param {OutboxEventCreateArgs} args - Arguments to create a OutboxEvent.
+     * @example
+     * // Create one OutboxEvent
+     * const OutboxEvent = await prisma.outboxEvent.create({
+     *   data: {
+     *     // ... data to create a OutboxEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends OutboxEventCreateArgs>(args: SelectSubset<T, OutboxEventCreateArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OutboxEvents.
+     * @param {OutboxEventCreateManyArgs} args - Arguments to create many OutboxEvents.
+     * @example
+     * // Create many OutboxEvents
+     * const outboxEvent = await prisma.outboxEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OutboxEventCreateManyArgs>(args?: SelectSubset<T, OutboxEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a OutboxEvent.
+     * @param {OutboxEventDeleteArgs} args - Arguments to delete one OutboxEvent.
+     * @example
+     * // Delete one OutboxEvent
+     * const OutboxEvent = await prisma.outboxEvent.delete({
+     *   where: {
+     *     // ... filter to delete one OutboxEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OutboxEventDeleteArgs>(args: SelectSubset<T, OutboxEventDeleteArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OutboxEvent.
+     * @param {OutboxEventUpdateArgs} args - Arguments to update one OutboxEvent.
+     * @example
+     * // Update one OutboxEvent
+     * const outboxEvent = await prisma.outboxEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OutboxEventUpdateArgs>(args: SelectSubset<T, OutboxEventUpdateArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OutboxEvents.
+     * @param {OutboxEventDeleteManyArgs} args - Arguments to filter OutboxEvents to delete.
+     * @example
+     * // Delete a few OutboxEvents
+     * const { count } = await prisma.outboxEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OutboxEventDeleteManyArgs>(args?: SelectSubset<T, OutboxEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OutboxEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OutboxEvents
+     * const outboxEvent = await prisma.outboxEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OutboxEventUpdateManyArgs>(args: SelectSubset<T, OutboxEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one OutboxEvent.
+     * @param {OutboxEventUpsertArgs} args - Arguments to update or create a OutboxEvent.
+     * @example
+     * // Update or create a OutboxEvent
+     * const outboxEvent = await prisma.outboxEvent.upsert({
+     *   create: {
+     *     // ... data to create a OutboxEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OutboxEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OutboxEventUpsertArgs>(args: SelectSubset<T, OutboxEventUpsertArgs<ExtArgs>>): Prisma__OutboxEventClient<$Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OutboxEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventCountArgs} args - Arguments to filter OutboxEvents to count.
+     * @example
+     * // Count the number of OutboxEvents
+     * const count = await prisma.outboxEvent.count({
+     *   where: {
+     *     // ... the filter for the OutboxEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends OutboxEventCountArgs>(
+      args?: Subset<T, OutboxEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OutboxEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OutboxEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OutboxEventAggregateArgs>(args: Subset<T, OutboxEventAggregateArgs>): Prisma.PrismaPromise<GetOutboxEventAggregateType<T>>
+
+    /**
+     * Group by OutboxEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OutboxEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OutboxEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OutboxEventGroupByArgs['orderBy'] }
+        : { orderBy?: OutboxEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OutboxEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOutboxEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OutboxEvent model
+   */
+  readonly fields: OutboxEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OutboxEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OutboxEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OutboxEvent model
+   */
+  interface OutboxEventFieldRefs {
+    readonly id: FieldRef<"OutboxEvent", 'String'>
+    readonly workflowInstanceId: FieldRef<"OutboxEvent", 'String'>
+    readonly processVersion: FieldRef<"OutboxEvent", 'Int'>
+    readonly nodeId: FieldRef<"OutboxEvent", 'String'>
+    readonly commandType: FieldRef<"OutboxEvent", 'String'>
+    readonly payload: FieldRef<"OutboxEvent", 'Json'>
+    readonly status: FieldRef<"OutboxEvent", 'String'>
+    readonly retryCount: FieldRef<"OutboxEvent", 'Int'>
+    readonly createdAt: FieldRef<"OutboxEvent", 'DateTime'>
+    readonly processedAt: FieldRef<"OutboxEvent", 'DateTime'>
+    readonly errorReason: FieldRef<"OutboxEvent", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OutboxEvent findUnique
+   */
+  export type OutboxEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * Filter, which OutboxEvent to fetch.
+     */
+    where: OutboxEventWhereUniqueInput
+  }
+
+  /**
+   * OutboxEvent findUniqueOrThrow
+   */
+  export type OutboxEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * Filter, which OutboxEvent to fetch.
+     */
+    where: OutboxEventWhereUniqueInput
+  }
+
+  /**
+   * OutboxEvent findFirst
+   */
+  export type OutboxEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * Filter, which OutboxEvent to fetch.
+     */
+    where?: OutboxEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OutboxEvents to fetch.
+     */
+    orderBy?: OutboxEventOrderByWithRelationInput | OutboxEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OutboxEvents.
+     */
+    cursor?: OutboxEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OutboxEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OutboxEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OutboxEvents.
+     */
+    distinct?: OutboxEventScalarFieldEnum | OutboxEventScalarFieldEnum[]
+  }
+
+  /**
+   * OutboxEvent findFirstOrThrow
+   */
+  export type OutboxEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * Filter, which OutboxEvent to fetch.
+     */
+    where?: OutboxEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OutboxEvents to fetch.
+     */
+    orderBy?: OutboxEventOrderByWithRelationInput | OutboxEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OutboxEvents.
+     */
+    cursor?: OutboxEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OutboxEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OutboxEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OutboxEvents.
+     */
+    distinct?: OutboxEventScalarFieldEnum | OutboxEventScalarFieldEnum[]
+  }
+
+  /**
+   * OutboxEvent findMany
+   */
+  export type OutboxEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * Filter, which OutboxEvents to fetch.
+     */
+    where?: OutboxEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OutboxEvents to fetch.
+     */
+    orderBy?: OutboxEventOrderByWithRelationInput | OutboxEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OutboxEvents.
+     */
+    cursor?: OutboxEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OutboxEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OutboxEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OutboxEvents.
+     */
+    distinct?: OutboxEventScalarFieldEnum | OutboxEventScalarFieldEnum[]
+  }
+
+  /**
+   * OutboxEvent create
+   */
+  export type OutboxEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OutboxEvent.
+     */
+    data: XOR<OutboxEventCreateInput, OutboxEventUncheckedCreateInput>
+  }
+
+  /**
+   * OutboxEvent createMany
+   */
+  export type OutboxEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OutboxEvents.
+     */
+    data: OutboxEventCreateManyInput | OutboxEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OutboxEvent update
+   */
+  export type OutboxEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OutboxEvent.
+     */
+    data: XOR<OutboxEventUpdateInput, OutboxEventUncheckedUpdateInput>
+    /**
+     * Choose, which OutboxEvent to update.
+     */
+    where: OutboxEventWhereUniqueInput
+  }
+
+  /**
+   * OutboxEvent updateMany
+   */
+  export type OutboxEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OutboxEvents.
+     */
+    data: XOR<OutboxEventUpdateManyMutationInput, OutboxEventUncheckedUpdateManyInput>
+    /**
+     * Filter which OutboxEvents to update
+     */
+    where?: OutboxEventWhereInput
+    /**
+     * Limit how many OutboxEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OutboxEvent upsert
+   */
+  export type OutboxEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OutboxEvent to update in case it exists.
+     */
+    where: OutboxEventWhereUniqueInput
+    /**
+     * In case the OutboxEvent found by the `where` argument doesn't exist, create a new OutboxEvent with this data.
+     */
+    create: XOR<OutboxEventCreateInput, OutboxEventUncheckedCreateInput>
+    /**
+     * In case the OutboxEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OutboxEventUpdateInput, OutboxEventUncheckedUpdateInput>
+  }
+
+  /**
+   * OutboxEvent delete
+   */
+  export type OutboxEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+    /**
+     * Filter which OutboxEvent to delete.
+     */
+    where: OutboxEventWhereUniqueInput
+  }
+
+  /**
+   * OutboxEvent deleteMany
+   */
+  export type OutboxEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OutboxEvents to delete
+     */
+    where?: OutboxEventWhereInput
+    /**
+     * Limit how many OutboxEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OutboxEvent without action
+   */
+  export type OutboxEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OutboxEvent
+     */
+    select?: OutboxEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OutboxEvent
+     */
+    omit?: OutboxEventOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProcessedCommand
+   */
+
+  export type AggregateProcessedCommand = {
+    _count: ProcessedCommandCountAggregateOutputType | null
+    _min: ProcessedCommandMinAggregateOutputType | null
+    _max: ProcessedCommandMaxAggregateOutputType | null
+  }
+
+  export type ProcessedCommandMinAggregateOutputType = {
+    commandId: string | null
+    workflowInstanceId: string | null
+    processedAt: Date | null
+    action: string | null
+    status: string | null
+  }
+
+  export type ProcessedCommandMaxAggregateOutputType = {
+    commandId: string | null
+    workflowInstanceId: string | null
+    processedAt: Date | null
+    action: string | null
+    status: string | null
+  }
+
+  export type ProcessedCommandCountAggregateOutputType = {
+    commandId: number
+    workflowInstanceId: number
+    processedAt: number
+    action: number
+    status: number
+    _all: number
+  }
+
+
+  export type ProcessedCommandMinAggregateInputType = {
+    commandId?: true
+    workflowInstanceId?: true
+    processedAt?: true
+    action?: true
+    status?: true
+  }
+
+  export type ProcessedCommandMaxAggregateInputType = {
+    commandId?: true
+    workflowInstanceId?: true
+    processedAt?: true
+    action?: true
+    status?: true
+  }
+
+  export type ProcessedCommandCountAggregateInputType = {
+    commandId?: true
+    workflowInstanceId?: true
+    processedAt?: true
+    action?: true
+    status?: true
+    _all?: true
+  }
+
+  export type ProcessedCommandAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProcessedCommand to aggregate.
+     */
+    where?: ProcessedCommandWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProcessedCommands to fetch.
+     */
+    orderBy?: ProcessedCommandOrderByWithRelationInput | ProcessedCommandOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProcessedCommandWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProcessedCommands from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProcessedCommands.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProcessedCommands
+    **/
+    _count?: true | ProcessedCommandCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProcessedCommandMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProcessedCommandMaxAggregateInputType
+  }
+
+  export type GetProcessedCommandAggregateType<T extends ProcessedCommandAggregateArgs> = {
+        [P in keyof T & keyof AggregateProcessedCommand]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProcessedCommand[P]>
+      : GetScalarType<T[P], AggregateProcessedCommand[P]>
+  }
+
+
+
+
+  export type ProcessedCommandGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProcessedCommandWhereInput
+    orderBy?: ProcessedCommandOrderByWithAggregationInput | ProcessedCommandOrderByWithAggregationInput[]
+    by: ProcessedCommandScalarFieldEnum[] | ProcessedCommandScalarFieldEnum
+    having?: ProcessedCommandScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProcessedCommandCountAggregateInputType | true
+    _min?: ProcessedCommandMinAggregateInputType
+    _max?: ProcessedCommandMaxAggregateInputType
+  }
+
+  export type ProcessedCommandGroupByOutputType = {
+    commandId: string
+    workflowInstanceId: string
+    processedAt: Date
+    action: string
+    status: string
+    _count: ProcessedCommandCountAggregateOutputType | null
+    _min: ProcessedCommandMinAggregateOutputType | null
+    _max: ProcessedCommandMaxAggregateOutputType | null
+  }
+
+  type GetProcessedCommandGroupByPayload<T extends ProcessedCommandGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProcessedCommandGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProcessedCommandGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProcessedCommandGroupByOutputType[P]>
+            : GetScalarType<T[P], ProcessedCommandGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProcessedCommandSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    commandId?: boolean
+    workflowInstanceId?: boolean
+    processedAt?: boolean
+    action?: boolean
+    status?: boolean
+  }, ExtArgs["result"]["processedCommand"]>
+
+
+
+  export type ProcessedCommandSelectScalar = {
+    commandId?: boolean
+    workflowInstanceId?: boolean
+    processedAt?: boolean
+    action?: boolean
+    status?: boolean
+  }
+
+  export type ProcessedCommandOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"commandId" | "workflowInstanceId" | "processedAt" | "action" | "status", ExtArgs["result"]["processedCommand"]>
+
+  export type $ProcessedCommandPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProcessedCommand"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      commandId: string
+      workflowInstanceId: string
+      processedAt: Date
+      action: string
+      status: string
+    }, ExtArgs["result"]["processedCommand"]>
+    composites: {}
+  }
+
+  type ProcessedCommandGetPayload<S extends boolean | null | undefined | ProcessedCommandDefaultArgs> = $Result.GetResult<Prisma.$ProcessedCommandPayload, S>
+
+  type ProcessedCommandCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProcessedCommandFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProcessedCommandCountAggregateInputType | true
+    }
+
+  export interface ProcessedCommandDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProcessedCommand'], meta: { name: 'ProcessedCommand' } }
+    /**
+     * Find zero or one ProcessedCommand that matches the filter.
+     * @param {ProcessedCommandFindUniqueArgs} args - Arguments to find a ProcessedCommand
+     * @example
+     * // Get one ProcessedCommand
+     * const processedCommand = await prisma.processedCommand.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProcessedCommandFindUniqueArgs>(args: SelectSubset<T, ProcessedCommandFindUniqueArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProcessedCommand that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProcessedCommandFindUniqueOrThrowArgs} args - Arguments to find a ProcessedCommand
+     * @example
+     * // Get one ProcessedCommand
+     * const processedCommand = await prisma.processedCommand.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProcessedCommandFindUniqueOrThrowArgs>(args: SelectSubset<T, ProcessedCommandFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProcessedCommand that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandFindFirstArgs} args - Arguments to find a ProcessedCommand
+     * @example
+     * // Get one ProcessedCommand
+     * const processedCommand = await prisma.processedCommand.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProcessedCommandFindFirstArgs>(args?: SelectSubset<T, ProcessedCommandFindFirstArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProcessedCommand that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandFindFirstOrThrowArgs} args - Arguments to find a ProcessedCommand
+     * @example
+     * // Get one ProcessedCommand
+     * const processedCommand = await prisma.processedCommand.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProcessedCommandFindFirstOrThrowArgs>(args?: SelectSubset<T, ProcessedCommandFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProcessedCommands that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProcessedCommands
+     * const processedCommands = await prisma.processedCommand.findMany()
+     * 
+     * // Get first 10 ProcessedCommands
+     * const processedCommands = await prisma.processedCommand.findMany({ take: 10 })
+     * 
+     * // Only select the `commandId`
+     * const processedCommandWithCommandIdOnly = await prisma.processedCommand.findMany({ select: { commandId: true } })
+     * 
+     */
+    findMany<T extends ProcessedCommandFindManyArgs>(args?: SelectSubset<T, ProcessedCommandFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProcessedCommand.
+     * @param {ProcessedCommandCreateArgs} args - Arguments to create a ProcessedCommand.
+     * @example
+     * // Create one ProcessedCommand
+     * const ProcessedCommand = await prisma.processedCommand.create({
+     *   data: {
+     *     // ... data to create a ProcessedCommand
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProcessedCommandCreateArgs>(args: SelectSubset<T, ProcessedCommandCreateArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProcessedCommands.
+     * @param {ProcessedCommandCreateManyArgs} args - Arguments to create many ProcessedCommands.
+     * @example
+     * // Create many ProcessedCommands
+     * const processedCommand = await prisma.processedCommand.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProcessedCommandCreateManyArgs>(args?: SelectSubset<T, ProcessedCommandCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a ProcessedCommand.
+     * @param {ProcessedCommandDeleteArgs} args - Arguments to delete one ProcessedCommand.
+     * @example
+     * // Delete one ProcessedCommand
+     * const ProcessedCommand = await prisma.processedCommand.delete({
+     *   where: {
+     *     // ... filter to delete one ProcessedCommand
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProcessedCommandDeleteArgs>(args: SelectSubset<T, ProcessedCommandDeleteArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProcessedCommand.
+     * @param {ProcessedCommandUpdateArgs} args - Arguments to update one ProcessedCommand.
+     * @example
+     * // Update one ProcessedCommand
+     * const processedCommand = await prisma.processedCommand.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProcessedCommandUpdateArgs>(args: SelectSubset<T, ProcessedCommandUpdateArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProcessedCommands.
+     * @param {ProcessedCommandDeleteManyArgs} args - Arguments to filter ProcessedCommands to delete.
+     * @example
+     * // Delete a few ProcessedCommands
+     * const { count } = await prisma.processedCommand.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProcessedCommandDeleteManyArgs>(args?: SelectSubset<T, ProcessedCommandDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProcessedCommands.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProcessedCommands
+     * const processedCommand = await prisma.processedCommand.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProcessedCommandUpdateManyArgs>(args: SelectSubset<T, ProcessedCommandUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ProcessedCommand.
+     * @param {ProcessedCommandUpsertArgs} args - Arguments to update or create a ProcessedCommand.
+     * @example
+     * // Update or create a ProcessedCommand
+     * const processedCommand = await prisma.processedCommand.upsert({
+     *   create: {
+     *     // ... data to create a ProcessedCommand
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProcessedCommand we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProcessedCommandUpsertArgs>(args: SelectSubset<T, ProcessedCommandUpsertArgs<ExtArgs>>): Prisma__ProcessedCommandClient<$Result.GetResult<Prisma.$ProcessedCommandPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProcessedCommands.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandCountArgs} args - Arguments to filter ProcessedCommands to count.
+     * @example
+     * // Count the number of ProcessedCommands
+     * const count = await prisma.processedCommand.count({
+     *   where: {
+     *     // ... the filter for the ProcessedCommands we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProcessedCommandCountArgs>(
+      args?: Subset<T, ProcessedCommandCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProcessedCommandCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProcessedCommand.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProcessedCommandAggregateArgs>(args: Subset<T, ProcessedCommandAggregateArgs>): Prisma.PrismaPromise<GetProcessedCommandAggregateType<T>>
+
+    /**
+     * Group by ProcessedCommand.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProcessedCommandGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProcessedCommandGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProcessedCommandGroupByArgs['orderBy'] }
+        : { orderBy?: ProcessedCommandGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProcessedCommandGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProcessedCommandGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProcessedCommand model
+   */
+  readonly fields: ProcessedCommandFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProcessedCommand.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProcessedCommandClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProcessedCommand model
+   */
+  interface ProcessedCommandFieldRefs {
+    readonly commandId: FieldRef<"ProcessedCommand", 'String'>
+    readonly workflowInstanceId: FieldRef<"ProcessedCommand", 'String'>
+    readonly processedAt: FieldRef<"ProcessedCommand", 'DateTime'>
+    readonly action: FieldRef<"ProcessedCommand", 'String'>
+    readonly status: FieldRef<"ProcessedCommand", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProcessedCommand findUnique
+   */
+  export type ProcessedCommandFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * Filter, which ProcessedCommand to fetch.
+     */
+    where: ProcessedCommandWhereUniqueInput
+  }
+
+  /**
+   * ProcessedCommand findUniqueOrThrow
+   */
+  export type ProcessedCommandFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * Filter, which ProcessedCommand to fetch.
+     */
+    where: ProcessedCommandWhereUniqueInput
+  }
+
+  /**
+   * ProcessedCommand findFirst
+   */
+  export type ProcessedCommandFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * Filter, which ProcessedCommand to fetch.
+     */
+    where?: ProcessedCommandWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProcessedCommands to fetch.
+     */
+    orderBy?: ProcessedCommandOrderByWithRelationInput | ProcessedCommandOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProcessedCommands.
+     */
+    cursor?: ProcessedCommandWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProcessedCommands from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProcessedCommands.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProcessedCommands.
+     */
+    distinct?: ProcessedCommandScalarFieldEnum | ProcessedCommandScalarFieldEnum[]
+  }
+
+  /**
+   * ProcessedCommand findFirstOrThrow
+   */
+  export type ProcessedCommandFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * Filter, which ProcessedCommand to fetch.
+     */
+    where?: ProcessedCommandWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProcessedCommands to fetch.
+     */
+    orderBy?: ProcessedCommandOrderByWithRelationInput | ProcessedCommandOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProcessedCommands.
+     */
+    cursor?: ProcessedCommandWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProcessedCommands from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProcessedCommands.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProcessedCommands.
+     */
+    distinct?: ProcessedCommandScalarFieldEnum | ProcessedCommandScalarFieldEnum[]
+  }
+
+  /**
+   * ProcessedCommand findMany
+   */
+  export type ProcessedCommandFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * Filter, which ProcessedCommands to fetch.
+     */
+    where?: ProcessedCommandWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProcessedCommands to fetch.
+     */
+    orderBy?: ProcessedCommandOrderByWithRelationInput | ProcessedCommandOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProcessedCommands.
+     */
+    cursor?: ProcessedCommandWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProcessedCommands from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProcessedCommands.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProcessedCommands.
+     */
+    distinct?: ProcessedCommandScalarFieldEnum | ProcessedCommandScalarFieldEnum[]
+  }
+
+  /**
+   * ProcessedCommand create
+   */
+  export type ProcessedCommandCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ProcessedCommand.
+     */
+    data: XOR<ProcessedCommandCreateInput, ProcessedCommandUncheckedCreateInput>
+  }
+
+  /**
+   * ProcessedCommand createMany
+   */
+  export type ProcessedCommandCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProcessedCommands.
+     */
+    data: ProcessedCommandCreateManyInput | ProcessedCommandCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProcessedCommand update
+   */
+  export type ProcessedCommandUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ProcessedCommand.
+     */
+    data: XOR<ProcessedCommandUpdateInput, ProcessedCommandUncheckedUpdateInput>
+    /**
+     * Choose, which ProcessedCommand to update.
+     */
+    where: ProcessedCommandWhereUniqueInput
+  }
+
+  /**
+   * ProcessedCommand updateMany
+   */
+  export type ProcessedCommandUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProcessedCommands.
+     */
+    data: XOR<ProcessedCommandUpdateManyMutationInput, ProcessedCommandUncheckedUpdateManyInput>
+    /**
+     * Filter which ProcessedCommands to update
+     */
+    where?: ProcessedCommandWhereInput
+    /**
+     * Limit how many ProcessedCommands to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProcessedCommand upsert
+   */
+  export type ProcessedCommandUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ProcessedCommand to update in case it exists.
+     */
+    where: ProcessedCommandWhereUniqueInput
+    /**
+     * In case the ProcessedCommand found by the `where` argument doesn't exist, create a new ProcessedCommand with this data.
+     */
+    create: XOR<ProcessedCommandCreateInput, ProcessedCommandUncheckedCreateInput>
+    /**
+     * In case the ProcessedCommand was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProcessedCommandUpdateInput, ProcessedCommandUncheckedUpdateInput>
+  }
+
+  /**
+   * ProcessedCommand delete
+   */
+  export type ProcessedCommandDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+    /**
+     * Filter which ProcessedCommand to delete.
+     */
+    where: ProcessedCommandWhereUniqueInput
+  }
+
+  /**
+   * ProcessedCommand deleteMany
+   */
+  export type ProcessedCommandDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProcessedCommands to delete
+     */
+    where?: ProcessedCommandWhereInput
+    /**
+     * Limit how many ProcessedCommands to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProcessedCommand without action
+   */
+  export type ProcessedCommandDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProcessedCommand
+     */
+    select?: ProcessedCommandSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProcessedCommand
+     */
+    omit?: ProcessedCommandOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -22258,6 +24298,34 @@ export namespace Prisma {
   export type RankQuotaScalarFieldEnum = (typeof RankQuotaScalarFieldEnum)[keyof typeof RankQuotaScalarFieldEnum]
 
 
+  export const OutboxEventScalarFieldEnum: {
+    id: 'id',
+    workflowInstanceId: 'workflowInstanceId',
+    processVersion: 'processVersion',
+    nodeId: 'nodeId',
+    commandType: 'commandType',
+    payload: 'payload',
+    status: 'status',
+    retryCount: 'retryCount',
+    createdAt: 'createdAt',
+    processedAt: 'processedAt',
+    errorReason: 'errorReason'
+  };
+
+  export type OutboxEventScalarFieldEnum = (typeof OutboxEventScalarFieldEnum)[keyof typeof OutboxEventScalarFieldEnum]
+
+
+  export const ProcessedCommandScalarFieldEnum: {
+    commandId: 'commandId',
+    workflowInstanceId: 'workflowInstanceId',
+    processedAt: 'processedAt',
+    action: 'action',
+    status: 'status'
+  };
+
+  export type ProcessedCommandScalarFieldEnum = (typeof ProcessedCommandScalarFieldEnum)[keyof typeof ProcessedCommandScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -22272,6 +24340,13 @@ export namespace Prisma {
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const JsonNullValueFilter: {
@@ -22473,6 +24548,28 @@ export namespace Prisma {
   };
 
   export type RankQuotaOrderByRelevanceFieldEnum = (typeof RankQuotaOrderByRelevanceFieldEnum)[keyof typeof RankQuotaOrderByRelevanceFieldEnum]
+
+
+  export const OutboxEventOrderByRelevanceFieldEnum: {
+    id: 'id',
+    workflowInstanceId: 'workflowInstanceId',
+    nodeId: 'nodeId',
+    commandType: 'commandType',
+    status: 'status',
+    errorReason: 'errorReason'
+  };
+
+  export type OutboxEventOrderByRelevanceFieldEnum = (typeof OutboxEventOrderByRelevanceFieldEnum)[keyof typeof OutboxEventOrderByRelevanceFieldEnum]
+
+
+  export const ProcessedCommandOrderByRelevanceFieldEnum: {
+    commandId: 'commandId',
+    workflowInstanceId: 'workflowInstanceId',
+    action: 'action',
+    status: 'status'
+  };
+
+  export type ProcessedCommandOrderByRelevanceFieldEnum = (typeof ProcessedCommandOrderByRelevanceFieldEnum)[keyof typeof ProcessedCommandOrderByRelevanceFieldEnum]
 
 
   /**
@@ -24187,6 +26284,144 @@ export namespace Prisma {
     weight?: FloatNullableWithAggregatesFilter<"RankQuota"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"RankQuota"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RankQuota"> | Date | string
+  }
+
+  export type OutboxEventWhereInput = {
+    AND?: OutboxEventWhereInput | OutboxEventWhereInput[]
+    OR?: OutboxEventWhereInput[]
+    NOT?: OutboxEventWhereInput | OutboxEventWhereInput[]
+    id?: StringFilter<"OutboxEvent"> | string
+    workflowInstanceId?: StringNullableFilter<"OutboxEvent"> | string | null
+    processVersion?: IntNullableFilter<"OutboxEvent"> | number | null
+    nodeId?: StringNullableFilter<"OutboxEvent"> | string | null
+    commandType?: StringFilter<"OutboxEvent"> | string
+    payload?: JsonFilter<"OutboxEvent">
+    status?: StringFilter<"OutboxEvent"> | string
+    retryCount?: IntFilter<"OutboxEvent"> | number
+    createdAt?: DateTimeFilter<"OutboxEvent"> | Date | string
+    processedAt?: DateTimeNullableFilter<"OutboxEvent"> | Date | string | null
+    errorReason?: StringNullableFilter<"OutboxEvent"> | string | null
+  }
+
+  export type OutboxEventOrderByWithRelationInput = {
+    id?: SortOrder
+    workflowInstanceId?: SortOrderInput | SortOrder
+    processVersion?: SortOrderInput | SortOrder
+    nodeId?: SortOrderInput | SortOrder
+    commandType?: SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    createdAt?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    errorReason?: SortOrderInput | SortOrder
+    _relevance?: OutboxEventOrderByRelevanceInput
+  }
+
+  export type OutboxEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OutboxEventWhereInput | OutboxEventWhereInput[]
+    OR?: OutboxEventWhereInput[]
+    NOT?: OutboxEventWhereInput | OutboxEventWhereInput[]
+    workflowInstanceId?: StringNullableFilter<"OutboxEvent"> | string | null
+    processVersion?: IntNullableFilter<"OutboxEvent"> | number | null
+    nodeId?: StringNullableFilter<"OutboxEvent"> | string | null
+    commandType?: StringFilter<"OutboxEvent"> | string
+    payload?: JsonFilter<"OutboxEvent">
+    status?: StringFilter<"OutboxEvent"> | string
+    retryCount?: IntFilter<"OutboxEvent"> | number
+    createdAt?: DateTimeFilter<"OutboxEvent"> | Date | string
+    processedAt?: DateTimeNullableFilter<"OutboxEvent"> | Date | string | null
+    errorReason?: StringNullableFilter<"OutboxEvent"> | string | null
+  }, "id">
+
+  export type OutboxEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    workflowInstanceId?: SortOrderInput | SortOrder
+    processVersion?: SortOrderInput | SortOrder
+    nodeId?: SortOrderInput | SortOrder
+    commandType?: SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    createdAt?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    errorReason?: SortOrderInput | SortOrder
+    _count?: OutboxEventCountOrderByAggregateInput
+    _avg?: OutboxEventAvgOrderByAggregateInput
+    _max?: OutboxEventMaxOrderByAggregateInput
+    _min?: OutboxEventMinOrderByAggregateInput
+    _sum?: OutboxEventSumOrderByAggregateInput
+  }
+
+  export type OutboxEventScalarWhereWithAggregatesInput = {
+    AND?: OutboxEventScalarWhereWithAggregatesInput | OutboxEventScalarWhereWithAggregatesInput[]
+    OR?: OutboxEventScalarWhereWithAggregatesInput[]
+    NOT?: OutboxEventScalarWhereWithAggregatesInput | OutboxEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"OutboxEvent"> | string
+    workflowInstanceId?: StringNullableWithAggregatesFilter<"OutboxEvent"> | string | null
+    processVersion?: IntNullableWithAggregatesFilter<"OutboxEvent"> | number | null
+    nodeId?: StringNullableWithAggregatesFilter<"OutboxEvent"> | string | null
+    commandType?: StringWithAggregatesFilter<"OutboxEvent"> | string
+    payload?: JsonWithAggregatesFilter<"OutboxEvent">
+    status?: StringWithAggregatesFilter<"OutboxEvent"> | string
+    retryCount?: IntWithAggregatesFilter<"OutboxEvent"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"OutboxEvent"> | Date | string
+    processedAt?: DateTimeNullableWithAggregatesFilter<"OutboxEvent"> | Date | string | null
+    errorReason?: StringNullableWithAggregatesFilter<"OutboxEvent"> | string | null
+  }
+
+  export type ProcessedCommandWhereInput = {
+    AND?: ProcessedCommandWhereInput | ProcessedCommandWhereInput[]
+    OR?: ProcessedCommandWhereInput[]
+    NOT?: ProcessedCommandWhereInput | ProcessedCommandWhereInput[]
+    commandId?: StringFilter<"ProcessedCommand"> | string
+    workflowInstanceId?: StringFilter<"ProcessedCommand"> | string
+    processedAt?: DateTimeFilter<"ProcessedCommand"> | Date | string
+    action?: StringFilter<"ProcessedCommand"> | string
+    status?: StringFilter<"ProcessedCommand"> | string
+  }
+
+  export type ProcessedCommandOrderByWithRelationInput = {
+    commandId?: SortOrder
+    workflowInstanceId?: SortOrder
+    processedAt?: SortOrder
+    action?: SortOrder
+    status?: SortOrder
+    _relevance?: ProcessedCommandOrderByRelevanceInput
+  }
+
+  export type ProcessedCommandWhereUniqueInput = Prisma.AtLeast<{
+    commandId?: string
+    AND?: ProcessedCommandWhereInput | ProcessedCommandWhereInput[]
+    OR?: ProcessedCommandWhereInput[]
+    NOT?: ProcessedCommandWhereInput | ProcessedCommandWhereInput[]
+    workflowInstanceId?: StringFilter<"ProcessedCommand"> | string
+    processedAt?: DateTimeFilter<"ProcessedCommand"> | Date | string
+    action?: StringFilter<"ProcessedCommand"> | string
+    status?: StringFilter<"ProcessedCommand"> | string
+  }, "commandId">
+
+  export type ProcessedCommandOrderByWithAggregationInput = {
+    commandId?: SortOrder
+    workflowInstanceId?: SortOrder
+    processedAt?: SortOrder
+    action?: SortOrder
+    status?: SortOrder
+    _count?: ProcessedCommandCountOrderByAggregateInput
+    _max?: ProcessedCommandMaxOrderByAggregateInput
+    _min?: ProcessedCommandMinOrderByAggregateInput
+  }
+
+  export type ProcessedCommandScalarWhereWithAggregatesInput = {
+    AND?: ProcessedCommandScalarWhereWithAggregatesInput | ProcessedCommandScalarWhereWithAggregatesInput[]
+    OR?: ProcessedCommandScalarWhereWithAggregatesInput[]
+    NOT?: ProcessedCommandScalarWhereWithAggregatesInput | ProcessedCommandScalarWhereWithAggregatesInput[]
+    commandId?: StringWithAggregatesFilter<"ProcessedCommand"> | string
+    workflowInstanceId?: StringWithAggregatesFilter<"ProcessedCommand"> | string
+    processedAt?: DateTimeWithAggregatesFilter<"ProcessedCommand"> | Date | string
+    action?: StringWithAggregatesFilter<"ProcessedCommand"> | string
+    status?: StringWithAggregatesFilter<"ProcessedCommand"> | string
   }
 
   export type EmployeeCreateInput = {
@@ -25976,6 +28211,160 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type OutboxEventCreateInput = {
+    id?: string
+    workflowInstanceId?: string | null
+    processVersion?: number | null
+    nodeId?: string | null
+    commandType: string
+    payload: JsonNullValueInput | InputJsonValue
+    status?: string
+    retryCount?: number
+    createdAt?: Date | string
+    processedAt?: Date | string | null
+    errorReason?: string | null
+  }
+
+  export type OutboxEventUncheckedCreateInput = {
+    id?: string
+    workflowInstanceId?: string | null
+    processVersion?: number | null
+    nodeId?: string | null
+    commandType: string
+    payload: JsonNullValueInput | InputJsonValue
+    status?: string
+    retryCount?: number
+    createdAt?: Date | string
+    processedAt?: Date | string | null
+    errorReason?: string | null
+  }
+
+  export type OutboxEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    processVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    nodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    commandType?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    retryCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    errorReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type OutboxEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    processVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    nodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    commandType?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    retryCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    errorReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type OutboxEventCreateManyInput = {
+    id?: string
+    workflowInstanceId?: string | null
+    processVersion?: number | null
+    nodeId?: string | null
+    commandType: string
+    payload: JsonNullValueInput | InputJsonValue
+    status?: string
+    retryCount?: number
+    createdAt?: Date | string
+    processedAt?: Date | string | null
+    errorReason?: string | null
+  }
+
+  export type OutboxEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    processVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    nodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    commandType?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    retryCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    errorReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type OutboxEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: NullableStringFieldUpdateOperationsInput | string | null
+    processVersion?: NullableIntFieldUpdateOperationsInput | number | null
+    nodeId?: NullableStringFieldUpdateOperationsInput | string | null
+    commandType?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    status?: StringFieldUpdateOperationsInput | string
+    retryCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    errorReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ProcessedCommandCreateInput = {
+    commandId: string
+    workflowInstanceId: string
+    processedAt?: Date | string
+    action: string
+    status?: string
+  }
+
+  export type ProcessedCommandUncheckedCreateInput = {
+    commandId: string
+    workflowInstanceId: string
+    processedAt?: Date | string
+    action: string
+    status?: string
+  }
+
+  export type ProcessedCommandUpdateInput = {
+    commandId?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: StringFieldUpdateOperationsInput | string
+    processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    action?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ProcessedCommandUncheckedUpdateInput = {
+    commandId?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: StringFieldUpdateOperationsInput | string
+    processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    action?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ProcessedCommandCreateManyInput = {
+    commandId: string
+    workflowInstanceId: string
+    processedAt?: Date | string
+    action: string
+    status?: string
+  }
+
+  export type ProcessedCommandUpdateManyMutationInput = {
+    commandId?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: StringFieldUpdateOperationsInput | string
+    processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    action?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type ProcessedCommandUncheckedUpdateManyInput = {
+    commandId?: StringFieldUpdateOperationsInput | string
+    workflowInstanceId?: StringFieldUpdateOperationsInput | string
+    processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    action?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -27567,6 +29956,141 @@ export namespace Prisma {
     targetValue?: SortOrder
     weight?: SortOrder
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type OutboxEventOrderByRelevanceInput = {
+    fields: OutboxEventOrderByRelevanceFieldEnum | OutboxEventOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type OutboxEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    workflowInstanceId?: SortOrder
+    processVersion?: SortOrder
+    nodeId?: SortOrder
+    commandType?: SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    createdAt?: SortOrder
+    processedAt?: SortOrder
+    errorReason?: SortOrder
+  }
+
+  export type OutboxEventAvgOrderByAggregateInput = {
+    processVersion?: SortOrder
+    retryCount?: SortOrder
+  }
+
+  export type OutboxEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    workflowInstanceId?: SortOrder
+    processVersion?: SortOrder
+    nodeId?: SortOrder
+    commandType?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    createdAt?: SortOrder
+    processedAt?: SortOrder
+    errorReason?: SortOrder
+  }
+
+  export type OutboxEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    workflowInstanceId?: SortOrder
+    processVersion?: SortOrder
+    nodeId?: SortOrder
+    commandType?: SortOrder
+    status?: SortOrder
+    retryCount?: SortOrder
+    createdAt?: SortOrder
+    processedAt?: SortOrder
+    errorReason?: SortOrder
+  }
+
+  export type OutboxEventSumOrderByAggregateInput = {
+    processVersion?: SortOrder
+    retryCount?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type ProcessedCommandOrderByRelevanceInput = {
+    fields: ProcessedCommandOrderByRelevanceFieldEnum | ProcessedCommandOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type ProcessedCommandCountOrderByAggregateInput = {
+    commandId?: SortOrder
+    workflowInstanceId?: SortOrder
+    processedAt?: SortOrder
+    action?: SortOrder
+    status?: SortOrder
+  }
+
+  export type ProcessedCommandMaxOrderByAggregateInput = {
+    commandId?: SortOrder
+    workflowInstanceId?: SortOrder
+    processedAt?: SortOrder
+    action?: SortOrder
+    status?: SortOrder
+  }
+
+  export type ProcessedCommandMinOrderByAggregateInput = {
+    commandId?: SortOrder
+    workflowInstanceId?: SortOrder
+    processedAt?: SortOrder
+    action?: SortOrder
+    status?: SortOrder
+  }
 
   export type KpiEvaluationCreateNestedManyWithoutEmployeeInput = {
     create?: XOR<KpiEvaluationCreateWithoutEmployeeInput, KpiEvaluationUncheckedCreateWithoutEmployeeInput> | KpiEvaluationCreateWithoutEmployeeInput[] | KpiEvaluationUncheckedCreateWithoutEmployeeInput[]
@@ -28915,6 +31439,29 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTaskRoleFilter<$PrismaModel>
     _max?: NestedEnumTaskRoleFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type KpiEvaluationCreateWithoutEmployeeInput = {

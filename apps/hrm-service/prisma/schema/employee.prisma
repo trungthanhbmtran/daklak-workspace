@@ -33,9 +33,9 @@ model Employee {
   isDeleted          Boolean  @default(false) @map("is_deleted")
 
   // Relations (Đã gỡ bỏ các relation trực tiếp với Task cũ)
-  kpiEvaluations     KpiEvaluation[]     @relation("KpiEmployee")
-  kpiReviews         KpiEvaluation[]     @relation("KpiReviewer")
-  taskParticipants   TaskParticipant[]   @relation("EmployeeTasks")
+  kpiEvaluations   KpiEvaluation[]   @relation("KpiEmployee")
+  kpiReviews       KpiEvaluation[]   @relation("KpiReviewer")
+  taskParticipants TaskParticipant[] @relation("EmployeeTasks")
 
   @@map("employees")
 }

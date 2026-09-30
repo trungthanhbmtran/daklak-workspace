@@ -1,10 +1,8 @@
 generator client {
-  provider = "prisma-client-js"
-  engineType = "binary"
+  provider     = "prisma-client-js"
+  engineType   = "binary"
   output       = "../../src/generated/prisma"
   moduleFormat = "cjs"
-
-
 }
 
 // LƯU Ý Prisma 7.x:
@@ -37,7 +35,7 @@ model ProcessVersion {
   id           String   @id @default(cuid())
   definitionId String   @map("definition_id")
   version      Int
-  status       String   // DRAFT | PUBLISHED | DEPRECATED
+  status       String // DRAFT | PUBLISHED | DEPRECATED
   graph        Json
   createdAt    DateTime @default(now()) @map("created_at")
 
@@ -55,12 +53,15 @@ model ProcessInstance {
   versionId       String    @map("version_id")
   businessKey     String?   @map("business_key")
   organizationId  String    @map("organization_id")
-  status          String    // RUNNING | COMPLETED | FAILED | CANCELED
+  status          String // RUNNING | COMPLETED | FAILED | CANCELED
   currentNodeCode String?   @map("current_node_code")
   variables       Json?
   startedBy       String    @map("started_by")
   startedAt       DateTime  @default(now()) @map("started_at")
   endedAt         DateTime? @map("ended_at")
+
+  // OCC: Trạng thái version dùng để check Conflict khi Data Plane sync lên
+  stateVersion Int @default(1) @map("state_version")
 
   version     ProcessVersion       @relation(fields: [versionId], references: [id])
   tasks       WorkflowTask[]
@@ -81,12 +82,12 @@ model WorkflowTask {
   title        String
   assigneeId   String?   @map("assignee_id")
   assigneeUnit String?   @map("assignee_unit")
-  status       String    // PENDING | IN_PROGRESS | COMPLETED | CANCELED
+  status       String // PENDING | IN_PROGRESS | COMPLETED | CANCELED
   dueAt        DateTime? @map("due_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   completedAt  DateTime? @map("completed_at")
 
-  instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  instance ProcessInstance   @relation(fields: [instanceId], references: [id], onDelete: Cascade)
   messages WorkflowMessage[]
 
   @@index([instanceId, status])
@@ -105,6 +106,9 @@ model WorkflowTransition {
   comment      String?  @db.Text
   payload      Json?
 
+  // OCC: Version mà Local Runtime đang giữ khi thực hiện action này
+  expectedVersion Int? @map("expected_version")
+
   instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
   @@index([instanceId])
@@ -116,7 +120,7 @@ model WorkflowEvent {
   instanceId  String    @map("instance_id")
   eventType   String    @map("event_type")
   payload     Json
-  status      String    // PENDING | PROCESSED | FAILED
+  status      String // PENDING | PROCESSED | FAILED
   retryCount  Int       @default(0) @map("retry_count")
   nextRetryAt DateTime? @map("next_retry_at")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -155,16 +159,16 @@ model IntegrationConnection {
   name        String
   code        String   @unique
   description String?  @db.Text
-  protocol    String   @default("REST")   // REST | SOAP | GRAPHQL | GRPC
+  protocol    String   @default("REST") // REST | SOAP | GRAPHQL | GRPC
   baseUrl     String   @map("base_url")
-  authType    String   @default("NONE")   // NONE | BASIC | BEARER | OAUTH2 | API_KEY
+  authType    String   @default("NONE") // NONE | BASIC | BEARER | OAUTH2 | API_KEY
   authConfig  Json?    @map("auth_config") // { token_url, client_id, client_secret, username, password, api_key }
-  headers     Json?                        // Các static header gửi kèm mọi request
-  endpoints   Json?                        // Danh sách endpoints: [{path, method, description}]
-  metadata    Json?                        // WSDL URL (SOAP), OpenAPI spec URL (REST), proto URL (gRPC)
-  isActive    Boolean  @default(true)     @map("is_active")
-  createdAt   DateTime @default(now())    @map("created_at")
-  updatedAt   DateTime @updatedAt         @map("updated_at")
+  headers     Json? // Các static header gửi kèm mọi request
+  endpoints   Json? // Danh sách endpoints: [{path, method, description}]
+  metadata    Json? // WSDL URL (SOAP), OpenAPI spec URL (REST), proto URL (gRPC)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([protocol, isActive])
   @@map("integration_connections")
