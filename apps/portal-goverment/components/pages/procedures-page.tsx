@@ -78,11 +78,9 @@ export default function ProceduresPage() {
     return [];
   }, [dbProceduresData])
 
-  React.useEffect(() => {
-    if (filteredProcedures.length > 0 && !activeProcedureIdx) {
-      setActiveProcedureIdx(filteredProcedures[0].id)
-    }
-  }, [filteredProcedures, activeProcedureIdx])
+  if (filteredProcedures.length > 0 && !activeProcedureIdx) {
+    setActiveProcedureIdx(filteredProcedures[0].id)
+  }
 
 
   return (

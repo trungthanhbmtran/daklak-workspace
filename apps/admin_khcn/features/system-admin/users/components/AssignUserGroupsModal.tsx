@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Shield, Loader2, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -42,13 +42,18 @@ export function AssignUserGroupsModal({
     staleTime: 60 * 1000,
   });
 
-  useEffect(() => {
+  const [prevUser, setPrevUser] = useState(user);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (user !== prevUser || isOpen !== prevIsOpen) {
+    setPrevUser(user);
+    setPrevIsOpen(isOpen);
     if (isOpen && user && "userGroupIds" in user) {
       setSelectedIds((user as UserDetail).userGroupIds || []);
     } else if (isOpen) {
       setSelectedIds([]);
     }
-  }, [isOpen, user]);
+  }
 
   const toggleGroup = (id: number) => {
     setSelectedIds((prev) =>

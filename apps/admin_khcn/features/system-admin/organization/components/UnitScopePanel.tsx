@@ -46,12 +46,14 @@ export function UnitScopePanel() {
   const [domainIds, setDomainIds] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
 
-  useEffect(() => {
+  const [prevScopeData, setPrevScopeData] = useState(scopeData);
+  if (scopeData !== prevScopeData) {
+    setPrevScopeData(scopeData);
     if (scopeData !== undefined) {
       setDomainIds(scopeData?.domainIds ?? []);
       setDirty(false);
     }
-  }, [scopeData]);
+  }
 
   // Truyền selectedIds lên server để server sort + đánh dấu
   // Backend sẽ tự động lọc danh sách lĩnh vực theo parentId nếu có

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
@@ -43,11 +43,11 @@ export function UserClient() {
   const total = listResponse?.meta?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  // Reset page khi search thay đổi
-   
-  useEffect(() => {
+  const [lastSearch, setLastSearch] = useState(ui.state.searchTerm);
+  if (ui.state.searchTerm !== lastSearch) {
     setPage(1);
-  }, [ui.state.searchTerm]);
+    setLastSearch(ui.state.searchTerm);
+  }
   
   const { data: detailUser, isLoading: isLoadingDetail } = useUserDetail(ui.state.detailId);
   const setActiveMutation = useSetUserActive();

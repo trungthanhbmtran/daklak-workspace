@@ -6,7 +6,7 @@
  * Rebuilt from scratch. No return null. Correct TQ v5 loading states.
  */
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,7 +28,6 @@ import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { organizationApi } from "../../api";
 import { organizationQueryKeys } from "../../constants/queryKeys";
-import { useDomainSearch } from "../../hooks/useScopeCatalog";
 import type { JobTitleItem, StaffingReportItem } from "../../types";
 
 const STALE = 2 * 60 * 1000;

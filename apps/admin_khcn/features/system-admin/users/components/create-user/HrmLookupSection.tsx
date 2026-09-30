@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Building2, UserCheck, Search, BadgeCheck, X } from "lucide-react";
@@ -76,12 +76,14 @@ export function HrmLookupSection({ isOpen }: Props) {
     return parts.length > 0 ? parts.join(" - ") : "";
   };
 
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setHrmKeyword("");
       setSelectedHrmEmp(null);
     }
-  }, [isOpen]);
+  }
 
   const fillFromHrm = (emp: HrmEmployee) => {
     const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(" ").trim() || undefined;

@@ -28,7 +28,7 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Heading, Text } from "@/components/ui/typography";
+import { Text } from "@/components/ui/typography";
 
 import { MenuItem, PbacResource } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";

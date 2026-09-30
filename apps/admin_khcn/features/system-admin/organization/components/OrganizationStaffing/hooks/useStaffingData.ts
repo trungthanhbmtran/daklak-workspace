@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { organizationApi } from "../../../api";
 import { organizationQueryKeys } from "../../../constants/queryKeys";
-import type { StaffingReportItem } from "../../../types";
 
 const STALE = 60 * 1000;
 const GC    = 5 * 60 * 1000;

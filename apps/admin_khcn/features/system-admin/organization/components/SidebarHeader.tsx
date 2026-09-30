@@ -1,16 +1,12 @@
 "use client";
 
 import { memo } from "react";
-import { Building2, Plus, BriefcaseBusiness, Settings2 } from "lucide-react";
+import { Building2, Plus, BriefcaseBusiness } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+
 
 interface SidebarHeaderProps {
     onAddRoot: () => void;

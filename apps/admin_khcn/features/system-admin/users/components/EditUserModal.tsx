@@ -16,7 +16,6 @@ import { useInvalidateHrmEmployees } from "@/features/hrm";
 import { useUpdateUser } from "../hooks/useUserApi";
 import type { UserItem } from "../types";
 
-import { HrmLookupSection } from "./create-user/HrmLookupSection";
 import { AccountInfoSection } from "./create-user/AccountInfoSection";
 
 // ==========================================

@@ -6,7 +6,6 @@ import type {
   UpdateUnitPayload,
   JobTitleItem,
   StaffingReportItem,
-  StaffingSlotItem,
   SetStaffingPayload,
   SetStaffingSlotPayload,
   UpdateJobTitlePayload,

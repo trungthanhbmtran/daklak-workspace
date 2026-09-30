@@ -180,7 +180,9 @@ export function PopoverMultiSelect({
   // Giữ ref tới giá trị mới nhất để `toggleItem` có identity ổn định
   // => OptionItem (memo) không bị re-render thừa.
   const latest = useRef({ selectedIds, onChange });
-  latest.current = { selectedIds, onChange };
+  useEffect(() => {
+    latest.current = { selectedIds, onChange };
+  });
 
   const toggleItem = useCallback((id: number) => {
     const { selectedIds, onChange } = latest.current;
