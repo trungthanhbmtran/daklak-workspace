@@ -1,6 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ClientProxy, ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger } from "@nestjs/common";
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+} from "@nestjs/microservices";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class RabbitmqService {
@@ -8,15 +12,16 @@ export class RabbitmqService {
   private readonly logger = new Logger(RabbitmqService.name);
 
   constructor(private configService: ConfigService) {
-    const rmqUrl = this.configService.get<string>('RABBITMQ_URL') || 'amqp://localhost:5672';
-    
+    const rmqUrl =
+      this.configService.get<string>("RABBITMQ_URL") || "amqp://localhost:5672";
+
     this.client = ClientProxyFactory.create({
       transport: Transport.RMQ,
       options: {
         urls: [rmqUrl],
-        queue: 'chat_events_queue',
+        queue: "chat_events_queue",
         queueOptions: {
-          durable: true
+          durable: true,
         },
       },
     });

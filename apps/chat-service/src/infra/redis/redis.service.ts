@@ -1,6 +1,11 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis from "ioredis";
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
@@ -10,15 +15,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    const redisUrl =
+      this.configService.get<string>("REDIS_URL") || "redis://localhost:6379";
     this.redisClient = new Redis(redisUrl);
-    
-    this.redisClient.on('connect', () => {
-      this.logger.log('Connected to Redis');
+
+    this.redisClient.on("connect", () => {
+      this.logger.log("Connected to Redis");
     });
 
-    this.redisClient.on('error', (err) => {
-      this.logger.error('Redis error', err);
+    this.redisClient.on("error", (err) => {
+      this.logger.error("Redis error", err);
     });
   }
 
@@ -34,7 +40,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async setPresence(userId: string, status: string, ttl?: number) {
     const key = `presence:${userId}`;
     if (ttl) {
-      await this.redisClient.set(key, status, 'EX', ttl);
+      await this.redisClient.set(key, status, "EX", ttl);
     } else {
       await this.redisClient.set(key, status);
     }

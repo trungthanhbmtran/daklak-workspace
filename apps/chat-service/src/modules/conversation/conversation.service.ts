@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
-import { RabbitmqService } from '../../infra/rabbitmq/rabbitmq.service';
-import { ConversationRepository } from './conversation.repository';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-import { ConversationResponseDto } from './dto/conversation-response.dto';
+import { Injectable, Logger } from "@nestjs/common";
+import { RpcException } from "@nestjs/microservices";
+import { RabbitmqService } from "../../infra/rabbitmq/rabbitmq.service";
+import { ConversationRepository } from "./conversation.repository";
+import { CreateConversationDto } from "./dto/create-conversation.dto";
+import { ConversationResponseDto } from "./dto/conversation-response.dto";
 
 @Injectable()
 export class ConversationService {
@@ -11,18 +11,22 @@ export class ConversationService {
 
   constructor(
     private readonly conversationRepository: ConversationRepository,
-    private readonly rabbitmqService: RabbitmqService
+    private readonly rabbitmqService: RabbitmqService,
   ) {}
 
-  async createConversation(data: CreateConversationDto): Promise<ConversationResponseDto> {
+  async createConversation(
+    data: CreateConversationDto,
+  ): Promise<ConversationResponseDto> {
     if (!data.type) {
-      throw new RpcException('Loại hội thoại là bắt buộc (DIRECT, GROUP, TASK)');
+      throw new RpcException(
+        "Loại hội thoại là bắt buộc (DIRECT, GROUP, TASK)",
+      );
     }
 
     try {
       const conversation = await this.conversationRepository.create(data);
-      
-      this.rabbitmqService.publishEvent('conversation.created', {
+
+      this.rabbitmqService.publishEvent("conversation.created", {
         id: conversation.id,
         type: conversation.type,
         title: conversation.title,
@@ -34,24 +38,24 @@ export class ConversationService {
         id: conversation.id,
         type: conversation.type,
         title: conversation.title,
-        createdAt: conversation.createdAt.toISOString()
+        createdAt: conversation.createdAt.toISOString(),
       });
     } catch (e) {
-      this.logger.error('Error creating conversation', e);
-      throw new RpcException('Không thể tạo cuộc hội thoại');
+      this.logger.error("Error creating conversation", e);
+      throw new RpcException("Không thể tạo cuộc hội thoại");
     }
   }
 
   async getConversation(id: string): Promise<ConversationResponseDto> {
     const conv = await this.conversationRepository.findById(id);
     if (!conv) {
-      throw new RpcException('Cuộc hội thoại không tồn tại');
+      throw new RpcException("Cuộc hội thoại không tồn tại");
     }
     return new ConversationResponseDto({
       id: conv.id,
       type: conv.type,
       title: conv.title,
-      createdAt: conv.createdAt.toISOString()
+      createdAt: conv.createdAt.toISOString(),
     });
   }
 }

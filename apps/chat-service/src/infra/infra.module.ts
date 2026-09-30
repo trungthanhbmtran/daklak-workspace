@@ -1,7 +1,7 @@
-import { Module, Global } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
-import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
-import { RedisModule } from './redis/redis.module';
+import { Module, Global } from "@nestjs/common";
+import { PrismaService } from "./prisma/prisma.service";
+import { RabbitmqModule } from "./rabbitmq/rabbitmq.module";
+import { RedisModule } from "./redis/redis.module";
 
 @Global()
 @Module({

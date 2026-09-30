@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsEnum,
+} from "class-validator";
 
 export class CreateConversationDto {
   @IsString()

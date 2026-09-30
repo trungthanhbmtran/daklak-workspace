@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../infra/prisma/prisma.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../infra/prisma/prisma.service";
 
 @Injectable()
 export class ConversationRepository {
@@ -7,22 +7,29 @@ export class ConversationRepository {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: { type: string; title?: string; participantIds: string[] }) {
+  async create(data: {
+    type: string;
+    title?: string;
+    participantIds: string[];
+  }) {
     try {
       return await this.prisma.conversation.create({
         data: {
           type: data.type,
           title: data.title,
           participants: {
-            create: data.participantIds.map(userId => ({ userId, role: 'MEMBER' }))
-          }
+            create: data.participantIds.map((userId) => ({
+              userId,
+              role: "MEMBER",
+            })),
+          },
         },
         include: {
-          participants: true
-        }
+          participants: true,
+        },
       });
     } catch (error) {
-      this.logger.error('Error in create conversation repository', error);
+      this.logger.error("Error in create conversation repository", error);
       throw error;
     }
   }
@@ -31,10 +38,10 @@ export class ConversationRepository {
     try {
       return await this.prisma.conversation.findUnique({
         where: { id },
-        include: { participants: true }
+        include: { participants: true },
       });
     } catch (error) {
-      this.logger.error('Error in findById conversation repository', error);
+      this.logger.error("Error in findById conversation repository", error);
       throw error;
     }
   }

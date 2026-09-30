@@ -1,5 +1,4 @@
-import { TransformInterceptor } from '@core/interceptors/transform.interceptor';
-import { AllExceptionsFilter } from '@core/filters/all-exceptions.filter';
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
@@ -40,4 +39,4 @@ async function bootstrap() {
     process.env.MEDIA_SERVICE_GRPC_URL || '0.0.0.0:50059',
   );
 }
-bootstrap();
+void bootstrap();

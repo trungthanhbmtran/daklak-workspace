@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../infra/prisma/prisma.service';
-import { CreateMessageDto } from './dto/create-message.dto';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../infra/prisma/prisma.service";
+import { CreateMessageDto } from "./dto/create-message.dto";
 
 @Injectable()
 export class MessageRepository {
@@ -14,26 +14,33 @@ export class MessageRepository {
         data: {
           conversationId: data.conversationId,
           senderId: data.senderId,
-          type: data.type || 'TEXT',
+          type: data.type || "TEXT",
           content: data.content,
-        }
+        },
       });
     } catch (error) {
-      this.logger.error('Error in create message repository', error);
+      this.logger.error("Error in create message repository", error);
       throw error;
     }
   }
 
-  async findByConversationId(conversationId: string, limit: number, offset: number) {
+  async findByConversationId(
+    conversationId: string,
+    limit: number,
+    offset: number,
+  ) {
     try {
       return await this.prisma.message.findMany({
         where: { conversationId },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         take: limit > 0 ? limit : 20,
         skip: offset > 0 ? offset : 0,
       });
     } catch (error) {
-      this.logger.error('Error in findByConversationId message repository', error);
+      this.logger.error(
+        "Error in findByConversationId message repository",
+        error,
+      );
       throw error;
     }
   }
@@ -43,10 +50,10 @@ export class MessageRepository {
       return await this.prisma.readReceipt.upsert({
         where: { messageId_userId: { messageId, userId } },
         update: { readAt: new Date() },
-        create: { messageId, userId }
+        create: { messageId, userId },
       });
     } catch (error) {
-      this.logger.error('Error in upsertReadReceipt message repository', error);
+      this.logger.error("Error in upsertReadReceipt message repository", error);
       throw error;
     }
   }

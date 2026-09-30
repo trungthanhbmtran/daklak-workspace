@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
-import { RabbitmqService } from '../../infra/rabbitmq/rabbitmq.service';
-import { MessageRepository } from './message.repository';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { MessageResponseDto } from './dto/message-response.dto';
+import { Injectable, Logger } from "@nestjs/common";
+import { RpcException } from "@nestjs/microservices";
+import { RabbitmqService } from "../../infra/rabbitmq/rabbitmq.service";
+import { MessageRepository } from "./message.repository";
+import { CreateMessageDto } from "./dto/create-message.dto";
+import { MessageResponseDto } from "./dto/message-response.dto";
 
 @Injectable()
 export class MessageService {
@@ -11,41 +11,52 @@ export class MessageService {
 
   constructor(
     private readonly messageRepository: MessageRepository,
-    private readonly rabbitmqService: RabbitmqService
+    private readonly rabbitmqService: RabbitmqService,
   ) {}
 
-  async getMessages(conversationId: string, limit: number, offset: number): Promise<MessageResponseDto[]> {
+  async getMessages(
+    conversationId: string,
+    limit: number,
+    offset: number,
+  ): Promise<MessageResponseDto[]> {
     if (!conversationId) {
-      throw new RpcException('conversationId là bắt buộc');
+      throw new RpcException("conversationId là bắt buộc");
     }
-    const messages = await this.messageRepository.findByConversationId(conversationId, limit, offset);
-    return messages.map(msg => new MessageResponseDto({
-      id: msg.id,
-      conversationId: msg.conversationId,
-      senderId: msg.senderId,
-      type: msg.type,
-      content: msg.content,
-      createdAt: msg.createdAt.toISOString()
-    }));
+    const messages = await this.messageRepository.findByConversationId(
+      conversationId,
+      limit,
+      offset,
+    );
+    return messages.map(
+      (msg) =>
+        new MessageResponseDto({
+          id: msg.id,
+          conversationId: msg.conversationId,
+          senderId: msg.senderId,
+          type: msg.type,
+          content: msg.content,
+          createdAt: msg.createdAt.toISOString(),
+        }),
+    );
   }
 
   async saveMessage(data: CreateMessageDto): Promise<MessageResponseDto> {
     try {
       const msg = await this.messageRepository.create(data);
-      
-      this.rabbitmqService.publishEvent('message.created', msg);
-      
+
+      this.rabbitmqService.publishEvent("message.created", msg);
+
       return new MessageResponseDto({
         id: msg.id,
         conversationId: msg.conversationId,
         senderId: msg.senderId,
         type: msg.type,
         content: msg.content,
-        createdAt: msg.createdAt.toISOString()
+        createdAt: msg.createdAt.toISOString(),
       });
     } catch (e) {
-      this.logger.error('Error saving message', e);
-      throw new RpcException('Không thể lưu tin nhắn');
+      this.logger.error("Error saving message", e);
+      throw new RpcException("Không thể lưu tin nhắn");
     }
   }
 
@@ -54,7 +65,7 @@ export class MessageService {
       await this.messageRepository.upsertReadReceipt(messageId, userId);
       return true;
     } catch (e) {
-      this.logger.error('Error marking message read', e);
+      this.logger.error("Error marking message read", e);
       return false;
     }
   }
