@@ -62,6 +62,51 @@ interface WorkflowListProps {
   onCreate: () => void;
 }
 import { useSearchParams } from "next/navigation";
+import { ReactFlow, Background, Controls } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { parseWorkflowDefinition } from "./utils/parseWorkflowDefinition";
+import { nodeTypes } from "./nodes";
+
+const WorkflowViewer = ({ workflow }: { workflow: any }) => {
+  const definition = parseWorkflowDefinition(workflow);
+  const nodes = (definition?.nodes || []).map((node: any) => ({
+    ...node,
+    draggable: false,
+    selectable: false,
+  }));
+  const edges = (definition?.edges || []).map((edge: any) => ({
+    ...edge,
+    animated: true,
+  }));
+
+  if (!nodes.length) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-muted/20 text-muted-foreground text-sm space-y-2">
+        <Activity className="h-8 w-8 opacity-20" />
+        <span>Chưa có cấu hình sơ đồ cho quy trình này</span>
+      </div>
+    );
+  }
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypes}
+      fitView
+      attributionPosition="bottom-right"
+      proOptions={{ hideAttribution: true }}
+      panOnDrag={true}
+      zoomOnScroll={true}
+      nodesDraggable={false}
+      nodesConnectable={false}
+      elementsSelectable={false}
+    >
+      <Background color="#ccc" gap={16} />
+      <Controls showInteractive={false} />
+    </ReactFlow>
+  );
+};
 
 const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -447,6 +492,13 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                       <span className="font-semibold text-emerald-600">—</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground italic mt-2">* Tính năng thống kê đang được cập nhật</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 flex-1 min-h-[350px] flex flex-col">
+                  <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider">Sơ đồ Quy trình</h4>
+                  <div className="flex-1 rounded-xl border border-border/40 bg-card overflow-hidden w-full relative">
+                    <WorkflowViewer workflow={selectedWorkflow} />
                   </div>
                 </div>
               </div>

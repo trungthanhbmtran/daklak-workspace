@@ -58,6 +58,50 @@ const integrationConnections = [
     ],
   },
 ];
+  
+const docStatIntegration = {
+  name: 'Báo cáo Thống kê Văn bản',
+  code: 'DOC_STATISTICS',
+  protocol: 'REST',
+  baseUrl: 'http://10.50.1.6:3166',
+  authType: 'NONE',
+  authConfig: {},
+  description: 'API thống kê văn bản để tạo báo cáo riêng cho đơn vị',
+  metadata: { 
+    defaultPayload: {
+      from_organ_id: "H15.151",
+      document_type: "8",
+      trang_thai_tiep_nhan: "fail",
+      subject: "minh",
+      searchKeyword: [
+          { filter: "document_id", value: "r", type: "like" },
+          { filter: "type_edoc", value: "edoc", type: "=" }
+      ],
+      start_date: "2026-07-01",
+      end_date: "2026-09-30"
+    },
+    _parsedEndpoints: [
+      {
+        id: "ep-doc-statistics-1",
+        name: "Lấy thống kê văn bản",
+        description: "API tạo báo cáo riêng cho đơn vị",
+        folder: "Báo cáo",
+        method: "POST",
+        path: "/api/document-statistics",
+        headers: [
+          { key: "Content-Type", value: "application/json", enabled: true }
+        ],
+        params: [],
+        bodyType: "raw",
+        body: "{\n    \"from_organ_id\": \"H15.151\",\n    \"document_type\": \"8\",\n    \"trang_thai_tiep_nhan\": \"fail\",\n    \"subject\": \"minh\",\n    \"searchKeyword\": [\n        {\n            \"filter\": \"document_id\",\n            \"value\": \"r\",\n            \"type\": \"like\"\n        },\n        {\n            \"filter\": \"type_edoc\",\n            \"value\": \"edoc\",\n            \"type\": \"=\"\n        }\n    ],\n    \"start_date\": \"2026-07-01\",\n    \"end_date\": \"2026-09-30\"\n}"
+      }
+    ]
+  },
+  endpoints: [
+    { path: '/api/document-statistics', method: 'POST', description: 'Lấy thống kê văn bản' },
+  ],
+};
+integrationConnections.push(docStatIntegration as any);
 
 const leaveRequestGraph = {
   nodes: [
