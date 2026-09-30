@@ -103,22 +103,23 @@ async function handleMessage(msg) {
     }
 
     // Save to NotificationLog
-    for (const recipient of payload.recipients) {
-      try {
-        await prisma.notificationLog.create({
-          data: {
-            channelId: channelId,
-            recipient: recipient,
-            subject: payload.subject,
-            body: payload.body,
-            status: result.success ? 'SENT' : 'FAILED',
-            errorMsg: result.success ? null : (result.error || 'Unknown error'),
-            sentAt: result.success ? new Date() : null,
-          }
+    try {
+      const logsToCreate = payload.recipients.map((recipient) => ({
+        channelId: channelId,
+        recipient: recipient,
+        subject: payload.subject,
+        body: payload.body,
+        status: result.success ? 'SENT' : 'FAILED',
+        errorMsg: result.success ? null : (result.error || 'Unknown error'),
+        sentAt: result.success ? new Date() : null,
+      }));
+      if (logsToCreate.length > 0) {
+        await prisma.notificationLog.createMany({
+          data: logsToCreate
         });
-      } catch (logErr) {
-        console.error('[Notification] Failed to write log:', logErr.message);
       }
+    } catch (logErr) {
+      console.error('[Notification] Failed to write batch logs:', logErr.message);
     }
   }
 }
