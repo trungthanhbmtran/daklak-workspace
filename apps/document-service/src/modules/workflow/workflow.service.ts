@@ -211,7 +211,7 @@ export class WorkflowService implements OnModuleInit {
   
   async executeIntegration(integrationCode: string, payload: any): Promise<any> {
     try {
-      this.logger.log(Executing integration  via workflow-service...);
+      this.logger.log(`Executing integration ${integrationCode} via workflow-service...`);
       const response = await firstValueFrom<any>(
         this.workflowGrpcService.ExecuteIntegration({
           id: integrationCode, 
@@ -224,8 +224,8 @@ export class WorkflowService implements OnModuleInit {
       }
       return response;
     } catch (error: any) {
-      this.logger.error(Failed to execute integration : );
-      throw new BadRequestException(Integration execution failed: );
+      this.logger.error(`Failed to execute integration ${integrationCode}: ${error.message}`);
+      throw new BadRequestException(`Integration execution failed: ${error.message}`);
     }
   }
 }
