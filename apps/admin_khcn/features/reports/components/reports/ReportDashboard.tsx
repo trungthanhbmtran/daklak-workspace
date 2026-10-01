@@ -26,7 +26,7 @@ import { useIntegrationList } from "@/features/integration/api";
 import { MOCK_DATA, generateMockDataForSource } from "./mockData";
 
 function ReportWidget({ widget, integrations }: { widget: any; integrations: any[] }) {
-  const systemSources = React.useMemo(() => {
+  const systemSources = React.useMemo<Array<{ id: string; name: string; type: string; endpoints?: any[] }>>(() => {
     const apiSources = (integrations || []).map((int: any) => ({
       id: `api-${int.id}`,
       name: `API: ${int.name}`,
@@ -191,6 +191,7 @@ export function ReportDashboard() {
         <Button onClick={() => setIsBuilding(true)} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl h-10 px-6 shadow-md shadow-violet-500/20">
           <Plus className="w-4 h-4" /> Thêm Biểu Đồ
         </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -201,8 +202,8 @@ export function ReportDashboard() {
         <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-2 flex flex-col items-center justify-center p-12 text-center bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
           <LayoutTemplate className="w-12 h-12 text-slate-300 dark:text-slate-700 mb-4" />
           <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Chưa có báo cáo nào</h3>
-          <p className="text-slate-500 max-w-sm mb-6">Tạo biểu đồ báo cáo tuỳ chỉnh đầu tiên của bạn để theo dõi các chỉ số quan trọng.</p>
-          <Button onClick={() => setIsBuilding(true)}>
+          <p className="text-slate-500 max-w-sm mb-6">Tạo bảng báo cáo từ dữ liệu API liên thông để theo dõi các chỉ số quan trọng.</p>
+          <Button onClick={() => setIsBuildingTable(true)}>
             <Plus className="w-4 h-4" />
             Tạo Báo Cáo
           </Button>
@@ -239,4 +240,6 @@ export function ReportDashboard() {
     </div>
   );
 }
+
+
 

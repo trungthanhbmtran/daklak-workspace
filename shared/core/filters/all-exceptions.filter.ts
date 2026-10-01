@@ -92,13 +92,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       exception instanceof Error ? exception.stack : undefined,
     );
 
+    // errorType: định danh kiểu lỗi để Frontend render đúng UI
+    // Frontend KHÔNG được dùng statusCode để đoán, phải dùng errorType này
+    const errorType = this.resolveErrorType(statusCode, code);
+
     const errorPayload = {
       success: false,
       message: finalMessage,
+      errorType,  // Frontend render dựa vào field này
       code,
       statusCode,
       timestamp,
-      // Lưu ý: Không trả về data: null hoặc meta: null để tuân thủ quy tắc dữ liệu
     };
 
     // 2. Trả về đúng context
@@ -118,4 +122,47 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return throwError(() => new RpcException(errorPayload));
     }
   }
+
+  /**
+   * Ánh xạ statusCode + code → errorType chuẩn hóa.
+   * Frontend chỉ cần đọc errorType, KHÔNG tự phân loại bằng statusCode.
+   */
+  private resolveErrorType(statusCode: number, code: string): string {
+    // Ưu tiên code cụ thể
+    switch (code) {
+      case 'UNAUTHENTICATED':
+      case 'UnauthorizedException':
+        return 'AUTH_FAILED';
+      case 'RATE_LIMITED':
+        return 'RATE_LIMITED';
+      case 'IP_BLOCKED':
+        return 'IP_BLOCKED';
+      case 'PERMISSION_DENIED':
+      case 'ForbiddenException':
+        return 'FORBIDDEN';
+      case 'NOT_FOUND':
+      case 'NotFoundException':
+        return 'NOT_FOUND';
+      case 'ALREADY_EXISTS':
+      case 'ConflictException':
+        return 'CONFLICT';
+      case 'BadRequestException':
+      case 'INVALID_ARGUMENT':
+        return 'VALIDATION_ERROR';
+      case 'RESOURCE_EXHAUSTED':
+        return 'RATE_LIMITED';
+    }
+    // Fallback theo statusCode
+    switch (statusCode) {
+      case 400: return 'VALIDATION_ERROR';
+      case 401: return 'AUTH_FAILED';
+      case 403: return 'FORBIDDEN';
+      case 404: return 'NOT_FOUND';
+      case 409: return 'CONFLICT';
+      case 429: return 'RATE_LIMITED';
+      case 503: return 'SERVICE_UNAVAILABLE';
+      default: return 'INTERNAL_ERROR';
+    }
+  }
 }
+

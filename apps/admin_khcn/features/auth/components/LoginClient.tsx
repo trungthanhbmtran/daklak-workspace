@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { scheduleToast } from "@/hooks/useToastBridge";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +30,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-// Cấu hình API
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Tên đăng nhập không được để trống." }),
@@ -45,10 +45,7 @@ export function LoginClient() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
+    defaultValues: { username: "", password: "" },
   });
 
   const loginMutation = useMutation({
@@ -58,37 +55,32 @@ export function LoginClient() {
         password: values.password,
       });
     },
+
     onSuccess: () => {
       setIsRedirecting(true);
-      toast.success("Đăng nhập thành công! Đang chuyển hướng...");
+      // Schedule toast TRƯỚC khi navigate — ToastBridgeRenderer sẽ hiện sau khi mount
+      // Không gọi toast.success() trực tiếp vì page sẽ remount và toast biến mất
+      scheduleToast({
+        type: 'success',
+        message: 'Đăng nhập thành công! Chào mừng bạn quay trở lại.',
+        duration: 4000,
+      });
       router.replace(callbackUrl || '/hub');
     },
+
     onError: (error: any) => {
       setIsRedirecting(false);
-      const status = error.response?.status;
+      // Frontend KHÔNG phân loại lỗi — chỉ đọc message và errorType từ backend
+      // Backend (AllExceptionsFilter) đã xử lý hoàn toàn logic phân loại
       const data = error.response?.data;
+      const message = data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
 
-      if (status === 429) {
-        // Rate limit: Hiển thị thông báo với thời gian chờ cụ thể
-        const retryAfter = data?.retryAfterSec || error.response?.headers?.["retry-after"] || 900;
-        const minutes = Math.ceil(retryAfter / 60);
-        toast.error(
-          `Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau ${minutes} phút.`,
-          { duration: 8000 }
-        );
-      } else if (status === 403 && (data?.message?.includes("bị khóa") || data?.message?.includes("đáng ngờ"))) {
-        // IP bị block bởi Threat Intelligence
-        toast.error(
-          "Tài khoản/IP của bạn đã bị khóa tạm thời. Vui lòng liên hệ Quản trị viên.",
-          { duration: 10000 }
-        );
-      } else {
-        const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Tên đăng nhập hoặc mật khẩu không chính xác.";
-        toast.error(message, { duration: 4000 });
-      }
+      // Chỉ đọc duration từ server nếu có (vd: RATE_LIMITED trả retryAfterSec)
+      const duration = data?.errorType === 'RATE_LIMITED'
+        ? 8000   // Giữ toast lâu hơn để user đọc kịp
+        : 4000;
+
+      toast.error(message, { duration });
     },
   });
 

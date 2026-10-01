@@ -483,9 +483,11 @@ export class UsersService implements OnModuleInit {
     const tokens = await this.generateAuthTokens(user.id);
     const authResponse = this.formatAuthResponse(user, tokens);
     
-    // CACHE QUYỀN VÀO REDIS: Lưu cache session để Gateway không cần đọc payload JWT lớn
+    // Fire-and-forget: cache session không làm chậm response
     const jwtExpiresIn = this.getAccessTokenExpiresInSeconds();
-    await this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn);
+    this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn).catch(
+      (e: any) => this.logger.warn(`[Login] Cache session failed: ${e.message}`)
+    );
 
     return authResponse;
   }
@@ -516,8 +518,11 @@ export class UsersService implements OnModuleInit {
     const tokens = await this.generateAuthTokens(user.id);
     const authResponse = this.formatAuthResponse(user, tokens);
     
+    // Fire-and-forget: cache session không làm chậm response
     const jwtExpiresIn = this.getAccessTokenExpiresInSeconds();
-    await this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn);
+    this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn).catch(
+      (e: any) => this.logger.warn(`[Refresh] Cache session failed: ${e.message}`)
+    );
 
     return authResponse;
   }

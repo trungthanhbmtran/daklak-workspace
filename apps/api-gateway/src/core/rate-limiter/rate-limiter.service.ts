@@ -15,10 +15,21 @@ import { RedisService } from '../redis/redis.service';
 export class RateLimiterService {
   private readonly logger = new Logger(RateLimiterService.name);
 
+  /**
+   * Lua script: INCR + EXPIRE atomic trong 1 lời gọi Redis.
+   * Đảm bảo key LUÔN có TTL — tránh key vĩnh viễn khi Redis crash giữa 2 lệnh.
+   * Return: [count, ttl]
+   */
+  private readonly LUA_SLIDING_WINDOW = `
+    local c = redis.call('INCR', KEYS[1])
+    if c == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end
+    return {c, redis.call('TTL', KEYS[1])}
+  `;
+
   constructor(private readonly redisService: RedisService) {}
 
   /**
-   * Kiểm tra và tăng bộ đếm rate limit.
+   * Kiểm tra và tăng bộ đếm rate limit (atomic).
    * @returns { allowed: boolean; remaining: number; retryAfterSec: number }
    */
   async check(
@@ -30,22 +41,19 @@ export class RateLimiterService {
     const client = this.redisService.getClient();
 
     try {
-      // Atomic increment + set TTL nếu key mới (INCR + EXPIRE trong pipeline)
-      const pipeline = client.pipeline();
-      pipeline.incr(redisKey);
-      pipeline.ttl(redisKey);
-      const results = await pipeline.exec();
+      // Atomic Lua: INCR + EXPIRE trong 1 round-trip — tránh race condition
+      const result = (await client.eval(
+        this.LUA_SLIDING_WINDOW,
+        1,        // numkeys
+        redisKey, // KEYS[1]
+        windowSec.toString(), // ARGV[1]
+      )) as [number, number];
 
-      const count = (results?.[0]?.[1] as number) ?? 0;
-      const ttl = (results?.[1]?.[1] as number) ?? -1;
-
-      // Nếu key vừa tạo (ttl = -1), set TTL sliding window
-      if (ttl === -1) {
-        await client.expire(redisKey, windowSec);
-      }
+      const count = result[0];
+      const ttl = result[1] > 0 ? result[1] : windowSec;
 
       const remaining = Math.max(0, limit - count);
-      const retryAfterSec = ttl > 0 ? ttl : windowSec;
+      const retryAfterSec = ttl;
       const allowed = count <= limit;
 
       if (!allowed) {
@@ -61,6 +69,7 @@ export class RateLimiterService {
       return { allowed: true, remaining: limit, retryAfterSec: 0 };
     }
   }
+
 
   /**
    * Reset bộ đếm — dùng sau khi login thành công để tránh penalize user hợp lệ.

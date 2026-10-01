@@ -4,26 +4,30 @@ import { toast } from "sonner";
 import { API_BASE_URL, API_TIMEOUT_MS } from "@/config/constants";
 import type { ApiResponse } from "@/lib/api.types";
 
-// Re-export for convenience
 export type { ApiResponse };
 
-// 1. KHỞI TẠO AXIOS
+/**
+ * Axios instance — Frontend KHÔNG chứa logic phân loại lỗi.
+ *
+ * Nguyên tắc "Dumb Frontend / Smart Backend":
+ * - Backend (AllExceptionsFilter) luôn trả về { message, errorType, statusCode }
+ * - Frontend chỉ đọc message từ backend và hiển thị
+ * - KHÔNG dùng statusCode để đoán ý nghĩa lỗi
+ * - KHÔNG hardcode string check như message.includes("bị khóa")
+ *
+ * Các trường hợp đặc biệt duy nhất:
+ * - 401: luôn phải redirect login (không thể xử lý khác)
+ * - Network error: backend không trả về gì → hiển thị thông báo mặc định
+ */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT_MS,
-  // CỰC KỲ QUAN TRỌNG: Trình duyệt tự động đính kèm HttpOnly Cookie vào request
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  withCredentials: true, // Tự động đính kèm HttpOnly Cookie
+  headers: { "Content-Type": "application/json" },
 });
 
-// 2. RESPONSE INTERCEPTOR
 apiClient.interceptors.response.use(
-  (response) => {
-    // Tự động bóc lớp data của Axios
-    return response.data;
-  },
+  (response) => response.data, // Bóc lớp Axios data
   async (error: AxiosError) => {
     if (!error.response) {
       toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền.");
@@ -33,47 +37,19 @@ apiClient.interceptors.response.use(
     const status = error.response.status;
     const data: any = error.response.data;
 
-    switch (status) {
-      case 401:
-        // HttpOnly Cookie hết hạn hoặc không hợp lệ → Về trang login
-        if (typeof window !== "undefined") {
-          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-          window.location.href = "/admin/login";
-        }
-        break;
+    // Message và duration DO BACKEND quyết định, frontend chỉ render
+    const message: string = data?.message || "Đã xảy ra lỗi. Vui lòng thử lại.";
+    const duration: number = data?.errorType === 'RATE_LIMITED' ? 8000 : 4000;
 
-      case 403:
-        // Phân biệt 2 nguyên nhân:
-        // - Bị block bởi Threat Intelligence (IP bị khóa)
-        // - Không có quyền truy cập tính năng
-        if (data?.message?.includes("bị khóa") || data?.message?.includes("đáng ngờ")) {
-          toast.error(
-            "IP của bạn đã bị khóa do hoạt động đáng ngờ. Vui lòng liên hệ Quản trị viên.",
-            { duration: 10000 }
-          );
-        } else {
-          toast.error("Bạn không có quyền thực hiện thao tác này!");
-        }
-        break;
-
-      case 429: {
-        // Rate Limit exceeded — hiển thị thời gian chờ từ header Retry-After
-        const retryAfter = error.response.headers?.["retry-after"]
-          || (data as any)?.retryAfterSec;
-        const waitMsg = retryAfter
-          ? ` Vui lòng thử lại sau ${retryAfter} giây.`
-          : " Vui lòng thử lại sau ít phút.";
-        toast.error(`Quá nhiều yêu cầu được gửi.${waitMsg}`, { duration: 6000 });
-        break;
+    if (status === 401) {
+      // 401: Luôn redirect login — đây là hành vi UX, không phải business logic
+      if (typeof window !== "undefined") {
+        toast.error(message, { duration: 3000 });
+        window.location.href = "/admin/login";
       }
-
-      case 500:
-        toast.error(data?.message || "Lỗi hệ thống (500). Vui lòng liên hệ Quản trị viên.");
-        break;
-
-      default:
-        if (data?.message) toast.error(data.message);
-        break;
+    } else {
+      // Mọi lỗi khác: render message từ backend
+      toast.error(message, { duration });
     }
 
     return Promise.reject(error);

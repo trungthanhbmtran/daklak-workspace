@@ -43,6 +43,7 @@ export class SecurityMiddleware implements NestMiddleware {
       return res.status(403).json({
         success: false,
         statusCode: 403,
+        errorType: 'IP_BLOCKED',
         message: 'Truy cập bị từ chối. IP của bạn đã bị khóa do hoạt động đáng ngờ.',
         retryAfter: 3600,
       });

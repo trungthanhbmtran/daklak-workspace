@@ -18,7 +18,7 @@ const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartR
   ),
 });
 import { toast } from "sonner";
-import { useIntegrationList } from "@/features/integration/api";
+import { useIntegrationList, type IntegrationConfig } from "@/features/integration/api";
 import { useCreateTemplate, usePreviewReport } from "../../api";
 
 interface ReportBuilderProps {
@@ -44,7 +44,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const { mutateAsync: createTemplate, isPending } = useCreateTemplate();
 
   const systemSources = useMemo<SystemSource[]>(() => {
-    const apiSources = (integrations || []).map(int => ({
+    const apiSources = (integrations || []).map((int: IntegrationConfig) => ({
       id: `api-${int.id}`,
       name: `API: ${int.name}`,
       type: 'api',
@@ -444,3 +444,4 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     </div>
   );
 }
+

@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Suspense } from "react";
+import { ToastBridgeRenderer } from "@/hooks/useToastBridge";
+
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -41,6 +43,9 @@ export default function RootLayout({
               {children}
             </Suspense>
           </TooltipProvider>
+
+          {/* ToastBridgeRenderer: hiển thị toast đã schedule trước khi navigate */}
+          <ToastBridgeRenderer />
 
           <Toaster
             position="bottom-right"
