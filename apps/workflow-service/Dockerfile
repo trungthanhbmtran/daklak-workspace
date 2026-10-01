@@ -60,4 +60,4 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/apps/workflow-service/src/main.js"]
