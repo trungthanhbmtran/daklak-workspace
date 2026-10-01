@@ -2,11 +2,20 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { IntegrationConfigService } from './integration-config.service';
 import { CreateUpstreamDto, UpdateUpstreamDto } from './dto/upstream.dto';
+import { IntegrationAuthService } from './integration-auth.service';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 
 @Controller()
 export class IntegrationConfigController {
-  constructor(private readonly service: IntegrationConfigService) {}
+  constructor(
+    private readonly service: IntegrationConfigService,
+    private readonly authService: IntegrationAuthService
+  ) {}
+
+  @GrpcMethod('IntegrationConfigService', 'GetPublicKey')
+  async getPublicKey() {
+    return this.authService.getPublicKeyDetails();
+  }
 
   @GrpcMethod('IntegrationConfigService', 'GetSnapshot')
   async getSnapshot() {

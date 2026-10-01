@@ -481,7 +481,13 @@ export class UsersService implements OnModuleInit {
       data.password,
     );
     const tokens = await this.generateAuthTokens(user.id);
-    return this.formatAuthResponse(user, tokens);
+    const authResponse = this.formatAuthResponse(user, tokens);
+    
+    // CACHE QUYỀN VÀO REDIS: Lưu cache session để Gateway không cần đọc payload JWT lớn
+    const jwtExpiresIn = this.getAccessTokenExpiresInSeconds();
+    await this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn);
+
+    return authResponse;
   }
 
   /** Làm mới access_token bằng refresh_token (rotation). Refresh token lưu Redis. */
@@ -508,7 +514,12 @@ export class UsersService implements OnModuleInit {
       });
     }
     const tokens = await this.generateAuthTokens(user.id);
-    return this.formatAuthResponse(user, tokens);
+    const authResponse = this.formatAuthResponse(user, tokens);
+    
+    const jwtExpiresIn = this.getAccessTokenExpiresInSeconds();
+    await this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn);
+
+    return authResponse;
   }
 
   private async validateUserCredentials(

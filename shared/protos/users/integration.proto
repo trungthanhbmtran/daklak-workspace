@@ -4,6 +4,7 @@ package integration;
 
 service IntegrationConfigService {
   rpc GetSnapshot (Empty) returns (SnapshotResponse) {}
+  rpc GetPublicKey (Empty) returns (PublicKeyResponse) {}
   
   // CRUD
   rpc CreateUpstream (UpstreamPayload) returns (UpstreamResponse) {}
@@ -75,4 +76,10 @@ message SnapshotResponse {
 
 message DeleteResponse {
   bool success = 1;
+}
+
+message PublicKeyResponse {
+  string publicKey = 1;
+  string kid = 2;
+  string alg = 3;
 }

@@ -54,13 +54,16 @@ export class IntegrationAuthService {
     };
   }
 
+  getPublicKeyDetails() {
+    return {
+      publicKey: this.publicKey,
+      kid: this.kid,
+      alg: 'RS256'
+    };
+  }
+
   signToken(payload: any): string {
     const sign = crypto.createSign('RSA-SHA256');
-    // We would manually construct JWT header/payload here, or use jsonwebtoken.
-    // For simplicity, we use jsonwebtoken library (assuming it's installed).
-    // Let's implement a manual base64 JWT construction for zero-dependency if needed, 
-    // but user-service has @nestjs/jwt and jsonwebtoken.
-    
     const header = { alg: 'RS256', typ: 'JWT', kid: this.kid };
     const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
     const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
