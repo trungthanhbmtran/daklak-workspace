@@ -124,7 +124,7 @@ export class IntegrationService {
     }
     
     // Nếu không chỉ định, lấy mặc định endpoint đầu tiên (rất hữu ích khi integration chỉ có 1 endpoint)
-    if (!targetEndpoint && endpoints.length > 0) {
+    if (!targetEndpoint && endpoints.length > 0 && !payload.endpointId && !payload.endpointPath) {
       targetEndpoint = endpoints[0];
     }
 

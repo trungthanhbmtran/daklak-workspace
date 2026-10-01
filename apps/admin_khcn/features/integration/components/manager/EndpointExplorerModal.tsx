@@ -51,6 +51,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       
       updateMutation.mutate({
         ...integration,
+        endpoints: endpoints,
         metadata: parsed
       }, {
         onSuccess: () => {

@@ -157,6 +157,8 @@ export const useEndpointManager = ({ initialEndpoints, integration }: UseEndpoin
       // the backend will fetch the rest (baseUrl, method, path, auth) from DB using integration.id and endpointId
       const payload = {
         endpointId: selectedEndpoint.id,
+        endpointPath: selectedEndpoint.path,
+        method: selectedEndpoint.method,
         headers: headersMap, // Extra headers configured in this endpoint (for overrides)
         params: queryParamsMap,
         body: parsedBody
