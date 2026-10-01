@@ -8,7 +8,7 @@ export class QdrantService implements OnModuleInit {
 
   onModuleInit() {
     const url = process.env.QDRANT_URL || 'http://localhost:6333';
-    this.client = new QdrantClient({ url });
+    this.client = new QdrantClient({ url, checkCompatibility: false });
     this.logger.log(`QdrantClient initialized with url: ${url}`);
   }
 
