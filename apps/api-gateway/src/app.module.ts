@@ -17,6 +17,7 @@ import { DynamicProxyMiddleware } from './modules/integration/dynamic-proxy.midd
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { AiGatewayModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     PrismaModule,
     ChatModule,
     ReportsModule,
+    AiGatewayModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -24,7 +24,6 @@ import { ConfigsController } from './configs.controller';
 import { UserConfigsController } from './user-configs.controller';
 import { AiAssistantGatewayController } from './ai-assistant.controller';
 import { IntegrationsController } from './integrations.controller';
-import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [
@@ -40,7 +39,6 @@ import { AiModule } from '../ai/ai.module';
     registerGrpcService(MICROSERVICES.AI_ASSISTANT),
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.REPORT),
-    AiModule,
     RedisModule,
   ],
   controllers: [

@@ -18,6 +18,7 @@ const protoPath = [
   join(userDir, 'system_config.proto'),
   join(userDir, 'user_config.proto'),
   join(userDir, 'ai_assistant.proto'),
+  join(userDir, 'ai.proto'),
 ];
 
 async function bootstrap() {

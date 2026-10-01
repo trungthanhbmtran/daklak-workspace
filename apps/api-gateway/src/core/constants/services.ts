@@ -75,6 +75,13 @@ export const MICROSERVICES = {
     URL: getUserUrl(),
     SERVICE: 'AiAssistantService',
   },
+  AI: {
+    PACKAGE: 'users',
+    SYMBOL: 'AI_PACKAGE',
+    PROTO: 'users/ai.proto',
+    URL: getUserUrl(),
+    SERVICE: 'AiService',
+  },
   SYS_CATEGORY: {
     PACKAGE: 'category',
     SYMBOL: 'SYS_CATEGORY_PACKAGE',

@@ -1,17 +1,9 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Param,
-  Logger,
-  Req,
-} from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { AiFeatureService } from './ai-feature.service';
-import { EventPattern } from '@nestjs/microservices';
+import { EventPattern, GrpcMethod } from '@nestjs/microservices';
 
-@Controller('admin/ai')
+@Controller()
 export class AiController {
   private readonly logger = new Logger(AiController.name);
 
@@ -20,27 +12,55 @@ export class AiController {
     private readonly aiFeatureService: AiFeatureService,
   ) {}
 
-  @Post('generate')
-  async generateText(@Req() req: any, @Body() body: { prompt: string }) {
-    return this.aiFeatureService.generateText(body.prompt, req.user?.id);
-  }
-
-  @Post('execute')
-  async executeAiFeature(
-    @Req() req: any,
-    @Body() body: { action: string; payload: any },
-  ) {
-    return this.aiFeatureService.executeAiFeature(
-      body.action,
-      body.payload,
-      req.user,
-      req.headers,
+  @GrpcMethod('AiService', 'GenerateText')
+  async generateText(data: { prompt: string; user_id?: number }) {
+    const result = await this.aiFeatureService.generateText(
+      data.prompt,
+      data.user_id,
     );
+    // aiFeatureService returns a job object like { jobId, status } or just throws.
+    // Wait, let's look at what generateText returns. It usually returns JSON.
+    return { result: JSON.stringify(result) };
   }
 
-  @Get('jobs/:jobId')
-  async getJobStatus(@Param('jobId') jobId: string) {
-    return this.aiFeatureService.getJobStatus(jobId);
+  @GrpcMethod('AiService', 'ExecuteAiFeature')
+  async executeAiFeature(data: {
+    action: string;
+    payload: string;
+    user_id?: number;
+    headers?: string;
+    user_payload?: string;
+  }) {
+    const payloadParsed = data.payload ? JSON.parse(data.payload) : {};
+    const userParsed = data.user_payload ? JSON.parse(data.user_payload) : { id: data.user_id };
+    const headersParsed = data.headers ? JSON.parse(data.headers) : {};
+
+    const result = await this.aiFeatureService.executeAiFeature(
+      data.action,
+      payloadParsed,
+      userParsed,
+      headersParsed,
+    );
+    return { result: JSON.stringify(result) };
+  }
+
+  @GrpcMethod('AiService', 'GetJobStatus')
+  async getJobStatus(data: { job_id: string }) {
+    const status = await this.aiFeatureService.getJobStatus(data.job_id);
+    return { status: JSON.stringify(status) };
+  }
+
+  @GrpcMethod('AiService', 'ListModels')
+  async listModels(data: { provider: string; api_key: string }) {
+    try {
+      const models = await this.aiService.listModels(
+        data.provider,
+        data.api_key,
+      );
+      return { success: true, data: models };
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
   }
 
   @EventPattern('ai_generate_task')
@@ -83,23 +103,6 @@ export class AiController {
     } catch (err: any) {
       this.logger.error(`Worker failed AI task: ${data.jobId}`, err);
       await this.aiFeatureService.setJobFailed(data.jobId, err.message);
-    }
-  }
-
-  @Post('models')
-  async listModels(@Body() body: { provider: string; apiKey: string }) {
-    if (!body.provider || !body.apiKey) {
-      return { status: 'error', message: 'Provider and apiKey are required' };
-    }
-
-    try {
-      const models = await this.aiService.listModels(
-        body.provider,
-        body.apiKey,
-      );
-      return { success: true, data: models };
-    } catch (err: any) {
-      throw new Error(err.message);
     }
   }
 }

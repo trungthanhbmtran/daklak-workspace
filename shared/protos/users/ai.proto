@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package users;
+
+message GenerateTextRequest {
+  string prompt = 1;
+  int32 user_id = 2;
+}
+
+message GenerateTextResponse {
+  string result = 1;
+}
+
+message ExecuteAiFeatureRequest {
+  string action = 1;
+  string payload = 2; // JSON string
+  int32 user_id = 3;
+  string headers = 4; // JSON string
+  string user_payload = 5; // JSON string for req.user
+}
+
+message ExecuteAiFeatureResponse {
+  string result = 1; // JSON string
+}
+
+message GetJobStatusRequest {
+  string job_id = 1;
+}
+
+message GetJobStatusResponse {
+  string status = 1; // JSON string
+}
+
+message ListModelsRequest {
+  string provider = 1;
+  string api_key = 2;
+}
+
+message AiModel {
+  string id = 1;
+  string name = 2;
+  int32 context_window = 3;
+}
+
+message ListModelsResponse {
+  repeated AiModel data = 1;
+  bool success = 2;
+}
+
+service AiService {
+  rpc GenerateText(GenerateTextRequest) returns (GenerateTextResponse);
+  rpc ExecuteAiFeature(ExecuteAiFeatureRequest) returns (ExecuteAiFeatureResponse);
+  rpc GetJobStatus(GetJobStatusRequest) returns (GetJobStatusResponse);
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+}
