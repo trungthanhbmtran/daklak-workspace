@@ -55,24 +55,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
     }));
 
-    // Default DB sources for testing
-    const dbSources = [
-      { id: "db-users", name: "CSDL: Người dùng", type: "db", icon: Database, endpoints: [] },
-      { id: "db-workflows", name: "CSDL: Quy trình", type: "db", icon: Database, endpoints: [] }
-    ];
-
-    const internalSources = [
-      { 
-        id: "api-internal-lgsp", 
-        name: "Hệ thống: Trục LGSP", 
-        type: "api", 
-        icon: Server, 
-        baseUrl: "http://api-gateway:3000/documents",
-        endpoints: [{ path: "/lgsp-statistics", method: "POST" }] 
-      }
-    ];
-
-    return [...apiSources, ...dbSources, ...internalSources];
+    return apiSources;
   }, [integrations]);
 
   const [title, setTitle] = useState("Báo cáo mới");
