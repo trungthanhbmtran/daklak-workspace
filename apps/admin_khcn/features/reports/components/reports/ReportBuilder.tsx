@@ -89,7 +89,17 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     return systemSources.find(s => s.id === sourceId);
   }, [sourceId, systemSources]);
 
-  const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
+  interface EndpointInfo {
+    path: string;
+    method?: string;
+    [key: string]: unknown;
+  }
+
+  const epInfo = selectedSource?.endpoints?.find((e: EndpointInfo) => {
+    const p1 = (e.path || '').replace(/^\/|\/$/g, '');
+    const p2 = (endpointPath || '').replace(/^\/|\/$/g, '');
+    return p1 === p2;
+  });
 
   const parsedPayload = useMemo(() => {
     try {
@@ -99,16 +109,24 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     }
   }, [apiPayload]);
 
-  const previewPayload = useMemo(() => ({
-    baseUrl: selectedSource?.baseUrl,
-    endpointPath: endpointPath,
-    method: epInfo?.method || 'GET',
-    headers: selectedSource?.headers,
-    authConfig: selectedSource?.authConfig,
-    params: epInfo?.method === 'GET' ? parsedPayload : {},
-    body: epInfo?.method !== 'GET' ? parsedPayload : undefined,
-    sourceId
-  }), [selectedSource, endpointPath, epInfo, sourceId, parsedPayload]);
+  const previewPayload = useMemo(() => {
+    const rawMethod = epInfo?.method || parsedPayload._method;
+    const finalMethod = rawMethod ? rawMethod.toUpperCase() : (Object.keys(parsedPayload).length > 0 ? 'POST' : 'GET');
+    
+    const cleanPayload = { ...parsedPayload };
+    delete cleanPayload._method;
+
+    return {
+      baseUrl: selectedSource?.baseUrl,
+      endpointPath: endpointPath,
+      method: finalMethod,
+      headers: selectedSource?.headers,
+      authConfig: selectedSource?.authConfig,
+      params: finalMethod === 'GET' ? cleanPayload : {},
+      body: finalMethod !== 'GET' ? cleanPayload : undefined,
+      sourceId
+    };
+  }, [selectedSource, endpointPath, epInfo, sourceId, parsedPayload]);
 
   const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
 

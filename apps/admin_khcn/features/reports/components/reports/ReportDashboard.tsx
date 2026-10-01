@@ -40,18 +40,34 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
   const sourceId = widget.dataSourceCode || widget.sourceId;
   const endpointPath = widget.config?.endpoint || widget.endpoint;
   const selectedSource = systemSources.find(s => s.id === sourceId);
-  const epInfo = selectedSource?.endpoints?.find((e: any) => e.path === endpointPath);
+  interface EndpointInfo {
+    path: string;
+    method?: string;
+    [key: string]: unknown;
+  }
+
+  const epInfo = selectedSource?.endpoints?.find((e: EndpointInfo) => {
+    const p1 = (e.path || '').replace(/^\/|\/$/g, '');
+    const p2 = (endpointPath || '').replace(/^\/|\/$/g, '');
+    return p1 === p2;
+  });
 
   const previewPayload = React.useMemo(() => {
     const apiPayload = widget.config?.apiPayload || {};
+    const rawMethod = epInfo?.method || apiPayload._method;
+    const finalMethod = rawMethod ? rawMethod.toUpperCase() : (Object.keys(apiPayload).length > 0 ? 'POST' : 'GET');
+    
+    const cleanPayload = { ...apiPayload };
+    delete cleanPayload._method;
+
     return {
       baseUrl: selectedSource?.baseUrl,
       endpointPath: endpointPath,
-      method: epInfo?.method || 'GET',
+      method: finalMethod,
       headers: selectedSource?.headers,
       authConfig: selectedSource?.authConfig,
-      params: epInfo?.method === 'GET' ? apiPayload : {},
-      body: epInfo?.method !== 'GET' ? apiPayload : undefined,
+      params: finalMethod === 'GET' ? cleanPayload : {},
+      body: finalMethod !== 'GET' ? cleanPayload : undefined,
       sourceId
     };
   }, [selectedSource, endpointPath, epInfo, sourceId, widget.config?.apiPayload]);
