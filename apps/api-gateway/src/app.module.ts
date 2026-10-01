@@ -18,6 +18,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { AiGatewayModule } from './modules/ai/ai.module';
+import { RateLimiterModule } from './core/rate-limiter/rate-limiter.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AiGatewayModule } from './modules/ai/ai.module';
     ChatModule,
     ReportsModule,
     AiGatewayModule,
+    RateLimiterModule,
   ],
   controllers: [AppController],
   providers: [],

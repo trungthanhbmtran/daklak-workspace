@@ -34,32 +34,35 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      // Xác thực token qua JWKS và check Denylist
-      const decodedUser = await this.tokenValidator.verifyToken(token);
+      // verifyToken: RS256 + iss/aud/exp + denylist + Redis permission cache + audit log
+      const ipAddress = (request as any).ip || request.headers['x-forwarded-for'] as string;
+      const decoded = await this.tokenValidator.verifyToken(token, ipAddress);
 
-      if (!decodedUser || decodedUser.isActive === false) {
-        throw new UnauthorizedException(
-          'Tài khoản đã bị vô hiệu hóa hoặc không khả dụng',
-        );
+      if (!decoded) {
+        throw new UnauthorizedException('Token không hợp lệ');
       }
 
-      // Payload của JWT mới từ user-service đã chứa sẵn đủ thông tin,
-      // Không cần gọi gRPC FindOne ngược về user-service nữa.
+      // Chuẩn hóa user object cho request:
+      // - id, sub từ JWT (luôn đáng tin cậy vì đã xác thực chữ ký)
+      // - permissionsFlatten, roles, policies từ Redis session (Coarse-grained cache)
+      const userId = decoded.id || parseInt(decoded.sub, 10);
       (request as any).user = {
-        id: decodedUser.id || parseInt(decodedUser.sub, 10),
-        email: decodedUser.email,
-        username: decodedUser.username,
-        fullName: decodedUser.fullName || decodedUser.full_name,
-        employeeCode: decodedUser.employeeCode || decodedUser.employee_code,
-        unitId: decodedUser.unitId || decodedUser.unit_id,
-        unitCode: decodedUser.unitCode || decodedUser.unit_code,
-        unitName: decodedUser.unitName || decodedUser.unit_name,
-        jobTitleCode: decodedUser.jobTitleCode || decodedUser.job_title_code,
-        jobTitleName: decodedUser.jobTitleName || decodedUser.job_title_name,
-        policies: decodedUser.policies || [],
-        permissionsFlatten:
-          decodedUser.permissionsFlatten || decodedUser.permissions_flatten || [],
-        roles: decodedUser.roles || [],
+        id: userId,
+        sub: decoded.sub,
+        email: decoded.email,
+        username: decoded.username,
+        fullName: decoded.fullName || decoded.full_name,
+        employeeCode: decoded.employeeCode || decoded.employee_code,
+        isActive: decoded.isActive,
+        unitId: decoded.unitId || decoded.unit_id,
+        unitCode: decoded.unitCode || decoded.unit_code,
+        unitName: decoded.unitName || decoded.unit_name,
+        jobTitleCode: decoded.jobTitleCode || decoded.job_title_code,
+        jobTitleName: decoded.jobTitleName || decoded.job_title_name,
+        // Quyền đọc từ Redis session cache (Coarse-grained)
+        permissionsFlatten: decoded.permissionsFlatten || decoded.permissions_flatten || [],
+        roles: decoded.roles || decoded.roleNames || decoded.role_names || [],
+        policies: decoded.policies || [],
       };
 
       return true;

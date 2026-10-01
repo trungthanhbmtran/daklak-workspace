@@ -16,6 +16,7 @@ import {
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RateLimitGuard, RateLimit } from '../../core/guards/rate-limit.guard';
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
@@ -23,18 +24,34 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Login: Rate limit 10 lần/15 phút theo IP.
+   * Chuẩn OWASP ASVS §2.2.1 — Brute-Force Protection
+   */
   @Post('login')
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 10, windowSec: 900, keyBy: 'ip', prefix: 'login' })
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({
     status: 200,
     description:
       'Trả về sessionId và expiresAt. Token được gán qua HTTP-Only Cookie.',
   })
+  @ApiResponse({
+    status: 429,
+    description: 'Quá nhiều lần thử đăng nhập. Thử lại sau 15 phút.',
+  })
   async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(body, res);
   }
 
+  /**
+   * Refresh: Rate limit 30 lần/15 phút theo IP.
+   * Ngăn attacker brute-force refresh token.
+   */
   @Post('refresh')
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ limit: 30, windowSec: 900, keyBy: 'ip', prefix: 'refresh' })
   @ApiOperation({
     summary: 'Làm mới access_token bằng refresh_token (session)',
   })
