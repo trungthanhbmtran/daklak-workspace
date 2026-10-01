@@ -12,6 +12,7 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "../..",
     "baseUrl": "./",
     "paths": {
       "@core/*": [
