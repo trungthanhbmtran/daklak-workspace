@@ -90,8 +90,12 @@ docker exec -it daklak-workspace-user-service-1 npx prisma db seed
 docker exec -it daklak-workspace-api-gateway-1 npx prisma db seed
 docker exec -it daklak-workspace-hrm-service-1 npx prisma db seed
 docker exec -it daklak-workspace-media-service-1 npx prisma db seed
+docker exec -it daklak-workspace-chat-service-1 npx prisma db seed
 docker exec -it daklak-workspace-posts-service-1 npx prisma db seed
 docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
+docker exec -it daklak-workspace-document-service-1 npx prisma db seed
+docker exec -it daklak-workspace-notification-service-1 npx prisma db seed
+docker exec -it daklak-workspace-report-service-1 npx prisma db seed
 
 # 💡 Khắc phục sự cố (Troubleshooting): Lỗi "No seed command configured"
 # Nếu khi chạy lệnh seed bị lỗi trên do container cũ chưa được build lại với cấu hình mới, 
