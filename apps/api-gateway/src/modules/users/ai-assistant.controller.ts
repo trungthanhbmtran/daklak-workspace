@@ -19,10 +19,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { AiService } from '../ai/ai.service';
-import { QdrantService } from '../ai/qdrant.service';
-import * as pdfParse from 'pdf-parse';
-import * as mammoth from 'mammoth';
 
 @ApiTags('AI Assistants')
 @Controller('admin/ai-assistants')
@@ -41,8 +37,6 @@ export class AiAssistantGatewayController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.AI_ASSISTANT.SYMBOL) private readonly client: any,
-    private readonly aiService: AiService,
-    private readonly qdrantService: QdrantService,
   ) {}
 
   onModuleInit() {
@@ -155,71 +149,14 @@ export class AiAssistantGatewayController implements OnModuleInit {
     },
   ) {
     try {
-      let qdrantId = body.qdrant_id;
-      let finalContent = body.content || '';
-
-      // If type is FILE and there is a URL in metadata, fetch and parse it
-      if (body.type === 'FILE' && body.metadata) {
-        try {
-          const meta = JSON.parse(body.metadata);
-          if (meta.url) {
-            const fileRes = await fetch(meta.url);
-            if (fileRes.ok) {
-              const arrayBuffer = await fileRes.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-
-              if (meta.url.toLowerCase().endsWith('.pdf')) {
-                const pdfData = await pdfParse(buffer);
-                finalContent = pdfData.text;
-              } else if (meta.url.toLowerCase().endsWith('.docx')) {
-                const docxData = await mammoth.extractRawText({ buffer });
-                finalContent = docxData.value;
-              } else if (meta.url.toLowerCase().match(/\.(txt|md|csv)$/)) {
-                finalContent = buffer.toString('utf-8');
-              }
-            }
-          }
-        } catch (err: any) {
-          console.warn(
-            'Failed to parse file for knowledge source',
-            err.message,
-          );
-        }
-      }
-
-      // If content is provided or extracted, embed it and save to Qdrant
-      if (finalContent) {
-        // Ensure collection exists
-        await this.qdrantService.createCollectionIfNotExists(id, 1536); // Assuming OpenAI ada-002 size for simplicity
-
-        const embedding = await this.aiService.generateEmbedding(
-          finalContent,
-          req.user?.id,
-        );
-
-        qdrantId = Date.now().toString(); // simple ID generation
-        await this.qdrantService.upsertPoints(id, [
-          {
-            id: qdrantId,
-            vector: embedding,
-            payload: {
-              title: body.title,
-              type: body.type,
-              content: finalContent,
-              metadata: body.metadata,
-            },
-          },
-        ]);
-      }
-
       await firstValueFrom(
         this.aiAssistantService.AddKnowledgeSource({
           assistantId: id,
           type: body.type,
           title: body.title,
-          content: finalContent,
-          metadata: body.metadata,
-          qdrantId: qdrantId,
+          content: body.content || '',
+          metadata: body.metadata || '',
+          qdrantId: body.qdrant_id || '',
         }),
       );
       return { success: true };
@@ -250,53 +187,16 @@ export class AiAssistantGatewayController implements OnModuleInit {
     if (!userId) throw new InternalServerErrorException('User ID missing');
 
     try {
-      // 1. Fetch assistant
       const response = (await firstValueFrom(
-        this.aiAssistantService.GetAssistant({ id }),
+        this.aiAssistantService.Chat({
+          assistantId: id,
+          message: body.message,
+          userId,
+        }),
       )) as any;
-      const assistant = response.assistant;
-      if (!assistant) throw new Error('Assistant not found');
-
-      // 2. Embed user question
-      const questionEmbedding = await this.aiService.generateEmbedding(
-        body.message,
-        userId,
-      );
-
-      // 3. Search Qdrant for context
-      let contextText = '';
-      try {
-        const searchResults = await this.qdrantService.search(
-          id, // use assistant id as collection name
-          questionEmbedding,
-          3,
-        );
-        if (searchResults && searchResults.length > 0) {
-          contextText = searchResults
-            .map((res: any) => res.payload?.content)
-            .filter((c) => !!c)
-            .join('\n\n---\n\n');
-        }
-      } catch (err: any) {
-        // If collection doesn't exist or search fails, we just proceed without context
-        console.warn(`Qdrant search failed for assistant ${id}:`, err.message);
-      }
-
-      // 4. Compose system prompt
-      let finalSystemPrompt = assistant.system_prompt;
-      if (contextText) {
-        finalSystemPrompt += `\n\nDưới đây là một số thông tin nền (nguồn tri thức) có thể giúp ích cho bạn trả lời câu hỏi. Dựa vào thông tin này nếu nó liên quan:\n\n${contextText}`;
-      }
-
-      // 5. Call LLM
-      const reply = await this.aiService.generateText(
-        body.message,
-        finalSystemPrompt,
-        userId,
-      );
 
       return {
-        reply,
+        reply: response.reply,
       };
     } catch (e: any) {
       throw new InternalServerErrorException(

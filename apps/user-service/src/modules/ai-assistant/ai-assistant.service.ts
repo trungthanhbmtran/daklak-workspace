@@ -1,10 +1,56 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
+import { AiService } from '../ai/ai.service';
+import { QdrantService } from '../ai/qdrant.service';
 
 @Injectable()
 export class AiAssistantService {
   private readonly logger = new Logger(AiAssistantService.name);
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly aiService: AiService,
+    private readonly qdrantService: QdrantService,
+  ) {}
+
+  async chat(assistantId: string, message: string, userId: number) {
+    const assistant = await this.getAssistant(assistantId);
+    if (!assistant) throw new NotFoundException('Assistant not found');
+
+    const questionEmbedding = await this.aiService.generateEmbedding(
+      message,
+      userId,
+    );
+
+    let contextText = '';
+    try {
+      const searchResults = await this.qdrantService.search(
+        assistantId,
+        questionEmbedding,
+        3,
+      );
+      if (searchResults && searchResults.length > 0) {
+        contextText = searchResults
+          .map((res: any) => res.payload?.content)
+          .filter((c) => !!c)
+          .join('\n\n---\n\n');
+      }
+    } catch (err: any) {
+      this.logger.warn(`Qdrant search failed: ${err.message}`);
+    }
+
+    let finalSystemPrompt = assistant.systemPrompt || '';
+    if (contextText) {
+      finalSystemPrompt += `\n\nDưới đây là một số thông tin nền (nguồn tri thức) có thể giúp ích cho bạn trả lời câu hỏi. Dựa vào thông tin này nếu nó liên quan:\n\n${contextText}`;
+    }
+
+    const reply = await this.aiService.generateText(
+      message,
+      finalSystemPrompt,
+      userId,
+    );
+
+    return reply;
+  }
 
   async getAssistants(userId: number) {
     const assistants = await this.prisma.aiAssistant.findMany({

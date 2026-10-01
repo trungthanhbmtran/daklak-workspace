@@ -9,6 +9,7 @@ import { OrganizationsModule } from '@/modules/organizations/organizations.modul
 import { ConfigsModule } from './configs/configs.module';
 import { UserConfigsModule } from './modules/user-configs/user-configs.module';
 import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
     ConfigsModule,
     UserConfigsModule,
     AiAssistantModule,
+    AiModule,
   ],
 })
 export class AppModule {}

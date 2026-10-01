@@ -7,12 +7,10 @@ import {
   Logger,
   Req,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { AiService } from './ai.service';
 import { AiFeatureService } from './ai-feature.service';
 import { EventPattern } from '@nestjs/microservices';
 
-@ApiTags('AI Service')
 @Controller('admin/ai')
 export class AiController {
   private readonly logger = new Logger(AiController.name);

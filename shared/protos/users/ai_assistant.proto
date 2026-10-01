@@ -108,4 +108,16 @@ service AiAssistantService {
   
   rpc AddAssistantTool(AddAssistantToolRequest) returns (EmptyResponse);
   rpc RemoveAssistantTool(RemoveAssistantToolRequest) returns (EmptyResponse);
+  
+  rpc Chat(ChatRequest) returns (ChatResponse);
+}
+
+message ChatRequest {
+  string assistant_id = 1;
+  string message = 2;
+  int32 user_id = 3;
+}
+
+message ChatResponse {
+  string reply = 1;
 }

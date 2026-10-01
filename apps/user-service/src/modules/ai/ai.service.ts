@@ -8,8 +8,8 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '../../core/constants/services';
+import { ConfigsService } from '../../configs/configs.service';
+import { UserConfigsService } from '../user-configs/user-configs.service';
 
 interface AiProviderConfig {
   id: string;
@@ -26,7 +26,7 @@ interface CircuitBreakerState {
 }
 
 @Injectable()
-export class AiService implements OnModuleInit {
+export class AiService {
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
     const code = e?.code;
     const message = e?.details || e?.message || defaultMsg;
@@ -36,8 +36,7 @@ export class AiService implements OnModuleInit {
     throw new InternalServerErrorException(message);
   }
 
-  private configService: any;
-  private userConfigService: any;
+
   private readonly logger = new Logger(AiService.name);
 
   // Circuit Breaker Config
@@ -50,16 +49,9 @@ export class AiService implements OnModuleInit {
   private readonly MODEL_CACHE_TTL_MS = 3600 * 1000; // 1 hour
 
   constructor(
-    @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any,
-    @Inject(MICROSERVICES.USER_CONFIG.SYMBOL)
-    private readonly userConfigClient: any,
+    private readonly configService: ConfigsService,
+    private readonly userConfigService: UserConfigsService,
   ) {}
-
-  onModuleInit() {
-    this.configService = this.client.getService('SystemConfigService');
-    this.userConfigService =
-      this.userConfigClient.getService('UserConfigService');
-  }
 
   private async getProviders(userId?: number): Promise<AiProviderConfig[]> {
     try {
@@ -67,25 +59,13 @@ export class AiService implements OnModuleInit {
 
       // Try user config first
       if (userId) {
-        const userConfigResponse = (await firstValueFrom(
-          this.userConfigService.GetConfigs({ userId }),
-        ).catch((err: any) => {
-          if (err?.code !== 5) this.handleRpcError(err);
-          return null;
-        })) as any;
-
-        const userConfigs = userConfigResponse?.configs || [];
-        aiProvidersConfig = userConfigs.find(
-          (c: any) => c.key === 'AI_PROVIDERS',
-        );
+        const userConfigs = await this.userConfigService.getUserConfigs(userId).catch(() => []);
+        aiProvidersConfig = userConfigs.find((c: any) => c.key === 'AI_PROVIDERS');
       }
 
       // Fallback to system config
       if (!aiProvidersConfig || !aiProvidersConfig.value) {
-        const response = (await firstValueFrom(
-          this.configService.GetConfigs({}),
-        )) as any;
-        const configs = response.configs || [];
+        const configs = await this.configService.getConfigs();
         aiProvidersConfig = configs.find((c: any) => c.key === 'AI_PROVIDERS');
       }
 

@@ -2,18 +2,15 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AiService } from './ai.service';
 import { AiFeatureService } from './ai-feature.service';
-import { registerGrpcService } from '../../core/factories/grpc.factory';
-import { MICROSERVICES } from '../../core/constants/services';
 import { AiController } from './ai.controller';
 import { QdrantService } from './qdrant.service';
+import { ConfigsModule } from '../../configs/configs.module';
+import { UserConfigsModule } from '../user-configs/user-configs.module';
 
 @Module({
   imports: [
-    registerGrpcService(MICROSERVICES.SYS_CONFIG),
-    registerGrpcService(MICROSERVICES.USER_CONFIG),
-    registerGrpcService(MICROSERVICES.USER),
-    registerGrpcService(MICROSERVICES.TASK),
-    registerGrpcService(MICROSERVICES.MASTER_PLAN),
+    ConfigsModule,
+    UserConfigsModule,
     ClientsModule.register([
       {
         name: 'AI_QUEUE_SERVICE',

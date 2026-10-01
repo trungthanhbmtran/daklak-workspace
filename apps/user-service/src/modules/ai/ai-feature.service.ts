@@ -8,9 +8,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { RedisService } from '../../core/redis/redis.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { v4 as uuidv4 } from 'uuid';
-import { MICROSERVICES } from '../../core/constants/services';
+import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 import * as jwt from 'jsonwebtoken';
@@ -25,25 +26,19 @@ export class AiFeatureService implements OnModuleInit {
   private masterPlanService: any;
 
   constructor(
-    private readonly redisService: RedisService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @Inject('AI_QUEUE_SERVICE') private readonly rmqClient: ClientProxy,
-    @Inject(MICROSERVICES.TASK.SYMBOL) private readonly taskClient: any,
-    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-    @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL)
-    private readonly sysConfigClient: any,
-    @Inject(MICROSERVICES.MASTER_PLAN.SYMBOL)
-    private readonly masterPlanClient: any,
+    @Inject('TASK_SERVICE') private readonly taskClient: any,
+    @Inject('USER_SERVICE') private readonly userClient: any,
+    @Inject('SYS_CONFIG_SERVICE') private readonly sysConfigClient: any,
+    @Inject('MASTER_PLAN_SERVICE') private readonly masterPlanClient: any,
   ) {}
 
   onModuleInit() {
-    this.taskService = this.taskClient.getService(MICROSERVICES.TASK.SERVICE);
-    this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    this.sysConfigService = this.sysConfigClient.getService(
-      MICROSERVICES.SYS_CONFIG.SERVICE,
-    );
-    this.masterPlanService = this.masterPlanClient.getService(
-      MICROSERVICES.MASTER_PLAN.SERVICE,
-    );
+    this.taskService = this.taskClient?.getService('TaskService');
+    this.userService = this.userClient?.getService('UserService');
+    this.sysConfigService = this.sysConfigClient?.getService('SystemConfigService');
+    this.masterPlanService = this.masterPlanClient?.getService('MasterPlanService');
   }
 
   private getGrpcMetadata(user: any, headers?: any) {
@@ -97,10 +92,10 @@ export class AiFeatureService implements OnModuleInit {
 
     try {
       const jobId = uuidv4();
-      await this.redisService.set(
+      await this.cacheManager.set(
         `ai_job_${jobId}`,
         JSON.stringify({ status: 'PROCESSING' }),
-        3600,
+        3600000,
       );
       const sysConfigRes: any = await firstValueFrom(
         this.sysConfigService.GetConfigs({}),
@@ -276,10 +271,10 @@ export class AiFeatureService implements OnModuleInit {
       }
 
       const jobId = uuidv4();
-      await this.redisService.set(
+      await this.cacheManager.set(
         `ai_job_${jobId}`,
         JSON.stringify({ status: 'PROCESSING' }),
-        3600,
+        3600000,
       );
 
       this.rmqClient.emit('ai_generate_task', {
@@ -300,7 +295,7 @@ export class AiFeatureService implements OnModuleInit {
 
   async getJobStatus(jobId: string) {
     try {
-      const jobData = await this.redisService.get(`ai_job_${jobId}`);
+      const jobData = (await this.cacheManager.get(`ai_job_${jobId}`)) as string;
       if (!jobData) {
         throw new NotFoundException('Không tìm thấy tác vụ (hoặc đã hết hạn)');
       }
@@ -312,24 +307,24 @@ export class AiFeatureService implements OnModuleInit {
   }
 
   async setJobCompleted(jobId: string, parsedResult: any) {
-    await this.redisService.set(
+    await this.cacheManager.set(
       `ai_job_${jobId}`,
       JSON.stringify({
         status: 'COMPLETED',
         result: parsedResult,
       }),
-      3600,
+      3600000,
     );
   }
 
   async setJobFailed(jobId: string, error: string) {
-    await this.redisService.set(
+    await this.cacheManager.set(
       `ai_job_${jobId}`,
       JSON.stringify({
         status: 'FAILED',
         error,
       }),
-      3600,
+      3600000,
     );
   }
 }

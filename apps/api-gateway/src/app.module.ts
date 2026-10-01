@@ -10,7 +10,6 @@ import { AppController } from './modules/app/app.controller';
 import { MediaModule } from './modules/media/media.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
-import { AiModule } from './modules/ai/ai.module';
 import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
 import { IntegrationModule } from './modules/integration/integration.module';
@@ -35,7 +34,6 @@ import { ReportsModule } from './modules/reports/reports.module';
     MediaModule,
     WorkflowModule,
     TranslateModule,
-    AiModule,
     RedisModule,
     IntegrationModule,
     PrismaModule,
