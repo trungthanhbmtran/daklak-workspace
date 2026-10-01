@@ -351,6 +351,7 @@ export class WorkflowService implements OnModuleInit {
       ...data,
       authConfig: this.safeParseJson(data.authConfig) || {},
       headers: this.safeParseJson(data.headers) || {},
+      endpoints: this.safeParseJson(data.endpoints) || [],
       metadata: this.safeParseJson(data.metadata) || {},
     };
   }
@@ -361,6 +362,7 @@ export class WorkflowService implements OnModuleInit {
       ...body,
       authConfig: body.authConfig ? JSON.stringify(body.authConfig) : '{}',
       headers: body.headers ? JSON.stringify(body.headers) : '{}',
+      endpoints: body.endpoints ? JSON.stringify(body.endpoints) : '[]',
       metadata: body.metadata ? JSON.stringify(body.metadata) : '{}',
     };
   }

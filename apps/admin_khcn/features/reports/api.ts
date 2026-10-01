@@ -70,18 +70,18 @@ export const previewReport = async (payload: any) => {
       case 'KPI_STATS': endpoint = '/reports/kpis'; break;
       default: throw new Error("Nguồn dữ liệu nội bộ không hợp lệ");
     }
-    const res = await api.get(endpoint, { params: payload.params });
-    return { success: true, data: res.data?.data || res.data };
+    const res: any = await api.get(endpoint, { params: payload.params });
+    return { success: true, data: res?.data || res };
   }
 
   // If it's an API integration source, use the unified Execute Integration engine
   if (payload.type === 'api') {
-    const res = await api.post(`/workflow/integrations/${payload.integrationId}/execute`, {
+    const res: any = await api.post(`/workflow/integrations/${payload.integrationId}/execute`, {
       endpointId: payload.endpointId,
       body: payload.body,
       params: payload.params,
     });
-    return { success: true, data: res.data?.data || res.data };
+    return { success: true, data: res?.data || res };
   }
 
   throw new Error("Loại nguồn dữ liệu không được hỗ trợ");

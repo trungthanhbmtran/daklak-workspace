@@ -126,6 +126,17 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       }
     }
 
+    const endpointsList = metadataObj._parsedEndpoints || [];
+    
+    // Strip massive Swagger/Postman root objects to avoid 10MB payloads crashing gRPC/DB
+    const cleanMetadata = { ...metadataObj };
+    delete cleanMetadata._parsedEndpoints;
+    delete cleanMetadata.paths;
+    delete cleanMetadata.components;
+    delete cleanMetadata.definitions;
+    delete cleanMetadata.item;
+    delete cleanMetadata.variable;
+
     const payload = {
       name: data.name,
       code: data.code,
@@ -141,7 +152,8 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         scope: data.scope,
         tokenPath: data.tokenPath
       },
-      metadata: metadataObj
+      endpoints: endpointsList,
+      metadata: cleanMetadata
     };
 
     if (editingItem) {

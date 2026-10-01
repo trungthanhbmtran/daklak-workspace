@@ -18,12 +18,12 @@ const parseJsonField = (val: any): any => {
   return val;
 };
 
-// Map gRPC/REST request sang Prisma DTO
 const mapToPrisma = (payload: any) => {
   return {
     ...payload,
     authConfig: parseJsonField(payload.authConfig) ?? {},
     headers: parseJsonField(payload.headers) ?? {},
+    endpoints: parseJsonField(payload.endpoints) ?? [],
     metadata: parseJsonField(payload.metadata) ?? {},
   };
 };
@@ -39,7 +39,7 @@ const mapIntegrationResponse = (data: any) => {
     // protobuf tự động encode/decode hoặc xử lý ở client.
     authConfig: parseJsonField(data.authConfig) ?? {},
     headers: parseJsonField(data.headers) ?? {},
-    endpoints: parsedEndpoints,
+    endpoints: typeof data.endpoints === 'string' ? data.endpoints : JSON.stringify(parsedEndpoints),
     metadata: parseJsonField(data.metadata) ?? {},
     createdAt: data.createdAt?.toISOString?.() ?? data.createdAt ?? '',
     updatedAt: data.updatedAt?.toISOString?.() ?? data.updatedAt ?? '',
@@ -116,7 +116,7 @@ export class IntegrationService {
     const endpoints: any[] = parseJsonField(conn.endpoints) || [];
 
     // Tìm kiếm cấu hình endpoint trong CSDL
-    let targetEndpoint = null;
+    let targetEndpoint: any = null;
     if (payload.endpointId) {
       targetEndpoint = endpoints.find((e: any) => e.id === payload.endpointId);
     } else if (payload.endpointPath) {

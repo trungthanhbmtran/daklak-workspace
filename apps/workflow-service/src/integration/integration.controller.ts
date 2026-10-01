@@ -20,6 +20,7 @@ const mapToGrpc = (data: any) => {
     ...data,
     authConfig: JSON.stringify(data.authConfig ?? {}),
     headers: JSON.stringify(data.headers ?? {}),
+    endpoints: typeof data.endpoints === 'string' ? data.endpoints : JSON.stringify(data.endpoints ?? []),
     metadata: JSON.stringify(data.metadata ?? {}),
   };
 };
