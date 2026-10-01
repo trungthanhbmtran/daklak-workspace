@@ -1,12 +1,15 @@
 import { Module, Global } from '@nestjs/common';
 import { IntegrationService } from './integration.service';
 import { IntegrationController } from './integration.controller';
+import { RegistryService } from './registry.service';
+import { TokenValidatorService } from './token-validator.service';
+import { EnvSecretProvider } from './secrets/env-secret-provider.service';
 
 @Global()
 @Module({
   imports: [],
   controllers: [IntegrationController],
-  providers: [IntegrationService],
-  exports: [IntegrationService],
+  providers: [IntegrationService, RegistryService, TokenValidatorService, EnvSecretProvider],
+  exports: [IntegrationService, RegistryService, TokenValidatorService, EnvSecretProvider],
 })
 export class IntegrationModule {}

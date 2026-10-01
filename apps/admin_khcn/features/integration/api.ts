@@ -96,28 +96,29 @@ export const integrationKeys = {
 
 export const integrationApi = {
   getList: async (search?: string) => {
-    const res = await apiClient.get('/workflow/integrations', { params: { search } }) as any;
-    if (res.success) return res.data as IntegrationConfig[];
+    const res = await apiClient.get('/admin/integration-upstreams', { params: { search } }) as any;
+    if (res.success || Array.isArray(res)) return res.data || res;
     throw new Error(res.message || 'Lỗi lấy dữ liệu');
   },
   create: async (data: any) => {
-    const res = await apiClient.post('/workflow/integrations', data) as any;
-    if (res.success) return res.data;
+    const res = await apiClient.post('/admin/integration-upstreams', data) as any;
+    if (res.success || res.id) return res.data || res;
     throw new Error(res.message || 'Lỗi khi tạo');
   },
   update: async (data: any) => {
-    const res = await apiClient.put(`/workflow/integrations/${data.id}`, data) as any;
-    if (res.success) return res.data;
+    const res = await apiClient.put(`/admin/integration-upstreams/${data.id}`, data) as any;
+    if (res.success || res.id) return res.data || res;
     throw new Error(res.message || 'Lỗi khi cập nhật');
   },
   delete: async (id: string) => { // Updated to string
-    const res = await apiClient.delete(`/workflow/integrations/${id}`) as any;
-    if (res.success) return res.data;
+    const res = await apiClient.delete(`/admin/integration-upstreams/${id}`) as any;
+    if (res.success || res) return res.data || res;
     throw new Error(res.message || 'Lỗi khi xóa');
   },
   toggleActive: async ({ id, isActive }: { id: string, isActive: boolean }) => {
-    const res = await apiClient.put(`/workflow/integrations/${id}`, { isActive }) as any;
-    if (res.success) return res.data;
+    // Note: Depends on whether /admin/integration-upstreams supports patch/toggle directly. If not, use update.
+    const res = await apiClient.put(`/admin/integration-upstreams/${id}`, { enabled: isActive }) as any;
+    if (res.success || res) return res.data || res;
     throw new Error(res.message || 'Lỗi khi cập nhật trạng thái');
   },
 
@@ -143,9 +144,25 @@ export const integrationApi = {
     const res = await apiClient.put('/integration/api-permissions', { rules }) as any;
     return res.data || res;
   },
-  execute: async (id: string, payload: any) => {
-    const res = await apiClient.post(`/workflow/integrations/${id}/execute`, payload) as any;
-    return res.data || res;
+  execute: async (upstreamName: string, payload: any) => {
+    // Trực tiếp gọi vào Gateway Data Plane thay vì nhờ Workflow gọi hộ!
+    const cleanPath = payload.endpointPath.startsWith('/') ? payload.endpointPath : `/${payload.endpointPath}`;
+    const url = `/gw/${upstreamName}${cleanPath}`;
+    
+    // apiClient sẽ lo việc gắn base url (vd: /api/v1)
+    const res = await apiClient.request({
+      method: payload.method,
+      url,
+      headers: payload.headers,
+      params: payload.params,
+      data: payload.body,
+    });
+    
+    return {
+      success: true,
+      status: res.status,
+      data: res.data,
+    };
   }
 };
 

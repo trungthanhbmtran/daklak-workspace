@@ -1,0 +1,39 @@
+model IntegrationUpstream {
+  id             String  @id @default(uuid())
+  name           String  @unique
+  type           String // 'internal' | 'external'
+  baseUrl        String
+  allowedPaths   Json // Array of strings, e.g., ["/api/*", "/v1/docs"]
+  allowedMethods Json // Array of strings, e.g., ["GET", "POST"]
+  auth           Json // { kind: 'none'|'bearer'|'apiKey'|'basic'|'mtls'|'oauth2_client_credentials', secretRef?: string }
+  timeoutMs      Int     @default(5000)
+  retry          Json? // { times: number, backoff: number }
+  cacheTtlSec    Int?
+  rateLimit      Json? // { windowMs: number, max: number }
+  roles          Json? // Array of strings
+  scopes         Json? // Array of strings
+  requestSchema  Json? // JSON schema for validation
+  responseLimit  Int? // bytes limit
+  enabled        Boolean @default(true)
+  version        Int     @default(1)
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("integration_upstreams")
+}
+
+model IntegrationUpstreamAudit {
+  id           String   @id @default(uuid())
+  upstreamName String
+  action       String // 'CREATE' | 'UPDATE' | 'DELETE'
+  changedBy    String?
+  changes      Json // Stores before/after values (masks secretRef if needed)
+  version      Int
+  createdAt    DateTime @default(now())
+
+  @@index([upstreamName])
+  @@map("integration_upstream_audits")
+}

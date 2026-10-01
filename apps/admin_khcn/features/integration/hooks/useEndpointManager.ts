@@ -170,7 +170,7 @@ export const useEndpointManager = ({ initialEndpoints, integration }: UseEndpoin
       if (!integration.id || integration.id.startsWith('new_')) {
         throw new Error("Vui lòng 'Lưu cấu hình' trước khi test để backend có thể sử dụng cấu hình từ Database.");
       } else {
-        res = await integrationApi.execute(integration.id, payload);
+        res = await integrationApi.execute(integration.name || integration.code, payload);
       }
       
       setTestResult(res);

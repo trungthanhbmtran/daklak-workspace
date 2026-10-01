@@ -10,6 +10,7 @@ import { ConfigsModule } from './configs/configs.module';
 import { UserConfigsModule } from './modules/user-configs/user-configs.module';
 import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
 import { AiModule } from './modules/ai/ai.module';
+import { IntegrationConfigModule } from './modules/integration-config/integration-config.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AiModule } from './modules/ai/ai.module';
     UserConfigsModule,
     AiAssistantModule,
     AiModule,
+    IntegrationConfigModule,
   ],
 })
 export class AppModule {}

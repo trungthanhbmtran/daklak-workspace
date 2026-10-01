@@ -1,41 +1,39 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { IntegrationService } from './integration.service';
+import { TokenValidatorService } from './token-validator.service';
 
 @Injectable()
 export class DynamicProxyMiddleware implements NestMiddleware {
-  constructor(private readonly integrationService: IntegrationService) {}
+  constructor(
+    private readonly integrationService: IntegrationService,
+    private readonly tokenValidator: TokenValidatorService,
+  ) {}
 
-  use(req: any, res: any, next: () => void) {
-    const route = this.integrationService.matchRoute(
-      req.originalUrl || req.url,
-    );
-    if (route) {
-      // Check API Key
-      const apiKey = req.headers['x-api-key'] || req.query?.apikey;
-      if (
-        !apiKey ||
-        !this.integrationService.validateApiKey(apiKey as string)
-      ) {
-        return res
-          .status(401)
-          .json({ success: false, message: 'Invalid or missing API Key' });
+  async use(req: any, res: any, next: () => void) {
+    const pathPrefix = '/gw/';
+    const urlPath = req.originalUrl || req.url;
+    
+    if (urlPath.includes(pathPrefix)) {
+      // 1. Authenticate with TokenValidatorService
+      try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          return res.status(401).json({ success: false, message: 'Missing or invalid Authorization header' });
+        }
+        
+        const token = authHeader.split(' ')[1];
+        const user = await this.tokenValidator.verifyToken(token);
+        
+        // Attach user to request for RBAC check in IntegrationService
+        req.user = user;
+      } catch (err: any) {
+        return res.status(401).json({ success: false, message: err.message || 'Unauthorized' });
       }
 
-      // Check method
-      const allowedMethods = route.methods
-        .split(',')
-        .map((m) => m.trim().toUpperCase());
-      if (!allowedMethods.includes(req.method.toUpperCase())) {
-        return res
-          .status(405)
-          .json({ success: false, message: 'Method Not Allowed' });
-      }
-
-      // Execute proxy
-      return this.integrationService.proxyMiddleware(req, res, next);
+      // 2. Execute proxy
+      await this.integrationService.proxyMiddleware(req, res, next);
+    } else {
+      next();
     }
-
-    // No dynamic route found, continue to normal controllers
-    next();
   }
 }
