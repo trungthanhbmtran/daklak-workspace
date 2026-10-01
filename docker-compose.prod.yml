@@ -77,6 +77,15 @@ services:
       dockerfile: ./apps/api-gateway/Dockerfile
     image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       redis:
         condition: service_healthy
@@ -102,6 +111,15 @@ services:
   user-service:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -122,6 +140,15 @@ services:
   hrm-service:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -135,6 +162,15 @@ services:
   media-service:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       minio:
         condition: service_started
@@ -150,6 +186,15 @@ services:
   posts-service:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -164,6 +209,15 @@ services:
   workflow-service:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -177,6 +231,15 @@ services:
   document-service:
     image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -190,6 +253,15 @@ services:
   translate-service:
     image: ${DOCKER_USERNAME}/daklak-translate-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -204,6 +276,15 @@ services:
   notification-service:
     image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -217,6 +298,15 @@ services:
   chat-service:
     image: ${DOCKER_USERNAME}/daklak-chat-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       mysql:
         condition: service_healthy
@@ -235,6 +325,15 @@ services:
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - api-gateway
     env_file:
@@ -243,6 +342,15 @@ services:
   portal-goverment:
     image: ${DOCKER_USERNAME}/daklak-portal-goverment:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     env_file:
       - .env.production
 
@@ -353,6 +461,15 @@ services:
   report-service:
     image: ${DOCKER_USERNAME}/daklak-report-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - rabbitmq
       - redis

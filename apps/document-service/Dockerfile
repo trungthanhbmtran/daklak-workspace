@@ -6,8 +6,7 @@ FROM node:22-slim AS builder
 WORKDIR /app
 
 # Bắt buộc cài openssl cho Prisma Engine
-RUN apt-get update -y && apt-get install -y openssl
-
+RUN apt-get update -y && apt-get install -y openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # [MONOREPO] Copy package.json của service cụ thể từ gốc
 # Context của docker build phải đặt ở thư mục ngoài cùng (root)
@@ -36,9 +35,10 @@ FROM node:22-slim AS runner
 WORKDIR /app
 
 # Bắt buộc cài openssl cho Prisma Engine (Runner)
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
+ENV TZ=Asia/Ho_Chi_Minh
 ENV PROTO_PATH=/app/protos
 
 
@@ -60,5 +60,5 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["node", "dist/apps/document-service/src/main.js"]
+CMD ["dumb-init", "node", "dist/apps/document-service/src/main.js"]
 

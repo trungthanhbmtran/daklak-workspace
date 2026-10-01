@@ -51,6 +51,15 @@ services:
       dockerfile: apps/user-service/Dockerfile
     container_name: user-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - mysql
       - redis
@@ -68,6 +77,15 @@ services:
       dockerfile: apps/posts-service/Dockerfile
     container_name: posts-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - mysql
       - redis
@@ -82,6 +100,15 @@ services:
       dockerfile: apps/document-service/Dockerfile
     container_name: document-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - mysql
       - redis
@@ -98,6 +125,15 @@ services:
       dockerfile: apps/translate_service/Dockerfile
     container_name: translate-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - mysql
       - rabbitmq
@@ -112,6 +148,15 @@ services:
       dockerfile: apps/notification_service/Dockerfile
     container_name: notification-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - mysql
       - rabbitmq
@@ -128,6 +173,15 @@ services:
       dockerfile: apps/chat-service/Dockerfile
     container_name: chat-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - mysql
       - redis
@@ -148,6 +202,15 @@ services:
       dockerfile: apps/report-service/Dockerfile
     container_name: report-service
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     depends_on:
       - redis
       - rabbitmq

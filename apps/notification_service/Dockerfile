@@ -20,9 +20,10 @@ FROM node:22-slim AS runner
 WORKDIR /app
 
 # Bắt buộc cài openssl cho Prisma Engine (Runner)
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y openssl dumb-init && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
+ENV TZ=Asia/Ho_Chi_Minh
 ENV PROTO_PATH=/app/protos
 
 # Create non-root user early to run container and install packages under its ownership
@@ -47,4 +48,4 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 50075
 
-CMD ["node", "server.js"]
+CMD ["dumb-init", "node", "server.js"]
