@@ -158,6 +158,10 @@ export class RegistryService implements OnModuleInit {
     return this.upstreams.get(name);
   }
 
+  public getReportSourceConfigs(): UpstreamConfig[] {
+    return [...this.upstreams.values()].map(state => state.config);
+  }
+
   public checkReady(): boolean {
     return this.isReady;
   }
@@ -199,3 +203,4 @@ export class RegistryService implements OnModuleInit {
     return false;
   }
 }
+

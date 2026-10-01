@@ -44,7 +44,7 @@ export function useCreateTemplate() {
     mutationFn: createTemplate,
     onSuccess: () => {
       // Tự động invalidate để refresh danh sách
-      queryClient.invalidateQueries({ queryKey: REPORT_KEYS.templates() });
+      queryClient.invalidateQueries({ queryKey: REPORT_KEYS.all });
     },
   });
 }
@@ -54,7 +54,7 @@ export function useDeleteTemplate() {
   return useMutation({
     mutationFn: deleteTemplate,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: REPORT_KEYS.templates() });
+      queryClient.invalidateQueries({ queryKey: REPORT_KEYS.all });
     },
   });
 }
@@ -95,3 +95,4 @@ export function usePreviewReport(payload: any, enabled: boolean) {
     retry: false,
   });
 }
+

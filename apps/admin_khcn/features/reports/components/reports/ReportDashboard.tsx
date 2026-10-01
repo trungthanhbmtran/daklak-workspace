@@ -5,6 +5,8 @@ import React, { useState } from "react";
 import { Plus, LayoutTemplate, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportBuilder } from "./ReportBuilder";
+import { TableReportBuilder } from "./TableReportBuilder";
+import { TableReportWidget } from "./TableReportWidget";
 import dynamic from "next/dynamic";
 
 const ChartRenderer = dynamic(() => import("./ChartRenderer").then(m => m.ChartRenderer), {
@@ -134,6 +136,7 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
 
 export function ReportDashboard() {
   const [isBuilding, setIsBuilding] = useState(false);
+  const [isBuildingTable, setIsBuildingTable] = useState(false);
 
   const { data: widgets = [], isLoading } = useWidgets();
   const { data: integrations = [] } = useIntegrationList("");
@@ -151,6 +154,10 @@ export function ReportDashboard() {
       toast.error(err.response?.data?.message || err.message || "Không thể xoá báo cáo");
     }
   };
+
+  if (isBuildingTable) {
+    return <TableReportBuilder onBack={() => setIsBuildingTable(false)} onSave={() => setIsBuildingTable(false)} />;
+  }
 
   if (isBuilding) {
     return (
@@ -179,8 +186,10 @@ export function ReportDashboard() {
           </h2>
           <p className="text-slate-500 text-sm mt-1">Tổng hợp các biểu đồ phân tích và thống kê hệ thống</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setIsBuildingTable(true)}>Tạo bảng từ API liên thông</Button>
         <Button onClick={() => setIsBuilding(true)} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl h-10 px-6 shadow-md shadow-violet-500/20">
-          <Plus className="w-4 h-4" /> Thêm Báo Cáo Mới
+          <Plus className="w-4 h-4" /> Thêm Biểu Đồ
         </Button>
       </div>
 
@@ -218,7 +227,9 @@ export function ReportDashboard() {
                 </div>
 
                 <div className="w-full">
-                  <ReportWidget widget={widget} integrations={integrations} />
+                  {widget.config?.table?.version === 1 && widget.config?.source ?
+                    <TableReportWidget id={widget.id} source={widget.config.source} table={widget.config.table} /> :
+                    <ReportWidget widget={widget} integrations={integrations} />}
                 </div>
               </div>
             );
@@ -228,3 +239,4 @@ export function ReportDashboard() {
     </div>
   );
 }
+

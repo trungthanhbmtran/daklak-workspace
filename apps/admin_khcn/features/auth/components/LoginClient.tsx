@@ -61,17 +61,34 @@ export function LoginClient() {
     onSuccess: () => {
       setIsRedirecting(true);
       toast.success("Đăng nhập thành công! Đang chuyển hướng...");
-      // Không cần delay nữa, Next.js sẽ chuyển trang tức thì bằng client-side routing
-      // Toaster component (sonner) nằm ngoài page nên thông báo sẽ không bị mất
       router.replace(callbackUrl || '/hub');
     },
     onError: (error: any) => {
       setIsRedirecting(false);
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Tên đăng nhập hoặc mật khẩu không chính xác.";
-      toast.error(message, { duration: 4000 });
+      const status = error.response?.status;
+      const data = error.response?.data;
+
+      if (status === 429) {
+        // Rate limit: Hiển thị thông báo với thời gian chờ cụ thể
+        const retryAfter = data?.retryAfterSec || error.response?.headers?.["retry-after"] || 900;
+        const minutes = Math.ceil(retryAfter / 60);
+        toast.error(
+          `Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau ${minutes} phút.`,
+          { duration: 8000 }
+        );
+      } else if (status === 403 && (data?.message?.includes("bị khóa") || data?.message?.includes("đáng ngờ"))) {
+        // IP bị block bởi Threat Intelligence
+        toast.error(
+          "Tài khoản/IP của bạn đã bị khóa tạm thời. Vui lòng liên hệ Quản trị viên.",
+          { duration: 10000 }
+        );
+      } else {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Tên đăng nhập hoặc mật khẩu không chính xác.";
+        toast.error(message, { duration: 4000 });
+      }
     },
   });
 

@@ -6,6 +6,8 @@ package reports;
 import "common/common.proto";
 
 service ReportService {
+  // JSON payload: { data, config }; the authenticated gateway fetches data.
+  rpc ExecuteTable (GenericRequest) returns (GenericResponse);
   rpc GetStaffingReport (GetStaffingReportRequest) returns (StaffingReportResponse);
   rpc CreateTemplate (GenericRequest) returns (GenericResponse);
   rpc GetAllTemplates (GenericRequest) returns (GenericResponse);
@@ -60,3 +62,4 @@ message StaffingReportResponse {
   repeated StaffingReportItem data = 2;
   string message = 3;
 }
+

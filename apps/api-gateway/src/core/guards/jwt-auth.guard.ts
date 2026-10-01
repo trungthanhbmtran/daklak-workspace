@@ -3,48 +3,58 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Optional,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { TokenValidatorService } from '../../modules/integration/token-validator.service';
+import { ThreatIntelService, THREAT_SCORES } from '../threat-intel/threat-intel.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly tokenValidator: TokenValidatorService) {}
+  constructor(
+    private readonly tokenValidator: TokenValidatorService,
+    // Optional để không break các module chưa inject ThreatIntelService
+    @Optional() private readonly threatIntel?: ThreatIntelService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
+    const ip = (request as any).clientIp
+      || (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
+      || request.ip
+      || 'unknown';
+
     let token: string | undefined;
 
-    // 1. ƯU TIÊN ĐỌC TỪ COOKIE (Do Frontend Next.js gửi lên bằng HttpOnly)
-    if (request.cookies && request.cookies.accessToken) {
+    // 1. Ưu tiên đọc từ HttpOnly Cookie (Frontend Next.js)
+    if (request.cookies?.accessToken) {
       token = request.cookies.accessToken;
     }
-    // 2. NẾU KHÔNG CÓ COOKIE, MỚI TÌM TRONG HEADER (Dùng cho Postman / Mobile App)
-    else if (
-      request.headers.authorization &&
-      request.headers.authorization.startsWith('Bearer ')
-    ) {
+    // 2. Fallback: Authorization Bearer header (Postman / Mobile)
+    else if (request.headers.authorization?.startsWith('Bearer ')) {
       token = request.headers.authorization.split(' ')[1];
     }
 
     if (!token) {
+      // Tích điểm: không có token → có thể đang probe API
+      this.reportThreat(ip, 'AUTH_FAIL', 'No token provided');
       throw new UnauthorizedException(
         'Không tìm thấy token xác thực trong Cookie hoặc Header',
       );
     }
 
     try {
-      // verifyToken: RS256 + iss/aud/exp + denylist + Redis permission cache + audit log
-      const ipAddress = (request as any).ip || request.headers['x-forwarded-for'] as string;
-      const decoded = await this.tokenValidator.verifyToken(token, ipAddress);
+      // verifyToken: RS256 + iss/aud/exp + denylist check + Redis permission cache
+      const decoded = await this.tokenValidator.verifyToken(token, ip);
 
       if (!decoded) {
+        this.reportThreat(ip, 'INVALID_JWT', 'Decoded null');
         throw new UnauthorizedException('Token không hợp lệ');
       }
 
-      // Chuẩn hóa user object cho request:
-      // - id, sub từ JWT (luôn đáng tin cậy vì đã xác thực chữ ký)
-      // - permissionsFlatten, roles, policies từ Redis session (Coarse-grained cache)
+      // Chuẩn hóa user object:
+      // - id, sub: từ JWT (đã xác thực chữ ký → tin tưởng tuyệt đối)
+      // - permissionsFlatten, roles: từ Redis session cache (Coarse-grained)
       const userId = decoded.id || parseInt(decoded.sub, 10);
       (request as any).user = {
         id: userId,
@@ -59,7 +69,6 @@ export class JwtAuthGuard implements CanActivate {
         unitName: decoded.unitName || decoded.unit_name,
         jobTitleCode: decoded.jobTitleCode || decoded.job_title_code,
         jobTitleName: decoded.jobTitleName || decoded.job_title_name,
-        // Quyền đọc từ Redis session cache (Coarse-grained)
         permissionsFlatten: decoded.permissionsFlatten || decoded.permissions_flatten || [],
         roles: decoded.roles || decoded.roleNames || decoded.role_names || [],
         policies: decoded.policies || [],
@@ -68,10 +77,29 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     } catch (error: any) {
       if (error instanceof UnauthorizedException) {
+        // Báo cáo event về ThreatIntel để tích điểm
+        const msg = error.message ?? '';
+        if (msg.includes('revoked')) {
+          this.reportThreat(ip, 'REVOKED_TOKEN', msg);
+        } else if (msg.includes('expired') || msg.includes('invalid')) {
+          this.reportThreat(ip, 'INVALID_JWT', msg);
+        } else {
+          this.reportThreat(ip, 'AUTH_FAIL', msg);
+        }
         throw error;
       }
-      console.error('JWT Verification Error:', error?.message);
+      this.reportThreat(ip, 'INVALID_JWT', error?.message);
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
     }
+  }
+
+  /** Fire-and-forget: báo cáo sự kiện về ThreatIntel mà không block request */
+  private reportThreat(
+    ip: string,
+    event: keyof typeof THREAT_SCORES,
+    detail?: string,
+  ) {
+    if (!this.threatIntel) return;
+    this.threatIntel.recordEvent(ip, event, detail).catch(() => {});
   }
 }

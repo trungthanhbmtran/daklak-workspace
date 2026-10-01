@@ -11,14 +11,14 @@ export type { ApiResponse };
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT_MS,
-  // CỰC KỲ QUAN TRỌNG: Trình duyệt sẽ tự động đính kèm HttpOnly Cookie vào request
+  // CỰC KỲ QUAN TRỌNG: Trình duyệt tự động đính kèm HttpOnly Cookie vào request
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// 2. RESPONSE INTERCEPTOR (Chỉ để bắt lỗi và bóc data)
+// 2. RESPONSE INTERCEPTOR
 apiClient.interceptors.response.use(
   (response) => {
     // Tự động bóc lớp data của Axios
@@ -35,18 +35,42 @@ apiClient.interceptors.response.use(
 
     switch (status) {
       case 401:
-        // HttpOnly Cookie hết hạn hoặc không hợp lệ -> Văng ra login
+        // HttpOnly Cookie hết hạn hoặc không hợp lệ → Về trang login
         if (typeof window !== "undefined") {
           toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
           window.location.href = "/admin/login";
         }
         break;
+
       case 403:
-        toast.error("Bạn không có quyền thực hiện thao tác này!");
+        // Phân biệt 2 nguyên nhân:
+        // - Bị block bởi Threat Intelligence (IP bị khóa)
+        // - Không có quyền truy cập tính năng
+        if (data?.message?.includes("bị khóa") || data?.message?.includes("đáng ngờ")) {
+          toast.error(
+            "IP của bạn đã bị khóa do hoạt động đáng ngờ. Vui lòng liên hệ Quản trị viên.",
+            { duration: 10000 }
+          );
+        } else {
+          toast.error("Bạn không có quyền thực hiện thao tác này!");
+        }
         break;
+
+      case 429: {
+        // Rate Limit exceeded — hiển thị thời gian chờ từ header Retry-After
+        const retryAfter = error.response.headers?.["retry-after"]
+          || (data as any)?.retryAfterSec;
+        const waitMsg = retryAfter
+          ? ` Vui lòng thử lại sau ${retryAfter} giây.`
+          : " Vui lòng thử lại sau ít phút.";
+        toast.error(`Quá nhiều yêu cầu được gửi.${waitMsg}`, { duration: 6000 });
+        break;
+      }
+
       case 500:
         toast.error(data?.message || "Lỗi hệ thống (500). Vui lòng liên hệ Quản trị viên.");
         break;
+
       default:
         if (data?.message) toast.error(data.message);
         break;

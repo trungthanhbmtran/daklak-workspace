@@ -1,11 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { validateTableConfig } from '../reports/table-engine';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class TemplatesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private validateTables(data: any) {
+    for (const widget of data.widgets || []) {
+      if (!widget.config?.table) continue;
+      try {
+        const config = validateTableConfig(widget.config.table);
+        if (!config.columns.length || !widget.config.source?.upstream || !widget.config.source?.path || widget.chartType !== 'TABLE') throw new Error('Bảng báo cáo thiếu cấu hình');
+      } catch (error) {
+        throw new RpcException({ code: 3, message: error instanceof Error ? error.message : 'Cấu hình bảng không hợp lệ' });
+      }
+    }
+  }
+
   async createTemplate(data: any) {
+    this.validateTables(data);
     return this.prisma.reportTemplate.create({
       data: {
         title: data.title,
@@ -42,6 +57,7 @@ export class TemplatesService {
   }
 
   async updateTemplate(id: number, data: any) {
+    this.validateTables(data);
     // Để update có cấu trúc phức tạp (widgets), thường ta sẽ xóa widgets cũ và tạo mới
     // hoặc upsert. Ở đây làm đơn giản: xóa cũ, thêm mới.
     await this.prisma.reportWidget.deleteMany({ where: { templateId: id } });
@@ -66,3 +82,4 @@ export class TemplatesService {
     });
   }
 }
+

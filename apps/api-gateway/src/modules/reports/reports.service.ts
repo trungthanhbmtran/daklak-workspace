@@ -3,10 +3,12 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { Metadata } from '@grpc/grpc-js';
+import { timeout } from 'rxjs';
 
 @Injectable()
 export class ReportsService implements OnModuleInit {
@@ -39,6 +41,7 @@ export class ReportsService implements OnModuleInit {
     return firstValueFrom(
       this.reportService[method]({ payload, userData }, meta),
     ).catch((e) => {
+      if (e.code === 3) throw new BadRequestException(e.details || 'Cấu hình báo cáo không hợp lệ');
       console.error(`RPC Call Failed [${method}]`, e.message);
       throw new InternalServerErrorException('Lỗi gọi gRPC Report Service');
     });
@@ -49,6 +52,16 @@ export class ReportsService implements OnModuleInit {
       success: res.success,
       data: res.data ? JSON.parse(res.data) : null,
     };
+  }
+
+  async executeTable(data: unknown, config: unknown, user: unknown) {
+    const res = await firstValueFrom(
+      this.reportService.ExecuteTable({ payload: JSON.stringify({ data, config }), userData: JSON.stringify(user) }).pipe(timeout(10000)),
+    ).catch((error: { code?: number; details?: string }) => {
+      if (error.code === 3) throw new BadRequestException(error.details || 'Cấu hình bảng không hợp lệ');
+      throw new InternalServerErrorException('Không thể xử lý bảng báo cáo');
+    });
+    return this.parseResponse(res);
   }
 
   // Templates & Widgets
@@ -105,3 +118,5 @@ export class ReportsService implements OnModuleInit {
     );
   }
 }
+
+

@@ -14,11 +14,13 @@ import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 import { DynamicProxyMiddleware } from './core/middlewares/dynamic-proxy.middleware';
+import { SecurityMiddleware } from './core/middlewares/security.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { AiGatewayModule } from './modules/ai/ai.module';
 import { RateLimiterModule } from './core/rate-limiter/rate-limiter.module';
+import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
 
 @Module({
   imports: [
@@ -43,12 +45,16 @@ import { RateLimiterModule } from './core/rate-limiter/rate-limiter.module';
     ReportsModule,
     AiGatewayModule,
     RateLimiterModule,
+    ThreatIntelModule,
   ],
   controllers: [AppController],
   providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // SecurityMiddleware PHẢI đứng TRƯỚC tất cả — chặn IP bị block tại cổng vào
+    consumer.apply(SecurityMiddleware).forRoutes('*');
+
     consumer.apply(DynamicProxyMiddleware).forRoutes('*');
 
     consumer
