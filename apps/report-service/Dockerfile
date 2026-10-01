@@ -61,5 +61,5 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["dumb-init", "node", "dist/apps/report-service/src/main.js"]
+CMD ["dumb-init", "sh", "-c", "node $(find dist -name main.js | head -n 1)"]
 
