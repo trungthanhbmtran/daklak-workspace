@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
+import { AUTH_DEFAULTS, positiveSeconds, TOUCH_AUTH_SESSION } from '../../../../../shared/core/auth-session';
 
 @Injectable()
 export class RedisService implements OnModuleDestroy {
@@ -11,10 +12,11 @@ export class RedisService implements OnModuleDestroy {
   constructor() {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379', {
       db: parseInt(process.env.REDIS_DB || '0', 10),
+      maxRetriesPerRequest: 2,
+      connectTimeout: 5000,
+      commandTimeout: 5000,
       retryStrategy: (times) => {
-        // Chỉ retry tối đa 3 lần nếu không có Redis, tránh spam log console
-        if (times > 3) return null;
-        return Math.min(times * 500, 2000);
+        return Math.min(times * 500, 5000);
       },
     });
 
@@ -29,6 +31,12 @@ export class RedisService implements OnModuleDestroy {
         this.hasLoggedError = true;
       }
     });
+  }
+
+  async touchAuthSession(sessionId: string, userId: string): Promise<boolean> {
+    const idle = positiveSeconds(process.env.AUTH_IDLE_TIMEOUT_SECONDS, AUTH_DEFAULTS.idleSeconds);
+    return Number(await this.redis.eval(TOUCH_AUTH_SESSION, 2, 'auth:session:' + sessionId,
+      'auth:user:version:' + userId, userId, idle)) === 1;
   }
 
   getClient(): Redis {
@@ -63,3 +71,4 @@ export class RedisService implements OnModuleDestroy {
     this.redis.disconnect();
   }
 }
+

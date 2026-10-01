@@ -6,6 +6,7 @@ import {
   Req,
   Res,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,6 +30,8 @@ export class AuthController {
    * Chuẩn OWASP ASVS §2.2.1 — Brute-Force Protection
    */
   @Post('login')
+  @Header('Cache-Control', 'no-store')
+  @Header('Pragma', 'no-cache')
   @UseGuards(RateLimitGuard)
   @RateLimit({ limit: 10, windowSec: 900, keyBy: 'ip', prefix: 'login' })
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
@@ -50,6 +53,7 @@ export class AuthController {
    * Ngăn attacker brute-force refresh token.
    */
   @Post('refresh')
+  @Header('Cache-Control', 'no-store')
   @UseGuards(RateLimitGuard)
   @RateLimit({ limit: 30, windowSec: 900, keyBy: 'ip', prefix: 'refresh' })
   @ApiOperation({
@@ -69,6 +73,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Đăng xuất và thu hồi refresh_token' })
   async logout(
     @Req() req: any,
@@ -79,6 +84,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @Header('Cache-Control', 'no-store')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Thông tin user đăng nhập' })
@@ -86,3 +92,4 @@ export class AuthController {
     return this.authService.me(req);
   }
 }
+

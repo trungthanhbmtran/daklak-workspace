@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
-import apiClient from "@/lib/axiosInstance";
+import { clearBrowserSession } from "@/lib/axiosInstance";
 
 /**
  * Hook đăng xuất: xóa toàn bộ cache React Query (menu, quyền, dữ liệu theo user)
@@ -19,15 +19,12 @@ export function useLogout() {
     startTransition(async () => {
       try {
         // 2. Gọi API logout để server xóa cookie HttpOnly
-        await apiClient.post("/auth/logout");
+        await clearBrowserSession();
       } catch (error) {
         console.error("Logout error:", error);
       } finally {
-        // 3. Thay vì hardNavigate, ta dùng reload.
-        // Trình duyệt tải lại trang (VD: /admin/hub).
-        // Middleware (middleware.ts) sẽ nhận thấy mất token và tự động redirect về /login,
-        // giữ nguyên basePath và đảm bảo clear sạch memory state.
-        window.location.reload();
+        // Navigate directly to the public login page, even when revocation is unavailable.
+        window.location.replace("/admin/login");
       }
     });
   }

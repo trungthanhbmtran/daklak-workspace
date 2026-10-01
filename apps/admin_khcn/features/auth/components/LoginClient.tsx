@@ -2,12 +2,13 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import apiClient from "@/lib/axiosInstance";
+import apiClient, { clearBrowserSession } from "@/lib/axiosInstance";
+import { safeAuthCallback } from "@/lib/auth-navigation";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { scheduleToast } from "@/hooks/useToastBridge";
@@ -32,12 +33,15 @@ import {
 import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
-  username: z.string().min(1, { message: "Tên đăng nhập không được để trống." }),
+  username: z
+    .string()
+    .min(1, { message: "Tên đăng nhập không được để trống." }),
   password: z.string().min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự." }),
 });
 
 export function LoginClient() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);
@@ -50,22 +54,33 @@ export function LoginClient() {
 
   const loginMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      return await apiClient.post(`/auth/login`, {
+      const result = await apiClient.post("/auth/login", {
         username: values.username,
         password: values.password,
       });
+      try {
+        // A successful login response is insufficient if the new cookie/JWT cannot be used.
+        await apiClient.get("/auth/me", { skipSessionRecovery: true });
+      } catch (error: any) {
+        if (error.response?.status === 401)
+          await clearBrowserSession().catch(() => undefined);
+        throw error;
+      }
+      return result;
     },
 
     onSuccess: () => {
+      queryClient.clear();
       setIsRedirecting(true);
       // Schedule toast TRƯỚC khi navigate — ToastBridgeRenderer sẽ hiện sau khi mount
       // Không gọi toast.success() trực tiếp vì page sẽ remount và toast biến mất
       scheduleToast({
-        type: 'success',
-        message: 'Đăng nhập thành công! Chào mừng bạn quay trở lại.',
+        type: "success",
+        message: "Đăng nhập thành công! Chào mừng bạn quay trở lại.",
         duration: 4000,
       });
-      router.replace(callbackUrl || '/hub');
+      router.replace(safeAuthCallback(callbackUrl));
+      router.refresh();
     },
 
     onError: (error: any) => {
@@ -76,9 +91,10 @@ export function LoginClient() {
       const message = data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
 
       // Chỉ đọc duration từ server nếu có (vd: RATE_LIMITED trả retryAfterSec)
-      const duration = data?.errorType === 'RATE_LIMITED'
-        ? 8000   // Giữ toast lâu hơn để user đọc kịp
-        : 4000;
+      const duration =
+        data?.errorType === "RATE_LIMITED"
+          ? 8000 // Giữ toast lâu hơn để user đọc kịp
+          : 4000;
 
       toast.error(message, { duration });
     },

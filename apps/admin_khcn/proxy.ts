@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Edge Proxy (Next.js Middleware)
@@ -17,48 +17,40 @@ import type { NextRequest } from 'next/server';
  *   Backend API: always enforce 403
  */
 export async function proxy(request: NextRequest) {
-    const token =
-        request.cookies.get('accessToken')?.value ||
-        request.cookies.get('session')?.value;
+  const token = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    const { pathname } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
-    // ✅ Public routes — không cần auth
-    const publicPaths = ['/login', '/api/admin/auth', '/api/'];
-    const isPublic = publicPaths.some(
-        (path) => pathname === path || pathname.startsWith(path + '/')
-    );
+  // ✅ Public routes — không cần auth
+  const publicPaths = ["/login", "/session/refresh", "/api"];
+  const isPublic = publicPaths.some(
+    (path) => pathname === path || pathname.startsWith(path + "/"),
+  );
 
-    if (isPublic) {
-        // Đã có token mà cố vào /login → redirect về hub
-        if (token && pathname === '/login') {
-            const callbackUrl = request.nextUrl.searchParams.get('callbackUrl');
-            const target = request.nextUrl.clone();
-            target.pathname = callbackUrl || '/hub';
-            target.searchParams.delete('callbackUrl');
-            return NextResponse.redirect(target);
-        }
-        return NextResponse.next();
-    }
+  if (isPublic) {
+    // Cookie presence does not establish a valid session. Login must stay reachable.
+    return NextResponse.next();
+  }
 
-    // ❌ Không có token → redirect login ngay tại Edge (nhanh, không cần verify)
-    if (!token) {
-        const loginUrl = request.nextUrl.clone();
-        loginUrl.pathname = '/login';
-        loginUrl.searchParams.set('callbackUrl', pathname);
-        return NextResponse.redirect(loginUrl);
-    }
+  // ❌ Không có token → redirect login ngay tại Edge (nhanh, không cần verify)
+  if (!token) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = refreshToken ? "/session/refresh" : "/login";
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
-    // ✅ Có token → forward pathname để Server Components dùng, JWT verify ở server
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-pathname', pathname);
+  // ✅ Có token → forward pathname để Server Components dùng, JWT verify ở server
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
 
-    return NextResponse.next({ request: { headers: requestHeaders } });
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
-    matcher: [
-        // Bỏ qua static files, images, favicon
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    ],
+  matcher: [
+    // Bỏ qua static files, images, favicon
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

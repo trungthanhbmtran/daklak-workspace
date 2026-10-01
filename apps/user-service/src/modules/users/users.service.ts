@@ -1,11 +1,13 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { IntegrationAuthService } from '../integration-config/integration-auth.service';
+import { AuthSessionStore } from './auth-session.store';
 import { RpcException, ClientGrpc } from '@nestjs/microservices';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
-import { randomBytes, randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
+import { AUTH_DEFAULTS, positiveSeconds, RefreshSession } from '../../../../../shared/core/auth-session';
 import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -16,8 +18,7 @@ const GRPC = {
   UNAUTHENTICATED: 16,
 } as const;
 
-const REFRESH_TOKEN_PREFIX = 'refresh:';
-const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 ngày
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync('not-a-real-account-password', 10);
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -27,7 +28,8 @@ export class UsersService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
-    private jwt: JwtService,
+    private readonly auth: IntegrationAuthService,
+    private readonly sessions: AuthSessionStore,
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
     @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
@@ -235,6 +237,7 @@ export class UsersService implements OnModuleInit {
     createdByUserId?: number;
     createdByEmail?: string;
   }) {
+    if (data.password) this.assertPasswordPolicy(data.password);
     await this.validateUsername(data.username);
 
     const user = await this.insertUserRecord(data);
@@ -358,6 +361,7 @@ export class UsersService implements OnModuleInit {
 
   private async createCredentialTx(tx: any, userId: number, password?: string) {
     if (password && password.trim()) {
+      this.assertPasswordPolicy(password);
       const hash = await bcrypt.hash(password, 10);
       await tx.credential.create({
         data: { userId, passwordHash: hash },
@@ -398,6 +402,7 @@ export class UsersService implements OnModuleInit {
 
   private async createCredential(userId: number, password?: string) {
     if (password && password.trim()) {
+      this.assertPasswordPolicy(password);
       const hash = await bcrypt.hash(password, 10);
       await this.prisma.credential.create({
         data: { userId, passwordHash: hash },
@@ -454,188 +459,106 @@ export class UsersService implements OnModuleInit {
     });
   }
 
-  /** Chuyển JWT expiresIn (vd "24h", "7d") sang số giây */
   private getAccessTokenExpiresInSeconds(): number {
-    const raw = this.config.get('JWT_EXPIRES_IN', '24h');
-    const str = String(raw).trim();
-    const match = str.match(/^(\d+)(s|m|h|d)$/i);
-    if (!match) return 24 * 60 * 60;
-    const num = parseInt(match[1], 10);
-    const unit = match[2].toLowerCase();
-    if (unit === 's') return num;
-    if (unit === 'm') return num * 60;
-    if (unit === 'h') return num * 60 * 60;
-    if (unit === 'd') return num * 24 * 60 * 60;
-    return 24 * 60 * 60;
+    return positiveSeconds(this.config.get('JWT_EXPIRES_IN'), AUTH_DEFAULTS.accessSeconds);
   }
 
-  /** Đăng nhập bằng username hoặc email + mật khẩu. Refresh token lưu Redis. */
-  async login(data: {
-    usernameOrEmail: string;
-    password: string;
-    deviceInfo?: string;
-    ipAddress?: string;
-  }) {
-    const user = await this.validateUserCredentials(
-      data.usernameOrEmail,
-      data.password,
-    );
-    const tokens = await this.generateAuthTokens(user.id);
-    const authResponse = this.formatAuthResponse(user, tokens);
-    
-    // Fire-and-forget: cache session không làm chậm response
-    const jwtExpiresIn = this.getAccessTokenExpiresInSeconds();
-    this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn).catch(
-      (e: any) => this.logger.warn(`[Login] Cache session failed: ${e.message}`)
-    );
-
-    return authResponse;
+  /** Credentials stay inside user-service; callers receive a generic failure. */
+  async login(data: { usernameOrEmail: string; password: string; deviceInfo?: string; ipAddress?: string }) {
+    const account = typeof data.usernameOrEmail === 'string' ? data.usernameOrEmail.trim() : '';
+    if (!await this.sessions.assertLoginAllowed(account)) {
+      this.auditAuth('LOGIN_THROTTLED');
+      throw new RpcException({ code: 8, message: 'Tạm thời không thể đăng nhập. Vui lòng thử lại sau.' });
+    }
+    let user: any;
+    try {
+      user = await this.validateUserCredentials(account, data.password);
+    } catch (error) {
+      if (error instanceof RpcException && (error.getError() as any)?.code === GRPC.UNAUTHENTICATED) {
+        await this.sessions.recordLoginFailure(account);
+        this.auditAuth('LOGIN_FAILED');
+      }
+      throw error;
+    }
+    await this.sessions.clearLoginFailures(account);
+    const session = await this.sessions.createSession(user.id);
+    const tokens = await this.generateAuthTokens(session);
+    const profile = await this.findOne({ id: user.id });
+    await this.sessions.setSession(user.id, profile, tokens.refreshTokenExpiresIn);
+    this.auditAuth('LOGIN_SUCCEEDED', user.id);
+    return this.formatAuthResponse(user, tokens);
   }
 
-  /** Làm mới access_token bằng refresh_token (rotation). Refresh token lưu Redis. */
-  async refresh(data: {
-    refreshToken: string;
-    deviceInfo?: string;
-    ipAddress?: string;
-  }) {
-    const userId = await this.validateRefreshTokenString(data.refreshToken);
+  async refresh(data: { refreshToken: string; deviceInfo?: string; ipAddress?: string }) {
+    const session = await this.validateRefreshTokenString(data.refreshToken);
     const user = await this.prisma.user.findFirst({
-      where: { id: userId, isActive: true },
+      where: { id: session.userId, isActive: true },
       include: {
         policies: { include: { resource: true } },
-        jobPositions: {
-          include: { unit: true, jobTitle: true },
-          orderBy: [{ isPrimary: 'desc' }],
-        },
+        jobPositions: { include: { unit: true, jobTitle: true }, orderBy: [{ isPrimary: 'desc' }] },
       },
     });
-    if (!user) {
-      throw new RpcException({
-        message: 'User không tồn tại',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
-    const tokens = await this.generateAuthTokens(user.id);
-    const authResponse = this.formatAuthResponse(user, tokens);
-    
-    // Fire-and-forget: cache session không làm chậm response
-    const jwtExpiresIn = this.getAccessTokenExpiresInSeconds();
-    this.cache.set(`user_session:${user.id}`, JSON.stringify(authResponse), jwtExpiresIn).catch(
-      (e: any) => this.logger.warn(`[Refresh] Cache session failed: ${e.message}`)
-    );
-
-    return authResponse;
+    if (!user) throw new RpcException({ message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn', code: GRPC.UNAUTHENTICATED });
+    const tokens = await this.generateAuthTokens(session);
+    const profile = await this.findOne({ id: user.id });
+    await this.sessions.setSession(user.id, profile, tokens.refreshTokenExpiresIn);
+    this.auditAuth('SESSION_REFRESHED', user.id);
+    return this.formatAuthResponse(user, tokens);
   }
 
-  private async validateUserCredentials(
-    usernameOrEmail?: string,
-    password?: string,
-  ) {
+  private async validateUserCredentials(usernameOrEmail?: string, password?: string) {
     const key = String(usernameOrEmail ?? '').trim();
-    const pwd = String(password ?? '').trim();
-    if (!key || !pwd) {
-      throw new RpcException({
-        message: 'Thiếu username/email hoặc mật khẩu',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
+    const pwd = typeof password === 'string' ? password : '';
+    const reject = () => new RpcException({ message: 'Tên đăng nhập hoặc mật khẩu không hợp lệ', code: GRPC.UNAUTHENTICATED });
+    if (!key || !pwd || key.length > 254 || Buffer.byteLength(pwd, 'utf8') > 72) throw reject();
     const user = await this.prisma.user.findFirst({
-      where: {
-        isActive: true,
-        OR: [{ email: key }, { username: key }],
-      },
+      where: { isActive: true, OR: [{ email: key }, { username: key }] },
       include: {
         credential: true,
         policies: { include: { resource: true } },
-        jobPositions: {
-          include: { unit: true, jobTitle: true },
-          orderBy: [{ isPrimary: 'desc' }],
-        },
+        jobPositions: { include: { unit: true, jobTitle: true }, orderBy: [{ isPrimary: 'desc' }] },
       },
     });
-    if (!user) {
-      throw new RpcException({
-        message: 'Tài khoản không tồn tại',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
-    if (!user.credential) {
-      throw new RpcException({
-        message:
-          'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
-    const ok = await bcrypt.compare(pwd, user.credential.passwordHash);
-    if (!ok) {
-      throw new RpcException({
-        message: 'Mật khẩu sai',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
+    // Run the same password work for missing/disabled accounts to reduce account enumeration.
+    const ok = await bcrypt.compare(pwd, user?.credential?.passwordHash || DUMMY_PASSWORD_HASH);
+    if (!user?.credential || !ok) throw reject();
     return user;
   }
 
-  private async validateRefreshTokenString(refreshToken?: string) {
-    const token = String(refreshToken ?? '').trim();
-    if (!token) {
-      throw new RpcException({
-        message: 'Thiếu refresh_token',
-        code: GRPC.UNAUTHENTICATED,
-      });
+  private async validateRefreshTokenString(refreshToken?: string): Promise<RefreshSession> {
+    const token = typeof refreshToken === 'string' ? refreshToken.trim() : '';
+    if (!/^[a-f0-9]{80}$/.test(token)) throw new RpcException({ message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn', code: GRPC.UNAUTHENTICATED });
+    const session = await this.sessions.consumeRefresh(token);
+    if (!session || !await this.sessions.touchSession(session)) {
+      this.auditAuth('REFRESH_REJECTED');
+      throw new RpcException({ message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn', code: GRPC.UNAUTHENTICATED });
     }
-    const redisKey = REFRESH_TOKEN_PREFIX + token;
-    const userIdStr = await this.cache.get<string>(redisKey);
-    if (!userIdStr) {
-      throw new RpcException({
-        message: 'Refresh token không hợp lệ hoặc đã hết hạn',
-        code: GRPC.UNAUTHENTICATED,
-      });
-    }
-    await this.cache.del(redisKey);
-    return parseInt(userIdStr, 10);
+    return session;
   }
 
-  private async generateAuthTokens(userId: number) {
+  private async generateAuthTokens(session: RefreshSession) {
+    const refreshTokenExpiresIn = session.expiresAt - Math.floor(Date.now() / 1000);
+    if (refreshTokenExpiresIn <= 0) throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Phiên đăng nhập đã hết hạn' });
+    const expiresIn = Math.min(this.getAccessTokenExpiresInSeconds(), refreshTokenExpiresIn);
     const refreshToken = randomBytes(40).toString('hex');
-    await this.cache.set(
-      REFRESH_TOKEN_PREFIX + refreshToken,
-      String(userId),
-      REFRESH_TTL_SECONDS,
-    );
-    const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
-    const accessToken = this.jwt.sign(
-      {
-        iss: 'daklak-user-service',
-        sub: String(userId),
-        aud: 'daklak-api-gateway',
-        jti: randomUUID(),
-      },
-      { expiresIn: jwtExpiresIn },
-    );
-    const expiresIn = this.getAccessTokenExpiresInSeconds();
-    return { accessToken, refreshToken, expiresIn };
+    const accessToken = this.auth.signAccessToken(session.userId, expiresIn, session.sessionId);
+    await this.sessions.setRefresh(refreshToken, session, refreshTokenExpiresIn);
+    return { accessToken, refreshToken, expiresIn, refreshTokenExpiresIn };
   }
 
   private formatAuthResponse(user: any, tokens: any) {
-    const firstPos = user.jobPositions?.[0];
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresIn: tokens.expiresIn,
-      refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
-      ...this.toUserResponse(user),
-      userId: user.id,
-      unitName: firstPos?.unit?.name ?? '',
-    };
+    return { ...tokens, ...this.toUserResponse(user), userId: user.id, unitName: user.jobPositions?.[0]?.unit?.name ?? '' };
   }
 
-  /** Thu hồi refresh_token (đăng xuất thiết bị). Xóa khỏi Redis. */
   async revokeRefreshToken(data: { refreshToken: string }) {
-    const token = String(data.refreshToken ?? '').trim();
-    if (!token) return { success: true };
-    await this.cache.del(REFRESH_TOKEN_PREFIX + token);
+    const token = typeof data.refreshToken === 'string' ? data.refreshToken.trim() : '';
+    if (token) await this.sessions.revokeRefresh(token);
+    this.auditAuth('LOGOUT');
     return { success: true };
+  }
+
+  private auditAuth(event: string, userId?: number) {
+    this.logger.log(JSON.stringify({ type: 'AUTH_AUDIT', event, userId, timestamp: new Date().toISOString() }));
   }
 
   async setPassword(data: { userId: number; newPassword: string }) {
@@ -648,6 +571,7 @@ export class UsersService implements OnModuleInit {
         message: 'User not found',
         code: GRPC.NOT_FOUND,
       });
+    this.assertPasswordPolicy(data.newPassword);
     const hash = await bcrypt.hash(data.newPassword, 10);
     if (user.credential) {
       await this.prisma.credential.update({
@@ -659,7 +583,15 @@ export class UsersService implements OnModuleInit {
         data: { userId: data.userId, passwordHash: hash },
       });
     }
+    await this.sessions.revokeAllForUser(data.userId);
+    this.auditAuth('PASSWORD_CHANGED', data.userId);
     return { success: true };
+  }
+
+  private assertPasswordPolicy(password: string) {
+    if (typeof password !== 'string' || password.length < 12 || Buffer.byteLength(password, 'utf8') > 72 || !password.trim()) {
+      throw new RpcException({ code: GRPC.INVALID_ARGUMENT, message: 'Mật khẩu phải có ít nhất 12 ký tự và tối đa 72 byte UTF-8.' });
+    }
   }
 
   async findOne(data: { id: number }) {
@@ -901,6 +833,9 @@ export class UsersService implements OnModuleInit {
       where: { id: data.userId },
       data: { isActive: data.isActive },
     });
+    if (!data.isActive) await this.sessions.revokeAllForUser(data.userId);
+    await this.cache.del(`user:profile:${data.userId}`);
+    this.auditAuth(data.isActive ? 'ACCOUNT_ENABLED' : 'ACCOUNT_DISABLED', data.userId);
     return {
       success: true,
       message: data.isActive ? 'Đã mở khóa tài khoản.' : 'Đã khóa tài khoản.',
@@ -1353,3 +1288,6 @@ export class UsersService implements OnModuleInit {
     };
   }
 }
+
+
+

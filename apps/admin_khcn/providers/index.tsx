@@ -15,9 +15,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
           queries: {
             staleTime: 60 * 1000, // Data được coi là fresh trong 1 phút
             refetchOnWindowFocus: false,
+            retry: (count, error) => {
+              const status = (error as { response?: { status?: number } })
+                .response?.status;
+              return status !== 401 && status !== 403 && count < 2;
+            },
           },
         },
-      })
+      }),
   );
 
   return (

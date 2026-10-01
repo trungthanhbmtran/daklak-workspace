@@ -1,10 +1,17 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  NestMiddleware,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { TokenValidatorService } from '../../modules/integration/token-validator.service';
 import { IntegrationService } from '../../modules/integration/integration.service';
 
 @Injectable()
 export class DynamicProxyMiddleware implements NestMiddleware {
   constructor(
     private readonly integrationService: IntegrationService,
+    private readonly tokenValidator: TokenValidatorService,
   ) {}
 
   async use(req: any, res: any, next: () => void) {
@@ -12,20 +19,28 @@ export class DynamicProxyMiddleware implements NestMiddleware {
     const urlPath = req.originalUrl || req.url;
 
     if (urlPath.includes(pathPrefix)) {
-      // Đọc req.user đã được JwtAuthGuard inject — KHÔNG verify lại token
-      // JwtAuthGuard chạy trước middleware này và đã xác thực + inject user
-      const user = req.user;
-
-      if (!user?.sub && !user?.id) {
-        // Nếu chưa có user (route không qua JwtAuthGuard), fallback về header check
+      // Middleware runs before guards, so authenticate before forwarding.
+      let user: any;
+      try {
         const authHeader = req.headers.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
-          return res.status(401).json({
-            success: false,
-            errorType: 'AUTH_FAILED',
-            message: 'Missing or invalid Authorization header',
-          });
-        }
+        const token =
+          req.cookies?.accessToken ||
+          (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+            ? authHeader.slice(7)
+            : undefined);
+        if (!token) throw new UnauthorizedException('Thiếu phiên đăng nhập');
+        user = await this.tokenValidator.verifyToken(token, req.ip);
+        req.user = user;
+      } catch (error) {
+        const status = error instanceof HttpException ? error.getStatus() : 503;
+        return res.status(status).json({
+          success: false,
+          errorType: status === 401 ? 'AUTH_FAILED' : 'SERVICE_UNAVAILABLE',
+          message:
+            status === 401
+              ? 'Phiên đăng nhập không hợp lệ'
+              : 'Dịch vụ xác thực tạm thời không khả dụng',
+        });
       }
 
       // ANTI-SPOOFING: Xóa bỏ các header giả mạo từ client
@@ -34,12 +49,16 @@ export class DynamicProxyMiddleware implements NestMiddleware {
       delete req.headers['x-user-roles'];
       delete req.headers['x-unit-id'];
 
-      // Inject trusted headers từ user đã được xác thực bởi JwtAuthGuard
+      // Forward identity from the verified session only.
       if (user) {
         req.headers['x-user-id'] = String(user.sub || user.id || '');
         if (user.email) req.headers['x-user-email'] = user.email;
-        if (user.roles?.length) req.headers['x-user-roles'] = Array.isArray(user.roles) ? user.roles.join(',') : user.roles;
-        if (user.unitId || user.unit_id) req.headers['x-unit-id'] = String(user.unitId || user.unit_id);
+        if (user.roles?.length)
+          req.headers['x-user-roles'] = Array.isArray(user.roles)
+            ? user.roles.join(',')
+            : user.roles;
+        if (user.unitId || user.unit_id)
+          req.headers['x-unit-id'] = String(user.unitId || user.unit_id);
       }
 
       await this.integrationService.proxyMiddleware(req, res, next);

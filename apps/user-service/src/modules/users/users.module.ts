@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { IntegrationConfigModule } from '../integration-config/integration-config.module';
+import { AuthSessionStore } from './auth-session.store';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -14,13 +15,7 @@ const protoRoot =
 
 @Module({
   imports: [
-    JwtModule.registerAsync({
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'change-me-in-production'),
-        signOptions: { expiresIn: config.get('JWT_EXPIRES_IN', '24h') },
-      }),
-      inject: [ConfigService],
-    }),
+    IntegrationConfigModule,
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
@@ -66,7 +61,7 @@ const protoRoot =
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, AuthSessionStore],
   exports: [UsersService],
 })
 export class UsersModule {}

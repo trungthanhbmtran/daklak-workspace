@@ -3,11 +3,15 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  HttpException,
   Optional,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { TokenValidatorService } from '../../modules/integration/token-validator.service';
-import { ThreatIntelService, THREAT_SCORES } from '../threat-intel/threat-intel.service';
+import {
+  ThreatIntelService,
+  THREAT_SCORES,
+} from '../threat-intel/threat-intel.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -19,10 +23,11 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const ip = (request as any).clientIp
-      || (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-      || request.ip
-      || 'unknown';
+    const ip =
+      (request as any).clientIp ||
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      request.ip ||
+      'unknown';
 
     let token: string | undefined;
 
@@ -69,7 +74,8 @@ export class JwtAuthGuard implements CanActivate {
         unitName: decoded.unitName || decoded.unit_name,
         jobTitleCode: decoded.jobTitleCode || decoded.job_title_code,
         jobTitleName: decoded.jobTitleName || decoded.job_title_name,
-        permissionsFlatten: decoded.permissionsFlatten || decoded.permissions_flatten || [],
+        permissionsFlatten:
+          decoded.permissionsFlatten || decoded.permissions_flatten || [],
         roles: decoded.roles || decoded.roleNames || decoded.role_names || [],
         policies: decoded.policies || [],
       };
@@ -79,6 +85,10 @@ export class JwtAuthGuard implements CanActivate {
       if (error instanceof UnauthorizedException) {
         // Báo cáo event về ThreatIntel để tích điểm
         const msg = error.message ?? '';
+        if (msg === 'ACCESS_TOKEN_EXPIRED' || msg.includes('Phiên đăng nhập')) {
+          // Normal session lifecycle is not evidence of an attack.
+          throw error;
+        }
         if (msg.includes('revoked')) {
           this.reportThreat(ip, 'REVOKED_TOKEN', msg);
         } else if (msg.includes('expired') || msg.includes('invalid')) {
@@ -88,6 +98,7 @@ export class JwtAuthGuard implements CanActivate {
         }
         throw error;
       }
+      if (error instanceof HttpException) throw error;
       this.reportThreat(ip, 'INVALID_JWT', error?.message);
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
     }
@@ -103,3 +114,4 @@ export class JwtAuthGuard implements CanActivate {
     this.threatIntel.recordEvent(ip, event, detail).catch(() => {});
   }
 }
+

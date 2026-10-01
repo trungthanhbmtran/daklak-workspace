@@ -2,6 +2,7 @@ import {
   Injectable,
   Logger,
   UnauthorizedException,
+  ServiceUnavailableException,
   Inject,
   OnModuleInit,
 } from '@nestjs/common';
@@ -10,7 +11,7 @@ import { promisify } from 'util';
 
 import { RedisService } from '../../core/redis/redis.service';
 import { MICROSERVICES } from '../../core/constants/services';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 
 // Chuẩn RFC 7519 + OWASP ASVS Level 2 (Thông tư 06/2023/TT-BTTTT)
 const JWT_ISSUER = 'daklak-user-service';
@@ -28,9 +29,12 @@ interface CacheEntry {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const jwtVerifyAsync = promisify<string, string, jwt.VerifyOptions, jwt.JwtPayload>(
-  jwt.verify as any,
-);
+const jwtVerifyAsync = promisify<
+  string,
+  string,
+  jwt.VerifyOptions,
+  jwt.JwtPayload
+>(jwt.verify as any);
 
 @Injectable()
 export class TokenValidatorService implements OnModuleInit {
@@ -40,6 +44,8 @@ export class TokenValidatorService implements OnModuleInit {
   // ── Public Key cache (in-memory, 5 phút) ──────────────────────────────────
   private cachedPublicKey: string | null = null;
   private lastFetchTime = 0;
+  private keyReload: Promise<string> | null = null;
+  private lastKeyReload = 0;
 
   // ── User Session LRU cache (in-memory, 30 giây) ───────────────────────────
   // Map giữ thứ tự insertion → evict entry cũ nhất khi vượt MAX
@@ -51,22 +57,28 @@ export class TokenValidatorService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.grpcService = this.client.getService(MICROSERVICES.INTEGRATION.SERVICE);
-    this.fetchPublicKey().catch(e =>
+    this.grpcService = this.client.getService(
+      MICROSERVICES.INTEGRATION.SERVICE,
+    );
+    this.fetchPublicKey().catch((e) =>
       this.logger.warn(`Failed to initial fetch public key: ${e.message}`),
     );
   }
 
   // ─── Public Key ───────────────────────────────────────────────────────────
 
-  private async fetchPublicKey(): Promise<string> {
+  private async fetchPublicKey(force = false): Promise<string> {
     const now = Date.now();
-    if (this.cachedPublicKey && now - this.lastFetchTime < 5 * 60 * 1000) {
+    if (
+      !force &&
+      this.cachedPublicKey &&
+      now - this.lastFetchTime < 5 * 60 * 1000
+    ) {
       return this.cachedPublicKey;
     }
     try {
       const response = (await firstValueFrom(
-        this.grpcService.GetPublicKey({}),
+        this.grpcService.GetPublicKey({}).pipe(timeout(5000)),
       )) as any;
       if (response?.publicKey) {
         this.cachedPublicKey = response.publicKey;
@@ -77,8 +89,10 @@ export class TokenValidatorService implements OnModuleInit {
       throw new Error('Public key not found in response');
     } catch (e: any) {
       this.logger.error(`Error fetching public key via gRPC: ${e.message}`);
-      if (this.cachedPublicKey) return this.cachedPublicKey as string;
-      throw new Error('Unable to fetch public key for JWT verification');
+      if (!force && this.cachedPublicKey) return this.cachedPublicKey as string;
+      throw new ServiceUnavailableException(
+        'Dịch vụ xác thực tạm thời không khả dụng',
+      );
     }
   }
 
@@ -90,7 +104,9 @@ export class TokenValidatorService implements OnModuleInit {
    * - MISS: gọi Redis (1ms), lưu vào RAM cache
    * - Invalidate: gọi invalidateSessionCache(userId) khi logout
    */
-  public async getUserSession(userId: string | number): Promise<Record<string, any>> {
+  public async getUserSession(
+    userId: string | number,
+  ): Promise<Record<string, any>> {
     if (!userId) return {};
 
     const cacheKey = String(userId);
@@ -114,7 +130,10 @@ export class TokenValidatorService implements OnModuleInit {
         return data;
       }
     } catch (e: any) {
-      this.logger.warn(`[getUserSession] Redis error for user ${userId}: ${e.message}`);
+      this.logger.warn(`[getUserSession] Redis unavailable for user ${userId}`);
+      throw new ServiceUnavailableException(
+        'Dịch vụ phiên đăng nhập tạm thời không khả dụng',
+      );
     }
     return {};
   }
@@ -133,81 +152,71 @@ export class TokenValidatorService implements OnModuleInit {
     this.sessionCache.delete(String(userId));
   }
 
-  // ─── Core: verifyToken với Parallel Execution ─────────────────────────────
-
-  /**
-   * TỐI ƯU TỐC ĐỘ — 3 kỹ thuật:
-   *
-   * 1. jwt.decode() TRƯỚC (0ms, no crypto) → lấy jti + sub để pipeline Redis
-   * 2. Promise.all([jwt.verify(), redisChecks]) — chạy SONG SONG
-   *    - jwt.verify() (RS256): ~1-2ms CPU
-   *    - Redis pipeline(denylist + session): ~1ms network
-   *    → Tiết kiệm ~1-2ms so với sequential
-   * 3. user_session từ LRU in-process cache (30s) → 0 Redis call / 99% requests
-   *
-   * Kết quả: ~4ms → ~1ms overhead/request
-   *
-   * Bảo mật vẫn đảm bảo:
-   * - jwt.verify() vẫn check chữ ký RS256 + iss + aud + exp
-   * - Denylist check vẫn thực thi sau khi verify thành công
-   * - Session cache 30s: stale window chấp nhận được cho Coarse-grained auth
-   */
+  // Verify signed claims before using them in Redis keys. Session/denylist reads run together.
   public async verifyToken(token: string, ipAddress?: string): Promise<any> {
-    // ── BƯỚC 1: Decode nhanh (không verify) để lấy claims sớm ──────────────
-    // jwt.decode() không check chữ ký — dùng để pipeline Redis song song
-    // jwt.verify() bên dưới sẽ xác thực đầy đủ ngay sau
-    const rawDecoded = jwt.decode(token) as any;
-    const earlyJti = rawDecoded?.jti;
-    const earlySub = rawDecoded?.sub;
-
-    // ── BƯỚC 2: Lấy Public Key (in-memory, ~0ms) ────────────────────────────
+    const options: jwt.VerifyOptions = {
+      algorithms: ['RS256'],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    };
+    let decoded: jwt.JwtPayload;
     const publicKey = await this.fetchPublicKey();
-
-    // ── BƯỚC 3: Parallel execution ──────────────────────────────────────────
-    // A) JWT verify + B) Redis denylist + C) Session cache — chạy đồng thời
-    const [decoded, denylistHit, userSession] = await Promise.all([
-      // A) Xác thực đầy đủ: chữ ký RS256 + iss + aud + exp
-      jwtVerifyAsync(token, publicKey, {
-        algorithms: ['RS256'],
-        issuer: JWT_ISSUER,
-        audience: JWT_AUDIENCE,
-      }).catch((e: any) => {
-        this.logger.warn(`[AUTH_FAILED] ${e.message} | ip=${ipAddress ?? 'unknown'}`);
+    try {
+      decoded = await jwtVerifyAsync(token, publicKey, options);
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) throw new UnauthorizedException('ACCESS_TOKEN_EXPIRED');
+      if (
+        error instanceof jwt.JsonWebTokenError &&
+        error.message === 'invalid signature'
+      ) {
+        // A user-service restart/key rotation must not invalidate every newly issued JWT
+        // for the entire five-minute public-key cache interval.
+        if (!this.keyReload && Date.now() - this.lastKeyReload > 10000) {
+          this.lastKeyReload = Date.now();
+          this.keyReload = this.fetchPublicKey(true).finally(() => {
+            this.keyReload = null;
+          });
+        }
+        const freshKey = this.keyReload
+          ? await this.keyReload
+          : this.cachedPublicKey!;
+        try {
+          decoded = await jwtVerifyAsync(token, freshKey, options);
+        } catch {
+          throw new UnauthorizedException('Invalid or expired token');
+        }
+      } else {
         throw new UnauthorizedException('Invalid or expired token');
-      }),
-
-      // B) Kiểm tra denylist (JTI) — song song với verify
-      earlyJti
-        ? this.redisService
-            .get(`denylist:${earlyJti}`)
-            .catch((e: any) => {
-              this.logger.warn(`Denylist check failed for jti=${earlyJti}: ${e.message}`);
-              return null; // Fail open — tránh block toàn bộ
-            })
-        : Promise.resolve(null),
-
-      // C) Session quyền — LRU cache (30s) → 0 Redis call cho 99% request
-      earlySub
-        ? this.getUserSession(earlySub)
-        : Promise.resolve({}),
-    ]);
-
-    // ── BƯỚC 4: Kiểm tra denylist sau khi verify thành công ─────────────────
-    if (denylistHit) {
-      this.logger.warn(
-        `[AUTH_REVOKED] jti=${decoded.jti} sub=${decoded.sub} | ip=${ipAddress ?? 'unknown'}`,
-      );
-      throw new UnauthorizedException('Token has been revoked');
+      }
     }
-
-    // ── BƯỚC 5: Audit log (async, không block response) ────────────────────
-    setImmediate(() => {
-      this.logger.log(
-        `[AUTH_SUCCESS] sub=${decoded.sub} jti=${decoded.jti} | ip=${ipAddress ?? 'unknown'}`,
-      );
-    });
-
-    // JWT claims (đã xác thực chữ ký) ghi đè session để đảm bảo toàn vẹn
+    if (
+      !decoded.sub ||
+      !/^[1-9]\d*$/.test(decoded.sub) ||
+      !decoded.jti ||
+      typeof decoded.sid !== 'string' ||
+      !/^[a-f0-9-]{36}$/i.test(decoded.sid) ||
+      typeof decoded.exp !== 'number'
+    ) {
+      throw new UnauthorizedException('Invalid token claims');
+    }
+    const [denylistHit, userSession, activeSession] = await Promise.all([
+      this.redisService.get('denylist:' + decoded.jti).catch(() => {
+        throw new ServiceUnavailableException(
+          'Dịch vụ xác thực tạm thời không khả dụng',
+        );
+      }),
+      this.getUserSession(decoded.sub),
+      this.redisService.touchAuthSession(decoded.sid as string, decoded.sub).catch(() => {
+        throw new ServiceUnavailableException('Dịch vụ phiên đăng nhập tạm thời không khả dụng');
+      }),
+    ]);
+    if (!activeSession) throw new UnauthorizedException('Phiên đăng nhập đã hết hạn hoặc bị thu hồi');
+    if (denylistHit) throw new UnauthorizedException('Token has been revoked');
+    if (!Object.keys(userSession).length)
+      throw new UnauthorizedException('Phiên đăng nhập cần được làm mới');
+    if (userSession.isActive === false)
+      throw new UnauthorizedException('Tài khoản không còn hoạt động');
     return { ...userSession, ...decoded };
   }
 }
+

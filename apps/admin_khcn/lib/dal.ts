@@ -1,64 +1,76 @@
-'use server'
+"use server";
 
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import axios from 'axios'
-
-// Vì login chưa có token, chúng ta gọi trực tiếp axios thay vì dùng serverApi instance
-// (để tránh interceptor tự động check token hoặc redirect vòng lặp)
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import axios from "axios";
+import { serverApiBase } from "./server-api-url";
 
 export async function loginAction(formData: FormData) {
-    const username = formData.get('username')
-    const password = formData.get('password')
-
-    const INTERNAL_API_URL = process.env.INTERNAL_API_URL || 'http://api-gateway:8080/api/v1/admin';
-
-    try {
-        const res = await axios.post(`${INTERNAL_API_URL}/auth/login`, {
-            username,
-            password,
-        })
-
-        // API Gateway trả về cookie ở dạng set-cookie header thay vì JSON
-        const setCookies = res.headers['set-cookie'] || [];
-        let token = null;
-        for (const cookieStr of setCookies) {
-            if (cookieStr.startsWith('accessToken=')) {
-                token = cookieStr.split(';')[0].substring('accessToken='.length);
-                break;
-            }
-        }
-
-        if (!token) {
-            return { error: 'Không lấy được phiên đăng nhập từ máy chủ.' }
-        }
-
-        const cookieStore = await cookies()
-        cookieStore.set('session', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24, // 1 ngày
-            path: '/',
-        })
-
-    } catch (error) {
-        // Xử lý lỗi từ axios
-        if (axios.isAxiosError(error)) {
-            return {
-                // Trả về message từ API gateway nếu có, không thì báo lỗi chung
-                error: error.response?.data?.message || error.response?.data?.error || 'Tên đăng nhập hoặc mật khẩu không chính xác.'
-            }
-        }
-        return { error: 'Lỗi kết nối đến hệ thống xác thực.' }
+  try {
+    const response = await axios.post(
+      serverApiBase() + "/auth/login",
+      {
+        username: formData.get("username"),
+        password: formData.get("password"),
+      },
+      { timeout: 15000 },
+    );
+    const authCookies = (response.headers["set-cookie"] || []).filter(
+      (value: string) =>
+        /^(accessToken|refreshToken)=/.test(value) &&
+        !/Max-Age=0(?:;|$)/i.test(value),
+    );
+    const access = authCookies.find((value: string) =>
+      value.startsWith("accessToken="),
+    );
+    const refresh = authCookies.find((value: string) =>
+      value.startsWith("refreshToken="),
+    );
+    if (!access || !refresh)
+      return { error: "Máy chủ không trả về phiên đăng nhập hợp lệ." };
+    const token = access.split(";")[0].slice("accessToken=".length);
+    await axios.get(serverApiBase() + "/auth/me", {
+      headers: { Authorization: "Bearer " + token },
+      timeout: 15000,
+    });
+    const cookieStore = await cookies();
+    cookieStore.delete("session");
+    for (const value of [access, refresh]) {
+      const first = value.split(";")[0],
+        separator = first.indexOf("=");
+      const maxAge = Number(value.match(/Max-Age=(\d+)/i)?.[1]);
+      if (!Number.isFinite(maxAge) || maxAge <= 0)
+        return { error: "Thời hạn phiên đăng nhập không hợp lệ." };
+      cookieStore.set(first.slice(0, separator), first.slice(separator + 1), {
+        httpOnly: true,
+        secure: /;\s*Secure(?:;|$)/i.test(value),
+        sameSite: "strict",
+        path: "/",
+        maxAge,
+      });
     }
-
-    // Chú ý quan trọng: redirect() luôn phải đặt BÊN NGOÀI khối try...catch
-    // Nếu để bên trong, khối catch sẽ vô tình "bắt" luôn lệnh chuyển hướng của Next.js
-    redirect('/dashboard')
+  } catch (error) {
+    return {
+      error: axios.isAxiosError(error)
+        ? error.response?.data?.message || "Không thể xác thực phiên đăng nhập."
+        : "Lỗi kết nối đến hệ thống xác thực.",
+    };
+  }
+  redirect("/hub");
 }
-
 export async function logoutAction() {
-    const cookieStore = await cookies()
-    cookieStore.delete('session')
-    redirect('/login')
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refreshToken")?.value;
+  try {
+    await axios.post(
+      serverApiBase() + "/auth/logout",
+      { refreshToken },
+      { timeout: 5000 },
+    );
+  } catch {
+    /* Local cleanup still runs when upstream is unavailable. */
+  }
+  for (const name of ["accessToken", "refreshToken", "session"])
+    cookieStore.delete(name);
+  redirect("/login");
 }
