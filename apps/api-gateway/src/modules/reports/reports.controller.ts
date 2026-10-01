@@ -20,7 +20,10 @@ import { RequirePermissions } from '../../core/decorators/permissions.decorator'
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService, private readonly sources: ReportSourceService) {}
+  constructor(
+    private readonly reportsService: ReportsService,
+    private readonly sources: ReportSourceService,
+  ) {}
 
   @Post('table/sources')
   @RequirePermissions('INTEGRATION:READ', 'INTEGRATION:MANAGE')
@@ -30,7 +33,10 @@ export class ReportsController {
 
   @Post('table/preview')
   @RequirePermissions('INTEGRATION:READ', 'INTEGRATION:MANAGE')
-  async previewTable(@Body() body: { source?: unknown; config?: unknown }, @Req() req: any) {
+  async previewTable(
+    @Body() body: { source?: unknown; config?: unknown },
+    @Req() req: any,
+  ) {
     const data = await this.sources.fetch(body?.source, req.user);
     return this.reportsService.executeTable(data, body?.config, req.user);
   }
@@ -101,4 +107,3 @@ export class ReportsController {
     );
   }
 }
-

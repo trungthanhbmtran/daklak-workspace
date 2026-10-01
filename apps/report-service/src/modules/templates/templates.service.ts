@@ -12,9 +12,21 @@ export class TemplatesService {
       if (!widget.config?.table) continue;
       try {
         const config = validateTableConfig(widget.config.table);
-        if (!config.columns.length || !widget.config.source?.upstream || !widget.config.source?.path || widget.chartType !== 'TABLE') throw new Error('Bảng báo cáo thiếu cấu hình');
+        if (
+          !config.columns.length ||
+          !widget.config.source?.upstream ||
+          !widget.config.source?.path ||
+          widget.chartType !== 'TABLE'
+        )
+          throw new Error('Bảng báo cáo thiếu cấu hình');
       } catch (error) {
-        throw new RpcException({ code: 3, message: error instanceof Error ? error.message : 'Cấu hình bảng không hợp lệ' });
+        throw new RpcException({
+          code: 3,
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Cấu hình bảng không hợp lệ',
+        });
       }
     }
   }
@@ -82,4 +94,3 @@ export class TemplatesService {
     });
   }
 }
-

@@ -10,10 +10,20 @@ export class ReportsController {
   @GrpcMethod('ReportService', 'ExecuteTable')
   executeTable(data: { payload: string }) {
     try {
-      const body = JSON.parse(data.payload) as { data: unknown; config: unknown };
-      return { success: true, data: JSON.stringify(executeTable(body.data, body.config)) };
+      const body = JSON.parse(data.payload) as {
+        data: unknown;
+        config: unknown;
+      };
+      return {
+        success: true,
+        data: JSON.stringify(executeTable(body.data, body.config)),
+      };
     } catch (error) {
-      throw new RpcException({ code: 3, message: error instanceof Error ? error.message : 'Cấu hình bảng không hợp lệ' });
+      throw new RpcException({
+        code: 3,
+        message:
+          error instanceof Error ? error.message : 'Cấu hình bảng không hợp lệ',
+      });
     }
   }
 
@@ -22,4 +32,3 @@ export class ReportsController {
     return this.reportsService.getStaffingReport(data.unitId);
   }
 }
-

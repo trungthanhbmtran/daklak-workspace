@@ -11,4 +11,3 @@ import { registerGrpcService } from '../../core/factories/grpc.factory';
   providers: [ReportsService, ReportSourceService],
 })
 export class ReportsModule {}
-
