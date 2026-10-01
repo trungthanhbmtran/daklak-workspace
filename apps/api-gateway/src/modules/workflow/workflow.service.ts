@@ -430,4 +430,17 @@ export class WorkflowService implements OnModuleInit {
       message: 'Deleted successfully',
     };
   }
+
+  async executeIntegration(id: string, payload: any) {
+    const result = (await firstValueFrom(
+      this.workflowGrpcService.ExecuteIntegration({ id, ...payload }),
+    ).catch((e) => this.handleIntegrationRpcError(e))) as any;
+
+    return {
+      success: true,
+      data: result?.data ? JSON.parse(result.data) : {},
+      meta: {},
+      message: 'Executed successfully',
+    };
+  }
 }

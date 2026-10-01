@@ -142,6 +142,10 @@ export const integrationApi = {
   updateApiPermissions: async (rules: any[]) => {
     const res = await apiClient.put('/integration/api-permissions', { rules }) as any;
     return res.data || res;
+  },
+  execute: async (id: string, payload: any) => {
+    const res = await apiClient.post(`/workflow/integrations/${id}/execute`, payload) as any;
+    return res.data || res;
   }
 };
 

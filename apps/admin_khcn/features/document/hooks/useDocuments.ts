@@ -182,24 +182,8 @@ export function useDocuments() {
     },
   });
 
-  const syncOnlineMutation = useMutation({
-     
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: () => apiClient.post(`${API_BASE}/sync`),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Đã đồng bộ văn bản từ trục liên thông!'); },
-  });
-
-  const fetchLgspStatisticsMutation = useMutation({
-    onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
-    mutationFn: async (payload: any): Promise<any> => {
-      const res = await apiClient.post(`${API_BASE}/lgsp-statistics`, payload) as any as ApiResponse<any>;
-      if (res.success && res.data) {
-        return JSON.parse(res.data);
-      }
-      throw new Error(res.message || "Lỗi khi lấy dữ liệu từ Trục liên thông");
-    },
-  });
-
+  
+  
   const moderateCommentMutation = useMutation({
      
     onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
@@ -254,9 +238,7 @@ export function useDocuments() {
     updateDocument: updateDocumentMutation.mutateAsync,
     deleteDocument: deleteDocumentMutation.mutateAsync,
     extractMetadata: extractMetadataMutation.mutateAsync,
-    syncOnline: syncOnlineMutation.mutateAsync,
-    fetchLgspStatistics: fetchLgspStatisticsMutation.mutateAsync,
-    moderateComment: moderateCommentMutation.mutateAsync,
+            moderateComment: moderateCommentMutation.mutateAsync,
     createCategory: createCategoryMutation.mutateAsync,
     updateCategory: updateCategoryMutation.mutateAsync,
     deleteCategory: deleteCategoryMutation.mutateAsync,
@@ -267,9 +249,7 @@ export function useDocuments() {
       updateDocumentMutation.isPending ||
       deleteDocumentMutation.isPending ||
       extractMetadataMutation.isPending ||
-      syncOnlineMutation.isPending ||
-      fetchLgspStatisticsMutation.isPending ||
-      moderateCommentMutation.isPending ||
+                  moderateCommentMutation.isPending ||
       createCategoryMutation.isPending ||
       updateCategoryMutation.isPending ||
       deleteCategoryMutation.isPending ||

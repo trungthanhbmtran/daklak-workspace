@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../infra/prisma.service';
+import axios from 'axios';
 
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
@@ -91,5 +92,101 @@ export class IntegrationService {
 
   async remove(id: string) {
     return this.prisma.integrationConnection.delete({ where: { id } });
+  }
+
+  async execute(idOrCode: string, payload: any) {
+    // payload có thể chứa: endpointPath, method, params, body, headers
+    let conn = await this.prisma.integrationConnection.findUnique({
+      where: { id: idOrCode },
+    });
+
+    // Fallback: nếu không tìm thấy theo ID, tìm theo Code
+    if (!conn) {
+      conn = await this.prisma.integrationConnection.findFirst({
+        where: { code: idOrCode, isActive: true },
+      });
+    }
+
+    if (!conn) {
+      throw new NotFoundException(`Integration Connection ${idOrCode} not found or inactive`);
+    }
+
+    const authConfig: any = parseJsonField(conn.authConfig) || {};
+    const baseHeaders: any = parseJsonField(conn.headers) || {};
+    const endpoints: any[] = parseJsonField(conn.endpoints) || [];
+
+    // Tìm kiếm cấu hình endpoint trong CSDL
+    let targetEndpoint = null;
+    if (payload.endpointId) {
+      targetEndpoint = endpoints.find((e: any) => e.id === payload.endpointId);
+    } else if (payload.endpointPath) {
+      targetEndpoint = endpoints.find((e: any) => e.path === payload.endpointPath);
+    }
+    
+    // Nếu không chỉ định, lấy mặc định endpoint đầu tiên (rất hữu ích khi integration chỉ có 1 endpoint)
+    if (!targetEndpoint && endpoints.length > 0) {
+      targetEndpoint = endpoints[0];
+    }
+
+    const endpointPath = targetEndpoint?.path || payload.endpointPath || '';
+    const executeMethod = targetEndpoint?.method || payload.method || 'GET';
+
+    const cleanBaseUrl = conn.baseUrl.replace(/\/$/, '');
+    const cleanEndpointPath = endpointPath.startsWith('/') ? endpointPath : (endpointPath ? `/${endpointPath}` : '');
+    let finalUrl = `${cleanBaseUrl}${cleanEndpointPath}`;
+
+    // Replace path variables like {key} or :key if params exist
+    const params = payload.params || {};
+    for (const key of Object.keys(params)) {
+      if (finalUrl.includes(`{${key}}`)) {
+        finalUrl = finalUrl.replace(`{${key}}`, encodeURIComponent(params[key]));
+        delete params[key];
+      } else if (finalUrl.includes(`:${key}`)) {
+        finalUrl = finalUrl.replace(`:${key}`, encodeURIComponent(params[key]));
+        delete params[key];
+      }
+    }
+
+    const headers = { ...baseHeaders, ...(payload.headers || {}) };
+
+    if (conn.authType === 'Bearer' && authConfig.token) {
+      headers['Authorization'] = `Bearer ${authConfig.token}`;
+    } else if (conn.authType === 'Basic' && authConfig.username && authConfig.password) {
+      const basicAuth = Buffer.from(`${authConfig.username}:${authConfig.password}`).toString('base64');
+      headers['Authorization'] = `Basic ${basicAuth}`;
+    } else if (conn.authType === 'API_KEY' && authConfig.apiKey && authConfig.keyName) {
+      if (authConfig.keyLocation === 'header') {
+        headers[authConfig.keyName] = authConfig.apiKey;
+      } else if (authConfig.keyLocation === 'query') {
+        params[authConfig.keyName] = authConfig.apiKey;
+      }
+    }
+
+    try {
+      const response = await axios({
+        method: executeMethod,
+        url: finalUrl,
+        headers,
+        params,
+        data: payload.body,
+        timeout: 15000,
+      });
+
+      return {
+        success: true,
+        status: response.status,
+        statusText: response.statusText,
+        data: response.data,
+      };
+    } catch (error: any) {
+      Logger.error(`Execute Integration Failed: ${error.message}`, error.stack, 'IntegrationService');
+      throw new BadRequestException({
+        success: false,
+        status: error.response?.status || 500,
+        statusText: error.response?.statusText || 'Error',
+        error: error.response?.data?.message || error.message || 'Lỗi khi gọi API external',
+        data: error.response?.data,
+      });
+    }
   }
 }

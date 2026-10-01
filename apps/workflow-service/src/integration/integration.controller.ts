@@ -62,6 +62,14 @@ export class IntegrationController {
     return {};
   }
 
+  @Post(':id/execute')
+  async executeRest(
+    @Param('id') id: string,
+    @Body() payload: any,
+  ) {
+    return this.integrationService.execute(id, payload);
+  }
+
   // ==========================================
   // GRPC ENDPOINTS
   // ==========================================
@@ -95,5 +103,12 @@ export class IntegrationController {
   async removeGrpc(@Payload() payload: { id: string }) {
     await this.integrationService.remove(payload.id);
     return { success: true, message: 'Deleted successfully' };
+  }
+
+  @GrpcMethod('WorkflowService', 'ExecuteIntegration')
+  async executeGrpc(@Payload() payload: any) {
+    const { id, ...data } = payload;
+    const result = await this.integrationService.execute(id, data);
+    return { success: true, data: JSON.stringify(result) };
   }
 }

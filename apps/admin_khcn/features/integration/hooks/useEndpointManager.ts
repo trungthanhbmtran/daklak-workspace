@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { ParsedEndpoint } from "../components/manager/EndpointTypes";
-import { previewReport } from "../../reports/api";
+import { integrationApi } from "../api";
 
 interface UseEndpointManagerProps {
   initialEndpoints: ParsedEndpoint[];
@@ -117,22 +117,11 @@ export const useEndpointManager = ({ initialEndpoints, integration }: UseEndpoin
         }
       });
       
-      let finalPath = selectedEndpoint.path || "";
       const queryParamsMap: Record<string, string> = {};
 
       selectedEndpoint.params?.forEach(p => {
         if (p.key && p.enabled !== false) {
-          const key = p.key.trim();
-          const val = (p.value || "").trim();
-          
-          // Substitute path variables like {key} or :key
-          if (finalPath.includes(`{${key}}`)) {
-            finalPath = finalPath.replace(`{${key}}`, encodeURIComponent(val));
-          } else if (finalPath.includes(`:${key}`)) {
-            finalPath = finalPath.replace(`:${key}`, encodeURIComponent(val));
-          } else {
-            queryParamsMap[key] = val;
-          }
+          queryParamsMap[p.key.trim()] = (p.value || "").trim();
         }
       });
 
@@ -165,18 +154,23 @@ export const useEndpointManager = ({ initialEndpoints, integration }: UseEndpoin
         parsedBody = undefined;
       }
 
+      // the backend will fetch the rest (baseUrl, method, path, auth) from DB using integration.id and endpointId
       const payload = {
-        baseUrl: integration.baseUrl,
-        endpointPath: finalPath,
-        method: selectedEndpoint.method || 'GET',
-        headers: headersMap,
-        authType: integration.authType,
-        authConfig: integration.authConfig,
+        endpointId: selectedEndpoint.id,
+        headers: headersMap, // Extra headers configured in this endpoint (for overrides)
         params: queryParamsMap,
         body: parsedBody
       };
 
-      const res = await previewReport(payload);
+      let res;
+      // If the integration is not saved yet (no ID), we can't test using the DB config!
+      // In a real flow, you should prompt the user to save first.
+      if (!integration.id || integration.id.startsWith('new_')) {
+        throw new Error("Vui lòng 'Lưu cấu hình' trước khi test để backend có thể sử dụng cấu hình từ Database.");
+      } else {
+        res = await integrationApi.execute(integration.id, payload);
+      }
+      
       setTestResult(res);
     } catch (err: any) {
       setTestResult(err.response?.data || {

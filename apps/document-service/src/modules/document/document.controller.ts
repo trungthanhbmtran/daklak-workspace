@@ -42,15 +42,7 @@ export class DocumentController {
     return this.documentService.extractMetadata(data.fileId);
   }
 
-  @GrpcMethod('DocumentService', 'SyncOnline')
-  syncOnline(@Payload() data: AnyGrpcDto) {
-    return this.documentService.syncOnline();
-  }
 
-  @GrpcMethod('DocumentService', 'FetchLgspStatistics')
-  fetchLgspStatistics(@Payload() data: any) {
-    return this.documentService.fetchLgspStatistics(data);
-  }
 
   @GrpcMethod('DocumentService', 'GetLogs')
   getLogs(@Payload() data: GetLogsGrpcDto) {

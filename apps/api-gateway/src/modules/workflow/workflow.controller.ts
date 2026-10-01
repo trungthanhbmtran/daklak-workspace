@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -183,6 +183,13 @@ export class WorkflowController {
   @ApiOperation({ summary: 'Xóa API integration' })
   async deleteIntegration(@Param('id') id: string) {
     return this.workflowService.deleteIntegration(id);
+  }
+
+  @Post('integrations/:id/execute')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:EXECUTE')
+  @ApiOperation({ summary: 'Thực thi API integration (gọi qua config DB)' })
+  async executeIntegration(@Param('id') id: string, @Body() body: any) {
+    return this.workflowService.executeIntegration(id, body);
   }
 
   // --- Routes with :id wildcard LAST (prevents shadowing specific routes above) ---

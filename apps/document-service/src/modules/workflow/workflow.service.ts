@@ -7,12 +7,12 @@ export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
 export const WORKFLOW_PACKAGE = 'WORKFLOW_PACKAGE';
 
 /**
- * WorkflowService — bridge gi?a document-service và workflow-service.
+ * WorkflowService ï¿½ bridge gi?a document-service vï¿½ workflow-service.
  *
  * Lu?ng chu?n:
  *  1. Khi t?o document m?i   ? g?i startDocumentWorkflow() ? gRPC TriggerWorkflow
- *  2. Khi user x? lý van b?n ? g?i resumeDocumentWorkflow() ? gRPC ResumeWorkflow
- *  3. Workflow events (RabbitMQ) du?c x? lý b?i WorkflowController, KHÔNG ? dây
+ *  2. Khi user x? lï¿½ van b?n ? g?i resumeDocumentWorkflow() ? gRPC ResumeWorkflow
+ *  3. Workflow events (RabbitMQ) du?c x? lï¿½ b?i WorkflowController, KHï¿½NG ? dï¿½y
  */
 @Injectable()
 export class WorkflowService implements OnModuleInit {
@@ -34,9 +34,9 @@ export class WorkflowService implements OnModuleInit {
 
   /**
    * Kh?i t?o workflow instance cho m?t document v?a du?c t?o.
-   * G?i gRPC TriggerWorkflow v?i trigger code = 'DOC_RECEIVED' (ho?c code du?c truy?n vào).
+   * G?i gRPC TriggerWorkflow v?i trigger code = 'DOC_RECEIVED' (ho?c code du?c truy?n vï¿½o).
    *
-   * @returns { instanceId, currentNodeId } d? caller luu vào Document record
+   * @returns { instanceId, currentNodeId } d? caller luu vï¿½o Document record
    */
   async startDocumentWorkflow(
     documentId: string,
@@ -95,7 +95,7 @@ export class WorkflowService implements OnModuleInit {
     if (!doc) throw new BadRequestException('Document not found');
 
     if (!doc.workflowInstanceId) {
-      this.logger.warn(`Document ${documentId} has no workflowInstanceId — skipping ResumeWorkflow`);
+      this.logger.warn(`Document ${documentId} has no workflowInstanceId ï¿½ skipping ResumeWorkflow`);
       return;
     }
 
@@ -127,7 +127,7 @@ export class WorkflowService implements OnModuleInit {
   // ---------------------------------------------------------------------------
 
   /**
-   * X? lý van b?n — ngu?i dùng nh?n nhi?m v? và b?t d?u x? lý.
+   * X? lï¿½ van b?n ï¿½ ngu?i dï¿½ng nh?n nhi?m v? vï¿½ b?t d?u x? lï¿½.
    */
   async processDocument(id: string, actorId: string, actorName: string, note?: string) {
     const doc = await this.prisma.document.findUnique({ where: { id } });
@@ -140,12 +140,12 @@ export class WorkflowService implements OnModuleInit {
       data: { status: 'PROCESSING' },
     });
 
-    await this.logDocumentAction(id, 'X? LÝ VAN B?N', note || 'C?p nh?t ti?n d? x? lý.', actorId, actorName);
+    await this.logDocumentAction(id, 'X? Lï¿½ VAN B?N', note || 'C?p nh?t ti?n d? x? lï¿½.', actorId, actorName);
     return updated;
   }
 
   /**
-   * K?t thúc x? lý van b?n — luu h? so.
+   * K?t thï¿½c x? lï¿½ van b?n ï¿½ luu h? so.
    */
   async finalizeDocument(id: string, actorId: string, actorName: string, note?: string) {
     const doc = await this.prisma.document.findUnique({ where: { id } });
@@ -158,7 +158,7 @@ export class WorkflowService implements OnModuleInit {
       data: { status: 'PUBLISHED' },
     });
 
-    await this.logDocumentAction(id, 'K?T THÚC / LUU H? SO', note || 'Van b?n dã du?c hoàn t?t x? lý.', actorId, actorName);
+    await this.logDocumentAction(id, 'K?T THï¿½C / LUU H? SO', note || 'Van b?n dï¿½ du?c hoï¿½n t?t x? lï¿½.', actorId, actorName);
     return updated;
   }
 
@@ -203,5 +203,29 @@ export class WorkflowService implements OnModuleInit {
         userName,
       },
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // EXTERNAL INTEGRATION
+  // ---------------------------------------------------------------------------
+  
+  async executeIntegration(integrationCode: string, payload: any): Promise<any> {
+    try {
+      this.logger.log(Executing integration  via workflow-service...);
+      const response = await firstValueFrom<any>(
+        this.workflowGrpcService.ExecuteIntegration({
+          id: integrationCode, 
+          ...payload
+        })
+      );
+      
+      if (response && response.success && response.data) {
+        return JSON.parse(response.data);
+      }
+      return response;
+    } catch (error: any) {
+      this.logger.error(Failed to execute integration : );
+      throw new BadRequestException(Integration execution failed: );
+    }
   }
 }
