@@ -55,7 +55,14 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
     }));
 
-    return apiSources;
+    const dbSources: SystemSource[] = [
+      { id: "HRM_TASK_STATS", name: "Thống kê Nhiệm vụ", type: "db", icon: Database },
+      { id: "DOC_STATS", name: "Thống kê Văn bản", type: "db", icon: Database },
+      { id: "POST_STATS", name: "Thống kê Bài viết", type: "db", icon: Database },
+      { id: "KPI_STATS", name: "Thống kê KPI", type: "db", icon: Database },
+    ];
+
+    return [...dbSources, ...apiSources];
   }, [integrations]);
 
   const [title, setTitle] = useState("Báo cáo mới");
@@ -99,19 +106,28 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
     const cleanPayload = { ...parsedPayload };
     delete cleanPayload._method;
 
+    if (selectedSource?.type === 'db') {
+      return {
+        type: 'db',
+        sourceId,
+        params: parsedPayload,
+      };
+    }
+
     return {
-      baseUrl: selectedSource?.baseUrl,
-      endpointPath: endpointPath,
+      type: 'api',
+      integrationId: selectedSource?.id?.replace('api-', ''),
+      endpointId: epInfo?.id,
       method: finalMethod,
-      headers: selectedSource?.headers,
-      authConfig: selectedSource?.authConfig,
       params: finalMethod === 'GET' ? cleanPayload : {},
       body: finalMethod !== 'GET' ? cleanPayload : undefined,
-      sourceId
     };
   }, [selectedSource, endpointPath, epInfo, sourceId, parsedPayload]);
 
-  const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
+  const isApiSourceReady = Boolean(
+    (selectedSource?.type === 'api' && endpointPath && epInfo) ||
+    selectedSource?.type === 'db'
+  );
 
   const { data: queryData, isFetching: isPreviewLoading, refetch: refetchPreview } = usePreviewReport(previewPayload, isApiSourceReady);
 

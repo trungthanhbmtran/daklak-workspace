@@ -34,7 +34,13 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
       authConfig: int.authConfig,
       endpoints: int.metadata?._parsedEndpoints || int.endpoints || []
     }));
-    return apiSources;
+    const dbSources = [
+      { id: "HRM_TASK_STATS", name: "Thống kê Nhiệm vụ", type: "db" },
+      { id: "DOC_STATS", name: "Thống kê Văn bản", type: "db" },
+      { id: "POST_STATS", name: "Thống kê Bài viết", type: "db" },
+      { id: "KPI_STATS", name: "Thống kê KPI", type: "db" },
+    ];
+    return [...dbSources, ...apiSources];
   }, [integrations]);
 
   const sourceId = widget.dataSourceCode || widget.sourceId;
@@ -60,19 +66,28 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
     const cleanPayload = { ...apiPayload };
     delete cleanPayload._method;
 
+    if (selectedSource?.type === 'db') {
+      return {
+        type: 'db',
+        sourceId,
+        params: apiPayload,
+      };
+    }
+
     return {
-      baseUrl: selectedSource?.baseUrl,
-      endpointPath: endpointPath,
+      type: 'api',
+      integrationId: selectedSource?.id?.replace('api-', ''),
+      endpointId: epInfo?.id,
       method: finalMethod,
-      headers: selectedSource?.headers,
-      authConfig: selectedSource?.authConfig,
       params: finalMethod === 'GET' ? cleanPayload : {},
       body: finalMethod !== 'GET' ? cleanPayload : undefined,
-      sourceId
     };
   }, [selectedSource, endpointPath, epInfo, sourceId, widget.config?.apiPayload]);
 
-  const isApiSourceReady = Boolean(selectedSource?.type === 'api' && endpointPath);
+  const isApiSourceReady = Boolean(
+    (selectedSource?.type === 'api' && endpointPath && epInfo) ||
+    selectedSource?.type === 'db'
+  );
   const { data: queryData, isFetching } = usePreviewReport(previewPayload, isApiSourceReady);
 
   const data = React.useMemo(() => {

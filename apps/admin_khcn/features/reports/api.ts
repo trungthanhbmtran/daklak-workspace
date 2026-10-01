@@ -60,10 +60,31 @@ export function useDeleteTemplate() {
 }
 
 export const previewReport = async (payload: any) => {
-  // Use baseURL: '' to call Next.js local API route instead of backend API
-  // Note: next.config.ts has basePath: '/admin', so the local route is /admin/api/reports/preview
-  const res = await api.post('/admin/api/reports/preview', payload, { baseURL: '' });
-  return res;
+  // Check if it's a DB internal source
+  if (payload.type === 'db') {
+    let endpoint = '';
+    switch (payload.sourceId) {
+      case 'HRM_TASK_STATS': endpoint = '/reports/tasks'; break;
+      case 'DOC_STATS': endpoint = '/reports/documents'; break;
+      case 'POST_STATS': endpoint = '/reports/posts'; break;
+      case 'KPI_STATS': endpoint = '/reports/kpis'; break;
+      default: throw new Error("Nguồn dữ liệu nội bộ không hợp lệ");
+    }
+    const res = await api.get(endpoint, { params: payload.params });
+    return { success: true, data: res.data?.data || res.data };
+  }
+
+  // If it's an API integration source, use the unified Execute Integration engine
+  if (payload.type === 'api') {
+    const res = await api.post(`/workflow/integrations/${payload.integrationId}/execute`, {
+      endpointId: payload.endpointId,
+      body: payload.body,
+      params: payload.params,
+    });
+    return { success: true, data: res.data?.data || res.data };
+  }
+
+  throw new Error("Loại nguồn dữ liệu không được hỗ trợ");
 };
 
 export function usePreviewReport(payload: any, enabled: boolean) {
