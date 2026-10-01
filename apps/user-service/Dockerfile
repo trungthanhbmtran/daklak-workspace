@@ -60,7 +60,7 @@ COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080
 
-CMD ["node", "dist/apps/user-service/src/main.js"]
+CMD ["node", "dist/src/main.js"]
 
 
 # Trigger rebuild
