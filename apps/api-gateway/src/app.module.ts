@@ -13,7 +13,7 @@ import { TranslateModule } from './modules/translate/translate.module';
 import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
 import { IntegrationModule } from './modules/integration/integration.module';
-import { DynamicProxyMiddleware } from './modules/integration/dynamic-proxy.middleware';
+import { DynamicProxyMiddleware } from './core/middlewares/dynamic-proxy.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReportsModule } from './modules/reports/reports.module';

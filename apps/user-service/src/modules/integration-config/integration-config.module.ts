@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { IntegrationConfigController } from './integration-config.controller';
-import { IntegrationConfigInternalController } from './integration-config.internal.controller';
+
 import { IntegrationConfigService } from './integration-config.service';
 import { IntegrationAuthService } from './integration-auth.service';
 
@@ -19,7 +19,7 @@ import { IntegrationAuthService } from './integration-auth.service';
       },
     ]),
   ],
-  controllers: [IntegrationConfigController, IntegrationConfigInternalController],
+  controllers: [IntegrationConfigController],
   providers: [IntegrationConfigService, IntegrationAuthService],
   exports: [IntegrationConfigService, IntegrationAuthService],
 })

@@ -1,39 +1,70 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { IntegrationConfigService } from './integration-config.service';
 import { CreateUpstreamDto, UpdateUpstreamDto } from './dto/upstream.dto';
-// NOTE: Assuming there's a global/shared AuthGuard in user-service, we might mock it here
-// import { AuthGuard } from '@/common/guards/auth.guard'; 
+import { status as GrpcStatus } from '@grpc/grpc-js';
 
-@Controller('admin/integration-upstreams')
-// @UseGuards(AuthGuard) // To be integrated with existing guards (requires role admin)
+@Controller()
 export class IntegrationConfigController {
   constructor(private readonly service: IntegrationConfigService) {}
 
-  @Post()
-  async create(@Body() dto: CreateUpstreamDto, @Req() req: any) {
-    const userId = req.user?.id || 'system-admin'; // Fallback for dev
-    return this.service.createUpstream(dto, userId);
+  @GrpcMethod('IntegrationConfigService', 'GetSnapshot')
+  async getSnapshot() {
+    const upstreams = await this.service.getAllUpstreams();
+    const highestVersion = upstreams.reduce((max, u) => Math.max(max, u.version), 0);
+    const etag = `W/"${highestVersion}-${upstreams.length}"`;
+    return {
+      version: highestVersion,
+      etag,
+      upstreams: JSON.stringify(upstreams)
+    };
   }
 
-  @Get()
-  async getAll() {
-    return this.service.getAllUpstreams();
+  @GrpcMethod('IntegrationConfigService', 'CreateUpstream')
+  async createUpstream(data: any) {
+    try {
+      const dto = data as CreateUpstreamDto;
+      const callerUserId = data.callerUserId || 'system-admin';
+      return await this.service.createUpstream(dto, callerUserId);
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e.message });
+    }
   }
 
-  @Get(':id')
-  async getById(@Param('id') id: string) {
-    return this.service.getUpstreamById(id);
+  @GrpcMethod('IntegrationConfigService', 'GetAllUpstreams')
+  async getAllUpstreams() {
+    const data = await this.service.getAllUpstreams();
+    return { data };
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateUpstreamDto, @Req() req: any) {
-    const userId = req.user?.id || 'system-admin';
-    return this.service.updateUpstream(id, dto, userId);
+  @GrpcMethod('IntegrationConfigService', 'GetUpstreamById')
+  async getUpstreamById(data: any) {
+    try {
+      return await this.service.getUpstreamById(data.id);
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: e.message });
+    }
   }
 
-  @Delete(':id')
-  async delete(@Param('id') id: string, @Req() req: any) {
-    const userId = req.user?.id || 'system-admin';
-    return this.service.deleteUpstream(id, userId);
+  @GrpcMethod('IntegrationConfigService', 'UpdateUpstream')
+  async updateUpstream(data: any) {
+    try {
+      const dto = data.data as UpdateUpstreamDto;
+      const callerUserId = data.callerUserId || 'system-admin';
+      return await this.service.updateUpstream(data.id, dto, callerUserId);
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e.message });
+    }
+  }
+
+  @GrpcMethod('IntegrationConfigService', 'DeleteUpstream')
+  async deleteUpstream(data: any) {
+    try {
+      const callerUserId = data.callerUserId || 'system-admin';
+      const success = await this.service.deleteUpstream(data.id, callerUserId);
+      return { success };
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
   }
 }

@@ -1,9 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import axios from 'axios';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { Pool } from 'undici';
 import CircuitBreaker from 'opossum';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import * as dns from 'dns/promises';
+import { MICROSERVICES } from '../../core/constants/services';
+import { firstValueFrom } from 'rxjs';
 
 export interface UpstreamConfig {
   name: string;
@@ -36,10 +37,13 @@ export class RegistryService implements OnModuleInit {
   private currentVersion = 0;
   private currentEtag = '';
   private isReady = false;
-  
-  private userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:3001';
+  private grpcService: any;
+
+  constructor(@Inject(MICROSERVICES.INTEGRATION.SYMBOL) private readonly client: any) {}
 
   async onModuleInit() {
+    this.grpcService = this.client.getService(MICROSERVICES.INTEGRATION.SERVICE);
+
     await this.fetchInitialSnapshot();
     
     setInterval(() => {
@@ -66,20 +70,20 @@ export class RegistryService implements OnModuleInit {
 
   private async pollSnapshot() {
     try {
-      const res = await axios.get(`${this.userServiceUrl}/internal/registry/snapshot`, {
-        headers: {
-          'if-none-match': this.currentEtag,
-          'Authorization': `Bearer ${process.env.INTERNAL_SERVICE_TOKEN || 'dummy'}`,
-        },
-        validateStatus: (status) => status === 200 || status === 304,
-      });
+      const data = (await firstValueFrom(this.grpcService.GetSnapshot({}))) as any;
+      if (!data || data.etag === this.currentEtag) {
+        return; // No changes
+      }
 
-      if (res.status === 304) {
+      let upstreamsList: UpstreamConfig[] = [];
+      try {
+        upstreamsList = JSON.parse(data.upstreams);
+      } catch (e) {
+        this.logger.error('Failed to parse upstreams JSON from gRPC', e);
         return;
       }
 
-      const data = res.data;
-      await this.applySnapshot(data.upstreams, data.version, res.headers['etag']);
+      await this.applySnapshot(upstreamsList, data.version, data.etag);
     } catch (error) {
       throw error;
     }

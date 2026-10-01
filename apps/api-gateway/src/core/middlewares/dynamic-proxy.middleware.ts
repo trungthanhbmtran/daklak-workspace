@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { IntegrationService } from './integration.service';
-import { TokenValidatorService } from './token-validator.service';
+import { IntegrationService } from '../../modules/integration/integration.service';
+import { TokenValidatorService } from '../../modules/integration/token-validator.service';
 
 @Injectable()
 export class DynamicProxyMiddleware implements NestMiddleware {
