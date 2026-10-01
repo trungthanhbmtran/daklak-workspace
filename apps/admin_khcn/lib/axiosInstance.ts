@@ -15,9 +15,9 @@ export type { ApiResponse };
  * - KHÔNG dùng statusCode để đoán ý nghĩa lỗi
  * - KHÔNG hardcode string check như message.includes("bị khóa")
  *
- * Các trường hợp đặc biệt duy nhất:
- * - 401: luôn phải redirect login (không thể xử lý khác)
- * - Network error: backend không trả về gì → hiển thị thông báo mặc định
+ * Trường hợp đặc biệt duy nhất cho 401:
+ * - Đang ở /admin/login: 401 = sai mật khẩu → giữ trang, để onError xử lý
+ * - Các trang khác: 401 = hết session → redirect về login
  */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -37,15 +37,27 @@ apiClient.interceptors.response.use(
     const status = error.response.status;
     const data: any = error.response.data;
 
-    // Message và duration DO BACKEND quyết định, frontend chỉ render
+    // Message DO BACKEND quyết định, frontend chỉ render
     const message: string = data?.message || "Đã xảy ra lỗi. Vui lòng thử lại.";
-    const duration: number = data?.errorType === 'RATE_LIMITED' ? 8000 : 4000;
+    const duration: number = data?.errorType === "RATE_LIMITED" ? 8000 : 4000;
 
     if (status === 401) {
-      // 401: Luôn redirect login — đây là hành vi UX, không phải business logic
-      if (typeof window !== "undefined") {
-        toast.error(message, { duration: 3000 });
-        window.location.href = "/admin/login";
+      // Kiểm tra CHÍNH XÁC bằng so sánh pathname — KHÔNG dùng includes() tránh false positive
+      // Ví dụ includes("/login") sẽ match nhầm: /admin/user-login-history, /admin/reports/login-audit
+      const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+      const isOnLoginPage = pathname === "/admin/login" || pathname === "/login";
+
+      if (isOnLoginPage) {
+        // Đang ở trang login: 401 = sai mật khẩu → KHÔNG redirect
+        // Để lỗi propagate lên onError của LoginClient để hiện toast
+      } else {
+        // Đang ở trang khác: 401 = hết session → redirect về login
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", {
+          duration: 3000,
+        });
+        if (typeof window !== "undefined") {
+          window.location.href = "/admin/login";
+        }
       }
     } else {
       // Mọi lỗi khác: render message từ backend
