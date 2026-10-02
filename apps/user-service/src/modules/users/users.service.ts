@@ -566,7 +566,12 @@ export class UsersService implements OnModuleInit {
         message: 'Tên đăng nhập hoặc mật khẩu không hợp lệ',
         code: GRPC.UNAUTHENTICATED,
       });
-    if (!key || !pwd || key.length > 254 || Buffer.byteLength(pwd, 'utf8') > 72)
+    if (
+      !key ||
+      !pwd ||
+      key.length > AUTH_DEFAULTS.loginIdentifierMaxLength ||
+      Buffer.byteLength(pwd, 'utf8') > 72
+    )
       throw reject();
     const user = await this.prisma.user.findFirst({
       where: { isActive: true, OR: [{ email: key }, { username: key }] },

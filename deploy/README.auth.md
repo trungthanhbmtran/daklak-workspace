@@ -33,7 +33,7 @@ RSA private/public key phải cùng cặp, ít nhất 2048 bit. Thiết lập `J
 3. Gateway đặt cookie access/refresh theo thời hạn thực tế. Frontend kiểm tra /auth/me trước khi chuyển Hub.
 4. Yêu cầu 401 được gom thành một refresh trong mỗi phiên frontend và thử lại tối đa một lần. Refresh token được tra cứu bằng hash và đổi nguyên tử; lỗi chuẩn bị dữ liệu không tiêu thụ token cũ.
 5. Phiên có định danh riêng, mốc tuyệt đối và thời hạn idle trong Redis. Logout xoá phiên của thiết bị; đổi mật khẩu hoặc khoá tài khoản tăng phiên bản để vô hiệu hoá mọi phiên cũ.
-6. 403 giữ nguyên trạng thái đăng nhập. Lỗi Redis/gRPC trả 503, không giả báo hết hạn. Login luôn truy cập được để tránh vòng lặp login ↔ Hub.
+6. 403 giữ nguyên trạng thái đăng nhập. Lỗi Redis/gRPC trả 503; deadline trả 504, không giả báo hết hạn. Login luôn truy cập được để tránh vòng lặp login ↔ Hub.
 
 Nhật ký `AUTH_AUDIT` ghi sự kiện, ID tài khoản khi biết và timestamp; không ghi password/access/refresh token. Cần chuyển nhật ký tới nơi lưu trữ tập trung theo chính sách của cơ quan. Cơ chế idle tính theo hoạt động API đã xác thực; yêu cầu nền cũng được tính là hoạt động.
 
@@ -66,7 +66,7 @@ Không chạy migration kèm seed chỉ để sửa đăng nhập. Không xoá R
 - Login thành công → /auth/me và /menus/me trả 200 → Hub tải được.
 - Access cookie có TTL theo cấu hình; refresh cookie hết hạn ở mốc tuyệt đối của phiên.
 - Token access hết hạn → một refresh → yêu cầu được thử lại; refresh hết hạn → login, không tự bật lại Hub.
-- Logout → token của phiên cũ bị từ chối. Đổi mật khẩu/khoá tài khoản → mọi phiên cũ bị từ chối, kể cả khi context quyền còn ở cache gateway.
+- Logout xoá cookie và trả thành công cho trình duyệt; khi Redis/user-service hoạt động, token của phiên cũ bị từ chối. Nếu thu hồi phía server lỗi, ghi log LOGOUT_REVOCATION; không bảo đảm phiên server đã bị xoá trong trường hợp này. Đổi mật khẩu/khoá tài khoản → mọi phiên cũ bị từ chối, kể cả khi context quyền còn ở cache gateway.
 - Mất kết nối Redis/user-service → 503 và thông báo thử lại; không tạo vòng lặp chuyển trang.
 - Origin ngoài danh sách bị chặn; HTTPS sử dụng cookie Secure.
 
@@ -77,22 +77,37 @@ cd apps/api-gateway
 npm test -- --runInBand
 npx tsc --noEmit
 cd ../user-service
-npm test -- --runInBand --testPathPatterns=modules/users
+npm test -- --runInBand
 npx tsc --noEmit
 cd ../admin_khcn
-npm run typecheck:auth
+npm run typecheck
 ```
 
 Benchmark trong test validator đo RSA thật với Redis giả lập; không đại diện cho độ trễ mạng/server thực tế. Build Docker và kiểm tra Redis thật cần môi trường có Docker engine đang chạy.
 
-
 ## Kết quả kiểm tra mã nguồn (02/10/2026)
 
-- Gateway: 72 test qua, gồm hồi quy Hub, cookie, đồng thời 401, phân biệt 401/403/503, origin và thu hồi phiên.
-- User-service: 40 test qua trong các module users/integration-config, gồm deadline, idle, rotation, mật khẩu, khoá tài khoản và RSA key cố định.
-- TypeScript: hai backend và `npm run typecheck:auth` của frontend đều qua. ESLint phần đăng nhập đã kiểm tra không có lỗi.
-- Benchmark 200 lần RS256 với Redis giả lập: median khoảng 0,22 ms; p95 khoảng 0,27 ms/lần. Không phải kết quả tải thực tế.
+- Gateway: 128 test qua, toàn bộ 12 suite; gồm hồi quy Hub, cookie, nhiều yêu cầu 401, xung đột refresh giữa tab, login/logout khi refresh đang chạy, DTO, null/undefined, deadline 504, dữ liệu HRM, origin và thu hồi phiên.
+- User-service: 45 test qua, toàn bộ 6 suite; gồm idle, mốc tuyệt đối, rotation, mật khẩu, khoá tài khoản, RSA key cố định và khởi tạo module AI.
+- TypeScript: hai backend và toàn bộ frontend đều qua. Đã bỏ ignoreBuildErrors; build frontend không còn bỏ qua lỗi kiểu dữ liệu. ESLint phần đăng nhập và các file frontend sửa trong lần rà soát này đều qua.
+- Build Node.js của gateway, user-service và frontend thành công. Frontend dựng đủ 75 trang, không còn lỗi cookies() trong prerender ở trang phân loại chức danh.
+- Benchmark 200 lần RS256 với Redis giả lập: median khoảng 0,23 ms; p95 khoảng 0,28 ms/lần. Không phải kết quả tải thực tế.
 - Compose build override hợp lệ khi kiểm tra cấu trúc, không đọc file cấu hình bí mật.
-- Chưa build/chạy container hoặc xác nhận website thật: Docker engine trên máy làm việc chưa chạy và chưa có cách truy cập máy chủ được xác nhận.
+- Chưa build/chạy container hoặc xác nhận đăng nhập trên website thật: Docker engine trên máy làm việc chưa chạy; chưa triển khai bản sửa lên máy chủ.
 
-Kiểm tra toàn dự án còn vấn đề ngoài phạm vi đăng nhập đã thấy trước bản chuẩn hoá: test AI user-service không nạp được dependency uuid ESM; frontend có lỗi kiểu `syncOnline` tại IncomingDocumentsClient và tham số `item` tại IntegrationManager. Lệnh `typecheck:auth` kiểm tra phần đăng nhập độc lập, không che kết quả kiểm tra toàn frontend.
+## Lỗi đã sửa trong lần rà soát bổ sung
+
+- Refresh đồng thời trả 409 cho token đã đổi khi phiên còn tồn tại. Token cũ không được cấp quyền hoặc tái sử dụng; metadata hash có TTL chỉ phục vụ nhận diện xung đột và thu hồi phiên. Frontend kiểm tra cookie hiện tại qua /auth/me, không xoá phiên mới từ phản hồi cũ.
+- Login/logout được xếp thứ tự với refresh trong cùng frontend. Lua thu hồi phiên nguyên tử, kể cả khi refresh đang dùng token cũ; không quét toàn bộ Redis.
+- Callback chuẩn hoá đường dẫn, chặn login/refresh/API sau giải mã để tránh vòng lặp; giữ nguyên query đã mã hoá.
+- Dynamic proxy chỉ nhận đường dẫn /gw/ có prefix hợp lệ, bao gồm /api/v1/admin/gw/; query chứa /gw/ không bị nhận nhầm thành proxy.
+- AuthService dùng ClientGrpc, DTO và request có kiểu. Không trả rpc.details; lỗi null/undefined được xử lý, deadline trả 504 và có log chẩn đoán không chứa token/password/thông điệp nội bộ.
+- Kiểm tra thời hạn có thể biểu diễn thành ngày trước khi ghi cookie; bỏ sessionId ngẫu nhiên không gắn với phiên thực.
+- /me kiểm tra ID protobuf int32 và tài khoản hoạt động; đọc employeeCode từ user-service rồi gọi GetEmployeeByCode với timeout 5 giây. Lỗi HRM được log và giữ hồ sơ user-service.
+- Sửa prefix lặp /admin của API cấu hình liên thông và kiểu dữ liệu danh sách.
+- Nút văn bản đến gọi syncOnline chưa tồn tại được thay bằng tải lại danh sách từ API đang có; chưa thêm tích hợp đồng bộ LGSP.
+- Server fetch truyền cookie tới gateway được cấu hình với no-store, không chuyển credential sang localhost khi lỗi; trạng thái request/prerender của Next.js được truyền đúng lên framework. Hằng số phân loại đơn vị được tách khỏi module client.
+- Module AI dùng randomUUID của Node.js để tránh lỗi nạp uuid ESM trong Jest; test khởi tạo bổ sung global cache đúng cấu hình ứng dụng.
+- Docker frontend giữ cấu trúc apps/admin_khcn và shared khi build, chạy đúng apps/admin_khcn/server.js trong standalone, dùng non-root user và dumb-init. .dockerignore loại file môi trường khỏi build context.
+
+Cấu hình root và standalone được đối chiếu với [tài liệu output của Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/output) và [tài liệu Turbopack root](https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory). Dockerfile đã rà soát cấu trúc; kết quả build Linux/container cần kiểm chứng trên máy có Docker engine.

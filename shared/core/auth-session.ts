@@ -5,6 +5,7 @@ export const AUTH_DEFAULTS = {
   idleSeconds: 1800,
   failureLimit: 5,
   failureWindowSeconds: 900,
+  loginIdentifierMaxLength: 254,
   passwordMinLength: 12,
   passwordMaxBytes: 72,
 } as const;

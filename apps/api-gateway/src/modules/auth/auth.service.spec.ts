@@ -1,9 +1,13 @@
-import { of, throwError } from 'rxjs';
+import { of, throwError, NEVER, TimeoutError } from 'rxjs';
+import type { ClientGrpc } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 import {
   UnauthorizedException,
   BadRequestException,
   ConflictException,
   ServiceUnavailableException,
+  GatewayTimeoutException,
+  Logger,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
@@ -20,18 +24,140 @@ describe('Gateway browser sessions', () => {
     RevokeRefreshToken: jest.fn(),
     FindOne: jest.fn(),
   };
+  const employee = { GetEmployeeByCode: jest.fn() };
   const res = { cookie: jest.fn(), clearCookie: jest.fn() };
   let service: AuthService;
+  let warn: jest.SpyInstance;
   beforeEach(() => {
     jest.clearAllMocks();
+    warn = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
     grpc.Login.mockReturnValue(of(tokens));
     grpc.Refresh.mockReturnValue(of(tokens));
     grpc.RevokeRefreshToken.mockReturnValue(of({ success: true }));
     service = new AuthService(
-      { getService: () => grpc },
-      { getService: () => ({}) },
+      { getService: () => grpc } as unknown as ClientGrpc,
+      { getService: () => employee } as unknown as ClientGrpc,
     );
     service.onModuleInit();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+  it.each([null, undefined, 'unexpected'])(
+    'maps malformed internal errors to 503 without a TypeError: %p',
+    async (error) => {
+      grpc.Login.mockReturnValue(throwError(() => error));
+      await expect(
+        service.login({ username: 'test', password: 'password' }, res as any),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(res.cookie).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalled();
+    },
+  );
+  it.each([status.UNAUTHENTICATED, status.INVALID_ARGUMENT])(
+    'does not expose private RPC details for status %s',
+    async (code) => {
+      const details = 'private-account-state-and-credentials';
+      grpc.Login.mockReturnValue(throwError(() => ({ code, details })));
+      try {
+        await service.login(
+          { username: 'test', password: 'password' },
+          res as any,
+        );
+      } catch (error) {
+        expect((error as Error).message).not.toContain(details);
+        expect(warn).not.toHaveBeenCalled();
+        return;
+      }
+      throw new Error('expected login to reject');
+    },
+  );
+  it.each([{ code: status.DEADLINE_EXCEEDED }, new TimeoutError()])(
+    'maps authentication deadlines to 504 and preserves cookies',
+    async (error) => {
+      grpc.Refresh.mockReturnValue(throwError(() => error));
+      await expect(
+        service.refresh({}, { cookies: { refreshToken: 'valid' } }, res as any),
+      ).rejects.toBeInstanceOf(GatewayTimeoutException);
+      expect(res.clearCookie).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalled();
+    },
+  );
+  it.each([undefined, NaN, Infinity, 1e15])(
+    'rejects an invalid or unrepresentable expiry before any cookie write: %p',
+    async (expiresIn) => {
+      grpc.Login.mockReturnValue(of({ ...tokens, expiresIn }));
+      await expect(
+        service.login({ username: 'test', password: 'password' }, res as any),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(res.cookie).not.toHaveBeenCalled();
+      expect(res.clearCookie).not.toHaveBeenCalled();
+    },
+  );
+  it('does not return an invented session identifier', async () => {
+    const result = await service.login(
+      { username: 'test', password: 'password' },
+      res as any,
+    );
+    expect(result).toEqual({ expiresAt: expect.any(String) });
+  });
+  it.each([
+    { username: 'a'.repeat(255), password: 'password' },
+    { username: 'test', password: 'á'.repeat(37) },
+  ])(
+    'rejects excessive credentials before sending a password to gRPC',
+    async (body) => {
+      await expect(service.login(body, res as any)).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(grpc.Login).not.toHaveBeenCalled();
+    },
+  );
+  it.each([undefined, 'NaN', 0, -1, 1.5, {}, null, 2147483648])(
+    'rejects an invalid profile ID before gRPC: %p',
+    async (id) => {
+      await expect(service.me({ user: { id } })).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(grpc.FindOne).not.toHaveBeenCalled();
+    },
+  );
+  it('uses the current employee code from the user service instead of a stale claim', async () => {
+    grpc.FindOne.mockReturnValue(
+      of({ id: 7, employeeCode: 'CURRENT', fullName: 'Local' }),
+    );
+    employee.GetEmployeeByCode.mockReturnValue(
+      of({ data: { fullName: 'Employee', avatar: 'avatar.png' } }),
+    );
+    const result = await service.me({ user: { id: 7, employeeId: 99 } } as any);
+    expect(employee.GetEmployeeByCode).toHaveBeenCalledWith({
+      code: 'CURRENT',
+    });
+    expect(result).toMatchObject({
+      fullName: 'Employee',
+      avatarUrl: 'avatar.png',
+    });
+  });
+  it('returns the user profile within five seconds if HRM never responds', async () => {
+    jest.useFakeTimers();
+    grpc.FindOne.mockReturnValue(
+      of({ id: 7, employeeCode: 'CURRENT', fullName: 'Local' }),
+    );
+    employee.GetEmployeeByCode.mockReturnValue(NEVER);
+    const pending = service.me({ user: { id: 7 } });
+    await jest.advanceTimersByTimeAsync(5000);
+    await expect(pending).resolves.toMatchObject({ fullName: 'Local' });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('GET_EMPLOYEE'));
+  });
+  it('rejects a profile returned for a different user ID', async () => {
+    grpc.FindOne.mockReturnValue(of({ id: 8 }));
+    await expect(service.me({ user: { id: 7 } })).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+    expect(employee.GetEmployeeByCode).not.toHaveBeenCalled();
   });
   it('does not confirm login when user lookup is unavailable', async () => {
     grpc.FindOne.mockReturnValue(throwError(() => ({ code: 14 })));
@@ -52,7 +178,11 @@ describe('Gateway browser sessions', () => {
   });
   it('rejects malformed refresh payloads with 400 rather than throwing a trim error', async () => {
     await expect(
-      service.refresh({ refreshToken: 123 }, { cookies: {} }, res as any),
+      service.refresh(
+        { refreshToken: 123 } as any,
+        { cookies: {} },
+        res as any,
+      ),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(grpc.Refresh).not.toHaveBeenCalled();
   });
@@ -109,7 +239,10 @@ describe('Gateway browser sessions', () => {
     grpc.RevokeRefreshToken.mockReturnValue(throwError(() => ({ code: 14 })));
     await expect(
       service.logout({ cookies: { refreshToken: 'valid' } }, res as any),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    ).resolves.toEqual({ success: true });
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('LOGOUT_REVOCATION'),
+    );
     for (const name of ['accessToken', 'refreshToken', 'session'])
       expect(res.clearCookie).toHaveBeenCalledWith(
         name,

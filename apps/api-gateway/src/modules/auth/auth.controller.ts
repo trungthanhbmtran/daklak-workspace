@@ -7,6 +7,7 @@ import {
   Res,
   UseGuards,
   Header,
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,6 +16,8 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { LoginDto, RefreshTokenDto } from './auth.dto';
+import type { AuthRequest } from './auth.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RateLimitGuard, RateLimit } from '../../core/guards/rate-limit.guard';
@@ -31,6 +34,7 @@ export class AuthController {
    * Chuẩn OWASP ASVS §2.2.1 — Brute-Force Protection
    */
   @Post('login')
+  @HttpCode(200)
   @Header('Cache-Control', 'no-store')
   @Header('Pragma', 'no-cache')
   @UseGuards(AuthOriginGuard, RateLimitGuard)
@@ -38,14 +42,16 @@ export class AuthController {
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({
     status: 200,
-    description:
-      'Trả về sessionId và expiresAt. Token được gán qua HTTP-Only Cookie.',
+    description: 'Trả về expiresAt. Token được gán qua HTTP-Only Cookie.',
   })
   @ApiResponse({
     status: 429,
     description: 'Quá nhiều lần thử đăng nhập. Thử lại sau 15 phút.',
   })
-  async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.login(body, res);
   }
 
@@ -54,6 +60,7 @@ export class AuthController {
    * Ngăn attacker brute-force refresh token.
    */
   @Post('refresh')
+  @HttpCode(200)
   @Header('Cache-Control', 'no-store')
   @UseGuards(AuthOriginGuard, RateLimitGuard)
   @RateLimit({ limit: 30, windowSec: 900, keyBy: 'ip', prefix: 'refresh' })
@@ -62,25 +69,25 @@ export class AuthController {
   })
   @ApiResponse({
     status: 200,
-    description:
-      'Trả về sessionId và expiresAt. Token mới được gán qua HTTP-Only Cookie.',
+    description: 'Trả về expiresAt. Token mới được gán qua HTTP-Only Cookie.',
   })
   async refresh(
-    @Body() body: any,
-    @Req() req: any,
+    @Body() body: RefreshTokenDto,
+    @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     return this.authService.refresh(body, req, res);
   }
 
   @Post('logout')
+  @HttpCode(200)
   @UseGuards(AuthOriginGuard)
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Đăng xuất và thu hồi refresh_token' })
   async logout(
-    @Req() req: any,
+    @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
-    @Body() body?: any,
+    @Body() body?: RefreshTokenDto,
   ) {
     return this.authService.logout(req, res, body);
   }
@@ -90,7 +97,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Thông tin user đăng nhập' })
-  async me(@Req() req: any) {
+  async me(@Req() req: AuthRequest) {
     return this.authService.me(req);
   }
 }
