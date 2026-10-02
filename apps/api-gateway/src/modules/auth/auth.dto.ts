@@ -16,6 +16,10 @@ export class LoginDto {
   @MinLength(1)
   @MaxLength(AUTH_DEFAULTS.passwordMaxBytes)
   password!: string;
+
+  @IsOptional()
+  @IsString()
+  lang?: string;
 }
 
 export class RefreshTokenDto {
@@ -23,4 +27,8 @@ export class RefreshTokenDto {
   @IsString()
   @MaxLength(128)
   refreshToken?: string;
+
+  @IsOptional()
+  @IsString()
+  lang?: string;
 }

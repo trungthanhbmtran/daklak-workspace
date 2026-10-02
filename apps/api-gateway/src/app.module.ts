@@ -94,6 +94,7 @@ export class AppModule implements NestModule {
           req.query = { lang };
         }
 
+
         // Also inject into request body for @Body bindings
         if (req.body && typeof req.body === 'object') {
           req.body.lang = lang;
