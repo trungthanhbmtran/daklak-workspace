@@ -183,6 +183,35 @@ export function ImportApiDialog() {
         onOpenChange={handleOpenChange}
         title="Import API Đầu Vào"
         description={step === 1 ? "Hỗ trợ định dạng OpenAPI 3, Swagger 2, Postman Collection, hoặc cURL." : "Xem trước và xác nhận các endpoint sẽ được import."}
+        maxWidth="max-w-5xl"
+        fullHeight={true}
+        footer={
+          step === 1 ? (
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 w-full">
+              <Button variant="outline" onClick={() => handleOpenChange(false)} className="rounded-xl w-full sm:w-auto">Hủy</Button>
+              <Button 
+                onClick={handlePreview} 
+                disabled={loading}
+                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white w-full sm:w-auto"
+                iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              >
+                Phân tích
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 w-full">
+              <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl w-full sm:w-auto">Quay lại</Button>
+              <Button 
+                onClick={handleCommit} 
+                disabled={loading || selectedEndpoints.size === 0}
+                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white w-full sm:w-auto"
+                iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              >
+                Xác nhận Import
+              </Button>
+            </div>
+          )
+        }
       >
         <div className="pt-4">
           {step === 1 && (
@@ -223,23 +252,13 @@ export function ImportApiDialog() {
                 </TabsContent>
               </Tabs>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button variant="outline" onClick={() => handleOpenChange(false)} className="rounded-xl">Hủy</Button>
-                <Button 
-                  onClick={handlePreview} 
-                  disabled={loading}
-                  className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white"
-                  iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                >
-                  Phân tích
-                </Button>
-              </div>
+
             </div>
           )}
 
           {step === 2 && parseResult && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-slate-500">Hệ thống nguồn</label>
                   <Input value={parseResult.systemName} readOnly className="h-9 bg-slate-50 dark:bg-slate-950" />
@@ -254,11 +273,11 @@ export function ImportApiDialog() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <span className="text-sm font-medium">Xử lý trùng lặp:</span>
                   <Select value={conflictStrategy} onValueChange={(v: any) => setConflictStrategy(v)}>
-                    <SelectTrigger className="w-[180px] h-8 text-xs">
+                    <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -272,7 +291,7 @@ export function ImportApiDialog() {
                 </div>
               </div>
 
-              <div className="border rounded-xl overflow-hidden">
+              <div className="border rounded-xl overflow-auto max-h-[50vh] custom-scrollbar">
                 <Table>
                   <TableHeader className="bg-slate-50 dark:bg-slate-900">
                     <TableRow>
@@ -318,17 +337,7 @@ export function ImportApiDialog() {
                 </Table>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl">Quay lại</Button>
-                <Button 
-                  onClick={handleCommit} 
-                  disabled={loading || selectedEndpoints.size === 0}
-                  className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white"
-                  iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                >
-                  Xác nhận Import
-                </Button>
-              </div>
+
             </div>
           )}
         </div>

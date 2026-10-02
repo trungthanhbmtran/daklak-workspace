@@ -1,7 +1,0 @@
-*** Begin Patch
-*** Delete File: .agents/context/architecture.md
-*** Delete File: .agents/hooks/pre-task.md
-*** Delete File: .agents/hooks/pre-analysis.md
-*** Delete File: .agents/hooks/post-implementation.md
-*** Delete File: .agents/hooks/final-validation.md
-*** End Patch
