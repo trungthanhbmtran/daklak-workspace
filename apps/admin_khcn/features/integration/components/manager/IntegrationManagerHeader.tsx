@@ -2,8 +2,7 @@ import React from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PostmanImportButton } from "../PostmanImportButton";
-import { SwaggerImportButton } from "../SwaggerImportButton";
+import { ImportApiDialog } from "../import/ImportApiDialog";
 
 interface Props {
   search: string;
@@ -25,8 +24,7 @@ export const IntegrationManagerHeader = ({ search, setSearch, onOpenCreate, onIm
         />
       </div>
       <div className="flex gap-2">
-        <PostmanImportButton onSuccess={onImportSuccess} />
-        <SwaggerImportButton onSuccess={onImportSuccess} />
+        <ImportApiDialog />
         <Button
           onClick={onOpenCreate}
           className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 px-6 h-10"
