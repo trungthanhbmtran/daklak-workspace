@@ -98,7 +98,18 @@ export const integrationApi = {
   getList: async (search?: string): Promise<IntegrationConfig[]> => {
     const res = await apiClient.get('/integration-upstreams', { params: { search } }) as any;
     const entries = Array.isArray(res) ? res : res.data;
-    if (Array.isArray(entries)) return entries;
+    if (Array.isArray(entries)) {
+      return entries.map(item => {
+        // Map backend IntegrationUpstream -> frontend IntegrationConfig
+        return {
+          ...item,
+          code: item.code || item.id,
+          protocol: item.protocol || item.type || "REST",
+          authType: item.authType || (item.auth ? (typeof item.auth === 'string' ? JSON.parse(item.auth).kind : item.auth.kind) : "NONE") || "NONE",
+          isActive: item.isActive ?? item.enabled ?? true,
+        };
+      });
+    }
     throw new Error(res.message || 'Lỗi lấy dữ liệu');
   },
   create: async (data: any) => {

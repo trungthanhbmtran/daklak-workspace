@@ -23,6 +23,9 @@ interface ParsedEndpoint {
   name: string;
   description: string;
   status: "NEW" | "CONFLICT";
+  headers?: any[];
+  params?: any[];
+  body?: string;
 }
 
 interface ParseResult {
@@ -283,6 +286,7 @@ export function ImportApiDialog() {
                       <TableHead>Method</TableHead>
                       <TableHead>Path</TableHead>
                       <TableHead>Tên API</TableHead>
+                      <TableHead className="text-right">Chi tiết</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -302,7 +306,12 @@ export function ImportApiDialog() {
                           <Badge variant="outline" className="font-mono">{ep.method}</Badge>
                         </TableCell>
                         <TableCell className="font-mono text-sm">{ep.path}</TableCell>
-                        <TableCell className="max-w-[200px] truncate" title={ep.name}>{ep.name}</TableCell>
+                        <TableCell className="max-w-[150px] truncate" title={ep.name}>{ep.name}</TableCell>
+                        <TableCell className="text-right text-xs text-slate-500 space-x-1">
+                          {ep.headers && ep.headers.length > 0 && <Badge variant="secondary" className="text-[10px] px-1">H:{ep.headers.length}</Badge>}
+                          {ep.params && ep.params.length > 0 && <Badge variant="secondary" className="text-[10px] px-1">Q:{ep.params.length}</Badge>}
+                          {ep.body && <Badge variant="secondary" className="text-[10px] px-1">Body</Badge>}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

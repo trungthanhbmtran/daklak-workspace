@@ -3,11 +3,18 @@ import * as yaml from 'js-yaml';
 import { Collection } from 'postman-collection';
 
 export interface ParsedEndpoint {
+  id?: string;
+  folder?: string;
   method: string;
   path: string;
   name: string;
   description: string;
   status?: 'NEW' | 'CONFLICT';
+  headers?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
+  params?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
+  body?: string;
+  bodyType?: 'none' | 'raw' | 'x-www-form-urlencoded' | 'form-data';
+  formItems?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
 }
 
 export interface ParseResult {
@@ -63,11 +70,42 @@ export class ImportParserService {
         for (const [method, detailsObj] of Object.entries(methods as any)) {
           if (!['get', 'post', 'put', 'delete', 'patch'].includes(method.toLowerCase())) continue;
           const details: any = detailsObj;
+          
+          const headers: any[] = [];
+          const params: any[] = [];
+          if (details.parameters && Array.isArray(details.parameters)) {
+            details.parameters.forEach((p: any) => {
+              if (p.in === 'header') headers.push({ key: p.name, value: p.example || '', description: p.description, enabled: true });
+              if (p.in === 'query') params.push({ key: p.name, value: p.example || '', description: p.description, enabled: true });
+            });
+          }
+
+          let body = '';
+          let bodyType = 'none';
+          if (details.requestBody && details.requestBody.content) {
+            const contentTypes = Object.keys(details.requestBody.content);
+            if (contentTypes.length > 0) {
+              const mainType = contentTypes[0];
+              bodyType = mainType.includes('json') || mainType.includes('xml') || mainType.includes('text') ? 'raw' : (mainType.includes('form') ? 'form-data' : 'raw');
+              if (details.requestBody.content[mainType].example) {
+                body = typeof details.requestBody.content[mainType].example === 'string' 
+                       ? details.requestBody.content[mainType].example 
+                       : JSON.stringify(details.requestBody.content[mainType].example, null, 2);
+              }
+            }
+          }
+
           endpoints.push({
+            id: `ep-${Math.random().toString(36).substring(2, 9)}`,
+            folder: '',
             method: method.toUpperCase(),
             path: this.normalizePath(path),
             name: details.summary || details.operationId || path,
             description: details.description || '',
+            headers,
+            params,
+            body,
+            bodyType: bodyType as any,
           });
         }
       }
@@ -111,11 +149,43 @@ export class ImportParserService {
           }
           
           const desc: any = req.description;
+          
+          const headers = req.header ? req.header.map((h: any) => ({ key: h.key, value: h.value, enabled: h.disabled !== true, description: h.description })) : [];
+          const params = (typeof req.url !== 'string' && req.url?.query) ? req.url.query.map((q: any) => ({ key: q.key, value: q.value, enabled: q.disabled !== true, description: q.description })) : [];
+          
+          let body = '';
+          let bodyType = 'none';
+          let formItems: any[] = [];
+
+          if (req.body) {
+            if (req.body.mode === 'raw') {
+              body = req.body.raw || '';
+              bodyType = 'raw';
+            } else if (req.body.mode === 'formdata') {
+              bodyType = 'form-data';
+              if (Array.isArray(req.body.formdata)) {
+                formItems = req.body.formdata.map((f: any) => ({ key: f.key, value: f.value || '', enabled: f.disabled !== true }));
+              }
+            } else if (req.body.mode === 'urlencoded') {
+              bodyType = 'x-www-form-urlencoded';
+              if (Array.isArray(req.body.urlencoded)) {
+                formItems = req.body.urlencoded.map((f: any) => ({ key: f.key, value: f.value || '', enabled: f.disabled !== true }));
+              }
+            }
+          }
+
           endpoints.push({
+            id: `ep-${Math.random().toString(36).substring(2, 9)}`,
+            folder: '',
             method: req.method?.toUpperCase() || 'GET',
             path: this.normalizePath(path),
             name: item.name || path,
             description: desc?.content || (typeof desc === 'string' ? desc : ''),
+            headers,
+            params,
+            body,
+            bodyType: bodyType as any,
+            formItems,
           });
         }
       });
@@ -167,16 +237,34 @@ export class ImportParserService {
       }
 
       const path = urlObj.pathname;
+      
+      const headers: any[] = [];
+      const headerRegex = /-(?:H|-header)\s+['"]([^:]+):\s*([^'"]+)['"]/g;
+      let headerMatch;
+      while ((headerMatch = headerRegex.exec(curlString)) !== null) {
+        headers.push({ key: headerMatch[1], value: headerMatch[2], enabled: true });
+      }
+
+      const params: any[] = [];
+      urlObj.searchParams.forEach((val, key) => {
+        params.push({ key, value: val, enabled: true });
+      });
 
       return {
         systemName: urlObj.hostname || 'Imported cURL',
-        baseUrl: `${urlObj.protocol}//${urlObj.host}`,
+        baseUrl: `${urlObj.protocol}//${urlObj.host}${urlObj.port ? ':' + urlObj.port : ''}`,
         endpoints: [
           {
+            id: `ep-${Math.random().toString(36).substring(2, 9)}`,
+            folder: '',
             method,
             path: this.normalizePath(path),
             name: 'API từ cURL',
-            description: ''
+            description: '',
+            headers,
+            params,
+            body: dataStr,
+            bodyType: dataStr ? 'raw' : 'none'
           }
         ]
       };

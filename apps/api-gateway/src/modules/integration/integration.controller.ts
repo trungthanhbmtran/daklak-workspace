@@ -122,55 +122,29 @@ export class IntegrationController {
     const res = (await firstValueFrom(this.grpcService.GetAllUpstreams({}))) as any;
     const existingUpstreams = res.data || [];
 
-    for (const ep of dto.endpoints) {
-      try {
-        const conflict = existingUpstreams.find((existing: any) => {
-          if (!existing.allowedPaths || !existing.allowedMethods) return false;
-          return existing.allowedPaths.includes(ep.path) && existing.allowedMethods.includes(ep.method);
-        });
+    try {
+      const payload = {
+        name: dto.systemName || 'Imported API',
+        type: 'REST',
+        baseUrl: dto.baseUrl,
+        allowedPaths: dto.endpoints.map(e => e.path),
+        allowedMethods: dto.endpoints.map(e => e.method),
+        auth: JSON.stringify({}),
+        timeoutMs: 30000,
+        retry: JSON.stringify({ attempts: 3 }),
+        cacheTtlSec: 0,
+        rateLimit: JSON.stringify({ windowMs: 60000, maxRequests: 1000 }),
+        roles: [],
+        scopes: [],
+        enabled: true,
+        callerUserId: req.user.id.toString(),
+        metadata: JSON.stringify({ _parsedEndpoints: dto.endpoints })
+      };
 
-        if (conflict) {
-          if (dto.conflictStrategy === 'IGNORE') {
-            skippedCount++;
-            continue;
-          } else if (dto.conflictStrategy === 'OVERWRITE') {
-            const payload = {
-              id: conflict.id,
-              data: {
-                ...conflict,
-                name: ep.name,
-                allowedPaths: [ep.path],
-                allowedMethods: [ep.method],
-              },
-              callerUserId: req.user.id.toString(),
-            };
-            await firstValueFrom(this.grpcService.UpdateUpstream(payload));
-            overwrittenCount++;
-          }
-        } else {
-          // Create new
-          const payload = {
-            name: ep.name,
-            type: 'REST', // default
-            baseUrl: dto.baseUrl,
-            allowedPaths: [ep.path],
-            allowedMethods: [ep.method],
-            auth: JSON.stringify({}),
-            timeoutMs: 30000,
-            retry: JSON.stringify({ attempts: 3 }),
-            cacheTtlSec: 0,
-            rateLimit: JSON.stringify({ windowMs: 60000, maxRequests: 1000 }),
-            roles: [],
-            scopes: [],
-            enabled: true,
-            callerUserId: req.user.id.toString(),
-          };
-          await firstValueFrom(this.grpcService.CreateUpstream(payload));
-          createdCount++;
-        }
-      } catch (err) {
-        errorCount++;
-      }
+      await firstValueFrom(this.grpcService.CreateUpstream(payload));
+      createdCount++;
+    } catch (err) {
+      errorCount++;
     }
 
     return {

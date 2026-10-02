@@ -42,6 +42,7 @@ message UpstreamPayload {
   repeated string scopes = 12;
   bool enabled = 13;
   string callerUserId = 14;
+  string metadata = 15; // JSON string
 }
 
 message UpstreamResponse {
@@ -62,6 +63,7 @@ message UpstreamResponse {
   bool enabled = 15;
   string createdAt = 16;
   string updatedAt = 17;
+  string metadata = 18; // JSON string
 }
 
 message UpstreamListResponse {

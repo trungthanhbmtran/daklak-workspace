@@ -14,6 +14,7 @@ model IntegrationUpstream {
   scopes         Json? // Array of strings
   requestSchema  Json? // JSON schema for validation
   responseLimit  Int? // bytes limit
+  metadata       Json? // Store _parsedEndpoints or other UI configs
   enabled        Boolean @default(true)
   version        Int     @default(1)
 

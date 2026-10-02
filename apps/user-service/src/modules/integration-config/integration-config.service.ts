@@ -30,6 +30,7 @@ export class IntegrationConfigService {
         scopes: dto.scopes as any,
         requestSchema: dto.requestSchema as any,
         responseLimit: dto.responseLimit,
+        metadata: (dto as any).metadata,
         enabled: dto.enabled ?? true,
         version: 1,
         createdBy: userId,
