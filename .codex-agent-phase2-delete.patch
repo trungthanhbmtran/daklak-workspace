@@ -1,0 +1,6 @@
+*** Begin Patch
+*** Delete File: .agents/rules/00-core.md
+*** Delete File: .agents/rules/03-business-rules.md
+*** Delete File: .agents/rules/04-security.md
+*** Delete File: .agents/workflows/00-main.md
+*** End Patch

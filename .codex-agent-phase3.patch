@@ -1,0 +1,134 @@
+*** Begin Patch
+*** Update File: .agents/rules/01-architecture.md
+@@
+-# Enterprise System Architecture (e-Government Standard)
++# Enterprise Architecture Baseline for the Government Platform
+@@
+-The project applies a distributed architecture following the **Enterprise Microservices** standard, specifically designed for government agencies and large-scale enterprises. The system places the highest priority on **High Availability (HA)**, **Deep Security**, **Data Integrity**, and **Auditability**.
++This is the project's internal architecture baseline for a government workflow platform. It prioritizes availability, security, data integrity, auditability, interoperability, and recoverability; it is not by itself proof of regulatory compliance.
+@@
+-4.  **Data Storage Layer:** Each Microservice manages an independent database (PostgreSQL via Prisma). Redis is used for caching, MinIO for Object Storage.
++4.  **Data Storage Layer:** Each microservice owns an isolated MySQL logical database/schema through Prisma with the MariaDB adapter used by the current Node.js services. Redis provides bounded cache/session state and MinIO provides object storage.
+@@
+-    -   **Frontend:** Absolutely MUST NOT contain core business logic. Do not arbitrarily transform critical data before sending. Only fetch APIs, handle UI state, and display errors.
+-    -   **Backend (API Gateway & Microservices):** Takes 100% responsibility for data correctness, strictly validates inputs, and standardizes the Response Format before returning it.
++    -   **Frontend:** Must not make authoritative business, permission, approval, signing, or organization-scope decisions. Client validation and presentation transforms are UX only.
++    -   **Backend (API Gateway & Microservices):** Authoritatively validates input and permissions; the owning service enforces domain invariants and data scope before returning a versioned response contract.
+@@
+-    -   The `.proto` file is the absolute source of truth defining the communication contract between services.
+-    -   Any changes to communication data structures must start by updating the Proto file.
++    -   `shared/protos` is the canonical source for internal gRPC contracts. Public REST, event, and file contracts have their own versioned canonical schemas.
++    -   Change the canonical contract first, preserve compatibility deliberately, then update producers and consumers.
+@@
+-    -   In an enterprise/government system, data is never physically deleted. All critical data tables must implement Soft Delete mechanisms (using flags like `deletedAt`, `deletedBy`) for historical archiving and recovery.
++    -   Use soft delete where the approved records lifecycle requires recoverability or legal hold. Physical disposal may occur only under the approved retention/destruction policy with authorization and audit evidence; soft delete does not replace that policy.
+ -   **Audit Trail:**
+-    -   Every change (Create, Update, Delete) on core Entities must be logged (who performed it, when, changing from what value to what value, which IP).
++    -   Security-sensitive and material domain changes require a tamper-protected, redacted audit record as defined in rules 04 and 11. Do not log unrestricted before/after payloads.
+@@
+-    -   Long-running processes (e.g., Document Approval Flow, Leave Request) MUST be orchestrated by the **Workflow Service** (Control Plane).
+-    -   Satellite services (Data Plane) only execute local tasks (Local Transactions) and report results via **RabbitMQ**.
++    -   Long-running, configurable processes are orchestrated by the generic **Workflow Service**. Domain services retain ownership of domain data and invariants and execute local transactions through typed contracts.
++    -   Workflow definitions must not embed domain implementation logic; asynchronous side effects use durable events when the accepted contract requires eventual consistency.
+@@
+-    -   When combining Database writes and Event/Message publishing, the **Transactional Outbox Pattern** MUST be applied. Write events to the Outbox table within the current database transaction, then a background worker sweeps the Outbox table and pushes to RabbitMQ. Ensures Eventual Consistency; data is never lost even if the Message Broker fails.
+-   **No Synchronous Connections for State Changes:**
+-    -   It is forbidden to use HTTP/gRPC to orchestrate business state changes across services (e.g., Update in Service A immediately calls RPC to force an Update in Service B). Network interruptions cause inconsistency. Event-Driven (RabbitMQ) is mandatory.
++    -   When a database change and an event must be atomic, use the **Transactional Outbox Pattern**, an idempotent consumer/inbox, bounded retry, and DLQ/reconciliation. Do not claim zero data loss without operational evidence.
++-   **Synchronous vs asynchronous boundary:**
++    -   Avoid synchronous chains of cross-service state mutation. gRPC is acceptable for explicit query/validation/result contracts with defined timeout/failure semantics; durable events are preferred for eventual side effects. Resolve conflicting transition designs through an ADR.
+@@
+-    -   **Redis** MUST be used as a Caching Layer for heavy queries, Master Data, or frequently accessed authorization data (PBAC) to reduce Database load.
++    -   Use Redis only when measurements and consistency requirements justify it. Set ownership, TTL, invalidation, key bounds, and fail-closed behavior for authorization/session data.
+@@
+-    -   When a child service (e.g., Media Service) responds slowly or crashes, the system must immediately short-circuit (return Fallback data or standardized errors) instead of hanging, preventing **Cascading Failures** system-wide.
++    -   Apply timeouts, bulkheads/circuit breakers, and bounded retries. Fallbacks must fail closed for authentication, authorization, approvals, signatures, publication, and classified data.
+@@
+--   **Authentication:** Authentication is centralized at the API Gateway (using JWT Tokens). Backend Microservices sit within a secure internal network (VPC) and entirely trust the User information attached to metadata/headers passed down by the Gateway.
++-   **Authentication:** Follow the single issuer and validator boundary in rule 04. Internal networks are not automatically trusted; services validate signed/asserted identity context and reject arbitrary identity headers/metadata.
+ -   **PBAC (Policy-Based Access Control):** Advanced authorization based on policies and context (Organization Scope, Data Scope). Do not merely check what Role a user has, but determine: "Does User U have the right to perform Action A on Resource R belonging to Organization Unit O?".
+--   **Input Validation:** Extreme validation of input data at both the Frontend and API Gateway (using libraries like Zod, class-validator). Zero-Trust Principle: Never trust any data sent from the client.
++-   **Input Validation:** Client validation improves UX; authoritative validation runs at every server trust boundary, including the owning service. Never trust client, upstream, queue, file, or cached input merely because it passed through the Gateway.
+*** Update File: .agents/rules/05-coding.md
+@@
+-- **Graceful Degradation & Fallback**: When depending on 3rd-party services or making cross-service gRPC calls, Timeouts and Fallback mechanisms MUST be implemented to prevent cascading failures if the destination service goes down.
++- **Graceful Degradation & Fallback**: Use explicit timeouts, bounded retries, and circuit breaking for remote dependencies. Fail closed for authentication, authorization, approval, signing, publication, and classified data; use fallback only when stale/degraded data is explicitly safe.
+@@
+-- **No Unbounded Arrays**: Any Database query capable of returning over 1,000 records **MUST** implement Pagination (Offset or Cursor) to prevent system crashes due to memory overflow (OOM - Out Of Memory).
+-- **Big-O Optimization**: Nested loops with $\mathcal{O}(N^2)$ complexity (e.g., using `find` inside a `map`) are FORBIDDEN. You must convert the secondary Array into a `Map` or `Set` to reduce lookup complexity to $\mathcal{O}(N)$.
++- **No Unbounded Arrays**: Any potentially large database/API read must use an approved hard limit, pagination/cursor, or streaming. The limit is use-case and resource-budget specific; do not invent a universal threshold.
++- **Big-O Optimization**: Avoid quadratic work on unbounded or performance-sensitive paths. Prefer indexed queries, `Map`, or `Set` where semantics and measurements justify them; document intentional small bounded cases.
+@@
+-- **Meaningful Logging**: Do not use meaningless logs like `console.log("Error: " + err)`. Context-rich logging is mandatory: Error source, Input payload, Stack trace, and Correlation ID (if available).
++- **Meaningful, minimal logging**: Log event/error type, safe identifiers, outcome, service, and correlation ID. Never log unrestricted input, tokens, secrets, or unnecessary PII. Stack traces belong only in access-controlled server logs and must not be exposed to clients.
+@@
+-## 5.5. Test-Driven Development (TDD)
+-- **Do not self-report "Completed"** without providing Test evidence (Jest unit tests).
+-- **Coverage**: Newly written code must be tested for both the Happy path and Error paths (Edge cases).
+-- **Sandbox Testing**: For core algorithms, the Agent must proactively create a scratch file (`scratch-test.ts`), inject Mock Data up to 10,000 elements to run `console.time()` (Benchmark), prove optimal logic, and output the report to the logs.
++## 5.5. Validation Evidence
++- **Do not self-report "Completed"** without evidence appropriate to the change. Behavior changes require automated regression tests; documentation changes require source/link/encoding checks.
++- **Coverage**: Test happy, authorization, validation, failure, and concurrency paths that are affected by the change.
++- **Performance**: Benchmark only changed or explicitly claimed performance-sensitive code using representative bounded data. Label environment and methodology; a local microbenchmark is not a production SLA.
+@@
+-- **Optimistic UI Update**: Instantly update the UI state while the API runs in the background to deliver a blazing fast UX (e.g., using React Query mutations).
++- **Optimistic UI Update**: Use only for reversible presentation actions with reconciliation. Do not optimistically confirm approvals, permissions, publication, signing, KPI finalization, or other legally/materially significant state.
+*** Update File: .agents/rules/08-integration-reporting.md
+@@
+-- **Centralized Integration Hub**: All inbound and outbound traffic MUST pass through a dedicated Integration Gateway/Service. Internal microservices (like HRM or Document) are **FORBIDDEN** from calling external APIs directly.
++- **Centralized Integration Boundary**: Route external-system traffic through the approved integration boundary and a server-controlled destination registry. Do not accept arbitrary upstream URLs; validate scheme, host/address, DNS/redirect behavior, method/path, timeout, size, and record count.
+@@
+-- **Integration Audit Log**: EVERY cross-system integration call must be logged in an `IntegrationLog` table. This log must capture: `TransactionId`, `ExternalEndpoint`, `Direction` (Inbound/Outbound), `Payload` (Masked for sensitive info), `ResponseStatus`, and `Timestamp`.
++- **Integration Audit Log**: Record transaction/correlation ID, registered destination identifier, direction, operation, result/status, duration, timestamp, and an approved hash or masked summary. Store full payload only when classification, purpose, access, encryption, and retention are explicitly approved.
++- **Credential Isolation**: Use server-side `secretRef` material. Never forward browser cookies, Hub tokens, arbitrary identity headers, or upstream `Set-Cookie` across trust boundaries.
+*** Update File: .agents/rules/10-senior-quality-gate.md
+@@
+-- **Leave It Better Than You Found It (Boy Scout Rule)**: If you touch a file and notice glaring anti-patterns nearby (e.g., deeply nested callbacks, lack of types), you MUST proactively refactor them (within the scope of the feature) or explicitly point them out to the User.
++- **Leave It Better Within Scope**: Fix nearby issues only when necessary for the requested change and covered by the same validation. Record unrelated debt instead of expanding a controlled change.
+@@
+-- Every new API endpoint MUST include rate-limiting annotations (if applicable) and pagination out-of-the-box.
+-- Every Prisma/DB query MUST explicitly `select` only the necessary fields to prevent massive data leaks to the Frontend. Do NOT `select *` implicitly by returning the whole object unless strictly required.
++- Every externally reachable or expensive endpoint must have an explicit abuse-control decision and bounded reads/exports where applicable.
++- Queries whose result crosses a service/API boundary or contains sensitive fields must explicitly select/map the allowed fields. Reviewed aggregate, existence, or internal maintenance queries may use the minimal safe query shape without artificial `select` clauses; raw entities must not leak across boundaries.
+@@
+-  // SSRF/Data Leak Risk: Returns everything including password hashes
++  // Data-leak risk: returns fields that the response contract did not authorize
+*** Update File: .agents/ROADMAP.md
+@@
+-> **MANDATORY RULE:** Mọi AI (Agent) khi làm việc trong workspace này ĐỀU PHẢI đọc file này để biết trạng thái dự án, và BẮT BUỘC PHẢI tự động cập nhật file này (đánh dấu hoàn thành, thêm To-Do mới) sau khi hoàn tất một tính năng hoặc sửa lỗi.
++> **QUY TẮC:** Agent phải đọc roadmap để nắm bối cảnh. Chỉ cập nhật khi có bằng chứng một mốc thực sự đổi trạng thái hoặc phát hiện backlog có thể hành động; không dùng roadmap làm bằng chứng tính năng đã tồn tại.
+@@
+-- [ ] Tích hợp SSO / Xác thực tập trung (nếu có).
++- [ ] Hoàn tất SSO/xác thực tập trung theo nhà cung cấp được phê duyệt; mã hiện có mới là khung provider, chưa chứng minh VNeID/MFA hay vận hành production.
+@@
+-- [x] Khởi tạo `admin-frontend` (Next.js 14, Tailwind, Shadcn UI).
++- [x] Khởi tạo `admin_khcn` (Next.js 16.1.x, Tailwind, Shadcn UI).
+@@
+ - [ ] Ứng dụng "Dumb Frontend" - Đẩy logic xử lý phức tạp xuống Backend.
++
++## 🛡️ Mức sẵn sàng cho hệ thống cơ quan nhà nước
++- [x] Chuẩn hóa charter/workflow/rule của agent theo hướng có căn cứ, PBAC, phân loại dữ liệu và không tự tuyên bố tuân thủ.
++- [ ] Hoàn thiện hồ sơ cấp độ an toàn hệ thống thông tin và ma trận yêu cầu/bằng chứng được cơ quan có thẩm quyền phê duyệt.
++- [ ] Bật TLS/cookie Secure theo cấu hình production đã kiểm chứng; loại bỏ default secret và thu hẹp cổng hạ tầng công khai.
++- [ ] Thống nhất biên phát hành/xác minh token, loại bỏ luồng legacy, kiểm chứng rotation/revocation và MFA/SSO.
++- [ ] Hoàn thiện PBAC theo resource/action/phạm vi đơn vị và kiểm thử chống IDOR cho API, báo cáo, WebSocket và tích hợp.
++- [ ] Hoàn thiện audit tập trung chống sửa/xóa, redaction, correlation, retention và quyền truy cập theo chính sách.
++- [ ] Hoàn thiện chống SSRF (IPv4/IPv6, DNS rebinding, redirect), registry/allowlist và giới hạn payload/record.
++- [ ] Kiểm chứng backup/restore, Redis/queue HA, key rotation, monitoring, incident response, rollback và DR theo RPO/RTO được duyệt.
+@@
+-1. Khi nhận một yêu cầu từ người dùng, hãy thêm nó vào mục **To-Do** (nếu là tính năng lớn/mới).
+-2. Khi đang làm, có thể chuyển sang mục **In Progress**.
+-3. Khi hoàn thành, chuyển sang mục **Done [x]** và ghi chú ngắn gọn cách giải quyết.
++1. Chỉ thêm **To-Do** cho hạng mục lớn, có phạm vi và bằng chứng rõ ràng.
++2. Chỉ chuyển **In Progress** khi công việc thực sự đang được triển khai.
++3. Chỉ đánh dấu **Done [x]** khi đạt tiêu chí chấp nhận và có test/cấu hình/vận hành tương ứng; code tồn tại không đồng nghĩa đã nghiệm thu.
+*** Update File: .agents/context/services.md
+@@
+ # Microservices & Ports List
+ 
+-The system utilizes a Microservices architecture combined with a Monorepo approach (NestJS for Backend, Next.js for Frontend). Below is the list of current services, their roles, and configured communication ports (based on `docker-compose.yml` and the `apps/` structure).
++This is a navigation snapshot, not deployment evidence. Derive current service names, ports, databases, and exposure from `docker-compose*.yml`, `apps/*/package.json`, Prisma schemas, and runtime configuration. Never use a value marked `Est.` or `Configurable` for firewall, integration, or acceptance decisions.
+@@
+-| `user-service` | Manages users, groups, and authorization (RBAC/PBAC). | `50051` | `3001` | `admin_systems` |
++| `user-service` | Manages users, groups, authentication state, and PBAC policy data. | `50051` | `3001` | `admin_systems` |
+*** End Patch

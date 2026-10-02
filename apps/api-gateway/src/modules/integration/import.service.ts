@@ -150,7 +150,7 @@ export class ImportParserService {
           
           const desc: any = req.description;
           
-          const headers = req.header ? req.header.map((h: any) => ({ key: h.key, value: h.value, enabled: h.disabled !== true, description: h.description })) : [];
+          const headers = req.headers ? req.headers.map((h: any) => ({ key: h.key, value: h.value, enabled: h.disabled !== true, description: h.description })) : [];
           const params = (typeof req.url !== 'string' && req.url?.query) ? req.url.query.map((q: any) => ({ key: q.key, value: q.value, enabled: q.disabled !== true, description: q.description })) : [];
           
           let body = '';
