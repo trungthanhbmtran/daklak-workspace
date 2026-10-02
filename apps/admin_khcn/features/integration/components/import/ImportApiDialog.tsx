@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
+import apiClient from "@/lib/axiosInstance";
 import { useQueryClient } from "@tanstack/react-query";
 import { integrationKeys } from "../../api";
 
@@ -93,20 +93,21 @@ export function ImportApiDialog() {
       }
 
       // We need to point this to the backend preview endpoint
-      const response = await axios.post("/api/admin/integration-upstreams/import/preview", formData, {
+      const response = await apiClient.post("/integration-upstreams/import/preview", formData, {
         headers: { "Content-Type": "multipart/form-data" }
-      });
+      }) as any;
 
-      if (response.data?.success) {
-        setParseResult(response.data.data);
+      if (response.data?.success || response.success) {
+        const resData = response.data?.success ? response.data.data : response.data;
+        setParseResult(resData);
         // Select all by default
-        const allIndices = response.data.data.endpoints.map((_: any, i: number) => i);
+        const allIndices = resData.endpoints.map((_: any, i: number) => i);
         setSelectedEndpoints(new Set(allIndices));
         setStep(2);
         toast.success("Phân tích thành công");
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Lỗi khi phân tích dữ liệu");
+      toast.error(error.response?.data?.message || error.message || "Lỗi khi phân tích dữ liệu");
     } finally {
       setLoading(false);
     }
@@ -130,10 +131,10 @@ export function ImportApiDialog() {
         conflictStrategy
       };
 
-      const response = await axios.post("/api/admin/integration-upstreams/import/commit", payload);
+      const response = await apiClient.post("/integration-upstreams/import/commit", payload) as any;
 
-      if (response.data?.success) {
-        toast.success(response.data.message);
+      if (response.success || response.data?.success) {
+        toast.success(response.message || response.data?.message || "Import thành công");
         queryClient.invalidateQueries({ queryKey: integrationKeys.lists() });
         handleOpenChange(false);
       }
