@@ -41,8 +41,8 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     if (!token) {
-      // Tích điểm: không có token → có thể đang probe API
-      this.reportThreat(ip, 'AUTH_FAIL', 'No token provided');
+      // An expired browser cookie can legitimately leave a request without a token.
+      // Rate limiting handles unauthenticated traffic without penalizing shared office IPs.
       throw new UnauthorizedException(
         'Không tìm thấy token xác thực trong Cookie hoặc Header',
       );
@@ -114,4 +114,3 @@ export class JwtAuthGuard implements CanActivate {
     this.threatIntel.recordEvent(ip, event, detail).catch(() => {});
   }
 }
-

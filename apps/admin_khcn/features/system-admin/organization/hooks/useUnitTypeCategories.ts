@@ -7,7 +7,8 @@ import { CATEGORY_KEYS } from "../../categories/keys";
 import { toast } from "sonner";
 import type { CategoryItem } from "../../categories/types";
 
-export const UNIT_TYPE_CATEGORY_GROUP = "UNIT_TYPE_CATEGORY";
+import { UNIT_TYPE_CATEGORY_GROUP } from "../constants/category-groups";
+export { UNIT_TYPE_CATEGORY_GROUP } from "../constants/category-groups";
 
 // ── Types phản chiếu đúng schema JSON trong DB ────────────────────────────────
 

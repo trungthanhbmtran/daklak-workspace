@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { AUTH_JWT } from '../../../../../shared/core/auth-session';
 
 @Injectable()
 export class IntegrationAuthService {
@@ -14,11 +15,37 @@ export class IntegrationAuthService {
   }
 
   private initializeKeys() {
-    // In production, we'd load this from an environment variable or secret manager.
-    // For now, we generate an RSA key pair in-memory.
+    if (
+      process.env.AUTH_REQUIRE_PERSISTENT_KEYS === 'true' &&
+      (!process.env.JWT_PRIVATE_KEY || !process.env.JWT_PUBLIC_KEY)
+    ) {
+      throw new Error(
+        'Persistent JWT_PRIVATE_KEY and JWT_PUBLIC_KEY are required',
+      );
+    }
+    if (
+      Boolean(process.env.JWT_PRIVATE_KEY) !==
+      Boolean(process.env.JWT_PUBLIC_KEY)
+    ) {
+      throw new Error('JWT private/public keys must be configured together');
+    }
     if (process.env.JWT_PRIVATE_KEY && process.env.JWT_PUBLIC_KEY) {
       this.privateKey = process.env.JWT_PRIVATE_KEY.replace(/\\n/g, '\n');
       this.publicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/g, '\n');
+      const privateKey = crypto.createPrivateKey(this.privateKey);
+      const publicKey = crypto.createPublicKey(this.publicKey);
+      if (
+        privateKey.asymmetricKeyType !== 'rsa' ||
+        (privateKey.asymmetricKeyDetails?.modulusLength || 0) < 2048 ||
+        !crypto
+          .createPublicKey(privateKey)
+          .export({ type: 'spki', format: 'der' })
+          .equals(publicKey.export({ type: 'spki', format: 'der' }))
+      ) {
+        throw new Error(
+          'JWT keys must be a matching RSA pair with at least 2048 bits',
+        );
+      }
       this.kid = process.env.JWT_KID || 'default-kid-1';
       this.logger.log('Loaded asymmetric keys from environment');
     } else {
@@ -62,11 +89,15 @@ export class IntegrationAuthService {
     };
   }
 
-  signAccessToken(userId: number, expiresIn: number, sessionId: string = crypto.randomUUID()): string {
+  signAccessToken(
+    userId: number,
+    expiresIn: number,
+    sessionId: string = crypto.randomUUID(),
+  ): string {
     const issuedAt = Math.floor(Date.now() / 1000);
     return this.signToken({
-      iss: 'daklak-user-service',
-      aud: 'daklak-api-gateway',
+      iss: AUTH_JWT.issuer,
+      aud: AUTH_JWT.audience,
       sub: String(userId),
       sid: sessionId,
       jti: crypto.randomUUID(),
@@ -91,4 +122,3 @@ export class IntegrationAuthService {
     return `${encodedHeader}.${encodedPayload}.${signature}`;
   }
 }
-

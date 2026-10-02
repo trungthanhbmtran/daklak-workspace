@@ -4,6 +4,7 @@ import {
   OnModuleInit,
   UnauthorizedException,
   BadRequestException,
+  ConflictException,
   ServiceUnavailableException,
   HttpException,
   HttpStatus,
@@ -21,7 +22,6 @@ export class AuthService implements OnModuleInit {
   private userGrpcService: any;
   private employeeGrpcService: any;
   constructor(
-    @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
   ) {}
@@ -39,7 +39,15 @@ export class AuthService implements OnModuleInit {
       return new UnauthorizedException(
         rpc.details || 'Thông tin đăng nhập không hợp lệ hoặc đã hết hạn',
       );
-    if (rpc.code === 8) return new HttpException('Tạm thời không thể đăng nhập. Vui lòng thử lại sau.', HttpStatus.TOO_MANY_REQUESTS);
+    if (rpc.code === 10)
+      return new ConflictException(
+        'Phiên đang được làm mới. Vui lòng thử lại.',
+      );
+    if (rpc.code === 8)
+      return new HttpException(
+        'Tạm thời không thể đăng nhập. Vui lòng thử lại sau.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     if (rpc.code === 3)
       return new BadRequestException(
         rpc.details || 'Thông tin đăng nhập không hợp lệ',
@@ -56,7 +64,9 @@ export class AuthService implements OnModuleInit {
     };
   }
   async login(body: any, res: Response) {
-    const loginKey = body?.username?.trim() || body?.email?.trim();
+    const loginKey =
+      (typeof body?.username === 'string' && body.username.trim()) ||
+      (typeof body?.email === 'string' && body.email.trim());
     if (
       !loginKey ||
       typeof body?.password !== 'string' ||
@@ -67,41 +77,48 @@ export class AuthService implements OnModuleInit {
       );
     }
     try {
-      const result = (await firstValueFrom(
+      const result = await firstValueFrom<AuthTokens>(
         this.userGrpcService
           .Login({ usernameOrEmail: loginKey, password: body.password })
           .pipe(timeout(10000)),
-      )) as AuthTokens;
+      );
       return this.establishSession(res, result);
     } catch (error) {
       throw this.authError(error);
     }
   }
+  private refreshToken(body: any, req: any): string {
+    if (body?.refreshToken != null && typeof body.refreshToken !== 'string') {
+      throw new BadRequestException('refreshToken phải là chuỗi');
+    }
+    return (
+      body?.refreshToken?.trim() ||
+      (typeof req.cookies?.refreshToken === 'string'
+        ? req.cookies.refreshToken.trim()
+        : '')
+    );
+  }
   async refresh(body: any, req: any, res: Response) {
-    const token =
-      body?.refreshToken?.trim() || req.cookies?.refreshToken?.trim();
+    const token = this.refreshToken(body, req);
     if (!token) {
-      clearAuthCookies(res);
       throw new UnauthorizedException('Thiếu refresh_token');
     }
     try {
-      const result = (await firstValueFrom(
+      const result = await firstValueFrom<AuthTokens>(
         this.userGrpcService
           .Refresh({ refreshToken: token })
           .pipe(timeout(10000)),
-      )) as AuthTokens;
+      );
       return this.establishSession(res, result);
     } catch (error) {
       const mapped = this.authError(error);
-      if (mapped instanceof UnauthorizedException) clearAuthCookies(res);
       throw mapped;
     }
   }
   async logout(req: any, res: Response, body?: any) {
     // Always clear the browser session, including legacy cookies, even if revocation is unavailable.
     clearAuthCookies(res);
-    const token =
-      body?.refreshToken?.trim() || req.cookies?.refreshToken?.trim();
+    const token = this.refreshToken(body, req);
     if (token) {
       try {
         await firstValueFrom(
@@ -109,8 +126,8 @@ export class AuthService implements OnModuleInit {
             .RevokeRefreshToken({ refreshToken: token })
             .pipe(timeout(5000)),
         );
-      } catch {
-        /* Browser session is already cleared. */
+      } catch (error) {
+        throw this.authError(error);
       }
     }
     return { success: true };
@@ -154,4 +171,3 @@ export class AuthService implements OnModuleInit {
     });
   }
 }
-

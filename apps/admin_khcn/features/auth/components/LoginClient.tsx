@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import apiClient, { clearBrowserSession } from "@/lib/axiosInstance";
+import apiClient, { clearBrowserSession, loginBrowserSession } from "@/lib/axiosInstance";
 import { safeAuthCallback } from "@/lib/auth-navigation";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,7 +36,7 @@ const formSchema = z.object({
   username: z
     .string()
     .min(1, { message: "Tên đăng nhập không được để trống." }),
-  password: z.string().min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự." }),
+  password: z.string().min(1, { message: "Vui lòng nhập mật khẩu." }),
 });
 
 export function LoginClient() {
@@ -54,7 +54,7 @@ export function LoginClient() {
 
   const loginMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const result = await apiClient.post("/auth/login", {
+      const result = await loginBrowserSession({
         username: values.username,
         password: values.password,
       });

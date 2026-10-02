@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useSearchParams } from "next/navigation";
-import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useListDocuments } from "@/features/document/hooks/useDocuments";
 
 // Lazy load heavy modals
 const DocumentUploadModal = dynamic(
@@ -130,14 +130,12 @@ export function IncomingDocumentsClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
-  const { syncOnline } = useDocuments();
 
 
-  const { data: response, isLoading } = useListDocuments({
+  const { data: response, isLoading, isFetching, refetch } = useListDocuments({
     isIncoming: true,
     search: searchTerm.length >= 2 ? searchTerm : undefined,
     pageSize: 50,
@@ -150,16 +148,9 @@ export function IncomingDocumentsClient() {
     setIsDetailOpen(true);
   }, []);
 
-  const handleSync = useCallback(async () => {
-    setIsSyncing(true);
-    try {
-      await syncOnline();
-    } catch (err) {
-      console.error("Sync error:", err);
-    } finally {
-      setIsSyncing(false);
-    }
-  }, [syncOnline]);
+  const handleRefresh = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
@@ -184,12 +175,12 @@ export function IncomingDocumentsClient() {
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <Button
             variant="outline"
-            onClick={handleSync}
-            disabled={isSyncing}
+            onClick={handleRefresh}
+            disabled={isFetching}
             className="rounded-xl border-blue-200 text-blue-600 font-bold px-6 h-12 hover:bg-blue-50 active:scale-95"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
-            {isSyncing ? "Đang đồng bộ..." : "Đồng bộ Trục VDX/LGSP"}
+            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+            {isFetching ? "Đang tải lại..." : "Tải lại danh sách"}
           </Button>
           <Button
             onClick={handleOpenModal}

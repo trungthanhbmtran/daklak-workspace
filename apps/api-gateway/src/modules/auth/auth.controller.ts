@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RateLimitGuard, RateLimit } from '../../core/guards/rate-limit.guard';
 import { AuthService } from './auth.service';
+import { AuthOriginGuard } from './auth-origin.guard';
 
 @ApiTags('Auth')
 @Controller('admin/auth')
@@ -32,7 +33,7 @@ export class AuthController {
   @Post('login')
   @Header('Cache-Control', 'no-store')
   @Header('Pragma', 'no-cache')
-  @UseGuards(RateLimitGuard)
+  @UseGuards(AuthOriginGuard, RateLimitGuard)
   @RateLimit({ limit: 10, windowSec: 900, keyBy: 'ip', prefix: 'login' })
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({
@@ -54,7 +55,7 @@ export class AuthController {
    */
   @Post('refresh')
   @Header('Cache-Control', 'no-store')
-  @UseGuards(RateLimitGuard)
+  @UseGuards(AuthOriginGuard, RateLimitGuard)
   @RateLimit({ limit: 30, windowSec: 900, keyBy: 'ip', prefix: 'refresh' })
   @ApiOperation({
     summary: 'Làm mới access_token bằng refresh_token (session)',
@@ -73,6 +74,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @UseGuards(AuthOriginGuard)
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Đăng xuất và thu hồi refresh_token' })
   async logout(
@@ -92,4 +94,3 @@ export class AuthController {
     return this.authService.me(req);
   }
 }
-

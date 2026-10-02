@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "incremental": false },
+  "include": ["next-env.d.ts", "lib/auth*.ts", "lib/axiosInstance.ts", "lib/session-recovery.ts", "lib/server-api-url.ts", "lib/serverFetch.ts", "proxy.ts", "providers/index.tsx", "features/auth/**/*.tsx", "app/session/**/*.tsx", "hooks/useLogout.ts"],
+  "exclude": ["node_modules", ".next"]
+}

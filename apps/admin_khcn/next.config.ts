@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
+import { join } from "node:path";
+
+const workspaceRoot = join(__dirname, "../..");
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingRoot: workspaceRoot,
+  turbopack: { root: workspaceRoot },
   basePath: "/admin",
   reactCompiler: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   logging: {
     fetches: {
       fullUrl: true,
@@ -20,3 +22,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+

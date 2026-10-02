@@ -1,0 +1,15 @@
+# Merge with docker-compose.prod.yml from the repository root.
+# Runtime configuration/logging/resource limits remain in the production Compose file.
+services:
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/user-service/Dockerfile
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+  admin-frontend:
+    build:
+      context: .
+      dockerfile: apps/admin_khcn/Dockerfile

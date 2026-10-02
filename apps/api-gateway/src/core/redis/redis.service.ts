@@ -1,6 +1,9 @@
 import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
-import { AUTH_DEFAULTS, positiveSeconds, TOUCH_AUTH_SESSION } from '../../../../../shared/core/auth-session';
+import {
+  getAuthPolicy,
+  TOUCH_AUTH_SESSION,
+} from '../../../../../shared/core/auth-session';
 
 @Injectable()
 export class RedisService implements OnModuleDestroy {
@@ -8,6 +11,7 @@ export class RedisService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
 
   private hasLoggedError = false;
+  private readonly authPolicy = getAuthPolicy();
 
   constructor() {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379', {
@@ -34,9 +38,19 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async touchAuthSession(sessionId: string, userId: string): Promise<boolean> {
-    const idle = positiveSeconds(process.env.AUTH_IDLE_TIMEOUT_SECONDS, AUTH_DEFAULTS.idleSeconds);
-    return Number(await this.redis.eval(TOUCH_AUTH_SESSION, 2, 'auth:session:' + sessionId,
-      'auth:user:version:' + userId, userId, idle)) === 1;
+    const idle = this.authPolicy.idleSeconds;
+    return (
+      Number(
+        await this.redis.eval(
+          TOUCH_AUTH_SESSION,
+          2,
+          'auth:session:' + sessionId,
+          'auth:user:version:' + userId,
+          userId,
+          idle,
+        ),
+      ) === 1
+    );
   }
 
   getClient(): Redis {
@@ -71,4 +85,3 @@ export class RedisService implements OnModuleDestroy {
     this.redis.disconnect();
   }
 }
-

@@ -34,6 +34,22 @@ describe('Dynamic proxy authentication', () => {
     expect(req.headers['x-user-roles']).toBeUndefined();
     expect(integration.proxyMiddleware).toHaveBeenCalled();
   });
+  it.each([
+    '/gw/source',
+    '/admin/gw/source',
+    '/api/v1/gw/source',
+    '/api/v1/admin/gw/source',
+  ])('authenticates and forwards the supported proxy path %s', async (url) => {
+    validator.verifyToken.mockResolvedValue({ id: 7 });
+    await middleware.use(
+      { url, cookies: { accessToken: 'valid' }, headers: {} },
+      res,
+      next,
+    );
+    expect(validator.verifyToken).toHaveBeenCalledWith('valid', undefined);
+    expect(integration.proxyMiddleware).toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
+  });
   it('never forwards an unverified bearer token or prepopulated identity', async () => {
     validator.verifyToken.mockRejectedValue(new UnauthorizedException());
     await middleware.use(
@@ -56,6 +72,16 @@ describe('Dynamic proxy authentication', () => {
       next,
     );
     expect(res.status).toHaveBeenCalledWith(503);
+  });
+  it('does not intercept auth routes when a query string contains /gw/', async () => {
+    await middleware.use(
+      { url: '/api/v1/admin/auth/login?callbackUrl=/gw/source', headers: {} },
+      res,
+      next,
+    );
+    expect(next).toHaveBeenCalled();
+    expect(validator.verifyToken).not.toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
   });
   it('requires credentials on proxy routes and leaves other routes alone', async () => {
     await middleware.use({ url: '/gw/source', headers: {} }, res, next);

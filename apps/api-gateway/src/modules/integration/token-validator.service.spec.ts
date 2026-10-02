@@ -78,13 +78,40 @@ describe('Issued JWT -> gateway verification', () => {
     const token = signer.signAccessToken(7, 3600);
     await validator.verifyToken(token);
     redis.touchAuthSession.mockResolvedValue(false);
-    await expect(validator.verifyToken(token)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(validator.verifyToken(token)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
   });
   it('does not mistake Redis outages for an expired user session', async () => {
     redis.get.mockRejectedValue(new Error('offline'));
     await expect(
       validator.verifyToken(signer.signAccessToken(7, 3600)),
     ).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+  it('benchmarks repeated verification with one cached key and profile lookup', async () => {
+    const token = signer.signAccessToken(7, 900);
+    const timings: number[] = [];
+    for (let i = 0; i < 200; i++) {
+      const start = performance.now();
+      await validator.verifyToken(token);
+      timings.push(performance.now() - start);
+    }
+    timings.sort((a, b) => a - b);
+    expect(rpc.GetPublicKey).toHaveBeenCalledTimes(1);
+    expect(
+      redis.get.mock.calls.filter(([key]) =>
+        String(key).startsWith('user_session:'),
+      ),
+    ).toHaveLength(1);
+    expect(redis.touchAuthSession).toHaveBeenCalledTimes(200);
+    console.log(
+      JSON.stringify({
+        benchmark: 'RS256 verification; Redis mocked',
+        samples: timings.length,
+        medianMs: +timings[100].toFixed(3),
+        p95Ms: +timings[190].toFixed(3),
+      }),
+    );
   });
   it('does not mistake public-key outages for an expired user session', async () => {
     rpc.GetPublicKey.mockReturnValue(throwError(() => new Error('offline')));
@@ -97,4 +124,3 @@ describe('Issued JWT -> gateway verification', () => {
     ).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 });
-

@@ -7,6 +7,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
+import { AUTH_JWT } from '../../../../../shared/core/auth-session';
 import { promisify } from 'util';
 
 import { RedisService } from '../../core/redis/redis.service';
@@ -14,8 +15,8 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom, timeout } from 'rxjs';
 
 // Chuẩn RFC 7519 + OWASP ASVS Level 2 (Thông tư 06/2023/TT-BTTTT)
-const JWT_ISSUER = 'daklak-user-service';
-const JWT_AUDIENCE = 'daklak-api-gateway';
+const JWT_ISSUER = AUTH_JWT.issuer;
+const JWT_AUDIENCE = AUTH_JWT.audience;
 
 // ─── In-process LRU Cache cho user_session ────────────────────────────────
 // Tránh Redis roundtrip cho mỗi request — TTL 30s (stale window chấp nhận được)
@@ -89,7 +90,7 @@ export class TokenValidatorService implements OnModuleInit {
       throw new Error('Public key not found in response');
     } catch (e: any) {
       this.logger.error(`Error fetching public key via gRPC: ${e.message}`);
-      if (!force && this.cachedPublicKey) return this.cachedPublicKey as string;
+      if (!force && this.cachedPublicKey) return this.cachedPublicKey;
       throw new ServiceUnavailableException(
         'Dịch vụ xác thực tạm thời không khả dụng',
       );
@@ -164,7 +165,8 @@ export class TokenValidatorService implements OnModuleInit {
     try {
       decoded = await jwtVerifyAsync(token, publicKey, options);
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) throw new UnauthorizedException('ACCESS_TOKEN_EXPIRED');
+      if (error instanceof jwt.TokenExpiredError)
+        throw new UnauthorizedException('ACCESS_TOKEN_EXPIRED');
       if (
         error instanceof jwt.JsonWebTokenError &&
         error.message === 'invalid signature'
@@ -206,11 +208,16 @@ export class TokenValidatorService implements OnModuleInit {
         );
       }),
       this.getUserSession(decoded.sub),
-      this.redisService.touchAuthSession(decoded.sid as string, decoded.sub).catch(() => {
-        throw new ServiceUnavailableException('Dịch vụ phiên đăng nhập tạm thời không khả dụng');
+      this.redisService.touchAuthSession(decoded.sid, decoded.sub).catch(() => {
+        throw new ServiceUnavailableException(
+          'Dịch vụ phiên đăng nhập tạm thời không khả dụng',
+        );
       }),
     ]);
-    if (!activeSession) throw new UnauthorizedException('Phiên đăng nhập đã hết hạn hoặc bị thu hồi');
+    if (!activeSession)
+      throw new UnauthorizedException(
+        'Phiên đăng nhập đã hết hạn hoặc bị thu hồi',
+      );
     if (denylistHit) throw new UnauthorizedException('Token has been revoked');
     if (!Object.keys(userSession).length)
       throw new UnauthorizedException('Phiên đăng nhập cần được làm mới');
@@ -219,4 +226,3 @@ export class TokenValidatorService implements OnModuleInit {
     return { ...userSession, ...decoded };
   }
 }
-

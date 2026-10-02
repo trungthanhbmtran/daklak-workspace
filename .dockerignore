@@ -20,9 +20,13 @@ build
 npm-debug.log
 yarn-error.log
 .env
-.env.local
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
 
 # Bỏ qua các tài liệu không cần thiết
 README.md
 docker-compose.yml
+
 

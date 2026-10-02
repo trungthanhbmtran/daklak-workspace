@@ -1,6 +1,8 @@
 import { of, throwError } from 'rxjs';
 import {
   UnauthorizedException,
+  BadRequestException,
+  ConflictException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -26,7 +28,6 @@ describe('Gateway browser sessions', () => {
     grpc.Refresh.mockReturnValue(of(tokens));
     grpc.RevokeRefreshToken.mockReturnValue(of({ success: true }));
     service = new AuthService(
-      {},
       { getService: () => grpc },
       { getService: () => ({}) },
     );
@@ -41,6 +42,19 @@ describe('Gateway browser sessions', () => {
     await expect(service.me({ user: { id: 1 } })).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
+  });
+  it('does not clear a newer browser cookie after a concurrent refresh conflict', async () => {
+    grpc.Refresh.mockReturnValue(throwError(() => ({ code: 10 })));
+    await expect(
+      service.refresh({}, { cookies: { refreshToken: 'old' } }, res as any),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(res.clearCookie).not.toHaveBeenCalled();
+  });
+  it('rejects malformed refresh payloads with 400 rather than throwing a trim error', async () => {
+    await expect(
+      service.refresh({ refreshToken: 123 }, { cookies: {} }, res as any),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(grpc.Refresh).not.toHaveBeenCalled();
   });
   it('sets separate access/refresh lifetimes on root HttpOnly cookies', async () => {
     await service.login({ username: 'test', password: 'password' }, res as any);
@@ -68,11 +82,11 @@ describe('Gateway browser sessions', () => {
     expect(grpc.Refresh).toHaveBeenCalledWith({ refreshToken: 'refresh' });
     expect(res.cookie).toHaveBeenCalledTimes(2);
   });
-  it('clears unusable cookies on missing or invalid refresh', async () => {
+  it('leaves cookie cleanup to logout so a late refresh cannot overwrite a newer login', async () => {
     await expect(
       service.refresh({}, { cookies: {} }, res as any),
     ).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(res.clearCookie).toHaveBeenCalled();
+    expect(res.clearCookie).not.toHaveBeenCalled();
     grpc.Refresh.mockReturnValue(
       throwError(() => ({ code: 16, details: 'Expired' })),
     );
@@ -93,7 +107,9 @@ describe('Gateway browser sessions', () => {
   });
   it('clears all browser cookies even if logout revocation fails', async () => {
     grpc.RevokeRefreshToken.mockReturnValue(throwError(() => ({ code: 14 })));
-    await service.logout({ cookies: { refreshToken: 'valid' } }, res as any);
+    await expect(
+      service.logout({ cookies: { refreshToken: 'valid' } }, res as any),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
     for (const name of ['accessToken', 'refreshToken', 'session'])
       expect(res.clearCookie).toHaveBeenCalledWith(
         name,

@@ -14,7 +14,10 @@ const apiClient = axios.create(options);
 // Dedicated transport prevents refresh/logout from recursively entering the interceptor.
 const sessionTransport = axios.create(options);
 export async function clearBrowserSession() {
-  await sessionTransport.post("/auth/logout", {}, { timeout: 5000 });
+  await sessionLifecycle.logout();
+}
+export function loginBrowserSession(credentials: { username: string; password: string }) {
+  return sessionLifecycle.login(() => apiClient.post("/auth/login", credentials));
 }
 function showError(error: AxiosError) {
   const data = error.response?.data as
@@ -30,7 +33,7 @@ function showError(error: AxiosError) {
     },
   );
 }
-installSessionRecovery(apiClient, sessionTransport, {
+const sessionLifecycle = installSessionRecovery(apiClient, sessionTransport, {
   onError: showError,
   onExpired: () => {
     if (typeof window === "undefined") return;

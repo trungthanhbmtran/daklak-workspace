@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
 import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
-import { ConfigService } from '@nestjs/config';
 import { IntegrationConfigModule } from '../integration-config/integration-config.module';
 import { AuthSessionStore } from './auth-session.store';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
-import * as redisStore from 'cache-manager-redis-store';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
 const protoRoot =
@@ -16,16 +14,8 @@ const protoRoot =
 @Module({
   imports: [
     IntegrationConfigModule,
-    CacheModule.registerAsync({
-      isGlobal: true,
-      useFactory: (config: ConfigService) => ({
-        store: redisStore,
-        host: config.get('REDIS_HOST', 'redis'),
-        port: parseInt(config.get('REDIS_PORT') ?? '6379', 10),
-        ttl: 600,
-      }),
-      inject: [ConfigService],
-    }),
+    // Profile cache only. Shared authentication state uses AuthSessionStore/ioredis.
+    CacheModule.register({ isGlobal: true, ttl: 600_000 }),
     ClientsModule.register([
       {
         name: 'NOTIFICATION_SERVICE', // Tên để Inject vào Service

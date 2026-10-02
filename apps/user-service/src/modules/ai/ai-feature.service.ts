@@ -10,7 +10,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
@@ -91,7 +91,7 @@ export class AiFeatureService implements OnModuleInit {
     }
 
     try {
-      const jobId = uuidv4();
+      const jobId = randomUUID();
       await this.cacheManager.set(
         `ai_job_${jobId}`,
         JSON.stringify({ status: 'PROCESSING' }),
@@ -270,7 +270,7 @@ export class AiFeatureService implements OnModuleInit {
           );
       }
 
-      const jobId = uuidv4();
+      const jobId = randomUUID();
       await this.cacheManager.set(
         `ai_job_${jobId}`,
         JSON.stringify({ status: 'PROCESSING' }),

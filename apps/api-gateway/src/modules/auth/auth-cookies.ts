@@ -1,4 +1,5 @@
 import type { Response, CookieOptions } from 'express';
+import { getAuthPolicy } from '../../../../../shared/core/auth-session';
 
 export interface AuthTokens {
   accessToken: string;
@@ -9,7 +10,7 @@ export interface AuthTokens {
 export function authCookieOptions(): CookieOptions {
   return {
     httpOnly: true,
-    secure: process.env.AUTH_COOKIE_SECURE === 'true',
+    secure: getAuthPolicy().secureCookie,
     sameSite: 'strict',
     path: '/',
   };

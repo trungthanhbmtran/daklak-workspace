@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
 import { clearBrowserSession } from "@/lib/axiosInstance";
+import { scheduleToast } from "@/hooks/useToastBridge";
 
 /**
  * Hook đăng xuất: xóa toàn bộ cache React Query (menu, quyền, dữ liệu theo user)
@@ -20,8 +21,8 @@ export function useLogout() {
       try {
         // 2. Gọi API logout để server xóa cookie HttpOnly
         await clearBrowserSession();
-      } catch (error) {
-        console.error("Logout error:", error);
+      } catch {
+        scheduleToast({ type: "error", message: "Máy chủ chưa xác nhận đăng xuất. Vui lòng thử lại khi có kết nối.", duration: 6000 });
       } finally {
         // Navigate directly to the public login page, even when revocation is unavailable.
         window.location.replace("/admin/login");

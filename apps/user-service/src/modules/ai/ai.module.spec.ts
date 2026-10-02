@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiModule } from './ai.module';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AiFeatureService } from './ai-feature.service';
 
 describe('AiModule', () => {
@@ -12,7 +13,7 @@ describe('AiModule', () => {
     process.env.RABBITMQ_URL = 'amqp://admin:admin123@localhost:5672';
     
     module = await Test.createTestingModule({
-      imports: [AiModule],
+      imports: [CacheModule.register({ isGlobal: true, ttl: 600_000 }), AiModule],
     }).compile();
   });
 

@@ -95,29 +95,30 @@ export const integrationKeys = {
 };
 
 export const integrationApi = {
-  getList: async (search?: string) => {
-    const res = await apiClient.get('/admin/integration-upstreams', { params: { search } }) as any;
-    if (res.success || Array.isArray(res)) return res.data || res;
+  getList: async (search?: string): Promise<IntegrationConfig[]> => {
+    const res = await apiClient.get('/integration-upstreams', { params: { search } }) as any;
+    const entries = Array.isArray(res) ? res : res.data;
+    if (Array.isArray(entries)) return entries;
     throw new Error(res.message || 'Lỗi lấy dữ liệu');
   },
   create: async (data: any) => {
-    const res = await apiClient.post('/admin/integration-upstreams', data) as any;
+    const res = await apiClient.post('/integration-upstreams', data) as any;
     if (res.success || res.id) return res.data || res;
     throw new Error(res.message || 'Lỗi khi tạo');
   },
   update: async (data: any) => {
-    const res = await apiClient.put(`/admin/integration-upstreams/${data.id}`, data) as any;
+    const res = await apiClient.put(`/integration-upstreams/${data.id}`, data) as any;
     if (res.success || res.id) return res.data || res;
     throw new Error(res.message || 'Lỗi khi cập nhật');
   },
   delete: async (id: string) => { // Updated to string
-    const res = await apiClient.delete(`/admin/integration-upstreams/${id}`) as any;
+    const res = await apiClient.delete(`/integration-upstreams/${id}`) as any;
     if (res.success || res) return res.data || res;
     throw new Error(res.message || 'Lỗi khi xóa');
   },
   toggleActive: async ({ id, isActive }: { id: string, isActive: boolean }) => {
-    // Note: Depends on whether /admin/integration-upstreams supports patch/toggle directly. If not, use update.
-    const res = await apiClient.put(`/admin/integration-upstreams/${id}`, { enabled: isActive }) as any;
+    // Note: Depends on whether /integration-upstreams supports patch/toggle directly. If not, use update.
+    const res = await apiClient.put(`/integration-upstreams/${id}`, { enabled: isActive }) as any;
     if (res.success || res) return res.data || res;
     throw new Error(res.message || 'Lỗi khi cập nhật trạng thái');
   },

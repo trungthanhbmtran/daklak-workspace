@@ -15,10 +15,9 @@ export class DynamicProxyMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: any, res: any, next: () => void) {
-    const pathPrefix = '/gw/';
-    const urlPath = req.originalUrl || req.url;
+    const pathname = (req.originalUrl || req.url || '').split('?')[0];
 
-    if (urlPath.includes(pathPrefix)) {
+    if (/^\/(?:api\/v1\/)?(?:admin\/)?gw\//.test(pathname)) {
       // Middleware runs before guards, so authenticate before forwarding.
       let user: any;
       try {
