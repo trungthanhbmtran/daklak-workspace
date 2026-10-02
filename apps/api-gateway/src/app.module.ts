@@ -1,6 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { AuthCryptoModule } from './core/auth/auth-crypto.module';
 import { HrmModule } from './modules/hrm/hrm.module';
 import { UsersModule } from './modules/users/users.module';
 import { DocumentsModule } from './modules/documents/documents.module';
@@ -29,6 +30,7 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
       envFilePath: '.env',
     }),
     GlobalClientModule,
+    AuthCryptoModule,
     AuthModule,
     HrmModule,
     UsersModule,
@@ -102,3 +104,4 @@ export class AppModule implements NestModule {
       .forRoutes('*');
   }
 }
+

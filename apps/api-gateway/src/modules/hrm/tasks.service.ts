@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
-import * as jwt from 'jsonwebtoken';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
+import { randomUUID } from 'crypto';
 import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
@@ -29,6 +31,7 @@ export class TasksService implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
+    private readonly issuer: TokenIssuerService,
   ) {}
 
   onModuleInit() {
@@ -38,15 +41,7 @@ export class TasksService implements OnModuleInit {
 
   getGrpcMetadata(req: any) {
     const meta = new Metadata();
-    if (req?.user) {
-      const internalToken = jwt.sign(
-        req.user,
-        process.env.JWT_SECRET || 'super-secret',
-      );
-      meta.add('authorization', `Bearer ${internalToken}`);
-    } else if (req?.headers?.authorization) {
-      meta.add('authorization', req.headers.authorization);
-    }
+    meta.set('authorization', 'Bearer ' + this.issuer.signDelegation(req.user, { requestId: randomUUID(), ipAddress: clientIp(req) }));
     return meta;
   }
 
@@ -822,3 +817,5 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
   }
 }
+
+

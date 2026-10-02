@@ -7,6 +7,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { clientIp } from '../client-ip';
 import { TokenValidatorService } from '../../modules/integration/token-validator.service';
 import {
   ThreatIntelService,
@@ -23,11 +24,7 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const ip =
-      (request as any).clientIp ||
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      request.ip ||
-      'unknown';
+    const ip = clientIp(request);
 
     let token: string | undefined;
 
@@ -64,6 +61,9 @@ export class JwtAuthGuard implements CanActivate {
       (request as any).user = {
         id: userId,
         sub: decoded.sub,
+        sid: decoded.sid,
+        authVersion: decoded.authVersion,
+        jti: decoded.jti,
         email: decoded.email,
         username: decoded.username,
         fullName: decoded.fullName || decoded.full_name,
@@ -114,3 +114,4 @@ export class JwtAuthGuard implements CanActivate {
     this.threatIntel.recordEvent(ip, event, detail).catch(() => {});
   }
 }
+

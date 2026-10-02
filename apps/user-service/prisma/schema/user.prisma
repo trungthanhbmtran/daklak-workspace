@@ -8,6 +8,7 @@ model User {
   cccd            String?           @map("cccd")
   employeeCode    String?           @map("employee_code")
   isActive        Boolean           @default(true) @map("is_active")
+  authVersion     Int               @default(0) @map("auth_version")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
   UserToUserGroup UserToUserGroup[]
@@ -50,3 +51,4 @@ model UserGroup {
 
   @@map("user_groups")
 }
+

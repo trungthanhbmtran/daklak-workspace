@@ -50,9 +50,10 @@ export class AuthController {
   })
   async login(
     @Body() body: LoginDto,
+    @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.login(body, res);
+    return this.authService.login(body, res, req);
   }
 
   /**
@@ -101,3 +102,4 @@ export class AuthController {
     return this.authService.me(req);
   }
 }
+

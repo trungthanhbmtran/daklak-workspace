@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RateLimiterService } from '../rate-limiter/rate-limiter.service';
+import { clientIp } from '../client-ip';
 
 /** Decorator để cấu hình rate limit per route:
  *  @RateLimit({ limit: 10, windowSec: 900, keyBy: 'ip' })
@@ -85,11 +86,7 @@ export class RateLimitGuard implements CanActivate {
     const keyBy = config.keyBy ?? 'ip';
 
     if (keyBy === 'ip') {
-      // Lấy IP thật khi đằng sau Nginx reverse proxy
-      const ip =
-        (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-        request.ip ||
-        'unknown';
+      const ip = clientIp(request);
       return `${prefix}:ip:${ip}`;
     }
 

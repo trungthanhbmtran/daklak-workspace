@@ -16,6 +16,12 @@ import { status } from '@grpc/grpc-js';
 import { firstValueFrom, timeout, TimeoutError, type Observable } from 'rxjs';
 import type { Request, Response } from 'express';
 import { MICROSERVICES } from '../../core/constants/services';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import type { AuthState } from '../../../../../shared/security/gateway-context';
+import { clientIp } from '../../core/client-ip';
+import { randomUUID, createHash } from 'crypto';
+import { AUTH_JWT } from '../../../../../shared/core/auth-session';
+import { SSO_GRANT_AUDIENCE } from '../../../../../shared/security/sso-assertion';
 import { AUTH_DEFAULTS } from '../../../../../shared/core/auth-session';
 import { clearAuthCookies, setAuthCookies } from './auth-cookies';
 import type { AuthTokens } from './auth-cookies';
@@ -29,12 +35,18 @@ interface UserProfile extends Record<string, unknown> {
   fullName?: string;
   avatarUrl?: string;
 }
+interface SessionGrant extends Omit<AuthTokens, 'accessToken'> {
+  userId: number; sessionId: string; authVersion: number;
+}
 interface UserAuthGrpc {
+  LoginSso(input: { assertion: string }): Observable<SessionGrant>;
+  GetAuthState(input: { id: number; sessionId: string }): Observable<AuthState>;
   Login(data: {
     usernameOrEmail: string;
     password: string;
-  }): Observable<AuthTokens>;
-  Refresh(data: { refreshToken: string }): Observable<AuthTokens>;
+    ipAddress?: string; requestId?: string;
+  }): Observable<SessionGrant>;
+  Refresh(data: { refreshToken: string; ipAddress?: string; requestId?: string }): Observable<SessionGrant>;
   RevokeRefreshToken(data: {
     refreshToken: string;
   }): Observable<{ success: boolean }>;
@@ -49,7 +61,7 @@ interface EmployeeGrpc {
     code: string;
   }): Observable<{ data?: EmployeeProfile }>;
 }
-export type AuthRequest = Pick<Partial<Request>, 'cookies'> & {
+export type AuthRequest = Pick<Partial<Request>, 'cookies' | 'ip' | 'socket'> & {
   user?: { id?: unknown };
 };
 
@@ -62,6 +74,7 @@ export class AuthService implements OnModuleInit {
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: ClientGrpc,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL)
     private readonly employeeClient: ClientGrpc,
+    private readonly issuer: TokenIssuerService,
   ) {}
   onModuleInit() {
     this.userGrpcService = this.userClient.getService<UserAuthGrpc>(
@@ -87,6 +100,7 @@ export class AuthService implements OnModuleInit {
     );
   }
   private authError(error: unknown): Error {
+    if (error instanceof HttpException) return error;
     const code = this.rpcCode(error);
     if (code === status.UNAUTHENTICATED)
       return new UnauthorizedException(
@@ -112,7 +126,7 @@ export class AuthService implements OnModuleInit {
       'Dịch vụ xác thực tạm thời không khả dụng. Vui lòng thử lại.',
     );
   }
-  private establishSession(res: Response, result: AuthTokens) {
+  private async establishSession(res: Response, result: SessionGrant) {
     const deadline =
       Number.isFinite(result?.expiresIn) && result.expiresIn > 0
         ? Date.now() + result.expiresIn * 1000
@@ -121,10 +135,17 @@ export class AuthService implements OnModuleInit {
     if (!Number.isFinite(date.getTime()))
       throw new Error('Invalid authentication lifetime');
     const expiresAt = date.toISOString();
-    setAuthCookies(res, result);
+    if (!Number.isSafeInteger(result.userId) || result.userId < 1 ||
+      !Number.isSafeInteger(result.authVersion) || result.authVersion < 0 ||
+      typeof result.sessionId !== 'string' || !/^[a-f0-9-]{36}$/i.test(result.sessionId))
+      throw new Error('Invalid session grant');
+    const state = await firstValueFrom(this.userGrpcService.GetAuthState({ id: result.userId, sessionId: result.sessionId }).pipe(timeout(5000)));
+    if (!state.isActive || !state.sessionActive || state.userId !== result.userId || state.authVersion !== result.authVersion)
+      throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không hợp lệ');
+    setAuthCookies(res, { ...result, accessToken: this.issuer.signAccessToken(result.userId, result.expiresIn, result.sessionId, result.authVersion) });
     return { expiresAt };
   }
-  async login(body: LoginDto, res: Response) {
+  async login(body: LoginDto, res: Response, req?: AuthRequest) {
     const username =
       typeof body?.username === 'string' ? body.username.trim() : '';
     const email = typeof body?.email === 'string' ? body.email.trim() : '';
@@ -143,14 +164,25 @@ export class AuthService implements OnModuleInit {
     try {
       const result = await firstValueFrom(
         this.userGrpcService
-          .Login({ usernameOrEmail: loginKey, password: body.password })
+          .Login({ usernameOrEmail: loginKey, password: body.password, ipAddress: clientIp(req ?? {}), requestId: randomUUID() })
           .pipe(timeout(10000)),
       );
-      return this.establishSession(res, result);
+      return await this.establishSession(res, result);
     } catch (error) {
       throw this.authError(error);
     }
   }
+  async loginSso(identity: { issuer: string; subject: string }, res: Response, req: AuthRequest) {
+    const now = Math.floor(Date.now() / 1000);
+    const assertion = this.issuer.signToken({ iss: AUTH_JWT.issuer, aud: SSO_GRANT_AUDIENCE, iat: now, exp: now + 30, jti: randomUUID(),
+      issuerHash: createHash('sha256').update(identity.issuer).digest('hex'), subjectHash: createHash('sha256').update(identity.subject).digest('hex'),
+      ipAddress: clientIp(req), requestId: randomUUID() });
+    try {
+      const grant = await firstValueFrom(this.userGrpcService.LoginSso({ assertion }).pipe(timeout(10000)));
+      return await this.establishSession(res, grant);
+    } catch (error) { throw this.authError(error); }
+  }
+
   private refreshToken(
     body: RefreshTokenDto | undefined,
     req: AuthRequest,
@@ -173,10 +205,10 @@ export class AuthService implements OnModuleInit {
     try {
       const result = await firstValueFrom(
         this.userGrpcService
-          .Refresh({ refreshToken: token })
+          .Refresh({ refreshToken: token, ipAddress: clientIp(req), requestId: randomUUID() })
           .pipe(timeout(10000)),
       );
-      return this.establishSession(res, result);
+      return await this.establishSession(res, result);
     } catch (error) {
       // A late failure must not clear a cookie created by a newer login/refresh.
       throw this.authError(error);
@@ -237,3 +269,5 @@ export class AuthService implements OnModuleInit {
     };
   }
 }
+
+

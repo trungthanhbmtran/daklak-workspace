@@ -3,6 +3,8 @@ syntax = "proto3";
 package user;
 
 service UserService {
+  rpc LoginSso (SsoLoginRequest) returns (LoginResponse);
+  rpc GetAuthState (AuthStateRequest) returns (AuthStateResponse);
   rpc CreateUser (CreateUserRequest) returns (UserResponse);
   rpc FindOne (FindOneRequest) returns (UserResponse);
   rpc GetUsersByIds (GetUsersByIdsRequest) returns (ListUsersResponse);
@@ -144,11 +146,14 @@ message AssignPositionResponse {
   string job_title_name = 7;
 }
 
+message SsoLoginRequest { string assertion = 1; }
+
 message LoginRequest {
   string username_or_email = 1;  // có thể nhập username hoặc email
   string password = 2;
   string device_info = 3;   // optional: "Chrome on Windows", user-agent, v.v.
-  string ip_address = 4;   // optional: địa chỉ IP client (gateway có thể truyền)
+  string ip_address = 4;
+  string request_id = 5;   // optional: địa chỉ IP client (gateway có thể truyền)
 }
 
 message LoginResponse {
@@ -162,12 +167,27 @@ message LoginResponse {
   // Thời gian hết hạn (giây) — backend trả về để client/cookie set đúng TTL
   int32 expires_in = 8;
   int32 refresh_token_expires_in = 9;
+  string session_id = 10;
+  int32 auth_version = 11;
+}
+
+message AuthStateRequest {
+  int32 id = 1;
+  string session_id = 2;
+}
+
+message AuthStateResponse {
+  int32 user_id = 1;
+  bool is_active = 2;
+  int32 auth_version = 3;
+  bool session_active = 4;
 }
 
 message RefreshRequest {
   string refresh_token = 1;
   string device_info = 2;   // optional: cập nhật khi refresh
-  string ip_address = 3;   // optional: cập nhật khi refresh
+  string ip_address = 3;
+  string request_id = 4;   // optional: cập nhật khi refresh
 }
 
 message RevokeRefreshTokenRequest {
@@ -230,4 +250,7 @@ message DeleteUserRequest {
 message DeleteUserResponse {
   bool success = 1;
 }
+
+
+
 

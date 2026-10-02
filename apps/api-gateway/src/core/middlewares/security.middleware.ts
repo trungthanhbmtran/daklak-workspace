@@ -1,5 +1,9 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-import { ThreatIntelService, ThreatLevel } from '../threat-intel/threat-intel.service';
+import { clientIp } from '../client-ip';
+import {
+  ThreatIntelService,
+  ThreatLevel,
+} from '../threat-intel/threat-intel.service';
 
 /**
  * SecurityMiddleware — Lớp bảo vệ đầu tiên (First Line of Defense).
@@ -26,25 +30,28 @@ export class SecurityMiddleware implements NestMiddleware {
   constructor(private readonly threatIntel: ThreatIntelService) {}
 
   async use(req: any, res: any, next: () => void) {
-    const ip = this.extractIp(req);
+    const ip = clientIp(req);
     const url: string = req.originalUrl || req.url;
     const method: string = req.method;
     const userAgent: string = req.headers['user-agent'] ?? '';
 
     // ── Bỏ qua whitelist paths ────────────────────────────────────────────
-    if (this.WHITELIST_PATHS.some(p => url.startsWith(p))) {
+    if (this.WHITELIST_PATHS.some((p) => url.startsWith(p))) {
       return next();
     }
 
     // ── Kiểm tra blocklist (fast path — chỉ 1 Redis GET ~0.5ms) ──────────
     const isBlocked = await this.threatIntel.isBlocked(ip);
     if (isBlocked) {
-      this.logger.warn(`[BLOCKED_REQUEST] ip=${ip} url=${url} ua=${userAgent.substring(0, 50)}`);
+      this.logger.warn(
+        `[BLOCKED_REQUEST] ip=${ip} url=${url} ua=${userAgent.substring(0, 50)}`,
+      );
       return res.status(403).json({
         success: false,
         statusCode: 403,
         errorType: 'IP_BLOCKED',
-        message: 'Truy cập bị từ chối. IP của bạn đã bị khóa do hoạt động đáng ngờ.',
+        message:
+          'Truy cập bị từ chối. IP của bạn đã bị khóa do hoạt động đáng ngờ.',
         retryAfter: 3600,
       });
     }
@@ -52,7 +59,9 @@ export class SecurityMiddleware implements NestMiddleware {
     // ── Phân tích threat pattern (async, không block response) ───────────
     // Chạy phân tích trong background, không làm chậm request hợp lệ
     const bodyStr = req.body ? JSON.stringify(req.body).substring(0, 500) : '';
-    const queryStr = req.query ? JSON.stringify(req.query).substring(0, 200) : '';
+    const queryStr = req.query
+      ? JSON.stringify(req.query).substring(0, 200)
+      : '';
 
     // Fire-and-forget: phân tích sau khi đã forward request
     // Nếu phát hiện pattern nguy hiểm, sẽ block request TIẾP THEO từ IP này
@@ -83,16 +92,5 @@ export class SecurityMiddleware implements NestMiddleware {
     req.clientIp = ip;
 
     next();
-  }
-
-  private extractIp(req: any): string {
-    // Lấy IP thật từ Nginx reverse proxy
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) {
-      return (typeof forwarded === 'string' ? forwarded : forwarded[0])
-        .split(',')[0]
-        .trim();
-    }
-    return req.ip || req.connection?.remoteAddress || 'unknown';
   }
 }

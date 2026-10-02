@@ -10,6 +10,10 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
+  allowedUpstreamPath,
+  canAccessUpstream,
+} from '../integration/upstream-access';
+import {
   RegistryService,
   UpstreamConfig,
 } from '../integration/registry.service';
@@ -64,22 +68,10 @@ export function canReadSource(
   config: UpstreamConfig,
   user: ReportCaller,
 ): boolean {
-  const roles = Array.isArray(user.roles) ? user.roles : [];
-  const permissions = Array.isArray(user.permissionsFlatten)
-    ? user.permissionsFlatten
-    : [];
-  return (
-    config.enabled !== false &&
-    config.allowedMethods?.includes('GET') &&
-    (!config.roles?.length || config.roles.some((r) => roles.includes(r))) &&
-    (!config.scopes?.length ||
-      config.scopes.every((s) => permissions.includes(s)))
-  );
+  return canAccessUpstream(config, user, 'GET');
 }
 export function allowedReportPath(path: string, paths: string[]): boolean {
-  return paths.some((p) =>
-    p.endsWith('/*') ? path.startsWith(p.slice(0, -1)) : p === path,
-  );
+  return allowedUpstreamPath(path, paths);
 }
 function protectData(value: unknown, sensitive: boolean, depth = 0): unknown {
   if (depth > 16)
@@ -139,10 +131,11 @@ export class ReportSourceService {
     const headers: Record<string, string> = {
       accept: 'application/json',
       'x-request-id': requestId,
-      'x-user-id': String(user.sub ?? user.id ?? ''),
-      'x-unit-id': String(user.unitId ?? ''),
-      'x-user-roles': (user.roles ?? []).join(','),
     };
+    if (upstream.config.type === 'internal') {
+      headers['x-user-id'] = String(user.sub ?? user.id ?? '');
+      headers['x-unit-id'] = String(user.unitId ?? '');
+    }
     const auth = upstream.config.auth as
       | { kind?: string; secretRef?: string }
       | undefined;

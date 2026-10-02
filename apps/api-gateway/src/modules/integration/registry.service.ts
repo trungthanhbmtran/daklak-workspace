@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { Pool } from 'undici';
 import CircuitBreaker from 'opossum';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import * as dns from 'dns/promises';
+import { checkUpstreamNetwork, guardedUpstreamLookup } from './upstream-network';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 
@@ -114,6 +114,7 @@ export class RegistryService implements OnModuleInit {
         connections: 100, // Bulkhead
         keepAliveTimeout: 10000,
         keepAliveMaxTimeout: 15000,
+        connect: { lookup: guardedUpstreamLookup(conf.type) },
       });
 
       const executeRequest = async (reqOptions: any) => {
@@ -167,40 +168,6 @@ export class RegistryService implements OnModuleInit {
   }
 
   private async checkSsrf(conf: UpstreamConfig) {
-    const parsed = new URL(conf.baseUrl);
-    const hostname = parsed.hostname;
-
-    // Fast check for exact loopback / metadata strings
-    if (['localhost', '127.0.0.1', '169.254.169.254'].includes(hostname)) {
-      if (conf.type === 'external') {
-        throw new Error('External upstreams cannot target loopback or cloud metadata');
-      }
-    }
-
-    // Resolve DNS
-    const addresses = await dns.resolve(hostname).catch(() => []);
-    for (const ip of addresses) {
-      if (this.isPrivateOrLinkLocal(ip)) {
-        if (conf.type === 'external') {
-          throw new Error(`Resolved IP ${ip} is private/link-local for external upstream`);
-        }
-      }
-    }
-  }
-
-  private isPrivateOrLinkLocal(ip: string): boolean {
-    // Basic IPv4 check for 10.x, 172.16-31.x, 192.168.x, 127.x, 169.254.x
-    // A robust library like 'ipaddr.js' would be better in prod, but this suffices for the requirement.
-    const parts = ip.split('.').map(Number);
-    if (parts.length !== 4) return false;
-    
-    if (parts[0] === 10) return true;
-    if (parts[0] === 127) return true;
-    if (parts[0] === 169 && parts[1] === 254) return true;
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-    if (parts[0] === 192 && parts[1] === 168) return true;
-    
-    return false;
+    await checkUpstreamNetwork(conf.baseUrl, conf.type);
   }
 }
-

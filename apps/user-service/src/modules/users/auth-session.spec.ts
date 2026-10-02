@@ -6,21 +6,21 @@ jest.mock('bcrypt', () => ({
 }));
 import { UsersService } from './users.service';
 import { RefreshConflictError } from './auth-session.store';
-import { IntegrationAuthService } from '../integration-config/integration-auth.service';
-import * as jwt from 'jsonwebtoken';
+
+
 import * as bcrypt from 'bcrypt';
 
 describe('Internal account session contract', () => {
-  const signer = new IntegrationAuthService();
+
   const profile = {
     id: 7,
-    isActive: true,
+    isActive: true, authVersion: 0,
     permissionsFlatten: ['MENU:READ'],
     unitId: 3,
   };
   const user = {
     id: 7,
-    username: 'test',
+    username: 'test', authVersion: 0, isActive: true,
     credential: { passwordHash: 'hash' },
     jobPositions: [],
     policies: [],
@@ -28,10 +28,7 @@ describe('Internal account session contract', () => {
   const sessions = {
     policy: { accessSeconds: 900 },
     setSession: jest.fn(),
-    setRefresh: jest.fn(),
-    getRefresh: jest.fn(),
-    rotateRefresh: jest.fn(),
-    revokeRefresh: jest.fn(),
+    revokeSession: jest.fn(),
     createSession: jest.fn(),
     touchSession: jest.fn(),
     assertLoginAllowed: jest.fn(),
@@ -39,14 +36,17 @@ describe('Internal account session contract', () => {
     recordLoginFailure: jest.fn(),
     revokeAllForUser: jest.fn(),
   };
+  const devices = { create: jest.fn(), read: jest.fn(), rotate: jest.fn(), revoke: jest.fn() };
   const prisma = {
     user: { findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
-    credential: { update: jest.fn() },
+    credential: { upsert: jest.fn(), update: jest.fn() },
+    authStateSync: { upsert: jest.fn() },
+    $transaction: jest.fn(),
   };
   const session = () => ({
     userId: 7,
     sessionId: '11c6badf-4128-490a-93b3-e105f7f415ce',
-    expiresAt: Math.floor(Date.now() / 1000) + 28800,
+    expiresAt: Math.floor(Date.now() / 1000) + 28800, authVersion: 0,
   });
   const oldToken = 'a'.repeat(80);
   let service: UsersService;
@@ -58,42 +58,25 @@ describe('Internal account session contract', () => {
     sessions.assertLoginAllowed.mockResolvedValue(true);
     sessions.createSession.mockImplementation(() => Promise.resolve(session()));
     sessions.touchSession.mockResolvedValue(true);
-    sessions.rotateRefresh.mockResolvedValue(true);
+    devices.rotate.mockResolvedValue(true);
+    prisma.user.update.mockResolvedValue({ ...user, authVersion: 1 });
+    prisma.$transaction.mockImplementation((fn) => fn(prisma));
     service = new UsersService(
       prisma as any,
-      signer,
       sessions as any,
+      devices as any,
       { del: jest.fn() } as any,
       {} as any,
       {} as any,
     );
-    jest.spyOn(service, 'findOne').mockResolvedValue(profile as any);
+    jest.spyOn(service as any, 'freshAuthProfile').mockResolvedValue(profile);
   });
-  it('issues RS256 tokens with a unique server session and 15 minute access lifetime', async () => {
-    const result = await service.login({
-      usernameOrEmail: 'test',
-      password: 'password',
-    });
-    const verified = jwt.verify(
-      result.accessToken,
-      signer.getPublicKeyDetails().publicKey,
-      {
-        algorithms: ['RS256'],
-        issuer: 'daklak-user-service',
-        audience: 'daklak-api-gateway',
-      },
-    ) as jwt.JwtPayload;
-    expect(verified).toMatchObject({ sub: '7', sid: session().sessionId });
-    expect(verified.exp! - verified.iat!).toBe(900);
-    expect(result.refreshTokenExpiresIn).toBeGreaterThanOrEqual(28798);
-    expect(result.refreshTokenExpiresIn).toBeLessThanOrEqual(28800);
-    expect(sessions.setSession).toHaveBeenCalledWith(
-      7,
-      profile,
-      result.refreshTokenExpiresIn,
-    );
-  });
-  it('awaits publishing the authorization context before returning login success', async () => {
+  it('returns a durable session grant without signing a JWT', async () => {
+    const result = await service.login({ usernameOrEmail: 'test', password: 'password' });
+    expect(result).toMatchObject({ accessToken: '', sessionId: session().sessionId, userId: 7, expiresIn: 900 });
+    expect(devices.create).toHaveBeenCalledWith(result.refreshToken, expect.objectContaining({ authVersion: 0 }));
+    expect(sessions.setSession).toHaveBeenCalledWith(7, profile, result.refreshTokenExpiresIn);
+  });  it('awaits publishing the authorization context before returning login success', async () => {
     let release!: () => void;
     sessions.setSession.mockReturnValue(
       new Promise<void>((resolve) => {
@@ -123,44 +106,43 @@ describe('Internal account session contract', () => {
       ...session(),
       expiresAt: Math.floor(Date.now() / 1000) + 100,
     };
-    sessions.getRefresh.mockResolvedValue(prior);
+    devices.read.mockResolvedValue(prior);
     const result = await service.refresh({ refreshToken: oldToken });
     expect(result.expiresIn).toBeLessThanOrEqual(100);
     expect(result.refreshTokenExpiresIn).toBeLessThanOrEqual(100);
-    expect(sessions.rotateRefresh).toHaveBeenCalledWith(
+    expect(devices.rotate).toHaveBeenCalledWith(
       oldToken,
       result.refreshToken,
       prior,
-      result.refreshTokenExpiresIn,
     );
   });
   it.each([false, null])(
     'rejects revoked/idle-expired or already consumed refresh (%s)',
     async (valid) => {
-      sessions.getRefresh.mockResolvedValue(valid === null ? null : session());
+      devices.read.mockResolvedValue(valid === null ? null : session());
       sessions.touchSession.mockResolvedValue(false);
       await expect(
         service.refresh({ refreshToken: oldToken }),
       ).rejects.toThrow();
-      expect(sessions.setRefresh).not.toHaveBeenCalled();
+      expect(devices.rotate).not.toHaveBeenCalled();
     },
   );
   it('preserves the old refresh token if preparing the new session fails', async () => {
-    sessions.getRefresh.mockResolvedValue(session());
+    devices.read.mockResolvedValue(session());
     prisma.user.findFirst.mockRejectedValueOnce(
       new Error('Database unavailable'),
     );
     await expect(service.refresh({ refreshToken: oldToken })).rejects.toThrow(
       'Database unavailable',
     );
-    expect(sessions.rotateRefresh).not.toHaveBeenCalled();
-    expect(sessions.revokeRefresh).not.toHaveBeenCalled();
+    expect(devices.rotate).not.toHaveBeenCalled();
+    expect(devices.revoke).not.toHaveBeenCalled();
   });
   it('reports a lost parallel refresh as a conflict rather than an expired session', async () => {
-    sessions.getRefresh
+    devices.read
       .mockResolvedValueOnce(session())
       .mockRejectedValueOnce(new RefreshConflictError());
-    sessions.rotateRefresh.mockResolvedValue(false);
+    devices.rotate.mockResolvedValue(false);
     try {
       await service.refresh({ refreshToken: oldToken });
       throw new Error('Expected conflict');
@@ -169,13 +151,14 @@ describe('Internal account session contract', () => {
     }
   });
   it('rejects a concurrent refresh that loses the atomic rotation', async () => {
-    sessions.getRefresh.mockResolvedValue(session());
-    sessions.rotateRefresh.mockResolvedValue(false);
+    devices.read.mockResolvedValue(session());
+    devices.rotate.mockResolvedValue(false);
     await expect(service.refresh({ refreshToken: oldToken })).rejects.toThrow();
   });
   it('revokes the session linked to refresh on logout', async () => {
+    devices.revoke.mockResolvedValue(session().sessionId);
     await service.revokeRefreshToken({ refreshToken: oldToken });
-    expect(sessions.revokeRefresh).toHaveBeenCalledWith(oldToken);
+    expect(devices.revoke).toHaveBeenCalledWith(oldToken);
   });
   it('blocks a throttled account before expensive password work', async () => {
     sessions.assertLoginAllowed.mockResolvedValue(false);
@@ -211,10 +194,11 @@ describe('Internal account session contract', () => {
       userId: 7,
       newPassword: 'long passphrase 123',
     });
-    expect(sessions.revokeAllForUser).toHaveBeenCalledWith(7);
+    expect(sessions.revokeAllForUser).toHaveBeenCalledWith(7, 1);
   });
   it('invalidates sessions when an administrator disables the account', async () => {
     await service.setUserActive({ userId: 7, isActive: false });
-    expect(sessions.revokeAllForUser).toHaveBeenCalledWith(7);
+    expect(sessions.revokeAllForUser).toHaveBeenCalledWith(7, 1);
   });
 });
+

@@ -1,0 +1,13 @@
+model ExternalIdentity {
+  id String @id @default(cuid()) @db.VarChar(64)
+  userId Int
+  issuerHash String @db.Char(64)
+  subjectHash String @db.Char(64)
+  approvedBy Int
+  approvedAt DateTime @default(now())
+  disabledAt DateTime?
+  @@unique([issuerHash, subjectHash])
+  @@index([userId])
+  @@map("external_identities")
+}
+

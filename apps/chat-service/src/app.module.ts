@@ -7,8 +7,11 @@ import { MessageModule } from "./modules/message/message.module";
 import { ParticipantModule } from "./modules/participant/participant.module";
 import { PresenceModule } from "./modules/presence/presence.module";
 
+import { InternalAuthModule } from './core/auth/gateway-context.service';
+
 @Module({
   imports: [
+    InternalAuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
     InfraModule,
@@ -21,3 +24,4 @@ import { PresenceModule } from "./modules/presence/presence.module";
   providers: [],
 })
 export class AppModule {}
+

@@ -29,7 +29,7 @@ describe('Dynamic proxy authentication', () => {
       headers: { 'x-user-id': '999', 'x-user-roles': 'ADMIN' },
     };
     await middleware.use(req, res, next);
-    expect(validator.verifyToken).toHaveBeenCalledWith('valid', undefined);
+    expect(validator.verifyToken).toHaveBeenCalledWith('valid', 'unknown');
     expect(req.headers['x-user-id']).toBe('7');
     expect(req.headers['x-user-roles']).toBeUndefined();
     expect(integration.proxyMiddleware).toHaveBeenCalled();
@@ -46,7 +46,7 @@ describe('Dynamic proxy authentication', () => {
       res,
       next,
     );
-    expect(validator.verifyToken).toHaveBeenCalledWith('valid', undefined);
+    expect(validator.verifyToken).toHaveBeenCalledWith('valid', 'unknown');
     expect(integration.proxyMiddleware).toHaveBeenCalled();
     expect(next).not.toHaveBeenCalled();
   });

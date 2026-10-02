@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
+import { SsoService } from './sso/sso.service';
+import { SsoController } from './sso/sso.controller';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthOriginGuard } from './auth-origin.guard';
@@ -13,7 +15,8 @@ import { RateLimitGuard } from '../../core/guards/rate-limit.guard';
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     RateLimiterModule,
   ],
-  controllers: [AuthController],
-  providers: [AuthService, RateLimitGuard, AuthOriginGuard],
+  controllers: [AuthController, SsoController],
+  providers: [SsoService, AuthService, RateLimitGuard, AuthOriginGuard],
 })
 export class AuthModule {}
+

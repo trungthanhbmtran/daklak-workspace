@@ -10,7 +10,8 @@ export const AUTH_DEFAULTS = {
   passwordMaxBytes: 72,
 } as const;
 export const AUTH_JWT = {
-  issuer: "daklak-user-service",
+  issuer: "daklak-api-gateway",
+  internalAudience: "daklak-internal-services",
   audience: "daklak-api-gateway",
   algorithm: "RS256",
 } as const;
@@ -18,6 +19,7 @@ export interface RefreshSession {
   userId: number;
   sessionId: string;
   expiresAt: number;
+  authVersion: number;
 }
 export interface AuthPolicy {
   accessSeconds: number;
@@ -91,10 +93,14 @@ if not raw then return 0 end
 local s = cjson.decode(raw)
 local now = tonumber(redis.call('TIME')[1])
 local version = tonumber(redis.call('GET', KEYS[2]) or '0')
-if tostring(s.userId) ~= ARGV[1] or s.version ~= version or s.expiresAt <= now then
+if tostring(s.userId) ~= ARGV[1] or s.version ~= version or (ARGV[3] and tonumber(ARGV[3]) ~= s.version) or s.expiresAt <= now then
   redis.call('DEL', KEYS[1])
   return 0
 end
-redis.call('EXPIRE', KEYS[1], math.min(tonumber(ARGV[2]), s.expiresAt - now))
+if not ARGV[4] or tonumber(ARGV[4]) == 1 then
+  redis.call('EXPIRE', KEYS[1], math.min(tonumber(ARGV[2]), s.expiresAt - now))
+end
 return 1
 `;
+
+

@@ -1,6 +1,8 @@
 import { TransformInterceptor } from '@core/interceptors/transform.interceptor';
 import { AllExceptionsFilter } from '@core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { trustedProxyAddresses } from './core/client-ip';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -59,7 +61,11 @@ function buildRmqOptions(queue: string, prefetchCount: number): RmqOptions {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set(
+    'trust proxy',
+    trustedProxyAddresses(process.env.TRUSTED_PROXY_CIDRS),
+  );
 
   app.setGlobalPrefix('api/v1');
   app.use(helmet());

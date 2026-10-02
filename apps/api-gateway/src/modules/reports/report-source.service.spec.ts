@@ -137,11 +137,33 @@ describe('Report sources', () => {
     expect(fire.mock.calls[0][0]).toMatchObject({
       method: 'GET',
       path: '/data?search=a%26b',
-      headers: { 'x-unit-id': '2', 'x-user-id': '1' },
+      headers: { accept: 'application/json' },
     });
+    expect(fire.mock.calls[0][0].headers['x-user-id']).toBeUndefined();
+    expect(fire.mock.calls[0][0].headers['x-unit-id']).toBeUndefined();
+    expect(fire.mock.calls[0][0].headers['x-user-roles']).toBeUndefined();
     expect(fire.mock.calls[0][0].headers.authorization).toBeUndefined();
     expect(fire.mock.calls[0][0].headers.cookie).toBeUndefined();
   });
+  it('passes verified organizational context only to internal report sources', async () => {
+    const originalType = config.type;
+    config.type = 'internal';
+    try {
+      fire.mockResolvedValue({
+        statusCode: 200,
+        headers: {},
+        body: Readable.from(['[]']),
+      });
+      await service.fetch(source, caller);
+      expect(fire.mock.calls[0][0].headers).toMatchObject({
+        'x-user-id': '1',
+        'x-unit-id': '2',
+      });
+    } finally {
+      config.type = originalType;
+    }
+  });
+
   it('allows authorized sensitive fields but always strips credentials', async () => {
     fire.mockResolvedValue({
       statusCode: 200,

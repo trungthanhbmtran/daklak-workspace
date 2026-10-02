@@ -14,7 +14,7 @@ import { randomUUID } from 'node:crypto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
-import * as jwt from 'jsonwebtoken';
+
 
 @Injectable()
 export class AiFeatureService implements OnModuleInit {
@@ -44,15 +44,8 @@ export class AiFeatureService implements OnModuleInit {
   private getGrpcMetadata(user: any, headers?: any) {
     const meta = new Metadata();
 
-    if (user) {
-      const internalToken = jwt.sign(
-        user,
-        process.env.JWT_SECRET || 'super-secret',
-      );
-      meta.add('authorization', `Bearer ${internalToken}`);
-    } else if (headers?.authorization) {
-      meta.add('authorization', headers.authorization);
-    }
+    if (!headers?.authorization) throw new Error('Verified Gateway delegation is required');
+    meta.set('authorization', headers.authorization);
     return meta;
   }
 
@@ -328,3 +321,5 @@ export class AiFeatureService implements OnModuleInit {
     );
   }
 }
+
+

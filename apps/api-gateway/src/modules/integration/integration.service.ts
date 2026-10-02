@@ -1,8 +1,37 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RegistryService, UpstreamState } from './registry.service';
-import { IncomingMessage, ServerResponse } from 'http';
+import { randomUUID } from 'crypto';
+import type { Request, Response } from 'express';
 import { pipeline } from 'stream/promises';
+import { RegistryService } from './registry.service';
 import { EnvSecretProvider } from './secrets/env-secret-provider.service';
+import {
+  allowedUpstreamPath,
+  canAccessUpstream,
+  type UpstreamCaller,
+} from './upstream-access';
+import { clientIp } from '../../core/client-ip';
+
+const HOP_HEADERS = new Set([
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+]);
+
+function connectionHeaders(value: string | string[] | undefined): Set<string> {
+  return new Set(
+    (Array.isArray(value) ? value.join(',') : (value ?? ''))
+      .split(',')
+      .map((name) => name.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+type ProxyRequest = Request & { user?: UpstreamCaller };
 
 @Injectable()
 export class IntegrationService {
@@ -13,98 +42,174 @@ export class IntegrationService {
     private readonly secretProvider: EnvSecretProvider,
   ) {}
 
-  public async proxyMiddleware(req: any, res: any, next: () => void) {
-    const pathPrefix = '/gw/';
-    const urlPath = req.originalUrl || req.url;
-    
-    let gwIndex = urlPath.indexOf(pathPrefix);
-    if (gwIndex === -1) {
-      return next(); // Not a proxy route
-    }
-    
-    const relativeUrl = urlPath.substring(gwIndex + pathPrefix.length);
-    const slashIdx = relativeUrl.indexOf('/');
-    
-    const upstreamName = slashIdx === -1 ? relativeUrl : relativeUrl.substring(0, slashIdx);
-    const targetPath = slashIdx === -1 ? '/' : relativeUrl.substring(slashIdx);
+  public async proxyMiddleware(
+    req: ProxyRequest,
+    res: Response,
+    next: () => void,
+  ) {
+    const url = req.originalUrl || req.url;
+    const queryIndex = url.indexOf('?');
+    const pathname = queryIndex === -1 ? url : url.slice(0, queryIndex);
+    const match =
+      /^\/(?:api\/v1\/)?(?:admin\/)?gw\/([a-zA-Z0-9_-]{1,100})(\/.*)?$/.exec(
+        pathname,
+      );
+    if (!match) return next();
 
+    const upstreamName = match[1];
+    const path = match[2] || '/';
     const upstream = this.registry.getUpstream(upstreamName);
-    
     if (!upstream) {
-      return res.status(404).json({ success: false, message: 'Upstream not found or disabled' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Nguồn không tồn tại hoặc đã tắt' });
+    }
+    const caller = req.user;
+    if (!caller) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Thiếu phiên đăng nhập' });
+    }
+    const permissions = new Set(caller.permissionsFlatten ?? []);
+    if (
+      (!permissions.has('INTEGRATION:READ') &&
+        !permissions.has('INTEGRATION:MANAGE')) ||
+      !canAccessUpstream(upstream.config, caller, req.method) ||
+      !allowedUpstreamPath(path, upstream.config.allowedPaths ?? [])
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Không có quyền truy cập nguồn, phương thức hoặc đường dẫn',
+      });
     }
 
-    if (!this.checkAccess(req, upstream.config)) {
-      return res.status(403).json({ success: false, message: 'Forbidden: Insufficient privileges' });
-    }
-
+    const requestId = randomUUID();
+    const startedAt = Date.now();
+    let responseStatus = 502;
     try {
-      const headers = { ...req.headers };
-      delete headers['host'];
-      delete headers['connection'];
-      delete headers['content-length'];
-
-      // Resolve secrets and inject Auth
-      if (upstream.config.auth?.kind === 'basic' && upstream.config.auth.secretRef) {
-        const secret = await this.secretProvider.getSecret(upstream.config.auth.secretRef);
-        if (secret) {
-          headers['authorization'] = `Basic ${Buffer.from(secret).toString('base64')}`;
-        }
-      } else if (upstream.config.auth?.kind === 'apiKey' && upstream.config.auth.secretRef) {
-        const secret = await this.secretProvider.getSecret(upstream.config.auth.secretRef);
-        if (secret) {
-          headers['x-api-key'] = secret; // Assuming x-api-key header for apiKey kind
-        }
-      } else if (upstream.config.auth?.kind !== 'none') {
-        delete headers['authorization'];
-        delete headers['cookie'];
+      const blocked = connectionHeaders(req.headers.connection);
+      const headers: Record<string, string | string[] | undefined> = {};
+      for (const [name, value] of Object.entries(req.headers)) {
+        if (
+          HOP_HEADERS.has(name) ||
+          blocked.has(name) ||
+          [
+            'host',
+            'content-length',
+            'cookie',
+            'authorization',
+            'x-api-key',
+            'x-real-ip',
+            'forwarded',
+            'x-csrf-token',
+            'x-access-token',
+            'x-refresh-token',
+            'x-request-id',
+          ].includes(name) ||
+          name.startsWith('x-user-') ||
+          name.startsWith('x-unit-') ||
+          name.startsWith('x-auth-') ||
+          name.startsWith('x-permission') ||
+          name.startsWith('x-forwarded-')
+        )
+          continue;
+        headers[name] = value;
       }
 
-      headers['x-request-id'] = req.headers['x-request-id'] || crypto.randomUUID();
+      // Internal context comes from the verified session. External partners get no Hub identity.
+      if (upstream.config.type === 'internal') {
+        headers['x-user-id'] = String(caller.sub ?? caller.id ?? '');
+        headers['x-unit-id'] = String(caller.unitId ?? '');
+      }
+      headers['x-request-id'] = requestId;
 
-      const options = {
-        path: targetPath,
+      const auth = upstream.config.auth as
+        | { kind?: string; secretRef?: string }
+        | undefined;
+      if (auth?.kind && auth.kind !== 'none') {
+        if (!['basic', 'apiKey'].includes(auth.kind) || !auth.secretRef) {
+          responseStatus = 503;
+          return res.status(503).json({
+            success: false,
+            message: 'Nguồn chưa cấu hình xác thực được hỗ trợ',
+          });
+        }
+        const secret = await this.secretProvider.getSecret(auth.secretRef);
+        if (!secret) {
+          responseStatus = 503;
+          return res
+            .status(503)
+            .json({ success: false, message: 'Nguồn chưa sẵn sàng xác thực' });
+        }
+        if (auth.kind === 'basic')
+          headers.authorization =
+            'Basic ' + Buffer.from(secret).toString('base64');
+        else headers['x-api-key'] = secret;
+      }
+
+      const {
+        statusCode,
+        headers: responseHeaders,
+        body,
+      } = await upstream.breaker.fire({
+        path: path + (queryIndex === -1 ? '' : url.slice(queryIndex)),
         method: req.method,
-        headers: headers as any,
+        headers,
         body: req.method !== 'GET' && req.method !== 'HEAD' ? req : undefined,
-      };
-
-      // 2. Execute via Opossum Circuit Breaker
-      const { statusCode, headers: resHeaders, body } = await upstream.breaker.fire(options);
-
-      // 3. Pipe response back to client
+      });
+      responseStatus = statusCode;
       res.status(statusCode);
-      for (const [key, value] of Object.entries(resHeaders)) {
-        if (value) res.setHeader(key, value);
+      const responseBlocked = connectionHeaders(responseHeaders.connection);
+      for (const [name, value] of Object.entries(responseHeaders)) {
+        if (
+          value &&
+          name.toLowerCase() !== 'set-cookie' &&
+          !HOP_HEADERS.has(name.toLowerCase()) &&
+          !responseBlocked.has(name.toLowerCase())
+        ) {
+          res.setHeader(name, value as string | string[]);
+        }
       }
-      
       await pipeline(body, res);
-
-    } catch (err) {
-      this.logger.error(`Proxy Error for ${upstreamName}: ${err.message}`);
-      
-      if (err.type === 'open') {
-        return res.status(503).json({ success: false, message: 'Service Unavailable (Circuit Breaker Open)' });
+    } catch (error: unknown) {
+      const rpc = (error ?? {}) as { type?: string; code?: string };
+      responseStatus =
+        rpc.type === 'open'
+          ? 503
+          : ['UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_HEADERS_TIMEOUT'].includes(
+                rpc.code ?? '',
+              )
+            ? 504
+            : 502;
+      this.logger.warn(
+        JSON.stringify({
+          event: 'INTEGRATION_PROXY_FAILED',
+          requestId,
+          upstream: upstreamName,
+          status: responseStatus,
+        }),
+      );
+      if (!res.headersSent) {
+        return res.status(responseStatus).json({
+          success: false,
+          message: 'Dịch vụ liên thông tạm thời không khả dụng',
+        });
       }
-      if (err.code === 'UND_ERR_CONNECT_TIMEOUT' || err.code === 'UND_ERR_HEADERS_TIMEOUT') {
-        return res.status(504).json({ success: false, message: 'Gateway Timeout' });
-      }
-      
-      return res.status(502).json({ success: false, message: 'Bad Gateway' });
+      res.destroy();
+    } finally {
+      this.logger.log(
+        JSON.stringify({
+          event: 'INTEGRATION_PROXY',
+          requestId,
+          upstream: upstreamName,
+          userId: caller.sub ?? caller.id,
+          ip: clientIp(req),
+          method: req.method,
+          status: responseStatus,
+          durationMs: Date.now() - startedAt,
+          timestamp: new Date().toISOString(),
+        }),
+      );
     }
-  }
-
-  private checkAccess(req: any, config: any): boolean {
-    // If upstream requires no specific role, allow
-    if (!config.roles || config.roles.length === 0) return true;
-    
-    // Check method
-    if (config.allowedMethods && config.allowedMethods.length > 0) {
-      if (!config.allowedMethods.includes(req.method)) return false;
-    }
-
-    // Role matching
-    const userRoles = req.user?.roles || [];
-    return config.roles.some((r: string) => userRoles.includes(r));
   }
 }

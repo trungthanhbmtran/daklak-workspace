@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,6 +43,10 @@ export function LoginClient() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
+  const { data: ssoProviders = [] } = useQuery<{ id: string; label: string }[]>({
+    queryKey: ['sso-providers'], retry: false,
+    queryFn: async () => { const res = await apiClient.get('/auth/sso/providers', { skipSessionRecovery: true }); return res.data?.data?.providers ?? res.data?.providers ?? []; },
+  });
   const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -201,6 +205,33 @@ export function LoginClient() {
               </Button>
             </form>
           </Form>
+          <div className="relative mt-6 mb-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                Hoặc đăng nhập bằng
+              </span>
+            </div>
+          </div>
+
+          <Button 
+            type="button" 
+            className="w-full bg-[#E52B2B] hover:bg-[#C92222] text-white font-medium" 
+            disabled={isPending} 
+            onClick={() => {
+              setIsRedirecting(true);
+              window.location.assign('/api/v1/admin/auth/sso/vneid/start');
+            }}
+          >
+            Đăng nhập qua VNeID
+          </Button>
+
+          {ssoProviders.filter(p => p.id !== 'vneid').map((provider) => (
+            <Button key={provider.id} variant="outline" className="w-full mt-3" disabled={isPending} onClick={() => window.location.assign(`/api/v1/admin/auth/sso/${encodeURIComponent(provider.id)}/start`)}>{provider.label}</Button>
+          ))}
+          {searchParams.get('ssoError') && <p role="alert" className="mt-3 text-sm text-destructive text-center">Không thể đăng nhập SSO. Vui lòng thử lại hoặc liên hệ quản trị viên.</p>}
         </CardContent>
 
         <CardFooter className="flex justify-center border-t p-4 mt-2">
@@ -215,3 +246,4 @@ export function LoginClient() {
     </div>
   );
 }
+

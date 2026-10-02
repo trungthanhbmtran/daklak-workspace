@@ -10,8 +10,11 @@ import { TaskHistoryModule } from './modules/task-history/task-history.module';
 import { TaskCatalogModule } from './modules/task-catalog/task-catalog.module';
 import { TaskKpiModule } from './modules/task-kpi/task-kpi.module';
 
+import { InternalAuthModule } from './core/auth/gateway-context.service';
+
 @Module({
   imports: [
+    InternalAuthModule,
     ConfigModule,
     PrismaModule,
     ScheduleModule.forRoot(),
@@ -26,3 +29,4 @@ import { TaskKpiModule } from './modules/task-kpi/task-kpi.module';
   ],
 })
 export class AppModule {}
+

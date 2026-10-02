@@ -3,6 +3,8 @@ import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
 import { IntegrationConfigModule } from '../integration-config/integration-config.module';
 import { AuthSessionStore } from './auth-session.store';
+import { AuthDeviceStore } from './auth-device.store';
+import { AuthStateSyncWorker } from './auth-state-sync.worker';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -51,7 +53,9 @@ const protoRoot =
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthSessionStore],
+  providers: [UsersService, AuthSessionStore, AuthDeviceStore, AuthStateSyncWorker],
   exports: [UsersService],
 })
 export class UsersModule {}
+
+

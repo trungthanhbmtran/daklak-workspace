@@ -7,8 +7,11 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 
+import { InternalAuthModule } from './core/auth/gateway-context.service';
+
 @Module({
   imports: [
+    InternalAuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     ReportsModule,
@@ -19,3 +22,4 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
   providers: [AppService],
 })
 export class AppModule {}
+

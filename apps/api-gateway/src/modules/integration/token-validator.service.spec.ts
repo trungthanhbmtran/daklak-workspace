@@ -1,126 +1,35 @@
 import { of, throwError } from 'rxjs';
-import {
-  UnauthorizedException,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { UnauthorizedException, ServiceUnavailableException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { IntegrationAuthService } from '../../../../user-service/src/modules/integration-config/integration-auth.service';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 import { TokenValidatorService } from './token-validator.service';
-
-describe('Issued JWT -> gateway verification', () => {
-  const signer = new IntegrationAuthService();
+describe('Gateway issuer and authoritative revocation', () => {
+  const signer = new TokenIssuerService(), sid = '11c6badf-4128-490a-93b3-e105f7f415ce';
   let validator: TokenValidatorService;
-  const redis = { get: jest.fn(), touchAuthSession: jest.fn() },
-    rpc = { GetPublicKey: jest.fn() };
-  beforeEach(async () => {
-    jest.clearAllMocks();
-    redis.touchAuthSession.mockResolvedValue(true);
-    rpc.GetPublicKey.mockReturnValue(of(signer.getPublicKeyDetails()));
-    redis.get.mockImplementation(async (key: string) =>
-      key.startsWith('user_session:')
-        ? JSON.stringify({
-            id: 7,
-            isActive: true,
-            permissionsFlatten: ['MENU:READ'],
-          })
-        : null,
-    );
-    validator = new TokenValidatorService(redis as any, {
-      getService: () => rpc,
-    });
-    await validator.onModuleInit();
+  const redis = { get: jest.fn(), touchAuthSession: jest.fn() }, rpc = { GetAuthState: jest.fn() };
+  const state = { userId: 7, isActive: true, authVersion: 0, sessionActive: true };
+  const token = () => signer.signAccessToken(7, 900, sid, 0);
+  beforeEach(() => {
+    jest.clearAllMocks(); redis.touchAuthSession.mockResolvedValue(true); rpc.GetAuthState.mockReturnValue(of(state));
+    redis.get.mockImplementation(async (key: string) => key.startsWith('user_session:') ? JSON.stringify({ id: 7, authVersion: 0, permissionsFlatten: ['MENU:READ'] }) : null);
+    validator = new TokenValidatorService(redis as any, { getService: () => rpc } as any, signer); validator.onModuleInit();
   });
-  it('accepts a newly issued token with the published session context', async () => {
-    expect(
-      await validator.verifyToken(signer.signAccessToken(7, 3600)),
-    ).toMatchObject({ sub: '7', id: 7, permissionsFlatten: ['MENU:READ'] });
+  it('accepts a Gateway token', async () => { expect(await validator.verifyToken(token())).toMatchObject({ id: 7, sid, authVersion: 0 }); });
+  it('rejects legacy HS256', async () => { await expect(validator.verifyToken(jwt.sign({ sub: '7' }, 'test-key', { expiresIn: 900 }))).rejects.toBeInstanceOf(UnauthorizedException); });
+  it.each([{ ...state, isActive: false }, { ...state, sessionActive: false }, { ...state, authVersion: 1 }, { ...state, userId: 8 }])('rejects durable revocation with active Redis: %p', async next => {
+    rpc.GetAuthState.mockReturnValue(of(next)); await expect(validator.verifyToken(token())).rejects.toBeInstanceOf(UnauthorizedException);
   });
-  it('reproduces the HS256 vs RS256 mismatch and continues to reject the old signer', async () => {
-    const old = jwt.sign(
-      { sub: '7', iss: 'daklak-user-service', aud: 'daklak-api-gateway' },
-      'test-hs256-key',
-      { expiresIn: 3600 },
-    );
-    await expect(validator.verifyToken(old)).rejects.toBeInstanceOf(
-      UnauthorizedException,
-    );
-  });
-  it('rejects expired tokens, wrong audiences and revoked tokens', async () => {
-    await expect(
-      validator.verifyToken(signer.signAccessToken(7, -1)),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
-    await expect(
-      validator.verifyToken(
-        signer.signToken({
-          sub: '7',
-          iss: 'daklak-user-service',
-          aud: 'other',
-          jti: 'x',
-          exp: Math.floor(Date.now() / 1000) + 3600,
-        }),
-      ),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
-    redis.get.mockImplementation(async (key: string) =>
-      key.startsWith('denylist:') ? 'revoked' : '{}',
-    );
-    await expect(
-      validator.verifyToken(signer.signAccessToken(7, 3600)),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
-  });
-  it('reloads the cached key when user-service rotates its signing key', async () => {
-    const rotated = new IntegrationAuthService();
-    rpc.GetPublicKey.mockReturnValue(of(rotated.getPublicKeyDetails()));
-    expect(
-      await validator.verifyToken(rotated.signAccessToken(7, 3600)),
-    ).toMatchObject({ sub: '7' });
-  });
-  it('rejects a server-revoked session even with a valid JWT and cached user', async () => {
-    const token = signer.signAccessToken(7, 3600);
-    await validator.verifyToken(token);
-    redis.touchAuthSession.mockResolvedValue(false);
-    await expect(validator.verifyToken(token)).rejects.toBeInstanceOf(
-      UnauthorizedException,
-    );
-  });
-  it('does not mistake Redis outages for an expired user session', async () => {
-    redis.get.mockRejectedValue(new Error('offline'));
-    await expect(
-      validator.verifyToken(signer.signAccessToken(7, 3600)),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
-  });
-  it('benchmarks repeated verification with one cached key and profile lookup', async () => {
-    const token = signer.signAccessToken(7, 900);
-    const timings: number[] = [];
-    for (let i = 0; i < 200; i++) {
-      const start = performance.now();
-      await validator.verifyToken(token);
-      timings.push(performance.now() - start);
-    }
-    timings.sort((a, b) => a - b);
-    expect(rpc.GetPublicKey).toHaveBeenCalledTimes(1);
-    expect(
-      redis.get.mock.calls.filter(([key]) =>
-        String(key).startsWith('user_session:'),
-      ),
-    ).toHaveLength(1);
-    expect(redis.touchAuthSession).toHaveBeenCalledTimes(200);
-    console.log(
-      JSON.stringify({
-        benchmark: 'RS256 verification; Redis mocked',
-        samples: timings.length,
-        medianMs: +timings[100].toFixed(3),
-        p95Ms: +timings[190].toFixed(3),
-      }),
-    );
-  });
-  it('does not mistake public-key outages for an expired user session', async () => {
-    rpc.GetPublicKey.mockReturnValue(throwError(() => new Error('offline')));
-    const cold = new TokenValidatorService(redis as any, {
-      getService: () => rpc,
-    });
-    await cold.onModuleInit();
-    await expect(
-      cold.verifyToken(signer.signAccessToken(7, 3600)),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+  it('checks DB again after caching profile', async () => { await validator.verifyToken(token()); rpc.GetAuthState.mockReturnValue(of({ ...state, authVersion: 1 })); await expect(validator.verifyToken(token())).rejects.toBeInstanceOf(UnauthorizedException); });
+  it('distinguishes idle expiry from outages', async () => { redis.touchAuthSession.mockResolvedValue(false); await expect(validator.verifyToken(token())).rejects.toBeInstanceOf(UnauthorizedException); redis.touchAuthSession.mockRejectedValue(new Error('offline')); await expect(validator.verifyToken(token())).rejects.toBeInstanceOf(ServiceUnavailableException); });
+  it('fails closed on DB outage', async () => { rpc.GetAuthState.mockReturnValue(throwError(() => new Error('offline'))); await expect(validator.verifyToken(token())).rejects.toBeInstanceOf(ServiceUnavailableException); });
+  it('rejects denylisted access token', async () => { redis.get.mockImplementation(async (key: string) => key.startsWith('denylist:') ? 'revoked' : JSON.stringify({ authVersion: 0 })); await expect(validator.verifyToken(token())).rejects.toBeInstanceOf(UnauthorizedException); });
+  it('does not renew idle for monitoring', async () => { await validator.verifyToken(token(), undefined, false); expect(redis.touchAuthSession).toHaveBeenCalledWith(sid, '7', 0, false); });
+  it('benchmarks 200 validations with dependency mocks', async () => {
+    const value = token(), timings: number[] = [];
+    for (let n = 0; n < 200; n++) { const start = performance.now(); await validator.verifyToken(value); timings.push(performance.now() - start); }
+    timings.sort((a,b) => a-b); expect(rpc.GetAuthState).toHaveBeenCalledTimes(200);
+    expect(redis.get.mock.calls.filter(([key]) => String(key).startsWith('user_session:'))).toHaveLength(1);
+    console.log(JSON.stringify({ benchmark: 'RS256; dependency mocks', samples: 200, medianMs: timings[100], p95Ms: timings[190] }));
   });
 });
+

@@ -61,6 +61,23 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up -d --no-
 
 Không chạy migration kèm seed chỉ để sửa đăng nhập. Không xoá Redis/database/volume để xử lý phiên cũ. Ghi lại ba image/tag trước khi cập nhật để có thể quay lại nếu kiểm tra vận hành thất bại.
 
+## IP thật và giới hạn đăng nhập
+
+Gateway dùng IP được Express xác định, không lấy trực tiếp IP đầu tiên trong header của trình duyệt. Đặt `TRUSTED_PROXY_CIDRS` trong `.env.production` theo IP/CIDR của các proxy thực tế được phép gửi request tới Gateway. Biến này áp dụng cho Gateway; user-service không cần khai báo proxy.
+
+Để trống thì không tin forwarded header. Trong triển khai sau Nginx, tất cả người dùng có thể bị tính cùng một bucket IP nếu chưa khai báo proxy. Không cấu hình `true`, wildcard, CIDR /0 hoặc tin toàn bộ mạng riêng mặc định. Không chỉ dùng số hop vì cổng Gateway có thể được truy cập qua đường đi ngắn hơn.
+
+Nginx trong repo ghi đè X-Forwarded-For bằng remote_addr tại biên. Nếu có load balancer trước Nginx, cần cấu hình real_ip và ranh giới tin cậy theo sơ đồ thật. Sau cập nhật source, kiểm tra rồi reload cấu hình Nginx:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.prod.yml exec -T nginx nginx -t
+docker compose --env-file .env.production -f docker-compose.prod.yml exec -T nginx nginx -s reload
+```
+
+Proxy liên thông bây giờ bắt buộc quyền INTEGRATION:READ hoặc INTEGRATION:MANAGE, mọi scopes đã cấu hình, allowedMethods và allowedPaths. Cấu hình thiếu danh sách phương thức/đường dẫn sẽ bị từ chối. Xác thực nguồn hiện hỗ trợ none/basic/apiKey; phương thức chưa triển khai hoặc secret thiếu trả 503. Cookie Hub và danh tính người dùng không được chuyển tới nguồn bên ngoài; Set-Cookie từ upstream bị loại.
+
+Xem `deploy/REVIEW.auth-government.md` để biết kết quả rà soát, các điểm legacy và điều kiện còn chưa đạt; các bản sửa HTTP không chứng minh toàn hệ thống đã đạt chuẩn an toàn thông tin.
+
 ## Kiểm tra sau triển khai
 
 - Login thành công → /auth/me và /menus/me trả 200 → Hub tải được.

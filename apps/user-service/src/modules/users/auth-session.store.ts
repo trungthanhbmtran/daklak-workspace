@@ -29,21 +29,13 @@ export class AuthSessionStore implements OnModuleDestroy {
       this.logger.error('Auth session Redis unavailable'),
     );
   }
-  private refreshKey(token: string) {
-    return 'auth:refresh:' + createHash('sha256').update(token).digest('hex');
-  }
-  private usedRefreshKey(token: string) {
-    return this.refreshKey(token).replace(
-      'auth:refresh:',
-      'auth:refresh-used:',
-    );
-  }
   private attemptKey(account: string) {
     return (
       'auth:attempts:' +
       createHash('sha256').update(account.trim().toLowerCase()).digest('hex')
     );
   }
+  async consumeSsoAssertion(jti: string): Promise<boolean> { return (await this.redis.set('auth:sso:assertion:' + jti, '1', 'EX', 60, 'NX')) === 'OK'; }
   async assertLoginAllowed(account: string): Promise<boolean> {
     return (
       Number(await this.redis.get(this.attemptKey(account))) <
@@ -61,22 +53,18 @@ export class AuthSessionStore implements OnModuleDestroy {
   async clearLoginFailures(account: string) {
     await this.redis.del(this.attemptKey(account));
   }
-  async createSession(userId: number): Promise<RefreshSession> {
+  async createSession(userId: number, authVersion: number): Promise<RefreshSession> {
+    if (!Number.isSafeInteger(authVersion) || authVersion < 0) throw new Error('Invalid durable authentication version');
     const now = Number((await this.redis.time())[0]);
-    const session = {
-      userId,
-      sessionId: randomUUID(),
-      expiresAt: now + this.policy.absoluteSeconds,
-    };
-    const version = Number(
-      (await this.redis.get('auth:user:version:' + userId)) || 0,
-    );
-    await this.redis.set(
-      'auth:session:' + session.sessionId,
-      JSON.stringify({ ...session, version }),
-      'EX',
-      Math.min(this.policy.absoluteSeconds, this.policy.idleSeconds),
-    );
+    const session = { userId, sessionId: randomUUID(), expiresAt: now + this.policy.absoluteSeconds, authVersion };
+    const created = Number(await this.redis.eval(`
+local current = tonumber(redis.call('GET', KEYS[1]) or '-1')
+if current > tonumber(ARGV[1]) then return 0 end
+redis.call('SET', KEYS[1], ARGV[1])
+redis.call('SET', KEYS[2], ARGV[2], 'EX', ARGV[3])
+return 1`, 2, 'auth:user:version:db:' + userId, 'auth:session:' + session.sessionId,
+      authVersion, JSON.stringify({ ...session, version: authVersion }), Math.min(this.policy.absoluteSeconds, this.policy.idleSeconds)));
+    if (created !== 1) throw new Error('Authentication state changed while logging in');
     return session;
   }
   async touchSession(session: RefreshSession): Promise<boolean> {
@@ -86,7 +74,7 @@ export class AuthSessionStore implements OnModuleDestroy {
           TOUCH_AUTH_SESSION,
           2,
           'auth:session:' + session.sessionId,
-          'auth:user:version:' + session.userId,
+          'auth:user:version:db:' + session.userId,
           String(session.userId),
           this.policy.idleSeconds,
         ),
@@ -108,81 +96,16 @@ export class AuthSessionStore implements OnModuleDestroy {
       ttl,
     );
   }
-  async setRefresh(token: string, session: RefreshSession, ttl: number) {
-    await this.redis.set(
-      this.refreshKey(token),
-      JSON.stringify(session),
-      'EX',
-      ttl,
-    );
-  }
-  async getRefresh(token: string): Promise<RefreshSession | null> {
-    const raw = await this.redis.get(this.refreshKey(token));
-    if (raw) return JSON.parse(raw) as RefreshSession;
-    const used = await this.redis.get(this.usedRefreshKey(token));
-    if (used) {
-      const session = JSON.parse(used) as RefreshSession;
-      if (await this.redis.get('auth:session:' + session.sessionId))
-        throw new RefreshConflictError();
-    }
-    return null;
-  }
-  async rotateRefresh(
-    oldToken: string,
-    newToken: string,
-    session: RefreshSession,
-    ttl: number,
-  ): Promise<boolean> {
-    const script = `local function touch() ${TOUCH_AUTH_SESSION} end
-local raw = redis.call('GET', KEYS[3])
-if not raw then return 0 end
-local old = cjson.decode(raw)
-if old.sessionId ~= ARGV[3] or touch() ~= 1 then return 0 end
-local now = tonumber(redis.call('TIME')[1])
-local ttl = math.min(tonumber(ARGV[4]), old.expiresAt - now)
-if ttl <= 0 then return 0 end
-redis.call('SET', KEYS[4], raw, 'EX', ttl)
-redis.call('SET', KEYS[5], raw, 'EX', ttl)
-redis.call('DEL', KEYS[3])
-return 1`;
-    return (
-      Number(
-        await this.redis.eval(
-          script,
-          5,
-          'auth:session:' + session.sessionId,
-          'auth:user:version:' + session.userId,
-          this.refreshKey(oldToken),
-          this.refreshKey(newToken),
-          this.usedRefreshKey(oldToken),
-          String(session.userId),
-          this.policy.idleSeconds,
-          session.sessionId,
-          ttl,
-        ),
-      ) === 1
-    );
-  }
-  async revokeRefresh(token: string) {
-    // A token consumed by an in-flight refresh still identifies the same session for logout.
-    await this.redis.eval(
-      `
-local raw = redis.call('GET', KEYS[1]) or redis.call('GET', KEYS[2])
-if not raw then return 0 end
-local s = cjson.decode(raw)
-redis.call('DEL', 'auth:session:' .. s.sessionId)
-redis.call('DEL', KEYS[1], KEYS[2])
-return 1`,
-      2,
-      this.refreshKey(token),
-      this.usedRefreshKey(token),
-    );
-  }
-  async revokeAllForUser(userId: number) {
-    await this.redis.incr('auth:user:version:' + userId);
-    await this.redis.del('user_session:' + userId);
+  async revokeSession(sessionId: string) { await this.redis.del('auth:session:' + sessionId); }
+  async revokeAllForUser(userId: number, authVersion: number) {
+    await this.redis.eval(`
+local current = tonumber(redis.call('GET', KEYS[1]) or '-1')
+if current < tonumber(ARGV[1]) then redis.call('SET', KEYS[1], ARGV[1]) end
+redis.call('DEL', KEYS[2])
+return 1`, 2, 'auth:user:version:db:' + userId, 'user_session:' + userId, authVersion);
   }
   onModuleDestroy() {
     this.redis.disconnect();
   }
 }
+

@@ -10,15 +10,17 @@ import {
   Logger,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 
 describe('Gateway browser sessions', () => {
   const tokens = {
-    accessToken: 'access',
+    userId: 7, authVersion: 0, sessionId: '11c6badf-4128-490a-93b3-e105f7f415ce',
     refreshToken: 'refresh',
     expiresIn: 3600,
     refreshTokenExpiresIn: 604800,
   };
   const grpc = {
+    GetAuthState: jest.fn(),
     Login: jest.fn(),
     Refresh: jest.fn(),
     RevokeRefreshToken: jest.fn(),
@@ -33,12 +35,14 @@ describe('Gateway browser sessions', () => {
     warn = jest
       .spyOn(Logger.prototype, 'warn')
       .mockImplementation(() => undefined);
+    grpc.GetAuthState.mockReturnValue(of({ userId: 7, isActive: true, authVersion: 0, sessionActive: true }));
     grpc.Login.mockReturnValue(of(tokens));
     grpc.Refresh.mockReturnValue(of(tokens));
     grpc.RevokeRefreshToken.mockReturnValue(of({ success: true }));
     service = new AuthService(
       { getService: () => grpc } as unknown as ClientGrpc,
       { getService: () => employee } as unknown as ClientGrpc,
+      { signAccessToken: () => 'access' } as unknown as TokenIssuerService,
     );
     service.onModuleInit();
   });
@@ -209,7 +213,7 @@ describe('Gateway browser sessions', () => {
       { cookies: { refreshToken: 'refresh' } },
       res as any,
     );
-    expect(grpc.Refresh).toHaveBeenCalledWith({ refreshToken: 'refresh' });
+    expect(grpc.Refresh).toHaveBeenCalledWith(expect.objectContaining({ refreshToken: 'refresh', requestId: expect.any(String) }));
     expect(res.cookie).toHaveBeenCalledTimes(2);
   });
   it('leaves cookie cleanup to logout so a late refresh cannot overwrite a newer login', async () => {
@@ -257,3 +261,4 @@ describe('Gateway browser sessions', () => {
     expect(res.cookie).not.toHaveBeenCalled();
   });
 });
+

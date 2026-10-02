@@ -1,6 +1,7 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
-import { IntegrationAuthService } from '../integration-config/integration-auth.service';
+
 import { AuthSessionStore, RefreshConflictError } from './auth-session.store';
+import { AuthDeviceStore } from './auth-device.store';
 import { RpcException, ClientGrpc } from '@nestjs/microservices';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -29,8 +30,8 @@ export class UsersService implements OnModuleInit {
 
   constructor(
     private prisma: PrismaService,
-    private readonly auth: IntegrationAuthService,
     private readonly sessions: AuthSessionStore,
+    private readonly devices: AuthDeviceStore,
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
     @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
@@ -492,20 +493,30 @@ export class UsersService implements OnModuleInit {
       throw error;
     }
     await this.sessions.clearLoginFailures(account);
-    const session = await this.sessions.createSession(user.id);
+    const session = await this.sessions.createSession(user.id, user.authVersion);
     const tokens = this.generateAuthTokens(session);
-    const profile = await this.findOne({ id: user.id });
+    const profile = await this.freshAuthProfile(user.id);
     await this.sessions.setSession(
       user.id,
-      profile,
+      { ...profile, authVersion: session.authVersion },
       tokens.refreshTokenExpiresIn,
     );
-    await this.sessions.setRefresh(
-      tokens.refreshToken,
-      session,
-      tokens.refreshTokenExpiresIn,
-    );
+    await this.devices.create(tokens.refreshToken, session);
     this.auditAuth('LOGIN_SUCCEEDED', user.id);
+    return this.formatAuthResponse(user, tokens);
+  }
+
+  async loginSso(identity: { issuerHash: string; subjectHash: string }) {
+    const link = await this.prisma.externalIdentity.findUnique({ where: { issuerHash_subjectHash: identity } });
+    if (!link || link.disabledAt) throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Tài khoản SSO chưa được liên kết hoặc đã bị khóa' });
+    const user = await this.fetchUserWithRelations(link.userId);
+    if (!user || !user.isActive) throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Tài khoản SSO chưa được liên kết hoặc đã bị khóa' });
+    const session = await this.sessions.createSession(user.id, user.authVersion);
+    const tokens = this.generateAuthTokens(session);
+    const profile = await this.freshAuthProfile(user.id);
+    await this.sessions.setSession(user.id, { ...profile, authVersion: session.authVersion }, tokens.refreshTokenExpiresIn);
+    await this.devices.create(tokens.refreshToken, session);
+    this.auditAuth('SSO_LOGIN_SUCCEEDED', user.id);
     return this.formatAuthResponse(user, tokens);
   }
 
@@ -530,19 +541,21 @@ export class UsersService implements OnModuleInit {
         message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn',
         code: GRPC.UNAUTHENTICATED,
       });
+    if (user.authVersion !== session.authVersion) {
+      throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn' });
+    }
     const tokens = this.generateAuthTokens(session);
-    const profile = await this.findOne({ id: user.id });
+    const profile = await this.freshAuthProfile(user.id);
     await this.sessions.setSession(
       user.id,
-      profile,
+      { ...profile, authVersion: session.authVersion },
       tokens.refreshTokenExpiresIn,
     );
     if (
-      !(await this.sessions.rotateRefresh(
+      !(await this.devices.rotate(
         data.refreshToken.trim(),
         tokens.refreshToken,
         session,
-        tokens.refreshTokenExpiresIn,
       ))
     ) {
       await this.readRefreshSession(data.refreshToken.trim());
@@ -597,7 +610,7 @@ export class UsersService implements OnModuleInit {
     token: string,
   ): Promise<RefreshSession | null> {
     try {
-      return await this.sessions.getRefresh(token);
+      return await this.devices.read(token);
     } catch (error) {
       if (error instanceof RefreshConflictError) {
         throw new RpcException({
@@ -641,12 +654,10 @@ export class UsersService implements OnModuleInit {
       refreshTokenExpiresIn,
     );
     const refreshToken = randomBytes(40).toString('hex');
-    const accessToken = this.auth.signAccessToken(
-      session.userId,
-      expiresIn,
-      session.sessionId,
-    );
-    return { accessToken, refreshToken, expiresIn, refreshTokenExpiresIn };
+    return {
+      accessToken: '', refreshToken, expiresIn, refreshTokenExpiresIn,
+      sessionId: session.sessionId, authVersion: session.authVersion,
+    };
   }
 
   private formatAuthResponse(user: any, tokens: any) {
@@ -661,7 +672,13 @@ export class UsersService implements OnModuleInit {
   async revokeRefreshToken(data: { refreshToken: string }) {
     const token =
       typeof data.refreshToken === 'string' ? data.refreshToken.trim() : '';
-    if (token) await this.sessions.revokeRefresh(token);
+    if (token) {
+      const sessionId = await this.devices.revoke(token);
+      if (sessionId) {
+        try { await this.sessions.revokeSession(sessionId); }
+        catch { this.logger.warn('Session revoked in DB; Redis cleanup pending'); }
+      }
+    }
     this.auditAuth('LOGOUT');
     return { success: true };
   }
@@ -689,17 +706,20 @@ export class UsersService implements OnModuleInit {
       });
     this.assertPasswordPolicy(data.newPassword);
     const hash = await bcrypt.hash(data.newPassword, 10);
-    if (user.credential) {
-      await this.prisma.credential.update({
+    const changed = await this.prisma.$transaction(async (tx) => {
+      await tx.credential.upsert({
         where: { userId: data.userId },
-        data: { passwordHash: hash },
+        update: { passwordHash: hash }, create: { userId: data.userId, passwordHash: hash },
       });
-    } else {
-      await this.prisma.credential.create({
-        data: { userId: data.userId, passwordHash: hash },
+      const account = await tx.user.update({ where: { id: data.userId }, data: { authVersion: { increment: 1 } } });
+      await tx.authStateSync.upsert({
+        where: { userId: data.userId },
+        create: { userId: data.userId, authVersion: account.authVersion },
+        update: { authVersion: account.authVersion, status: 'PENDING' },
       });
-    }
-    await this.sessions.revokeAllForUser(data.userId);
+      return account;
+    });
+    await this.publishAuthState(data.userId, changed.authVersion);
     this.auditAuth('PASSWORD_CHANGED', data.userId);
     return { success: true };
   }
@@ -716,6 +736,30 @@ export class UsersService implements OnModuleInit {
         message: 'Mật khẩu phải có ít nhất 12 ký tự và tối đa 72 byte UTF-8.',
       });
     }
+  }
+
+  private async publishAuthState(userId: number, authVersion: number) {
+    try { await this.sessions.revokeAllForUser(userId, authVersion); }
+    catch { this.logger.warn('Account version persisted; Redis synchronization queued'); }
+    try { await this.cache.del('user:profile:' + userId); }
+    catch { this.logger.warn('Profile cache invalidation pending; authentication uses fresh DB state'); }
+  }
+  async getAuthState(data: { id: number; sessionId: string }) {
+    const [user, session] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: data.id }, select: { id: true, isActive: true, authVersion: true } }),
+      this.prisma.authDeviceSession.findFirst({
+        where: { id: data.sessionId || '', userId: data.id, revokedAt: null, expiresAt: { gt: new Date() } },
+        select: { authVersion: true },
+      }),
+    ]);
+    return {
+      userId: user?.id ?? data.id, isActive: user?.isActive === true, authVersion: user?.authVersion ?? 0,
+      sessionActive: Boolean(user && session && session.authVersion === user.authVersion),
+    };
+  }
+
+  private async freshAuthProfile(userId: number) {
+    return this.mapUserPermissionsAndRoles(await this.fetchUserWithRelations(userId));
   }
 
   async findOne(data: { id: number }) {
@@ -953,12 +997,18 @@ export class UsersService implements OnModuleInit {
         code: GRPC.NOT_FOUND,
       });
     }
-    await this.prisma.user.update({
-      where: { id: data.userId },
-      data: { isActive: data.isActive },
+    const changed = await this.prisma.$transaction(async (tx) => {
+      const account = await tx.user.update({
+        where: { id: data.userId }, data: { isActive: data.isActive, authVersion: { increment: 1 } },
+      });
+      await tx.authStateSync.upsert({
+        where: { userId: data.userId },
+        create: { userId: data.userId, authVersion: account.authVersion },
+        update: { authVersion: account.authVersion, status: 'PENDING' },
+      });
+      return account;
     });
-    if (!data.isActive) await this.sessions.revokeAllForUser(data.userId);
-    await this.cache.del(`user:profile:${data.userId}`);
+    await this.publishAuthState(data.userId, changed.authVersion);
     this.auditAuth(
       data.isActive ? 'ACCOUNT_ENABLED' : 'ACCOUNT_DISABLED',
       data.userId,
@@ -1415,3 +1465,6 @@ export class UsersService implements OnModuleInit {
     };
   }
 }
+
+
+

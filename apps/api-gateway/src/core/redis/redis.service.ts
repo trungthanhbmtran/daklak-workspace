@@ -37,7 +37,7 @@ export class RedisService implements OnModuleDestroy {
     });
   }
 
-  async touchAuthSession(sessionId: string, userId: string): Promise<boolean> {
+  async touchAuthSession(sessionId: string, userId: string, authVersion: number, renew = true): Promise<boolean> {
     const idle = this.authPolicy.idleSeconds;
     return (
       Number(
@@ -45,9 +45,11 @@ export class RedisService implements OnModuleDestroy {
           TOUCH_AUTH_SESSION,
           2,
           'auth:session:' + sessionId,
-          'auth:user:version:' + userId,
+          'auth:user:version:db:' + userId,
           userId,
           idle,
+          authVersion,
+          renew ? 1 : 0,
         ),
       ) === 1
     );
@@ -85,3 +87,4 @@ export class RedisService implements OnModuleDestroy {
     this.redis.disconnect();
   }
 }
+

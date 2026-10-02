@@ -1,0 +1,15 @@
+[
+  {
+    "id": "agency-sso",
+    "label": "Đăng nhập SSO cơ quan",
+    "issuer": "https://sso.example.gov.vn",
+    "clientId": "REPLACE_WITH_APPROVED_CLIENT_ID",
+    "authorizationEndpoint": "https://sso.example.gov.vn/authorize",
+    "tokenEndpoint": "https://sso.example.gov.vn/token",
+    "jwksUri": "https://sso.example.gov.vn/jwks",
+    "callbackUrl": "https://hub.example.gov.vn/api/v1/admin/auth/sso/agency-sso/callback",
+    "clientSecretRef": "AGENCY_SSO_CLIENT_SECRET",
+    "tokenAuthMethod": "client_secret_basic"
+  }
+]
+

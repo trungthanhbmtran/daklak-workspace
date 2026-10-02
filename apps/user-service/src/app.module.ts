@@ -12,8 +12,11 @@ import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
 import { AiModule } from './modules/ai/ai.module';
 import { IntegrationConfigModule } from './modules/integration-config/integration-config.module';
 
+import { InternalAuthModule } from './core/auth/gateway-context.service';
+
 @Module({
   imports: [
+    InternalAuthModule,
     ConfigModule,
     PrismaModule,
     UsersModule,
@@ -29,3 +32,4 @@ import { IntegrationConfigModule } from './modules/integration-config/integratio
   ],
 })
 export class AppModule {}
+

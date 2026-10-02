@@ -4,6 +4,7 @@ import {
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
+import { clientIp } from '../client-ip';
 import { TokenValidatorService } from '../../modules/integration/token-validator.service';
 import { IntegrationService } from '../../modules/integration/integration.service';
 
@@ -28,7 +29,7 @@ export class DynamicProxyMiddleware implements NestMiddleware {
             ? authHeader.slice(7)
             : undefined);
         if (!token) throw new UnauthorizedException('Thiếu phiên đăng nhập');
-        user = await this.tokenValidator.verifyToken(token, req.ip);
+        user = await this.tokenValidator.verifyToken(token, clientIp(req));
         req.user = user;
       } catch (error) {
         const status = error instanceof HttpException ? error.getStatus() : 503;

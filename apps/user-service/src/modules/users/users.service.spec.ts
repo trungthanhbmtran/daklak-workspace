@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RpcException } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { IntegrationAuthService } from '../integration-config/integration-auth.service';
+import { AuthDeviceStore } from './auth-device.store';
 import { AuthSessionStore } from './auth-session.store';
 import { UsersService } from './users.service';
 import { PrismaService } from '@/database/prisma.service';
@@ -43,6 +44,7 @@ describe('UsersService', () => {
           },
         },
         { provide: IntegrationAuthService, useValue: { signAccessToken: jest.fn(() => 'mock-jwt') } },
+        { provide: AuthDeviceStore, useValue: {} },
         { provide: AuthSessionStore, useValue: { setSession: jest.fn(), setRefresh: jest.fn(), consumeRefresh: jest.fn(), revokeRefresh: jest.fn() } },
       ],
     }).compile();
@@ -106,4 +108,5 @@ describe('UsersService', () => {
     });
   });
 });
+
 
