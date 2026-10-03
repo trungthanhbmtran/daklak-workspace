@@ -190,25 +190,25 @@ export function AuthFields() {
           <KeyRound className="w-4 h-4" />
           Thông tin Xác thực (Authentication)
         </div>
-        {showTestButton ? (
-          <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <Button
-              type="button" variant="outline" size="sm"
-              onClick={handleTestAuth}
-              disabled={isTesting}
-              className="h-8 text-xs gap-1.5"
-            >
-              {isTesting
-                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                : <Play className="w-3.5 h-3.5" />
-              }
-              {isTesting ? "Đang kiểm tra..." : "Test kết nối"}
-            </Button>
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground chevron" />
-          </div>
-        ) : (
+        <div className="flex items-center gap-4">
+          {showTestButton && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <Button
+                type="button" variant="outline" size="sm"
+                onClick={handleTestAuth}
+                disabled={isTesting}
+                className="h-8 text-xs gap-1.5"
+              >
+                {isTesting
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  : <Play className="w-3.5 h-3.5" />
+                }
+                {isTesting ? "Đang kiểm tra..." : "Test kết nối"}
+              </Button>
+            </div>
+          )}
           <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground chevron" />
-        )}
+        </div>
       </CollapsibleTrigger>
 
       <CollapsibleContent>
