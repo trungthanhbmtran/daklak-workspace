@@ -106,7 +106,7 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] z-[99999] overflow-y-auto p-6 sm:p-8 flex flex-col">
+      <SheetContent side="right" className="w-[85vw] sm:min-w-[85vw] z-[99999] overflow-y-auto p-6 sm:p-8 flex flex-col">
         <SheetHeader className="mb-6 shrink-0">
           <SheetTitle>Tải lên hoặc dán nội dung</SheetTitle>
           <SheetDescription>Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</SheetDescription>

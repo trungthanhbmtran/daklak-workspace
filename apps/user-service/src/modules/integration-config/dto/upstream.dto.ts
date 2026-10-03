@@ -1,5 +1,6 @@
 import { IsString, IsEnum, IsUrl, IsArray, IsOptional, ValidateNested, IsNumber, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PartialType } from '@nestjs/mapped-types';
 
 export enum UpstreamType {
   INTERNAL = 'internal',
@@ -102,4 +103,4 @@ export class CreateUpstreamDto {
   enabled?: boolean;
 }
 
-export class UpdateUpstreamDto extends CreateUpstreamDto {}
+export class UpdateUpstreamDto extends PartialType(CreateUpstreamDto) {}
