@@ -42,15 +42,33 @@ export class IntegrationConfigController {
       rateLimit: r.rateLimit ? JSON.stringify(r.rateLimit) : '{}',
       roles: Array.isArray(r.roles) ? r.roles : [],
       scopes: Array.isArray(r.scopes) ? r.scopes : [],
+      metadata: r.metadata ? (typeof r.metadata === 'string' ? r.metadata : JSON.stringify(r.metadata)) : '{}',
       createdAt: r.createdAt?.toISOString() || '',
       updatedAt: r.updatedAt?.toISOString() || '',
     };
   }
 
+  private parseDto(data: any) {
+    const dto = { ...data };
+    if (typeof dto.auth === 'string') {
+      try { dto.auth = JSON.parse(dto.auth); } catch(e) {}
+    }
+    if (typeof dto.retry === 'string') {
+      try { dto.retry = JSON.parse(dto.retry); } catch(e) {}
+    }
+    if (typeof dto.rateLimit === 'string') {
+      try { dto.rateLimit = JSON.parse(dto.rateLimit); } catch(e) {}
+    }
+    if (typeof dto.metadata === 'string') {
+      try { dto.metadata = JSON.parse(dto.metadata); } catch(e) {}
+    }
+    return dto;
+  }
+
   @GrpcMethod('IntegrationConfigService', 'CreateUpstream')
   async createUpstream(data: any) {
     try {
-      const dto = data as CreateUpstreamDto;
+      const dto = this.parseDto(data) as CreateUpstreamDto;
       const callerUserId = data.callerUserId || 'system-admin';
       const r = await this.service.createUpstream(dto, callerUserId);
       return this.mapToUpstreamResponse(r);
@@ -85,7 +103,7 @@ export class IntegrationConfigController {
   @GrpcMethod('IntegrationConfigService', 'UpdateUpstream')
   async updateUpstream(data: any) {
     try {
-      const dto = data.data as UpdateUpstreamDto;
+      const dto = this.parseDto(data.data) as UpdateUpstreamDto;
       const callerUserId = data.callerUserId || 'system-admin';
       const r = await this.service.updateUpstream(data.id, dto, callerUserId);
       return this.mapToUpstreamResponse(r);

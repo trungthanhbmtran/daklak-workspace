@@ -10,13 +10,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } fr
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from "../../api";
 import { toast } from "sonner";
 
 import { BasicInfoFields } from "./form/BasicInfoFields";
 import { ProtocolFields } from "./form/ProtocolFields";
 import { AuthFields } from "./form/AuthFields";
+import { AdvancedConfigFields } from "./form/AdvancedConfigFields";
 import { RawConfigFields } from "./form/RawConfigFields";
 import { ImportApiDialog } from "../import/ImportApiDialog";
 
@@ -50,7 +51,13 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       scope: "",
       tokenPath: "access_token",
       isRawMode: false,
-      rawConfig: "{}"
+      rawConfig: "{}",
+      timeoutMs: 30000,
+      cacheTtlSec: 0,
+      retry: "{}",
+      rateLimit: "{}",
+      roles: "",
+      scopes: ""
     }
   });
 
@@ -82,7 +89,13 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         scope: initialData?.authConfig?.scope || "",
         tokenPath: initialData?.authConfig?.tokenPath || "access_token",
         isRawMode: !!initialData?.isRawMode,
-        rawConfig: initialData?.rawConfig || (initialData?.metadata ? JSON.stringify(initialData.metadata, null, 2) : "{}")
+        rawConfig: initialData?.rawConfig || (initialData?.metadata ? JSON.stringify(initialData.metadata, null, 2) : "{}"),
+        timeoutMs: initialData?.timeoutMs ?? 30000,
+        cacheTtlSec: initialData?.cacheTtlSec ?? 0,
+        retry: initialData?.retry ? (typeof initialData.retry === 'string' ? initialData.retry : JSON.stringify(initialData.retry)) : "{}",
+        rateLimit: initialData?.rateLimit ? (typeof initialData.rateLimit === 'string' ? initialData.rateLimit : JSON.stringify(initialData.rateLimit)) : "{}",
+        roles: Array.isArray(initialData?.roles) ? initialData.roles.join(', ') : "",
+        scopes: Array.isArray(initialData?.scopes) ? initialData.scopes.join(', ') : ""
       });
       setIsOpen(true);
     },
@@ -102,7 +115,13 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         scope: item.authConfig?.scope || "",
         tokenPath: item.authConfig?.tokenPath || "access_token",
         isRawMode: false,
-        rawConfig: item.metadata ? JSON.stringify(item.metadata, null, 2) : "{}"
+        rawConfig: item.metadata ? JSON.stringify(item.metadata, null, 2) : "{}",
+        timeoutMs: (item as any).timeoutMs ?? 30000,
+        cacheTtlSec: (item as any).cacheTtlSec ?? 0,
+        retry: (item as any).retry ? (typeof (item as any).retry === 'string' ? (item as any).retry : JSON.stringify((item as any).retry)) : "{}",
+        rateLimit: (item as any).rateLimit ? (typeof (item as any).rateLimit === 'string' ? (item as any).rateLimit : JSON.stringify((item as any).rateLimit)) : "{}",
+        roles: Array.isArray((item as any).roles) ? (item as any).roles.join(', ') : "",
+        scopes: Array.isArray((item as any).scopes) ? (item as any).scopes.join(', ') : ""
       });
       setIsOpen(true);
     }
@@ -169,7 +188,13 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         tokenPath: data.tokenPath
       },
       endpoints: endpointsList,
-      metadata: cleanMetadata
+      metadata: cleanMetadata,
+      timeoutMs: data.timeoutMs,
+      cacheTtlSec: data.cacheTtlSec,
+      retry: data.retry,
+      rateLimit: data.rateLimit,
+      roles: data.roles,
+      scopes: data.scopes
     };
 
     if (editingItem) {
@@ -194,101 +219,99 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Sheet open={isOpen} onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}>
-      <SheetContent side="right" className="w-[85vw] sm:max-w-[85vw] z-[99999] p-0 flex flex-col gap-0 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-        <SheetHeader className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950 text-left">
-          <SheetTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <Server className="w-6 h-6 text-violet-600 flex-shrink-0" />
-            {editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
-          </SheetTitle>
-          <SheetDescription className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-            Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP).
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="w-full flex justify-center">
-            <Form {...form}>
-              <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-5xl">
-                {!editingItem && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-md border bg-muted/50 gap-4">
-                    <div>
-                      <h4 className="text-sm font-bold">Khởi tạo nhanh từ File cấu hình</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</p>
-                    </div>
-                    <ImportApiDialog onSuccess={handleImportSuccess} />
-                  </div>
-                )}
-
-                <BasicInfoFields />
-
-                <FormField
-                  name="isRawMode"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between p-4 rounded-md border bg-muted/50 space-y-0">
-                      <div className="flex items-center gap-3">
-                        <ShieldAlert className="w-5 h-5 text-muted-foreground" />
-                        <div>
-                          <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
-                          <FormDescription className="text-xs mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</FormDescription>
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                {!isRawMode ? (
-                  <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
-                    <ProtocolFields />
-                    <AuthFields />
-                    {parsedEndpointCount > 0 && (
-                      <div className="flex items-center gap-3 p-4 rounded-md border bg-muted/50">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-bold">Đã trích xuất Endpoints</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Hệ thống đã tìm thấy <strong>{parsedEndpointCount}</strong> API endpoints từ file import.
-                            Sau khi lưu, bạn có thể quản lý chi tiết qua nút <List className="w-3 h-3 inline" /> trên thẻ tích hợp.
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="font-mono text-sm shrink-0">
-                          {parsedEndpointCount} APIs
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <RawConfigFields />
-                )}
-
-                <FormField
-                  name="isActive"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between p-4 rounded-md border bg-muted/50 space-y-0">
-                      <FormLabel className="text-sm font-semibold cursor-pointer">Bật / Tắt kết nối ngay lập tức</FormLabel>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </form>
-            </Form>
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950 flex justify-end gap-2 mt-auto">
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}
+      maxWidth="max-w-[85vw]"
+      contentClassName="!w-screen sm:!w-[85vw] !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
+      icon={<Server className="w-6 h-6 text-violet-600" />}
+      title={editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
+      description="Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP)."
+      bodyClassName="bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-hidden flex flex-col p-0"
+      fullHeight={true}
+      footer={
+        <div className="w-full flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Hủy bỏ</Button>
           <Button type="submit" form="integration-form" className="min-w-[120px]" disabled={isPending}>
             {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {isPending ? "Đang xử lý..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      }
+    >
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 w-full flex justify-center">
+        <Form {...form}>
+          <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-5xl">
+            {!editingItem && (
+              <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-md border bg-muted/50 gap-4">
+                <div>
+                  <h4 className="text-sm font-bold">Khởi tạo nhanh từ File cấu hình</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</p>
+                </div>
+                <ImportApiDialog onSuccess={handleImportSuccess} />
+              </div>
+            )}
+
+            <BasicInfoFields />
+
+            <FormField
+              name="isRawMode"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between p-4 rounded-md border bg-muted/50 space-y-0">
+                  <div className="flex items-center gap-3">
+                    <ShieldAlert className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
+                      <FormDescription className="text-xs mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</FormDescription>
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {!isRawMode ? (
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+                <ProtocolFields />
+                <AuthFields />
+                <AdvancedConfigFields />
+                {parsedEndpointCount > 0 && (
+                  <div className="flex items-center gap-3 p-4 rounded-md border bg-muted/50">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="text-sm font-bold">Đã trích xuất Endpoints</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Hệ thống đã tìm thấy <strong>{parsedEndpointCount}</strong> API endpoints từ file import.
+                        Sau khi lưu, bạn có thể quản lý chi tiết qua nút <List className="w-3 h-3 inline" /> trên thẻ tích hợp.
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="font-mono text-sm shrink-0">
+                      {parsedEndpointCount} APIs
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <RawConfigFields />
+            )}
+
+            <FormField
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between p-4 rounded-md border bg-muted/50 space-y-0">
+                  <FormLabel className="text-sm font-semibold cursor-pointer">Bật / Tắt kết nối ngay lập tức</FormLabel>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+      </div>
+    </ResponsiveModal>
   );
 });
 

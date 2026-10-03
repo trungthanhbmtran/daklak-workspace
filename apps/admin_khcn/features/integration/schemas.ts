@@ -15,7 +15,14 @@ export const integrationFormSchema = z.object({
   scope: z.string().optional(),
   tokenPath: z.string().optional(),
   isRawMode: z.boolean(),
-  rawConfig: z.string()
+  rawConfig: z.string(),
+  // Missing properties from protobuf payload
+  timeoutMs: z.number().min(0).optional(),
+  cacheTtlSec: z.number().min(0).optional(),
+  retry: z.string().optional(), // Expected to be JSON
+  rateLimit: z.string().optional(), // Expected to be JSON
+  roles: z.string().optional(), // Comma-separated string
+  scopes: z.string().optional(), // Comma-separated string
 }).refine((data) => {
   if (data.isRawMode) {
     try {

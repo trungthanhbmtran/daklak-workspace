@@ -4,7 +4,7 @@
 import React, { useState, forwardRef, useImperativeHandle, useCallback } from "react";
 import { Plug, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { IntegrationConfig, useUpdateIntegration } from "../../api";
 import { toast } from "sonner";
@@ -85,59 +85,52 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
   return (
     <>
     {isOpen && (
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-[95vw] sm:max-w-[95vw] z-[99999] p-0 flex flex-col gap-0 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-          <SheetHeader className="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950 text-left">
-            <div className="flex justify-between items-center w-full">
-              <div>
-                <SheetTitle className="text-lg font-bold flex items-center gap-2">
-                  <Plug className="w-5 h-5 text-violet-500" />
-                  Quản lý Endpoints - {integration?.name}
-                </SheetTitle>
-                <SheetDescription className="mt-1 text-sm text-slate-500">
-                  Trích xuất từ cấu hình {integration?.code} ({endpoints.length} APIs)
-                </SheetDescription>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleSave} 
-                  disabled={updateMutation.isPending}
-                 className="min-w-[120px]">
-                   {updateMutation.isPending ? "Đang lưu..." : (
-                     <>
-                       <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
-                     </>
-                   )}
-                 </Button>
-              </div>
-            </div>
-          </SheetHeader>
-          <div className="flex-1 bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden flex flex-col p-0">
-            <div className="flex flex-col md:flex-row h-full w-full overflow-hidden">
-              <EndpointSidebar 
-                endpoints={endpoints}
-                selectedId={selectedId}
-                search={search}
-                setSearch={setSearch}
-                onSelect={handleSelect}
-                onAdd={handleAddEndpoint}
-              />
-
-              <EndpointEditor 
-                selectedEndpoint={selectedEndpoint}
-                onChange={handleEndpointChange}
-                onItemChange={handleItemChange}
-                onAddItem={handleAddItem}
-                onRemoveItem={handleRemoveItem}
-                onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
-                onTest={handleTestEndpoint}
-                isTesting={isTesting}
-                baseUrl={integration?.baseUrl}
-              />
-            </div>
+      <ResponsiveModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        maxWidth="max-w-[85vw]"
+        contentClassName="!w-screen sm:!w-[85vw] !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
+        icon={<Plug className="w-6 h-6 text-violet-500" />}
+        title={`Quản lý Endpoints - ${integration?.name}`}
+        description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
+        bodyClassName="p-0 bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-hidden flex flex-col"
+        footer={
+          <div className="w-full flex justify-end">
+            <Button 
+              onClick={handleSave} 
+              disabled={updateMutation.isPending}
+            >{updateMutation.isPending ? "Đang lưu..." : (
+              <>
+                <Save className="w-4 h-4 mr-2" /> Lưu thay đổi
+              </>
+            )}</Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        }
+        fullHeight={true}
+      >
+        <div className="flex flex-col md:flex-row h-full w-full overflow-hidden">
+          <EndpointSidebar 
+            endpoints={endpoints}
+            selectedId={selectedId}
+            search={search}
+            setSearch={setSearch}
+            onSelect={handleSelect}
+            onAdd={handleAddEndpoint}
+          />
+
+          <EndpointEditor 
+            selectedEndpoint={selectedEndpoint}
+            onChange={handleEndpointChange}
+            onItemChange={handleItemChange}
+            onAddItem={handleAddItem}
+            onRemoveItem={handleRemoveItem}
+            onDelete={() => selectedId && handleDeleteEndpoint(selectedId)}
+            onTest={handleTestEndpoint}
+            isTesting={isTesting}
+            baseUrl={integration?.baseUrl}
+          />
+        </div>
+      </ResponsiveModal>
     )}
 
       <Dialog open={testModalOpen} onOpenChange={setTestModalOpen}>

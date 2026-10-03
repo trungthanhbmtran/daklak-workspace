@@ -93,6 +93,12 @@ export const integrationApi = {
       enabled: data.isActive !== undefined ? data.isActive : data.enabled,
       allowedPaths: data.endpoints?.map((e: any) => e.path) || [],
       allowedMethods: data.endpoints?.map((e: any) => e.method) || [],
+      timeoutMs: data.timeoutMs ?? 30000,
+      cacheTtlSec: data.cacheTtlSec ?? 0,
+      retry: data.retry ? (typeof data.retry === 'string' ? data.retry : JSON.stringify(data.retry)) : '{}',
+      rateLimit: data.rateLimit ? (typeof data.rateLimit === 'string' ? data.rateLimit : JSON.stringify(data.rateLimit)) : '{}',
+      roles: data.roles ? (typeof data.roles === 'string' ? data.roles.split(',').map((s: string) => s.trim()).filter(Boolean) : data.roles) : [],
+      scopes: data.scopes ? (typeof data.scopes === 'string' ? data.scopes.split(',').map((s: string) => s.trim()).filter(Boolean) : data.scopes) : [],
       auth: data.auth || {
         kind: mapAuthKind(data.authType),
         config: data.authConfig
@@ -116,6 +122,12 @@ export const integrationApi = {
       enabled: data.isActive !== undefined ? data.isActive : data.enabled,
       allowedPaths: data.endpoints?.map((e: any) => e.path) || [],
       allowedMethods: data.endpoints?.map((e: any) => e.method) || [],
+      timeoutMs: data.timeoutMs ?? 30000,
+      cacheTtlSec: data.cacheTtlSec ?? 0,
+      retry: data.retry ? (typeof data.retry === 'string' ? data.retry : JSON.stringify(data.retry)) : '{}',
+      rateLimit: data.rateLimit ? (typeof data.rateLimit === 'string' ? data.rateLimit : JSON.stringify(data.rateLimit)) : '{}',
+      roles: data.roles ? (typeof data.roles === 'string' ? data.roles.split(',').map((s: string) => s.trim()).filter(Boolean) : data.roles) : [],
+      scopes: data.scopes ? (typeof data.scopes === 'string' ? data.scopes.split(',').map((s: string) => s.trim()).filter(Boolean) : data.scopes) : [],
       auth: data.auth || {
         kind: mapAuthKind(data.authType),
         config: data.authConfig
