@@ -223,12 +223,12 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       open={isOpen}
       onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}
       maxWidth="max-w-[85vw]"
-      contentClassName="!w-screen sm:!w-[85vw] !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
+      contentClassName="sm:!h-[85vh] sm:!max-h-[85vh]"
       icon={<Server className="w-6 h-6 text-violet-600" />}
       title={editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
       description="Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP)."
       bodyClassName="bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-hidden flex flex-col p-0"
-      fullHeight={true}
+      fullHeight={false}
       footer={
         <div className="w-full flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Hủy bỏ</Button>

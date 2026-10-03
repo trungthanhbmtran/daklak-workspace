@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Upload, FileText, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
@@ -95,8 +95,8 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
+      <DrawerTrigger asChild>
         <Button
           type="button"
           className="w-full sm:w-auto"
@@ -104,15 +104,16 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
           <Upload className="mr-2 w-4 h-4" />
           Import API
         </Button>
-      </SheetTrigger>
+      </DrawerTrigger>
 
-      <SheetContent side="right" className="w-[85vw] sm:min-w-[85vw] z-[99999] overflow-y-auto p-6 sm:p-8 flex flex-col">
-        <SheetHeader className="mb-6 shrink-0">
-          <SheetTitle>Tải lên hoặc dán nội dung</SheetTitle>
-          <SheetDescription>Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</SheetDescription>
-        </SheetHeader>
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-4xl p-6 sm:p-8 flex flex-col">
+          <DrawerHeader className="mb-6 shrink-0 px-0">
+            <DrawerTitle className="text-xl">Tải lên hoặc dán nội dung</DrawerTitle>
+            <DrawerDescription>Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</DrawerDescription>
+          </DrawerHeader>
 
-        <Tabs value={inputType} onValueChange={(v) => setInputType(v as "file" | "text")} className="flex-1 flex flex-col">
+          <Tabs value={inputType} onValueChange={(v) => setInputType(v as "file" | "text")} className="flex flex-col">
           <TabsList className="grid w-full grid-cols-2 shrink-0">
             <TabsTrigger value="file">Upload File</TabsTrigger>
             <TabsTrigger value="text">Dán Text</TabsTrigger>
@@ -155,7 +156,7 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
           </TabsContent>
         </Tabs>
 
-        <div className="mt-8 pt-4 border-t shrink-0">
+        <div className="mt-6 pt-4 border-t shrink-0">
           <Button
             type="button"
             onClick={handlePreview}
@@ -167,7 +168,8 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
             Phân tích và Điền
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
