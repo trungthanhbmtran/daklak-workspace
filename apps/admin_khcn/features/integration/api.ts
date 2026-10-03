@@ -18,6 +18,18 @@ export const useCategories = (groupCode: string) => {
     staleTime: 5 * 60 * 1000,
   });
 };
+
+const mapAuthKind = (authType?: string) => {
+  if (!authType) return 'none';
+  const type = authType.toUpperCase();
+  if (type === 'OAUTH2') return 'oauth2_client_credentials';
+  if (type === 'API_KEY') return 'apiKey';
+  if (type === 'BEARER') return 'bearer';
+  if (type === 'BASIC') return 'basic';
+  if (type === 'MTLS') return 'mtls';
+  return 'none';
+};
+
 export interface IntegrationConfig {
   id: string; // Updated to string (uuid)
   name: string;
@@ -41,6 +53,16 @@ export const integrationKeys = {
   lists: () => [...integrationKeys.all, 'list'] as const,
 };
 
+const mapAuthType = (kind?: string) => {
+  if (!kind) return 'NONE';
+  if (kind === 'oauth2_client_credentials') return 'OAUTH2';
+  if (kind === 'apiKey') return 'API_KEY';
+  if (kind === 'bearer') return 'BEARER';
+  if (kind === 'basic') return 'BASIC';
+  if (kind === 'mtls') return 'MTLS';
+  return 'NONE';
+};
+
 export const integrationApi = {
   getList: async (search?: string): Promise<IntegrationConfig[]> => {
     const res = await apiClient.get('/integration-upstreams', { params: { search } }) as any;
@@ -48,11 +70,13 @@ export const integrationApi = {
     if (Array.isArray(entries)) {
       return entries.map(item => {
         // Map backend IntegrationUpstream -> frontend IntegrationConfig
+        const authObj = item.auth ? (typeof item.auth === 'string' ? JSON.parse(item.auth) : item.auth) : null;
         return {
           ...item,
           code: item.code || item.id,
           protocol: item.protocol || item.type || "REST",
-          authType: item.authType || (item.auth ? (typeof item.auth === 'string' ? JSON.parse(item.auth).kind : item.auth.kind) : "NONE") || "NONE",
+          authType: item.authType || mapAuthType(authObj?.kind),
+          authConfig: item.authConfig || (authObj ? authObj.config : undefined),
           isActive: item.isActive ?? item.enabled ?? true,
         };
       });
@@ -60,12 +84,34 @@ export const integrationApi = {
     throw new Error(res.message || 'Lỗi lấy dữ liệu');
   },
   create: async (data: any) => {
-    const res = await apiClient.post('/integration-upstreams', data) as any;
+    const payload = {
+      ...data,
+      type: data.protocol || data.type,
+      enabled: data.isActive !== undefined ? data.isActive : data.enabled,
+      allowedPaths: data.endpoints?.map((e: any) => e.path) || [],
+      allowedMethods: data.endpoints?.map((e: any) => e.method) || [],
+      auth: data.auth || {
+        kind: mapAuthKind(data.authType),
+        config: data.authConfig
+      },
+    };
+    const res = await apiClient.post('/integration-upstreams', payload) as any;
     if (res.success || res.id) return res.data || res;
     throw new Error(res.message || 'Lỗi khi tạo');
   },
   update: async (data: any) => {
-    const res = await apiClient.put(`/integration-upstreams/${data.id}`, data) as any;
+    const payload = {
+      ...data,
+      type: data.protocol || data.type,
+      enabled: data.isActive !== undefined ? data.isActive : data.enabled,
+      allowedPaths: data.endpoints?.map((e: any) => e.path) || [],
+      allowedMethods: data.endpoints?.map((e: any) => e.method) || [],
+      auth: data.auth || {
+        kind: mapAuthKind(data.authType),
+        config: data.authConfig
+      },
+    };
+    const res = await apiClient.put(`/integration-upstreams/${data.id}`, payload) as any;
     if (res.success || res.id) return res.data || res;
     throw new Error(res.message || 'Lỗi khi cập nhật');
   },

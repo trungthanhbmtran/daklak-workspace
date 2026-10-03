@@ -71,7 +71,9 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
       setIntegration(item);
       try {
         const parsed = item.metadata || {};
-        const parsedEndpoints: ParsedEndpoint[] = Array.isArray(parsed._parsedEndpoints) ? parsed._parsedEndpoints : [];
+        const parsedEndpoints: ParsedEndpoint[] = Array.isArray(parsed._parsedEndpoints) 
+          ? parsed._parsedEndpoints 
+          : (Array.isArray(item.endpoints) ? item.endpoints : []);
         setInitialEndpoints(parsedEndpoints);
       } catch (e) {
         setInitialEndpoints([]);

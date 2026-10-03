@@ -161,7 +161,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     
     // Strip massive Swagger/Postman root objects to avoid 10MB payloads crashing gRPC/DB
     const cleanMetadata = { ...metadataObj };
-    delete cleanMetadata._parsedEndpoints;
     delete cleanMetadata.paths;
     delete cleanMetadata.components;
     delete cleanMetadata.definitions;
