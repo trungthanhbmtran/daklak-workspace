@@ -73,6 +73,12 @@ export class IntegrationConfigController {
       const r = await this.service.createUpstream(dto, callerUserId);
       return this.mapToUpstreamResponse(r);
     } catch (e: any) {
+      if (e.code === 'P2002') {
+        throw new RpcException({
+          code: GrpcStatus.ALREADY_EXISTS,
+          message: 'Tên API (Upstream) này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.',
+        });
+      }
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: e.message,
@@ -108,6 +114,12 @@ export class IntegrationConfigController {
       const r = await this.service.updateUpstream(data.id, dto, callerUserId);
       return this.mapToUpstreamResponse(r);
     } catch (e: any) {
+      if (e.code === 'P2002') {
+        throw new RpcException({
+          code: GrpcStatus.ALREADY_EXISTS,
+          message: 'Tên API (Upstream) này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.',
+        });
+      }
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
         message: e.message,
