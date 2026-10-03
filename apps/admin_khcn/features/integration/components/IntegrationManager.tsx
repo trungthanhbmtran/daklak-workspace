@@ -12,7 +12,14 @@ import { IntegrationPagination } from "./manager/IntegrationPagination";
 
 export function IntegrationManager() {
   const [search, setSearch] = useState("");
-  const { data: integrations, isLoading } = useIntegrationList(search);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const { data: integrations, isLoading } = useIntegrationList(debouncedSearch);
 
   // Pagination logic
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,7 +27,7 @@ export function IntegrationManager() {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [debouncedSearch]);
 
   const totalItems = integrations?.length || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -34,9 +41,9 @@ export function IntegrationManager() {
   const modalRef = useRef<IntegrationFormModalRef>(null);
   const explorerRef = useRef<EndpointExplorerModalRef>(null);
 
-  const handleOpenCreate = () => modalRef.current?.openCreate();
-  const handleOpenEdit = (item: IntegrationConfig) => modalRef.current?.openEdit(item);
-  const handleOpenExplorer = (item: IntegrationConfig) => explorerRef.current?.open(item);
+  const handleOpenCreate = React.useCallback(() => modalRef.current?.openCreate(), []);
+  const handleOpenEdit = React.useCallback((item: IntegrationConfig) => modalRef.current?.openEdit(item), []);
+  const handleOpenExplorer = React.useCallback((item: IntegrationConfig) => explorerRef.current?.open(item), []);
 
   return (
     <div className="w-full min-h-screen flex flex-col space-y-8 bg-slate-50/50 dark:bg-[#0B1120]">
