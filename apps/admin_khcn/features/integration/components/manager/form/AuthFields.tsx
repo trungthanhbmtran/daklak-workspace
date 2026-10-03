@@ -185,12 +185,12 @@ export function AuthFields() {
 
   return (
     <Collapsible className="rounded-md border bg-card overflow-hidden" defaultOpen={false}>
-      {/* ── Section Header ─────────────────────────────────────────────────── */}
       <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 bg-muted/50 font-semibold text-sm hover:bg-muted/70 transition-colors [&[data-state=open]>div>svg.chevron]:rotate-180">
         <div className="flex items-center gap-2.5">
           <KeyRound className="w-4 h-4" />
           Thông tin Xác thực (Authentication)
         </div>
+        {showTestButton ? (
           <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
             <Button
               type="button" variant="outline" size="sm"
