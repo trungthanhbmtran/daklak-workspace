@@ -166,6 +166,38 @@ export class DefinitionService {
     });
   }
 
+  /**
+   * Danh sách quy trình cho màn quản trị: phân trang có giới hạn, tìm theo tên/mã.
+   * Không trả `graph` (có thể rất lớn) – chi tiết sơ đồ lấy qua getDefinitionById.
+   */
+  async listProcesses(params: { skip?: number; take?: number; search?: string }) {
+    const skip = Math.max(0, Number(params.skip) || 0);
+    const take = Math.min(100, Math.max(1, Number(params.take) || 20));
+    const search = params.search?.trim().slice(0, 100);
+    const where = search
+      ? { OR: [{ name: { contains: search } }, { code: { contains: search } }] }
+      : {};
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.processDefinition.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        include: {
+          versions: {
+            orderBy: { version: 'desc' },
+            take: 1,
+            select: { version: true, status: true, createdAt: true },
+          },
+        },
+      }),
+      this.prisma.processDefinition.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
   async getDefinition(code: string) {
     const def = await this.prisma.processDefinition.findUnique({
       where: { code },

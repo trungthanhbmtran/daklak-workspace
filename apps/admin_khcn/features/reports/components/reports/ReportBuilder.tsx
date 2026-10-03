@@ -60,6 +60,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
       { id: "DOC_STATS", name: "Thống kê Văn bản", type: "db", icon: Database },
       { id: "POST_STATS", name: "Thống kê Bài viết", type: "db", icon: Database },
       { id: "KPI_STATS", name: "Thống kê KPI", type: "db", icon: Database },
+      { id: "EMPLOYEE_QUALITY", name: "Chất lượng Cá nhân (Tổng hợp)", type: "db", icon: Database },
     ];
 
     return [...dbSources, ...apiSources];
@@ -68,10 +69,9 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
   const [title, setTitle] = useState("Báo cáo mới");
   const [sourceId, setSourceId] = useState<string>("");
   const [endpointPath, setEndpointPath] = useState<string>("");
-  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie' | 'table' | 'area' | 'doughnut' | string>('bar');
+  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie' | 'area' | 'doughnut' | string>('bar');
   const [xAxisKey, setXAxisKey] = useState<string>("");
   const [yAxisKey, setYAxisKey] = useState<string>("");
-  const [xAxisLabel, setXAxisLabel] = useState<string>("");
   const [yAxisLabel, setYAxisLabel] = useState<string>("");
   const [apiPayload, setApiPayload] = useState<string>("{}");
 
@@ -188,7 +188,6 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
           yAxisKey,
           config: {
             endpoint: endpointPath,
-            xAxisLabel,
             yAxisLabel,
             apiPayload: parsedPayload
           }
@@ -327,13 +326,6 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
               >
                 <PieChart className="w-4 h-4" /> Vành Khuyên
               </Button>
-              <Button
-                variant={chartType === 'table' ? 'default' : 'outline'}
-                className={`w-full justify-start ${chartType === 'table' ? 'bg-slate-800 hover:bg-slate-900 text-white' : ''}`}
-                onClick={() => setChartType('table')}
-              >
-                <Table2 className="w-4 h-4" /> Bảng
-              </Button>
             </div>
           </div>
 
@@ -341,12 +333,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mapping Dữ Liệu</h4>
 
             <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Danh Mục (Name)' : chartType === 'table' ? 'Trường Chính' : 'Trục Hoành (X-Axis)'}</Label>
-
-              <div className="space-y-2">
-                <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
-                <Input value={xAxisLabel} onChange={e => setXAxisLabel(e.target.value)} placeholder="VD: Tháng, Phòng ban..." className="bg-white dark:bg-slate-950 h-8 text-sm" />
-              </div>
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Danh Mục (Name)' : 'Trục Hoành (X-Axis)'}</Label>
 
               <div className="space-y-2">
                 <Label className="text-xs">Trường dữ liệu nguồn</Label>
@@ -364,7 +351,7 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
             </div>
 
             <div className="space-y-3 p-3 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Giá Trị (Value)' : chartType === 'table' ? 'Trường Phụ' : 'Trục Tung (Y-Axis)'}</Label>
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{['pie', 'doughnut'].includes(chartType) ? 'Giá Trị (Value)' : 'Trục Tung (Y-Axis)'}</Label>
 
               <div className="space-y-2">
                 <Label className="text-xs">Tên hiển thị (Tùy chọn)</Label>
@@ -433,7 +420,6 @@ export function ReportBuilder({ onBack, onSave }: ReportBuilderProps) {
                 data={previewData}
                 xAxisKey={xAxisKey}
                 yAxisKey={yAxisKey}
-                xAxisLabel={xAxisLabel}
                 yAxisLabel={yAxisLabel}
                 height={400}
               />

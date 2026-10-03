@@ -68,6 +68,7 @@ export const previewReport = async (payload: any) => {
       case 'DOC_STATS': endpoint = '/reports/documents'; break;
       case 'POST_STATS': endpoint = '/reports/posts'; break;
       case 'KPI_STATS': endpoint = '/reports/kpis'; break;
+      case 'EMPLOYEE_QUALITY': endpoint = '/reports/employee-quality'; break;
       default: throw new Error("Nguồn dữ liệu nội bộ không hợp lệ");
     }
     const res: any = await api.get(endpoint, { params: payload.params });

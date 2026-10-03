@@ -106,4 +106,13 @@ export class ReportsController {
       req.headers.authorization,
     );
   }
+
+  @Get('employee-quality')
+  async getEmployeeQualityReport(@Req() req: any) {
+    return this.reportsService.getEmployeeQualityReport(
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
+  }
 }

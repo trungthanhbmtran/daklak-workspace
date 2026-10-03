@@ -128,4 +128,10 @@ export class ReportsService implements OnModuleInit {
       await this.callGrpc('GetDocumentStats', query, user, authHeader),
     );
   }
+
+  async getEmployeeQualityReport(query: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetEmployeeQualityReport', query, user, authHeader),
+    );
+  }
 }

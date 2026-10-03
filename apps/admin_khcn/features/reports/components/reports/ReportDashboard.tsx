@@ -41,6 +41,7 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
       { id: "DOC_STATS", name: "Thống kê Văn bản", type: "db" },
       { id: "POST_STATS", name: "Thống kê Bài viết", type: "db" },
       { id: "KPI_STATS", name: "Thống kê KPI", type: "db" },
+      { id: "EMPLOYEE_QUALITY", name: "Chất lượng Cá nhân (Tổng hợp)", type: "db" },
     ];
     return [...dbSources, ...apiSources];
   }, [integrations]);
@@ -126,7 +127,6 @@ function ReportWidget({ widget, integrations }: { widget: any; integrations: any
          data={data}
          xAxisKey={widget.xAxisKey}
          yAxisKey={widget.yAxisKey}
-         xAxisLabel={widget.config?.xAxisLabel || widget.xAxisLabel}
          yAxisLabel={widget.config?.yAxisLabel || widget.yAxisLabel}
          height={280}
        />

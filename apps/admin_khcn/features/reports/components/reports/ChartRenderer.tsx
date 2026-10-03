@@ -15,7 +15,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { ResponsiveTable } from "@/components/shared/responsive-table";
+
 import {
   ChartConfig,
   ChartContainer,
@@ -26,37 +26,19 @@ import {
 } from "@/components/ui/chart";
 
 interface ChartRendererProps {
-  type: 'bar' | 'line' | 'pie' | 'table' | 'area' | 'doughnut' | string;
+  type: 'bar' | 'line' | 'pie' | 'area' | 'doughnut' | string;
   data: any[];
   xAxisKey: string;
   yAxisKey: string;
-  xAxisLabel?: string;
   yAxisLabel?: string;
   height?: number;
 }
 
-export function ChartRenderer({ type, data, xAxisKey, yAxisKey, xAxisLabel, yAxisLabel, height = 300 }: ChartRendererProps) {
+export function ChartRenderer({ type, data, xAxisKey, yAxisKey, yAxisLabel, height = 300 }: ChartRendererProps) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center w-full bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800" style={{ height }}>
         <span className="text-slate-400 text-sm">Chưa có dữ liệu</span>
-      </div>
-    );
-  }
-
-  // Handle Table
-  if (type === 'table') {
-    const columns = Object.keys(data[0] || {}).slice(0, 6);
-    return (
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-950" style={{ maxHeight: height }}>
-        <ResponsiveTable
-          data={data}
-          keyExtractor={(_, i) => String(i)}
-          columns={columns.map(col => ({
-            header: col,
-            cell: (row: any) => <span className="text-slate-600 dark:text-slate-400">{String(row[col])}</span>
-          }))}
-        />
       </div>
     );
   }

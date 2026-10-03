@@ -50,18 +50,27 @@ export interface WorkflowDefinition {
   edges: WorkflowEdge[];
 }
 
+export type WorkflowVersionStatus = "DRAFT" | "PUBLISHED" | "DEPRECATED" | string;
+
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
-  definition: WorkflowDefinition;
-  active: boolean;
+  /** Danh sách (list) không trả graph; dùng getOne để lấy sơ đồ. */
+  definition?: WorkflowDefinition;
+  /** Trạng thái phiên bản mới nhất theo WorkflowResponse.status */
+  status?: WorkflowVersionStatus;
+  /** @deprecated Backend không trả trường này; dùng isWorkflowPublished(). */
+  active?: boolean;
   trigger: string;
   code?: string;
   version: number;
   createdAt: string;
   updatedAt: string;
 }
+
+export const isWorkflowPublished = (w?: Pick<Workflow, "status" | "active"> | null) =>
+  !!w && (w.status === "PUBLISHED" || w.active === true);
 
 export interface WorkflowInstance {
   id: string;

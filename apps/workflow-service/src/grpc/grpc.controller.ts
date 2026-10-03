@@ -60,11 +60,24 @@ export class GrpcWorkflowController {
   }
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
-  async listWorkflows(@Payload() _data: ListWorkflowsGrpcDto) {
-    const processes = await this.definitionService.getProcesses();
+  async listWorkflows(@Payload() data: ListWorkflowsGrpcDto) {
+    const { items, total } = await this.definitionService.listProcesses(
+      data || {},
+    );
+    const take = Math.min(100, Math.max(1, Number(data?.take) || 20));
+    const skip = Math.max(0, Number(data?.skip) || 0);
+    const totalPages = Math.max(1, Math.ceil(total / take));
+    const page = Math.floor(skip / take) + 1;
     return {
-      data: processes.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
-      meta: { total: processes.length },
+      data: items.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
+      meta: {
+        total,
+        page,
+        pageSize: take,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
     };
   }
 
@@ -201,6 +214,7 @@ export class GrpcWorkflowController {
       definition: version?.graph || {},
       trigger: def.code,
       createdAt: def.createdAt?.toISOString(),
+      updatedAt: def.updatedAt?.toISOString(),
     };
   }
 

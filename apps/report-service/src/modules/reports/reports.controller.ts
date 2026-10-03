@@ -31,4 +31,9 @@ export class ReportsController {
   async getStaffingReport(data: { unitId: number }) {
     return this.reportsService.getStaffingReport(data.unitId);
   }
+
+  @GrpcMethod('ReportService', 'GetEmployeeQualityReport')
+  async getEmployeeQualityReport(data: { payload: string; userData: string }) {
+    return this.reportsService.getEmployeeQualityReport(data.payload, data.userData);
+  }
 }

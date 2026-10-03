@@ -19,6 +19,7 @@ service ReportService {
   rpc GetPostStats (GenericRequest) returns (GenericResponse);
   rpc GetKpiStats (GenericRequest) returns (GenericResponse);
   rpc GetDocumentStats (GenericRequest) returns (GenericResponse);
+  rpc GetEmployeeQualityReport (GenericRequest) returns (GenericResponse);
 }
 
 message GenericRequest {
