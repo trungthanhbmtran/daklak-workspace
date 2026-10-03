@@ -89,7 +89,7 @@ export const EndpointExplorerModal = forwardRef<EndpointExplorerModalRef>((props
         open={isOpen}
         onOpenChange={setIsOpen}
         maxWidth="max-w-[85vw]"
-        contentClassName="sm:!h-[85vh] sm:!max-h-[85vh]"
+        contentClassName="!w-[85vw] !max-w-[85vw] sm:!h-[85vh] sm:!max-h-[85vh]"
         icon={<Plug className="w-6 h-6 text-violet-500" />}
         title={`Quản lý Endpoints - ${integration?.name}`}
         description={`Trích xuất từ cấu hình ${integration?.code} (${endpoints.length} APIs)`}
