@@ -71,9 +71,12 @@ export const integrationApi = {
       return entries.map(item => {
         // Map backend IntegrationUpstream -> frontend IntegrationConfig
         const authObj = item.auth ? (typeof item.auth === 'string' ? JSON.parse(item.auth) : item.auth) : null;
+        const metaObj = item.metadata ? (typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata) : {};
         return {
           ...item,
-          code: item.code || item.id,
+          metadata: metaObj,
+          code: metaObj._uiConfig?.code || item.code || item.id.toUpperCase().replace(/-/g, '_'),
+          version: metaObj._uiConfig?.version || (item.version ? String(item.version) : ""),
           protocol: item.protocol || item.type || "REST",
           authType: item.authType || mapAuthType(authObj?.kind),
           authConfig: item.authConfig || (authObj ? authObj.config : undefined),
@@ -94,6 +97,13 @@ export const integrationApi = {
         kind: mapAuthKind(data.authType),
         config: data.authConfig
       },
+      metadata: {
+        ...(data.metadata || {}),
+        _uiConfig: {
+          code: data.code,
+          version: data.version
+        }
+      }
     };
     const res = await apiClient.post('/integration-upstreams', payload) as any;
     if (res.success || res.id) return res.data || res;
@@ -110,6 +120,13 @@ export const integrationApi = {
         kind: mapAuthKind(data.authType),
         config: data.authConfig
       },
+      metadata: {
+        ...(data.metadata || {}),
+        _uiConfig: {
+          code: data.code,
+          version: data.version
+        }
+      }
     };
     const res = await apiClient.put(`/integration-upstreams/${data.id}`, payload) as any;
     if (res.success || res.id) return res.data || res;

@@ -71,8 +71,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
       form.reset({
         name: initialData?.name || initialData?.systemName || "",
-        code: initialData?.code || initialData?.integrationCode || "",
-        version: initialData?.version || "",
         isActive: true,
         protocol: initialData?.protocol || "REST",
         baseUrl: initialData?.baseUrl || initialData?.apiUrl || "",
@@ -93,8 +91,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       setParsedEndpointCount(item.metadata?._parsedEndpoints?.length || item.endpoints?.length || 0);
       form.reset({
         name: item.name || "",
-        code: item.code || "",
-        version: item.version || "",
         isActive: item.isActive ?? true,
         protocol: item.protocol || "REST",
         baseUrl: item.baseUrl || "",
@@ -121,16 +117,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   const handleImportSuccess = (data: any) => {
     if (data.systemName) {
       form.setValue("name", data.systemName);
-      if (!form.getValues("code")) {
-        const generatedCode = data.systemName
-          .toUpperCase()
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^A-Z0-9]+/g, "_")
-          .replace(/^_|_$/g, "");
-        form.setValue("code", generatedCode);
-      }
     }
-    if (data.version) form.setValue("version", data.version);
     if (data.baseUrl) form.setValue("baseUrl", data.baseUrl);
     if (data.metadata?._parsedEndpoints) {
       setParsedEndpointCount(data.metadata._parsedEndpoints.length);
@@ -169,8 +156,6 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
 
     const payload = {
       name: data.name,
-      code: data.code,
-      version: data.version,
       isActive: data.isActive,
       protocol: data.protocol,
       baseUrl: data.baseUrl,
