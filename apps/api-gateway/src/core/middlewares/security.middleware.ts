@@ -37,6 +37,7 @@ export class SecurityMiddleware implements NestMiddleware {
 
     // ── Bỏ qua whitelist paths ────────────────────────────────────────────
     if (this.WHITELIST_PATHS.some((p) => url.startsWith(p))) {
+      req.clientIp = ip;
       return next();
     }
 

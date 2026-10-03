@@ -44,9 +44,13 @@ const MALICIOUS_UA_PATTERNS = [
   /python-requests\/[0-1]\./i, // Rất cũ — thường là tool tự động
 ];
 
-// SQL Injection patterns
-const SQL_INJECTION_PATTERNS = [
+// SQL Injection patterns (Chỉ áp dụng cho URL/Query, rất dễ false positive nếu áp dụng cho Body)
+const STRICT_SQLI_PATTERNS = [
   /(\%27)|(\')|(\-\-)|(\%23)|(#)/i,
+];
+
+// SQL Injection patterns (Áp dụng cho toàn bộ Request bao gồm Body)
+const GENERIC_SQLI_PATTERNS = [
   /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i,
   /union.+select/i,
   /exec(\s|\+)+(s|x)p\w+/i,
@@ -85,7 +89,7 @@ const PROFILE_TTL_SEC = 86400;     // Lưu profile 24h
 export class ThreatIntelService {
   private readonly logger = new Logger(ThreatIntelService.name);
 
-  constructor(private readonly redisService: RedisService) {}
+  constructor(private readonly redisService: RedisService) { }
 
   // ─── Kiểm tra xem IP có đang bị block không ──────────────────────────────
 
@@ -104,7 +108,7 @@ export class ThreatIntelService {
     try {
       const raw = await this.redisService.get(`threat:profile:${ip}`);
       if (raw) return JSON.parse(raw);
-    } catch {}
+    } catch { }
     return null;
   }
 
@@ -138,11 +142,23 @@ export class ThreatIntelService {
     }
 
     // ── 2. Kiểm tra SQL Injection ──
+    const urlAndQuery = `${ctx.url} ${ctx.query ?? ''}`;
     const fullInput = `${ctx.url} ${ctx.body ?? ''} ${ctx.query ?? ''}`;
-    for (const pattern of SQL_INJECTION_PATTERNS) {
+
+    // Kiểm tra gắt gao (Dấu nháy đơn, Hash) chỉ trên URL và Query Params để tránh false positive trong Body JSON
+    for (const pattern of STRICT_SQLI_PATTERNS) {
+      if (pattern.test(urlAndQuery)) {
+        additionalScore += THREAT_SCORES.SQL_INJECTION;
+        reasons.push('SQL Injection attempt detected in URL/Query');
+        break;
+      }
+    }
+
+    // Kiểm tra cấu trúc tấn công (Union, Drop, Exec) trên toàn bộ Payload bao gồm Body
+    for (const pattern of GENERIC_SQLI_PATTERNS) {
       if (pattern.test(fullInput)) {
         additionalScore += THREAT_SCORES.SQL_INJECTION;
-        reasons.push('SQL Injection attempt detected');
+        reasons.push('SQL Injection attempt detected in Payload');
         break;
       }
     }
