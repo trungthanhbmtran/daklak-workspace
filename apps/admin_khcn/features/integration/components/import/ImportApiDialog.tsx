@@ -106,21 +106,21 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] z-[99999] overflow-y-auto">
-        <SheetHeader className="mb-6">
+      <SheetContent side="right" className="w-[400px] sm:w-[540px] z-[99999] overflow-y-auto p-6 sm:p-8 flex flex-col">
+        <SheetHeader className="mb-6 shrink-0">
           <SheetTitle>Tải lên hoặc dán nội dung</SheetTitle>
           <SheetDescription>Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</SheetDescription>
         </SheetHeader>
 
-        <Tabs value={inputType} onValueChange={(v) => setInputType(v as "file" | "text")}>
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={inputType} onValueChange={(v) => setInputType(v as "file" | "text")} className="flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 shrink-0">
             <TabsTrigger value="file">Upload File</TabsTrigger>
             <TabsTrigger value="text">Dán Text</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="file" className="mt-6">
+          <TabsContent value="file" className="mt-6 flex-1 flex flex-col">
             <div
-              className="border-2 border-dashed border-muted-foreground/25 rounded-md p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors"
+              className="flex-1 border-2 border-dashed border-muted-foreground/25 rounded-md p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               <FileText className="w-10 h-10 text-muted-foreground mb-4" />
@@ -136,26 +136,34 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
                 onChange={handleFileChange}
               />
             </div>
+            
+            <div className="mt-6 space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-md text-sm leading-relaxed">
+                <strong className="block mb-1">Mẹo nhỏ:</strong>
+                Bạn có thể Export bộ sưu tập (Collection) từ Postman dưới dạng JSON v2.1 và tải lên đây. Hệ thống sẽ tự động bóc tách các API, phương thức (GET/POST), URL và headers để điền vào hệ thống.
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="text" className="mt-6">
+          <TabsContent value="text" className="mt-6 flex-1 flex flex-col">
             <Textarea
               placeholder="Dán nội dung OpenAPI/Swagger, Postman Collection, hoặc cURL..."
-              className="min-h-[300px] font-mono text-sm resize-none"
+              className="flex-1 min-h-[400px] font-mono text-sm resize-none"
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-end mt-8">
+        <div className="mt-8 pt-4 border-t shrink-0">
           <Button
             type="button"
             onClick={handlePreview}
             disabled={loading}
-            className="w-full sm:w-auto"
+            className="w-full"
+            size="lg"
           >
-            {loading ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+            {loading ? <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
             Phân tích và Điền
           </Button>
         </div>
