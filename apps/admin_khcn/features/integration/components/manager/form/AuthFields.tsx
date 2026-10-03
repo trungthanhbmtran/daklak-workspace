@@ -185,31 +185,33 @@ export function AuthFields() {
 
   return (
     <Collapsible className="rounded-md border bg-card overflow-hidden" defaultOpen={false}>
-      <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 bg-muted/50 font-semibold text-sm hover:bg-muted/70 transition-colors [&[data-state=open]>div>svg.chevron]:rotate-180">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between px-5 py-2.5 bg-muted/50 border-b">
+        <div className="flex items-center gap-2.5 font-semibold text-sm">
           <KeyRound className="w-4 h-4" />
           Thông tin Xác thực (Authentication)
         </div>
         <div className="flex items-center gap-4">
           {showTestButton && (
-            <div onClick={(e) => e.stopPropagation()}>
-              <Button
-                type="button" variant="outline" size="sm"
-                onClick={handleTestAuth}
-                disabled={isTesting}
-                className="h-8 text-xs gap-1.5"
-              >
-                {isTesting
-                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  : <Play className="w-3.5 h-3.5" />
-                }
-                {isTesting ? "Đang kiểm tra..." : "Test kết nối"}
-              </Button>
-            </div>
+            <Button
+              type="button" variant="outline" size="sm"
+              onClick={handleTestAuth}
+              disabled={isTesting}
+              className="h-8 text-xs gap-1.5"
+            >
+              {isTesting
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Play className="w-3.5 h-3.5" />
+              }
+              {isTesting ? "Đang kiểm tra..." : "Test kết nối"}
+            </Button>
           )}
-          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground chevron" />
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="w-8 h-8 p-0 [&[data-state=open]>svg]:rotate-180">
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground" />
+            </Button>
+          </CollapsibleTrigger>
         </div>
-      </CollapsibleTrigger>
+      </div>
 
       <CollapsibleContent>
         <div className="p-5 space-y-5 border-t">

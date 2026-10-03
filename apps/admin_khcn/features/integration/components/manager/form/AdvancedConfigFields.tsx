@@ -2,6 +2,7 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Settings2, ChevronDown } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { IntegrationFormValues } from "../../../schemas";
@@ -11,13 +12,17 @@ export function AdvancedConfigFields() {
 
   return (
     <Collapsible className="rounded-md border bg-card overflow-hidden" defaultOpen={false}>
-      <CollapsibleTrigger className="flex w-full items-center justify-between gap-2.5 px-5 py-3.5 bg-muted/50 font-semibold text-sm hover:bg-muted/70 transition-colors [&[data-state=open]>svg]:rotate-180">
-        <div className="flex items-center gap-2.5">
+      <div className="flex w-full items-center justify-between px-5 py-2.5 bg-muted/50 border-b">
+        <div className="flex items-center gap-2.5 font-semibold text-sm">
           <Settings2 className="w-4 h-4" />
           Cấu hình nâng cao (Advanced & Limits)
         </div>
-        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground" />
-      </CollapsibleTrigger>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-8 h-8 p-0 [&[data-state=open]>svg]:rotate-180">
+            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground" />
+          </Button>
+        </CollapsibleTrigger>
+      </div>
 
       <CollapsibleContent>
         <div className="p-5 border-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
