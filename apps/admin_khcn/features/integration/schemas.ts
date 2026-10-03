@@ -3,6 +3,7 @@ import { z } from "zod";
 export const integrationFormSchema = z.object({
   name: z.string().min(1, { message: "Vui lòng nhập Tên hệ thống đối tác" }),
   code: z.string().min(1, { message: "Vui lòng nhập Mã tích hợp" }).regex(/^[A-Z0-9_]+$/, { message: "Mã tích hợp chỉ chứa chữ in hoa, số và dấu gạch dưới" }),
+  version: z.string().optional(),
   isActive: z.boolean(),
   protocol: z.string().min(1, { message: "Vui lòng chọn giao thức" }),
   baseUrl: z.string().optional(),

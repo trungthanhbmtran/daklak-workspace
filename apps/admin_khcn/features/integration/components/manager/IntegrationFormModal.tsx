@@ -38,6 +38,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     defaultValues: {
       name: "",
       code: "",
+      version: "",
       isActive: true,
       protocol: "REST",
       baseUrl: "",
@@ -71,6 +72,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       form.reset({
         name: initialData?.name || initialData?.systemName || "",
         code: initialData?.code || initialData?.integrationCode || "",
+        version: initialData?.version || "",
         isActive: true,
         protocol: initialData?.protocol || "REST",
         baseUrl: initialData?.baseUrl || initialData?.apiUrl || "",
@@ -92,6 +94,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       form.reset({
         name: item.name || "",
         code: item.code || "",
+        version: item.version || "",
         isActive: item.isActive ?? true,
         protocol: item.protocol || "REST",
         baseUrl: item.baseUrl || "",
@@ -127,6 +130,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
         form.setValue("code", generatedCode);
       }
     }
+    if (data.version) form.setValue("version", data.version);
     if (data.baseUrl) form.setValue("baseUrl", data.baseUrl);
     if (data.metadata?._parsedEndpoints) {
       setParsedEndpointCount(data.metadata._parsedEndpoints.length);
@@ -167,6 +171,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     const payload = {
       name: data.name,
       code: data.code,
+      version: data.version,
       isActive: data.isActive,
       protocol: data.protocol,
       baseUrl: data.baseUrl,

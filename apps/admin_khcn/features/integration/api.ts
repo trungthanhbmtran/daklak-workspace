@@ -22,6 +22,7 @@ export interface IntegrationConfig {
   id: string; // Updated to string (uuid)
   name: string;
   code: string;
+  version?: string;
   description?: string;
   protocol: string;
   baseUrl: string;

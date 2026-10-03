@@ -48,6 +48,24 @@ export function BasicInfoFields() {
             </FormItem>
           )}
         />
+        <FormField
+          control={control}
+          name="version"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phiên bản API (Tùy chọn)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Vd: v1.0.0, v2..."
+                  className="font-mono"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>Hữu ích khi hệ thống có nhiều version.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );

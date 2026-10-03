@@ -43,6 +43,7 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
       const exportData = {
         name: item.name,
         code: item.code,
+        version: item.version,
         protocol: item.protocol,
         baseUrl: item.baseUrl,
         authType: item.authType,
@@ -78,6 +79,11 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
             <span className="text-xs font-medium font-mono text-muted-foreground bg-muted px-2 py-1 rounded-md truncate">
               {item.code}
             </span>
+            {item.version && (
+              <span className="text-[10px] font-bold font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded-sm">
+                {item.version}
+              </span>
+            )}
           </div>
         </div>
       </CardHeader>
