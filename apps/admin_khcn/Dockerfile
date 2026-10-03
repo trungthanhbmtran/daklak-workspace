@@ -2,7 +2,7 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY apps/admin_khcn/package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps
 
 FROM node:22-alpine AS builder
 WORKDIR /app/apps/admin_khcn
@@ -10,7 +10,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/admin_khcn ./
 COPY shared /app/shared
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN --mount=type=cache,target=/app/apps/admin_khcn/.next/cache npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

@@ -5,7 +5,7 @@ FROM node:22-slim AS builder
 WORKDIR /app
 
 COPY apps/notification_service/package*.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY apps/notification_service/ ./
 COPY shared/protos ./shared/protos

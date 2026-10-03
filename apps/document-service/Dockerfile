@@ -15,10 +15,10 @@ COPY tsconfig.base.json ./
 COPY shared ./shared
 COPY apps/document-service ./apps/document-service
 # Install root dependencies so shared/core can resolve them
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 WORKDIR /app/apps/document-service
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 # Generate Prisma Client (Nếu service có sử dụng Prisma)
 RUN DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy" npx prisma generate
 
