@@ -12,16 +12,9 @@ interface Props {
 
 export const IntegrationManagerHeader = ({ search, setSearch, onOpenCreate }: Props) => {
   return (
-    <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 sm:p-8 rounded-[2rem] bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-      
-      {/* Decorative gradient blob */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-violet-400/20 dark:bg-violet-600/10 rounded-full blur-3xl opacity-50" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-fuchsia-400/20 dark:bg-fuchsia-600/10 rounded-full blur-3xl opacity-50" />
-      </div>
-
-      <div className="flex flex-col gap-1 z-10">
-        <h2 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Cấu hình Tích hợp
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">

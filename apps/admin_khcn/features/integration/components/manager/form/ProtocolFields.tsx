@@ -13,8 +13,8 @@ export function ProtocolFields() {
   const { data: protocols, isLoading } = useCategories("INTEGRATION_PROTOCOL");
 
   return (
-    <div className="rounded-xl border border-sky-100 dark:border-sky-900/30 bg-sky-50/50 dark:bg-sky-900/10 overflow-hidden">
-      <div className="flex items-center gap-2.5 px-5 py-3.5 bg-sky-100/60 dark:bg-sky-900/20 border-b border-sky-100 dark:border-sky-900/30 text-sky-800 dark:text-sky-300 font-semibold text-sm">
+    <div className="rounded-md border overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 py-3.5 bg-muted/50 border-b font-semibold text-sm">
         <Globe className="w-4 h-4" />
         Kết nối (Protocol & Endpoint)
       </div>
@@ -30,7 +30,7 @@ export function ProtocolFields() {
               ) : (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger className="bg-white dark:bg-slate-950">
+                    <SelectTrigger>
                       <SelectValue placeholder="Chọn giao thức" />
                     </SelectTrigger>
                   </FormControl>
@@ -55,7 +55,7 @@ export function ProtocolFields() {
               <FormControl>
                 <Textarea 
                   placeholder="https://api.example.com/v1" 
-                  className="font-mono resize-none min-h-[60px] bg-white dark:bg-slate-950" 
+                  className="font-mono resize-none min-h-[60px]" 
                   {...field} 
                 />
               </FormControl>

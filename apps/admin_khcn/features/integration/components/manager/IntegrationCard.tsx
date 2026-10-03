@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { Edit, Trash2, ShieldCheck, Activity, Plug } from "lucide-react";
+import { Edit, Trash2, ShieldCheck, Activity, Plug, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -37,21 +37,45 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
     });
   }, [item.id, toggleActiveMutation]);
 
-  return (
-    <Card className="group relative flex flex-col hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-500 border border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl overflow-hidden transform hover:-translate-y-1">
-      {/* Hover Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+  const handleExport = useCallback(() => {
+    try {
+      // Create a clean export object (removing internal IDs or timestamps if desired, but we can just export the whole item)
+      const exportData = {
+        name: item.name,
+        code: item.code,
+        protocol: item.protocol,
+        baseUrl: item.baseUrl,
+        authType: item.authType,
+        authConfig: item.authConfig,
+        metadata: item.metadata,
+        isActive: item.isActive,
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `integration-${item.code || "export"}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Đã xuất file cấu hình");
+    } catch (error) {
+      toast.error("Lỗi khi xuất file");
+    }
+  }, [item]);
 
-      <CardHeader className="relative flex flex-row items-center gap-4 pb-4 space-y-0 z-10">
-        <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/30 dark:to-fuchsia-900/30 border border-violet-100/50 dark:border-violet-800/30 flex shrink-0 items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-          <Activity className="w-7 h-7 text-violet-600 dark:text-violet-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors" />
-        </div>
+  return (
+    <Card className="group relative flex flex-col transition-all duration-200 hover:shadow-md">
+      <CardHeader className="relative flex flex-row items-center gap-4 pb-4 space-y-0">
         <div className="flex flex-col gap-1.5 overflow-hidden">
-          <CardTitle className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 truncate">
+          <CardTitle className="text-lg font-bold truncate">
             {item.name}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium font-mono text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2 py-1 rounded-md truncate">
+            <span className="text-xs font-medium font-mono text-muted-foreground bg-muted px-2 py-1 rounded-md truncate">
               {item.code}
             </span>
           </div>
@@ -81,10 +105,10 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
           </div>
           
           <div className="flex items-center gap-2 pt-1">
-            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${item.isActive ? "bg-emerald-100 dark:bg-emerald-500/20" : "bg-slate-100 dark:bg-slate-800"}`}>
-              <ShieldCheck className={`w-3.5 h-3.5 ${item.isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
+            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${item.isActive ? "bg-primary/10" : "bg-muted"}`}>
+              <ShieldCheck className={`w-3.5 h-3.5 ${item.isActive ? "text-primary" : "text-muted-foreground"}`} />
             </div>
-            <span className={`text-sm font-semibold ${item.isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500"}`}>
+            <span className={`text-sm font-semibold ${item.isActive ? "text-primary" : "text-muted-foreground"}`}>
               {item.isActive ? "Đang hoạt động" : "Vô hiệu hóa"}
             </span>
           </div>
@@ -96,24 +120,26 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
         </div>
       </CardContent>
 
-      <CardFooter className="relative border-t border-slate-100/80 dark:border-slate-800/80 p-4 bg-slate-50/30 dark:bg-slate-900/30 flex items-center justify-between z-10">
+      <CardFooter className="relative border-t p-4 bg-muted/30 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
           <Switch
             checked={item.isActive}
             onCheckedChange={() => handleToggleActive(item.isActive)}
-            className="data-[state=checked]:bg-emerald-500"
           />
         </div>
         <div className="flex gap-1">
           {onExplore && (
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-500/20 transition-all" onClick={() => onExplore(item)} title="Quản lý Endpoints">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => onExplore(item)} title="Quản lý Endpoints">
               <Plug className="w-4 h-4" />
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-all" onClick={() => onEdit(item)} title="Sửa thông tin">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={handleExport} title="Xuất cấu hình (JSON)">
+            <Download className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => onEdit(item)} title="Sửa thông tin">
             <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all" onClick={handleDelete} title="Xóa">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={handleDelete} title="Xóa">
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>

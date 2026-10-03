@@ -182,11 +182,10 @@ export function AuthFields() {
   };
 
   return (
-    <div className="rounded-xl border border-violet-100 dark:border-violet-900/30 bg-violet-50/50 dark:bg-violet-900/10 overflow-hidden">
-
+    <div className="rounded-md border overflow-hidden">
       {/* ── Section Header ─────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-3.5 bg-violet-100/60 dark:bg-violet-900/20 border-b border-violet-100 dark:border-violet-900/30">
-        <div className="flex items-center gap-2.5 text-violet-800 dark:text-violet-300 font-semibold text-sm">
+      <div className="flex items-center justify-between px-5 py-3.5 bg-muted/50 border-b">
+        <div className="flex items-center gap-2.5 font-semibold text-sm">
           <KeyRound className="w-4 h-4" />
           Thông tin Xác thực (Authentication)
         </div>
@@ -195,7 +194,7 @@ export function AuthFields() {
             type="button" variant="outline" size="sm"
             onClick={handleTestAuth}
             disabled={isTesting}
-            className="h-8 text-xs gap-1.5 bg-white hover:bg-violet-50 text-violet-700 border-violet-300 dark:bg-violet-900/30 dark:hover:bg-violet-900/50 dark:text-violet-300 dark:border-violet-700"
+            className="h-8 text-xs gap-1.5"
           >
             {isTesting
               ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -256,7 +255,7 @@ export function AuthFields() {
         {/* ── Auth-specific fields ────────────────────────────────────────────── */}
         {authType !== "NONE" && (
           <>
-            <Separator className="bg-violet-100 dark:bg-violet-900/30" />
+            <Separator />
 
             {/* OAUTH2 fields */}
             {authType === "OAUTH2" && (
@@ -272,7 +271,7 @@ export function AuthFields() {
                       <FormControl>
                         <Textarea
                           placeholder="https://sso.example.com/realms/gov/protocol/openid-connect/token"
-                          className="font-mono bg-white dark:bg-slate-950 resize-none min-h-[72px]"
+                          className="font-mono"
                           {...field}
                         />
                       </FormControl>
@@ -290,7 +289,7 @@ export function AuthFields() {
                         Client ID (App Key) <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input className="font-mono bg-white dark:bg-slate-950" placeholder="my-service-client" {...field} />
+                        <Input className="font-mono" placeholder="my-service-client" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -305,7 +304,7 @@ export function AuthFields() {
                         Client Secret (App Secret) <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <SecretInput field={field} placeholder="••••••••" className="bg-white dark:bg-slate-950" />
+                        <SecretInput field={field} placeholder="••••••••" className="" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -320,7 +319,7 @@ export function AuthFields() {
                         Scope
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="openid profile email" className="font-mono bg-white dark:bg-slate-950" {...field} />
+                        <Input placeholder="openid profile email" className="font-mono" {...field} />
                       </FormControl>
                       <FormDescription>Danh sách scope phân tách bởi dấu cách (tùy chọn).</FormDescription>
                       <FormMessage />
@@ -336,7 +335,7 @@ export function AuthFields() {
                         Đường dẫn trích xuất Token (Token Path)
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="access_token" className="font-mono bg-white dark:bg-slate-950" {...field} />
+                        <Input placeholder="access_token" className="font-mono" {...field} />
                       </FormControl>
                       <FormDescription>Mặc định là <code>access_token</code>. Sửa nếu token nằm ở đường dẫn khác trong JSON (VD: <code>data.token</code>).</FormDescription>
                       <FormMessage />
@@ -361,7 +360,7 @@ export function AuthFields() {
                         <SecretInput
                           field={field}
                           placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                          className="bg-white dark:bg-slate-950"
+                          className=""
                         />
                       </FormControl>
                       <FormDescription>Token tĩnh được hệ thống đối tác cấp phát. Sẽ gắn vào header: <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 rounded">Authorization: Bearer &lt;token&gt;</code></FormDescription>
@@ -384,7 +383,7 @@ export function AuthFields() {
                         Username <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input className="font-mono bg-white dark:bg-slate-950" placeholder="service_user" {...field} />
+                        <Input className="font-mono" placeholder="service_user" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -399,7 +398,7 @@ export function AuthFields() {
                         Password <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <SecretInput field={field} placeholder="••••••••" className="bg-white dark:bg-slate-950" />
+                        <SecretInput field={field} placeholder="••••••••" className="" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -420,7 +419,7 @@ export function AuthFields() {
                         Header Name / Key ID <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input className="font-mono bg-white dark:bg-slate-950" placeholder="X-API-Key" {...field} />
+                        <Input className="font-mono" placeholder="X-API-Key" {...field} />
                       </FormControl>
                       <FormDescription>Tên header mà hệ thống đối tác yêu cầu (vd: <code className="text-xs">X-API-Key</code>).</FormDescription>
                       <FormMessage />
@@ -436,7 +435,7 @@ export function AuthFields() {
                         API Key Value <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
-                        <SecretInput field={field} placeholder="sk-••••••••••••" className="bg-white dark:bg-slate-950" />
+                        <SecretInput field={field} placeholder="sk-••••••••••••" className="" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -227,10 +227,10 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
       <Form {...form}>
         <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {!editingItem && (
-            <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl border border-violet-200 bg-violet-50 dark:border-violet-900/50 dark:bg-violet-900/10 gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-md border bg-muted/50 gap-4">
               <div>
-                <h4 className="text-sm font-bold text-violet-800 dark:text-violet-400">Khởi tạo nhanh từ File cấu hình</h4>
-                <p className="text-xs text-violet-600 dark:text-violet-500 mt-0.5">Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</p>
+                <h4 className="text-sm font-bold">Khởi tạo nhanh từ File cấu hình</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</p>
               </div>
               <ImportApiDialog onSuccess={handleImportSuccess} />
             </div>
@@ -241,12 +241,12 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
           <FormField
             name="isRawMode"
             render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10 space-y-0">
-                <div className="flex items-center gap-3 text-amber-800 dark:text-amber-500">
-                  <ShieldAlert className="w-5 h-5" />
+              <FormItem className="flex items-center justify-between p-4 rounded-md border bg-muted/50 space-y-0">
+                <div className="flex items-center gap-3">
+                  <ShieldAlert className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <h4 className="text-sm font-bold">Chế độ Nhập liệu Nâng cao (Raw JSON)</h4>
-                    <FormDescription className="text-xs text-amber-700 dark:text-amber-600 opacity-80 mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</FormDescription>
+                    <FormDescription className="text-xs mt-0.5">Dành cho kỹ thuật viên khi cần chèn cấu hình JSON phức tạp.</FormDescription>
                   </div>
                 </div>
                 <FormControl>
@@ -261,16 +261,16 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
               <ProtocolFields />
               <AuthFields />
               {parsedEndpointCount > 0 && (
-                <div className="flex items-center gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/10">
+                <div className="flex items-center gap-3 p-4 rounded-md border bg-muted/50">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                   <div className="flex-1">
-                    <h4 className="text-sm font-bold text-emerald-800 dark:text-emerald-400">Đã trích xuất Endpoints</h4>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-500 mt-0.5">
+                    <h4 className="text-sm font-bold">Đã trích xuất Endpoints</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Hệ thống đã tìm thấy <strong>{parsedEndpointCount}</strong> API endpoints từ file import.
                       Sau khi lưu, bạn có thể quản lý chi tiết qua nút <List className="w-3 h-3 inline" /> trên thẻ tích hợp.
                     </p>
                   </div>
-                  <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800 font-mono text-sm shrink-0">
+                  <Badge variant="outline" className="font-mono text-sm shrink-0">
                     {parsedEndpointCount} APIs
                   </Badge>
                 </div>
@@ -283,7 +283,7 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
           <FormField
             name="isActive"
             render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-0">
+              <FormItem className="flex items-center justify-between p-4 rounded-md border bg-muted/50 space-y-0">
                 <FormLabel className="text-sm font-semibold cursor-pointer">Bật / Tắt kết nối ngay lập tức</FormLabel>
                 <FormControl>
                   <Switch checked={field.value} onCheckedChange={field.onChange} />

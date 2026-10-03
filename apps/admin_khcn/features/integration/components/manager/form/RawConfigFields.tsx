@@ -15,7 +15,7 @@ export function RawConfigFields() {
           <FormLabel>JSON Configuration Data</FormLabel>
           <FormControl>
             <Textarea
-              className="flex-1 font-mono text-sm p-4 bg-slate-900 text-slate-300 rounded-xl resize-none"
+              className="flex-1 font-mono text-sm p-4 rounded-md resize-none"
               spellCheck={false}
               {...field}
             />
