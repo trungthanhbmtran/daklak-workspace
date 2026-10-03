@@ -213,24 +213,26 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     <ResponsiveModal
       open={isOpen}
       onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}
-      maxWidth="max-w-[85vw]"
-      contentClassName="!w-[85vw] !max-w-[85vw] !h-[85vh]"
+      maxWidth="max-w-full"
+      contentClassName="!w-screen !h-[100dvh] sm:!h-[100dvh] !max-w-none !rounded-none sm:!rounded-none !border-0 !m-0 !p-0 [&>div]:!max-h-[100dvh] [&>div]:!border-0 [&>div]:!rounded-none"
       icon={<Server className="w-6 h-6 text-violet-600" />}
       title={editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
       description="Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP)."
-      bodyClassName="space-y-6"
+      bodyClassName="bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-hidden flex flex-col p-0"
+      fullHeight={true}
       footer={
-        <>
+        <div className="w-full flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={handleClose} disabled={isPending}>Hủy bỏ</Button>
           <Button type="submit" form="integration-form" className="min-w-[120px]" disabled={isPending}>
             {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {isPending ? "Đang xử lý..." : (editingItem ? "Lưu thay đổi" : "Khởi tạo API")}
           </Button>
-        </>
+        </div>
       }
     >
-      <Form {...form}>
-        <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 w-full flex justify-center">
+        <Form {...form}>
+          <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-5xl">
           {!editingItem && (
             <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-md border bg-muted/50 gap-4">
               <div>
@@ -297,7 +299,8 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
             )}
           />
         </form>
-      </Form>
+        </Form>
+      </div>
     </ResponsiveModal>
   );
 });
