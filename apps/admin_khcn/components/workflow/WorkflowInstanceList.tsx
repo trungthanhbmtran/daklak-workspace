@@ -35,18 +35,13 @@ const WorkflowInstanceList = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">Giám sát Thực thi</h2>
-          <p className="text-muted-foreground text-xs mt-1"> Theo dõi trạng thái các quy trình đang chạy trong hệ thống. </p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Search placeholder="Tìm theo ID hoặc tên quy trình..." className="max-w-sm" />
         <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="rounded-lg">
           <RefreshCcw className={`h-4 w-4 mr-2 ${isFetching && !isFetchingNextPage ? "animate-spin" : ""}`} /> Làm mới
         </Button>
       </div>
-
-      <Search placeholder="Tìm theo ID hoặc tên quy trình..." className="max-w-sm" />
 
       <div 
         className="border border-border/60 rounded-xl bg-card w-full max-h-[60vh] overflow-auto relative"

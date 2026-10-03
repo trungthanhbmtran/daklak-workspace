@@ -19,16 +19,18 @@ export function ServiceLayout({ children }: ServiceLayoutProps) {
         <AppSidebar />
       </Suspense>
 
-      {/* Vùng bên phải: header sticky + content scroll */}
-      <SidebarInset>
+      {/* Vùng bên phải: header cố định + content là vùng cuộn duy nhất.
+          Wrapper của SidebarProvider là h-svh overflow-hidden, nên inset phải giới hạn chiều cao
+          (min-h-0) và content phải tự cuộn — nếu không nội dung dài sẽ bị cắt hoặc trượt dưới header. */}
+      <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
 
         {/* Header cố định — không scroll */}
-        <Suspense fallback={<header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-background sticky top-0 z-10 shadow-sm" />}>
+        <Suspense fallback={<header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-background z-10 shadow-sm" />}>
           <ServiceHeader />
         </Suspense>
 
-        {/* Content area */}
-        <div className="flex flex-1 flex-col bg-muted/20 overflow-hidden min-h-0 p-2 sm:p-4 lg:p-6">
+        {/* Content area — vùng cuộn duy nhất của trang */}
+        <div className="flex flex-1 flex-col bg-muted/20 overflow-y-auto overflow-x-hidden min-h-0 p-2 sm:p-4 lg:p-6">
           <Suspense fallback={
             <div className="flex flex-1 items-center justify-center h-full">
               <Spinner className="w-8 h-8 text-primary" />

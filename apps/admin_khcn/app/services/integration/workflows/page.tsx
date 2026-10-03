@@ -1,9 +1,9 @@
-import { IntegrationClient } from '../Client';
+import WorkflowList from "@/components/workflow/WorkflowList";
 
 export const metadata = {
-  title: "Quy trình hệ thống | Cổng Ứng dụng Nội bộ",
+  title: "Định nghĩa quy trình | Cổng Ứng dụng Nội bộ",
 };
 
 export default function WorkflowsPage() {
-  return <IntegrationClient initialView="definitions" />;
+  return <WorkflowList />;
 }

@@ -1,2 +1,1 @@
-export * from './api';
-export { IntegrationClient } from './components/IntegrationClient';
+﻿export * from './api';
