@@ -97,12 +97,16 @@ export function installSessionRecovery(
           // Another browser tab may already have rotated the shared HttpOnly cookie.
           // A conflict cannot expire that tab's session or authorise using an old token.
           try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
             await transport.get("/auth/me", { timeout: 5000 });
             await authentication?.catch(() => undefined);
             if (expired) return Promise.reject(error);
             if (recoveryVersion === version) version++;
             return replay();
-          } catch { effects.onError(refreshError as AxiosError); }
+          } catch (meError) {
+            const meStatus = (meError as AxiosError).response?.status;
+            if (meStatus === 401) await expire(recoveryVersion);
+          }
         } else if (status === 401) await expire(recoveryVersion);
         else effects.onError(refreshError as AxiosError);
         return Promise.reject(refreshError);
