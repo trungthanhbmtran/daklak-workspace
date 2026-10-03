@@ -35,31 +35,59 @@ export class IntegrationController {
   @Post()
   @RequirePermissions('INTEGRATION:MANAGE')
   async create(@Body() dto: any, @Req() req: any) {
-    const payload = { ...dto, callerUserId: req.user.id.toString() };
+    const payload = { 
+      ...dto, 
+      auth: typeof dto.auth === 'object' ? JSON.stringify(dto.auth) : dto.auth,
+      retry: typeof dto.retry === 'object' ? JSON.stringify(dto.retry) : dto.retry,
+      rateLimit: typeof dto.rateLimit === 'object' ? JSON.stringify(dto.rateLimit) : dto.rateLimit,
+      metadata: typeof dto.metadata === 'object' ? JSON.stringify(dto.metadata) : dto.metadata,
+      callerUserId: req.user.id.toString() 
+    };
     const res = await firstValueFrom(this.grpcService.CreateUpstream(payload));
-    return { success: true, data: res };
+    return { success: true, data: this.parseGrpcResponse(res) };
+  }
+
+  private parseGrpcResponse(item: any) {
+    if (!item) return item;
+    try { if (typeof item.auth === 'string' && item.auth !== '') item.auth = JSON.parse(item.auth); } catch(e) { item.auth = {}; }
+    try { if (typeof item.retry === 'string' && item.retry !== '') item.retry = JSON.parse(item.retry); } catch(e) { item.retry = {}; }
+    try { if (typeof item.rateLimit === 'string' && item.rateLimit !== '') item.rateLimit = JSON.parse(item.rateLimit); } catch(e) { item.rateLimit = {}; }
+    try { if (typeof item.metadata === 'string' && item.metadata !== '') item.metadata = JSON.parse(item.metadata); } catch(e) { item.metadata = {}; }
+    // Handle the corrupted [object Object] cases
+    if (item.metadata === '[object Object]') item.metadata = {};
+    if (item.auth === '[object Object]') item.auth = {};
+    return item;
   }
 
   @Get()
   @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:READ')
   async getAll() {
     const res = (await firstValueFrom(this.grpcService.GetAllUpstreams({}))) as any;
-    return { success: true, data: res.data || [] };
+    const items = res.data || [];
+    const parsedItems = items.map((item: any) => this.parseGrpcResponse(item));
+    return { success: true, data: parsedItems };
   }
 
   @Get(':id')
   @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:READ')
   async getById(@Param('id') id: string) {
     const res = await firstValueFrom(this.grpcService.GetUpstreamById({ id }));
-    return { success: true, data: res };
+    return { success: true, data: this.parseGrpcResponse(res) };
   }
 
   @Put(':id')
   @RequirePermissions('INTEGRATION:MANAGE')
   async update(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
-    const payload = { id, data: dto, callerUserId: req.user.id.toString() };
+    const parsedDto = { 
+      ...dto, 
+      auth: typeof dto.auth === 'object' ? JSON.stringify(dto.auth) : dto.auth,
+      retry: typeof dto.retry === 'object' ? JSON.stringify(dto.retry) : dto.retry,
+      rateLimit: typeof dto.rateLimit === 'object' ? JSON.stringify(dto.rateLimit) : dto.rateLimit,
+      metadata: typeof dto.metadata === 'object' ? JSON.stringify(dto.metadata) : dto.metadata,
+    };
+    const payload = { id, data: parsedDto, callerUserId: req.user.id.toString() };
     const res = await firstValueFrom(this.grpcService.UpdateUpstream(payload));
-    return { success: true, data: res };
+    return { success: true, data: this.parseGrpcResponse(res) };
   }
 
   @Delete(':id')

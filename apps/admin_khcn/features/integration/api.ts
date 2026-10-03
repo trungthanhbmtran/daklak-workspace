@@ -66,12 +66,11 @@ const mapAuthType = (kind?: string) => {
 export const integrationApi = {
   getList: async (search?: string): Promise<IntegrationConfig[]> => {
     const res = await apiClient.get('/integration-upstreams', { params: { search } }) as any;
-    const entries = Array.isArray(res) ? res : res.data;
-    if (Array.isArray(entries)) {
-      return entries.map(item => {
+    if (Array.isArray(res.data)) {
+      return res.data.map((item: any) => {
         // Map backend IntegrationUpstream -> frontend IntegrationConfig
-        const authObj = item.auth ? (typeof item.auth === 'string' ? JSON.parse(item.auth) : item.auth) : null;
-        const metaObj = item.metadata ? (typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata) : {};
+        const authObj = item.auth || null;
+        const metaObj = item.metadata || {};
         return {
           ...item,
           metadata: metaObj,
