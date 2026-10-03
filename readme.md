@@ -82,7 +82,7 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm report-serv
 # docker exec -it daklak-workspace-report-service-1 npx prisma db push --accept-data-loss
 
 # Khởi động toàn bộ các services (đảm bảo DB đang chạy để seed)
-docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml up -d
 
 # Chạy seeders để khởi tạo dữ liệu mặc định (hoặc dữ liệu mẫu)

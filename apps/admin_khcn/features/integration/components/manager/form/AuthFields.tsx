@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { IntegrationFormValues } from "../../../schemas";
 import { useCategories } from "../../../api";
 
@@ -182,30 +184,35 @@ export function AuthFields() {
   };
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <Collapsible className="rounded-md border bg-card overflow-hidden" defaultOpen={false}>
       {/* ── Section Header ─────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-3.5 bg-muted/50 border-b">
-        <div className="flex items-center gap-2.5 font-semibold text-sm">
+      <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 bg-muted/50 font-semibold text-sm hover:bg-muted/70 transition-colors [&[data-state=open]>div>svg.chevron]:rotate-180">
+        <div className="flex items-center gap-2.5">
           <KeyRound className="w-4 h-4" />
           Thông tin Xác thực (Authentication)
         </div>
-        {showTestButton && (
-          <Button
-            type="button" variant="outline" size="sm"
-            onClick={handleTestAuth}
-            disabled={isTesting}
-            className="h-8 text-xs gap-1.5"
-          >
-            {isTesting
-              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              : <Play className="w-3.5 h-3.5" />
-            }
-            {isTesting ? "Đang kiểm tra..." : "Test kết nối"}
-          </Button>
+          <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
+            <Button
+              type="button" variant="outline" size="sm"
+              onClick={handleTestAuth}
+              disabled={isTesting}
+              className="h-8 text-xs gap-1.5"
+            >
+              {isTesting
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Play className="w-3.5 h-3.5" />
+              }
+              {isTesting ? "Đang kiểm tra..." : "Test kết nối"}
+            </Button>
+            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground chevron" />
+          </div>
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground chevron" />
         )}
-      </div>
+      </CollapsibleTrigger>
 
-      <div className="p-5 space-y-5">
+      <CollapsibleContent>
+        <div className="p-5 space-y-5 border-t">
 
         {/* ── Auth Type Selector ─────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
@@ -500,7 +507,8 @@ export function AuthFields() {
             )}
           </div>
         )}
-      </div>
-    </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
