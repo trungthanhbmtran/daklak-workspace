@@ -36,7 +36,6 @@ export class AiService {
     throw new InternalServerErrorException(message);
   }
 
-
   private readonly logger = new Logger(AiService.name);
 
   // Circuit Breaker Config
@@ -59,8 +58,12 @@ export class AiService {
 
       // Try user config first
       if (userId) {
-        const userConfigs = await this.userConfigService.getUserConfigs(userId).catch(() => []);
-        aiProvidersConfig = userConfigs.find((c: any) => c.key === 'AI_PROVIDERS');
+        const userConfigs = await this.userConfigService
+          .getUserConfigs(userId)
+          .catch(() => []);
+        aiProvidersConfig = userConfigs.find(
+          (c: any) => c.key === 'AI_PROVIDERS',
+        );
       }
 
       // Fallback to system config

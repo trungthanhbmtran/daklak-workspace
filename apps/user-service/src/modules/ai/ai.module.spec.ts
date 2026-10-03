@@ -11,15 +11,18 @@ describe('AiModule', () => {
     process.env.HRM_GRPC_URL = '0.0.0.0:50053';
     process.env.USERS_GRPC_URL = '0.0.0.0:50051';
     process.env.RABBITMQ_URL = 'amqp://admin:admin123@localhost:5672';
-    
+
     module = await Test.createTestingModule({
-      imports: [CacheModule.register({ isGlobal: true, ttl: 600_000 }), AiModule],
+      imports: [
+        CacheModule.register({ isGlobal: true, ttl: 600_000 }),
+        AiModule,
+      ],
     }).compile();
   });
 
   it('should compile the module and resolve AiFeatureService', () => {
     expect(module).toBeDefined();
-    
+
     // Check if AiFeatureService is successfully injected
     const aiFeatureService = module.get<AiFeatureService>(AiFeatureService);
     expect(aiFeatureService).toBeDefined();

@@ -53,9 +53,12 @@ const protoRoot =
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthSessionStore, AuthDeviceStore, AuthStateSyncWorker],
+  providers: [
+    UsersService,
+    AuthSessionStore,
+    AuthDeviceStore,
+    AuthStateSyncWorker,
+  ],
   exports: [UsersService],
 })
 export class UsersModule {}
-
-

@@ -142,23 +142,24 @@ export class AiAssistantController implements OnModuleInit {
     this.logger.log(`Worker processing knowledge source: ${data.title}`);
     try {
       let finalContent = data.content || '';
-      let qdrantId = data.qdrant_id || require('crypto').randomUUID();
+      const qdrantId = data.qdrant_id || require('crypto').randomUUID();
       let fileUrl = '';
       let originalName = '';
 
       if (data.type === 'FILE' && data.metadata) {
         try {
           const meta = JSON.parse(data.metadata);
-          
+
           // Ưu tiên lấy file qua Media Service nếu có mediaId
           if (meta.mediaId) {
             const { firstValueFrom } = require('rxjs');
-            const mediaResponse = (await firstValueFrom(
-              this.mediaService.GetMedia({ fileId: meta.mediaId })
-            )) as any;
+            const mediaResponse = await firstValueFrom(
+              this.mediaService.GetMedia({ fileId: meta.mediaId }),
+            );
             if (mediaResponse && mediaResponse.downloadUrl) {
               fileUrl = mediaResponse.downloadUrl;
-              originalName = mediaResponse.originalName || mediaResponse.fileName || '';
+              originalName =
+                mediaResponse.originalName || mediaResponse.fileName || '';
             }
           } else if (meta.url) {
             // Fallback dành cho các file public
@@ -171,7 +172,7 @@ export class AiAssistantController implements OnModuleInit {
             if (fileRes.ok) {
               const arrayBuffer = await fileRes.arrayBuffer();
               const buffer = Buffer.from(arrayBuffer);
-              
+
               if (!originalName) originalName = fileUrl.split('?')[0];
 
               if (originalName.toLowerCase().endsWith('.pdf')) {
@@ -188,19 +189,24 @@ export class AiAssistantController implements OnModuleInit {
             }
           }
         } catch (err: any) {
-          this.logger.warn(`Failed to parse file for knowledge source: ${err.message}`);
+          this.logger.warn(
+            `Failed to parse file for knowledge source: ${err.message}`,
+          );
         }
       }
 
       if (finalContent) {
-        await this.qdrantService.createCollectionIfNotExists(data.assistant_id, 1536);
+        await this.qdrantService.createCollectionIfNotExists(
+          data.assistant_id,
+          1536,
+        );
 
         // 1. Text Chunking Algorithm (Phân mảnh văn bản)
         const chunks: string[] = [];
         let currentChunk = '';
         // Tách câu dựa trên dấu chấm, hỏi, chấm than
         const sentences = finalContent.split(/(?<=[.!?])\s+/);
-        
+
         for (const sentence of sentences) {
           if ((currentChunk + ' ' + sentence).length > 1000) {
             if (currentChunk) chunks.push(currentChunk.trim());
@@ -217,15 +223,18 @@ export class AiAssistantController implements OnModuleInit {
         // 2. Parallel Embedding with Concurrency Control (Tránh treo Event Loop và Rate Limit API)
         const CONCURRENCY_LIMIT = 5;
         const points: any[] = [];
-        
+
         for (let i = 0; i < chunks.length; i += CONCURRENCY_LIMIT) {
           const batchChunks = chunks.slice(i, i + CONCURRENCY_LIMIT);
-          
+
           // Chạy song song N chunk trong cùng một thời điểm
           const batchPromises = batchChunks.map(async (chunk, index) => {
             // Qdrant point id bắt buộc phải là UUID hợp lệ hoặc UInt64
             const chunkId = require('crypto').randomUUID();
-            const embedding = await this.aiService.generateEmbedding(chunk, data.user_id);
+            const embedding = await this.aiService.generateEmbedding(
+              chunk,
+              data.user_id,
+            );
             return {
               id: chunkId,
               vector: embedding,
@@ -243,14 +252,16 @@ export class AiAssistantController implements OnModuleInit {
           // Đợi batch này nhúng xong mới chạy batch tiếp theo
           const batchPoints = await Promise.all(batchPromises);
           points.push(...batchPoints);
-          
+
           // Node.js Event Loop Yield (Tránh Block Thread nếu file quá lớn)
           await new Promise((resolve) => setImmediate(resolve));
         }
 
         // 3. Batch Upsert to Qdrant (Bulk insert)
         await this.qdrantService.upsertPoints(data.assistant_id, points);
-        this.logger.log(`Successfully upserted ${points.length} points to Qdrant for ${data.title}`);
+        this.logger.log(
+          `Successfully upserted ${points.length} points to Qdrant for ${data.title}`,
+        );
       }
 
       await this.assistantService.addKnowledgeSource({

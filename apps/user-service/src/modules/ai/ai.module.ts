@@ -51,7 +51,10 @@ const protoRoot =
         options: {
           package: 'user',
           protoPath: join(protoRoot, 'users', 'user.proto'),
-          url: process.env.USERS_GRPC_URL || process.env.USER_GRPC_URL || '0.0.0.0:50051',
+          url:
+            process.env.USERS_GRPC_URL ||
+            process.env.USER_GRPC_URL ||
+            '0.0.0.0:50051',
           loader: {
             keepCase: false,
             longs: String,
@@ -67,7 +70,10 @@ const protoRoot =
         options: {
           package: 'users',
           protoPath: join(protoRoot, 'users', 'system_config.proto'),
-          url: process.env.USERS_GRPC_URL || process.env.USER_GRPC_URL || '0.0.0.0:50051',
+          url:
+            process.env.USERS_GRPC_URL ||
+            process.env.USER_GRPC_URL ||
+            '0.0.0.0:50051',
           loader: {
             keepCase: false,
             longs: String,

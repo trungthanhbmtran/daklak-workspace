@@ -43,9 +43,20 @@ describe('UsersService', () => {
             ),
           },
         },
-        { provide: IntegrationAuthService, useValue: { signAccessToken: jest.fn(() => 'mock-jwt') } },
+        {
+          provide: IntegrationAuthService,
+          useValue: { signAccessToken: jest.fn(() => 'mock-jwt') },
+        },
         { provide: AuthDeviceStore, useValue: {} },
-        { provide: AuthSessionStore, useValue: { setSession: jest.fn(), setRefresh: jest.fn(), consumeRefresh: jest.fn(), revokeRefresh: jest.fn() } },
+        {
+          provide: AuthSessionStore,
+          useValue: {
+            setSession: jest.fn(),
+            setRefresh: jest.fn(),
+            consumeRefresh: jest.fn(),
+            revokeRefresh: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -108,5 +119,3 @@ describe('UsersService', () => {
     });
   });
 });
-
-

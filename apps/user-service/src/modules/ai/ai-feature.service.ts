@@ -15,7 +15,6 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 
-
 @Injectable()
 export class AiFeatureService implements OnModuleInit {
   private readonly logger = new Logger(AiFeatureService.name);
@@ -37,14 +36,18 @@ export class AiFeatureService implements OnModuleInit {
   onModuleInit() {
     this.taskService = this.taskClient?.getService('TaskService');
     this.userService = this.userClient?.getService('UserService');
-    this.sysConfigService = this.sysConfigClient?.getService('SystemConfigService');
-    this.masterPlanService = this.masterPlanClient?.getService('MasterPlanService');
+    this.sysConfigService = this.sysConfigClient?.getService(
+      'SystemConfigService',
+    );
+    this.masterPlanService =
+      this.masterPlanClient?.getService('MasterPlanService');
   }
 
   private getGrpcMetadata(user: any, headers?: any) {
     const meta = new Metadata();
 
-    if (!headers?.authorization) throw new Error('Verified Gateway delegation is required');
+    if (!headers?.authorization)
+      throw new Error('Verified Gateway delegation is required');
     meta.set('authorization', headers.authorization);
     return meta;
   }
@@ -288,7 +291,9 @@ export class AiFeatureService implements OnModuleInit {
 
   async getJobStatus(jobId: string) {
     try {
-      const jobData = (await this.cacheManager.get(`ai_job_${jobId}`)) as string;
+      const jobData = (await this.cacheManager.get(
+        `ai_job_${jobId}`,
+      )) as string;
       if (!jobData) {
         throw new NotFoundException('Không tìm thấy tác vụ (hoặc đã hết hạn)');
       }
@@ -321,5 +326,3 @@ export class AiFeatureService implements OnModuleInit {
     );
   }
 }
-
-

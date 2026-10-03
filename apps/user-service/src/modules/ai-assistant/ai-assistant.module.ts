@@ -29,14 +29,22 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         transport: Transport.GRPC,
         options: {
           package: 'media',
-          protoPath: join(process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos'), 'media', 'media.proto'),
+          protoPath: join(
+            process.env.PROTO_PATH ??
+              join(process.cwd(), '..', '..', 'shared', 'protos'),
+            'media',
+            'media.proto',
+          ),
           url: process.env.MEDIA_SERVICE_URL || 'media-service:50059',
           loader: {
             keepCase: false,
             longs: String,
             enums: String,
             defaults: true,
-            includeDirs: [process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos')],
+            includeDirs: [
+              process.env.PROTO_PATH ??
+                join(process.cwd(), '..', '..', 'shared', 'protos'),
+            ],
           },
         },
       },

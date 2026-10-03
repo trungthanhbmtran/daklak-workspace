@@ -32,7 +32,9 @@ export class AiController {
     user_payload?: string;
   }) {
     const payloadParsed = data.payload ? JSON.parse(data.payload) : {};
-    const userParsed = data.user_payload ? JSON.parse(data.user_payload) : { id: data.user_id };
+    const userParsed = data.user_payload
+      ? JSON.parse(data.user_payload)
+      : { id: data.user_id };
     const headersParsed = data.headers ? JSON.parse(data.headers) : {};
 
     const result = await this.aiFeatureService.executeAiFeature(

@@ -18,7 +18,8 @@ describe('Shared authentication state', () => {
   const session = {
     userId: 7,
     sessionId: '11c6badf-4128-490a-93b3-e105f7f415ce',
-    expiresAt: 40000, authVersion: 4,
+    expiresAt: 40000,
+    authVersion: 4,
   };
   const tokenKey =
     'auth:refresh:' +
@@ -55,7 +56,15 @@ describe('Shared authentication state', () => {
     client.eval.mockResolvedValue(1);
     const result = await store.createSession(7, 4);
     expect(result.expiresAt).toBe(29800);
-    expect(client.eval).toHaveBeenCalledWith(expect.any(String), 2, 'auth:user:version:db:7', 'auth:session:' + result.sessionId, 4, JSON.stringify({ ...result, version: 4 }), 1800);
+    expect(client.eval).toHaveBeenCalledWith(
+      expect.any(String),
+      2,
+      'auth:user:version:db:7',
+      'auth:session:' + result.sessionId,
+      4,
+      JSON.stringify({ ...result, version: 4 }),
+      1800,
+    );
   });
   it('checks active status and user generation with the same atomic policy as gateway', async () => {
     client.eval.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
@@ -72,8 +81,13 @@ describe('Shared authentication state', () => {
   });
   it('invalidates every older session without scanning all session keys', async () => {
     await store.revokeAllForUser(7, 5);
-    expect(client.eval).toHaveBeenCalledWith(expect.any(String), 2, 'auth:user:version:db:7', 'user_session:7', 5);
-
+    expect(client.eval).toHaveBeenCalledWith(
+      expect.any(String),
+      2,
+      'auth:user:version:db:7',
+      'user_session:7',
+      5,
+    );
   });
   it('uses the shared configured limit for failed login attempts', async () => {
     client.get.mockResolvedValue('5');
@@ -142,4 +156,3 @@ describe('One authentication policy for issuer and gateway', () => {
     ).toThrow();
   });
 });
-

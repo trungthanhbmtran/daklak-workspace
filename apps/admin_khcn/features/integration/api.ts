@@ -75,7 +75,7 @@ export const integrationApi = {
         return {
           ...item,
           metadata: metaObj,
-          code: metaObj._uiConfig?.code || item.code || item.id.toUpperCase().replace(/-/g, '_'),
+          code: metaObj._uiConfig?.code || item.code || (item.id ? item.id.toUpperCase().replace(/-/g, '_') : 'UNKNOWN'),
           version: metaObj._uiConfig?.version || (item.version ? String(item.version) : ""),
           protocol: item.protocol || item.type || "REST",
           authType: item.authType || mapAuthType(authObj?.kind),

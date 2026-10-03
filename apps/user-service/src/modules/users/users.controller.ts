@@ -20,15 +20,34 @@ import { UsersService } from './users.service';
 
 @Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService, private readonly sessions: AuthSessionStore) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly sessions: AuthSessionStore,
+  ) {}
 
   @GrpcMethod('UserService', 'LoginSso')
   async loginSso(data: { assertion: string }) {
     let claims: ReturnType<typeof verifySsoAssertion>;
-    try { claims = verifySsoAssertion(data.assertion, process.env.JWT_PUBLIC_KEY || ''); }
-    catch { throw new RpcException({ code: GrpcStatus.UNAUTHENTICATED, message: 'SSO không hợp lệ' }); }
-    if (!(await this.sessions.consumeSsoAssertion(claims.jti))) throw new RpcException({ code: GrpcStatus.UNAUTHENTICATED, message: 'SSO không hợp lệ' });
-    return this.usersService.loginSso({ issuerHash: claims.issuerHash, subjectHash: claims.subjectHash });
+    try {
+      claims = verifySsoAssertion(
+        data.assertion,
+        process.env.JWT_PUBLIC_KEY || '',
+      );
+    } catch {
+      throw new RpcException({
+        code: GrpcStatus.UNAUTHENTICATED,
+        message: 'SSO không hợp lệ',
+      });
+    }
+    if (!(await this.sessions.consumeSsoAssertion(claims.jti)))
+      throw new RpcException({
+        code: GrpcStatus.UNAUTHENTICATED,
+        message: 'SSO không hợp lệ',
+      });
+    return this.usersService.loginSso({
+      issuerHash: claims.issuerHash,
+      subjectHash: claims.subjectHash,
+    });
   }
 
   @GrpcMethod('UserService', 'CreateUser')
@@ -88,7 +107,9 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'GetAuthState')
-  getAuthState(data: { id: number; sessionId: string }) { return this.usersService.getAuthState(data); }
+  getAuthState(data: { id: number; sessionId: string }) {
+    return this.usersService.getAuthState(data);
+  }
 
   @GrpcMethod('UserService', 'FindOne')
   async findOne(@Payload() data: FindOneGrpcDto) {
@@ -219,6 +240,3 @@ export class UsersController {
     }
   }
 }
-
-
-

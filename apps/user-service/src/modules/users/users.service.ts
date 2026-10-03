@@ -493,7 +493,10 @@ export class UsersService implements OnModuleInit {
       throw error;
     }
     await this.sessions.clearLoginFailures(account);
-    const session = await this.sessions.createSession(user.id, user.authVersion);
+    const session = await this.sessions.createSession(
+      user.id,
+      user.authVersion,
+    );
     const tokens = this.generateAuthTokens(session);
     const profile = await this.freshAuthProfile(user.id);
     await this.sessions.setSession(
@@ -507,14 +510,31 @@ export class UsersService implements OnModuleInit {
   }
 
   async loginSso(identity: { issuerHash: string; subjectHash: string }) {
-    const link = await this.prisma.externalIdentity.findUnique({ where: { issuerHash_subjectHash: identity } });
-    if (!link || link.disabledAt) throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Tài khoản SSO chưa được liên kết hoặc đã bị khóa' });
+    const link = await this.prisma.externalIdentity.findUnique({
+      where: { issuerHash_subjectHash: identity },
+    });
+    if (!link || link.disabledAt)
+      throw new RpcException({
+        code: GRPC.UNAUTHENTICATED,
+        message: 'Tài khoản SSO chưa được liên kết hoặc đã bị khóa',
+      });
     const user = await this.fetchUserWithRelations(link.userId);
-    if (!user || !user.isActive) throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Tài khoản SSO chưa được liên kết hoặc đã bị khóa' });
-    const session = await this.sessions.createSession(user.id, user.authVersion);
+    if (!user || !user.isActive)
+      throw new RpcException({
+        code: GRPC.UNAUTHENTICATED,
+        message: 'Tài khoản SSO chưa được liên kết hoặc đã bị khóa',
+      });
+    const session = await this.sessions.createSession(
+      user.id,
+      user.authVersion,
+    );
     const tokens = this.generateAuthTokens(session);
     const profile = await this.freshAuthProfile(user.id);
-    await this.sessions.setSession(user.id, { ...profile, authVersion: session.authVersion }, tokens.refreshTokenExpiresIn);
+    await this.sessions.setSession(
+      user.id,
+      { ...profile, authVersion: session.authVersion },
+      tokens.refreshTokenExpiresIn,
+    );
     await this.devices.create(tokens.refreshToken, session);
     this.auditAuth('SSO_LOGIN_SUCCEEDED', user.id);
     return this.formatAuthResponse(user, tokens);
@@ -542,7 +562,10 @@ export class UsersService implements OnModuleInit {
         code: GRPC.UNAUTHENTICATED,
       });
     if (user.authVersion !== session.authVersion) {
-      throw new RpcException({ code: GRPC.UNAUTHENTICATED, message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn' });
+      throw new RpcException({
+        code: GRPC.UNAUTHENTICATED,
+        message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn',
+      });
     }
     const tokens = this.generateAuthTokens(session);
     const profile = await this.freshAuthProfile(user.id);
@@ -655,8 +678,12 @@ export class UsersService implements OnModuleInit {
     );
     const refreshToken = randomBytes(40).toString('hex');
     return {
-      accessToken: '', refreshToken, expiresIn, refreshTokenExpiresIn,
-      sessionId: session.sessionId, authVersion: session.authVersion,
+      accessToken: '',
+      refreshToken,
+      expiresIn,
+      refreshTokenExpiresIn,
+      sessionId: session.sessionId,
+      authVersion: session.authVersion,
     };
   }
 
@@ -675,8 +702,11 @@ export class UsersService implements OnModuleInit {
     if (token) {
       const sessionId = await this.devices.revoke(token);
       if (sessionId) {
-        try { await this.sessions.revokeSession(sessionId); }
-        catch { this.logger.warn('Session revoked in DB; Redis cleanup pending'); }
+        try {
+          await this.sessions.revokeSession(sessionId);
+        } catch {
+          this.logger.warn('Session revoked in DB; Redis cleanup pending');
+        }
       }
     }
     this.auditAuth('LOGOUT');
@@ -709,9 +739,13 @@ export class UsersService implements OnModuleInit {
     const changed = await this.prisma.$transaction(async (tx) => {
       await tx.credential.upsert({
         where: { userId: data.userId },
-        update: { passwordHash: hash }, create: { userId: data.userId, passwordHash: hash },
+        update: { passwordHash: hash },
+        create: { userId: data.userId, passwordHash: hash },
       });
-      const account = await tx.user.update({ where: { id: data.userId }, data: { authVersion: { increment: 1 } } });
+      const account = await tx.user.update({
+        where: { id: data.userId },
+        data: { authVersion: { increment: 1 } },
+      });
       await tx.authStateSync.upsert({
         where: { userId: data.userId },
         create: { userId: data.userId, authVersion: account.authVersion },
@@ -739,27 +773,51 @@ export class UsersService implements OnModuleInit {
   }
 
   private async publishAuthState(userId: number, authVersion: number) {
-    try { await this.sessions.revokeAllForUser(userId, authVersion); }
-    catch { this.logger.warn('Account version persisted; Redis synchronization queued'); }
-    try { await this.cache.del('user:profile:' + userId); }
-    catch { this.logger.warn('Profile cache invalidation pending; authentication uses fresh DB state'); }
+    try {
+      await this.sessions.revokeAllForUser(userId, authVersion);
+    } catch {
+      this.logger.warn(
+        'Account version persisted; Redis synchronization queued',
+      );
+    }
+    try {
+      await this.cache.del('user:profile:' + userId);
+    } catch {
+      this.logger.warn(
+        'Profile cache invalidation pending; authentication uses fresh DB state',
+      );
+    }
   }
   async getAuthState(data: { id: number; sessionId: string }) {
     const [user, session] = await Promise.all([
-      this.prisma.user.findUnique({ where: { id: data.id }, select: { id: true, isActive: true, authVersion: true } }),
+      this.prisma.user.findUnique({
+        where: { id: data.id },
+        select: { id: true, isActive: true, authVersion: true },
+      }),
       this.prisma.authDeviceSession.findFirst({
-        where: { id: data.sessionId || '', userId: data.id, revokedAt: null, expiresAt: { gt: new Date() } },
+        where: {
+          id: data.sessionId || '',
+          userId: data.id,
+          revokedAt: null,
+          expiresAt: { gt: new Date() },
+        },
         select: { authVersion: true },
       }),
     ]);
     return {
-      userId: user?.id ?? data.id, isActive: user?.isActive === true, authVersion: user?.authVersion ?? 0,
-      sessionActive: Boolean(user && session && session.authVersion === user.authVersion),
+      userId: user?.id ?? data.id,
+      isActive: user?.isActive === true,
+      authVersion: user?.authVersion ?? 0,
+      sessionActive: Boolean(
+        user && session && session.authVersion === user.authVersion,
+      ),
     };
   }
 
   private async freshAuthProfile(userId: number) {
-    return this.mapUserPermissionsAndRoles(await this.fetchUserWithRelations(userId));
+    return this.mapUserPermissionsAndRoles(
+      await this.fetchUserWithRelations(userId),
+    );
   }
 
   async findOne(data: { id: number }) {
@@ -999,7 +1057,8 @@ export class UsersService implements OnModuleInit {
     }
     const changed = await this.prisma.$transaction(async (tx) => {
       const account = await tx.user.update({
-        where: { id: data.userId }, data: { isActive: data.isActive, authVersion: { increment: 1 } },
+        where: { id: data.userId },
+        data: { isActive: data.isActive, authVersion: { increment: 1 } },
       });
       await tx.authStateSync.upsert({
         where: { userId: data.userId },
@@ -1465,6 +1524,3 @@ export class UsersService implements OnModuleInit {
     };
   }
 }
-
-
-

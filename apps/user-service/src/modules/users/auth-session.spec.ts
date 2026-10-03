@@ -7,20 +7,21 @@ jest.mock('bcrypt', () => ({
 import { UsersService } from './users.service';
 import { RefreshConflictError } from './auth-session.store';
 
-
 import * as bcrypt from 'bcrypt';
 
 describe('Internal account session contract', () => {
-
   const profile = {
     id: 7,
-    isActive: true, authVersion: 0,
+    isActive: true,
+    authVersion: 0,
     permissionsFlatten: ['MENU:READ'],
     unitId: 3,
   };
   const user = {
     id: 7,
-    username: 'test', authVersion: 0, isActive: true,
+    username: 'test',
+    authVersion: 0,
+    isActive: true,
     credential: { passwordHash: 'hash' },
     jobPositions: [],
     policies: [],
@@ -36,7 +37,12 @@ describe('Internal account session contract', () => {
     recordLoginFailure: jest.fn(),
     revokeAllForUser: jest.fn(),
   };
-  const devices = { create: jest.fn(), read: jest.fn(), rotate: jest.fn(), revoke: jest.fn() };
+  const devices = {
+    create: jest.fn(),
+    read: jest.fn(),
+    rotate: jest.fn(),
+    revoke: jest.fn(),
+  };
   const prisma = {
     user: { findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
     credential: { upsert: jest.fn(), update: jest.fn() },
@@ -46,7 +52,8 @@ describe('Internal account session contract', () => {
   const session = () => ({
     userId: 7,
     sessionId: '11c6badf-4128-490a-93b3-e105f7f415ce',
-    expiresAt: Math.floor(Date.now() / 1000) + 28800, authVersion: 0,
+    expiresAt: Math.floor(Date.now() / 1000) + 28800,
+    authVersion: 0,
   });
   const oldToken = 'a'.repeat(80);
   let service: UsersService;
@@ -72,11 +79,27 @@ describe('Internal account session contract', () => {
     jest.spyOn(service as any, 'freshAuthProfile').mockResolvedValue(profile);
   });
   it('returns a durable session grant without signing a JWT', async () => {
-    const result = await service.login({ usernameOrEmail: 'test', password: 'password' });
-    expect(result).toMatchObject({ accessToken: '', sessionId: session().sessionId, userId: 7, expiresIn: 900 });
-    expect(devices.create).toHaveBeenCalledWith(result.refreshToken, expect.objectContaining({ authVersion: 0 }));
-    expect(sessions.setSession).toHaveBeenCalledWith(7, profile, result.refreshTokenExpiresIn);
-  });  it('awaits publishing the authorization context before returning login success', async () => {
+    const result = await service.login({
+      usernameOrEmail: 'test',
+      password: 'password',
+    });
+    expect(result).toMatchObject({
+      accessToken: '',
+      sessionId: session().sessionId,
+      userId: 7,
+      expiresIn: 900,
+    });
+    expect(devices.create).toHaveBeenCalledWith(
+      result.refreshToken,
+      expect.objectContaining({ authVersion: 0 }),
+    );
+    expect(sessions.setSession).toHaveBeenCalledWith(
+      7,
+      profile,
+      result.refreshTokenExpiresIn,
+    );
+  });
+  it('awaits publishing the authorization context before returning login success', async () => {
     let release!: () => void;
     sessions.setSession.mockReturnValue(
       new Promise<void>((resolve) => {
@@ -201,4 +224,3 @@ describe('Internal account session contract', () => {
     expect(sessions.revokeAllForUser).toHaveBeenCalledWith(7, 1);
   });
 });
-

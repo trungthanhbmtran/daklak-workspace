@@ -28,7 +28,7 @@ export class IntegrationConfigService {
         rateLimit: dto.rateLimit as any,
         roles: dto.roles as any,
         scopes: dto.scopes as any,
-        requestSchema: dto.requestSchema as any,
+        requestSchema: dto.requestSchema,
         responseLimit: dto.responseLimit,
         metadata: (dto as any).metadata,
         enabled: dto.enabled ?? true,
@@ -38,14 +38,22 @@ export class IntegrationConfigService {
       },
     });
 
-    await this.logAudit(upstream.name, 'CREATE', userId, { after: upstream }, upstream.version);
+    await this.logAudit(
+      upstream.name,
+      'CREATE',
+      userId,
+      { after: upstream },
+      upstream.version,
+    );
     this.emitRegistryChanged(upstream);
 
     return upstream;
   }
 
   async updateUpstream(id: string, dto: UpdateUpstreamDto, userId: string) {
-    const existing = await this.prisma.integrationUpstream.findUnique({ where: { id } });
+    const existing = await this.prisma.integrationUpstream.findUnique({
+      where: { id },
+    });
     if (!existing) {
       throw new NotFoundException('Upstream not found');
     }
@@ -61,7 +69,13 @@ export class IntegrationConfigService {
       } as any,
     });
 
-    await this.logAudit(upstream.name, 'UPDATE', userId, { before: existing, after: upstream }, upstream.version);
+    await this.logAudit(
+      upstream.name,
+      'UPDATE',
+      userId,
+      { before: existing, after: upstream },
+      upstream.version,
+    );
     this.emitRegistryChanged(upstream);
 
     return upstream;
@@ -74,21 +88,31 @@ export class IntegrationConfigService {
   }
 
   async getUpstreamById(id: string) {
-    const upstream = await this.prisma.integrationUpstream.findUnique({ where: { id } });
+    const upstream = await this.prisma.integrationUpstream.findUnique({
+      where: { id },
+    });
     if (!upstream) throw new NotFoundException('Upstream not found');
     return upstream;
   }
 
   async deleteUpstream(id: string, userId: string) {
-    const existing = await this.prisma.integrationUpstream.findUnique({ where: { id } });
+    const existing = await this.prisma.integrationUpstream.findUnique({
+      where: { id },
+    });
     if (!existing) {
       throw new NotFoundException('Upstream not found');
     }
 
     await this.prisma.integrationUpstream.delete({ where: { id } });
 
-    await this.logAudit(existing.name, 'DELETE', userId, { before: existing }, existing.version + 1);
-    
+    await this.logAudit(
+      existing.name,
+      'DELETE',
+      userId,
+      { before: existing },
+      existing.version + 1,
+    );
+
     // Emit event that it was deleted
     this.rmqClient.emit('registry.changed', {
       version: existing.version + 1,
@@ -107,20 +131,30 @@ export class IntegrationConfigService {
       action: 'UPSERT',
       at: new Date().toISOString(),
     });
-    this.logger.log(`Emitted registry.changed event for upstream: ${upstream.name}`);
+    this.logger.log(
+      `Emitted registry.changed event for upstream: ${upstream.name}`,
+    );
   }
 
-  private async logAudit(upstreamName: string, action: string, changedBy: string, changes: any, version: number) {
+  private async logAudit(
+    upstreamName: string,
+    action: string,
+    changedBy: string,
+    changes: any,
+    version: number,
+  ) {
     const safeChanges = JSON.parse(JSON.stringify(changes));
-    if (safeChanges.before?.auth?.secretRef) safeChanges.before.auth.secretRef = '***';
-    if (safeChanges.after?.auth?.secretRef) safeChanges.after.auth.secretRef = '***';
+    if (safeChanges.before?.auth?.secretRef)
+      safeChanges.before.auth.secretRef = '***';
+    if (safeChanges.after?.auth?.secretRef)
+      safeChanges.after.auth.secretRef = '***';
 
     await this.prisma.integrationUpstreamAudit.create({
       data: {
         upstreamName,
         action,
         changedBy,
-        changes: safeChanges as any,
+        changes: safeChanges,
         version,
       },
     });

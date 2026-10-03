@@ -35,7 +35,17 @@ export class AuthSessionStore implements OnModuleDestroy {
       createHash('sha256').update(account.trim().toLowerCase()).digest('hex')
     );
   }
-  async consumeSsoAssertion(jti: string): Promise<boolean> { return (await this.redis.set('auth:sso:assertion:' + jti, '1', 'EX', 60, 'NX')) === 'OK'; }
+  async consumeSsoAssertion(jti: string): Promise<boolean> {
+    return (
+      (await this.redis.set(
+        'auth:sso:assertion:' + jti,
+        '1',
+        'EX',
+        60,
+        'NX',
+      )) === 'OK'
+    );
+  }
   async assertLoginAllowed(account: string): Promise<boolean> {
     return (
       Number(await this.redis.get(this.attemptKey(account))) <
@@ -53,18 +63,37 @@ export class AuthSessionStore implements OnModuleDestroy {
   async clearLoginFailures(account: string) {
     await this.redis.del(this.attemptKey(account));
   }
-  async createSession(userId: number, authVersion: number): Promise<RefreshSession> {
-    if (!Number.isSafeInteger(authVersion) || authVersion < 0) throw new Error('Invalid durable authentication version');
+  async createSession(
+    userId: number,
+    authVersion: number,
+  ): Promise<RefreshSession> {
+    if (!Number.isSafeInteger(authVersion) || authVersion < 0)
+      throw new Error('Invalid durable authentication version');
     const now = Number((await this.redis.time())[0]);
-    const session = { userId, sessionId: randomUUID(), expiresAt: now + this.policy.absoluteSeconds, authVersion };
-    const created = Number(await this.redis.eval(`
+    const session = {
+      userId,
+      sessionId: randomUUID(),
+      expiresAt: now + this.policy.absoluteSeconds,
+      authVersion,
+    };
+    const created = Number(
+      await this.redis.eval(
+        `
 local current = tonumber(redis.call('GET', KEYS[1]) or '-1')
 if current > tonumber(ARGV[1]) then return 0 end
 redis.call('SET', KEYS[1], ARGV[1])
 redis.call('SET', KEYS[2], ARGV[2], 'EX', ARGV[3])
-return 1`, 2, 'auth:user:version:db:' + userId, 'auth:session:' + session.sessionId,
-      authVersion, JSON.stringify({ ...session, version: authVersion }), Math.min(this.policy.absoluteSeconds, this.policy.idleSeconds)));
-    if (created !== 1) throw new Error('Authentication state changed while logging in');
+return 1`,
+        2,
+        'auth:user:version:db:' + userId,
+        'auth:session:' + session.sessionId,
+        authVersion,
+        JSON.stringify({ ...session, version: authVersion }),
+        Math.min(this.policy.absoluteSeconds, this.policy.idleSeconds),
+      ),
+    );
+    if (created !== 1)
+      throw new Error('Authentication state changed while logging in');
     return session;
   }
   async touchSession(session: RefreshSession): Promise<boolean> {
@@ -96,16 +125,23 @@ return 1`, 2, 'auth:user:version:db:' + userId, 'auth:session:' + session.sessio
       ttl,
     );
   }
-  async revokeSession(sessionId: string) { await this.redis.del('auth:session:' + sessionId); }
+  async revokeSession(sessionId: string) {
+    await this.redis.del('auth:session:' + sessionId);
+  }
   async revokeAllForUser(userId: number, authVersion: number) {
-    await this.redis.eval(`
+    await this.redis.eval(
+      `
 local current = tonumber(redis.call('GET', KEYS[1]) or '-1')
 if current < tonumber(ARGV[1]) then redis.call('SET', KEYS[1], ARGV[1]) end
 redis.call('DEL', KEYS[2])
-return 1`, 2, 'auth:user:version:db:' + userId, 'user_session:' + userId, authVersion);
+return 1`,
+      2,
+      'auth:user:version:db:' + userId,
+      'user_session:' + userId,
+      authVersion,
+    );
   }
   onModuleDestroy() {
     this.redis.disconnect();
   }
 }
-
