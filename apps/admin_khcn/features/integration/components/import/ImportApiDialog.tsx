@@ -93,9 +93,9 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
         <Button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 px-6 h-10 w-full sm:w-auto"
-          iconStart={<Upload className="w-4 h-4" />}
+          className="w-full sm:w-auto"
         >
+          <Upload className="mr-2 w-4 h-4" />
           Import API
         </Button>
       ) : (
@@ -145,9 +145,9 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
               type="button"
               onClick={handlePreview}
               disabled={loading}
-              className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-md border-0 w-full sm:w-auto"
-              iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              className="w-full sm:w-auto"
             >
+              {loading ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
               Phân tích và Điền
             </Button>
           </div>
