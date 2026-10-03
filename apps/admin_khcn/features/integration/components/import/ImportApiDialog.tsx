@@ -14,6 +14,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Upload, FileText, CheckCircle2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import apiClient from "@/lib/axiosInstance";
 
 interface ImportApiDialogProps {
   onSuccess?: (data: any) => void;
@@ -69,7 +71,6 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
       } else {
         formData.append("text", text);
       }
-
       const response = await apiClient.post("/integration-upstreams/import/preview", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       }) as any;
@@ -104,7 +105,7 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
           Import API
         </Button>
       </SheetTrigger>
-      
+
       <SheetContent side="right" className="w-[400px] sm:w-[540px] z-[99999] overflow-y-auto">
         <SheetHeader className="mb-6">
           <SheetTitle>Tải lên hoặc dán nội dung</SheetTitle>
