@@ -3,7 +3,6 @@
 
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, FileText, CheckCircle2, RefreshCw } from "lucide-react";
@@ -17,7 +16,7 @@ interface ImportApiDialogProps {
 export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   // Step 1 states
   const [inputType, setInputType] = useState<"file" | "text">("file");
   const [file, setFile] = useState<File | null>(null);
@@ -89,55 +88,41 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
   };
 
   return (
-    <>
-      <Button
-        onClick={() => setOpen(true)}
-        className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 px-6 h-10"
-        iconStart={<Upload className="w-4 h-4" />}
-      >
-        Import API
-      </Button>
-
-      <ResponsiveModal
-        open={open}
-        onOpenChange={handleOpenChange}
-        title="Import API Đầu Vào"
-        description="Hỗ trợ định dạng OpenAPI 3, Swagger 2, Postman Collection, hoặc cURL."
-        maxWidth="max-w-2xl"
-        footer={
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 w-full">
-            <Button variant="outline" onClick={() => handleOpenChange(false)} className="rounded-xl w-full sm:w-auto">Hủy</Button>
-            <Button 
-              onClick={handlePreview} 
-              disabled={loading}
-              className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/25 border-0 w-full sm:w-auto"
-              iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-            >
-              Phân tích và Tự động điền
-            </Button>
+    <div className="w-full sm:w-auto">
+      {!open ? (
+        <Button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 px-6 h-10 w-full sm:w-auto"
+          iconStart={<Upload className="w-4 h-4" />}
+        >
+          Import API
+        </Button>
+      ) : (
+        <div className="mt-4 sm:mt-0 p-4 border border-violet-200 dark:border-violet-800 rounded-xl bg-white dark:bg-slate-900/50 shadow-inner w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h5 className="font-semibold text-sm">Tải lên hoặc dán nội dung</h5>
+            <Button variant="ghost" size="sm" onClick={() => setOpen(false)} className="h-8 px-2 text-slate-500">Đóng</Button>
           </div>
-        }
-      >
-        <div className="pt-4 space-y-4">
           <Tabs value={inputType} onValueChange={(v) => setInputType(v as "file" | "text")}>
             <TabsList className="grid w-full grid-cols-2 rounded-xl">
               <TabsTrigger value="file" className="rounded-lg">Upload File</TabsTrigger>
               <TabsTrigger value="text" className="rounded-lg">Dán Text</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="file" className="mt-4">
-              <div 
-                className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+              <div
+                className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <FileText className="w-10 h-10 text-slate-400 mb-2" />
+                <FileText className="w-8 h-8 text-slate-400 mb-2" />
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {file ? file.name : "Nhấn để chọn file JSON/YAML"}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">Tối đa 10MB</p>
-                <input 
-                  type="file" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  className="hidden"
                   ref={fileInputRef}
                   accept=".json,.yaml,.yml"
                   onChange={handleFileChange}
@@ -146,16 +131,28 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
             </TabsContent>
 
             <TabsContent value="text" className="mt-4">
-              <Textarea 
-                placeholder="Dán nội dung OpenAPI/Swagger, Postman Collection, hoặc cURL vào đây..."
-                className="min-h-[200px] font-mono text-sm bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl p-4"
+              <Textarea
+                placeholder="Dán nội dung OpenAPI/Swagger, Postman Collection, hoặc cURL..."
+                className="min-h-[150px] font-mono text-sm bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl p-3"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
               />
             </TabsContent>
           </Tabs>
+
+          <div className="flex justify-end mt-4">
+            <Button
+              type="button"
+              onClick={handlePreview}
+              disabled={loading}
+              className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-md border-0 w-full sm:w-auto"
+              iconStart={loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+            >
+              Phân tích và Điền
+            </Button>
+          </div>
         </div>
-      </ResponsiveModal>
-    </>
+      )}
+    </div>
   );
 }

@@ -195,8 +195,9 @@ export class ImportParserService {
         baseUrl,
         endpoints
       };
-    } catch (e) {
-      throw new BadRequestException('Lỗi khi phân tích Postman file.');
+    } catch (e: any) {
+      console.error("Postman parse error:", e);
+      throw new BadRequestException(`Lỗi khi phân tích Postman file: ${e.message || 'Lỗi không xác định'}`);
     }
   }
 
