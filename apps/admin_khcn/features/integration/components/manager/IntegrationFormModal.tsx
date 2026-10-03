@@ -116,7 +116,17 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
   };
 
   const handleImportSuccess = (data: any) => {
-    if (data.systemName) form.setValue("name", data.systemName);
+    if (data.systemName) {
+      form.setValue("name", data.systemName);
+      if (!form.getValues("code")) {
+        const generatedCode = data.systemName
+          .toUpperCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^A-Z0-9]+/g, "_")
+          .replace(/^_|_$/g, "");
+        form.setValue("code", generatedCode);
+      }
+    }
     if (data.baseUrl) form.setValue("baseUrl", data.baseUrl);
     if (data.metadata?._parsedEndpoints) {
       setParsedEndpointCount(data.metadata._parsedEndpoints.length);

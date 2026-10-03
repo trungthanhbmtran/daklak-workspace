@@ -113,21 +113,21 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
         </SheetHeader>
 
         <Tabs value={inputType} onValueChange={(v) => setInputType(v as "file" | "text")}>
-          <TabsList className="grid w-full grid-cols-2 rounded-xl">
-            <TabsTrigger value="file" className="rounded-lg">Upload File</TabsTrigger>
-            <TabsTrigger value="text" className="rounded-lg">Dán Text</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="file">Upload File</TabsTrigger>
+            <TabsTrigger value="text">Dán Text</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="file" className="mt-4">
+          <TabsContent value="file" className="mt-6">
             <div
-              className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"
+              className="border-2 border-dashed border-muted-foreground/25 rounded-md p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
-              <FileText className="w-8 h-8 text-slate-400 mb-2" />
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <FileText className="w-10 h-10 text-muted-foreground mb-4" />
+              <p className="text-sm font-medium">
                 {file ? file.name : "Nhấn để chọn file JSON/YAML"}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Tối đa 10MB</p>
+              <p className="text-xs text-muted-foreground mt-2">Tối đa 10MB</p>
               <input
                 type="file"
                 className="hidden"
@@ -138,10 +138,10 @@ export function ImportApiDialog({ onSuccess }: ImportApiDialogProps = {}) {
             </div>
           </TabsContent>
 
-          <TabsContent value="text" className="mt-4">
+          <TabsContent value="text" className="mt-6">
             <Textarea
               placeholder="Dán nội dung OpenAPI/Swagger, Postman Collection, hoặc cURL..."
-              className="min-h-[250px] font-mono text-sm bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl p-3"
+              className="min-h-[300px] font-mono text-sm resize-none"
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
