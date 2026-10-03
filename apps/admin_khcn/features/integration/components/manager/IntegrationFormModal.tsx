@@ -18,6 +18,7 @@ import { BasicInfoFields } from "./form/BasicInfoFields";
 import { ProtocolFields } from "./form/ProtocolFields";
 import { AuthFields } from "./form/AuthFields";
 import { RawConfigFields } from "./form/RawConfigFields";
+import { ImportApiDialog } from "../import/ImportApiDialog";
 
 export interface IntegrationFormModalRef {
   openCreate: (initialData?: any) => void;
@@ -114,6 +115,22 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     form.reset();
   };
 
+  const handleImportSuccess = (data: any) => {
+    if (data.systemName) form.setValue("name", data.systemName);
+    if (data.baseUrl) form.setValue("baseUrl", data.baseUrl);
+    if (data.metadata?._parsedEndpoints) {
+      setParsedEndpointCount(data.metadata._parsedEndpoints.length);
+      
+      let existingRaw = {};
+      try { existingRaw = JSON.parse(form.getValues("rawConfig") || "{}"); } catch(e) {}
+      
+      form.setValue("rawConfig", JSON.stringify({
+        ...existingRaw,
+        _parsedEndpoints: data.metadata._parsedEndpoints
+      }, null, 2));
+    }
+  };
+
   const onSubmit = (data: IntegrationFormValues) => {
     let metadataObj: any = {};
     if (data.isRawMode) {
@@ -181,8 +198,8 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     <ResponsiveModal
       open={isOpen}
       onOpenChange={(v) => { if (!v) handleClose(); else setIsOpen(v); }}
-      maxWidth="max-w-4xl"
-      contentClassName="w-[95vw] max-h-[90vh]"
+      maxWidth="max-w-[85vw]"
+      contentClassName="max-h-[90vh]"
       icon={<Server className="w-6 h-6 text-violet-600" />}
       title={editingItem ? "Cập nhật cấu hình API" : "Thêm mới API Đầu Vào"}
       description="Định nghĩa các thông số kỹ thuật (URL, Cặp Key, Token, Endpoints) để kết nối và xác thực với hệ thống ngoài (LGSP/NDXP)."
@@ -199,6 +216,16 @@ export const IntegrationFormModal = forwardRef<IntegrationFormModalRef>((props, 
     >
       <Form {...form}>
         <form id="integration-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {!editingItem && (
+            <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl border border-violet-200 bg-violet-50 dark:border-violet-900/50 dark:bg-violet-900/10 gap-4">
+              <div>
+                <h4 className="text-sm font-bold text-violet-800 dark:text-violet-400">Khởi tạo nhanh từ File cấu hình</h4>
+                <p className="text-xs text-violet-600 dark:text-violet-500 mt-0.5">Hỗ trợ định dạng OpenAPI, Swagger, Postman, cURL để tự động điền form.</p>
+              </div>
+              <ImportApiDialog onSuccess={handleImportSuccess} />
+            </div>
+          )}
+
           <BasicInfoFields />
 
           <FormField

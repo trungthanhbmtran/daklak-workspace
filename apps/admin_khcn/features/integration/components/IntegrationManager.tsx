@@ -35,30 +35,29 @@ export function IntegrationManager() {
   const explorerRef = useRef<EndpointExplorerModalRef>(null);
 
   const handleOpenCreate = () => modalRef.current?.openCreate();
-  const handleImportSuccess = (initialData: any) => modalRef.current?.openCreate(initialData);
   const handleOpenEdit = (item: IntegrationConfig) => modalRef.current?.openEdit(item);
   const handleOpenExplorer = (item: IntegrationConfig) => explorerRef.current?.open(item);
 
   return (
-    <div className="w-full flex flex-col space-y-6">
+    <div className="w-full min-h-screen flex flex-col space-y-8 bg-slate-50/50 dark:bg-[#0B1120]">
       <IntegrationManagerHeader 
         search={search}
         setSearch={setSearch}
         onOpenCreate={handleOpenCreate}
-        onImportSuccess={handleImportSuccess}
       />
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-1">
         {isLoading ? (
-          Array(3).fill(0).map((_, i) => (
-            <div key={i} className="h-64 rounded-2xl bg-slate-100 dark:bg-slate-800/50 animate-pulse border border-slate-200 dark:border-slate-800" />
+          Array(4).fill(0).map((_, i) => (
+            <div key={i} className="h-64 rounded-3xl bg-white/40 dark:bg-slate-800/20 backdrop-blur-md animate-pulse border border-slate-200/50 dark:border-slate-800/50" />
           ))
         ) : integrations?.length === 0 ? (
-          <div className="col-span-full py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
-            <Server className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-1">Chưa có cấu hình API nào</h3>
-            <p className="text-slate-500 text-sm">Nhấn "Thêm API Đầu Vào" để bắt đầu cấu hình kết nối.</p>
+          <div className="col-span-full py-24 text-center bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-dashed border-violet-200 dark:border-violet-900/50 relative overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-violet-400/10 rounded-full blur-3xl pointer-events-none" />
+            <Server className="w-16 h-16 text-violet-300 dark:text-violet-600/50 mx-auto mb-6 drop-shadow-md" />
+            <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 mb-2">Chưa có kết nối nào</h3>
+            <p className="text-slate-500 font-medium">Bắt đầu bằng việc thêm một cấu hình API mới.</p>
           </div>
         ) : currentItems.map((item) => (
           <IntegrationCard
@@ -70,11 +69,13 @@ export function IntegrationManager() {
         ))}
       </div>
 
-      <IntegrationPagination 
-        currentPage={currentPage}
-        totalPages={totalPages}
-        setCurrentPage={setCurrentPage}
-      />
+      <div className="pt-4">
+        <IntegrationPagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+        />
+      </div>
 
       <IntegrationFormModal ref={modalRef} />
       <EndpointExplorerModal ref={explorerRef} />

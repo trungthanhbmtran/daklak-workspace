@@ -38,74 +38,84 @@ export const IntegrationCard = React.memo(function IntegrationCard({ item, onEdi
   }, [item.id, toggleActiveMutation]);
 
   return (
-    <Card className="group relative flex flex-col hover:shadow-lg transition-all duration-300 hover:border-violet-300 dark:hover:border-violet-700/50">
-      <CardHeader className="flex flex-row items-center gap-4 pb-4 space-y-0">
-        <div className="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-900/30 border border-violet-100 dark:border-violet-800/50 flex shrink-0 items-center justify-center">
-          <Activity className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+    <Card className="group relative flex flex-col hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-500 border border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl overflow-hidden transform hover:-translate-y-1">
+      {/* Hover Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+      <CardHeader className="relative flex flex-row items-center gap-4 pb-4 space-y-0 z-10">
+        <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/30 dark:to-fuchsia-900/30 border border-violet-100/50 dark:border-violet-800/30 flex shrink-0 items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+          <Activity className="w-7 h-7 text-violet-600 dark:text-violet-400 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors" />
         </div>
         <div className="flex flex-col gap-1.5 overflow-hidden">
-          <CardTitle className="text-lg break-words">{item.name}</CardTitle>
-          <CardDescription className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md w-fit break-all">
-            {item.code}
-          </CardDescription>
+          <CardTitle className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 truncate">
+            {item.name}
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium font-mono text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2 py-1 rounded-md truncate">
+              {item.code}
+            </span>
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-4">
-        <div className="flex flex-col space-y-2 text-sm text-slate-600 dark:text-slate-400">
+      <CardContent className="relative flex-1 space-y-5 z-10">
+        <div className="space-y-3 text-sm">
           {item.baseUrl && (
-            <div className="flex items-start gap-2 overflow-hidden">
-              <span className="font-medium shrink-0">Base URL:</span>
-              <span className="break-all text-violet-600 dark:text-violet-400" title={item.baseUrl}>
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
+              <Plug className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <span className="break-all text-slate-600 dark:text-slate-300 font-mono text-xs">
                 {item.baseUrl}
               </span>
             </div>
           )}
           
-          <div className="flex items-center gap-2">
-            <span className="font-medium shrink-0">Protocol:</span>
-            <Badge variant="outline" className="text-xs bg-slate-50 dark:bg-slate-800">
-              {item.protocol || "N/A"}
-            </Badge>
-            <span className="font-medium shrink-0 ml-2">Auth:</span>
-            <Badge variant="outline" className="text-xs bg-slate-50 dark:bg-slate-800">
-              {item.authType || "N/A"}
-            </Badge>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-800">
+              <span className="text-xs font-semibold text-slate-500">Protocol</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">{item.protocol || "N/A"}</span>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-800">
+              <span className="text-xs font-semibold text-slate-500">Auth</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">{item.authType || "N/A"}</span>
+            </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span className="font-medium shrink-0">Trạng thái:</span>
-            <Badge variant={item.isActive ? "default" : "secondary"} className={item.isActive ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" : ""}>
+          <div className="flex items-center gap-2 pt-1">
+            <div className={`flex items-center justify-center w-6 h-6 rounded-full ${item.isActive ? "bg-emerald-100 dark:bg-emerald-500/20" : "bg-slate-100 dark:bg-slate-800"}`}>
+              <ShieldCheck className={`w-3.5 h-3.5 ${item.isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
+            </div>
+            <span className={`text-sm font-semibold ${item.isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500"}`}>
               {item.isActive ? "Đang hoạt động" : "Vô hiệu hóa"}
-            </Badge>
+            </span>
           </div>
         </div>
 
-        <div className="text-xs text-slate-500 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-          <span>Cập nhật lần cuối:</span>
-          <span className="font-medium">{formatDate(item.updatedAt, "dd/MM/yyyy HH:mm")}</span>
+        <div className="flex justify-between items-center text-[11px] font-medium text-slate-400 uppercase tracking-wider pt-2 border-t border-slate-100/50 dark:border-slate-800/50">
+          <span>Cập nhật</span>
+          <span>{formatDate(item.updatedAt, "dd/MM/yyyy HH:mm")}</span>
         </div>
       </CardContent>
 
-      <CardFooter className="border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <CardFooter className="relative border-t border-slate-100/80 dark:border-slate-800/80 p-4 bg-slate-50/30 dark:bg-slate-900/30 flex items-center justify-between z-10">
+        <div className="flex items-center gap-3">
           <Switch
             checked={item.isActive}
             onCheckedChange={() => handleToggleActive(item.isActive)}
+            className="data-[state=checked]:bg-emerald-500"
           />
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Hoạt động</span>
         </div>
-        <div className="flex gap-1 -mr-2">
+        <div className="flex gap-1">
           {onExplore && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors" onClick={() => onExplore(item)} title="Quản lý Endpoints">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-500/20 transition-all" onClick={() => onExplore(item)} title="Quản lý Endpoints">
               <Plug className="w-4 h-4" />
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" onClick={() => onEdit(item)} title="Sửa thông tin">
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-all" onClick={() => onEdit(item)} title="Sửa thông tin">
             <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" onClick={handleDelete} title="Xóa" iconStart={<Trash2 className="w-4 h-4" />}></Button>
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all" onClick={handleDelete} title="Xóa">
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </CardFooter>
     </Card>
