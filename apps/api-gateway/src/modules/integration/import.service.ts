@@ -134,7 +134,7 @@ export class ImportParserService {
       collection.forEachItem((item) => {
         const req = item.request;
         if (req) {
-          const rawUrl = typeof req.url === 'string' ? req.url : req.url?.getRaw() || '';
+          const rawUrl = typeof req.url === 'string' ? req.url : req.url?.toString() || '';
           if (!baseUrl && rawUrl.startsWith('http')) {
              const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
              if (match) baseUrl = match[1];
