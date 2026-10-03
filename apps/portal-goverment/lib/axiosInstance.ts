@@ -1,8 +1,9 @@
 import axios, { AxiosError } from "axios";
 import { API_BASE_URL, API_TIMEOUT_MS } from "@/config/constants";
+import { installSessionRecovery } from "./session-recovery";
 
 // 1. KHỞI TẠO AXIOS
-const apiClient = axios.create({
+const options = {
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT_MS,
   // CỰC KỲ QUAN TRỌNG: Trình duyệt sẽ tự động đính kèm HttpOnly Cookie vào request
@@ -10,7 +11,9 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-});
+};
+const apiClient = axios.create(options);
+const sessionTransport = axios.create(options);
 
 // Helper to extract cookies in browser
 const getCookie = (name: string): string | null => {
@@ -51,38 +54,50 @@ apiClient.interceptors.request.use(
 );
 
 
-// 3. RESPONSE INTERCEPTOR (Chỉ để bắt lỗi và bóc data)
-apiClient.interceptors.response.use(
-  (response) => {
-    // Tự động bóc lớp data của Axios
-    return response.data;
-  },
-  async (error: AxiosError) => {
-    if (!error.response) {
-      console.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền.");
-      return Promise.reject(error);
-    }
-
-    const status = error.response.status;
-    const data: any = error.response.data;
-
-    switch (status) {
-      case 401:
-        console.warn("Phiên làm việc không hợp lệ hoặc đã hết hạn.");
-        break;
-      case 403:
-        console.error("Bạn không có quyền truy cập tài nguyên này.");
-        break;
-      case 500:
-        console.error(data?.message || "Lỗi hệ thống (500).");
-        break;
-      default:
-        if (data?.message) console.error(data.message);
-        break;
-    }
-
-    return Promise.reject(error);
+// 3. XỬ LÝ LỖI (Error Handler)
+function showError(error: AxiosError) {
+  if (!error.response) {
+    console.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền.");
+    return;
   }
-);
+
+  const data = error.response.data as { message?: string } | undefined;
+  const status = error.response.status;
+
+  switch (status) {
+    case 403:
+      console.error("Bạn không có quyền truy cập tài nguyên này.");
+      return;
+    case 500:
+      console.error(data?.message || "Lỗi hệ thống (500).");
+      return;
+    default:
+      if (data?.message) {
+        console.error(data.message);
+      }
+      return;
+  }
+}
+
+// 4. CÀI ĐẶT SESSION RECOVERY
+const sessionLifecycle = installSessionRecovery(apiClient, sessionTransport, {
+  onError: showError,
+  onExpired: () => {
+    if (typeof window === "undefined") return;
+    if (["/login"].includes(window.location.pathname.replace(/\/$/, ""))) return;
+
+    alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+    const callback = window.location.pathname + window.location.search;
+    window.location.replace("/login?callbackUrl=" + encodeURIComponent(callback));
+  },
+});
+
+export async function clearBrowserSession() {
+  await sessionLifecycle.logout();
+}
+
+export function loginBrowserSession(credentials: any) {
+  return sessionLifecycle.login(() => apiClient.post("/auth/login", credentials));
+}
 
 export default apiClient;
