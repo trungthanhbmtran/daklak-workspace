@@ -42,4 +42,21 @@ logs/
 
 # AI Agents & Docs
 .agents/
+!.agents/
+.agents/*
+!.agents/AGENTS.md
+!.agents/agents/
+.agents/agents/*
+!.agents/agents/chatgpt-planner.md
+!.agents/agents/chatgpt-planner.toml
+!.agents/agents/gemini-executor.md
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/plan-critique/
+.agents/skills/plan-critique/*
+!.agents/skills/plan-critique/SKILL.md
 docs/
+!docs/
+docs/*
+!docs/plans/
+!docs/plans/workflow-user-designed-processes.md

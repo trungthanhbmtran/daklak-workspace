@@ -6,18 +6,44 @@ import "google/protobuf/struct.proto";
 import "common/common.proto";
 
 service WorkflowService {
+  // =========================================================================
+  // DEFINITION MANAGEMENT (Backward-compat: giữ nguyên field numbers cũ)
+  // =========================================================================
   rpc CreateWorkflow (CreateWorkflowRequest) returns (WorkflowResponse);
   rpc UpdateWorkflow (UpdateWorkflowRequest) returns (WorkflowResponse);
   rpc FindOneWorkflow (FindOneWorkflowRequest) returns (WorkflowResponse);
   rpc ListWorkflows (ListWorkflowsRequest) returns (ListWorkflowsResponse);
   rpc DeleteWorkflow (DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
-
   rpc FindWorkflowByCode (FindWorkflowByCodeRequest) returns (WorkflowResponse);
   rpc ListModules (common.EmptyRequest) returns (ListModulesResponse);
   rpc PublishWorkflow (PublishWorkflowRequest) returns (WorkflowResponse);
   rpc ApplyModule (ApplyModuleRequest) returns (WorkflowResponse);
 
-  // Execution Engine
+  // =========================================================================
+  // PROCESS CATALOG (New — additive)
+  // =========================================================================
+  rpc RegisterProcessType (RegisterProcessTypeRequest) returns (ProcessTypeResponse);
+  rpc GetProcessType (GetProcessTypeRequest) returns (ProcessTypeResponse);
+  rpc ListProcessTypes (ListProcessTypesRequest) returns (ListProcessTypesResponse);
+
+  // =========================================================================
+  // BINDING MANAGEMENT (New — additive)
+  // =========================================================================
+  rpc CreateProcessBinding (CreateProcessBindingRequest) returns (ProcessBindingResponse);
+  rpc UpdateProcessBinding (UpdateProcessBindingRequest) returns (ProcessBindingResponse);
+  rpc GetProcessBinding (GetProcessBindingRequest) returns (ProcessBindingResponse);
+  rpc ListProcessBindings (ListProcessBindingsRequest) returns (ListProcessBindingsResponse);
+  rpc DeactivateProcessBinding (DeactivateProcessBindingRequest) returns (ProcessBindingResponse);
+  rpc ResolveBinding (ResolveBindingRequest) returns (ResolveBindingResponse);
+
+  // =========================================================================
+  // DEFINITION VALIDATION & PUBLISH (New — additive)
+  // =========================================================================
+  rpc ValidateWorkflowDefinition (ValidateWorkflowDefinitionRequest) returns (ValidateWorkflowDefinitionResponse);
+
+  // =========================================================================
+  // EXECUTION ENGINE (Backward-compat + extend)
+  // =========================================================================
   rpc StartWorkflow (StartWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc TriggerWorkflow (TriggerWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc ResumeWorkflow (ResumeWorkflowRequest) returns (WorkflowInstanceResponse);
@@ -28,7 +54,22 @@ service WorkflowService {
   rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse);
   rpc GetInitialNode (GetInitialNodeRequest) returns (GetInitialNodeResponse);
   rpc GetNextNode (GetNextNodeRequest) returns (GetNextNodeResponse);
-  // API Integrations
+
+  // Start by processType (New — resolver-based, replaces hardcoded workflow code)
+  rpc StartByProcessType (StartByProcessTypeRequest) returns (WorkflowInstanceResponse);
+
+  // Submit action (New — OCC-safe, creates command)
+  rpc SubmitAction (SubmitActionRequest) returns (SubmitActionResponse);
+
+  // Domain ACK (New — domain service calls this after processing command)
+  rpc AcknowledgeCommand (AcknowledgeCommandRequest) returns (AcknowledgeCommandResponse);
+
+  // Instance history (New — additive; gateway /instances/:id/logs)
+  rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
+
+  // =========================================================================
+  // API INTEGRATIONS (Backward-compat)
+  // =========================================================================
   rpc CreateIntegration (CreateIntegrationRequest) returns (IntegrationResponse);
   rpc UpdateIntegration (UpdateIntegrationRequest) returns (IntegrationResponse);
   rpc FindOneIntegration (FindOneIntegrationRequest) returns (IntegrationResponse);
@@ -36,6 +77,242 @@ service WorkflowService {
   rpc DeleteIntegration (DeleteIntegrationRequest) returns (DeleteIntegrationResponse);
 }
 
+// =============================================================================
+// PROCESS CATALOG MESSAGES
+// =============================================================================
+
+message RegisterProcessTypeRequest {
+  string code = 1;
+  string name = 2;
+  string description = 3;
+  string ownerService = 4;
+  repeated string validTriggers = 5;
+  repeated string validActions = 6;
+  // OBSERVE | ENFORCE
+  string enforcementMode = 7;
+}
+
+message GetProcessTypeRequest {
+  string code = 1;
+}
+
+message ListProcessTypesRequest {
+  bool activeOnly = 1;
+}
+
+message ProcessTypeResponse {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  string ownerService = 5;
+  repeated string validTriggers = 6;
+  repeated string validActions = 7;
+  string enforcementMode = 8;
+  bool isActive = 9;
+}
+
+message ListProcessTypesResponse {
+  repeated ProcessTypeResponse data = 1;
+}
+
+// =============================================================================
+// BINDING MESSAGES
+// =============================================================================
+
+message CreateProcessBindingRequest {
+  string processTypeCode = 1;
+  string definitionId = 2;
+  string pinnedVersionId = 3;
+  string organizationId = 4;
+  string trigger = 5;
+  google.protobuf.Struct criteria = 6;
+  int32 priority = 7;
+  string effectiveFrom = 8;
+  string effectiveTo = 9;
+  string createdBy = 10;
+  string reason = 11;
+}
+
+message UpdateProcessBindingRequest {
+  string id = 1;
+  string pinnedVersionId = 2;
+  string status = 3;
+  int32 priority = 4;
+  string effectiveTo = 5;
+  string reason = 6;
+  string updatedBy = 7;
+}
+
+message GetProcessBindingRequest {
+  string id = 1;
+}
+
+message ListProcessBindingsRequest {
+  string processTypeCode = 1;
+  string organizationId = 2;
+  string status = 3;
+  int32 skip = 4;
+  int32 take = 5;
+}
+
+message DeactivateProcessBindingRequest {
+  string id = 1;
+  string actorId = 2;
+  string reason = 3;
+}
+
+message ProcessBindingResponse {
+  string id = 1;
+  string processTypeCode = 2;
+  string definitionId = 3;
+  string pinnedVersionId = 4;
+  string organizationId = 5;
+  string trigger = 6;
+  int32 priority = 7;
+  string status = 8;
+  string effectiveFrom = 9;
+  string effectiveTo = 10;
+  string createdBy = 11;
+  string createdAt = 12;
+}
+
+message ListProcessBindingsResponse {
+  repeated ProcessBindingResponse data = 1;
+  common.PaginationMeta meta = 2;
+}
+
+message ResolveBindingRequest {
+  string processTypeCode = 1;
+  string organizationId = 2;
+  string trigger = 3;
+  google.protobuf.Struct context = 4;
+}
+
+message ResolveBindingResponse {
+  bool found = 1;
+  string bindingId = 2;
+  string definitionId = 3;
+  string pinnedVersionId = 4;
+  // reason why not found (e.g., NO_BINDING, AMBIGUOUS, INACTIVE)
+  string reason = 5;
+}
+
+// =============================================================================
+// VALIDATION MESSAGES
+// =============================================================================
+
+message ValidateWorkflowDefinitionRequest {
+  string definitionId = 1;
+  // optional: validate a specific version (defaults to latest DRAFT)
+  string versionId = 2;
+  // actor performing validation
+  string actorId = 3;
+}
+
+message ValidationError {
+  string nodeId = 1;
+  string field = 2;
+  string code = 3;
+  string message = 4;
+}
+
+message ValidateWorkflowDefinitionResponse {
+  bool valid = 1;
+  repeated ValidationError errors = 2;
+}
+
+// =============================================================================
+// START BY PROCESS TYPE (New)
+// =============================================================================
+
+message StartByProcessTypeRequest {
+  string processTypeCode = 1;
+  string organizationId = 2;
+  string trigger = 3;
+  string businessId = 4;
+  string businessType = 5;
+  string actorId = 6;
+  string correlationId = 7;
+  string idempotencyKey = 8;
+  google.protobuf.Struct initialContext = 9;
+}
+
+// =============================================================================
+// SUBMIT ACTION (New — OCC-safe)
+// =============================================================================
+
+message SubmitActionRequest {
+  string instanceId = 1;
+  string actionName = 2;
+  string actorId = 3;
+  string organizationId = 4;
+  string correlationId = 5;
+  // expected OCC version of the instance
+  int32 expectedVersion = 6;
+  google.protobuf.Struct actionData = 7;
+  string note = 8;
+  // Client-stable key: gửi lại cùng key => trả command cũ (duplicate=true), không tạo mới.
+  string idempotencyKey = 9;
+}
+
+message SubmitActionResponse {
+  bool accepted = 1;
+  // PENDING (command created, waiting for domain ack) | COMPLETED | FAILED
+  string status = 2;
+  string commandId = 3;
+  string reason = 4;
+  int32 newVersion = 5;
+  bool duplicate = 6;
+}
+
+// =============================================================================
+// ACKNOWLEDGE COMMAND (New)
+// =============================================================================
+
+message AcknowledgeCommandRequest {
+  string commandId = 1;
+  string instanceId = 2;
+  // SUCCESS | FAILURE
+  string result = 3;
+  int32 entityVersion = 4;
+  google.protobuf.Struct payload = 5;
+  string errorMessage = 6;
+}
+
+message AcknowledgeCommandResponse {
+  bool accepted = 1;
+  string reason = 2;
+  bool duplicate = 3;
+}
+
+// =============================================================================
+// INSTANCE HISTORY (New)
+// =============================================================================
+
+message GetLogsRequest {
+  string instanceId = 1;
+  // Org scope do gateway inject từ JWT; rỗng = không giới hạn (chỉ dùng nội bộ).
+  string organizationId = 2;
+}
+
+message WorkflowLogEntry {
+  string id = 1;
+  string fromNodeId = 2;
+  string toNodeId = 3;
+  string action = 4;
+  string performedBy = 5;
+  string performedAt = 6;
+  string comment = 7;
+}
+
+message GetLogsResponse {
+  repeated WorkflowLogEntry logs = 1;
+}
+
+// =============================================================================
+// EXISTING MESSAGES (Backward-compat — field numbers preserved)
+// =============================================================================
 
 message ListModulesResponse {
   repeated WorkflowModule data = 1;
@@ -51,6 +328,8 @@ message WorkflowModule {
 
 message PublishWorkflowRequest {
   string id = 1;
+  // New optional field: actor performing publish
+  string actorId = 2;
 }
 
 message ApplyModuleRequest {
@@ -117,6 +396,9 @@ message WorkflowResponse {
   string updatedAt = 9;
   WorkflowDefinition definition = 10;
   string trigger = 11;
+  // New fields (additive, field numbers after 11)
+  string publishedBy = 12;
+  string publishedAt = 13;
 }
 
 message WorkflowDefinition {
@@ -145,8 +427,6 @@ message WorkflowNode {
   int32 order = 8;
   repeated AssignmentRule assignments = 9;
   repeated NodeAction actions = 10;
-  
-  // React Flow Properties
   Position position = 11;
   google.protobuf.Struct data = 12;
   float width = 13;
@@ -165,8 +445,6 @@ message WorkflowEdge {
   int32 priority = 5;
   bool defaultFlow = 6;
   string propertiesJson = 7;
-  
-  // React Flow Properties
   string source = 8;
   string target = 9;
   string sourceHandle = 10;
@@ -260,6 +538,7 @@ message ResumeWorkflowRequest {
 
 message GetInstanceRequest {
   string id = 1;
+  string organizationId = 2;
 }
 
 message WorkflowInstanceResponse {
@@ -272,6 +551,19 @@ message WorkflowInstanceResponse {
   string updatedAt = 7;
   string workflowName = 8;
   repeated WorkflowTask tasks = 9;
+  // New additive fields
+  string processType = 10;
+  string businessId = 11;
+  string correlationId = 12;
+  repeated string allowedActions = 13;
+  // OCC version client phải gửi lại trong SubmitAction.expectedVersion
+  int32 stateVersion = 14;
+  string organizationId = 15;
+  string businessType = 16;
+  // Trạng thái command gần nhất (PENDING | SENT | ACKED | FAILED) để UI hiển thị tiến trình
+  string lastCommandId = 17;
+  string lastCommandStatus = 18;
+  string lastCommandError = 19;
 }
 
 message ListInstancesRequest {
@@ -280,6 +572,9 @@ message ListInstancesRequest {
   string workflowId = 3;
   string status = 4;
   string search = 5;
+  string organizationId = 6;
+  string processType = 7;
+  string businessId = 8;
 }
 
 message ListInstancesResponse {
@@ -320,7 +615,7 @@ message GetNextNodeResponse {
 }
 
 // =============================================================================
-// API INTEGRATION MESSAGES
+// API INTEGRATION MESSAGES (Backward-compat)
 // =============================================================================
 
 message CreateIntegrationRequest {

@@ -279,9 +279,35 @@ exports.Prisma.DocumentCabinetScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.OutboxEventScalarFieldEnum = {
+  id: 'id',
+  workflowInstanceId: 'workflowInstanceId',
+  processVersion: 'processVersion',
+  nodeId: 'nodeId',
+  commandType: 'commandType',
+  payload: 'payload',
+  status: 'status',
+  retryCount: 'retryCount',
+  createdAt: 'createdAt',
+  processedAt: 'processedAt',
+  errorReason: 'errorReason'
+};
+
+exports.Prisma.ProcessedCommandScalarFieldEnum = {
+  commandId: 'commandId',
+  workflowInstanceId: 'workflowInstanceId',
+  processedAt: 'processedAt',
+  action: 'action',
+  status: 'status'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.NullsOrder = {
@@ -409,6 +435,33 @@ exports.Prisma.DocumentCabinetOrderByRelevanceFieldEnum = {
   tags: 'tags'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.OutboxEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  workflowInstanceId: 'workflowInstanceId',
+  nodeId: 'nodeId',
+  commandType: 'commandType',
+  status: 'status',
+  errorReason: 'errorReason'
+};
+
+exports.Prisma.ProcessedCommandOrderByRelevanceFieldEnum = {
+  commandId: 'commandId',
+  workflowInstanceId: 'workflowInstanceId',
+  action: 'action',
+  status: 'status'
+};
+
 
 exports.Prisma.ModelName = {
   Consultation: 'Consultation',
@@ -420,7 +473,9 @@ exports.Prisma.ModelName = {
   AdministrativeProcedure: 'AdministrativeProcedure',
   OneStopDossier: 'OneStopDossier',
   DossierComponent: 'DossierComponent',
-  DocumentCabinet: 'DocumentCabinet'
+  DocumentCabinet: 'DocumentCabinet',
+  OutboxEvent: 'OutboxEvent',
+  ProcessedCommand: 'ProcessedCommand'
 };
 
 /**

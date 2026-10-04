@@ -5,11 +5,34 @@ generator client {
   moduleFormat = "cjs"
 }
 
-// LƯU Ý Prisma 7.x:
-// - Datasource URL KHÔNG được khai báo trong schema.prisma.
-// - URL được quản lý hoàn toàn bởi `prisma.config.ts` (datasource.url: env("DATABASE_URL")).
+// LUU Y Prisma 7.x:
+// - Datasource URL KHONG duoc khai bao trong schema.prisma.
+// - URL duoc quan ly hoan toan boi `prisma.config.ts`.
 datasource db {
   provider = "mysql"
+}
+
+// =============================================================================
+// PROCESS CATALOG
+// =============================================================================
+
+model ProcessType {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String
+  description   String?  @db.Text
+  ownerService  String   @map("owner_service")
+  validTriggers Json     @map("valid_triggers")
+  validActions  Json     @map("valid_actions")
+  enforcementMode String @default("OBSERVE") @map("enforcement_mode")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  bindings ProcessBinding[]
+
+  @@index([isActive])
+  @@map("process_types")
 }
 
 // =============================================================================
@@ -26,25 +49,60 @@ model ProcessDefinition {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   versions ProcessVersion[]
+  bindings ProcessBinding[]
 
   @@index([isActive])
   @@map("process_definitions")
 }
 
 model ProcessVersion {
-  id           String   @id @default(cuid())
-  definitionId String   @map("definition_id")
-  version      Int
-  status       String // DRAFT | PUBLISHED | DEPRECATED
-  graph        Json
-  createdAt    DateTime @default(now()) @map("created_at")
+  id               String    @id @default(cuid())
+  definitionId     String    @map("definition_id")
+  version          Int
+  status           String
+  graph            Json
+  compiledGraph    Json?     @map("compiled_graph")
+  validationErrors Json?     @map("validation_errors")
+  publishedBy      String?   @map("published_by")
+  publishedAt      DateTime? @map("published_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
-  definition ProcessDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
-  instances  ProcessInstance[]
+  definition    ProcessDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  instances     ProcessInstance[]
+  bindings      ProcessBinding[]
 
   @@unique([definitionId, version])
   @@index([definitionId, status])
   @@map("process_versions")
+}
+
+model ProcessBinding {
+  id              String    @id @default(cuid())
+  processTypeId   String    @map("process_type_id")
+  definitionId    String    @map("definition_id")
+  pinnedVersionId String?   @map("pinned_version_id")
+  organizationId  String?   @map("organization_id")
+  trigger         String
+  criteria        Json?
+  priority        Int       @default(100)
+  status          String    @default("ACTIVE")
+  effectiveFrom   DateTime? @map("effective_from")
+  effectiveTo     DateTime? @map("effective_to")
+  createdBy       String    @map("created_by")
+  approvedBy      String?   @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  reason          String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  processType   ProcessType       @relation(fields: [processTypeId], references: [id])
+  definition    ProcessDefinition @relation(fields: [definitionId], references: [id])
+  pinnedVersion ProcessVersion?   @relation(fields: [pinnedVersionId], references: [id])
+  instances     ProcessInstance[]
+
+  @@index([processTypeId, status, organizationId])
+  @@index([definitionId])
+  @@map("process_bindings")
 }
 
 model ProcessInstance {
@@ -53,25 +111,36 @@ model ProcessInstance {
   versionId       String    @map("version_id")
   businessKey     String?   @map("business_key")
   organizationId  String    @map("organization_id")
-  status          String // RUNNING | COMPLETED | FAILED | CANCELED
+  status          String
   currentNodeCode String?   @map("current_node_code")
   variables       Json?
   startedBy       String    @map("started_by")
   startedAt       DateTime  @default(now()) @map("started_at")
   endedAt         DateTime? @map("ended_at")
+  stateVersion    Int       @default(1) @map("state_version")
 
-  // OCC: Trạng thái version dùng để check Conflict khi Data Plane sync lên
-  stateVersion Int @default(1) @map("state_version")
+  // Expand fields (nullable)
+  processType    String?   @map("process_type")
+  businessType   String?   @map("business_type")
+  businessId     String?   @map("business_id")
+  bindingId      String?   @map("binding_id")
+  correlationId  String?   @map("correlation_id")
+  idempotencyKey String?   @unique @map("idempotency_key")
+  actorId        String?   @map("actor_id")
 
   version     ProcessVersion       @relation(fields: [versionId], references: [id])
+  binding     ProcessBinding?      @relation(fields: [bindingId], references: [id])
   tasks       WorkflowTask[]
   transitions WorkflowTransition[]
   events      WorkflowEvent[]
   messages    WorkflowMessage[]
+  commands    WorkflowCommand[]
 
   @@index([organizationId, status])
   @@index([businessKey])
   @@index([startedAt])
+  @@index([processType, businessId])
+  @@index([correlationId])
   @@map("process_instances")
 }
 
@@ -82,7 +151,7 @@ model WorkflowTask {
   title        String
   assigneeId   String?   @map("assignee_id")
   assigneeUnit String?   @map("assignee_unit")
-  status       String // PENDING | IN_PROGRESS | COMPLETED | CANCELED
+  status       String
   dueAt        DateTime? @map("due_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   completedAt  DateTime? @map("completed_at")
@@ -96,18 +165,16 @@ model WorkflowTask {
 }
 
 model WorkflowTransition {
-  id           String   @id @default(cuid())
-  instanceId   String   @map("instance_id")
-  fromNodeCode String?  @map("from_node_code")
-  toNodeCode   String   @map("to_node_code")
-  action       String
-  performedBy  String   @map("performed_by")
-  performedAt  DateTime @default(now()) @map("performed_at")
-  comment      String?  @db.Text
-  payload      Json?
-
-  // OCC: Version mà Local Runtime đang giữ khi thực hiện action này
-  expectedVersion Int? @map("expected_version")
+  id              String   @id @default(cuid())
+  instanceId      String   @map("instance_id")
+  fromNodeCode    String?  @map("from_node_code")
+  toNodeCode      String   @map("to_node_code")
+  action          String
+  performedBy     String   @map("performed_by")
+  performedAt     DateTime @default(now()) @map("performed_at")
+  comment         String?  @db.Text
+  payload         Json?
+  expectedVersion Int?     @map("expected_version")
 
   instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 
@@ -120,7 +187,7 @@ model WorkflowEvent {
   instanceId  String    @map("instance_id")
   eventType   String    @map("event_type")
   payload     Json
-  status      String // PENDING | PROCESSED | FAILED
+  status      String
   retryCount  Int       @default(0) @map("retry_count")
   nextRetryAt DateTime? @map("next_retry_at")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -130,6 +197,46 @@ model WorkflowEvent {
   @@index([instanceId, status])
   @@index([status, nextRetryAt])
   @@map("workflow_events")
+}
+
+model WorkflowCommand {
+  id            String    @id @default(cuid())
+  instanceId    String    @map("instance_id")
+  commandType   String    @map("command_type")
+  targetService String    @map("target_service")
+  payload       Json
+  status        String    @default("PENDING")
+  correlationId String?   @map("correlation_id")
+  retryCount    Int       @default(0) @map("retry_count")
+  maxRetries    Int       @default(3) @map("max_retries")
+  nextRetryAt   DateTime? @map("next_retry_at")
+  error         String?   @db.Text
+  createdAt     DateTime  @default(now()) @map("created_at")
+  sentAt        DateTime? @map("sent_at")
+  ackedAt       DateTime? @map("acked_at")
+  // Client-supplied key: cùng key => trả lại command cũ, không tạo command mới.
+  idempotencyKey String?  @unique @map("idempotency_key")
+  actorId        String?  @map("actor_id")
+
+  instance ProcessInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextRetryAt])
+  @@index([instanceId, status])
+  @@map("workflow_commands")
+}
+
+model DomainAck {
+  id            String   @id @default(cuid())
+  commandId     String   @unique @map("command_id")
+  instanceId    String   @map("instance_id")
+  result        String
+  entityVersion Int?     @map("entity_version")
+  payload       Json?
+  errorMessage  String?  @db.Text @map("error_message")
+  receivedAt    DateTime @default(now()) @map("received_at")
+
+  @@index([instanceId])
+  @@map("domain_acks")
 }
 
 model WorkflowMessage {
@@ -159,13 +266,13 @@ model IntegrationConnection {
   name        String
   code        String   @unique
   description String?  @db.Text
-  protocol    String   @default("REST") // REST | SOAP | GRAPHQL | GRPC
+  protocol    String   @default("REST")
   baseUrl     String   @map("base_url")
-  authType    String   @default("NONE") // NONE | BASIC | BEARER | OAUTH2 | API_KEY
-  authConfig  Json?    @map("auth_config") // { token_url, client_id, client_secret, username, password, api_key }
-  headers     Json? // Các static header gửi kèm mọi request
-  endpoints   Json? // Danh sách endpoints: [{path, method, description}]
-  metadata    Json? // WSDL URL (SOAP), OpenAPI spec URL (REST), proto URL (gRPC)
+  authType    String   @default("NONE")
+  authConfig  Json?    @map("auth_config")
+  headers     Json?
+  endpoints   Json?
+  metadata    Json?
   isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -174,10 +281,11 @@ model IntegrationConnection {
   @@map("integration_connections")
 }
 
+// @deprecated - kept for backward-compat. Use ProcessBinding instead.
 model WorkflowBinding {
   id                   String   @id @default(cuid())
   entityType           String   @map("entity_type")
-  eventTrigger         String   @map("event_trigger") // created, updated, deleted
+  eventTrigger         String   @map("event_trigger")
   workflowDefinitionId String   @map("workflow_definition_id")
   isActive             Boolean  @default(true) @map("is_active")
   createdAt            DateTime @default(now()) @map("created_at")
@@ -187,9 +295,8 @@ model WorkflowBinding {
   @@map("workflow_bindings")
 }
 
-
 // =============================================================================
-// OUTBOX & INBOX MODELS (DISTRIBUTED WORKFLOW)
+// OUTBOX & INBOX MODELS
 // =============================================================================
 
 model OutboxEvent {
@@ -198,20 +305,44 @@ model OutboxEvent {
   processVersion     Int       @map("process_version")
   nodeId             String    @map("node_id")
   commandType        String    @map("command_type")
+  eventId            String?   @unique @map("event_id")
+  eventType          String?   @map("event_type")
+  schemaVersion      Int       @default(1) @map("schema_version")
   payload            Json
-  status             String    @default("PENDING") // PENDING | PROCESSED | FAILED
+  status             String    @default("PENDING")
+  retryCount         Int       @default(0) @map("retry_count")
   error              String?   @db.Text
   createdAt          DateTime  @default(now()) @map("created_at")
   processedAt        DateTime? @map("processed_at")
+  // Resilience fields (OutboxPublisher): backoff, lease chống double-publish, dead-letter.
+  correlationId      String?   @map("correlation_id")
+  maxRetries         Int       @default(8) @map("max_retries")
+  nextRetryAt        DateTime? @map("next_retry_at")
+  claimedAt          DateTime? @map("claimed_at")
+  deadLetteredAt     DateTime? @map("dead_lettered_at")
 
   @@index([status, createdAt])
+  @@index([status, nextRetryAt])
   @@map("outbox_events")
 }
 
 model ProcessedCommand {
-  id          String   @id // commandId from message
+  id          String   @id
   status      String   @default("PROCESSED")
   processedAt DateTime @default(now()) @map("processed_at")
 
   @@map("processed_commands")
+}
+
+model BindingAudit {
+  id        String   @id @default(cuid())
+  bindingId String   @map("binding_id")
+  action    String
+  actorId   String   @map("actor_id")
+  reason    String?  @db.Text
+  snapshot  Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([bindingId])
+  @@map("binding_audits")
 }

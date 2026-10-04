@@ -802,7 +802,89 @@ export class TasksService {
     await this.notif.notifyTransition(enriched, transition.nextNodeData, actorCode || context?.currentEmployeeCode);
   }
 
+  
+  // --- Inbox Consumer cho Workflow Commands ---
+  async handleWorkflowCommand(event: any) {
+    this.logger.log(`Received workflow command: ${event.commandType} for instance ${event.instanceId}`);
+    const commandId = event.payload?.commandId || event.eventId || Date.now().toString();
+    
+    // Idempotency (Inbox) check
+    const existing = await this.prisma.processedCommand.findUnique({ where: { commandId } });
+    if (existing) {
+      this.logger.warn(`Command ${commandId} already processed, skipping.`);
+      return;
+    }
+
+    const payloadData = event.payload?.actionData || event.payload || {};
+    const businessId = parseInt(payloadData.businessId || event.businessId || 0, 10);
+    if (!businessId) return;
+
+    try {
+      await this.prisma.$transaction(async (tx: any) => {
+        const rawTask = await tx.task.findUnique({ where: { id: businessId }, include: this.taskInclude });
+        if (rawTask) {
+          if (event.commandType === 'ASSIGN') {
+             await this.executeAssignTaskTransaction(businessId, payloadData, rawTask);
+             await tx.taskHistory.create({
+                data: {
+                  taskId: businessId,
+                  action: 'Giao việc (Workflow)',
+                  actorCode: payloadData.currentEmployeeCode || null,
+                  newValue: { assigneeCode: payloadData.assigneeCode, status: 'PENDING_ACCEPTANCE' }
+                }
+             });
+          } else if (event.commandType === 'ACCEPT' || event.commandType === 'REJECT') {
+             const participant = await tx.taskParticipant.findFirst({
+               where: { taskId: businessId, employeeCode: payloadData.currentEmployeeCode, participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] } }
+             });
+             if (participant) {
+                 if (event.commandType === 'ACCEPT') {
+                     await tx.taskParticipant.update({ where: { taskId_employeeCode_participantRole: { taskId: businessId, employeeCode: payloadData.currentEmployeeCode, participantRole: participant.participantRole } }, data: { status: 'ACCEPTED' } });
+                     if (participant.participantRole === 'ASSIGNEE') await tx.task.update({ where: { id: businessId }, data: { status: 'IN_PROGRESS' } });
+                 } else {
+                     await tx.taskParticipant.update({ where: { taskId_employeeCode_participantRole: { taskId: businessId, employeeCode: payloadData.currentEmployeeCode, participantRole: participant.participantRole } }, data: { status: 'REJECTED', reason: payloadData.rejectReason } });
+                     if (participant.participantRole === 'ASSIGNEE') await tx.task.update({ where: { id: businessId }, data: { status: 'REJECTED', rejectReason: payloadData.rejectReason } });
+                 }
+             }
+          } else if (event.commandType === 'UPDATE_STATUS' || ['IN_PROGRESS', 'COMPLETED', 'DONE', 'RETURNED'].includes(event.commandType)) {
+             await tx.task.update({ where: { id: businessId }, data: { status: event.commandType === 'UPDATE_STATUS' ? payloadData.status : event.commandType } });
+          }
+        }
+
+        // Đánh dấu đã xử lý (Inbox)
+        await tx.processedCommand.create({ data: { commandId, workflowInstanceId: event.instanceId || 'TASK', action: event.commandType, status: 'SUCCESS' } });
+
+        // Tạo Domain Ack (Outbox)
+        await tx.outboxEvent.create({
+          data: {
+            workflowInstanceId: event.instanceId || 'TASK',
+            processVersion: event.processVersion || 1,
+            nodeId: event.nodeId || '',
+            commandType: 'DOMAIN_ACK',
+            payload: { commandId, instanceId: event.instanceId, result: 'SUCCESS', entityVersion: 1 }
+          }
+        });
+      });
+    } catch (error: any) {
+      this.logger.error(`Failed to process command ${commandId}: ${error.message}`);
+      await this.prisma.$transaction(async (tx: any) => {
+        await tx.processedCommand.create({ data: { commandId, workflowInstanceId: event.instanceId || 'TASK', action: event.commandType, status: 'REJECTED' } });
+        await tx.outboxEvent.create({
+          data: {
+            workflowInstanceId: event.instanceId || 'TASK', processVersion: event.processVersion || 1, nodeId: event.nodeId || '', commandType: 'DOMAIN_ACK',
+            payload: { commandId, instanceId: event.instanceId, result: 'FAILED', errorMessage: error.message }
+          }
+        });
+      });
+    }
+  }
+
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionName?: string) {
+    const rawTask = await this.prisma.task.findUnique({ where: { id } });
+    await this.prisma.outboxEvent.create({ data: { workflowInstanceId: (rawTask?.metadata as any)?.workflowInstanceId || 'TASK', processVersion: 1, nodeId: 'UPDATE', commandType: 'UPDATE_STATUS', payload: { businessId: id, status, rejectReason, actorCode } } });
+    return { success: true, message: 'Yêu cầu cập nhật trạng thái đã được đưa vào hàng đợi xử lý' };
+  }
+  async _old_updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionName?: string) {
     if (context) await this.shared.populateQueryHierarchy(context);
 
     const rawTask = await this.findTaskOrFail(id);
@@ -917,6 +999,10 @@ export class TasksService {
   }
 
   async assignTask(id: number, data: any) {
+    await this.prisma.outboxEvent.create({ data: { workflowInstanceId: 'TASK', processVersion: 1, nodeId: 'ASSIGN', commandType: 'ASSIGN', payload: { businessId: id, ...data } } });
+    return { success: true, message: 'Lệnh phân công đã được đưa vào hàng đợi xử lý' };
+  }
+  async _old_assignTask(id: number, data: any) {
     if (data) await this.shared.populateQueryHierarchy(data);
 
     const rawTask = await this.prisma.task.findUnique({ where: { id }, include: { participants: true } });
@@ -1005,7 +1091,11 @@ export class TasksService {
     return { success: true, message: 'Đã gửi yêu cầu xin phối hợp', data: await this.toResponse(await this.findTaskOrFail(id)) };
   }
 
-  async respondTask(id: number, data: { action: 'ACCEPT' | 'REJECT' | 'REQUEST_COORDINATION', rejectReason?: string, message?: string, currentEmployeeCode?: string }) {
+  async respondTask(id: number, data: any) {
+    await this.prisma.outboxEvent.create({ data: { workflowInstanceId: 'TASK', processVersion: 1, nodeId: 'RESPOND', commandType: data.action, payload: { businessId: id, ...data } } });
+    return { success: true, message: 'Phản hồi đã được đưa vào hàng đợi xử lý' };
+  }
+  async _old_respondTask(id: number, data: { action: 'ACCEPT' | 'REJECT' | 'REQUEST_COORDINATION', rejectReason?: string, message?: string, currentEmployeeCode?: string }) {
     if (data) await this.shared.populateQueryHierarchy(data);
     const rawTask = await this.findTaskOrFail(id);
 

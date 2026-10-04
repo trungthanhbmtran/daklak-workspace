@@ -81,14 +81,22 @@ export interface WorkflowInstance {
   createdAt: string;
   updatedAt: string;
   workflowName?: string;
+  processType?: string;
+  businessId?: string;
+  correlationId?: string;
+  allowedActions?: string[];
+  stateVersion?: number;
+  organizationId?: string;
+  businessType?: string;
+  lastCommandId?: string;
+  lastCommandStatus?: string;
+  lastCommandError?: string;
 }
 
 /**
  * Helper để bóc tách dữ liệu từ Gateway response chuẩn hóa.
  */
 function unwrapData<T>(res: any): T {
-  // Chuẩn hóa: Gateway trả về { success: true, data: T, meta: ... }
-  // Axios interceptor trả về res = { success: true, data: T, meta: ... }
   return res.data as T;
 }
 
@@ -103,7 +111,7 @@ export const workflowApi = {
       meta: unwrapMeta(res),
     })),
 
-  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string } = {}) =>
+  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string; processType?: string; businessId?: string; } = {}) =>
     apiClient.get("/workflow/instances", { params }).then((res: any) => ({
       data: unwrapData<WorkflowInstance[]>(res),
       meta: unwrapMeta(res),
@@ -127,11 +135,33 @@ export const workflowApi = {
   resume: (instanceId: string, nodeId: string, actionData: any = {}) =>
     apiClient.post(`/workflow/instances/${instanceId}/resume/${nodeId}`, { actionData }).then((res: any) => unwrapData<WorkflowInstance>(res)),
 
+  startByProcessType: (data: { processTypeCode: string; trigger?: string; businessId?: string; businessType?: string; initialContext?: any; idempotencyKey?: string; correlationId?: string; }) =>
+    apiClient.post('/workflow/instances/start-by-type', data).then((res: any) => unwrapData<WorkflowInstance>(res)),
+
+  submitAction: (instanceId: string, data: { actionName: string; actionData?: any; expectedVersion?: number; idempotencyKey?: string; correlationId?: string; note?: string; }) =>
+    apiClient.post(`/workflow/instances/${instanceId}/action`, data).then((res: any) => unwrapData<{ accepted: boolean; status: string; commandId: string; newVersion: number; }>(res)),
+
   getInstance: (id: string) =>
     apiClient.get(`/workflow/instances/${id}`).then((res: any) => unwrapData<WorkflowInstance>(res)),
 
   getLogs: (instanceId: string) =>
     apiClient.get(`/workflow/instances/${instanceId}/logs`).then((res: any) => unwrapData<any[]>(res)),
+
+  // Catalog & Binding
+  getProcessTypes: (activeOnly?: boolean) =>
+    apiClient.get('/workflow/catalog/process-types', { params: { activeOnly } }).then((res: any) => unwrapData<any[]>(res)),
+  
+  getProcessBindings: (params: { processTypeCode?: string; organizationId?: string; status?: string; skip?: number; take?: number; } = {}) =>
+    apiClient.get('/workflow/bindings', { params }).then((res: any) => ({
+      data: unwrapData<any[]>(res),
+      meta: unwrapMeta(res),
+    })),
+
+  createProcessBinding: (data: any) =>
+    apiClient.post('/workflow/bindings', data).then((res: any) => unwrapData<any>(res)),
+
+  deactivateProcessBinding: (id: string, reason?: string) =>
+    apiClient.post(`/workflow/bindings/${id}/deactivate`, { reason }).then((res: any) => unwrapData<any>(res)),
 
   getServices: () =>
     apiClient.get('/workflow/services').then((res: any) => unwrapData<any[]>(res)),
@@ -148,7 +178,6 @@ export const workflowApi = {
   getModules: () =>
     apiClient.get('/workflow/modules').then((res: any) => unwrapData<{ id: string; code: string; name: string; description?: string }[]>(res)),
 
-  /** Lấy danh sách vị trí/chức danh tổ chức (JobTitle) để hiển thị trong thiết kế quyền workflow */
   getOrgRoles: () =>
     apiClient.get('/workflow/org-roles').then((res: any) => unwrapData<{ code: string; name: string; rank: number; authorityLevel?: string; category?: string }[]>(res)),
 

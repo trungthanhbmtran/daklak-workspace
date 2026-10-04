@@ -78,7 +78,17 @@ const WorkflowInstanceList = () => {
             },
             {
               header: "Trạng thái",
-              cell: (instance) => <WorkflowStatusBadge status={instance.status} />,
+              cell: (instance) => {
+                const isFailed = instance.lastCommandStatus === 'FAILED';
+                const isPending = instance.lastCommandStatus === 'PENDING';
+                return (
+                  <div className="flex flex-col gap-1">
+                    <WorkflowStatusBadge status={instance.status} />
+                    {isPending && <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full inline-flex w-fit">Đang đồng bộ...</span>}
+                    {isFailed && <span className="text-[10px] text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full inline-flex w-fit" title={instance.lastCommandError}>Lỗi xử lý</span>}
+                  </div>
+                );
+              },
             },
             {
               header: "Bắt đầu lúc",

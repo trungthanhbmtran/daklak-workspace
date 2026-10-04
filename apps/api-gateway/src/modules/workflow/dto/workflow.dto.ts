@@ -212,3 +212,76 @@ export class ApplyModuleDto {
   @IsNotEmpty()
   moduleCode: string;
 }
+
+export class SubmitActionDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  actionName: string;
+
+  @ApiProperty({ required: false })
+  @IsObject()
+  @IsOptional()
+  actionData?: Record<string, any>;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  expectedVersion?: number;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  correlationId?: string;
+  
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  idempotencyKey?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  note?: string;
+}
+
+export class StartByProcessTypeDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  processTypeCode: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  organizationId?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  trigger?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  businessId?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  businessType?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  correlationId?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  idempotencyKey?: string;
+
+  @ApiProperty({ required: false })
+  @IsObject()
+  @IsOptional()
+  initialContext?: Record<string, any>;
+}

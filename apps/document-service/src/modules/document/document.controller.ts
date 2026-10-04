@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import { GrpcMethod, Payload } from '@nestjs/microservices';
+﻿import { Controller } from '@nestjs/common';
+import { GrpcMethod, Payload, EventPattern } from '@nestjs/microservices';
 import { CreateDocumentGrpcDto, UpdateDocumentGrpcDto, IdStringGrpcDto, ListDocumentsGrpcDto, ExtractMetadataGrpcDto, GetLogsGrpcDto, DocumentActionGrpcDto, ReceiveDocumentGrpcDto, DossierCodeDto, AnyGrpcDto } from './dto/document.grpc.dto';
 import { DocumentService } from './document.service';
 
@@ -42,13 +42,20 @@ export class DocumentController {
     return this.documentService.extractMetadata(data.fileId);
   }
 
-
-
   @GrpcMethod('DocumentService', 'GetLogs')
   getLogs(@Payload() data: GetLogsGrpcDto) {
     return this.documentService.getLogs(data.documentId);
   }
 
+  // --- Inbox Consumer cho Workflow Commands ---
+  @EventPattern('workflow.command.sent')
+  async handleWorkflowCommand(@Payload() event: any) {
+    // Expected event payload: { commandId, instanceId, commandType, targetService, payload, ... }
+    if (event.targetService !== 'document-service') return;
+    await this.documentService.handleWorkflowCommand(event);
+  }
+  
+  // Các hàm cũ sẽ bị giới hạn hoặc loại bỏ dần
   @GrpcMethod('DocumentService', 'ReceiveDocument')
   async receiveDocument(@Payload() data: ReceiveDocumentGrpcDto) {
     const result = await this.documentService.receiveDocument(data.id, data.actorId, data.actorName);
@@ -69,56 +76,33 @@ export class DocumentController {
 
   // --- Procedures (Thủ tục hành chính) ---
   @GrpcMethod('DocumentService', 'CreateProcedure')
-  createProcedure(@Payload() data: AnyGrpcDto) {
-    return this.documentService.createProcedure(data);
-  }
+  createProcedure(@Payload() data: AnyGrpcDto) { return this.documentService.createProcedure(data); }
 
   @GrpcMethod('DocumentService', 'GetProcedure')
-  getProcedure(@Payload() data: IdStringGrpcDto) {
-    return this.documentService.findProcedureOne(data.id);
-  }
+  getProcedure(@Payload() data: IdStringGrpcDto) { return this.documentService.findProcedureOne(data.id); }
 
   @GrpcMethod('DocumentService', 'ListProcedures')
-  listProcedures(@Payload() data: AnyGrpcDto) {
-    return this.documentService.findProcedureAll(data);
-  }
+  listProcedures(@Payload() data: AnyGrpcDto) { return this.documentService.findProcedureAll(data); }
 
   @GrpcMethod('DocumentService', 'UpdateProcedure')
-  updateProcedure(@Payload() data: AnyGrpcDto) {
-    return this.documentService.updateProcedure(data.id!, data);
-  }
+  updateProcedure(@Payload() data: AnyGrpcDto) { return this.documentService.updateProcedure(data.id!, data); }
 
   @GrpcMethod('DocumentService', 'DeleteProcedure')
-  deleteProcedure(@Payload() data: IdStringGrpcDto) {
-    return this.documentService.removeProcedure(data.id);
-  }
+  deleteProcedure(@Payload() data: IdStringGrpcDto) { return this.documentService.removeProcedure(data.id); }
 
   // --- OneStopDossier (Hồ sơ một cửa) ---
   @GrpcMethod('DocumentService', 'CreateDossier')
-  createDossier(@Payload() data: AnyGrpcDto) {
-    return this.documentService.createDossier(data);
-  }
+  createDossier(@Payload() data: AnyGrpcDto) { return this.documentService.createDossier(data); }
 
   @GrpcMethod('DocumentService', 'GetDossier')
-  getDossier(@Payload() data: DossierCodeDto) {
-    return this.documentService.findDossierOne(data);
-  }
+  getDossier(@Payload() data: DossierCodeDto) { return this.documentService.findDossierOne(data); }
 
   @GrpcMethod('DocumentService', 'ListDossiers')
-  listDossiers(@Payload() data: AnyGrpcDto) {
-    return this.documentService.findDossierAll(data);
-  }
+  listDossiers(@Payload() data: AnyGrpcDto) { return this.documentService.findDossierAll(data); }
 
   @GrpcMethod('DocumentService', 'UpdateDossier')
-  updateDossier(@Payload() data: AnyGrpcDto) {
-    return this.documentService.updateDossier(data.id!, data);
-  }
+  updateDossier(@Payload() data: AnyGrpcDto) { return this.documentService.updateDossier(data.id!, data); }
 
   @GrpcMethod('DocumentService', 'DeleteDossier')
-  deleteDossier(@Payload() data: IdStringGrpcDto) {
-    return this.documentService.removeDossier(data.id);
-  }
+  deleteDossier(@Payload() data: IdStringGrpcDto) { return this.documentService.removeDossier(data.id); }
 }
-
-
-
