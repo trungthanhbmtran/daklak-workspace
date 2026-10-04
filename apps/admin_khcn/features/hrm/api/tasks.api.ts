@@ -15,13 +15,6 @@ export const hrmTasksApi = {
     return apiClient.get(`/hrm/tasks/${id}`) as any;
   },
 
-  /** Lấy TOÀN BỘ task của 1 kế hoạch (flat list, bao gồm sub-tasks mọi cấp).
-   *  Client tự build tree theo parentId. Auth filter bị bỏ qua — plan visibility đã kiểm tra.
-   */
-  listByPlan(planId: number): Promise<ApiResponse<any[]>> {
-    return apiClient.get("/hrm/tasks", { params: { planId } }) as any;
-  },
-
   create(payload: any): Promise<ApiResponse<any>> {
     return apiClient.post('/hrm/tasks', payload) as any;
   },
@@ -58,10 +51,6 @@ export const hrmTasksApi = {
     return apiClient.post(`/hrm/tasks/${id}/respond`, payload) as any;
   },
 
-  recommendAssignees(params: { rankCode?: string; strategy?: string; domainId?: number; jobTitleId?: number }): Promise<ApiResponse<any[]>> {
-    return apiClient.get('/hrm/tasks/recommend-assignees', { params }) as any;
-  },
-
   assignTask(id: number, payload: { assigneeCode?: string; assignee?: string; assigneePercentage?: number; coAssigneeCodes?: string[]; coordinators?: string[]; coassigneePercentages?: number[]; departmentId?: number }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${id}/assign`, payload) as any;
   },
@@ -83,22 +72,8 @@ export const hrmTasksApi = {
     return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload || {}) as any;
   },
 
-  /** Supervisor assigns Lead + Coordinators for task (no sub-task creation). */
-  assignCoordination(id: number, payload: { leadCode: string; coordinatorCodes: string[] }): Promise<ApiResponse<any>> {
-    return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload) as any;
-  },
-
-
   getHistory(id: number): Promise<ApiResponse<any[]>> {
     return apiClient.get(`/hrm/tasks/${id}/history`) as any;
-  },
-
-  getKpiSetting(id: number): Promise<ApiResponse<any>> {
-    return apiClient.get(`/hrm/tasks/${id}/kpi-setting`) as any;
-  },
-
-  upsertKpiSetting(id: number, payload: any): Promise<ApiResponse<any>> {
-    return apiClient.put(`/hrm/tasks/${id}/kpi-setting`, payload) as any;
   },
 
   /** Steps (Checklist nội bộ) */
@@ -112,10 +87,6 @@ export const hrmTasksApi = {
 
   updateStep(taskId: number, stepId: number, payload: { title?: string; status?: string; order?: number; assigneeCode?: string; baseScore?: number; evidence?: string; evidenceData?: any }): Promise<ApiResponse<any>> {
     return apiClient.put(`/hrm/tasks/${taskId}/steps/${stepId}`, payload) as any;
-  },
-
-  deleteStep(taskId: number, stepId: number): Promise<ApiResponse<any>> {
-    return apiClient.delete(`/hrm/tasks/${taskId}/steps/${stepId}`) as any;
   },
 
   recordAttendance(id: number): Promise<ApiResponse<any>> {

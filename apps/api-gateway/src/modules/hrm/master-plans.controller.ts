@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Param,
   Body,
   Query,
@@ -37,27 +36,9 @@ export class MasterPlansController {
     );
   }
 
-  @Get('advanced/historical-feasibility')
-  async getHistoricalFeasibility(
-    @Query('type') type: string,
-    @Query('title') title: string,
-    @Query('durationDays') durationDays: string,
-  ) {
-    return this.masterPlansService.getHistoricalFeasibility(
-      type,
-      title,
-      durationDays,
-    );
-  }
-
   @Get(':id')
   async findById(@Req() req: any, @Param('id') id: string) {
     return this.masterPlansService.findById(req.user, id);
-  }
-
-  @Post('ai-generate')
-  async generateFromAi(@Body('text') _text: string) {
-    return this.masterPlansService.generateFromAi(_text);
   }
 
   @Post()
@@ -68,10 +49,5 @@ export class MasterPlansController {
   @Put(':id')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
     return this.masterPlansService.update(req.user, id, body);
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.masterPlansService.remove(id);
   }
 }

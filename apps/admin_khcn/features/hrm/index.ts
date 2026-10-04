@@ -14,10 +14,3 @@ export {
 
 export { HrmDashboardClient } from "./components/HrmDashboardClient";
 export { EmployeeListClient } from "./components/EmployeeListClient";
-
-export {
-  hrmDepartmentsApi,
-  hrmLeaveApi,
-  hrmContractsApi,
-  hrmPayrollApi
-} from "./api";

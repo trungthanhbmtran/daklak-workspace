@@ -72,45 +72,6 @@ export interface HrmDepartment {
   description?: string;
 }
 
-export interface HrmLeaveRequest {
-  id: number;
-  employeeId: number;
-  leaveTypeId: number;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  approverId?: number;
-  createdAt: string;
-  employee?: HrmEmployee;
-}
-
-
-export interface HrmLaborContract {
-  id: number;
-  employeeId: number;
-  contractNumber: string;
-  contractType: "DETERMINATE" | "INDETERMINATE" | "PROBATION";
-  startDate: string;
-  endDate?: string;
-  baseSalary: number;
-  status: "ACTIVE" | "EXPIRED" | "TERMINATED";
-  employee?: HrmEmployee;
-}
-
-export interface HrmPayrollRecord {
-  id: number;
-  employeeId: number;
-  month: number;
-  year: number;
-  baseSalary: number;
-  allowance: number;
-  deduction: number;
-  netSalary: number;
-  status: "DRAFT" | "APPROVED" | "PAID";
-  employee?: HrmEmployee;
-}
-
 export interface HrmMasterPlan {
   id: number;
   title: string;

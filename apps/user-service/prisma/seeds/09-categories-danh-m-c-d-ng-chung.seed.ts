@@ -559,13 +559,8 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/services/hrm/employees', icon: 'UserCircle', order: 2, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
     { code: 'HRM_TASK_MENU', name: 'Danh sách nhiệm vụ', route: '/services/hrm/work-plans/tasks', icon: 'CheckSquare', order: 3, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
     { code: 'HRM_CALENDAR_MENU', name: 'Lịch công tác', route: '/services/hrm/calendar', icon: 'CalendarDays', order: 4, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
-    { code: 'HRM_PROJECT_MENU', name: 'Dự án', route: '/services/hrm/work-plans/projects', icon: 'FolderGit2', order: 5, parentCode: 'HRM_GROUP', linkedResourceCode: 'PROJECT', type: 'MENU' },
     { code: 'HRM_TEMPLATE_MENU', name: 'Khung mẫu nhiệm vụ', route: '/services/hrm/work-plans/rank-templates', icon: 'ClipboardList', order: 6, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
     { code: 'HRM_SELECTOR_MENU', name: 'Đăng ký nhiệm vụ', route: '/services/hrm/work-plans/manual-selector', icon: 'Layers', order: 7, parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN', type: 'MENU' },
-    { code: 'HRM_CRITERIA_MENU', name: 'Tiêu chí đánh giá', route: '/services/hrm/work-plans/criteria', icon: 'BarChart2', order: 8, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
-    { code: 'HRM_PERSONAL_KPI_MENU', name: 'KPI Cá nhân', route: '/services/hrm/work-plans/personal-kpi', icon: 'Target', order: 9, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
-    { code: 'HRM_REVIEW_KPI_MENU', name: 'Đánh giá KPI', route: '/services/hrm/work-plans/review-kpi', icon: 'CheckCircle', order: 10, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
-    { code: 'HRM_DASHBOARD_KPI_MENU', name: 'Tổng hợp KPI', route: '/services/hrm/work-plans/dashboard-kpi', icon: 'PieChart', order: 11, parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI', type: 'MENU' },
 
     // 4. Quản lý Văn bản
     { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: '/services/documents', icon: 'FileText', order: 3, linkedResourceCode: null, type: 'SERVICE_ITEM' },

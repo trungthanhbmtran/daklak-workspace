@@ -232,20 +232,6 @@ export class MasterPlansService implements OnModuleInit {
     return res;
   }
 
-  async getHistoricalFeasibility(
-    type: string,
-    title: string,
-    durationDays: string,
-  ) {
-    return firstValueFrom(
-      this.masterPlanService.GetHistoricalFeasibility({
-        type,
-        title,
-        durationDays: parseInt(durationDays || '0', 10),
-      }),
-    ).catch((e) => this.handleRpcError(e));
-  }
-
   async findById(user: any, id: string) {
     const isAdmin =
       user?.permissionsFlatten?.includes('PLAN:MANAGE') ||
@@ -279,49 +265,6 @@ export class MasterPlansService implements OnModuleInit {
     return res;
   }
 
-  async generateFromAi(_text: string) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    const mockPlan = {
-      title: 'Triá»ƒn khai CÄS ngÃ nh Y Táº¿ Äáº¯k Láº¯k',
-      objective:
-        'ÄÆ°a 100% há»“ sÆ¡ bá»‡nh Ã¡n lÃªn ná»n táº£ng sá»‘ hÃ³a trong nÄƒm 2026.',
-      startDate: new Date().toISOString(),
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      tasks: [
-        {
-          title: 'Kháº£o sÃ¡t hiá»‡n tráº¡ng bá»‡nh Ã¡n Ä‘iá»‡n tá»­',
-          description:
-            'LÃ m viá»‡c vá»›i cÃ¡c bá»‡nh viá»‡n tuyáº¿n tá»‰nh Ä‘á»ƒ rÃ  soÃ¡t háº¡ táº§ng server.',
-          priority: 'HIGH',
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          assigneeCode: 'E001',
-        },
-        {
-          title: 'ÄÃ o táº¡o sá»­ dá»¥ng pháº§n má»m quáº£n lÃ½',
-          description: 'Má»Ÿ lá»›p táº­p huáº¥n cho 500 y bÃ¡c sÄ©.',
-          priority: 'MEDIUM',
-          dueDate: new Date(
-            Date.now() + 14 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          assigneeCode: 'E002',
-        },
-        {
-          title: 'Ban hÃ nh quy cháº¿ an toÃ n dá»¯ liá»‡u',
-          description: 'Dá»± tháº£o vÃ  xin chá»¯ kÃ½ Sá»Ÿ Y Táº¿.',
-          priority: 'URGENT',
-          dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          assigneeCode: 'E003',
-        },
-      ],
-    };
-
-    return {
-      success: true,
-      data: mockPlan,
-      message: 'AI Ä‘Ã£ phÃ¢n tÃ­ch vÃ  Ä‘á» xuáº¥t thÃ nh cÃ´ng',
-    };
-  }
-
   async create(user: any, body: any) {
     body.createdByCode = user?.employeeCode || 'system';
     if (user?.unitId) {
@@ -336,12 +279,6 @@ export class MasterPlansService implements OnModuleInit {
     body.updatedByCode = user?.employeeCode || 'system';
     return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
-    ).catch((e) => this.handleRpcError(e));
-  }
-
-  async remove(id: string) {
-    return firstValueFrom(
-      this.masterPlanService.Delete({ id: parseInt(id, 10) }),
     ).catch((e) => this.handleRpcError(e));
   }
 }

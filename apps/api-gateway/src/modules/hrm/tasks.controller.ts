@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -124,23 +123,6 @@ export class TasksController {
     );
   }
 
-  @Get('recommend-assignees')
-  async recommendAssignees(
-    @Req() req: any,
-    @Query('rankCode') rankCode: string,
-    @Query('strategy') strategy: string,
-    @Query('domainId') domainId: string,
-    @Query('jobTitleId') jobTitleId: string,
-  ) {
-    return this.tasksService.recommendAssignees(
-      req,
-      rankCode,
-      strategy,
-      domainId,
-      jobTitleId,
-    );
-  }
-
   @Put(':id/assign')
   async assignTask(
     @Req() req: any,
@@ -157,20 +139,6 @@ export class TasksController {
     @Body() body: any,
   ) {
     return this.tasksService.breakdownTask(req, id, body);
-  }
-
-  @Get(':id/comments')
-  async getComments(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
-    return this.tasksService.getComments(req, id);
-  }
-
-  @Post(':id/comments')
-  async addComment(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { content: string; isSystemMessage?: boolean },
-  ) {
-    return this.tasksService.addComment(req, id, body);
   }
 
   @Post(':id/coordinate')
@@ -190,19 +158,6 @@ export class TasksController {
   @Get(':id/history')
   async getTaskHistory(@Param('id', ParseIntPipe) id: number) {
     return this.tasksService.getTaskHistory(id);
-  }
-
-  @Put(':id/kpi-setting')
-  async upsertTaskKpiSetting(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
-  ) {
-    return this.tasksService.upsertTaskKpiSetting(id, body);
-  }
-
-  @Get(':id/kpi-setting')
-  async getTaskKpiSetting(@Param('id', ParseIntPipe) id: number) {
-    return this.tasksService.getTaskKpiSetting(id);
   }
 
   @Get(':id')
@@ -232,15 +187,6 @@ export class TasksController {
     @Body() body: any,
   ) {
     return this.tasksService.updateStep(req, id, stepId, body);
-  }
-
-  @Delete(':id/steps/:stepId')
-  async deleteStep(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-    @Param('stepId', ParseIntPipe) stepId: number,
-  ) {
-    return this.tasksService.deleteStep(req, id, stepId);
   }
 
   @Post(':id/attend')
