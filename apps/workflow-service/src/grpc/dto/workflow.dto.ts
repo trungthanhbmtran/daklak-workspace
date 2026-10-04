@@ -179,6 +179,10 @@ export class StartWorkflowGrpcDto {
   @IsString()
   @IsOptional()
   businessKey?: string;
+
+  @IsString()
+  @IsOptional()
+  commandId?: string;
 }
 
 export class FindOneWorkflowGrpcDto {
@@ -389,6 +393,10 @@ export class ResumeWorkflowGrpcDto {
   @IsArray()
   @IsOptional()
   userRoles?: string[];
+
+  @IsString()
+  @IsOptional()
+  commandId?: string;
 }
 
 export class GetInstanceGrpcDto {

@@ -21,6 +21,15 @@ export class ExecutionController {
     await this.executionService.startProcess(data.code, data.payload);
   }
 
+  @EventPattern('workflow.auto_binding.trigger')
+  async handleAutoBindingTrigger(
+    @Payload() data: { entity: string; eventTrigger: string; payloadData: any },
+  ) {
+    // Gọi sang ExecutionService để xử lý logic dò tìm WorkflowBinding
+    await this.executionService.triggerAutoBinding(data);
+  }
+
+
   @EventPattern('workflow.task.action_submitted')
   async handleActionSubmitted(
     @Payload() data: { taskId: string; payload: any },

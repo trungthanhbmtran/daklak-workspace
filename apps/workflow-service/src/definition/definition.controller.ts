@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param } from '@nestjs/common';
 import { DefinitionService, CreateDefinitionDto } from './definition.service';
 
 @Controller('workflow/processes')
@@ -30,4 +30,35 @@ export class DefinitionController {
       message: 'OK',
     };
   }
+
+  // ==========================================
+  // AUTO BINDING
+  // ==========================================
+
+  @Post('bindings')
+  async createBinding(
+    @Body()
+    dto: {
+      entityType: string;
+      eventTrigger: string;
+      workflowDefinitionId: string;
+    },
+  ) {
+    const data = await this.definitionService.createBinding(dto);
+    return { success: true, data, message: 'Binding created/updated' };
+  }
+
+  @Get('bindings')
+  async getBindings() {
+    const data = await this.definitionService.getBindings();
+    return { success: true, data, message: 'OK' };
+  }
+
+  @Delete('bindings/:id')
+  async deleteBinding(@Param('id') id: string) {
+    const data = await this.definitionService.deleteBinding(id);
+    return { success: true, data, message: 'Deleted successfully' };
+  }
 }
+
+

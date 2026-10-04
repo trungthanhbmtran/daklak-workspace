@@ -233,4 +233,45 @@ export class DefinitionService {
 
     return def;
   }
+
+  // ==========================================
+  // AUTO BINDING (NO-CODE WORKFLOW)
+  // ==========================================
+
+  async createBinding(data: {
+    entityType: string;
+    eventTrigger: string;
+    workflowDefinitionId: string;
+  }) {
+    return this.prisma.workflowBinding.upsert({
+      where: {
+        entityType_eventTrigger: {
+          entityType: data.entityType,
+          eventTrigger: data.eventTrigger,
+        },
+      },
+      update: {
+        workflowDefinitionId: data.workflowDefinitionId,
+        isActive: true,
+      },
+      create: {
+        entityType: data.entityType,
+        eventTrigger: data.eventTrigger,
+        workflowDefinitionId: data.workflowDefinitionId,
+        isActive: true,
+      },
+    });
+  }
+
+  async getBindings() {
+    return this.prisma.workflowBinding.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async deleteBinding(id: string) {
+    return this.prisma.workflowBinding.delete({
+      where: { id },
+    });
+  }
 }

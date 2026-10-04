@@ -112,11 +112,18 @@ export default function WorkflowList() {
         backHref={WORKFLOW_ROUTES.hub}
         backLabel="Về Trung tâm tích hợp"
         actions={
-          <Button asChild id="workflow-create-button">
-            <Link href={WORKFLOW_ROUTES.create}>
-              <Plus className="size-4" /> Tạo quy trình
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" id="workflow-binding-button">
+              <Link href={`${WORKFLOW_ROUTES.hub}/workflows/bindings`}>
+                <Layers className="size-4 mr-2" /> Auto-Binding
+              </Link>
+            </Button>
+            <Button asChild id="workflow-create-button">
+              <Link href={WORKFLOW_ROUTES.create}>
+                <Plus className="size-4 mr-2" /> Tạo quy trình
+              </Link>
+            </Button>
+          </div>
         }
       />
 

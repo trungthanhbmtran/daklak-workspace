@@ -61,6 +61,23 @@ export class ExecutionService {
       );
     }
 
+    // Idempotency Check
+    if ((payload as any).commandId) {
+      const existing = await this.prisma.processedCommand.findUnique({
+        where: { id: (payload as any).commandId },
+      });
+      if (existing) {
+        this.logger.warn(`Command ${ (payload as any).commandId } already processed. Idempotency triggered.`);
+        // Note: For a fully robust idempotent response, we would need to fetch the existing instance and return it.
+        // For now, returning null to indicate it's already handled, or throw ConflictException.
+        // Let's just fetch the instance by businessKey if possible, but safely return empty object or throw
+        throw new Error(`Command already processed`);
+      }
+      await this.prisma.processedCommand.create({
+        data: { id: (payload as any).commandId, status: 'PROCESSED' }
+      });
+    }
+
     const version = def.versions[0];
 
     const instance = await this.prisma.processInstance.create({
@@ -542,6 +559,45 @@ export class ExecutionService {
   }
 
   /**
+   * Tự động dò tìm cấu hình Binding và Start Workflow nếu khớp
+   */
+  async triggerAutoBinding(data: {
+    entity: string;
+    eventTrigger: string;
+    payloadData: any;
+  }) {
+    const binding = await this.prisma.workflowBinding.findUnique({
+      where: {
+        entityType_eventTrigger: {
+          entityType: data.entity,
+          eventTrigger: data.eventTrigger,
+        },
+      },
+    });
+
+    if (!binding || !binding.isActive) {
+      return null;
+    }
+
+    this.logger.log(`Auto-triggering workflow ${binding.workflowDefinitionId} for ${data.entity}.${data.eventTrigger}`);
+
+    const def = await this.prisma.processDefinition.findUnique({
+      where: { id: binding.workflowDefinitionId }
+    });
+
+    if (def) {
+      // payloadData thường là dữ liệu Entity (ví dụ: Document có id là data.id)
+      const businessId = data.payloadData?.id;
+      return this.triggerProcess(def.code, {
+        businessId,
+        businessType: data.entity,
+        initiatorId: data.payloadData?.createdBy || 'SYSTEM',
+        initialContext: data.payloadData,
+      });
+    }
+  }
+
+  /**
    * Resume a running instance at a specific node by completing the pending task.
    * Finds the PENDING task for the given nodeCode (or first pending task if nodeId omitted).
    */
@@ -550,7 +606,22 @@ export class ExecutionService {
     nodeId: string | undefined,
     actionData: Record<string, any>,
     userRoles?: string[],
+    commandId?: string,
   ): Promise<{ success: boolean; message?: string }> {
+    // Idempotency Check
+    if (commandId) {
+      const existing = await this.prisma.processedCommand.findUnique({
+        where: { id: commandId },
+      });
+      if (existing) {
+        this.logger.warn(`Command ${commandId} already processed. Idempotency triggered.`);
+        return { success: true, message: 'Already processed (Idempotency)' };
+      }
+      await this.prisma.processedCommand.create({
+        data: { id: commandId, status: 'PROCESSED' }
+      });
+    }
+
     // Find pending task for this instance (and optionally this node)
     const taskWhere: any = { instanceId, status: 'PENDING' };
     if (nodeId) {

@@ -173,3 +173,45 @@ model IntegrationConnection {
   @@index([protocol, isActive])
   @@map("integration_connections")
 }
+
+model WorkflowBinding {
+  id                   String   @id @default(cuid())
+  entityType           String   @map("entity_type")
+  eventTrigger         String   @map("event_trigger") // created, updated, deleted
+  workflowDefinitionId String   @map("workflow_definition_id")
+  isActive             Boolean  @default(true) @map("is_active")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@unique([entityType, eventTrigger])
+  @@map("workflow_bindings")
+}
+
+
+// =============================================================================
+// OUTBOX & INBOX MODELS (DISTRIBUTED WORKFLOW)
+// =============================================================================
+
+model OutboxEvent {
+  id                 String    @id @default(uuid())
+  workflowInstanceId String    @map("workflow_instance_id")
+  processVersion     Int       @map("process_version")
+  nodeId             String    @map("node_id")
+  commandType        String    @map("command_type")
+  payload            Json
+  status             String    @default("PENDING") // PENDING | PROCESSED | FAILED
+  error              String?   @db.Text
+  createdAt          DateTime  @default(now()) @map("created_at")
+  processedAt        DateTime? @map("processed_at")
+
+  @@index([status, createdAt])
+  @@map("outbox_events")
+}
+
+model ProcessedCommand {
+  id          String   @id // commandId from message
+  status      String   @default("PROCESSED")
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("processed_commands")
+}

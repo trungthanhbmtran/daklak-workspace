@@ -98,8 +98,6 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(@Payload() data: StartWorkflowGrpcDto) {
-    // StartWorkflow uses businessId (UUID of the definition or code string)
-    // We use startProcess which accepts the definition CODE
     const instance = await this.executionService.startProcess(
       data.businessId || data.workflowId,
       {
@@ -107,7 +105,8 @@ export class GrpcWorkflowController {
         startedBy: data.initiatorId,
         businessKey: data.businessId,
         organizationId: data.businessType || 'DEFAULT',
-      },
+        commandId: data.commandId,
+      } as any,
     );
     return this.mapInstanceToResponse(instance);
   }
@@ -130,6 +129,7 @@ export class GrpcWorkflowController {
       data.nodeId,
       data.actionData || {},
       data.userRoles,
+      data.commandId,
     );
     // Return updated instance after resume
     const instance = await this.executionService.getInstance(data.instanceId);
