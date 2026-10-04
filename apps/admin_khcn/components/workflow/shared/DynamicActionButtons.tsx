@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import api from "@/lib/api"; // Giả sử có axios instance tại đây
+import { toast } from "sonner";
+import apiClient from "@/lib/axiosInstance"; // Giả sử có axios instance tại đây
 
 interface DynamicActionButtonsProps {
   businessId?: string;
@@ -22,7 +22,7 @@ export function DynamicActionButtons({
   const [actions, setActions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<string | null>(null);
-  const { toast } = useToast();
+
 
   useEffect(() => {
     const fetchActions = async () => {
@@ -35,7 +35,7 @@ export function DynamicActionButtons({
         if (currentNodeId) params.append("currentNodeId", currentNodeId);
 
         // API Gateway route or direct Workflow Service route
-        const res = await api.get(`/admin/workflow/instances/${instanceId || businessId}/allowed-actions?${params.toString()}`);
+        const res = await apiClient.get(`/workflow/instances/${instanceId || businessId}/allowed-actions?${params.toString()}`);
         if (res.data?.success) {
           setActions(res.data.data?.actions || []);
         }
@@ -58,21 +58,17 @@ export function DynamicActionButtons({
       const payload = {
         actionData: { action },
       };
-      // Giả sử API Gateway /admin/workflow/instances/:instanceId/resume/:nodeId
+      // Giả sử API Gateway /workflow/instances/:instanceId/resume/:nodeId
       const targetNodeId = currentNodeId || 'unknown';
-      const res = await api.post(`/admin/workflow/instances/${instanceId}/resume/${targetNodeId}`, payload);
+      const res = await apiClient.post(`/workflow/instances/${instanceId}/resume/${targetNodeId}`, payload);
       if (res.data?.success) {
-        toast({ title: "Thành công", description: `Đã thực hiện: ${action}` });
+        toast.success(`Đã thực hiện: ${action}`);
         if (onActionSuccess) onActionSuccess();
       } else {
-        toast({ title: "Lỗi", description: res.data?.message, variant: "destructive" });
+        toast.error(res.data?.message || "Thất bại");
       }
     } catch (error: any) {
-      toast({
-        title: "Lỗi hệ thống",
-        description: error?.response?.data?.message || error.message,
-        variant: "destructive",
-      });
+      toast.error(error?.response?.data?.message || error.message);
     } finally {
       setSubmitting(null);
     }

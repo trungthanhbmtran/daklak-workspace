@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Link as LinkIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import api from "@/lib/api";
+import { toast } from "sonner";
+import apiClient from "@/lib/axiosInstance";
 
 interface WorkflowBinding {
   id: string;
@@ -19,21 +19,17 @@ interface WorkflowBinding {
 export default function WorkflowBindingList() {
   const [bindings, setBindings] = useState<WorkflowBinding[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+
 
   const fetchBindings = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/admin/workflow/processes/bindings"); // Cần map vào api-gateway
+      const res = await apiClient.get("/workflow/processes/bindings"); // Cần map vào api-gateway
       if (res.data?.success) {
         setBindings(res.data.data || []);
       }
     } catch (error: any) {
-      toast({
-        title: "Lỗi tải dữ liệu",
-        description: error?.message || "Không thể tải danh sách binding",
-        variant: "destructive",
-      });
+      toast.error(error?.message || "Không thể tải danh sách binding");
     } finally {
       setLoading(false);
     }
@@ -47,17 +43,13 @@ export default function WorkflowBindingList() {
     if (!confirm("Bạn có chắc muốn xoá thiết lập này?")) return;
     try {
       // API có thể cần bổ sung method DELETE
-      const res = await api.delete(`/admin/workflow/processes/bindings/${id}`);
+      const res = await apiClient.delete(`/workflow/processes/bindings/${id}`);
       if (res.data?.success) {
-        toast({ title: "Thành công", description: "Đã xoá thiết lập quy trình" });
+        toast.success("Đã xoá thiết lập quy trình");
         fetchBindings();
       }
     } catch (error: any) {
-      toast({
-        title: "Lỗi",
-        description: error?.message || "Xóa thất bại",
-        variant: "destructive",
-      });
+      toast.error(error?.message || "Xóa thất bại");
     }
   };
 
