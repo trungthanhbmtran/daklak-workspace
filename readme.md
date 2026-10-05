@@ -82,8 +82,13 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm report-serv
 # docker exec -it daklak-workspace-report-service-1 npx prisma db push --accept-data-loss
 
 # Khởi động toàn bộ các services (đảm bảo DB đang chạy để seed)
-docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
+
+# Tải lại cấu hình Nginx (Nếu có thay đổi file nginx.conf) mà không gây gián đoạn (Zero Downtime)
+docker exec -it daklak-workspace-nginx-1 nginx -s reload
+# Hoặc khởi động lại hoàn toàn service Nginx
+# docker compose -f docker-compose.prod.yml restart nginx
 
 # Chạy seeders để khởi tạo dữ liệu mặc định (hoặc dữ liệu mẫu)
 # YÊU CẦU QUAN TRỌNG: Phải chạy seed của user-service ĐẦU TIÊN để tạo sơ đồ tổ chức, sau đó mới tới các dịch vụ khác.
