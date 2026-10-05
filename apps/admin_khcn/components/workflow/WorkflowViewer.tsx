@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ReactFlow, Background, Controls, MiniMap } from "@xyflow/react";
+import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Workflow as WorkflowIcon } from "lucide-react";
 import { nodeTypes } from "./nodes";
@@ -31,23 +31,25 @@ export function WorkflowViewer({ workflow, className, showMiniMap = false }: Wor
 
   return (
     <div className={cn("h-[420px] w-full", className)}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.2}
-        proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={false}
-      >
-        <Background gap={16} className="opacity-60" />
-        <Controls showInteractive={false} />
-        {showMiniMap && <MiniMap pannable zoomable className="!bg-background" />}
-      </ReactFlow>
+      <ReactFlowProvider>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.2 }}
+          minZoom={0.2}
+          proOptions={{ hideAttribution: true }}
+          nodesDraggable={false}
+          nodesConnectable={false}
+          elementsSelectable={false}
+        >
+          <Background gap={16} className="opacity-60" />
+          <Controls showInteractive={false} />
+          {showMiniMap && <MiniMap pannable zoomable className="!bg-background" />}
+        </ReactFlow>
+      </ReactFlowProvider>
     </div>
   );
 }
