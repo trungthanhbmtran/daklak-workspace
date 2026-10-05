@@ -151,7 +151,7 @@ export const PropertiesPanel = ({
 
         <div className="flex-1 overflow-y-auto p-5">
           <PropertiesItemInfo selectedNode={selectedNode} selectedEdge={selectedEdge} />
-          <div className={cn(readOnly && "pointer-events-none opacity-80")}>
+          <div className={cn(readOnly && "opacity-90 [&_input]:pointer-events-none [&_textarea]:pointer-events-none [&_select]:pointer-events-none [&_button:not([data-slot=accordion-trigger])]:pointer-events-none [&_[role=switch]]:pointer-events-none [&_[role=checkbox]]:pointer-events-none")}>
             {renderFields()}
           </div>
         </div>
