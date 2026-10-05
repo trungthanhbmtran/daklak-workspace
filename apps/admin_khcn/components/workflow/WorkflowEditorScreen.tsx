@@ -22,7 +22,7 @@ const WorkflowEditor = dynamic(() => import("./WorkflowEditor"), {
 export default function WorkflowEditorScreen({ id }: { id?: string }) {
   const router = useRouter();
   return (
-    <div className="flex h-full min-h-[560px] flex-1 flex-col overflow-hidden rounded-xl border bg-background shadow-sm">
+    <div className="flex h-screen w-screen flex-1 flex-col overflow-hidden bg-background">
       <WorkflowEditor
         id={id}
         onBack={() => router.push(id ? WORKFLOW_ROUTES.detail(id) : WORKFLOW_ROUTES.list)}
