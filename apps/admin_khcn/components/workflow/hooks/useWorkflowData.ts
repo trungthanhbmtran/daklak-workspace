@@ -47,6 +47,7 @@ export function useWorkflowData({
           console.log("Definition found:", definition);
           const loadedNodes = (definition.nodes || []).map((node: any) => ({
             ...node,
+            id: String(node.id),
             // Ensure position exists for ReactFlow
             position: node.position || {
               x: Math.random() * 400,
@@ -61,7 +62,7 @@ export function useWorkflowData({
             (edge: any, index: number) => ({
               ...edge,
               type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
-              id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
+              id: String(edge.id || `edge-${edge.source}-${edge.target}-${index}`),
               animated: edge.animated || true,
               label: edge.label || (edge.data?.label as string) || "Chuyển tiếp",
               markerEnd: edge.markerEnd || {
@@ -99,12 +100,44 @@ export function useWorkflowData({
   }, [id, loadWorkflow]);
 
   const onSave = useCallback(async () => {
+    // Validation
+    const hasStart = nodes.some((n) => n.type === "start");
+    const hasEnd = nodes.some((n) => n.type === "end");
+    let hasError = false;
+
+    const validatedNodes = nodes.map((n) => {
+      let nodeError = false;
+      if (n.type === "user_task" && !n.data?.assignmentStrategy) {
+        nodeError = true;
+      }
+      if (n.type === "exclusive_gateway" && !edges.some(e => e.source === n.id)) {
+        nodeError = true;
+      }
+      if (nodeError) hasError = true;
+      
+      return {
+        ...n,
+        className: nodeError ? "ring-2 ring-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-300" : n.className?.replace(/ring-2 ring-red-500 shadow-\[0_0_15px_rgba\(239,68,68,0\.5\)\] transition-all duration-300/g, "").trim()
+      };
+    });
+
+    if (hasError) {
+      setNodes(validatedNodes as any);
+      toast.error("Vui lòng kiểm tra lại cấu hình các tác nhân bị đánh dấu đỏ!");
+      return;
+    }
+    
+    if (!hasStart || !hasEnd) {
+      toast.error("Quy trình phải có ít nhất một Bắt đầu và một Kết thúc!");
+      return;
+    }
+
     setIsSaving(true);
     const workflowData = {
       name: workflowName,
       description: workflowDesc,
       code: workflowCode,
-      definition: { nodes, edges: edges as any },
+      definition: { nodes: validatedNodes, edges: edges as any },
     };
 
     try {
@@ -144,6 +177,38 @@ export function useWorkflowData({
   const onPublishAndApply = useCallback(async (moduleCode: string) => {
     let targetId = workflowId;
 
+    // Validation
+    const hasStart = nodes.some((n) => n.type === "start");
+    const hasEnd = nodes.some((n) => n.type === "end");
+    let hasError = false;
+
+    const validatedNodes = nodes.map((n) => {
+      let nodeError = false;
+      if (n.type === "user_task" && !n.data?.assignmentStrategy) {
+        nodeError = true;
+      }
+      if (n.type === "exclusive_gateway" && !edges.some(e => e.source === n.id)) {
+        nodeError = true;
+      }
+      if (nodeError) hasError = true;
+      
+      return {
+        ...n,
+        className: nodeError ? "ring-2 ring-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-300" : n.className?.replace(/ring-2 ring-red-500 shadow-\[0_0_15px_rgba\(239,68,68,0\.5\)\] transition-all duration-300/g, "").trim()
+      };
+    });
+
+    if (hasError) {
+      setNodes(validatedNodes as any);
+      toast.error("Vui lòng kiểm tra lại cấu hình các tác nhân bị đánh dấu đỏ!");
+      return;
+    }
+    
+    if (!hasStart || !hasEnd) {
+      toast.error("Quy trình phải có ít nhất một Bắt đầu và một Kết thúc!");
+      return;
+    }
+
     // Nếu chưa lưu, lưu trước
     if (!targetId) {
       setIsSaving(true);
@@ -151,7 +216,7 @@ export function useWorkflowData({
         name: workflowName,
         description: workflowDesc,
         code: workflowCode,
-        definition: { nodes, edges: edges as any },
+        definition: { nodes: validatedNodes, edges: edges as any },
       };
       try {
         const response = await workflowApi.create(workflowData as any);

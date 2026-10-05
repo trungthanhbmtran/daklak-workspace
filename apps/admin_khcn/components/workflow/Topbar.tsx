@@ -26,6 +26,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 
 interface TopbarProps {
@@ -59,12 +69,17 @@ export const Topbar = ({
 }: TopbarProps) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const [isBindingDialogOpen, setIsBindingDialogOpen] = useState(false);
+  const [selectedModule, setSelectedModule] = useState("");
+  const [bindingCondition, setBindingCondition] = useState("");
 
-  const handleApplyModule = async (moduleCode: string) => {
-    if (!onPublishAndApply) return;
+  const handleApplyModule = async () => {
+    if (!onPublishAndApply || !selectedModule) return;
     setIsApplying(true);
     try {
-      await onPublishAndApply(moduleCode);
+      // Pass bindingCondition if backend supports it later
+      await onPublishAndApply(selectedModule);
+      setIsBindingDialogOpen(false);
     } finally {
       setIsApplying(false);
     }
@@ -174,10 +189,10 @@ export const Topbar = ({
               Lưu thiết kế
             </Button>
 
-            {/* Nút Áp dụng nghiệp vụ */}
+            {/* Nút Áp dụng nghiệp vụ (Deployment Settings) */}
             {onPublishAndApply && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Dialog open={isBindingDialogOpen} onOpenChange={setIsBindingDialogOpen}>
+                <DialogTrigger asChild>
                   <Button
                     size="sm"
                     variant="outline"
@@ -190,34 +205,60 @@ export const Topbar = ({
                       <Link2 className="h-4 w-4 mr-2" />
                     )}
                     Gắn vào Form
-                    <ChevronDown className="h-4 w-4 ml-2 opacity-70" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[300px] p-2">
-                  <DropdownMenuLabel className="font-semibold text-sm">
-                    Chọn Form / Luồng nghiệp vụ để gắn
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {workflowModules.length === 0 ? (
-                    <div className="p-4 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        Chưa có Form nào. Hãy tạo Form trước.
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Thiết lập áp dụng quy trình</DialogTitle>
+                    <DialogDescription>
+                      Cấu hình để quy trình này được áp dụng tự động cho các hồ sơ/form cụ thể.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <label className="text-sm font-semibold">Mục tiêu áp dụng (Form/Luồng)</label>
+                      <NativeSelect
+                        value={selectedModule}
+                        onChange={(e) => setSelectedModule(e.target.value)}
+                        className="w-full"
+                      >
+                        <NativeSelectOption value="" disabled>-- Chọn Form nghiệp vụ --</NativeSelectOption>
+                        {workflowModules.map((mod) => (
+                          <NativeSelectOption key={mod.code} value={mod.code}>
+                            {mod.name} ({mod.code})
+                          </NativeSelectOption>
+                        ))}
+                      </NativeSelect>
+                    </div>
+                    <div className="grid gap-2">
+                      <label className="text-sm font-semibold">Điều kiện áp dụng (Tùy chọn)</label>
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          placeholder="VD: Chỉ áp dụng khi Tổng tiền > 50,000,000" 
+                          value={bindingCondition}
+                          onChange={(e) => setBindingCondition(e.target.value)}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Sử dụng Visual Rule Builder để thêm điều kiện chi tiết (tương tự như cài đặt rẽ nhánh). Tính năng này đang được phát triển thêm.
                       </p>
                     </div>
-                  ) : (
-                    workflowModules.map((mod) => (
-                      <DropdownMenuItem
-                        key={mod.code}
-                        className="cursor-pointer flex flex-col items-start gap-1 p-3"
-                        onClick={() => handleApplyModule(mod.code)}
-                      >
-                        <span className="font-medium">{mod.name}</span>
-                        <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{mod.code}</span>
-                      </DropdownMenuItem>
-                    ))
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsBindingDialogOpen(false)}>
+                      Hủy bỏ
+                    </Button>
+                    <Button 
+                      onClick={handleApplyModule} 
+                      disabled={isApplying || !selectedModule}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      {isApplying && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      Lưu và Áp dụng
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             )}
 
             <Button

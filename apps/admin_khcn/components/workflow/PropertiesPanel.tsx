@@ -65,6 +65,7 @@ export const PropertiesPanel = ({
   setWorkflowCode,
   readOnly = false
 }: PropertiesPanelProps) => {
+  const [isExpertMode, setIsExpertMode] = React.useState(false);
   const data = selectedNode ? (selectedNode.data || {}) as any : (selectedEdge ? selectedEdge : {} as any);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -102,6 +103,7 @@ export const PropertiesPanel = ({
           handleChange={handleChange}
           selectedEdge={selectedEdge}
           onUpdateEdge={onUpdateEdge}
+          isExpertMode={isExpertMode}
         />
       );
     }
@@ -109,24 +111,44 @@ export const PropertiesPanel = ({
     if (!selectedNode) return null;
     
     const { type } = selectedNode;
-    const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles };
+    const commonProps = { data, handleChange, selectedNode, onUpdate, availableServices, taskRoles, orgRoles, isExpertMode };
 
     switch (type) {
       case "user_task":
         return <UserTaskProperties {...commonProps} />;
       case "script_task":
-        return <ScriptTaskProperties {...commonProps} />;
+        return isExpertMode ? <ScriptTaskProperties {...commonProps} /> : (
+          <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded-md">
+            Thuộc tính này chỉ khả dụng trong chế độ chuyên gia.
+          </div>
+        );
       case "parallel_gateway":
       case "exclusive_gateway":
         return <GatewayProperties {...commonProps} />;
       case "service_task":
-        return <ServiceTaskProperties {...commonProps} />;
+        return isExpertMode ? <ServiceTaskProperties {...commonProps} /> : (
+          <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded-md">
+            Thuộc tính này chỉ khả dụng trong chế độ chuyên gia.
+          </div>
+        );
       case "nginx_proxy":
-        return <NginxProxyProperties {...commonProps} />;
+        return isExpertMode ? <NginxProxyProperties {...commonProps} /> : (
+          <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded-md">
+            Thuộc tính này chỉ khả dụng trong chế độ chuyên gia.
+          </div>
+        );
       case "api_gateway":
-        return <ApiGatewayProperties {...commonProps} />;
+        return isExpertMode ? <ApiGatewayProperties {...commonProps} /> : (
+          <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded-md">
+            Thuộc tính này chỉ khả dụng trong chế độ chuyên gia.
+          </div>
+        );
       case "external_system":
-        return <ExternalSystemProperties {...commonProps} />;
+        return isExpertMode ? <ExternalSystemProperties {...commonProps} /> : (
+          <div className="p-4 text-center text-sm text-muted-foreground bg-muted/20 rounded-md">
+            Thuộc tính này chỉ khả dụng trong chế độ chuyên gia.
+          </div>
+        );
       default:
         return (
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -147,7 +169,13 @@ export const PropertiesPanel = ({
           }
         }}
       >
-        <PropertiesHeader selectedNode={selectedNode} selectedEdge={selectedEdge} data={data} />
+        <PropertiesHeader 
+          selectedNode={selectedNode} 
+          selectedEdge={selectedEdge} 
+          data={data}
+          isExpertMode={isExpertMode}
+          setIsExpertMode={setIsExpertMode}
+        />
 
         <div className="flex-1 overflow-y-auto p-5">
           <PropertiesItemInfo selectedNode={selectedNode} selectedEdge={selectedEdge} />

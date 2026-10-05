@@ -12,9 +12,11 @@ export const EdgeProperties = (props: PropertiesPanelComponentProps) => {
       <BasicEdgeConfig {...props} />
       <RuleBuilderConfig {...props} />
       
-      <Accordion type="single" collapsible className="w-full mt-4">
-        <AdvancedExpressionConfig {...props} />
-      </Accordion>
+      {props.isExpertMode && (
+        <Accordion type="single" collapsible className="w-full mt-4">
+          <AdvancedExpressionConfig {...props} />
+        </Accordion>
+      )}
     </div>
   );
 };

@@ -9,6 +9,11 @@ This file defines the operating contract for every AI agent working in this work
 - Agent roles and their instructions live under `.agents/agents/`; skills live under `.agents/skills/`. `.codex/config.toml` is only Codex's runtime registry and must point custom role `config_file` entries into `.agents/agents/`. Keep root `AGENTS.md` as a short bootstrap that tells Codex to read this canonical charter, since Codex discovers root/ancestor `AGENTS.md` files and does not automatically traverse the hidden `.agents` directory.
 - For tasks using the configured two-role workflow, ChatGPT researches, drafts, critiques, revises, and saves the plan first; Gemini executes only that reviewed plan in order. Do not invoke Gemini or implement when the user asked only for planning. If either role/model is unavailable, report the limitation and do not claim a handoff occurred.
 - Gemini must stop before any step that is unclear, impossible, unsafe, or conflicts with higher-priority instructions. It must report the issue and request a revised plan; it must not silently deviate. The handoff script uses Gemini CLI's default approval behavior and must not use `--yolo` or bypass Gemini tool approvals.
+- **Mandatory Skill Utilization:** Agents MUST actively use the installed project skills to guide their workflows:
+  - Apply `project-coding-conventions` to ensure all code (variables, functions, classes) uses English while UI text uses Vietnamese with diacritics.
+  - Apply `karpathy-guidelines` (Andrej Karpathy skills) when writing, reviewing, or refactoring code to ensure high quality and minimal complexity.
+  - Utilize `speckit-*` skills (`speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`, `speckit-converge`) to structure feature development, planning, and bug fixes.
+  - Apply `playwright-cli` when interacting with UI, performing browser automation, or writing end-to-end tests.
 
 
 ## 1. Sources of truth and conflict handling

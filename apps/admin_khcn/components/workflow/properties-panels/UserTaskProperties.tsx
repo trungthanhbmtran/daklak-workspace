@@ -1,4 +1,3 @@
- 
 import React from 'react';
 import { Accordion } from "@/components/ui/accordion";
 import { PropertiesPanelComponentProps } from "./types";
@@ -17,7 +16,7 @@ export const UserTaskProperties = (props: PropertiesPanelComponentProps) => {
       <Accordion type="multiple" className="w-full mt-4 space-y-2">
         <FormBuilderConfig {...props} />
         <AdvancedConfig {...props} />
-        <DevConfig {...props} />
+        {props.isExpertMode && <DevConfig {...props} />}
       </Accordion>
     </div>
   );

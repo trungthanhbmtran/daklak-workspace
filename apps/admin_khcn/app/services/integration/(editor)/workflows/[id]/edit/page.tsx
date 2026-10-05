@@ -6,5 +6,5 @@ export const metadata = {
 
 export default async function EditWorkflowPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <WorkflowEditorScreen id={decodeURIComponent(id)} />;
+  return <WorkflowEditorScreen id={decodeURIComponent(id)} mode="edit" />;
 }
