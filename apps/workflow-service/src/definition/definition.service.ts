@@ -7,6 +7,8 @@ export interface CreateDefinitionDto {
   name: string;
   description?: string;
   graph: any;
+  organizationId?: string;
+  createdBy?: string;
 }
 
 export interface UpdateDefinitionDto {
@@ -31,6 +33,8 @@ export class DefinitionService {
           name: dto.name,
           description: dto.description,
           isActive: true,
+          organizationId: dto.organizationId,
+          createdBy: dto.createdBy,
         },
       });
 
@@ -47,10 +51,13 @@ export class DefinitionService {
     });
   }
 
-  async updateProcess(id: string, dto: UpdateDefinitionDto) {
+  async updateProcess(id: string, dto: UpdateDefinitionDto, organizationId?: string) {
     return this.prisma.$transaction(async (tx) => {
+      const whereClause: any = { id };
+      if (organizationId) whereClause.organizationId = organizationId;
+
       const def = await tx.processDefinition.findUnique({
-        where: { id },
+        where: whereClause,
         include: { versions: { orderBy: { version: "desc" }, take: 1 } },
       });
 
@@ -219,13 +226,18 @@ export class DefinitionService {
     });
   }
 
-  async listProcesses(params: { skip?: number; take?: number; search?: string }) {
+  async listProcesses(params: { skip?: number; take?: number; search?: string; organizationId?: string }) {
     const skip = Math.max(0, Number(params.skip) || 0);
     const take = Math.min(100, Math.max(1, Number(params.take) || 20));
     const search = params.search?.trim().slice(0, 100);
-    const where = search
-      ? { OR: [{ name: { contains: search } }, { code: { contains: search } }] }
-      : {};
+    
+    const where: any = {};
+    if (search) {
+      where.OR = [{ name: { contains: search } }, { code: { contains: search } }];
+    }
+    if (params.organizationId) {
+      where.organizationId = params.organizationId;
+    }
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.processDefinition.findMany({
@@ -247,9 +259,12 @@ export class DefinitionService {
     return { items, total };
   }
 
-  async getDefinition(code: string) {
-    const def = await this.prisma.processDefinition.findUnique({
-      where: { code },
+  async getDefinition(code: string, organizationId?: string) {
+    const whereClause: any = { code };
+    if (organizationId) whereClause.organizationId = organizationId;
+
+    const def = await this.prisma.processDefinition.findFirst({
+      where: whereClause,
       include: {
         versions: {
           orderBy: { version: "desc" },
@@ -262,9 +277,12 @@ export class DefinitionService {
     return def;
   }
 
-  async getDefinitionById(id: string) {
-    const def = await this.prisma.processDefinition.findUnique({
-      where: { id },
+  async getDefinitionById(id: string, organizationId?: string) {
+    const whereClause: any = { id };
+    if (organizationId) whereClause.organizationId = organizationId;
+
+    const def = await this.prisma.processDefinition.findFirst({
+      where: whereClause,
       include: {
         versions: {
           orderBy: { version: "desc" },
@@ -316,7 +334,15 @@ export class DefinitionService {
     return this.prisma.workflowBinding.delete({ where: { id } });
   }
 
-  async deleteProcess(id: string) {
+  async deleteProcess(id: string, organizationId?: string) {
+    const whereClause: any = { id };
+    if (organizationId) whereClause.organizationId = organizationId;
+
+    const def = await this.prisma.processDefinition.findFirst({
+      where: whereClause,
+    });
+    if (!def) throw new NotFoundException(`Process definition ${id} not found`);
+
     return this.prisma.processDefinition.update({
       where: { id },
       data: { isActive: false }

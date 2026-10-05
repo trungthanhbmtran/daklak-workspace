@@ -27,26 +27,34 @@ export class GrpcWorkflowController {
       code: data.code,
       name: data.name,
       description: data.description,
-      graph: data.definition || {},
+      graph: data.definitionJson ? JSON.parse(data.definitionJson) : (data.definition || {}),
+      organizationId: data.organizationId,
+      createdBy: data.createdBy,
     });
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
   async updateWorkflow(@Payload() data: any) {
-    const result = await this.definitionService.updateProcess(data.id, data);
+    let updatePayload = { ...data };
+    if (data.definitionJson) {
+      updatePayload.graph = JSON.parse(data.definitionJson);
+    } else if (data.definition) {
+      updatePayload.graph = data.definition;
+    }
+    const result = await this.definitionService.updateProcess(data.id, updatePayload, data.organizationId);
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
   async findOneWorkflow(@Payload() data: any) {
-    const def = await this.definitionService.getDefinitionById(data.id);
+    const def = await this.definitionService.getDefinitionById(data.id, data.organizationId);
     return this.mapToWorkflowResponse(def, def.versions[0]);
   }
 
   @GrpcMethod('WorkflowService', 'FindWorkflowByCode')
   async findWorkflowByCode(@Payload() data: any) {
-    const def = await this.definitionService.getDefinition(data.code);
+    const def = await this.definitionService.getDefinition(data.code, data.organizationId);
     return this.mapToWorkflowResponse(def, def.versions[0]);
   }
 
@@ -69,7 +77,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'DeleteWorkflow')
   async deleteWorkflow(@Payload() data: any) {
-    await this.definitionService.deleteProcess(data.id);
+    await this.definitionService.deleteProcess(data.id, data.organizationId);
     return { success: true };
   }
 
@@ -268,7 +276,7 @@ export class GrpcWorkflowController {
       description: def.description,
       version: version?.version || 1,
       status: version?.status || 'DRAFT',
-      definition: version?.graph || {},
+      definitionJson: version?.graph ? JSON.stringify(version.graph) : '{}',
       trigger: def.code,
       createdAt: def.createdAt?.toISOString(),
       updatedAt: def.updatedAt?.toISOString(),

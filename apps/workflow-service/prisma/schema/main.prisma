@@ -40,18 +40,21 @@ model ProcessType {
 // =============================================================================
 
 model ProcessDefinition {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
-  description String?  @db.Text
-  isActive    Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(cuid())
+  code           String   @unique
+  name           String
+  description    String?  @db.Text
+  organizationId String?  @map("organization_id")
+  createdBy      String?  @map("created_by")
+  isActive       Boolean  @default(false)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   versions ProcessVersion[]
   bindings ProcessBinding[]
 
   @@index([isActive])
+  @@index([organizationId])
   @@map("process_definitions")
 }
 

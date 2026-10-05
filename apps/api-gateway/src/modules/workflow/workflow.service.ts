@@ -99,6 +99,20 @@ export class WorkflowService implements OnModuleInit {
   // --- Backward Compatible (Legacy APIs) ---
 
 
+  private mapResponse(result: any) {
+    if (!result) return {};
+    const res = { ...result };
+    if (res.definitionJson) {
+      try {
+        res.definition = JSON.parse(res.definitionJson);
+      } catch (e) {
+        res.definition = {};
+      }
+      delete res.definitionJson;
+    }
+    return res;
+  }
+
   async getMicroservices() {
     const result = (await firstValueFrom(this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' })).catch(e => this.handleRpcError(e))) as any;
     return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
@@ -121,22 +135,33 @@ export class WorkflowService implements OnModuleInit {
     return { success: true, data: items || [], meta: {}, message: 'OK' };
   }
 
-  async create(body: CreateWorkflowDto) {
-    const payload = { name: body.name, description: body.description, code: body.code, definition: body.definition || {} };
+  async create(body: CreateWorkflowDto, user?: any) {
+    const payload = { 
+      name: body.name, description: body.description, code: body.code, 
+      definitionJson: body.definition ? JSON.stringify(body.definition) : undefined,
+      organizationId: user?.organizationId || user?.orgId,
+      createdBy: user?.id?.toString()
+    };
     const result = (await firstValueFrom(this.workflowGrpcService.CreateWorkflow(payload)).catch(e => this.handleRpcError(e))) as any;
-    return { success: true, data: result || {}, meta: {}, message: 'Created successfully' };
+    return { success: true, data: this.mapResponse(result) || {}, meta: {}, message: 'Created successfully' };
   }
 
-  async update(id: string, body: UpdateWorkflowDto) {
-    const payload: any = { id, name: body.name, description: body.description, code: body.code, definition: body.definition || {} };
+  async update(id: string, body: UpdateWorkflowDto, user?: any) {
+    const payload: any = { 
+      id, name: body.name, description: body.description, code: body.code, 
+      definitionJson: body.definition ? JSON.stringify(body.definition) : undefined,
+      organizationId: user?.organizationId || user?.orgId
+    };
     const result = (await firstValueFrom(this.workflowGrpcService.UpdateWorkflow(payload)).catch(e => this.handleRpcError(e))) as any;
-    return { success: true, data: result || {}, meta: {}, message: 'Updated successfully' };
+    return { success: true, data: this.mapResponse(result) || {}, meta: {}, message: 'Updated successfully' };
   }
 
-  async list(query: any) {
+  async list(query: any, user?: any) {
     const skip = query.skip || 0; const take = query.take || 20; const search = query.search;
-    const result = (await firstValueFrom(this.workflowGrpcService.ListWorkflows({ skip, take, search })).catch(e => this.handleRpcError(e))) as any;
-    return { success: true, data: result?.data || [], meta: result?.meta || {}, message: 'OK' };
+    const organizationId = user?.organizationId || user?.orgId;
+    const result = (await firstValueFrom(this.workflowGrpcService.ListWorkflows({ skip, take, search, organizationId })).catch(e => this.handleRpcError(e))) as any;
+    const items = (result?.data || []).map((item: any) => this.mapResponse(item));
+    return { success: true, data: items, meta: result?.meta || {}, message: 'OK' };
   }
 
   async resume(instanceId: string, nodeId: string, body: any, user: any) {
@@ -160,19 +185,23 @@ export class WorkflowService implements OnModuleInit {
     return { success: true, data: response?.logs || [], meta: {}, message: 'OK' };
   }
 
-  async findOne(id: string) {
-    const result = (await firstValueFrom(this.workflowGrpcService.FindOneWorkflow({ id })).catch(e => this.handleRpcError(e))) as any;
-    return { success: true, data: result || {}, meta: {}, message: 'OK' };
+  async findOne(id: string, user?: any) {
+    const organizationId = user?.organizationId || user?.orgId;
+    const result = (await firstValueFrom(this.workflowGrpcService.FindOneWorkflow({ id, organizationId })).catch(e => this.handleRpcError(e))) as any;
+    return { success: true, data: this.mapResponse(result) || {}, meta: {}, message: 'OK' };
   }
 
-  async delete(id: string) {
-    const result = (await firstValueFrom(this.workflowGrpcService.DeleteWorkflow({ id })).catch(e => this.handleRpcError(e))) as any;
+  async delete(id: string, user?: any) {
+    const organizationId = user?.organizationId || user?.orgId;
+    const result = (await firstValueFrom(this.workflowGrpcService.DeleteWorkflow({ id, organizationId })).catch(e => this.handleRpcError(e))) as any;
     return { success: result?.success ?? true, data: {}, meta: {}, message: 'Deleted successfully' };
   }
 
-  async publish(id: string) {
-    const result = (await firstValueFrom(this.workflowGrpcService.PublishWorkflow({ id })).catch(e => this.handleRpcError(e))) as any;
-    return { success: true, data: result || {}, meta: {}, message: 'Workflow published successfully' };
+  async publish(id: string, user?: any) {
+    const organizationId = user?.organizationId || user?.orgId;
+    const actorId = user?.id?.toString();
+    const result = (await firstValueFrom(this.workflowGrpcService.PublishWorkflow({ id, actorId, organizationId })).catch(e => this.handleRpcError(e))) as any;
+    return { success: true, data: this.mapResponse(result) || {}, meta: {}, message: 'Workflow published successfully' };
   }
 
   async applyModule(id: string, moduleCode: string) {

@@ -330,6 +330,7 @@ message PublishWorkflowRequest {
   string id = 1;
   // New optional field: actor performing publish
   string actorId = 2;
+  string organizationId = 3;
 }
 
 message ApplyModuleRequest {
@@ -344,7 +345,8 @@ message CreateWorkflowRequest {
   int32 version = 4;
   string status = 5;
   string createdBy = 6;
-  WorkflowDefinition definition = 7;
+  string definitionJson = 7;
+  string organizationId = 8;
 }
 
 message UpdateWorkflowRequest {
@@ -354,21 +356,25 @@ message UpdateWorkflowRequest {
   string description = 4;
   int32 version = 5;
   string status = 6;
-  WorkflowDefinition definition = 7;
+  string definitionJson = 7;
+  string organizationId = 8;
 }
 
 message FindOneWorkflowRequest {
   string id = 1;
+  string organizationId = 2;
 }
 
 message FindWorkflowByCodeRequest {
   string code = 1;
+  string organizationId = 2;
 }
 
 message ListWorkflowsRequest {
   int32 skip = 1;
   int32 take = 2;
   string search = 3;
+  string organizationId = 4;
 }
 
 message ListWorkflowsResponse {
@@ -378,6 +384,7 @@ message ListWorkflowsResponse {
 
 message DeleteWorkflowRequest {
   string id = 1;
+  string organizationId = 2;
 }
 
 message DeleteWorkflowResponse {
@@ -394,7 +401,7 @@ message WorkflowResponse {
   string createdBy = 7;
   string createdAt = 8;
   string updatedAt = 9;
-  WorkflowDefinition definition = 10;
+  string definitionJson = 10;
   string trigger = 11;
   // New fields (additive, field numbers after 11)
   string publishedBy = 12;

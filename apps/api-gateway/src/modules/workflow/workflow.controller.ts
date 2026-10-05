@@ -126,15 +126,15 @@ export class WorkflowController {
 
   @Post()
   @ApiOperation({ summary: 'Tạo quy trình mới/phiên bản mới' })
-  async create(@Body() body: CreateWorkflowDto) { return this.workflowService.create(body); }
+  async create(@Body() body: CreateWorkflowDto, @Req() req: any) { return this.workflowService.create(body, req.user); }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật định nghĩa quy trình' })
-  async update(@Param('id') id: string, @Body() body: UpdateWorkflowDto) { return this.workflowService.update(id, body); }
+  async update(@Param('id') id: string, @Body() body: UpdateWorkflowDto, @Req() req: any) { return this.workflowService.update(id, body, req.user); }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách quy trình' })
-  async list(@Query() query: PaginationQueryDto & { search?: string }) { return this.workflowService.list(query); }
+  async list(@Query() query: PaginationQueryDto & { search?: string }, @Req() req: any) { return this.workflowService.list(query, req.user); }
 
   @Post('instances/:instanceId/resume/:nodeId')
   @ApiOperation({ summary: 'Xử lý bước chờ (User Task) trong quy trình' })
@@ -168,15 +168,15 @@ export class WorkflowController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết quy trình' })
-  async findOne(@Param('id') id: string) { return this.workflowService.findOne(id); }
+  async findOne(@Param('id') id: string, @Req() req: any) { return this.workflowService.findOne(id, req.user); }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa quy trình' })
-  async delete(@Param('id') id: string) { return this.workflowService.delete(id); }
+  async delete(@Param('id') id: string, @Req() req: any) { return this.workflowService.delete(id, req.user); }
 
   @Post(':id/publish')
   @ApiOperation({ summary: 'Publish quy trình' })
-  async publish(@Param('id') id: string) { return this.workflowService.publish(id); }
+  async publish(@Param('id') id: string, @Req() req: any) { return this.workflowService.publish(id, req.user); }
 
   @Post(':id/apply-module')
   @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
