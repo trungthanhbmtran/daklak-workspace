@@ -23,6 +23,7 @@ import Topbar from "./Topbar";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { WorkflowUpdateHistory } from "./WorkflowUpdateHistory";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { useWorkflowDynamics } from "./hooks/useWorkflowDynamics";
 import { useWorkflowCanvas } from "./hooks/useWorkflowCanvas";
@@ -193,7 +194,6 @@ const Flow = ({ id, onBack, readOnly = false }: WorkflowEditorProps) => {
             className="transition-opacity duration-300"
             nodesDraggable={!readOnly}
             nodesConnectable={!readOnly}
-            edgesUpdatable={!readOnly}
             edgesFocusable={!readOnly}
             elementsSelectable={true}
           >
