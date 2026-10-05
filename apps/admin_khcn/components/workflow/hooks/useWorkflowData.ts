@@ -48,6 +48,7 @@ export function useWorkflowData({
           const loadedNodes = (definition.nodes || []).map((node: any) => ({
             ...node,
             id: String(node.id),
+            data: node.data || {},
             // Ensure position exists for ReactFlow
             position: node.position || {
               x: Math.random() * 400,
@@ -64,6 +65,7 @@ export function useWorkflowData({
               type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
               id: String(edge.id || `edge-${edge.source}-${edge.target}-${index}`),
               animated: edge.animated || true,
+              data: edge.data || {},
               label: edge.label || (edge.data?.label as string) || "Chuyển tiếp",
               markerEnd: edge.markerEnd || {
                 type: MarkerType.ArrowClosed,

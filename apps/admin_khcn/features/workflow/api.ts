@@ -97,11 +97,19 @@ export interface WorkflowInstance {
  * Helper để bóc tách dữ liệu từ Gateway response chuẩn hóa.
  */
 function unwrapData<T>(res: any): T {
-  return res.data as T;
+  const axiosData = res.data;
+  if (axiosData && typeof axiosData === 'object' && 'success' in axiosData && 'data' in axiosData) {
+    return axiosData.data as T;
+  }
+  return axiosData as T;
 }
 
 function unwrapMeta(res: any): any {
-  return res?.meta;
+  const axiosData = res.data;
+  if (axiosData && typeof axiosData === 'object' && 'success' in axiosData && 'meta' in axiosData) {
+    return axiosData.meta;
+  }
+  return axiosData?.meta;
 }
 
 export const workflowApi = {
