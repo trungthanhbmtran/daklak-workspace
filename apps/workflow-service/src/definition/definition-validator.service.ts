@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
 export interface ValidationError {
   nodeId: string;
@@ -184,14 +184,31 @@ export class DefinitionValidatorService {
       data: this._sanitizeData(n.data),
     }));
 
-    const edges: any[] = (graph?.edges ?? []).map((e: any) => ({
-      id: e.id,
-      source: e.source ?? e.sourceNodeId,
-      target: e.target ?? e.targetNodeId,
-      action: e.label ?? e.action ?? (e.data?.action) ?? null,
-      condition: e.condition ?? null,
-      priority: e.priority ?? 0,
-    }));
+    const edges: any[] = (graph?.edges ?? []).map((e: any) => {
+      // Map action từ label hoặc data.action (chuẩn React Flow)
+      const action = e.label ?? e.action ?? (e.data?.action) ?? null;
+      
+      // Map condition từ properties gốc hoặc từ data (nếu UI truyền lên)
+      let condition = e.condition ?? null;
+      if (!condition && e.data) {
+        if (e.data.expression) {
+          condition = e.data.expression;
+        } else if (e.data.conditions && Array.isArray(e.data.conditions)) {
+          condition = e.data.conditions;
+        }
+      }
+
+      return {
+        id: e.id,
+        source: e.source ?? e.sourceNodeId,
+        target: e.target ?? e.targetNodeId,
+        action,
+        condition,
+        priority: e.priority ?? (e.data?.priority) ?? 0,
+        // Lưu lại raw data nếu cần thiết cho debugging/frontend mapping
+        data: this._sanitizeData(e.data),
+      };
+    });
 
     return { nodes, edges, compiledAt: new Date().toISOString(), schemaVersion: 1 };
   }

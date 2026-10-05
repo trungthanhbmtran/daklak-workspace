@@ -106,7 +106,7 @@ integrationConnections.push(docStatIntegration as any);
 const leaveRequestGraph = {
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
-    { id: 'task_1', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Nhân viên nộp đơn', assignments: [{ unitScope: 'SELF' }], formSchema: JSON.stringify([{ id: "f1", name: "reason", label: "Lý do", type: "textarea" }, { id: "f2", name: "startDate", label: "Ngày bắt đầu", type: "date" }, { id: "f3", name: "endDate", label: "Ngày kết thúc", type: "date" }, { id: "f4", name: "leaveDays", label: "Số ngày nghỉ", type: "number" }]) } },
+    { id: 'task_1', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Nhân viên nộp đơn', assignments: [{ unitScope: 'SELF' }], formSchema: JSON.stringify([{ id: "f1", name: "reason", action: "Lý do", type: "textarea" }, { id: "f2", name: "startDate", action: "Ngày bắt đầu", type: "date" }, { id: "f3", name: "endDate", action: "Ngày kết thúc", type: "date" }, { id: "f4", name: "leaveDays", action: "Số ngày nghỉ", type: "number" }]) } },
     { id: 'task_2', type: 'user_task', position: { x: 500, y: 250 }, data: { label: 'Trưởng phòng Duyệt', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }] } },
     { id: 'gateway_1', type: 'exclusive_gateway', position: { x: 750, y: 250 }, data: { label: 'Kiểm tra Kết quả Duyệt' } },
     { id: 'integration_1', type: 'service_task', position: { x: 1050, y: 250 }, data: { label: 'Đồng bộ nghỉ phép sang HRM', integrationCode: 'LGSP_TINH', endpoint: '/hrm/leave-sync', method: 'POST', bodyMapping: { employeeId: '{{ variables.employeeId }}', startDate: '{{ variables.startDate }}', endDate: '{{ variables.endDate }}' } } },
@@ -115,10 +115,10 @@ const leaveRequestGraph = {
   ],
   edges: [
     { id: 'e_start1_task1', source: 'start_1', target: 'task_1', type: 'custom' },
-    { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom', label: 'SUBMIT' },
-    { id: 'e_task2_gateway1', source: 'task_2', target: 'gateway_1', type: 'custom', label: 'REVIEW' },
-    { id: 'e_gateway1_integration1', source: 'gateway_1', target: 'integration_1', type: 'custom', sourceHandle: 'true', label: 'APPROVE', data: { conditions: [{ id: 'c1', field: 'variables.approved', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.approved === true" } },
-    { id: 'e_gateway1_rejected', source: 'gateway_1', target: 'end_rejected', type: 'custom', sourceHandle: 'false', label: 'REJECT', data: { conditions: [{ id: 'c1', field: 'variables.approved', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.approved === false" } },
+    { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom', action: 'SUBMIT' },
+    { id: 'e_task2_gateway1', source: 'task_2', target: 'gateway_1', type: 'custom', action: 'REVIEW' },
+    { id: 'e_gateway1_integration1', source: 'gateway_1', target: 'integration_1', type: 'custom', sourceHandle: 'true', action: 'APPROVE', condition: 'variables.approved === true' },
+    { id: 'e_gateway1_rejected', source: 'gateway_1', target: 'end_rejected', type: 'custom', sourceHandle: 'false', action: 'REJECT', condition: 'variables.approved === false' },
     { id: 'e_integration1_end', source: 'integration_1', target: 'end_approved', type: 'custom' },
   ],
 };
@@ -126,22 +126,22 @@ const leaveRequestGraph = {
 const govComplexTaskGraph = {
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
-    { id: 'task_assign', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Giao việc (Lãnh đạo)', targetStatus: 'PENDING_ACCEPTANCE', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "taskName", label: "Tên công việc", type: "text" }, { id: "f2", name: "description", label: "Mô tả", type: "textarea" }, { id: "f3", name: "dueDate", label: "Hạn chót", type: "date" }, { id: "f4", name: "assigneeId", label: "Người nhận", type: "text" }]) } },
+    { id: 'task_assign', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Giao việc (Lãnh đạo)', targetStatus: 'PENDING_ACCEPTANCE', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "taskName", action: "Tên công việc", type: "text" }, { id: "f2", name: "description", action: "Mô tả", type: "textarea" }, { id: "f3", name: "dueDate", action: "Hạn chót", type: "date" }, { id: "f4", name: "assigneeId", action: "Người nhận", type: "text" }]) } },
     { id: 'gateway_accept', type: 'exclusive_gateway', position: { x: 550, y: 250 }, data: { label: 'Tiếp nhận hay Từ chối?' } },
-    { id: 'task_process', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', targetStatus: 'IN_PROGRESS', assignments: [{ unitScope: 'CHILD_UNIT', rankOperator: 'any' }], formSchema: JSON.stringify([{ id: "f1", name: "reportContent", label: "Nội dung báo cáo", type: "textarea" }, { id: "f2", name: "attachments", label: "Đính kèm", type: "text" }, { id: "f3", name: "coordinators", label: "Người phối hợp", type: "text" }]), multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
-    { id: 'task_evaluate', type: 'user_task', position: { x: 1150, y: 250 }, data: { label: 'Nghiệm thu & Chấm KPI', targetStatus: 'WAITING_FOR_APPROVAL', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "isApproved", label: "Đồng ý duyệt", type: "text" }, { id: "f2", name: "kpiScore", label: "Điểm KPI", type: "number" }, { id: "f3", name: "managerFeedback", label: "Phản hồi", type: "textarea" }]) } },
+    { id: 'task_process', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', targetStatus: 'IN_PROGRESS', assignments: [{ unitScope: 'CHILD_UNIT', rankOperator: 'any' }], formSchema: JSON.stringify([{ id: "f1", name: "reportContent", action: "Nội dung báo cáo", type: "textarea" }, { id: "f2", name: "attachments", action: "Đính kèm", type: "text" }, { id: "f3", name: "coordinators", action: "Người phối hợp", type: "text" }]), multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
+    { id: 'task_evaluate', type: 'user_task', position: { x: 1150, y: 250 }, data: { label: 'Nghiệm thu & Chấm KPI', targetStatus: 'WAITING_FOR_APPROVAL', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "isApproved", action: "Đồng ý duyệt", type: "text" }, { id: "f2", name: "kpiScore", action: "Điểm KPI", type: "number" }, { id: "f3", name: "managerFeedback", action: "Phản hồi", type: "textarea" }]) } },
     { id: 'gateway_evaluate', type: 'exclusive_gateway', position: { x: 1450, y: 250 }, data: { label: 'Kết quả Nghiệm thu' } },
     { id: 'end_done', type: 'end', position: { x: 1750, y: 250 }, data: { label: 'Hoàn thành', targetStatus: 'COMPLETED' } },
   ],
   edges: [
     { id: 'e_start_assign', source: 'start_1', target: 'task_assign', type: 'custom' },
-    { id: 'e_assign_gw', source: 'task_assign', target: 'gateway_accept', type: 'custom', label: 'ASSIGN' },
-    { id: 'e_gw_reject', source: 'gateway_accept', target: 'task_assign', type: 'custom', sourceHandle: 'false', label: 'REJECT', data: { conditions: [{ id: 'c1', field: 'variables.isAccepted', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.isAccepted === false" } },
-    { id: 'e_gw_process', source: 'gateway_accept', target: 'task_process', type: 'custom', sourceHandle: 'true', label: 'ACCEPT', data: { conditions: [{ id: 'c1', field: 'variables.isAccepted', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.isAccepted === true" } },
-    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom', label: 'SUBMIT_REPORT' },
-    { id: 'e_eval_gw', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom', label: 'EVALUATE' },
-    { id: 'e_gweval_reject', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', label: 'REWORK', data: { conditions: [{ id: 'c1', field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], expression: "variables.isApproved === false" } },
-    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', label: 'APPROVE', data: { conditions: [{ id: 'c1', field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], expression: "variables.isApproved === true" } },
+    { id: 'e_assign_gw', source: 'task_assign', target: 'gateway_accept', type: 'custom', action: 'ASSIGN' },
+    { id: 'e_gw_reject', source: 'gateway_accept', target: 'task_assign', type: 'custom', sourceHandle: 'false', action: 'REJECT', condition: 'variables.isAccepted === false' },
+    { id: 'e_gw_process', source: 'gateway_accept', target: 'task_process', type: 'custom', sourceHandle: 'true', action: 'ACCEPT', condition: 'variables.isAccepted === true' },
+    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom', action: 'SUBMIT_REPORT' },
+    { id: 'e_eval_gw', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom', action: 'EVALUATE' },
+    { id: 'e_gweval_reject', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', action: 'REWORK', condition: 'variables.isApproved === false' },
+    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', action: 'APPROVE', condition: 'variables.isApproved === true' },
   ],
 };
 
@@ -149,25 +149,25 @@ const govComplexTaskGraph = {
 const unexpectedTaskGraph = {
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
-    { id: 'task_propose', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Đề xuất việc phát sinh (Nhân viên)', targetStatus: 'TODO', assignments: [{ unitScope: 'SELF' }], formSchema: JSON.stringify([{ id: 'f1', name: 'taskName', label: 'Tên công việc', type: 'text' }, { id: 'f2', name: 'description', label: 'Mô tả', type: 'textarea' }, { id: 'f3', name: 'dueDate', label: 'Đề xuất hạn chót', type: 'date' }]) } },
-    { id: 'task_approve_proposal', type: 'user_task', position: { x: 550, y: 250 }, data: { label: 'Phê duyệt đề xuất (Lãnh đạo)', targetStatus: 'PENDING_ACCEPTANCE', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: 'f1', name: 'isApproved', label: 'Đồng ý', type: 'text' }, { id: 'f2', name: 'reason', label: 'Lý do', type: 'textarea' }]) } },
+    { id: 'task_propose', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Đề xuất việc phát sinh (Nhân viên)', targetStatus: 'TODO', assignments: [{ unitScope: 'SELF' }], formSchema: JSON.stringify([{ id: 'f1', name: 'taskName', action: 'Tên công việc', type: 'text' }, { id: 'f2', name: 'description', action: 'Mô tả', type: 'textarea' }, { id: 'f3', name: 'dueDate', action: 'Đề xuất hạn chót', type: 'date' }]) } },
+    { id: 'task_approve_proposal', type: 'user_task', position: { x: 550, y: 250 }, data: { label: 'Phê duyệt đề xuất (Lãnh đạo)', targetStatus: 'PENDING_ACCEPTANCE', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: 'f1', name: 'isApproved', action: 'Đồng ý', type: 'text' }, { id: 'f2', name: 'reason', action: 'Lý do', type: 'textarea' }]) } },
     { id: 'gateway_proposal', type: 'exclusive_gateway', position: { x: 850, y: 250 }, data: { label: 'Quyết định' } },
     { id: 'end_rejected', type: 'end', position: { x: 850, y: 450 }, data: { label: 'Bị từ chối', targetStatus: 'REJECTED' } },
     { id: 'task_process', type: 'user_task', position: { x: 1150, y: 250 }, data: { label: 'Xử lý & Báo cáo (Nhân viên)', targetStatus: 'IN_PROGRESS', assignments: [{ unitScope: 'SELF' }] } },
-    { id: 'task_evaluate', type: 'user_task', position: { x: 1450, y: 250 }, data: { label: 'Nghiệm thu (Lãnh đạo)', targetStatus: 'WAITING_FOR_APPROVAL', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: 'f1', name: 'isApproved', label: 'Đồng ý duyệt', type: 'text' }, { id: 'f2', name: 'kpiScore', label: 'Điểm KPI', type: 'number' }, { id: 'f3', name: 'managerFeedback', label: 'Phản hồi', type: "textarea" }]) } },
+    { id: 'task_evaluate', type: 'user_task', position: { x: 1450, y: 250 }, data: { label: 'Nghiệm thu (Lãnh đạo)', targetStatus: 'WAITING_FOR_APPROVAL', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: 'f1', name: 'isApproved', action: 'Đồng ý duyệt', type: 'text' }, { id: 'f2', name: 'kpiScore', action: 'Điểm KPI', type: 'number' }, { id: 'f3', name: 'managerFeedback', action: 'Phản hồi', type: "textarea" }]) } },
     { id: 'gateway_evaluate', type: 'exclusive_gateway', position: { x: 1750, y: 250 }, data: { label: 'Kết quả Nghiệm thu' } },
     { id: 'end_done', type: 'end', position: { x: 2050, y: 250 }, data: { label: 'Hoàn thành', targetStatus: 'COMPLETED' } },
   ],
   edges: [
     { id: 'e_start_propose', source: 'start_1', target: 'task_propose', type: 'custom' },
-    { id: 'e_propose_approve', source: 'task_propose', target: 'task_approve_proposal', type: 'custom', label: 'SUBMIT' },
-    { id: 'e_approve_gw', source: 'task_approve_proposal', target: 'gateway_proposal', type: 'custom', label: 'REVIEW' },
-    { id: 'e_gw_reject', source: 'gateway_proposal', target: 'end_rejected', type: 'custom', sourceHandle: 'false', label: 'REJECT', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], expression: 'variables.isApproved === false' } },
-    { id: 'e_gw_process', source: 'gateway_proposal', target: 'task_process', type: 'custom', sourceHandle: 'true', label: 'APPROVE', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], expression: 'variables.isApproved === true' } },
-    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom', label: 'SUBMIT_REPORT' },
-    { id: 'e_eval_gweval', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom', label: 'EVALUATE' },
-    { id: 'e_gweval_rework', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', label: 'REWORK', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], expression: 'variables.isApproved === false' } },
-    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', label: 'APPROVE', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], expression: 'variables.isApproved === true' } },
+    { id: 'e_propose_approve', source: 'task_propose', target: 'task_approve_proposal', type: 'custom', action: 'SUBMIT' },
+    { id: 'e_approve_gw', source: 'task_approve_proposal', target: 'gateway_proposal', type: 'custom', action: 'REVIEW' },
+    { id: 'e_gw_reject', source: 'gateway_proposal', target: 'end_rejected', type: 'custom', sourceHandle: 'false', action: 'REJECT', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], condition: 'variables.isApproved === false' } },
+    { id: 'e_gw_process', source: 'gateway_proposal', target: 'task_process', type: 'custom', sourceHandle: 'true', action: 'APPROVE', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], condition: 'variables.isApproved === true' } },
+    { id: 'e_process_eval', source: 'task_process', target: 'task_evaluate', type: 'custom', action: 'SUBMIT_REPORT' },
+    { id: 'e_eval_gweval', source: 'task_evaluate', target: 'gateway_evaluate', type: 'custom', action: 'EVALUATE' },
+    { id: 'e_gweval_rework', source: 'gateway_evaluate', target: 'task_process', type: 'custom', sourceHandle: 'false', action: 'REWORK', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'false', logicalOp: '&&' }], condition: 'variables.isApproved === false' } },
+    { id: 'e_gweval_done', source: 'gateway_evaluate', target: 'end_done', type: 'custom', sourceHandle: 'true', action: 'APPROVE', data: { conditions: [{ field: 'variables.isApproved', operator: '===', value: 'true', logicalOp: '&&' }], condition: 'variables.isApproved === true' } },
   ]
 };
 
@@ -213,9 +213,9 @@ const processDefinitions = [
         ],
         edges: [
           { id: 'e_start1_task1', source: 'start_1', target: 'task_1', type: 'custom' },
-          { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom', label: 'SUBMIT' },
-          { id: 'e_task2_task3', source: 'task_2', target: 'task_3', type: 'custom', label: 'APPROVE' },
-          { id: 'e_task3_end1', source: 'task_3', target: 'end_1', type: 'custom', label: 'PUBLISH' },
+          { id: 'e_task1_task2', source: 'task_1', target: 'task_2', type: 'custom', action: 'SUBMIT' },
+          { id: 'e_task2_task3', source: 'task_2', target: 'task_3', type: 'custom', action: 'APPROVE' },
+          { id: 'e_task3_end1', source: 'task_3', target: 'end_1', type: 'custom', action: 'PUBLISH' },
         ],
       },
     },
@@ -231,6 +231,35 @@ const processDefinitions = [
       graph: govComplexTaskGraph,
     },
   },
+  {
+    code: 'BUSINESS_LICENSE',
+    name: 'Quy trình Cấp phép Kinh doanh',
+    description: 'Quy trình chuẩn cấp giấy phép kinh doanh cho tổ chức/cá nhân.',
+    isActive: true,
+    version: {
+      version: 1,
+      status: 'PUBLISHED',
+      graph: {
+        nodes: [
+          { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Công dân nộp hồ sơ' } },
+          { id: 'task_receive', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Tiếp nhận & Kiểm tra', assignments: [{ unitScope: 'SAME_UNIT' }] } },
+          { id: 'gw_valid', type: 'exclusive_gateway', position: { x: 450, y: 250 }, data: { label: 'Hồ sơ hợp lệ?' } },
+          { id: 'end_rejected', type: 'end', position: { x: 450, y: 400 }, data: { label: 'Trả hồ sơ / Từ chối' } },
+          { id: 'task_verify', type: 'user_task', position: { x: 650, y: 250 }, data: { label: 'Thẩm định hồ sơ', assignments: [{ unitScope: 'SAME_UNIT' }] } },
+          { id: 'task_approve', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Lãnh đạo phê duyệt', assignments: [{ unitScope: 'PARENT_UNIT', rankOperator: 'exact', rankValue: 'minRank' }] } },
+          { id: 'end_approved', type: 'end', position: { x: 1050, y: 250 }, data: { label: 'Cấp phép thành công' } }
+        ],
+        edges: [
+          { id: 'e_start_recv', source: 'start_1', target: 'task_receive', type: 'custom' },
+          { id: 'e_recv_gw', source: 'task_receive', target: 'gw_valid', type: 'custom', action: 'CHECK' },
+          { id: 'e_gw_rej', source: 'gw_valid', target: 'end_rejected', type: 'custom', sourceHandle: 'false', action: 'INVALID', condition: 'variables.isValid === false' },
+          { id: 'e_gw_ok', source: 'gw_valid', target: 'task_verify', type: 'custom', sourceHandle: 'true', action: 'VALID', condition: 'variables.isValid === true' },
+          { id: 'e_ver_appr', source: 'task_verify', target: 'task_approve', type: 'custom', action: 'VERIFIED' },
+          { id: 'e_appr_end', source: 'task_approve', target: 'end_approved', type: 'custom', action: 'APPROVE' }
+        ]
+      }
+    }
+  }
 ];
 
 // ============================================================================
