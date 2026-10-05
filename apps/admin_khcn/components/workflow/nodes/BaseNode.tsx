@@ -22,36 +22,39 @@ export const BaseNode = ({
   return (
     <div
       className={cn(
-        "group min-w-[220px] max-w-[350px] rounded-2xl border bg-card/90 backdrop-blur-md p-0 shadow-lg transition-all duration-300",
+        "group min-w-[240px] max-w-[380px] rounded-3xl border bg-white/80 dark:bg-black/60 backdrop-blur-2xl p-0 shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out relative overflow-hidden",
         selected
-          ? "border-primary ring-1 ring-primary/30 shadow-[0_0_20px_rgba(var(--primary),0.25)] scale-[1.02]"
-          : "border-border/60 hover:border-primary/40 hover:shadow-xl",
+          ? "border-primary/60 ring-4 ring-primary/10 shadow-[0_0_40px_rgba(var(--primary),0.2)] scale-[1.03]"
+          : "border-white/40 dark:border-white/10 hover:border-primary/30 hover:shadow-xl",
         className
       )}
     >
-      <div className="flex items-center gap-2.5 border-b border-border/40 bg-muted/30 px-4 py-3 rounded-t-2xl transition-colors group-hover:bg-muted/50">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-background shadow-sm border border-border/50 group-hover:scale-110 transition-transform duration-300">
+      {/* Subtle top gradient glow */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/5 to-transparent opacity-50 pointer-events-none" />
+
+      <div className="flex items-center gap-3 border-b border-border/30 bg-muted/20 px-5 py-4 transition-colors group-hover:bg-muted/30 relative z-10">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-background shadow-sm border border-border/40 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
           {icon}
         </div>
-        <span className="text-[11px] font-black uppercase tracking-widest text-foreground/80">
+        <span className="text-[12px] font-black uppercase tracking-[0.15em] text-foreground/85">
           {label}
         </span>
       </div>
-      <div className="p-4">{children}</div>
+      <div className="p-5 relative z-10">{children}</div>
       
       {/* Handles */}
       {type !== "start" && (
         <Handle
           type="target"
           position={Position.Left}
-          className="h-6 w-6 -ml-3 border-2 border-background bg-slate-400 ring-2 ring-border/50 transition-all hover:scale-125 hover:bg-primary z-10"
+          className="h-7 w-7 -ml-3.5 border-[3px] border-background bg-slate-300 ring-2 ring-border/30 transition-all hover:scale-125 hover:bg-primary z-20 shadow-md"
         />
       )}
       {type !== "end" && !type.includes("gateway") && (
         <Handle
           type="source"
           position={Position.Right}
-          className="h-6 w-6 -mr-3 border-2 border-background bg-primary ring-2 ring-primary/30 transition-all hover:scale-125 hover:shadow-[0_0_10px_rgba(var(--primary),0.5)] z-10"
+          className="h-7 w-7 -mr-3.5 border-[3px] border-background bg-primary ring-2 ring-primary/20 transition-all hover:scale-125 hover:shadow-[0_0_15px_rgba(var(--primary),0.6)] z-20 shadow-md"
         />
       )}
     </div>
