@@ -3,6 +3,7 @@ import React from "react";
 import { Node, Edge } from "@xyflow/react";
 import { Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 // Import all specific property panels
@@ -135,15 +136,16 @@ export const PropertiesPanel = ({
   };
 
   return (
-    <div
-      className={cn(
-        "absolute z-40 w-80 sm:w-96 top-[90px] bottom-6 flex flex-col transition-all duration-500 ease-out",
-        isOpen ? "right-6 opacity-100 translate-x-0" : "-right-10 opacity-0 translate-x-full pointer-events-none"
-      )}
-    >
-      <div className="flex-1 border border-white/20 dark:border-white/10 bg-white/70 dark:bg-black/50 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.1)] flex flex-col rounded-3xl overflow-hidden relative">
+    <Sheet open={isOpen} onOpenChange={onOpenChange} modal={false}>
+      <SheetContent 
+        className="w-[320px] sm:w-[400px] border-l border-border bg-card p-0 flex flex-col shadow-2xl z-50"
+        onPointerDownOutside={(e) => {
+          if ((e.target as Element).closest('.react-flow')) {
+            e.preventDefault();
+          }
+        }}
+      >
         <PropertiesHeader selectedNode={selectedNode} selectedEdge={selectedEdge} data={data} />
-
 
         <div className="flex-1 overflow-y-auto p-5">
           <PropertiesItemInfo selectedNode={selectedNode} selectedEdge={selectedEdge} />
@@ -162,12 +164,12 @@ export const PropertiesPanel = ({
                 onOpenChange(false);
               }}
             >
-              <Trash2 className="w-4 h-4" />
-              Xóa {selectedNode ? "Node" : "Edge"}
+              <Trash2 className="w-4 h-4 mr-2" />
+              Xóa {selectedNode ? "Tác nhân" : "Đường dẫn"}
             </Button>
           </div>
         )}
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 };
