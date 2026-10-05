@@ -66,23 +66,34 @@ export class ExecutionService {
 
     const version = def.versions[0];
 
-    const instance = await this.prisma.processInstance.create({
-      data: {
-        definitionId: def.id,
-        versionId: version.id,
-        businessKey: payload.businessKey,
-        organizationId: payload.organizationId || 'DEFAULT',
-        status: 'RUNNING',
-        startedBy: payload.startedBy || 'SYSTEM',
-        variables: payload.variables || {},
-      },
+    const instance = await this.prisma.$transaction(async tx => {
+      const inst = await tx.processInstance.create({
+        data: {
+          definitionId: def.id,
+          versionId: version.id,
+          businessKey: payload.businessKey,
+          organizationId: payload.organizationId || 'DEFAULT',
+          status: 'RUNNING',
+          startedBy: payload.startedBy || 'SYSTEM',
+          variables: payload.variables || {},
+        },
+      });
+
+      await tx.outboxEvent.create({
+        data: {
+          workflowInstanceId: inst.id,
+          processVersion: 1,
+          nodeId: 'start',
+          commandType: 'start',
+          eventType: 'workflow.instance.started',
+          payload: { instanceId: inst.id, businessKey: inst.businessKey }
+        }
+      });
+
+      return inst;
     });
 
     await this.redisService.set(`workflow:${instance.id}:graph`, version.graph, 86400000);
-    this.rabbitMqService.emit('workflow.instance.started', {
-      instanceId: instance.id,
-      businessKey: instance.businessKey,
-    });
     this.advanceProcess(instance.id, 'start').catch(err => this.logger.error(`Advance failed`, err));
     return instance;
   }
@@ -125,32 +136,42 @@ export class ExecutionService {
       versionId = latestPublished.id;
     }
 
-    const instance = await this.prisma.processInstance.create({
-      data: {
-        definitionId: resolverResult.definitionId!,
-        versionId,
-        businessKey: req.businessId,
-        organizationId: req.organizationId || 'DEFAULT',
-        status: 'RUNNING',
-        startedBy: req.actorId || 'SYSTEM',
-        variables: req.initialContext || {},
-        processType: req.processTypeCode,
-        businessType: req.businessType,
-        businessId: req.businessId,
-        bindingId: resolverResult.bindingId,
-        correlationId: req.correlationId,
-        idempotencyKey: req.idempotencyKey,
-        actorId: req.actorId,
-      },
-      include: { version: true } // Include to cache graph
+    const instance = await this.prisma.$transaction(async tx => {
+      const inst = await tx.processInstance.create({
+        data: {
+          definitionId: resolverResult.definitionId!,
+          versionId,
+          businessKey: req.businessId,
+          organizationId: req.organizationId || 'DEFAULT',
+          status: 'RUNNING',
+          startedBy: req.actorId || 'SYSTEM',
+          variables: req.initialContext || {},
+          processType: req.processTypeCode,
+          businessType: req.businessType,
+          businessId: req.businessId,
+          bindingId: resolverResult.bindingId,
+          correlationId: req.correlationId,
+          idempotencyKey: req.idempotencyKey,
+          actorId: req.actorId,
+        },
+        include: { version: true } // Include to cache graph
+      });
+
+      await tx.outboxEvent.create({
+        data: {
+          workflowInstanceId: inst.id,
+          processVersion: 1,
+          nodeId: 'start',
+          commandType: 'start',
+          eventType: 'workflow.instance.started',
+          payload: { instanceId: inst.id, processType: inst.processType, businessId: inst.businessId }
+        }
+      });
+
+      return inst;
     });
 
     await this.redisService.set(`workflow:${instance.id}:graph`, (instance.version as any).graph, 86400000);
-    this.rabbitMqService.emit('workflow.instance.started', {
-      instanceId: instance.id,
-      processType: instance.processType,
-      businessId: instance.businessId,
-    });
     this.advanceProcess(instance.id, 'start').catch(err => this.logger.error(`Advance failed`, err));
     return instance;
   }
@@ -477,7 +498,52 @@ export class ExecutionService {
   }
   
   async triggerProcess(trigger: string, payload: any) { return this.startProcess(trigger, payload); }
-  async resumeInstance(instanceId: string, nodeId: string, actionData: any, userRoles?: string[], commandId?: string) { return { success: true }; }
+  async resumeInstance(instanceId: string, nodeId: string, actionData: any, userRoles?: string[], commandId?: string) {
+    const result = await this.prisma.$transaction(async tx => {
+      if (commandId) {
+        const existing = await tx.processedCommand.findUnique({ where: { id: commandId } });
+        if (existing) return { success: true, alreadyProcessed: true };
+      }
+
+      const instance = await tx.processInstance.findUnique({ where: { id: instanceId } });
+      if (!instance) throw new NotFoundException('Instance not found');
+
+      const task = await tx.workflowTask.findFirst({
+        where: { instanceId, nodeCode: nodeId, status: 'PENDING' }
+      });
+      if (!task) throw new BadRequestException('No pending task for this node');
+
+      await tx.workflowTask.update({
+        where: { id: task.id },
+        data: { status: 'COMPLETED', completedAt: new Date() }
+      });
+
+      if (commandId) {
+        await tx.processedCommand.create({ data: { id: commandId, status: 'PROCESSED' } });
+      }
+
+      await tx.outboxEvent.create({
+        data: {
+          workflowInstanceId: instance.id,
+          processVersion: instance.stateVersion + 1,
+          nodeId: nodeId,
+          commandType: actionData?.action || 'resume',
+          eventType: 'workflow.task.completed',
+          payload: { taskId: task.id, instanceId, actionData }
+        }
+      });
+
+      return { success: true, alreadyProcessed: false };
+    });
+
+    if (result.success && !result.alreadyProcessed) {
+      setImmediate(() => {
+         this.advanceProcess(instanceId, actionData?.action || 'resume').catch(err => this.logger.error(err));
+      });
+    }
+
+    return result;
+  }
   
   async triggerAutoBinding(data: { entity: string; eventTrigger: string; payloadData: any }) {
     // BL-007: migrate from WorkflowBinding to startByProcessType (ProcessBinding)
