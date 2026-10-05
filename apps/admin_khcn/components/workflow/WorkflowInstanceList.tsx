@@ -106,7 +106,7 @@ const WorkflowInstanceList = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-8 w-8 p-0 rounded-lg "
                     onClick={() => handleViewHistory(instance)}
                     title="Xem lịch sử"
                   >
