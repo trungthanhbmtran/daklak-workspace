@@ -92,8 +92,11 @@ export class WorkflowController {
   @Post('instances/start-by-type')
   @ApiOperation({ summary: 'Kích hoạt quy trình theo ProcessType' })
   async startByProcessType(@Body() body: StartByProcessTypeDto, @Req() req: any) {
-    (body as any).actorId = req.user.id.toString();
-    return this.workflowService.startByProcessType(body);
+    const payload = {
+      ...body,
+      actorId: req.user.id.toString(),
+    };
+    return this.workflowService.startByProcessType(payload);
   }
 
   @Post('instances/:instanceId/action')
@@ -103,9 +106,12 @@ export class WorkflowController {
     @Body() body: SubmitActionDto,
     @Req() req: any,
   ) {
-    body.instanceId = instanceId;
-    body.actorId = req.user.id.toString();
-    return this.workflowService.submitAction(body);
+    const payload = {
+      ...body,
+      instanceId,
+      actorId: req.user.id.toString(),
+    };
+    return this.workflowService.submitAction(payload);
   }
 
   // --- Backward Compatible (Legacy APIs) ---
