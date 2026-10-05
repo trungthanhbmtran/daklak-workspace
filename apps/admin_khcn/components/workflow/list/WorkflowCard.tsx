@@ -57,6 +57,7 @@ interface WorkflowCardProps {
   onTestRun: (w: Workflow) => void;
   onApply: (w: Workflow) => void;
   onDelete: (id: string) => void;
+  canEdit?: boolean;
 }
 
 export function WorkflowCard({
@@ -67,6 +68,7 @@ export function WorkflowCard({
   onTestRun,
   onApply,
   onDelete,
+  canEdit = true,
 }: WorkflowCardProps) {
   return (
     <article className="group relative flex flex-col rounded-xl border bg-card text-card-foreground shadow-xs transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
@@ -94,18 +96,22 @@ export function WorkflowCard({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={() => onEdit(workflow.id)}>
-                  <Edit2 className="size-4" /> Chỉnh sửa sơ đồ
+                  <Edit2 className="size-4" /> {canEdit ? "Chỉnh sửa sơ đồ" : "Xem sơ đồ"}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onTestRun(workflow)}>
-                  <Play className="size-4" /> Chạy thử
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onApply(workflow)}>
-                  <Link2 className="size-4" /> Áp dụng nghiệp vụ
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(workflow.id)}>
-                  <Trash2 className="size-4" /> Xóa
-                </DropdownMenuItem>
+                {canEdit && (
+                  <>
+                    <DropdownMenuItem onClick={() => onTestRun(workflow)}>
+                      <Play className="size-4" /> Chạy thử
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onApply(workflow)}>
+                      <Link2 className="size-4" /> Áp dụng nghiệp vụ
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(workflow.id)}>
+                      <Trash2 className="size-4" /> Xóa
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -40,6 +40,7 @@ interface PropertiesPanelProps {
   setWorkflowDesc: (desc: string) => void;
   workflowCode: string;
   setWorkflowCode: (code: string) => void;
+  readOnly?: boolean;
 }
 
 export const PropertiesPanel = ({
@@ -61,7 +62,8 @@ export const PropertiesPanel = ({
   workflowDesc,
   setWorkflowDesc,
   workflowCode,
-  setWorkflowCode
+  setWorkflowCode,
+  readOnly = false
 }: PropertiesPanelProps) => {
   const data = selectedNode ? (selectedNode.data || {}) as any : (selectedEdge ? selectedEdge : {} as any);
 
@@ -149,10 +151,12 @@ export const PropertiesPanel = ({
 
         <div className="flex-1 overflow-y-auto p-5">
           <PropertiesItemInfo selectedNode={selectedNode} selectedEdge={selectedEdge} />
-          {renderFields()}
+          <div className={cn(readOnly && "pointer-events-none opacity-80")}>
+            {renderFields()}
+          </div>
         </div>
 
-        {(selectedNode || selectedEdge) && (
+        {(selectedNode || selectedEdge) && !readOnly && (
           <div className="p-4 border-t border-border/60 bg-muted/5 flex items-center justify-between gap-3 shrink-0">
             <Button
               variant="outline"

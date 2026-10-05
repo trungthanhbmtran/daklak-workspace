@@ -36,6 +36,7 @@ import {
   WorkflowTestRunDialog,
   useWorkflowModuleOptions,
 } from "./list/WorkflowDialogs";
+import { useUser } from "@/hooks/useUser";
 
 /** Trang danh sách quy trình: /services/integration/workflows. Chi tiết/sửa là các route riêng. */
 export default function WorkflowList() {
@@ -56,6 +57,11 @@ export default function WorkflowList() {
   const [testRunTarget, setTestRunTarget] = useState<Workflow | null>(null);
 
   const { modules, getModuleName } = useWorkflowModuleOptions();
+  const { user } = useUser();
+  const isSuperAdmin = user?.isAdmin === true;
+  const isOrgAdmin = user?.roles?.includes('ORG_ADMIN') || false; 
+  const hasEditPerm = user?.permissions?.includes('WORKFLOW:EDIT') || user?.permissions?.includes('WORKFLOW:*');
+  const canEdit = isSuperAdmin || isOrgAdmin || hasEditPerm;
 
   const loadWorkflows = async () => {
     setIsLoading(true);
@@ -118,11 +124,13 @@ export default function WorkflowList() {
                 <Layers className="size-4 mr-2" /> Auto-Binding
               </Link>
             </Button>
-            <Button asChild id="workflow-create-button">
-              <Link href={WORKFLOW_ROUTES.create}>
-                <Plus className="size-4 mr-2" /> Tạo quy trình
-              </Link>
-            </Button>
+            {canEdit && (
+              <Button asChild id="workflow-create-button">
+                <Link href={WORKFLOW_ROUTES.create}>
+                  <Plus className="size-4 mr-2" /> Tạo quy trình
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -174,6 +182,7 @@ export default function WorkflowList() {
             <WorkflowCard
               key={w.id}
               workflow={w}
+              canEdit={canEdit}
               appliedModuleName={getModuleName(w.code)}
               onOpen={(wf) => router.push(WORKFLOW_ROUTES.edit(wf.id))}
               onEdit={(id) => router.push(WORKFLOW_ROUTES.edit(id))}

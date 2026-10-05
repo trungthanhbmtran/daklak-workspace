@@ -31,9 +31,10 @@ import { useWorkflowData } from "./hooks/useWorkflowData";
 interface WorkflowEditorProps {
   id?: string;
   onBack: () => void;
+  readOnly?: boolean;
 }
 
-const Flow = ({ id, onBack }: WorkflowEditorProps) => {
+const Flow = ({ id, onBack, readOnly = false }: WorkflowEditorProps) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -149,6 +150,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   return (
     <div className="flex flex-col w-full h-full overflow-hidden bg-background">
       <Topbar
+        readOnly={readOnly}
         onSave={onSave}
         onPublish={onPublish}
         onPublishAndApply={onPublishAndApply}
@@ -167,17 +169,17 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
       />
 
       <div className="flex flex-1 overflow-hidden relative min-h-0" ref={reactFlowWrapper}>
-        <NodePalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} />
+        {!readOnly && <NodePalette isOpen={isPaletteOpen} onClose={() => setIsPaletteOpen(false)} />}
 
         <div className="flex-1 relative bg-muted/20 min-h-[500px]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
+            onNodesChange={readOnly ? undefined : onNodesChange}
+            onEdgesChange={readOnly ? undefined : onEdgesChange}
+            onConnect={readOnly ? undefined : onConnect}
+            onDrop={readOnly ? undefined : onDrop}
+            onDragOver={readOnly ? undefined : onDragOver}
             onNodeClick={onNodeClick}
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
@@ -189,6 +191,11 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             connectionLineStyle={{ stroke: '#3b82f6', strokeWidth: 2.5 }}
             connectionLineType={"smoothstep" as any}
             className="transition-opacity duration-300"
+            nodesDraggable={!readOnly}
+            nodesConnectable={!readOnly}
+            edgesUpdatable={!readOnly}
+            edgesFocusable={!readOnly}
+            elementsSelectable={true}
           >
             <Background
               variant={BackgroundVariant.Dots}
@@ -198,7 +205,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             />
             <Controls
               className="bg-card/90 backdrop-blur border border-border/50 shadow-xl rounded-2xl overflow-hidden"
-              showInteractive={false}
+              showInteractive={!readOnly}
             />
             <MiniMap
               className="bg-card/90 backdrop-blur border border-border/50 shadow-xl rounded-2xl overflow-hidden mb-4 mr-4"
@@ -211,14 +218,15 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
             <Panel position="top-left" className="bg-card/80 backdrop-blur-md border border-border/50 px-3 py-2 rounded-xl shadow-md mt-4 ml-4">
               <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                {workflowId ? `Editing: ${workflowId.slice(0, 8)}` : "New Workflow"}
+                <div className={cn("w-2 h-2 rounded-full", readOnly ? "bg-amber-500" : "bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]")} />
+                {workflowId ? (readOnly ? `Viewing: ${workflowId.slice(0, 8)}` : `Editing: ${workflowId.slice(0, 8)}`) : "New Workflow"}
               </div>
             </Panel>
           </ReactFlow>
         </div>
 
         <PropertiesPanel
+          readOnly={readOnly}
           isOpen={isPropertiesOpen}
           onOpenChange={setIsPropertiesOpen}
           selectedNode={selectedNode}

@@ -73,7 +73,28 @@ export async function seedUserGroups(prisma: PrismaClient) {
   });
 
   // Có thể gán các quyền cơ bản (VIEW) ở đây nếu cần,
-  // Tạm thời chỉ tạo khung nhóm quyền.
+  // Cấp quyền XEM (VIEW) tài nguyên WORKFLOW cho nhân viên
+  const workflowRes = resources.find(r => r.code === 'WORKFLOW');
+  if (workflowRes) {
+    const existingViewPolicy = await prisma.policy.findFirst({
+      where: {
+        resourceId: workflowRes.id,
+        action: 'VIEW',
+        userGroups: { some: { id: employeeGroup.id } }
+      }
+    });
+
+    if (!existingViewPolicy) {
+      await prisma.policy.create({
+        data: {
+          resourceId: workflowRes.id,
+          action: 'VIEW',
+          effect: 'ALLOW',
+          userGroups: { connect: { id: employeeGroup.id } }
+        }
+      });
+    }
+  }
   
   console.log('✅ PBAC seeding completed.');
 }

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { WORKFLOW_ROUTES } from "@/features/workflow/routes";
+import { useUser } from "@/hooks/useUser";
 
 // React Flow chỉ chạy phía trình duyệt — tải động, không SSR.
 const WorkflowEditor = dynamic(() => import("./WorkflowEditor"), {
@@ -21,10 +22,21 @@ const WorkflowEditor = dynamic(() => import("./WorkflowEditor"), {
  */
 export default function WorkflowEditorScreen({ id }: { id?: string }) {
   const router = useRouter();
+  const { user } = useUser();
+  
+  // Xác định quyền chỉnh sửa: Admin hệ thống, Admin đơn vị, hoặc user có quyền EDIT.
+  const isSuperAdmin = user?.isAdmin === true;
+  const isOrgAdmin = user?.roles?.includes('ORG_ADMIN') || false; 
+  const hasEditPerm = user?.permissions?.includes('WORKFLOW:EDIT') || user?.permissions?.includes('WORKFLOW:*');
+  
+  const canEdit = isSuperAdmin || isOrgAdmin || hasEditPerm || !id;
+  const readOnly = !canEdit;
+
   return (
     <div className="flex h-screen w-screen flex-1 flex-col overflow-hidden bg-background">
       <WorkflowEditor
         id={id}
+        readOnly={readOnly}
         onBack={() => router.push(WORKFLOW_ROUTES.list)}
       />
     </div>
