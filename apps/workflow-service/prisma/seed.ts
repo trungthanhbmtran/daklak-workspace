@@ -128,7 +128,7 @@ const govComplexTaskGraph = {
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
     { id: 'task_assign', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Giao việc (Lãnh đạo)', targetStatus: 'PENDING_ACCEPTANCE', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "taskName", action: "Tên công việc", type: "text" }, { id: "f2", name: "description", action: "Mô tả", type: "textarea" }, { id: "f3", name: "dueDate", action: "Hạn chót", type: "date" }, { id: "f4", name: "assigneeId", action: "Người nhận", type: "text" }]) } },
     { id: 'gateway_accept', type: 'exclusive_gateway', position: { x: 550, y: 250 }, data: { label: 'Tiếp nhận hay Từ chối?' } },
-    { id: 'task_process', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', targetStatus: 'IN_PROGRESS', assignments: [{ unitScope: 'CHILD_UNIT', rankOperator: 'any' }], formSchema: JSON.stringify([{ id: "f1", name: "reportContent", action: "Nội dung báo cáo", type: "textarea" }, { id: "f2", name: "attachments", action: "Đính kèm", type: "text" }, { id: "f3", name: "coordinators", action: "Người phối hợp", type: "text" }]), multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
+    { id: 'task_process', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Xử lý & Phối hợp (Chuyên viên)', targetStatus: 'IN_PROGRESS', assignments: [{ unitScope: 'CHILD_UNIT', rankOperator: 'any' }, { unitScope: 'SAME_UNIT', rankOperator: 'any' }], formSchema: JSON.stringify([{ id: "f1", name: "reportContent", action: "Nội dung báo cáo", type: "textarea" }, { id: "f2", name: "attachments", action: "Đính kèm", type: "text" }, { id: "f3", name: "coordinators", action: "Người phối hợp", type: "text" }]), multiInstanceLoopCharacteristics: { isSequential: false, collectionString: 'variables.assignees' } } },
     { id: 'task_evaluate', type: 'user_task', position: { x: 1150, y: 250 }, data: { label: 'Nghiệm thu & Chấm KPI', targetStatus: 'WAITING_FOR_APPROVAL', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "isApproved", action: "Đồng ý duyệt", type: "text" }, { id: "f2", name: "kpiScore", action: "Điểm KPI", type: "number" }, { id: "f3", name: "managerFeedback", action: "Phản hồi", type: "textarea" }]) } },
     { id: 'gateway_evaluate', type: 'exclusive_gateway', position: { x: 1450, y: 250 }, data: { label: 'Kết quả Nghiệm thu' } },
     { id: 'end_done', type: 'end', position: { x: 1750, y: 250 }, data: { label: 'Hoàn thành', targetStatus: 'COMPLETED' } },
@@ -242,10 +242,10 @@ const processDefinitions = [
       graph: {
         nodes: [
           { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Công dân nộp hồ sơ' } },
-          { id: 'task_receive', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Tiếp nhận & Kiểm tra', assignments: [{ unitScope: 'SAME_UNIT' }] } },
+          { id: 'task_receive', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Tiếp nhận & Kiểm tra', assignments: [{ unitScope: 'BY_GEO_AREA', rankOperator: 'any' }] } },
           { id: 'gw_valid', type: 'exclusive_gateway', position: { x: 450, y: 250 }, data: { label: 'Hồ sơ hợp lệ?' } },
           { id: 'end_rejected', type: 'end', position: { x: 450, y: 400 }, data: { label: 'Trả hồ sơ / Từ chối' } },
-          { id: 'task_verify', type: 'user_task', position: { x: 650, y: 250 }, data: { label: 'Thẩm định hồ sơ', assignments: [{ unitScope: 'SAME_UNIT' }] } },
+          { id: 'task_verify', type: 'user_task', position: { x: 650, y: 250 }, data: { label: 'Thẩm định hồ sơ', assignments: [{ unitScope: 'BY_DOMAIN', rankOperator: 'any' }] } },
           { id: 'task_approve', type: 'user_task', position: { x: 850, y: 250 }, data: { label: 'Lãnh đạo phê duyệt', assignments: [{ unitScope: 'PARENT_UNIT', rankOperator: 'exact', rankValue: 'minRank' }] } },
           { id: 'end_approved', type: 'end', position: { x: 1050, y: 250 }, data: { label: 'Cấp phép thành công' } }
         ],

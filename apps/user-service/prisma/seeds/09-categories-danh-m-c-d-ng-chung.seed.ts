@@ -94,7 +94,34 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     });
   }
 
+  // --- WORKFLOW PARTICIPANT ROLES ---
+  await prisma.categoryGroup.upsert({
+    where: { code: 'WORKFLOW_PARTICIPANT_ROLE' },
+    update: { name: 'Vai trò tham gia Quy trình' },
+    create: { code: 'WORKFLOW_PARTICIPANT_ROLE', name: 'Vai trò tham gia Quy trình' },
+  });
 
+  const participantRoles = [
+    { code: 'OWNER', name: 'Người giao việc (OWNER)', order: 1 },
+    { code: 'ASSIGNEE', name: 'Người xử lý chính (ASSIGNEE)', order: 2 },
+    { code: 'COORDINATOR', name: 'Người phối hợp (COORDINATOR)', order: 3 },
+    { code: 'APPROVER', name: 'Người chỉ đạo/Theo dõi (APPROVER)', order: 4 },
+    { code: 'ADMIN', name: 'Quản trị viên (ADMIN)', order: 5 },
+  ];
+
+  for (const role of participantRoles) {
+    const cat = await prisma.category.upsert({
+      where: { groupCode_code: { groupCode: 'WORKFLOW_PARTICIPANT_ROLE', code: role.code } },
+      update: { order: role.order },
+      create: { groupCode: 'WORKFLOW_PARTICIPANT_ROLE', code: role.code, order: role.order },
+    });
+
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_langCode: { categoryId: cat.id, langCode: 'vi' } },
+      update: { name: role.name },
+      create: { categoryId: cat.id, langCode: 'vi', name: role.name },
+    });
+  }
 
   console.log('✅ Categories seeded successfully!');
 

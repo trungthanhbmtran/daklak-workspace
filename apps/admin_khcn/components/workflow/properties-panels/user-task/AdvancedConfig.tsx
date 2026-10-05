@@ -8,34 +8,39 @@ import { Plus, X, Trash2 } from "lucide-react";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { PropertiesPanelComponentProps } from "../types";
 
-const TASK_PARTICIPANT_ROLES = [
-  { code: 'OWNER', name: 'Người giao việc (OWNER)' },
-  { code: 'ASSIGNEE', name: 'Người xử lý chính (ASSIGNEE)' },
-  { code: 'COORDINATOR', name: 'Người phối hợp (COORDINATOR)' },
-  { code: 'APPROVER', name: 'Người chỉ đạo/Theo dõi (APPROVER)' },
-  { code: 'ADMIN', name: 'Quản trị viên hệ thống (ADMIN)' },
-];
-
-export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, taskRoles = [], orgRoles = [] }: PropertiesPanelComponentProps) => {
+export const AdvancedConfig = ({ 
+  data, 
+  handleChange, 
+  onUpdate, 
+  selectedNode, 
+  taskRoles = [], 
+  orgRoles = [],
+  participantRoles = [
+    { code: 'OWNER', name: 'Người giao việc (OWNER)' },
+    { code: 'ASSIGNEE', name: 'Người xử lý chính (ASSIGNEE)' },
+    { code: 'COORDINATOR', name: 'Người phối hợp (COORDINATOR)' },
+    { code: 'APPROVER', name: 'Người chỉ đạo/Theo dõi (APPROVER)' },
+    { code: 'ADMIN', name: 'Quản trị viên (ADMIN)' }
+  ]
+}: PropertiesPanelComponentProps) => {
   const [activeRoleGroups, setActiveRoleGroups] = useState<Record<string, string>>({});
 
   if (!selectedNode || !onUpdate) return null;
 
   return (
-    <AccordionItem value="advanced" className="border-none">
-      <AccordionTrigger className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border hover:bg-accent hover:text-accent-foreground py-2">
-        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Cấu hình nâng cao (Quyền, UI, Phân công)</span>
+    <AccordionItem value="advanced">
+      <AccordionTrigger className="text-sm font-semibold hover:no-underline px-4">
+        Cấu hình nâng cao (Quyền, UI, Phân công)
       </AccordionTrigger>
-      <AccordionContent className="p-4 rounded-b-xl bg-muted/30 border border-t-0 space-y-6">
-
+      <AccordionContent className="space-y-6 pt-4 px-4">
+        
         {/* Approval Evidence Configuration */}
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
             Phê duyệt & Minh chứng
           </h4>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-foreground">
+            <label className="text-sm font-medium text-foreground">
               Bắt buộc phê duyệt
             </label>
             <Switch
@@ -44,15 +49,14 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
             />
           </div>
           {data.approvalRequired && (
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">
                 Loại minh chứng yêu cầu
               </label>
               <NativeSelect
                 name="evidenceType"
                 value={data.evidenceType || "none"}
                 onChange={handleChange}
-                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 outline-none transition-all"
               >
                 <NativeSelectOption value="none">Không yêu cầu</NativeSelectOption>
                 <NativeSelectOption value="upload">Tệp đính kèm (Upload)</NativeSelectOption>
@@ -67,18 +71,18 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
 
         {/* Target Status & Assignment */}
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Chuyển trạng thái & Phân công</h4>
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Trạng thái mục tiêu</label>
-            <Input name="targetStatus" value={data.targetStatus || ""} onChange={handleChange} className="w-full text-sm bg-background" placeholder="VD: IN_PROGRESS" />
+          <h4 className="text-sm font-semibold text-foreground">Chuyển trạng thái & Phân công</h4>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Trạng thái mục tiêu</label>
+            <Input name="targetStatus" value={data.targetStatus || ""} onChange={handleChange} placeholder="VD: IN_PROGRESS" />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Giao trực tiếp cho nhân sự (Mã NV)</label>
-            <Input name="employeeCode" value={data.employeeCode || ""} onChange={handleChange} className="w-full text-sm bg-background" placeholder="VD: NV001" />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Giao trực tiếp cho nhân sự (Mã NV)</label>
+            <Input name="employeeCode" value={data.employeeCode || ""} onChange={handleChange} placeholder="VD: NV001" />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">Chiến lược phân công tự động (PBAC)</label>
-            <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange} className="w-full text-sm bg-background">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Chiến lược phân công tự động (PBAC)</label>
+            <NativeSelect name="assignmentStrategy" value={data.assignmentStrategy || "ANY"} onChange={handleChange}>
               <NativeSelectOption value="ANY">Không giới hạn (Toàn hệ thống)</NativeSelectOption>
               <NativeSelectOption value="BY_DOMAIN">Theo Lĩnh vực phụ trách</NativeSelectOption>
               <NativeSelectOption value="BY_DEPARTMENT">Theo Phòng ban theo dõi</NativeSelectOption>
@@ -91,14 +95,109 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
 
         <div className="border-t border-border" />
 
-        {/* Dynamic Permissions Configuration */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Quyền thao tác tuỳ biến</h4>
+        {/* Dynamic Assignments Configuration */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-foreground">Phạm vi phân công (Assignments)</h4>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-6 px-2 text-[10px] text-violet-600 hover:text-violet-700 hover:bg-violet-100"
+              onClick={() => {
+                const currentAssignments = Array.isArray(data.assignments) ? data.assignments : [];
+                onUpdate(selectedNode.id, {
+                  ...data,
+                  assignments: [...currentAssignments, { unitScope: 'SAME_UNIT', rankOperator: 'any' }]
+                });
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" /> Thêm quy tắc
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {(Array.isArray(data.assignments) ? data.assignments : []).map((assignment: any, idx: number) => (
+              <div key={idx} className="flex flex-col gap-4 p-4 bg-muted/50 rounded-md border border-border">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Quy tắc {idx + 1}</span>
+                  <Button variant="ghost" size="icon" onClick={() => {
+                    const newAssignments = data.assignments.filter((_: any, i: number) => i !== idx);
+                    onUpdate(selectedNode.id, { ...data, assignments: newAssignments });
+                  }}>
+                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Phạm vi (Scope)</label>
+                    <NativeSelect
+                      value={assignment.unitScope || 'SAME_UNIT'}
+                      onChange={(e) => {
+                        const newAssignments = [...data.assignments];
+                        newAssignments[idx] = { ...newAssignments[idx], unitScope: e.target.value };
+                        onUpdate(selectedNode.id, { ...data, assignments: newAssignments });
+                      }}
+                    >
+                      <NativeSelectOption value="SAME_UNIT">Cùng phòng ban</NativeSelectOption>
+                      <NativeSelectOption value="CHILD_UNIT">Phòng cấp dưới</NativeSelectOption>
+                      <NativeSelectOption value="PARENT_UNIT">Phòng cấp trên</NativeSelectOption>
+                      <NativeSelectOption value="SELF">Chỉ bản thân</NativeSelectOption>
+                      <NativeSelectOption value="ANY">Toàn hệ thống</NativeSelectOption>
+                      <NativeSelectOption value="BY_DOMAIN">Lĩnh vực phụ trách</NativeSelectOption>
+                      <NativeSelectOption value="BY_GEO_AREA">Địa bàn phụ trách</NativeSelectOption>
+                    </NativeSelect>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Chức vụ (Rank)</label>
+                    <NativeSelect
+                      value={assignment.rankOperator || 'any'}
+                      onChange={(e) => {
+                        const newAssignments = [...data.assignments];
+                        newAssignments[idx] = { ...newAssignments[idx], rankOperator: e.target.value };
+                        onUpdate(selectedNode.id, { ...data, assignments: newAssignments });
+                      }}
+                    >
+                      <NativeSelectOption value="any">Bất kỳ</NativeSelectOption>
+                      <NativeSelectOption value="exact">Chính xác (=)</NativeSelectOption>
+                      <NativeSelectOption value="gte">Từ cấp này trở lên</NativeSelectOption>
+                      <NativeSelectOption value="lte">Từ cấp này trở xuống</NativeSelectOption>
+                    </NativeSelect>
+                  </div>
+                </div>
+
+                {assignment.rankOperator && assignment.rankOperator !== 'any' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Giá trị Rank / Mức độ</label>
+                    <Input
+                      value={assignment.rankValue || ''}
+                      onChange={(e) => {
+                        const newAssignments = [...data.assignments];
+                        newAssignments[idx] = { ...newAssignments[idx], rankValue: e.target.value };
+                        onUpdate(selectedNode.id, { ...data, assignments: newAssignments });
+                      }}
+                      placeholder="VD: minRank, maxRank, 1, 2..."
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+            {(!data.assignments || data.assignments.length === 0) && (
+              <p className="text-sm text-center text-muted-foreground py-4 border border-dashed rounded-md">
+                Chưa có quy tắc phân công. Sẽ dùng chiến lược mặc định.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="border-t border-border" />
+
+        {/* Dynamic Permissions Configuration */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-foreground">Quyền thao tác tuỳ biến</h4>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 const currentPerms = data.permissions || {};
                 let newActionName = 'NEW_ACTION';
@@ -113,15 +212,15 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                 });
               }}
             >
-              <Plus className="h-3 w-3" /> Thêm quyền
+              <Plus className="h-4 w-4 mr-2" /> Thêm quyền
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {Object.entries(data.permissions || {}).map(([action, roles]) => (
-              <div key={action} className="flex flex-col gap-1.5 p-2 bg-background rounded-lg border border-border">
-                <div className="flex items-start gap-2">
-                  <div className="flex-1 flex flex-col gap-2">
+              <div key={action} className="flex flex-col gap-4 p-4 bg-muted/50 rounded-md border border-border">
+                <div className="flex items-start gap-4">
+                  <div className="flex-1 space-y-4">
                     <Input
                       value={action}
                       onChange={(e) => {
@@ -138,16 +237,18 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                         }
                         onUpdate(selectedNode.id, { ...data, permissions: updatedPerms });
                       }}
-                      className="h-7 text-xs font-bold font-mono w-[130px] bg-muted border-none px-2"
+                      className="font-mono max-w-[200px]"
                       placeholder="ACTION"
                     />
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    
+                    <div className="flex flex-wrap items-center gap-2">
                       {Array.isArray(roles) && roles.map((role: string) => (
-                        <span key={role} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border border-violet-200 dark:border-violet-800">
+                        <div key={role} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary text-secondary-foreground transition-colors hover:bg-secondary/80">
                           {role}
                           <Button
-                            type="button"
-                            className="text-violet-600 hover:text-violet-900 dark:text-violet-400 dark:hover:text-violet-200"
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 ml-1 hover:bg-transparent"
                             onClick={() => {
                               const newRoles = (roles as string[]).filter(r => r !== role);
                               onUpdate(selectedNode.id, {
@@ -156,25 +257,25 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                               });
                             }}
                           >
-                            <X className="h-2.5 w-2.5" />
+                            <X className="h-3 w-3" />
                           </Button>
-                        </span>
+                        </div>
                       ))}
-                      <div className="flex items-center gap-1">
-                        <select
-                          className="h-6 text-[10px] bg-muted border border-border rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-foreground"
+                      
+                      <div className="flex items-center gap-2">
+                        <NativeSelect
                           value={activeRoleGroups[action] || ""}
                           onChange={(e) => setActiveRoleGroups({ ...activeRoleGroups, [action]: e.target.value })}
+                          className="w-[140px]"
                         >
-                          <option value="" disabled>+ Chọn nhóm</option>
-                          <option value="TASK">Vai trò trong Task</option>
-                          {orgRoles.length > 0 && <option value="ORG">Vị trí tổ chức</option>}
-                          {taskRoles && taskRoles.length > 0 && <option value="PBAC">Quyền hệ thống</option>}
-                        </select>
+                          <NativeSelectOption value="" disabled>+ Chọn nhóm</NativeSelectOption>
+                          <NativeSelectOption value="TASK">Vai trò trong Task</NativeSelectOption>
+                          {orgRoles.length > 0 && <NativeSelectOption value="ORG">Vị trí tổ chức</NativeSelectOption>}
+                          {taskRoles && taskRoles.length > 0 && <NativeSelectOption value="PBAC">Quyền hệ thống</NativeSelectOption>}
+                        </NativeSelect>
 
                         {activeRoleGroups[action] && (
-                          <select
-                            className="h-6 text-[10px] bg-muted border border-border rounded px-1 cursor-pointer outline-none hover:border-violet-300 text-foreground max-w-[120px]"
+                          <NativeSelect
                             onChange={(e) => {
                               const role = e.target.value;
                               if (!role) return;
@@ -188,26 +289,27 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                               setActiveRoleGroups({ ...activeRoleGroups, [action]: "" });
                             }}
                             defaultValue=""
+                            className="w-[180px]"
                           >
-                            <option value="" disabled>+ Chọn</option>
-                            {activeRoleGroups[action] === 'TASK' && TASK_PARTICIPANT_ROLES.map(r => (
-                              <option key={r.code} value={r.code}>{r.name}</option>
+                            <NativeSelectOption value="" disabled>+ Chọn</NativeSelectOption>
+                            {activeRoleGroups[action] === 'TASK' && participantRoles.map((r: any) => (
+                              <NativeSelectOption key={r.code} value={r.code}>{r.name}</NativeSelectOption>
                             ))}
                             {activeRoleGroups[action] === 'ORG' && orgRoles.map((r: any) => (
-                              <option key={r.code} value={r.code}>{r.name}</option>
+                              <NativeSelectOption key={r.code} value={r.code}>{r.name}</NativeSelectOption>
                             ))}
                             {activeRoleGroups[action] === 'PBAC' && taskRoles.map((r: any) => (
-                              <option key={r.code} value={r.code}>{r.name || r.nameVi}</option>
+                              <NativeSelectOption key={r.code} value={r.code}>{r.name || r.nameVi}</NativeSelectOption>
                             ))}
-                          </select>
+                          </NativeSelect>
                         )}
                       </div>
                     </div>
                   </div>
+                  
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded"
                     onClick={() => {
                       const newPerms = { ...data.permissions };
                       delete newPerms[action];
@@ -220,13 +322,13 @@ export const AdvancedConfig = ({ data, handleChange, onUpdate, selectedNode, tas
                       }
                     }}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                   </Button>
                 </div>
               </div>
             ))}
             {(!data.permissions || Object.keys(data.permissions).length === 0) && (
-              <p className="text-[10px] text-muted-foreground text-center py-2">
+              <p className="text-sm text-center text-muted-foreground py-4 border border-dashed rounded-md">
                 Sử dụng quyền hệ thống mặc định.
               </p>
             )}
