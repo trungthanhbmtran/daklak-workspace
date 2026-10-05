@@ -84,8 +84,6 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm report-serv
 # Khởi động toàn bộ các services (đảm bảo DB đang chạy để seed)
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
-
-# Tải lại cấu hình Nginx (Nếu có thay đổi file nginx.conf) mà không gây gián đoạn (Zero Downtime)
 docker exec -it daklak-workspace-nginx-1 nginx -s reload
 # Hoặc khởi động lại hoàn toàn service Nginx
 # docker compose -f docker-compose.prod.yml restart nginx
