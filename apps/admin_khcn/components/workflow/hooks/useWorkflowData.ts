@@ -109,11 +109,16 @@ export function useWorkflowData({
 
     const validatedNodes = nodes.map((n) => {
       let nodeError = false;
-      if (n.type === "user_task" && !n.data?.assignmentStrategy) {
-        nodeError = true;
+      if (n.type === "userTask") {
+        if (!n.data?.assignmentStrategy) nodeError = true;
+        if (n.data?.assignmentStrategy === 'BY_ROLE' && !n.data?.targetRole) nodeError = true;
+        if (n.data?.assignmentStrategy === 'DIRECT_USER' && !n.data?.employeeCode) nodeError = true;
       }
-      if (n.type === "exclusive_gateway" && !edges.some(e => e.source === n.id)) {
-        nodeError = true;
+      if (n.type === "exclusive_gateway") {
+        const outgoing = edges.filter(e => e.source === n.id);
+        if (outgoing.length > 0 && !outgoing.some(e => e.data?.isDefault)) {
+          nodeError = true;
+        }
       }
       if (nodeError) hasError = true;
       
