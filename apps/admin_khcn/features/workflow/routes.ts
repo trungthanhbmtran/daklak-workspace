@@ -3,7 +3,6 @@ export const WORKFLOW_ROUTES = {
   hub: "/services/integration",
   list: "/services/integration/workflows",
   create: "/services/integration/workflows/new",
-  detail: (id: string) => `/services/integration/workflows/${encodeURIComponent(id)}`,
   edit: (id: string) => `/services/integration/workflows/${encodeURIComponent(id)}/edit`,
   instances: "/services/integration/instances",
 } as const;

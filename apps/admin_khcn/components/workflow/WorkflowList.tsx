@@ -175,7 +175,7 @@ export default function WorkflowList() {
               key={w.id}
               workflow={w}
               appliedModuleName={getModuleName(w.code)}
-              onOpen={(wf) => router.push(WORKFLOW_ROUTES.detail(wf.id))}
+              onOpen={(wf) => router.push(WORKFLOW_ROUTES.edit(wf.id))}
               onEdit={(id) => router.push(WORKFLOW_ROUTES.edit(id))}
               onTestRun={setTestRunTarget}
               onApply={setApplyTarget}

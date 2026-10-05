@@ -25,7 +25,7 @@ export default function WorkflowEditorScreen({ id }: { id?: string }) {
     <div className="flex h-screen w-screen flex-1 flex-col overflow-hidden bg-background">
       <WorkflowEditor
         id={id}
-        onBack={() => router.push(id ? WORKFLOW_ROUTES.detail(id) : WORKFLOW_ROUTES.list)}
+        onBack={() => router.push(WORKFLOW_ROUTES.list)}
       />
     </div>
   );
