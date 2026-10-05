@@ -13,7 +13,7 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { RequirePermissions } from '../../core/decorators/permissions.decorator';
+
 import {
   CreateWorkflowDto,
   UpdateWorkflowDto,
@@ -22,6 +22,7 @@ import {
   ApplyModuleDto,
   SubmitActionDto,
   StartByProcessTypeDto,
+  PaginationQueryDto,
 } from './dto/workflow.dto';
 import { WorkflowService } from './workflow.service';
 
@@ -61,7 +62,7 @@ export class WorkflowController {
 
   @Get('bindings')
   @ApiOperation({ summary: 'Danh sách bindings' })
-  async listProcessBindings(@Query() query: any) {
+  async listProcessBindings(@Query() query: PaginationQueryDto) {
     return this.workflowService.listProcessBindings(query);
   }
 
@@ -77,17 +78,7 @@ export class WorkflowController {
     return this.workflowService.deactivateProcessBinding(id, req.user.id.toString(), body.reason);
   }
 
-  @Post('bindings/resolve')
-  @ApiOperation({ summary: 'Dò tìm binding cho 1 ngữ cảnh' })
-  async resolveBinding(@Body() body: any) {
-    return this.workflowService.resolveBinding(body);
-  }
 
-  @Post(':id/validate')
-  @ApiOperation({ summary: 'Validate quy trình' })
-  async validateWorkflowDefinition(@Param('id') id: string, @Body() body: any) {
-    return this.workflowService.validateWorkflowDefinition(id, body.versionId);
-  }
 
   @Post('instances/start-by-type')
   @ApiOperation({ summary: 'Kích hoạt quy trình theo ProcessType' })
@@ -119,16 +110,7 @@ export class WorkflowController {
   @ApiOperation({ summary: 'Lấy danh sách các microservice khả dụng cho workflow' })
   async getMicroservices() { return this.workflowService.getMicroservices(); }
 
-  @Get('assignable-users')
-  @ApiOperation({ summary: 'Lấy danh sách người nhận việc an toàn theo Node (Decoupled)' })
-  async getAssignableUsers(
-    @Query('workflowCode') workflowCode: string,
-    @Query('currentNodeId') currentNodeId: string,
-    @Req() req: any,
-  ) {
-    if (!workflowCode || !currentNodeId) return { success: false, message: 'Thiếu tham số', data: [] };
-    return this.workflowService.getAssignableUsers(workflowCode, currentNodeId, req.user.id);
-  }
+
 
   @Get('triggers')
   @ApiOperation({ summary: 'Lấy danh sách các trigger khả dụng' })
@@ -152,7 +134,7 @@ export class WorkflowController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách quy trình' })
-  async list(@Query() query: any) { return this.workflowService.list(query); }
+  async list(@Query() query: PaginationQueryDto & { search?: string }) { return this.workflowService.list(query); }
 
   @Post('instances/:instanceId/resume/:nodeId')
   @ApiOperation({ summary: 'Xử lý bước chờ (User Task) trong quy trình' })
@@ -163,15 +145,11 @@ export class WorkflowController {
   @Get('instances')
   @ApiOperation({ summary: 'Danh sách workflow instances' })
   async listInstances(
-    @Query('skip') skip?: string, 
-    @Query('take') take?: string, 
-    @Query('workflowId') workflowId?: string, 
-    @Query('status') status?: string, 
-    @Query('search') search?: string,
+    @Query() query: PaginationQueryDto & { workflowId?: string, status?: string, search?: string },
     @Req() req?: any
   ) {
     const orgId = req?.user?.organizationId || req?.user?.orgId;
-    return this.workflowService.listInstances(skip, take, workflowId, status, search, orgId);
+    return this.workflowService.listInstances(query, orgId);
   }
 
   @Get('instances/:id')

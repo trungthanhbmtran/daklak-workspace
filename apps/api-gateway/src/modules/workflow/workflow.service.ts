@@ -82,15 +82,7 @@ export class WorkflowService implements OnModuleInit {
     return { success: true, data: result, message: 'Binding deactivated' };
   }
 
-  async resolveBinding(body: any) {
-    const result = await firstValueFrom(this.workflowGrpcService.ResolveBinding(body)).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'OK' };
-  }
 
-  async validateWorkflowDefinition(definitionId: string, versionId: string) {
-    const result = await firstValueFrom(this.workflowGrpcService.ValidateWorkflowDefinition({ definitionId, versionId })).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'OK' };
-  }
 
   // --- Process Execution ---
   async startByProcessType(body: any) {
@@ -105,35 +97,7 @@ export class WorkflowService implements OnModuleInit {
 
 
   // --- Backward Compatible (Legacy APIs) ---
-  async getAssignableUsers(workflowCode: string, currentNodeId: string, callerUserId: number) {
-    try {
-      const wfRes: any = await firstValueFrom(this.workflowGrpcService.FindWorkflowByCode({ code: workflowCode })).catch((err) => {
-        if (err?.code !== 5) this.handleRpcError(err); return null;
-      });
-      if (!wfRes || !wfRes.id) return { success: true, data: [] };
 
-      const nextNodeRes: any = await firstValueFrom(this.workflowGrpcService.GetNextNode({
-        workflowId: wfRes.id, currentNodeId, actionName: 'ASSIGN', evalContext: { fields: {} },
-      })).catch((err) => {
-        if (err?.code !== 5) this.handleRpcError(err); return null;
-      });
-      if (!nextNodeRes || !nextNodeRes.nextNodeData) return { success: true, data: [] };
-
-      const rule = JSON.parse(nextNodeRes.nextNodeData).assignments?.[0];
-      if (!rule) return { success: true, data: [] };
-
-      const conditionsRes: any = await firstValueFrom(this.userGrpcService.FindUsersByConditions({
-        callerUserId, unitScope: rule.unitScope || 'SAME_UNIT', rankOperator: rule.rankOperator || 'lt', rankValue: rule.rankValue,
-      })).catch((err) => {
-        if (err?.code !== 5) this.handleRpcError(err); return null;
-      });
-
-      const allowedCodes = conditionsRes?.allowedEmployeeCodes ?? conditionsRes?.allowed_employee_codes ?? [];
-      return { success: true, data: allowedCodes, message: 'OK' };
-    } catch (e: any) {
-      throw new InternalServerErrorException(e.message || 'Lỗi điều phối danh sách nhân sự');
-    }
-  }
 
   async getMicroservices() {
     const result = (await firstValueFrom(this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' })).catch(e => this.handleRpcError(e))) as any;
@@ -170,7 +134,7 @@ export class WorkflowService implements OnModuleInit {
   }
 
   async list(query: any) {
-    const skip = parseInt(query.skip) || 0; const take = parseInt(query.take) || 20; const search = query.search;
+    const skip = query.skip || 0; const take = query.take || 20; const search = query.search;
     const result = (await firstValueFrom(this.workflowGrpcService.ListWorkflows({ skip, take, search })).catch(e => this.handleRpcError(e))) as any;
     return { success: true, data: result?.data || [], meta: result?.meta || {}, message: 'OK' };
   }
@@ -180,8 +144,9 @@ export class WorkflowService implements OnModuleInit {
     return { success: true, data: result || {}, meta: {}, message: 'Task resumed successfully' };
   }
 
-  async listInstances(skip?: string, take?: string, workflowId?: string, status?: string, search?: string, organizationId?: string) {
-    const result = (await firstValueFrom(this.workflowGrpcService.ListInstances({ skip: skip ? parseInt(skip, 10) : undefined, take: take ? parseInt(take, 10) : undefined, workflowId, status, search, organizationId })).catch(e => this.handleRpcError(e))) as any;
+  async listInstances(query: any, organizationId?: string) {
+    const payload = { ...query, organizationId };
+    const result = (await firstValueFrom(this.workflowGrpcService.ListInstances(payload)).catch(e => this.handleRpcError(e))) as any;
     return { success: true, data: result?.data || [], meta: result?.meta || {}, message: 'OK' };
   }
 

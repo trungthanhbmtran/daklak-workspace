@@ -67,6 +67,18 @@ export class GrpcWorkflowController {
     };
   }
 
+  @GrpcMethod('WorkflowService', 'DeleteWorkflow')
+  async deleteWorkflow(@Payload() data: any) {
+    await this.definitionService.deleteProcess(data.id);
+    return { success: true };
+  }
+
+  @GrpcMethod('WorkflowService', 'ApplyModule')
+  async applyModule(@Payload() data: any) {
+    const result = await this.definitionService.applyModule(data.id, data.moduleCode);
+    return this.mapToWorkflowResponse(result.def, result.version);
+  }
+
   @GrpcMethod('WorkflowService', 'PublishWorkflow')
   async publishWorkflow(@Payload() data: any) {
     const result = await this.definitionService.publishProcess(data.id, data.actorId);
@@ -99,6 +111,11 @@ export class GrpcWorkflowController {
   async listProcessTypes(@Payload() data: any) {
     const types = await this.catalogService.listAll(data.activeOnly);
     return { data: types };
+  }
+
+  @GrpcMethod('WorkflowService', 'ListModules')
+  async listModules() {
+    return { data: [] };
   }
 
   // =========================================================================
@@ -176,6 +193,16 @@ export class GrpcWorkflowController {
   @GrpcMethod('WorkflowService', 'SubmitAction')
   async submitAction(@Payload() data: any) {
     return this.executionService.submitAction(data);
+  }
+
+  @GrpcMethod('WorkflowService', 'ResumeWorkflow')
+  async resumeWorkflow(@Payload() data: any) {
+    return this.executionService.resumeInstance(
+      data.instanceId,
+      data.nodeId,
+      data.actionData,
+      data.userRoles
+    );
   }
 
   @GrpcMethod('WorkflowService', 'AcknowledgeCommand')

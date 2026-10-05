@@ -6,6 +6,8 @@ import {
   IsObject,
   IsArray,
   ValidateNested,
+  IsInt,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -284,4 +286,20 @@ export class StartByProcessTypeDto {
   @IsObject()
   @IsOptional()
   initialContext?: Record<string, any>;
+}
+
+export class PaginationQueryDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  skip?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  take?: number;
 }

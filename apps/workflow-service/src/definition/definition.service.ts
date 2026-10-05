@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException, BadRequestException, ConflictException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from "@nestjs/common";
 import { PrismaService } from "../infra/prisma.service";
 import { DefinitionValidatorService } from "./definition-validator.service";
 
@@ -314,5 +314,12 @@ export class DefinitionService {
 
   async deleteBinding(id: string) {
     return this.prisma.workflowBinding.delete({ where: { id } });
+  }
+
+  async deleteProcess(id: string) {
+    return this.prisma.processDefinition.update({
+      where: { id },
+      data: { isActive: false }
+    });
   }
 }
