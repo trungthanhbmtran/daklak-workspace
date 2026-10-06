@@ -35,6 +35,13 @@ export interface ColumnDef {
   label: string;
 }
 
+export interface ChartConfig {
+  type: 'bar' | 'line' | 'pie';
+  xAxis: string;
+  yAxis: string;
+  title?: string;
+}
+
 export interface ReportConfigAST {
   version: number;
   sources: ReportSourceDef[];
@@ -46,6 +53,7 @@ export interface ReportConfigAST {
     key: string;
     direction: 'asc' | 'desc';
   };
+  charts?: ChartConfig[];
 }
 
 export interface ReportDefinition {

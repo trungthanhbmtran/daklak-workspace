@@ -69,40 +69,62 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({ definitionId, config
             </div>
 
             {runStatus?.status === 'SUCCEEDED' && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Bảng Dữ liệu (Snapshot)</h3>
-                {isSnapshotLoading ? (
-                  <p className="text-sm text-gray-500">Đang tải Snapshot...</p>
-                ) : (
-                  <div className="border rounded overflow-hidden">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-100 border-b">
-                        <tr>
-                          {snapshot?.schema?.map((col: any) => (
-                            <th key={col.key} className="p-2 font-medium">{col.label || col.key}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {snapshot?.data?.slice(0, 100).map((row: any, i: number) => (
-                          <tr key={i} className="border-b last:border-0 hover:bg-slate-50">
-                            {snapshot?.schema?.map((col: any) => (
-                              <td key={col.key} className="p-2">{String(row[col.key] ?? '')}</td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {!snapshot?.data?.length && (
-                      <p className="p-4 text-center text-gray-500">Không có dữ liệu.</p>
-                    )}
-                    {(snapshot?.data?.length || 0) > 100 && (
-                      <p className="p-2 text-xs text-center text-gray-500 border-t">
-                        Đang hiển thị 100 dòng đầu tiên của Snapshot. Sử dụng Server Pagination để xem thêm.
-                      </p>
-                    )}
+              <div className="space-y-6">
+                {/* Khu vực Biểu đồ */}
+                {config?.charts && config.charts.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">Biểu đồ Phân tích</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {config.charts.map((chart: any, index: number) => (
+                        <div key={index} className="border rounded p-4 flex flex-col items-center justify-center h-48 bg-slate-50 text-gray-500">
+                          <p className="font-medium text-gray-700">{chart.title || `Biểu đồ ${chart.type}`}</p>
+                          <p className="text-sm">Trục X: {chart.xAxis} | Trục Y: {chart.yAxis}</p>
+                          <p className="text-xs italic mt-2">(Render bằng Recharts sẽ thực hiện ở phase sau)</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
+
+                {/* Bảng dữ liệu */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-lg">Bảng Dữ liệu (Snapshot)</h3>
+                    <Button variant="outline" size="sm">Xuất Excel / CSV</Button>
+                  </div>
+                  {isSnapshotLoading ? (
+                    <p className="text-sm text-gray-500">Đang tải Snapshot...</p>
+                  ) : (
+                    <div className="border rounded overflow-hidden">
+                      <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-100 border-b">
+                          <tr>
+                            {snapshot?.schema?.map((col: any) => (
+                              <th key={col.key} className="p-2 font-medium">{col.label || col.key}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {snapshot?.data?.slice(0, 100).map((row: any, i: number) => (
+                            <tr key={i} className="border-b last:border-0 hover:bg-slate-50">
+                              {snapshot?.schema?.map((col: any) => (
+                                <td key={col.key} className="p-2">{String(row[col.key] ?? '')}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {!snapshot?.data?.length && (
+                        <p className="p-4 text-center text-gray-500">Không có dữ liệu.</p>
+                      )}
+                      {(snapshot?.data?.length || 0) > 100 && (
+                        <p className="p-2 text-xs text-center text-gray-500 border-t">
+                          Đang hiển thị 100 dòng đầu tiên của Snapshot. Sử dụng Server Pagination để xem thêm.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
