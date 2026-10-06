@@ -20,6 +20,14 @@ service ReportService {
   rpc GetKpiStats (GenericRequest) returns (GenericResponse);
   rpc GetDocumentStats (GenericRequest) returns (GenericResponse);
   rpc GetEmployeeQualityReport (GenericRequest) returns (GenericResponse);
+  
+  // V2: Dynamic Report Designer
+  rpc CreateReportDefinition (GenericRequest) returns (GenericResponse);
+  rpc GetReportDefinitions (GenericRequest) returns (GenericResponse);
+  rpc GetReportDefinitionById (GenericRequest) returns (GenericResponse);
+  rpc RunReport (GenericRequest) returns (GenericResponse);
+  rpc GetReportRunStatus (GenericRequest) returns (GenericResponse);
+  rpc GetDatasetSnapshot (GenericRequest) returns (GenericResponse);
 }
 
 message GenericRequest {

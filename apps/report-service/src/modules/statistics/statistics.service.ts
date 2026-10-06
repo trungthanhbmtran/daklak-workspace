@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 import type { ClientGrpc } from '@nestjs/microservices';
+import { executeTable } from '../reports/table-engine';
 
 @Injectable()
 export class StatisticsService implements OnModuleInit {
@@ -76,7 +77,6 @@ export class StatisticsService implements OnModuleInit {
           data,
         },
       });
-      // Giữ tối đa 10 snapshots mới nhất để tránh phình bảng
       const oldSnapshots = await this.prisma.statisticsSnapshot.findMany({
         where: { dataSourceCode },
         orderBy: { recordedAt: 'desc' },
@@ -104,39 +104,47 @@ export class StatisticsService implements OnModuleInit {
       where: { dataSourceCode: 'HRM_TASK_STATS' },
       orderBy: { recordedAt: 'desc' },
     });
-    if (latest && latest.data) {
-      const snapshotData = { ...(latest.data as any) };
-      snapshotData.totalTasks = (snapshotData.totalTasks || 0) + 1;
-      snapshotData.inTime = (snapshotData.inTime || 0) + 1;
-      await this.saveSnapshot('HRM_TASK_STATS', snapshotData);
+    if (latest && Array.isArray(latest.data)) {
+      const rows = [...(latest.data as any[])];
+      rows.unshift({
+        id: data.taskId,
+        title: data.title || `Nhiệm vụ #${data.taskId}`,
+        status: data.status || 'PENDING_ACCEPTANCE',
+        priority: data.priority || 'MEDIUM',
+        progress: 0,
+        departmentId: data.departmentId || 0,
+        departmentName: 'Đang cập nhật',
+        assigneeCode: data.assigneeCode || 'Chưa giao',
+        assigneeName: data.assigneeName || 'Chưa giao',
+        dueDate: data.dueDate ? String(data.dueDate).split('T')[0] : '',
+        createdAt: new Date().toISOString().split('T')[0],
+        isOverdue: 'Đúng hạn',
+        isCompleted: 'Chưa hoàn thành',
+      });
+      await this.saveSnapshot('HRM_TASK_STATS', rows);
     }
   }
 
   async handleTaskStateChanged(data: any) {
-    this.logger.log(`[CQRS Event] task.state_changed received: ${data.status}`);
+    this.logger.log(`[CQRS Event] task.state_changed: task ${data.taskId} -> ${data.status}`);
     const latest = await this.prisma.statisticsSnapshot.findFirst({
       where: { dataSourceCode: 'HRM_TASK_STATS' },
       orderBy: { recordedAt: 'desc' },
     });
-    if (latest && latest.data) {
-      const snapshotData = { ...(latest.data as any) };
-      const isCompleted = data.status === 'COMPLETED' || data.status === 'DONE';
-      if (isCompleted) {
-        snapshotData.completedTasks = (snapshotData.completedTasks || 0) + 1;
-        if (snapshotData.inProgressTasks > 0) snapshotData.inProgressTasks -= 1;
-        if (data.dueDate) {
-          const due = new Date(data.dueDate).getTime();
-          const completedAt = data.completedAt ? new Date(data.completedAt).getTime() : Date.now();
-          if (completedAt > due) {
-            snapshotData.doneOverdue = (snapshotData.doneOverdue || 0) + 1;
-          } else {
-            snapshotData.doneInTime = (snapshotData.doneInTime || 0) + 1;
-          }
-        } else {
-          snapshotData.doneInTime = (snapshotData.doneInTime || 0) + 1;
+    if (latest && Array.isArray(latest.data)) {
+      const rows = (latest.data as any[]).map((r) => {
+        if (r.id === data.taskId) {
+          const isDone = data.status === 'COMPLETED' || data.status === 'DONE';
+          return {
+            ...r,
+            status: data.status || r.status,
+            progress: isDone ? 100 : (data.progress ?? r.progress),
+            isCompleted: isDone ? 'Hoàn thành' : 'Chưa hoàn thành',
+          };
         }
-      }
-      await this.saveSnapshot('HRM_TASK_STATS', snapshotData);
+        return r;
+      });
+      await this.saveSnapshot('HRM_TASK_STATS', rows);
     }
   }
 
@@ -146,11 +154,14 @@ export class StatisticsService implements OnModuleInit {
       where: { dataSourceCode: 'POST_STATS' },
       orderBy: { recordedAt: 'desc' },
     });
-    if (latest && latest.data) {
-      const snapshotData = { ...(latest.data as any) };
-      snapshotData.total = (snapshotData.total || 0) + 1;
-      snapshotData.published = (snapshotData.published || 0) + 1;
-      await this.saveSnapshot('POST_STATS', snapshotData);
+    if (latest && Array.isArray(latest.data)) {
+      const rows = (latest.data as any[]).map((r) => {
+        if (r.id === data.id) {
+          return { ...r, status: 'PUBLISHED' };
+        }
+        return r;
+      });
+      await this.saveSnapshot('POST_STATS', rows);
     }
   }
 
@@ -160,155 +171,127 @@ export class StatisticsService implements OnModuleInit {
       where: { dataSourceCode: 'DOC_STATS' },
       orderBy: { recordedAt: 'desc' },
     });
-    if (latest && latest.data) {
-      const snapshotData = { ...(latest.data as any) };
-      if (data.isIncoming) {
-        snapshotData.incomingTotal = (snapshotData.incomingTotal || 0) + 1;
-        snapshotData.incomingPending = (snapshotData.incomingPending || 0) + 1;
-      } else {
-        snapshotData.outgoingTotal = (snapshotData.outgoingTotal || 0) + 1;
-      }
-      await this.saveSnapshot('DOC_STATS', snapshotData);
+    if (latest && Array.isArray(latest.data)) {
+      const rows = [...(latest.data as any[])];
+      rows.unshift({
+        id: data.id,
+        documentNumber: data.documentNumber || `VB-${data.id}`,
+        abstract: data.abstract || '',
+        status: data.status || 'PROCESSING',
+        isIncoming: data.isIncoming ? 'Văn bản đến' : 'Văn bản đi',
+        urgency: data.urgency || 'NORMAL',
+        securityLevel: data.securityLevel || 'NORMAL',
+        pageCount: Number(data.pageCount || 1),
+        isLate: 'Đúng hạn',
+        issueDate: new Date().toISOString().split('T')[0],
+        deadlineDate: data.processingDeadline ? String(data.processingDeadline).split('T')[0] : '',
+      });
+      await this.saveSnapshot('DOC_STATS', rows);
     }
   }
 
   // =========================================================================
-  // QUERY / READ METHODS (CQRS READ-MODEL FIRST -> FALLBACK VIA gRPC)
+  // DYNAMIC DATASET QUERY METHODS (FLAT ROWS FOR CHARTS & TABLE ENGINE)
   // =========================================================================
 
-  async getTaskStatistics(filter: any, user: any, metadata: Metadata) {
+  async getTaskStatistics(filter: any, _user: any, metadata: Metadata) {
     try {
       const isGenericQuery = !filter || Object.keys(filter).length === 0;
 
-      // 1. Kiểm tra CQRS Read-Model Snapshot (O(1) complexity, không gọi gRPC)
+      // 1. Check CQRS Read-Model Snapshot
+      let rows: any[] | null = null;
       if (isGenericQuery) {
         const cached = await this.prisma.statisticsSnapshot.findFirst({
           where: { dataSourceCode: 'HRM_TASK_STATS' },
           orderBy: { recordedAt: 'desc' },
         });
-        if (cached && cached.data) {
-          // Nếu snapshot chưa quá 10 phút, trả về ngay lập tức
-          const ageMinutes = (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
+        if (cached && Array.isArray(cached.data)) {
+          const ageMinutes =
+            (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
           if (ageMinutes < 10) {
-            return {
-              success: true,
-              message: 'Lấy thống kê thành công (từ CQRS Read-Model)',
-              data: cached.data as any,
-            };
+            rows = cached.data as any[];
           }
         }
       }
 
-      // 2. Fallback / Cold start / Specific Filter: Lấy và tổng hợp dữ liệu
-      const listReq = { ...filter, page: 1, limit: 100000 };
-      const res: any = await firstValueFrom(this.taskService.ListTasks(listReq, metadata));
-      const allTasks = res?.data || [];
+      // 2. Fetch via gRPC if no cached flat dataset
+      if (!rows) {
+        const listReq = { ...filter, page: 1, limit: 10000 };
+        delete listReq.config;
+        delete listReq.format;
 
-      const nowTime = new Date().setHours(0, 0, 0, 0);
+        const res: any = await firstValueFrom(
+          this.taskService.ListTasks(listReq, metadata),
+        );
+        const allTasks = res?.data || [];
+        const nowTime = Date.now();
 
-      let overdue = 0, warning = 0, inTime = 0, doneInTime = 0, doneOverdue = 0;
-      let totalTasks = 0, completedTasks = 0, inProgressTasks = 0, overdueTasks = 0;
-
-      const individualMap: Record<string, any> = {};
-      const departmentMap: Record<string, any> = {};
-
-      for (const row of allTasks) {
-        totalTasks++;
-
-        const taskDueTime = row.dueDate ? new Date(row.dueDate).setHours(0,0,0,0) : null;
-        const isDone = row.status === 'COMPLETED' || row.status === 'DONE';
-
-        if (isDone) completedTasks++;
-        else if (row.status === 'IN_PROGRESS' || row.status === 'ASSIGNED') inProgressTasks++;
-
-        if (!isDone && taskDueTime && nowTime > taskDueTime) overdueTasks++;
-
-        if (isDone) {
-          const completedTime = row.createdAt ? new Date(row.createdAt).setHours(0,0,0,0) : nowTime;
-          if (taskDueTime && completedTime > taskDueTime) doneOverdue++;
-          else doneInTime++;
-        } else {
-          if (!taskDueTime) { inTime++; }
-          else {
-            const diff = Math.round((taskDueTime - nowTime) / 86400000);
-            if (diff < 0) overdue++;
-            else if (diff <= 3) warning++;
-            else inTime++;
-          }
+        let unitMap: Record<number, any> = {};
+        try {
+          unitMap = await this.getUnitMap();
+        } catch {
+          // Fallback to empty unit map
         }
 
-        if (row.participants && row.participants.length > 0) {
-          for (const p of row.participants) {
-            if (p.role === 'ASSIGNEE') {
-              const empCode = p.employeeCode || 'Chưa phân công';
-              const deptId = p.departmentId || 'unknown';
+        rows = allTasks.map((t: any) => {
+          const isDone = t.status === 'COMPLETED' || t.status === 'DONE';
+          const taskDueTime = t.dueDate ? new Date(t.dueDate).getTime() : null;
+          const isOverdue = !isDone && taskDueTime && nowTime > taskDueTime;
+          const deptId = t.departmentId || t.plan?.departmentId || 0;
+          const deptName =
+            (unitMap[deptId] ? unitMap[deptId].name : null) || 'Chưa phân công';
+          const mainAssignee = t.participants?.find(
+            (p: any) => p.role === 'ASSIGNEE',
+          );
+          const assigneeCode =
+            mainAssignee?.employeeCode || t.assigneeCode || 'Chưa giao';
+          const assigneeName =
+            mainAssignee?.fullName || t.assigneeName || assigneeCode;
 
-              if (!individualMap[empCode]) individualMap[empCode] = { name: empCode, completed: 0, inTime: 0, completedOverdue: 0, overdue: 0, total: 0 };
-              if (!departmentMap[deptId]) departmentMap[deptId] = { name: deptId, completed: 0, inTime: 0, completedOverdue: 0, overdue: 0, total: 0 };
+          return {
+            id: t.id,
+            title: t.title || `Nhiệm vụ #${t.id}`,
+            status: t.status,
+            priority: t.priority || 'MEDIUM',
+            progress: Number(t.progress || (isDone ? 100 : 0)),
+            departmentId: deptId,
+            departmentName: deptName,
+            assigneeCode,
+            assigneeName,
+            dueDate: t.dueDate
+              ? new Date(t.dueDate).toISOString().split('T')[0]
+              : '',
+            createdAt: t.createdAt
+              ? new Date(t.createdAt).toISOString().split('T')[0]
+              : '',
+            isOverdue: isOverdue ? 'Quá hạn' : 'Đúng hạn',
+            isCompleted: isDone ? 'Hoàn thành' : 'Chưa hoàn thành',
+          };
+        });
 
-              individualMap[empCode].total++;
-              departmentMap[deptId].total++;
-
-              if (isDone) {
-                const completedTime = row.createdAt ? new Date(row.createdAt).setHours(0,0,0,0) : nowTime;
-                if (taskDueTime && completedTime > taskDueTime) {
-                  individualMap[empCode].completedOverdue++;
-                  departmentMap[deptId].completedOverdue++;
-                } else {
-                  individualMap[empCode].completed++;
-                  departmentMap[deptId].completed++;
-                }
-              } else {
-                if (taskDueTime && nowTime > taskDueTime) {
-                  individualMap[empCode].overdue++;
-                  departmentMap[deptId].overdue++;
-                } else {
-                  individualMap[empCode].inTime++;
-                  departmentMap[deptId].inTime++;
-                }
-              }
-            }
-          }
+        if (isGenericQuery) {
+          await this.saveSnapshot('HRM_TASK_STATS', rows);
         }
       }
 
-      const individualStats = Object.values(individualMap).sort((a: any, b: any) => b.total - a.total).slice(0, 10);
-      const deptStatsRaw = Object.values(departmentMap).sort((a: any, b: any) => b.total - a.total).slice(0, 10);
-
-      let unitMap: Record<number, any> = {};
-      try { unitMap = await this.getUnitMap(); } catch (e) {}
-
-      const departmentStats = deptStatsRaw.map((s: any) => {
-        const dId = parseInt(s.name, 10);
-        return { ...s, name: (!isNaN(dId) && unitMap[dId]) ? unitMap[dId].name : 'Chưa phân công bộ phận' };
-      });
-
-      const responseData = {
-        overdue,
-        warning,
-        inTime,
-        doneInTime,
-        doneOverdue,
-        totalTasks,
-        completedTasks,
-        inProgressTasks,
-        overdueTasks,
-        individualStats,
-        departmentStats,
-      };
-
-      // 3. Cập nhật CQRS Snapshot cho các lần gọi sau
-      if (isGenericQuery) {
-        await this.saveSnapshot('HRM_TASK_STATS', responseData);
+      // 3. Xử lý qua TableEngine nếu có TableConfig
+      if (filter?.config && filter.config.version === 1) {
+        const tableResult = executeTable({ items: rows }, filter.config);
+        return {
+          success: true,
+          message: 'Báo cáo nhiệm vụ (Table Engine)',
+          data: tableResult,
+        };
       }
 
+      // 4. Trả về mảng bản ghi phẳng (Flat Dataset) cho ChartRenderer / Dynamic Builder
       return {
         success: true,
-        message: 'Lấy thống kê thành công',
-        data: responseData,
+        message: 'Lấy dữ liệu nhiệm vụ động thành công',
+        data: rows,
       };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error('Lỗi lấy thống kê nhiệm vụ:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê nhiệm vụ');
     }
   }
@@ -316,118 +299,145 @@ export class StatisticsService implements OnModuleInit {
   async getPostStatistics(filter: any, metadata: Metadata) {
     try {
       const isGenericQuery = !filter || Object.keys(filter).length === 0;
+
+      let rows: any[] | null = null;
       if (isGenericQuery) {
         const cached = await this.prisma.statisticsSnapshot.findFirst({
           where: { dataSourceCode: 'POST_STATS' },
           orderBy: { recordedAt: 'desc' },
         });
-        if (cached && cached.data) {
-          const ageMinutes = (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
+        if (cached && Array.isArray(cached.data)) {
+          const ageMinutes =
+            (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
           if (ageMinutes < 10) {
-            return { success: true, message: 'Lấy thống kê bài viết thành công (từ CQRS Read-Model)', data: cached.data as any };
+            rows = cached.data as any[];
           }
         }
       }
 
-      const listReq = { ...filter, page: 1, limit: 100000 };
-      const res: any = await firstValueFrom(this.postService.ListPosts(listReq, metadata));
-      const allPosts = res?.data || [];
+      if (!rows) {
+        const listReq = { ...filter, page: 1, limit: 10000 };
+        delete listReq.config;
+        delete listReq.format;
 
-      let total = 0, published = 0, draft = 0, pending = 0, reviewing = 0, rejected = 0, totalViews = 0;
+        const res: any = await firstValueFrom(
+          this.postService.ListPosts(listReq, metadata),
+        );
+        const allPosts = res?.data || [];
 
-      for (const row of allPosts) {
-        total++;
-        totalViews += Number(row.viewCount || 0);
-        if (row.status === 'PUBLISHED') published++;
-        else if (row.status === 'DRAFT') draft++;
-        else if (row.status === 'PENDING') pending++;
-        else if (row.status === 'REVIEWING') reviewing++;
-        else if (row.status === 'REJECTED') rejected++;
+        rows = allPosts.map((p: any) => ({
+          id: p.id,
+          title: p.title || '',
+          status: p.status,
+          categoryName: p.category || p.categoryName || 'Tin tức chung',
+          authorName: p.authorName || p.authorId || 'Ban biên tập',
+          viewCount: Number(p.viewCount || 0),
+          isFeatured: p.isFeatured ? 'Nổi bật' : 'Bình thường',
+          publishedDate: p.publishedAt
+            ? new Date(p.publishedAt).toISOString().split('T')[0]
+            : '',
+          createdAt: p.createdAt
+            ? new Date(p.createdAt).toISOString().split('T')[0]
+            : '',
+        }));
+
+        if (isGenericQuery) {
+          await this.saveSnapshot('POST_STATS', rows);
+        }
       }
-      const responseData = {
-        total,
-        published,
-        draft,
-        pending,
-        reviewing,
-        rejected,
-        totalViews,
-        byStatus: [
-          { status: 'PUBLISHED', count: published },
-          { status: 'DRAFT', count: draft },
-          { status: 'PENDING', count: pending },
-          { status: 'REVIEWING', count: reviewing },
-          { status: 'REJECTED', count: rejected },
-        ],
+
+      if (filter?.config && filter.config.version === 1) {
+        const tableResult = executeTable({ items: rows }, filter.config);
+        return {
+          success: true,
+          message: 'Báo cáo bài viết (Table Engine)',
+          data: tableResult,
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Lấy dữ liệu bài viết động thành công',
+        data: rows,
       };
-
-      if (isGenericQuery) {
-        await this.saveSnapshot('POST_STATS', responseData);
-      }
-
-      return { success: true, message: 'Lấy thống kê bài viết thành công', data: responseData };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error('Lỗi lấy thống kê bài viết:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê bài viết');
     }
   }
 
-  async getKpiStatistics(filter: any, user: any, metadata: Metadata) {
+  async getKpiStatistics(filter: any, _user: any, metadata: Metadata) {
     try {
       const isGenericQuery = !filter || Object.keys(filter).length === 0;
+
+      let rows: any[] | null = null;
       if (isGenericQuery) {
         const cached = await this.prisma.statisticsSnapshot.findFirst({
           where: { dataSourceCode: 'KPI_STATS' },
           orderBy: { recordedAt: 'desc' },
         });
-        if (cached && cached.data) {
-          const ageMinutes = (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
+        if (cached && Array.isArray(cached.data)) {
+          const ageMinutes =
+            (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
           if (ageMinutes < 10) {
-            return { success: true, message: 'Lấy thống kê KPI thành công (từ CQRS Read-Model)', data: cached.data as any };
+            rows = cached.data as any[];
           }
         }
       }
 
-      const listReq = { ...filter, page: 1, limit: 100000 };
-      const res: any = await firstValueFrom(this.kpiService.FindEvaluations(listReq, metadata));
-      const allEvals = res?.data || [];
+      if (!rows) {
+        const listReq = { ...filter, page: 1, limit: 10000 };
+        delete listReq.config;
+        delete listReq.format;
 
-      let totalScore = 0;
-      const unitStats = new Map();
+        const res: any = await firstValueFrom(
+          this.kpiService.FindEvaluations(listReq, metadata),
+        );
+        const allEvals = res?.data || [];
 
-      for (const row of allEvals) {
-        const score = Number(row.totalScore || 0);
-        const deptId = row.employee?.departmentId || 0;
+        let unitMap: Record<number, any> = {};
+        try {
+          unitMap = await this.getUnitMap();
+        } catch {
+          // Fallback to empty unit map
+        }
 
-        totalScore += score;
+        rows = allEvals.map((ev: any) => {
+          const deptId = ev.employee?.departmentId || 0;
+          const deptName =
+            (unitMap[deptId] ? unitMap[deptId].name : null) || 'Chưa xác định';
+          return {
+            id: ev.id,
+            employeeCode: ev.employeeCode || '',
+            employeeName: ev.employee?.fullName || ev.employeeCode || '',
+            departmentName: deptName,
+            periodId: String(ev.periodId || ''),
+            totalScore: Number(ev.totalScore || 0),
+            status: ev.status || 'SUBMITTED',
+          };
+        });
 
-        if (!unitStats.has(deptId)) unitStats.set(deptId, { count: 0, totalScore: 0 });
-        const st = unitStats.get(deptId);
-        st.count++;
-        st.totalScore += score;
+        if (isGenericQuery) {
+          await this.saveSnapshot('KPI_STATS', rows);
+        }
       }
 
-      const companyAvgScore = allEvals.length > 0 ? totalScore / allEvals.length : 0;
-      let unitMap: Record<number, any> = {};
-      try { unitMap = await this.getUnitMap(); } catch (e) {}
-
-      const statsByUnit = Array.from(unitStats.entries()).map(([deptId, st]) => {
+      if (filter?.config && filter.config.version === 1) {
+        const tableResult = executeTable({ items: rows }, filter.config);
         return {
-          departmentId: deptId,
-          departmentName: unitMap[deptId] ? unitMap[deptId].name : 'Chưa xác định',
-          count: st.count,
-          avgScore: st.count > 0 ? st.totalScore / st.count : 0,
+          success: true,
+          message: 'Báo cáo KPI (Table Engine)',
+          data: tableResult,
         };
-      });
-
-      const responseData = { totalEvaluations: allEvals.length, companyAvgScore, statsByUnit };
-
-      if (isGenericQuery) {
-        await this.saveSnapshot('KPI_STATS', responseData);
       }
 
-      return { success: true, message: 'Lấy thống kê KPI thành công', data: responseData };
+      return {
+        success: true,
+        message: 'Lấy dữ liệu KPI động thành công',
+        data: rows,
+      };
     } catch (e) {
+      this.logger.error('Lỗi lấy thống kê KPI:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê KPI');
     }
   }
@@ -435,62 +445,81 @@ export class StatisticsService implements OnModuleInit {
   async getDocumentStatistics(filter: any, metadata: Metadata) {
     try {
       const isGenericQuery = !filter || Object.keys(filter).length === 0;
+
+      let rows: any[] | null = null;
       if (isGenericQuery) {
         const cached = await this.prisma.statisticsSnapshot.findFirst({
           where: { dataSourceCode: 'DOC_STATS' },
           orderBy: { recordedAt: 'desc' },
         });
-        if (cached && cached.data) {
-          const ageMinutes = (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
+        if (cached && Array.isArray(cached.data)) {
+          const ageMinutes =
+            (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
           if (ageMinutes < 10) {
-            return {
-              success: true,
-              message: 'Lấy thống kê văn bản thành công (từ CQRS Read-Model)',
-              data: cached.data as any,
-            };
+            rows = cached.data as any[];
           }
         }
       }
 
-      const res: any = await firstValueFrom(
-        this.documentService.ListDocuments({ page: 1, limit: 100000, ...filter }, metadata),
-      );
-      const allDocs = res?.data || [];
+      if (!rows) {
+        const listReq = { ...filter, page: 1, limit: 10000 };
+        delete listReq.config;
+        delete listReq.format;
 
-      let incomingTotal = 0, incomingPending = 0, incomingLate = 0, outgoingTotal = 0, urgentTotal = 0;
-      const now = new Date().getTime();
+        const res: any = await firstValueFrom(
+          this.documentService.ListDocuments(listReq, metadata),
+        );
+        const allDocs = res?.data || [];
+        const now = Date.now();
 
-      for (const doc of allDocs) {
-        if (doc.isIncoming) {
-          incomingTotal++;
-          if (doc.status === 'PROCESSING') {
-            incomingPending++;
-            if (doc.processingDeadline) {
-              const deadline = new Date(doc.processingDeadline).getTime();
-              if (deadline < now) incomingLate++;
-            }
-          }
-        } else {
-          outgoingTotal++;
-        }
+        rows = allDocs.map((doc: any) => {
+          const isIncoming = doc.isIncoming ? 'Văn bản đến' : 'Văn bản đi';
+          const deadline = doc.processingDeadline
+            ? new Date(doc.processingDeadline).getTime()
+            : null;
+          const isLate =
+            doc.status === 'PROCESSING' && deadline && deadline < now;
 
-        if (doc.status === 'PROCESSING' && (doc.urgency === 'URGENT' || doc.urgency === 'FLASH')) {
-          urgentTotal++;
+          return {
+            id: doc.id,
+            documentNumber: doc.documentNumber || `VB-${doc.id}`,
+            abstract: doc.abstract || '',
+            status: doc.status,
+            isIncoming,
+            urgency: doc.urgency || 'NORMAL',
+            securityLevel: doc.securityLevel || 'NORMAL',
+            pageCount: Number(doc.pageCount || 1),
+            isLate: isLate ? 'Trễ hạn' : 'Đúng hạn',
+            issueDate: doc.issueDate
+              ? new Date(doc.issueDate).toISOString().split('T')[0]
+              : '',
+            deadlineDate: doc.processingDeadline
+              ? new Date(doc.processingDeadline).toISOString().split('T')[0]
+              : '',
+          };
+        });
+
+        if (isGenericQuery) {
+          await this.saveSnapshot('DOC_STATS', rows);
         }
       }
 
-      const responseData = { incomingTotal, incomingPending, incomingLate, outgoingTotal, urgentTotal };
-
-      if (isGenericQuery) {
-        await this.saveSnapshot('DOC_STATS', responseData);
+      if (filter?.config && filter.config.version === 1) {
+        const tableResult = executeTable({ items: rows }, filter.config);
+        return {
+          success: true,
+          message: 'Báo cáo văn bản (Table Engine)',
+          data: tableResult,
+        };
       }
 
       return {
         success: true,
-        message: 'Lấy thống kê văn bản thành công',
-        data: responseData,
+        message: 'Lấy dữ liệu văn bản động thành công',
+        data: rows,
       };
     } catch (e) {
+      this.logger.error('Lỗi lấy thống kê văn bản:', e);
       throw new InternalServerErrorException('Lỗi lấy thống kê văn bản');
     }
   }

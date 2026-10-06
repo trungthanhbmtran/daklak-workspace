@@ -134,4 +134,42 @@ export class ReportsService implements OnModuleInit {
       await this.callGrpc('GetEmployeeQualityReport', query, user, authHeader),
     );
   }
+
+  // --- V2 Dynamic Report Designer ---
+  
+  async createReportDefinition(body: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('CreateReportDefinition', body, user, authHeader),
+    );
+  }
+
+  async getReportDefinitions(query: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetReportDefinitions', query, user, authHeader),
+    );
+  }
+
+  async getReportDefinitionById(id: string, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetReportDefinitionById', { id }, user, authHeader),
+    );
+  }
+
+  async runReport(body: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('RunReport', body, user, authHeader),
+    );
+  }
+
+  async getReportRunStatus(id: string, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetReportRunStatus', { id }, user, authHeader),
+    );
+  }
+
+  async getDatasetSnapshot(runId: string, query: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetDatasetSnapshot', { runId, ...query }, user, authHeader),
+    );
+  }
 }

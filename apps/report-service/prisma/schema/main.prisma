@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
-  engineType = "binary"
+  provider     = "prisma-client-js"
+  engineType   = "binary"
   output       = "../../src/generated/prisma"
   moduleFormat = "cjs"
 }
@@ -16,7 +16,7 @@ model ReportTemplate {
   id          Int            @id @default(autoincrement())
   title       String         @db.VarChar(255)
   description String?        @db.Text
-  layout      Json?          // Lưu trữ lưới (Grid layout) của các Widget
+  layout      Json? // LÆ°u trá»¯ lÆ°á»›i (Grid layout) cá»§a cÃ¡c Widget
   widgets     ReportWidget[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -30,14 +30,71 @@ model ReportWidget {
   dataSourceCode String         @db.VarChar(100) // "HRM_TASK_STATS", "DOC_STATS"
   xAxisKey       String         @db.VarChar(100)
   yAxisKey       String         @db.VarChar(100)
-  config         Json?          // Cấu hình màu sắc, bộ lọc...
+  config         Json? // Cáº¥u hÃ¬nh mÃ u sáº¯c, bá»™ lá»c...
   template       ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 }
 
-// Bảng dùng để lưu thống kê dạng Read-Model (CQRS) do RabbitMQ đẩy vào
+// Báº£ng dÃ¹ng Ä‘á»ƒ lÆ°u thá»‘ng kÃª dáº¡ng Read-Model (CQRS) do RabbitMQ Ä‘áº©y vÃ o
 model StatisticsSnapshot {
   id             Int      @id @default(autoincrement())
   dataSourceCode String   @db.VarChar(100)
-  data           Json     // Lưu dữ liệu thống kê
+  data           Json // LÆ°u dá»¯ liá»‡u thá»‘ng kÃª
   recordedAt     DateTime @default(now())
+}
+
+model ReportDefinition {
+  id             Int     @id @default(autoincrement())
+  code           String  @unique @db.VarChar(100)
+  name           String  @db.VarChar(255)
+  description    String? @db.Text
+  version        Int     @default(1)
+  organizationId Int? // Ph?m vi t? ch?c c?a báo cáo (PBAC)
+  ownerId        Int? // Ngu?i t?o/s? h?u báo cáo
+
+  // Luu c?u hình: sources, join graph, fields, filters, groups, sorts
+  configuration Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  runs ReportRun[]
+}
+
+model ReportRun {
+  id                 Int    @id @default(autoincrement())
+  reportDefinitionId Int
+  definitionVersion  Int // Ch?p l?i version c?a c?u hình lúc ch?y
+  status             String @db.VarChar(50) // "QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED", "PARTIAL"
+
+  organizationId Int? // Scope t? ch?c lúc ch?y
+  executorId     Int? // ID ngu?i ch?y
+
+  rowCount       Int?
+  checksum       String?   @db.VarChar(255)
+  errors         Json? // Các l?i ho?c metadata c?a ngu?n b? l?i (redacted)
+  retentionUntil DateTime? // Th?i h?n luu tr? snapshot
+
+  startedAt DateTime?
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  definition ReportDefinition  @relation(fields: [reportDefinitionId], references: [id], onDelete: Cascade)
+  snapshots  DatasetSnapshot[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model DatasetSnapshot {
+  id         Int      @id @default(autoincrement())
+  runId      Int
+  chunkIndex Int      @default(0) // Dùng khi luu d? li?u l?n chia thành nhi?u ph?n
+  schema     Json? // C?u trúc tr? v? (metadata)
+  data       Json // D? li?u dòng (rows)
+  recordedAt DateTime @default(now())
+
+  run ReportRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, chunkIndex])
 }

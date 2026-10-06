@@ -115,4 +115,67 @@ export class ReportsController {
       req.headers.authorization,
     );
   }
+
+  // --- V2 Dynamic Report Designer ---
+
+  @Post('v2/definitions')
+  @RequirePermissions('REPORT:MANAGE')
+  async createReportDefinition(@Body() body: any, @Req() req: any) {
+    return this.reportsService.createReportDefinition(
+      body,
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Get('v2/definitions')
+  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  async getReportDefinitions(@Req() req: any) {
+    return this.reportsService.getReportDefinitions(
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Get('v2/definitions/:id')
+  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  async getReportDefinitionById(@Param('id') id: string, @Req() req: any) {
+    return this.reportsService.getReportDefinitionById(
+      id,
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Post('v2/runs')
+  @RequirePermissions('REPORT:EXECUTE')
+  async runReport(@Body() body: any, @Req() req: any) {
+    return this.reportsService.runReport(
+      body,
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Get('v2/runs/:id/status')
+  @RequirePermissions('REPORT:READ')
+  async getReportRunStatus(@Param('id') id: string, @Req() req: any) {
+    return this.reportsService.getReportRunStatus(
+      id,
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Get('v2/runs/:runId/snapshot')
+  @RequirePermissions('REPORT:READ')
+  async getDatasetSnapshot(@Param('runId') runId: string, @Req() req: any) {
+    return this.reportsService.getDatasetSnapshot(
+      runId,
+      req.query,
+      req.user,
+      req.headers.authorization,
+    );
+  }
 }
