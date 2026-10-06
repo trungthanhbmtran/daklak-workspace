@@ -10,7 +10,7 @@ export const ReportWorkspace = () => {
   const { data: reports, isLoading } = useGetReportDefinitions();
   const createMutation = useCreateReportDefinition();
   const [isDesigning, setIsDesigning] = useState(false);
-  const [viewingReport, setViewingReport] = useState<{id: number, config: any} | null>(null);
+  const [viewingReport, setViewingReport] = useState<{ id: number, config: any } | null>(null);
 
   const handleSaveConfig = async (config: ReportConfigAST) => {
     await createMutation.mutateAsync({
@@ -31,7 +31,7 @@ export const ReportWorkspace = () => {
 
   if (viewingReport) {
     return (
-      <ReportViewer 
+      <ReportViewer
         definitionId={viewingReport.id}
         config={viewingReport.config}
         onBack={() => setViewingReport(null)}
@@ -47,7 +47,7 @@ export const ReportWorkspace = () => {
             <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Trung tâm Báo cáo</h1>
             <p className="text-slate-500 mt-1">Quản lý, thiết kế và thực thi các báo cáo phân tích dữ liệu.</p>
           </div>
-          <Button 
+          <Button
             onClick={() => setIsDesigning(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-lg px-5 py-2.5 transition-all flex items-center gap-2"
           >
@@ -79,7 +79,10 @@ export const ReportWorkspace = () => {
                   <div className="mt-6 flex gap-3">
                     <Button variant="outline" className="flex-1 bg-white border-slate-200 hover:bg-slate-50 text-slate-700" size="sm" onClick={() => setIsDesigning(true)}>Thiết kế lại</Button>
                     <Button variant="default" className="flex-1 bg-indigo-600 hover:bg-indigo-700 shadow-sm" size="sm" onClick={() => setViewingReport({ id: report.id, config: report.configuration })}>
-                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
                       Chạy báo cáo
                     </Button>
                   </div>
