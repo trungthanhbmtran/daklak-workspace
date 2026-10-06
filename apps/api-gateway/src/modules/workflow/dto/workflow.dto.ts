@@ -184,12 +184,10 @@ export class CreateWorkflowDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ required: false, type: WorkflowDefinitionDto })
+  @ApiProperty({ required: false, type: Object })
   @IsObject()
   @IsOptional()
-  @ValidateNested()
-  @Type(() => WorkflowDefinitionDto)
-  definition?: WorkflowDefinitionDto;
+  definition?: Record<string, any>;
 }
 
 export class UpdateWorkflowDto extends CreateWorkflowDto {}

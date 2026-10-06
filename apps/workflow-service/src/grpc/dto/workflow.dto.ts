@@ -150,9 +150,7 @@ export class CreateWorkflowGrpcDto {
 
   @IsObject()
   @IsOptional()
-  @ValidateNested()
-  @Type(() => WorkflowDefinitionDto)
-  definition?: WorkflowDefinitionDto;
+  definition?: Record<string, any>;
 }
 
 export class StartWorkflowGrpcDto {
@@ -216,9 +214,7 @@ export class UpdateWorkflowGrpcDto {
 
   @IsObject()
   @IsOptional()
-  @ValidateNested()
-  @Type(() => WorkflowDefinitionDto)
-  definition?: WorkflowDefinitionDto;
+  definition?: Record<string, any>;
 }
 
 export class PublishWorkflowGrpcDto {

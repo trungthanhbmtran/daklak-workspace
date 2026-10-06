@@ -13,7 +13,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
-, UnauthorizedException, ForbiddenException} from '@nestjs/common';
+  UnauthorizedException, ForbiddenException} from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';

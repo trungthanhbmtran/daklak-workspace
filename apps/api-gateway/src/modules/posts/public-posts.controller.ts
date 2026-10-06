@@ -10,7 +10,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
-, UnauthorizedException, ForbiddenException} from '@nestjs/common';
+  UnauthorizedException, ForbiddenException} from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';

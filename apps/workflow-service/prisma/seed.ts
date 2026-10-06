@@ -104,6 +104,7 @@ const docStatIntegration = {
 integrationConnections.push(docStatIntegration as any);
 
 const leaveRequestGraph = {
+  viewport: { x: 0, y: 0, zoom: 1 },
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
     { id: 'task_1', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Nhân viên nộp đơn', assignments: [{ unitScope: 'SELF' }], formSchema: JSON.stringify([{ id: "f1", name: "reason", action: "Lý do", type: "textarea" }, { id: "f2", name: "startDate", action: "Ngày bắt đầu", type: "date" }, { id: "f3", name: "endDate", action: "Ngày kết thúc", type: "date" }, { id: "f4", name: "leaveDays", action: "Số ngày nghỉ", type: "number" }]) } },
@@ -124,6 +125,7 @@ const leaveRequestGraph = {
 };
 
 const govComplexTaskGraph = {
+  viewport: { x: 0, y: 0, zoom: 1 },
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
     { id: 'task_assign', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Giao việc (Lãnh đạo)', targetStatus: 'PENDING_ACCEPTANCE', assignments: [{ unitScope: 'SAME_UNIT', rankOperator: 'exact', rankValue: 'minRank' }], formSchema: JSON.stringify([{ id: "f1", name: "taskName", action: "Tên công việc", type: "text" }, { id: "f2", name: "description", action: "Mô tả", type: "textarea" }, { id: "f3", name: "dueDate", action: "Hạn chót", type: "date" }, { id: "f4", name: "assigneeId", action: "Người nhận", type: "text" }]) } },
@@ -147,6 +149,7 @@ const govComplexTaskGraph = {
 
 
 const unexpectedTaskGraph = {
+  viewport: { x: 0, y: 0, zoom: 1 },
   nodes: [
     { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
     { id: 'task_propose', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Đề xuất việc phát sinh (Nhân viên)', targetStatus: 'TODO', assignments: [{ unitScope: 'SELF' }], formSchema: JSON.stringify([{ id: 'f1', name: 'taskName', action: 'Tên công việc', type: 'text' }, { id: 'f2', name: 'description', action: 'Mô tả', type: 'textarea' }, { id: 'f3', name: 'dueDate', action: 'Đề xuất hạn chót', type: 'date' }]) } },
@@ -204,6 +207,7 @@ const processDefinitions = [
       version: 1,
       status: 'PUBLISHED',
       graph: {
+        viewport: { x: 0, y: 0, zoom: 1 },
         nodes: [
           { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Bắt đầu' } },
           { id: 'task_1', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Soạn thảo văn bản', assignments: [{ unitScope: 'SELF' }] } },
@@ -240,6 +244,7 @@ const processDefinitions = [
       version: 1,
       status: 'PUBLISHED',
       graph: {
+        viewport: { x: 0, y: 0, zoom: 1 },
         nodes: [
           { id: 'start_1', type: 'start', position: { x: 50, y: 250 }, data: { label: 'Công dân nộp hồ sơ' } },
           { id: 'task_receive', type: 'user_task', position: { x: 250, y: 250 }, data: { label: 'Tiếp nhận & Kiểm tra', assignments: [{ unitScope: 'BY_GEO_AREA', rankOperator: 'any' }] } },
