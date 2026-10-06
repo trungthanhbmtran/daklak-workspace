@@ -18,18 +18,24 @@ async function main() {
   await prisma.reportDataSource.createMany({
     data: [
       {
-        endpoint: 'HRM_TASK_STATS',
+        code: 'HRM_TASK_STATS',
         name: 'Thống kê nhiệm vụ',
+        upstream: 'hrm-service',
+        path: '/admin/reports/tasks',
         fields: ['taskId', 'employeeId', 'status', 'hours'],
       },
       {
-        endpoint: 'DOC_STATS',
+        code: 'DOC_STATS',
         name: 'Thống kê văn bản',
+        upstream: 'document-service',
+        path: '/admin/documents/stats',
         fields: ['docId', 'departmentId', 'type', 'issueDate'],
       },
       {
-        endpoint: 'POST_STATS',
+        code: 'POST_STATS',
         name: 'Thống kê bài viết',
+        upstream: 'posts-service',
+        path: '/admin/posts/stats',
         fields: ['postId', 'authorId', 'categoryName', 'viewCount'],
       }
     ]

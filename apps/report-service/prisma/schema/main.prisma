@@ -103,7 +103,8 @@ model ReportDataSource {
   id             Int      @id @default(autoincrement())
   code           String   @unique @db.VarChar(100)
   name           String   @db.VarChar(255)
-  endpoint       String   @db.VarChar(255)
+  upstream       String   @db.VarChar(100)
+  path           String   @db.VarChar(255)
   fields         Json
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

@@ -175,14 +175,22 @@ export class ReportsService implements OnModuleInit {
       // Fetch dynamic catalog from Prisma ReportDataSource table
       const sources = await this.prisma.reportDataSource.findMany({
         select: {
-          endpoint: true,
+          code: true,
           name: true,
+          upstream: true,
+          path: true,
           fields: true,
         },
       });
 
       // If DB is empty, provide fallback defaults or just empty array
-      const catalog = sources.length > 0 ? sources : [
+      const catalog = sources.length > 0 ? sources.map(s => ({
+        endpoint: s.code, // Alias for frontend compatibility
+        upstream: s.upstream,
+        path: s.path,
+        name: s.name,
+        fields: s.fields
+      })) : [
         {
           endpoint: 'HRM_TASK_STATS',
           name: 'Thống kê nhiệm vụ',
