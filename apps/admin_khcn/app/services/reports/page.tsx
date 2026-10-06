@@ -1,4 +1,4 @@
-import { ReportDashboard } from "@/features/reports/components/reports/ReportDashboard";
+import { ReportWorkspace } from "@/features/reports/components/reports/v2/ReportWorkspace";
 
 export const metadata = {
   title: "Thiết kế Báo cáo | Cổng Ứng dụng Nội bộ",
@@ -6,8 +6,9 @@ export const metadata = {
 
 export default function ReportDashboardPage() {
   return (
-    <div className="container mx-auto p-6 max-w-7xl flex-1 min-h-0 flex flex-col overflow-y-auto">
-      <ReportDashboard />
+    <div className="w-full h-full flex flex-col bg-white overflow-hidden">
+      <ReportWorkspace />
     </div>
   );
 }
+
