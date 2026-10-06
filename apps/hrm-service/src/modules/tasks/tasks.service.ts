@@ -860,8 +860,7 @@ export class TasksService {
         }
         if (participantsToUpdate.length > 0) {
           await Promise.all(participantsToUpdate.map(u => tx.taskParticipant.update({ where: u.where, data: u.data })));
-        });
-      }
+        }
 
       if (resetTaskStatus) {
         await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });
