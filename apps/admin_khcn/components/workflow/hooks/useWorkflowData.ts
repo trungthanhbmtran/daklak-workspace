@@ -45,21 +45,34 @@ export function useWorkflowData({
 
         if (definition && definition.nodes) {
           console.log("Definition found:", definition);
-          const loadedNodes = (definition.nodes || []).map((node: any) => ({
-            ...node,
-            id: String(node.id),
-            data: node.data || {},
-            // Ensure position exists for ReactFlow
-            position: node.position || {
-              x: Math.random() * 400,
-              y: Math.random() * 400,
-            },
-          }));
+          const rawNodes = definition.nodes || [];
+          const loadedNodes = rawNodes
+            .filter((n: any) => n && n.id)
+            .map((node: any, index: number) => {
+              const hasPosition = node.position && typeof node.position.x === 'number' && typeof node.position.y === 'number';
+              const fallbackX = typeof node.x === 'number' ? node.x : (index % 4) * 280;
+              const fallbackY = typeof node.y === 'number' ? node.y : Math.floor(index / 4) * 160;
+              const type = node.type === 'userTask' ? 'user_task' : node.type;
+
+              return {
+                ...node,
+                id: String(node.id),
+                type,
+                position: hasPosition ? node.position : { x: fallbackX, y: fallbackY },
+                data: {
+                  label: node.name || node.data?.label || node.data?.name || `Node ${index + 1}`,
+                  ...node.data
+                },
+              };
+            });
 
           console.log(`Setting ${loadedNodes.length} nodes`);
           setNodes(loadedNodes.length > 0 ? loadedNodes : initialNodes);
 
-          const loadedEdges = (definition.edges || []).map(
+          const nodeIds = new Set(loadedNodes.map((n: any) => n.id));
+
+          const rawEdges = definition.edges || [];
+          const loadedEdges = rawEdges.map(
             (edge: any, index: number) => {
               const source = String(edge.source || edge.sourceNodeId || "");
               const target = String(edge.target || edge.targetNodeId || "");
@@ -87,7 +100,7 @@ export function useWorkflowData({
                 }
               };
             }
-          );
+          ).filter((e: any) => nodeIds.has(e.source) && nodeIds.has(e.target));
 
           console.log(`Setting ${loadedEdges.length} edges`);
           setEdges(loadedEdges);
@@ -118,7 +131,7 @@ export function useWorkflowData({
 
     const validatedNodes = nodes.map((n) => {
       let nodeError = false;
-      if (n.type === "userTask") {
+      if (n.type === "user_task" || n.type === "userTask") {
         if (!n.data?.assignmentStrategy) nodeError = true;
         if (n.data?.assignmentStrategy === 'BY_ROLE' && !n.data?.targetRole) nodeError = true;
         if (n.data?.assignmentStrategy === 'DIRECT_USER' && !n.data?.employeeCode) nodeError = true;
