@@ -46,6 +46,7 @@ export interface ReportConfigAST {
     key: string;
     direction: 'asc' | 'desc';
   };
+  charts?: any[];
 }
 
 export interface CompiledPlan {
