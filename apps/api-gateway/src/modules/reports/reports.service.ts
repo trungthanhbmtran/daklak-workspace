@@ -149,6 +149,12 @@ export class ReportsService implements OnModuleInit {
     );
   }
 
+  async getReportCatalog(user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetReportCatalog', {}, user, authHeader),
+    );
+  }
+
   async getReportDefinitionById(id: string, user: any, authHeader: string) {
     return this.parseResponse(
       await this.callGrpc('GetReportDefinitionById', { id }, user, authHeader),
