@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import {
   EventPattern,
   Payload,
@@ -11,20 +11,82 @@ import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
 export class StatisticsController {
+  private readonly logger = new Logger(StatisticsController.name);
+
   constructor(private readonly statisticsService: StatisticsService) {}
+
+  // =========================================================================
+  // CQRS EVENT CONSUMERS (RABBITMQ)
+  // =========================================================================
 
   @EventPattern('task.completed')
   async handleTaskCompleted(@Payload() data: any, @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
-
     try {
       await this.statisticsService.recordTaskCompleted(data);
       channel.ack(originalMsg);
     } catch (err) {
-      channel.nack(originalMsg);
+      this.logger.error('Failed to handle task.completed event:', err);
+      channel.nack(originalMsg, false, false);
     }
   }
+
+  @EventPattern('task.created')
+  async handleTaskCreated(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    try {
+      await this.statisticsService.handleTaskCreated(data);
+      channel.ack(originalMsg);
+    } catch (err) {
+      this.logger.error('Failed to handle task.created event:', err);
+      channel.nack(originalMsg, false, false);
+    }
+  }
+
+  @EventPattern('task.state_changed')
+  async handleTaskStateChanged(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    try {
+      await this.statisticsService.handleTaskStateChanged(data);
+      channel.ack(originalMsg);
+    } catch (err) {
+      this.logger.error('Failed to handle task.state_changed event:', err);
+      channel.nack(originalMsg, false, false);
+    }
+  }
+
+  @EventPattern('post.published')
+  async handlePostPublished(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    try {
+      await this.statisticsService.handlePostPublished(data);
+      channel.ack(originalMsg);
+    } catch (err) {
+      this.logger.error('Failed to handle post.published event:', err);
+      channel.nack(originalMsg, false, false);
+    }
+  }
+
+  @EventPattern('document.created')
+  async handleDocumentCreated(@Payload() data: any, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    try {
+      await this.statisticsService.handleDocumentCreated(data);
+      channel.ack(originalMsg);
+    } catch (err) {
+      this.logger.error('Failed to handle document.created event:', err);
+      channel.nack(originalMsg, false, false);
+    }
+  }
+
+  // =========================================================================
+  // gRPC QUERY ENDPOINTS
+  // =========================================================================
 
   @GrpcMethod('ReportService', 'GetTaskStats')
   async getTaskStatistics(
@@ -38,7 +100,6 @@ export class StatisticsController {
       user,
       metadata,
     );
-    console.log('DEBUG getTaskStatistics res:', JSON.stringify(res, null, 2));
     return {
       success: res.success,
       message: res.message,

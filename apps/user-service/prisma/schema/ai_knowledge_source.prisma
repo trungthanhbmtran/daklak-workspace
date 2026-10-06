@@ -1,5 +1,5 @@
 model AiKnowledgeSource {
-  id          String  @default(cuid()) @id 
+  id          String  @id @default(cuid())
   assistantId String  @map("assistant_id")
   type        String // TEXT, FILE, URL
   title       String
@@ -13,6 +13,7 @@ model AiKnowledgeSource {
   assistant AiAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([assistantId])
   @@map("ai_knowledge_sources")
 }

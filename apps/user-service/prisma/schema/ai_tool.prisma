@@ -1,5 +1,5 @@
 model AiAssistantTool {
-  id          String @default(cuid()) @id 
+  id          String @id @default(cuid())
   assistantId String @map("assistant_id")
   toolName    String @map("tool_name") // Predefined tool name (e.g. GET_WEATHER, GET_TASKS)
 
@@ -8,6 +8,7 @@ model AiAssistantTool {
   assistant AiAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([assistantId])
   @@map("ai_assistant_tools")
 }

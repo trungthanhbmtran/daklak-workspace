@@ -1,6 +1,6 @@
 model Menu {
-  id                 Int      @default(autoincrement()) @id 
-  code               String @unique 
+  id                 Int      @id @default(autoincrement())
+  code               String   @unique
   name               String
   route              String?
   icon               String?
@@ -23,6 +23,7 @@ model Menu {
   children           Menu[]   @relation("MenuHierarchy")
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([parentId, order])
   @@index([parentId], map: "sys_menus_parent_id_fkey")
   @@map("sys_menus")

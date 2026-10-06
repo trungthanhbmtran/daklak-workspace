@@ -1,9 +1,10 @@
 model SystemConfig {
-  key         String @id 
+  key         String   @id
   value       String   @db.Text
   description String?
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@map("sys_configs")
 }

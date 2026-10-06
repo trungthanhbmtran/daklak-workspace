@@ -1,5 +1,5 @@
 model AiAssistant {
-  id           String   @default(cuid()) @id 
+  id           String   @id @default(cuid())
   userId       Int      @map("user_id") // owner of the assistant
   name         String
   description  String?  @db.Text
@@ -14,6 +14,7 @@ model AiAssistant {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([userId])
   @@map("ai_assistants")
 }

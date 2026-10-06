@@ -1,6 +1,6 @@
 model OrganizationUnit {
-  id            Int                    @default(autoincrement()) @id 
-  code          String @unique 
+  id            Int                    @id @default(autoincrement())
+  code          String                 @unique
   name          String
   shortName     String?                @map("short_name")
   typeId        Int                    @map("type_id")
@@ -24,6 +24,7 @@ model OrganizationUnit {
   monitoredByStaffingSlots StaffingSlotMonitoredUnit[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([typeId])
   @@index([parentId])
   @@index([hierarchyPath])
@@ -37,14 +38,15 @@ model UnitDomain {
   unit     OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@id([unitId, domainId, organizationId])
   @@index([domainId], map: "organization_unit_domains_domain_id_fkey")
   @@map("organization_unit_domains")
 }
 
 model JobTitle {
-  id                      Int                    @default(autoincrement()) @id 
-  code                    String @unique 
+  id                      Int                    @id @default(autoincrement())
+  code                    String                 @unique
   name                    String
   description             String?
   category                String?
@@ -61,12 +63,13 @@ model JobTitle {
   group                   Category?              @relation(fields: [categoryId], references: [id])
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([reportsToJobTitleId])
   @@map("job_titles")
 }
 
 model OrganizationStaffing {
-  id           Int              @default(autoincrement()) @id 
+  id           Int              @id @default(autoincrement())
   unitId       Int              @map("unit_id")
   jobTitleId   Int              @map("job_title_id")
   quantity     Int              @default(1)
@@ -79,13 +82,14 @@ model OrganizationStaffing {
   slots        StaffingSlot[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@unique([unitId, jobTitleId])
   @@index([jobTitleId], map: "org_staffing_job_title_id_fkey")
   @@map("org_staffing")
 }
 
 model StaffingSlot {
-  id                   Int                          @default(autoincrement()) @id 
+  id                   Int                          @id @default(autoincrement())
   staffingId           Int                          @map("staffing_id")
   slotOrder            Int                          @map("slot_order")
   description          String?                      @map("description")
@@ -96,6 +100,7 @@ model StaffingSlot {
   staffing             OrganizationStaffing         @relation(fields: [staffingId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@unique([staffingId, slotOrder])
   @@index([staffingId])
   @@map("staffing_slots")
@@ -108,6 +113,7 @@ model StaffingSlotMonitoredUnit {
   unit   OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@id([slotId, unitId, organizationId])
   @@index([unitId], map: "staffing_slot_monitored_units_unit_id_fkey")
   @@map("staffing_slot_monitored_units")
@@ -120,6 +126,7 @@ model StaffingSlotGeographicArea {
   geographicArea   Category     @relation(fields: [geographicAreaId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@id([slotId, geographicAreaId, organizationId])
   @@index([geographicAreaId], map: "staffing_slot_geographic_areas_geographic_area_id_fkey")
   @@map("staffing_slot_geographic_areas")
@@ -132,6 +139,7 @@ model StaffingSlotDomain {
   domain   Category     @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@id([slotId, domainId, organizationId])
   @@index([domainId], map: "staffing_slot_domains_domain_id_fkey")
   @@map("staffing_slot_domains")

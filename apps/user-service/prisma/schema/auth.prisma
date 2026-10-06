@@ -1,18 +1,19 @@
 model Credential {
-  id           String   @default(cuid()) @id 
-  userId       Int      @map("user_id") @unique 
+  id           String   @id @default(cuid())
+  userId       Int      @unique @map("user_id")
   passwordHash String   @map("password_hash") @db.VarChar(255)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@map("auth_credentials")
 }
 
 model Account {
-  id                String  @default(cuid()) @id 
-  userId            Int     @map("user_id") @unique 
+  id                String  @id @default(cuid())
+  userId            Int     @unique @map("user_id")
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
@@ -26,15 +27,16 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@unique([provider, providerAccountId, organizationId])
   @@index([userId], map: "auth_accounts_user_id_fkey")
   @@map("auth_accounts")
 }
 
 model RefreshToken {
-  id              String   @default(cuid()) @id 
-  token           String   @db.VarChar(512) @unique 
-  userId          Int      @map("user_id") @unique 
+  id              String   @id @default(cuid())
+  token           String   @unique @db.VarChar(512)
+  userId          Int      @unique @map("user_id")
   deviceInfo      String?  @map("device_info")
   ipAddress       String?  @map("ip_address")
   isRevoked       Boolean  @default(false) @map("is_revoked")
@@ -44,6 +46,7 @@ model RefreshToken {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([userId])
   @@map("auth_refresh_tokens")
 }

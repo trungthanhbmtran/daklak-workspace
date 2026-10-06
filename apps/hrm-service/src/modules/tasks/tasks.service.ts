@@ -643,6 +643,17 @@ export class TasksService {
       }).subscribe({ error: (err: any) => this.logger.warn('Failed to emit task.completed event', err) });
     }
 
+    // CQRS: Emit task.state_changed event cho report-service Read-Model
+    this.reportClient.emit('task.state_changed', {
+      taskId: resultTask.id,
+      title: resultTask.title,
+      status: resultTask.status,
+      dueDate: resultTask.dueDate,
+      completedAt: resultTask.completedAt,
+      progress: resultTask.progress,
+      departmentId: resultTask.plan?.departmentId || null,
+    }).subscribe({ error: (err: any) => this.logger.warn('Failed to emit task.state_changed event', err) });
+
     if (updateData.isCompleted && context?.evidence && this.shared.chatService && rawTask.conversationId) {
       firstValueFrom(this.shared.chatService.SendMessage({
         conversationId: rawTask.conversationId,

@@ -1,28 +1,29 @@
 model AuthDeviceSession {
-  id           String   @db.VarChar(36) @id 
-  userId       Int      @map("user_id")
-  authVersion  Int      @map("auth_version")
-  expiresAt    DateTime @map("expires_at")
-  revokedAt    DateTime? @map("revoked_at")
-  redisCleaned Boolean  @default(false) @map("redis_cleaned")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id           String              @id @db.VarChar(36)
+  userId       Int                 @map("user_id")
+  authVersion  Int                 @map("auth_version")
+  expiresAt    DateTime            @map("expires_at")
+  revokedAt    DateTime?           @map("revoked_at")
+  redisCleaned Boolean             @default(false) @map("redis_cleaned")
+  createdAt    DateTime            @default(now()) @map("created_at")
   handles      AuthRefreshHandle[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([userId, revokedAt])
   @@index([revokedAt, redisCleaned])
   @@map("auth_device_sessions")
 }
 
 model AuthRefreshHandle {
-  hash       String @db.Char(64) @id 
-  sessionId  String @map("session_id") @db.VarChar(36)
-  status     String @default("ACTIVE") @db.VarChar(12)
-  createdAt  DateTime @default(now()) @map("created_at")
-  session    AuthDeviceSession @relation(fields: [sessionId], references: [id])
+  hash      String            @id @db.Char(64)
+  sessionId String            @map("session_id") @db.VarChar(36)
+  status    String            @default("ACTIVE") @db.VarChar(12)
+  createdAt DateTime          @default(now()) @map("created_at")
+  session   AuthDeviceSession @relation(fields: [sessionId], references: [id])
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([sessionId, status])
   @@map("auth_refresh_handles")
 }
-

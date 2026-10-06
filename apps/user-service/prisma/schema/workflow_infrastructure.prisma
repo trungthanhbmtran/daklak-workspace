@@ -4,7 +4,7 @@
 
 // Bảng Outbox lưu trữ Command/Event khi hệ thống Offline hoặc để đảm bảo Transaction
 model OutboxEvent {
-  id                 String    @default(uuid()) @id 
+  id                 String    @id @default(uuid())
   workflowInstanceId String    @map("workflow_instance_id")
   processVersion     Int       @map("process_version")
   nodeId             String    @map("node_id")
@@ -17,6 +17,7 @@ model OutboxEvent {
   errorReason        String?   @map("error_reason") @db.Text
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([status])
   @@index([workflowInstanceId])
   @@map("outbox_events")
@@ -24,13 +25,14 @@ model OutboxEvent {
 
 // Bảng Inbox chống Duplicate Event (Idempotency) khi mạng chập chờn
 model ProcessedCommand {
-  commandId          String   @map("command_id") @id 
+  commandId          String   @id @map("command_id")
   workflowInstanceId String   @map("workflow_instance_id")
   processedAt        DateTime @default(now()) @map("processed_at")
   action             String
   status             String   @default("SUCCESS") // SUCCESS, REJECTED
 
   organizationId String @default("DEFAULT") @map("organization_id")
+
   @@index([workflowInstanceId])
   @@map("processed_commands")
 }
