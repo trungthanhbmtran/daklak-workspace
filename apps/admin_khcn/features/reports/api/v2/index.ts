@@ -18,7 +18,7 @@ export const useGetReportCatalog = () => {
   return useQuery({
     queryKey: reportKeys.catalog(),
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/admin/reports/v2/catalog');
+      const { data } = await axiosInstance.get('/reports/v2/catalog');
       return data.data as { endpoint: string; name: string; fields: string[] }[];
     },
   });
@@ -28,7 +28,7 @@ export const useGetReportDefinitions = () => {
   return useQuery({
     queryKey: reportKeys.lists(),
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/admin/reports/v2/definitions');
+      const { data } = await axiosInstance.get('/reports/v2/definitions');
       return data.data as ReportDefinition[];
     },
   });
@@ -38,7 +38,7 @@ export const useGetReportDefinition = (id: string) => {
   return useQuery({
     queryKey: reportKeys.detail(id),
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/admin/reports/v2/definitions/${id}`);
+      const { data } = await axiosInstance.get(`/reports/v2/definitions/${id}`);
       return data.data as ReportDefinition;
     },
     enabled: !!id,
@@ -49,7 +49,7 @@ export const useCreateReportDefinition = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<ReportDefinition>) => {
-      const { data } = await axiosInstance.post('/admin/reports/v2/definitions', payload);
+      const { data } = await axiosInstance.post('/reports/v2/definitions', payload);
       return data.data;
     },
     onSuccess: () => {
@@ -61,7 +61,7 @@ export const useCreateReportDefinition = () => {
 export const useRunReport = () => {
   return useMutation({
     mutationFn: async (payload: { definitionId: number; config: any }) => {
-      const { data } = await axiosInstance.post('/admin/reports/v2/runs', payload);
+      const { data } = await axiosInstance.post('/reports/v2/runs', payload);
       return data.data as { runId: number };
     },
   });
@@ -71,7 +71,7 @@ export const useGetReportRunStatus = (runId: string, enabled = true) => {
   return useQuery({
     queryKey: reportKeys.runStatus(runId),
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/admin/reports/v2/runs/${runId}/status`);
+      const { data } = await axiosInstance.get(`/reports/v2/runs/${runId}/status`);
       return data.data as ReportRun;
     },
     enabled: !!runId && enabled,
@@ -86,7 +86,7 @@ export const useGetDatasetSnapshot = (runId: string) => {
   return useQuery({
     queryKey: reportKeys.snapshot(runId),
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/admin/reports/v2/runs/${runId}/snapshot`);
+      const { data } = await axiosInstance.get(`/reports/v2/runs/${runId}/snapshot`);
       return data.data as DatasetSnapshot;
     },
     enabled: !!runId,
