@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { useGetReportRunStatus, useGetDatasetSnapshot, useRunReport } from '../../../api/v2';
 import { Button } from '../../../../../components/ui/button';
@@ -180,3 +181,4 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({ definitionId, config
     </div>
   );
 };
+

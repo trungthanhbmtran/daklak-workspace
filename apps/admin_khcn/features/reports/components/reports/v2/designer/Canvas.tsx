@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { ReportConfigAST, JoinDef, ReportSourceDef } from '../../../../types/v2';
 import { Button } from '../../../../../../components/ui/button';
@@ -99,3 +100,4 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
     </div>
   );
 };
+

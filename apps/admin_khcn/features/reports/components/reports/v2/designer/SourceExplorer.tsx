@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { ReportSourceDef } from '../../../../types/v2';
 import { Button } from '../../../../../../components/ui/button';
@@ -33,11 +34,9 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({ onAddSource }) =
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      
+
       <div className="flex-1 overflow-y-auto space-y-3">
-        {MOCK_CATALOG.filter((c) =>
-          c.name.toLowerCase().includes(searchTerm.toLowerCase())
-        ).map((catalog) => (
+        {MOCK_CATALOG.filter((c) => c.name.toLowerCase().includes(searchTerm.toLowerCase())).map((catalog) => (
           <div key={catalog.endpoint} className="p-3 bg-white border rounded shadow-sm">
             <h4 className="font-medium text-sm">{catalog.name}</h4>
             <p className="text-xs text-gray-500 mb-2">{catalog.endpoint}</p>
@@ -61,3 +60,4 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({ onAddSource }) =
     </div>
   );
 };
+

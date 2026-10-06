@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { ReportConfigAST } from '../../../../types/v2';
 import { Button } from '../../../../../../components/ui/button';
@@ -90,4 +91,5 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
     </div>
   );
 };
+
 

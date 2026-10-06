@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { useGetReportDefinitions, useCreateReportDefinition } from '../../../api/v2';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../../../components/ui/card';
@@ -102,3 +103,4 @@ export const ReportWorkspace = () => {
     </div>
   );
 };
+
