@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
-import { ReportConfigAST, ChartConfig } from '../../../../types/v2';
-import { Button } from '../../../../../../components/ui/button';
+import { ReportConfigAST, ChartConfig } from '../../../types';
+import { Button } from '../../../../../components/ui/button';
 
 interface ChartBuilderProps {
   config: ReportConfigAST;

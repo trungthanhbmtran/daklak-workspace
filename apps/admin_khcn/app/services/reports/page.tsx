@@ -1,4 +1,4 @@
-import { ReportWorkspace } from "@/features/reports/components/reports/v2/ReportWorkspace";
+import { ReportWorkspace } from "@/features/reports/components/reports/ReportWorkspace";
 
 export const metadata = {
   title: "Thiết kế Báo cáo | Cổng Ứng dụng Nội bộ",

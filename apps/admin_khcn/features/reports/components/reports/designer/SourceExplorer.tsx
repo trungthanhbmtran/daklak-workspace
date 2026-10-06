@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from 'react';
-import { ReportSourceDef } from '../../../../types/v2';
-import { Button } from '../../../../../../components/ui/button';
-import { useGetReportCatalog } from '../../../../api/v2';
+import { ReportSourceDef } from '../../../types';
+import { Button } from '../../../../../components/ui/button';
+import { useGetReportCatalog } from '../../../api';
 
 interface SourceExplorerProps {
   onAddSource: (source: ReportSourceDef) => void;

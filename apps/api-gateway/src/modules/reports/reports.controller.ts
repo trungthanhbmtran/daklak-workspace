@@ -118,7 +118,7 @@ export class ReportsController {
 
   // --- V2 Dynamic Report Designer ---
 
-  @Post('v2/definitions')
+  @Post('definitions')
   @RequirePermissions('REPORT:MANAGE')
   async createReportDefinition(@Body() body: any, @Req() req: any) {
     return this.reportsService.createReportDefinition(
@@ -128,7 +128,7 @@ export class ReportsController {
     );
   }
 
-  @Get('v2/definitions')
+  @Get('definitions')
   @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
   async getReportDefinitions(@Req() req: any) {
     return this.reportsService.getReportDefinitions(
@@ -138,7 +138,7 @@ export class ReportsController {
     );
   }
 
-  @Get('v2/catalog')
+  @Get('catalog')
   @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
   async getReportCatalog(@Req() req: any) {
     return this.reportsService.getReportCatalog(
@@ -147,7 +147,7 @@ export class ReportsController {
     );
   }
 
-  @Get('v2/definitions/:id')
+  @Get('definitions/:id')
   @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
   async getReportDefinitionById(@Param('id') id: string, @Req() req: any) {
     return this.reportsService.getReportDefinitionById(
@@ -157,7 +157,7 @@ export class ReportsController {
     );
   }
 
-  @Post('v2/runs')
+  @Post('runs')
   @RequirePermissions('REPORT:EXECUTE')
   async runReport(@Body() body: any, @Req() req: any) {
     return this.reportsService.runReport(
@@ -167,7 +167,7 @@ export class ReportsController {
     );
   }
 
-  @Get('v2/runs/:id/status')
+  @Get('runs/:id/status')
   @RequirePermissions('REPORT:READ')
   async getReportRunStatus(@Param('id') id: string, @Req() req: any) {
     return this.reportsService.getReportRunStatus(
@@ -177,7 +177,7 @@ export class ReportsController {
     );
   }
 
-  @Get('v2/runs/:runId/snapshot')
+  @Get('runs/:runId/snapshot')
   @RequirePermissions('REPORT:READ')
   async getDatasetSnapshot(@Param('runId') runId: string, @Req() req: any) {
     return this.reportsService.getDatasetSnapshot(

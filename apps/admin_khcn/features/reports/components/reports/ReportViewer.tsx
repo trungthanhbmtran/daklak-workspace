@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
-import { useGetReportRunStatus, useGetDatasetSnapshot, useRunReport } from '../../../api/v2';
-import { Button } from '../../../../../components/ui/button';
+import { useGetReportRunStatus, useGetDatasetSnapshot, useRunReport } from '../../api';
+import { Button } from '../../../../components/ui/button';
 
 interface ReportViewerProps {
   definitionId: number;
